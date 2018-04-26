@@ -12,12 +12,12 @@ import (
 	"github.com/micro-plat/hydra/servers"
 
 	"github.com/micro-plat/hydra/servers/http"
-	"github.com/qxnw/lib4go/jsons"
-	"github.com/qxnw/lib4go/logger"
-	"github.com/qxnw/lib4go/net"
-	"github.com/qxnw/lib4go/sysinfo/cpu"
-	"github.com/qxnw/lib4go/sysinfo/disk"
-	"github.com/qxnw/lib4go/sysinfo/memory"
+	"github.com/micro-plat/lib4go/jsons"
+	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/sysinfo/cpu"
+	"github.com/micro-plat/lib4go/sysinfo/disk"
+	"github.com/micro-plat/lib4go/sysinfo/memory"
 )
 
 var statusLocalPort = []int{10160, 10162, 10166, 10168}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/context"
-	"github.com/qxnw/lib4go/types"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //RPCProxy rpc 代理服务

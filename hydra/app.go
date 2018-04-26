@@ -12,7 +12,7 @@ import (
 	_ "github.com/micro-plat/hydra/hydra/impt"
 	"github.com/micro-plat/hydra/hydra/rqs"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
 )
 

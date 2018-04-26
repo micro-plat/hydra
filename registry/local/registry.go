@@ -2,7 +2,7 @@ package local
 
 import (
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //zkRegistry 基于zookeeper的注册中心

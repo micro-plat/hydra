@@ -9,7 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/cron"
 )
 

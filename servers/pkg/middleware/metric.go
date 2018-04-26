@@ -7,10 +7,10 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/servers/pkg/timer"
-	"github.com/qxnw/lib4go/concurrent/cmap"
-	"github.com/qxnw/lib4go/logger"
-	"github.com/qxnw/lib4go/metrics"
-	"github.com/qxnw/lib4go/net"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/metrics"
+	"github.com/micro-plat/lib4go/net"
 )
 
 type reporter struct {

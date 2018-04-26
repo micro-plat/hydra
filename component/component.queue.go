@@ -6,8 +6,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/qxnw/lib4go/concurrent/cmap"
-	"github.com/qxnw/lib4go/queue"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/queue"
 )
 
 //QueueTypeNameInVar queue在var配置中的类型名称

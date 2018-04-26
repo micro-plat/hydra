@@ -11,7 +11,6 @@ func main() {
 		hydra.WithPlatName("hydra-20"),
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("rpc-api"),
-		hydra.WithAutoCreateConf(),
 		hydra.WithDebug())
 
 	app.Micro("/user/login", user.NewLoginHandler)

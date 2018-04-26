@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/registry"
-	r "github.com/qxnw/lib4go/registry"
+	r "github.com/micro-plat/lib4go/registry"
 
 	"sort"
 

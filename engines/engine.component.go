@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/qxnw/lib4go/file"
+	"github.com/micro-plat/lib4go/file"
 )
 
 var components = make(map[string]ServiceLoader)

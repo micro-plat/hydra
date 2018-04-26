@@ -15,7 +15,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	r "github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/registry"
+	"github.com/micro-plat/lib4go/registry"
 )
 
 var _ r.IRegistry = &local{}

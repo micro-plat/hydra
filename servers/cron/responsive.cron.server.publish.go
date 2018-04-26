@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/qxnw/lib4go/jsons"
+	"github.com/micro-plat/lib4go/jsons"
 )
 
 //publish 将当前服务器的节点信息发布到注册中心

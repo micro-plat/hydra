@@ -8,7 +8,6 @@ func main() {
 	app := hydra.NewApp(hydra.WithPlatName("hydrav4"),
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("api"),
-		//hydra.WithAutoCreateConf(),
 		hydra.WithDebug())
 	app.Start()
 }

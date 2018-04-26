@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers"
-	"github.com/qxnw/lib4go/encoding"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/encoding"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 func getUUID(c *gin.Context) string {

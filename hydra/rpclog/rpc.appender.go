@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/qxnw/lib4go/jsons"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/jsons"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/log"
 )
 

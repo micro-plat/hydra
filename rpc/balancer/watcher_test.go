@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/ut"
+	"github.com/micro-plat/lib4go/ut"
 )
 
 type testfileChecker struct {

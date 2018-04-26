@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 var IsDebug = false

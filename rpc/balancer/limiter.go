@@ -1,7 +1,7 @@
 package balancer
 
-import "github.com/qxnw/lib4go/metrics"
-import "github.com/qxnw/lib4go/concurrent/cmap"
+import "github.com/micro-plat/lib4go/metrics"
+import "github.com/micro-plat/lib4go/concurrent/cmap"
 
 //Limiter 限流组件,用于限制客户端每分钟请求服务器的数量,当超过限制数量时不再选择该服务提供者
 type Limiter struct {

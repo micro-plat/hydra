@@ -1,7 +1,7 @@
 package rpc
 
 import "testing"
-import "github.com/qxnw/lib4go/ut"
+import "github.com/micro-plat/lib4go/ut"
 
 var invoker = NewRPCInvoker("/hydra", "merchant_api", "zk://192.168.106.172")
 

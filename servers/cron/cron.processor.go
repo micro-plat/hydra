@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/qxnw/lib4go/concurrent/cmap"
-	"github.com/qxnw/lib4go/redis"
-	"github.com/qxnw/lib4go/utility"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/redis"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 //Processor 任务处理程序

@@ -10,7 +10,6 @@ func main() {
 		hydra.WithPlatName("hydrav-db"),
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("api"),
-		hydra.WithAutoCreateConf(),
 		hydra.WithDebug())
 	app.Micro("/order/query", order.NewQueryHandler)
 	app.Micro("/order/request", order.NewRequestHandler)

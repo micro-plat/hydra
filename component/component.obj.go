@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/qxnw/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 var _ IComponentGlobalVarObject = &GlobalVarObjectCache{}

@@ -8,7 +8,7 @@ import (
 	"runtime/trace"
 
 	"github.com/pkg/profile"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}

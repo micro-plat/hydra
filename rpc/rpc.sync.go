@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/qxnw/lib4go/rpc"
+	"github.com/micro-plat/lib4go/rpc"
 )
 
 //AsyncRequest 发起异步Request请求

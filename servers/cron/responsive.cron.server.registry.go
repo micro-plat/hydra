@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/servers"
-	"github.com/qxnw/lib4go/types"
+	"github.com/micro-plat/lib4go/types"
 )
 
 func (s *CronResponsiveServer) watchMasterChange(root, path string) error {

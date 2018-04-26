@@ -2,7 +2,7 @@ package mqc
 
 import (
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 type option struct {

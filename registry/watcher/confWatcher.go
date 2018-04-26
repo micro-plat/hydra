@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 const (

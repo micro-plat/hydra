@@ -3,7 +3,7 @@ package balancer
 import (
 	"sync"
 
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 
 	"golang.org/x/net/context"
 

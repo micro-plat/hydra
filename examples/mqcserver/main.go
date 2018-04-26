@@ -11,7 +11,6 @@ func main() {
 		hydra.WithPlatName("hydra-20"),
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("mqc-api-rpc"),
-		hydra.WithAutoCreateConf(),
 		hydra.WithDebug())
 
 	app.Autoflow("/order/query", order.NewQueryHandler)

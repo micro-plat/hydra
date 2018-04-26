@@ -1,7 +1,7 @@
 package rpc
 
 import "testing"
-import "github.com/qxnw/lib4go/ut"
+import "github.com/micro-plat/lib4go/ut"
 
 func TestFactoryResolvePath(t *testing.T) {
 	def_domain := "hydra"

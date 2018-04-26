@@ -16,9 +16,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
-	"github.com/qxnw/lib4go/osext"
-	"github.com/qxnw/lib4go/security/crc32"
+	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/osext"
+	"github.com/micro-plat/lib4go/security/crc32"
 	"github.com/zkfy/archiver"
 )
 

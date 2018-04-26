@@ -18,7 +18,7 @@ import (
 
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/watcher"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //Hydra  hydra app

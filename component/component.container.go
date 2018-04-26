@@ -4,10 +4,10 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/cache"
-	"github.com/qxnw/lib4go/db"
-	"github.com/qxnw/lib4go/influxdb"
-	"github.com/qxnw/lib4go/queue"
+	"github.com/micro-plat/lib4go/cache"
+	"github.com/micro-plat/lib4go/db"
+	"github.com/micro-plat/lib4go/influxdb"
+	"github.com/micro-plat/lib4go/queue"
 )
 
 type IContainer interface {

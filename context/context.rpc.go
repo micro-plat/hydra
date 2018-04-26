@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/qxnw/lib4go/jsons"
-	"github.com/qxnw/lib4go/rpc"
+	"github.com/micro-plat/lib4go/jsons"
+	"github.com/micro-plat/lib4go/rpc"
 )
 
 type RPCInvoker interface {

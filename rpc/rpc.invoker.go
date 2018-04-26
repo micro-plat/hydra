@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/rpc/balancer"
-	"github.com/qxnw/lib4go/concurrent/cmap"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //Invoker RPC服务调用器，封装基于域及负载算法的RPC客户端

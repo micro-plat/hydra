@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //Creator 配置文件创建器

@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/qxnw/lib4go/mq"
+	"github.com/micro-plat/lib4go/mq"
 )
 
 type Processor struct {

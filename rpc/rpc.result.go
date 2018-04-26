@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/qxnw/lib4go/rpc"
+	"github.com/micro-plat/lib4go/rpc"
 )
 
 //Response 异步请求的响应内容

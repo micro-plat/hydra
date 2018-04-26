@@ -7,7 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
-	"github.com/qxnw/lib4go/utility"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 type IData interface {

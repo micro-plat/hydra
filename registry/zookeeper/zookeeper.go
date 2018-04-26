@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/logger"
-	"github.com/qxnw/lib4go/zk"
+	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/zk"
 )
 
 //zkRegistry 基于zookeeper的注册中心

@@ -6,8 +6,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/qxnw/lib4go/cache"
-	"github.com/qxnw/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/cache"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 //CacheTypeNameInVar 缓存在var配置中的类型名称

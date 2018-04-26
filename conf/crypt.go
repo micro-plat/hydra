@@ -5,7 +5,7 @@ import (
 
 	"encoding/hex"
 
-	"github.com/qxnw/lib4go/security/des"
+	"github.com/micro-plat/lib4go/security/des"
 )
 
 const confKey = "@-hydra*"

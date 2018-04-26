@@ -11,7 +11,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 func getUUID(c *dispatcher.Context) string {

@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
-	"github.com/qxnw/lib4go/security/jwt"
-	"github.com/qxnw/lib4go/types"
+	"github.com/micro-plat/lib4go/security/jwt"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //JwtAuth jwt

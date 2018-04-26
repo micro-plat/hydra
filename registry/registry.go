@@ -5,9 +5,9 @@ import (
 
 	"strings"
 
-	"github.com/qxnw/lib4go/concurrent/cmap"
-	"github.com/qxnw/lib4go/logger"
-	"github.com/qxnw/lib4go/registry"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/registry"
 )
 
 //IRegistry 注册中心接口,通过扩展支持zookeeper,consul,etcd

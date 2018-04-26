@@ -10,7 +10,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/engines"
 	"github.com/micro-plat/hydra/servers"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 type IServer interface {

@@ -3,10 +3,10 @@ package middleware
 import (
 	"time"
 
-	"github.com/qxnw/lib4go/metrics"
-	"github.com/qxnw/lib4go/sysinfo/cpu"
-	"github.com/qxnw/lib4go/sysinfo/disk"
-	"github.com/qxnw/lib4go/sysinfo/memory"
+	"github.com/micro-plat/lib4go/metrics"
+	"github.com/micro-plat/lib4go/sysinfo/cpu"
+	"github.com/micro-plat/lib4go/sysinfo/disk"
+	"github.com/micro-plat/lib4go/sysinfo/memory"
 )
 
 func (m *Metric) collectCPU() {

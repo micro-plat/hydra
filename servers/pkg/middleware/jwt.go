@@ -7,7 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/qxnw/lib4go/security/jwt"
+	"github.com/micro-plat/lib4go/security/jwt"
 )
 
 //JwtAuth jwt

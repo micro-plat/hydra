@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/servers/rpc/standard/pb"
-	"github.com/qxnw/lib4go/ut"
+	"github.com/micro-plat/lib4go/ut"
 )
 
 func TestEngine(t *testing.T) {

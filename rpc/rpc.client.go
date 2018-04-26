@@ -6,7 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/rpc/balancer"
 	"github.com/micro-plat/hydra/servers/rpc/pb"
-	"github.com/qxnw/lib4go/logger"
+	"github.com/micro-plat/lib4go/logger"
 
 	"errors"
 
