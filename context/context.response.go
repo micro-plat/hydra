@@ -24,6 +24,10 @@ type IResponse interface {
 	HasError(v interface{}) bool
 	GetError() error
 	IsSuccess() bool
+	JSON(content interface{})
+	XML(content interface{})
+	Text(content interface{})
+	HTML(content interface{})
 }
 
 var _ IResponse = &Response{}

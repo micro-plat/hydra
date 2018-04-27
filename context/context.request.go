@@ -11,9 +11,7 @@ import (
 )
 
 type IData interface {
-	//Set(string, string)
-	Get(string) (string, error)
-	//Each(func(string, string))
+	Get(string) (string, bool)
 }
 
 //Request 输入参数
@@ -110,19 +108,19 @@ func (r *Request) Body2Input(encoding ...string) (map[string]string, error) {
 }
 
 //Get 获取请求数据值
-func (r *Request) Get(name string) (result string, err error) {
-	if result, err = r.Form.Get(name); err == nil {
-		return result, nil
+func (r *Request) Get(name string) (result string, b bool) {
+	if result, b = r.Form.Get(name); b {
+		return result, b
 	}
-	if result, err = r.QueryString.Get(name); err == nil {
-		return result, nil
+	if result, b = r.QueryString.Get(name); b {
+		return result, b
 	}
-	return "", fmt.Errorf("%s值不存在", name)
+	return "", false
 }
 
 func (r *Request) GetString(name string, p ...string) string {
-	v, err := r.Get(name)
-	if err == nil {
+	v, b := r.Get(name)
+	if b {
 		return v
 	}
 	if len(p) > 0 {
@@ -133,9 +131,10 @@ func (r *Request) GetString(name string, p ...string) string {
 
 //GetInt 获取int数字
 func (r *Request) GetInt(name string, p ...int) int {
-	value, err := r.Get(name)
+	value, b := r.Get(name)
 	var v int
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.Atoi(value)
 	}
 	if err == nil {
@@ -149,9 +148,10 @@ func (r *Request) GetInt(name string, p ...int) int {
 
 //GetInt64 获取int64数字
 func (r *Request) GetInt64(name string, p ...int64) int64 {
-	value, err := r.Get(name)
+	value, b := r.Get(name)
 	var v int64
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.ParseInt(value, 10, 64)
 	}
 	if err == nil {
@@ -185,9 +185,10 @@ func (r *Request) Translate(format string, a bool) string {
 
 //GetFloat64 获取float64数字
 func (r *Request) GetFloat64(name string, p ...float64) float64 {
-	value, err := r.Get(name)
+	value, b := r.Get(name)
 	var v float64
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.ParseFloat(value, 64)
 	}
 	if err == nil {
@@ -206,9 +207,10 @@ func (r *Request) GetDataTime(name string, p ...time.Time) (time.Time, error) {
 
 //GetDataTimeByFormat 获取日期时间
 func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time) (time.Time, error) {
-	value, err := r.Get(name)
+	value, b := r.Get(name)
 	var v time.Time
-	if err == nil {
+	var err error
+	if b {
 		v, err = time.Parse(format, value)
 	}
 	if err == nil {

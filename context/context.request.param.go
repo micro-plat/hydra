@@ -14,19 +14,19 @@ type inputParams struct {
 //Check 检查是否包含指定的参数
 func (i *inputParams) Check(names ...string) error {
 	for _, v := range names {
-		if r, err := i.Get(v); err != nil || r == "" {
+		if r, b := i.Get(v); !b || r == "" {
 			return fmt.Errorf("%s值不能为空", v)
 		}
 	}
 	return nil
 }
 
-func (i *inputParams) Get(name string) (string, error) {
+func (i *inputParams) Get(name string) (string, bool) {
 	return i.data.Get(name)
 }
 func (i *inputParams) GetString(name string, p ...string) string {
-	v, err := i.Get(name)
-	if err == nil {
+	v, b := i.Get(name)
+	if b {
 		return v
 	}
 	if len(p) > 0 {
@@ -37,9 +37,10 @@ func (i *inputParams) GetString(name string, p ...string) string {
 
 //GetInt 获取int数字
 func (i *inputParams) GetInt(name string, p ...int) int {
-	value, err := i.Get(name)
+	value, b := i.Get(name)
 	var v int
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.Atoi(value)
 	}
 	if err == nil {
@@ -53,9 +54,10 @@ func (i *inputParams) GetInt(name string, p ...int) int {
 
 //GetInt64 获取int64数字
 func (i *inputParams) GetInt64(name string, p ...int64) int64 {
-	value, err := i.Get(name)
+	value, b := i.Get(name)
 	var v int64
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.ParseInt(value, 10, 64)
 	}
 	if err == nil {
@@ -69,9 +71,10 @@ func (i *inputParams) GetInt64(name string, p ...int64) int64 {
 
 //GetFloat64 获取float64数字
 func (i *inputParams) GetFloat64(name string, p ...float64) float64 {
-	value, err := i.Get(name)
+	value, b := i.Get(name)
 	var v float64
-	if err == nil {
+	var err error
+	if b {
 		v, err = strconv.ParseFloat(value, 64)
 	}
 	if err == nil {
@@ -88,9 +91,10 @@ func (i *inputParams) GetDataTime(name string, p ...time.Time) (time.Time, error
 
 //GetFloat64 获取float64数字
 func (i *inputParams) GetDataTimeByFormat(name string, format string, p ...time.Time) (time.Time, error) {
-	value, err := i.Get(name)
+	value, b := i.Get(name)
 	var v time.Time
-	if err == nil {
+	var err error
+	if b {
 		v, err = time.Parse(format, value)
 	}
 	if err == nil {
@@ -107,7 +111,7 @@ func (i *inputParams) Translate(format string, a bool) (string, int) {
 	brackets, _ := regexp.Compile(`\{@\w+\}`)
 	v := 0
 	result := brackets.ReplaceAllStringFunc(format, func(s string) string {
-		if v, err := i.Get(s[2 : len(s)-1]); err == nil {
+		if v, b := i.Get(s[2 : len(s)-1]); b {
 			return v
 		}
 		v++
@@ -118,7 +122,7 @@ func (i *inputParams) Translate(format string, a bool) (string, int) {
 	})
 	word, _ := regexp.Compile(`@\w+`)
 	result = word.ReplaceAllStringFunc(result, func(s string) string {
-		if v, err := i.Get(s[1:]); err == nil {
+		if v, b := i.Get(s[1:]); b {
 			return v
 		}
 		v++

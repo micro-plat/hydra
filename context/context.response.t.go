@@ -97,3 +97,27 @@ func (r *Response) getStatus(c interface{}) int {
 		return r.Status
 	}
 }
+
+//JSON 按json格式输入
+func (r *Response) JSON(content interface{}) {
+	r.SeTextJSON()
+	r.ShouldContent(content)
+}
+
+//XML 按xml格式输入
+func (r *Response) XML(content interface{}) {
+	r.SetTextXML()
+	r.ShouldContent(content)
+}
+
+//Text 按text/plain格式输入
+func (r *Response) Text(content interface{}) {
+	r.SetTextPlain()
+	r.ShouldContent(content)
+}
+
+//HTML 按text/HTML
+func (r *Response) HTML(content interface{}) {
+	r.SetTextHTML()
+	r.ShouldContent(content)
+}

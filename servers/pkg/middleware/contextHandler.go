@@ -166,23 +166,20 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 type InputData func(key string) (string, bool)
 
 //Get 获取指定键对应的数据
-func (i InputData) Get(key string) (string, error) {
+func (i InputData) Get(key string) (string, bool) {
 	if i != nil {
-		if r, ok := i(key); ok {
-			return r, nil
-		}
+		r, ok := i(key)
+		return r, ok
 	}
 
-	return "", fmt.Errorf("数据不存在:%s", key)
+	return "", false
 }
 
 //ParamData map参数数据
 type ParamData map[string]string
 
 //Get 获取指定键对应的数据
-func (i ParamData) Get(key string) (string, error) {
-	if r, ok := i[key]; ok {
-		return r, nil
-	}
-	return "", fmt.Errorf("数据不存在:%s", key)
+func (i ParamData) Get(key string) (string, bool) {
+	r, ok := i[key]
+	return r, ok
 }
