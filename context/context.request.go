@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -54,6 +55,10 @@ func (r *Request) Bind(obj interface{}) error {
 	f := r.Ext.GetBindingFunc()
 	if err := f(obj); err != nil {
 		return err
+	}
+	val := reflect.ValueOf(obj)
+	if val.Kind() != reflect.Struct {
+		return nil
 	}
 	if _, err := govalidator.ValidateStruct(obj); err != nil {
 		err = fmt.Errorf("输入参数有误 %v", err)
