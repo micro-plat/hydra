@@ -85,16 +85,16 @@ type Tasks struct {
 	Tasks   []*Task           `json:"tasks"`
 }
 type Task struct {
-	Name    string            `json:"name" valid:"ascii"`
-	Cron    string            `json:"cron" valid:"ascii,required"`
-	Input   map[string]string `json:"input,omitempty"`
-	Engine  string            `json:"engine,omitempty"  valid:"ascii,uppercase,in(*|RPC)"`
-	Service string            `json:"service"  valid:"ascii,required"`
-	Setting map[string]string `json:"args"`
-	Next    string            `json:"next"`
-	Last    string            `json:"last"`
-	Handler interface{}       `json:"handler,omitempty"`
-	Disable bool              `json:"disable"`
+	Name    string                 `json:"name" valid:"ascii"`
+	Cron    string                 `json:"cron" valid:"ascii,required"`
+	Input   map[string]interface{} `json:"input,omitempty"`
+	Engine  string                 `json:"engine,omitempty"  valid:"ascii,uppercase,in(*|RPC)"`
+	Service string                 `json:"service"  valid:"ascii,required"`
+	Setting map[string]string      `json:"args"`
+	Next    string                 `json:"next"`
+	Last    string                 `json:"last"`
+	Handler interface{}            `json:"handler,omitempty"`
+	Disable bool                   `json:"disable"`
 }
 
 type Package struct {

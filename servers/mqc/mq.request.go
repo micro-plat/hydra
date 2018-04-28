@@ -10,7 +10,7 @@ type mqRequest struct {
 	service string
 	method  string
 	raw     string
-	form    map[string]string
+	form    map[string]interface{}
 	header  map[string]string
 }
 
@@ -19,14 +19,10 @@ func newMQRequest(service, method, raw string) *mqRequest {
 		service: service,
 		method:  method,
 		header:  make(map[string]string),
-		form:    make(map[string]string),
+		form:    make(map[string]interface{}),
 		raw:     raw,
 	}
-	var input map[string]interface{}
-	json.Unmarshal([]byte(r.raw), &input)
-	for k, v := range input {
-		r.form[k] = fmt.Sprint(v)
-	}
+	json.Unmarshal([]byte(r.raw), &r.form)
 	r.form["__body_"] = r.raw
 	return r
 }
@@ -37,7 +33,7 @@ func (m *mqRequest) GetService() string {
 func (m *mqRequest) GetMethod() string {
 	return m.method
 }
-func (m *mqRequest) GetForm() map[string]string {
+func (m *mqRequest) GetForm() map[string]interface{} {
 	return m.form
 }
 func (m *mqRequest) GetHeader() map[string]string {

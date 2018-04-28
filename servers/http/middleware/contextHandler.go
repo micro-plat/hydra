@@ -155,9 +155,9 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 		return c.BindWith(v, binding.Default(c.Request.Method, ct))
 
 	}
-	input["__get_request_values_"] = func() map[string]string {
+	input["__get_request_values_"] = func() map[string]interface{} {
 		c.Request.ParseForm()
-		data := make(map[string]string)
+		data := make(map[string]interface{})
 		query := c.Request.URL.Query()
 		for k, v := range query {
 			switch len(v) {
@@ -194,7 +194,7 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 type InputData func(key string) (string, bool)
 
 //Get 获取指定键对应的数据
-func (i InputData) Get(key string) (string, bool) {
+func (i InputData) Get(key string) (interface{}, bool) {
 	r, ok := i(key)
 	return r, ok
 }
@@ -203,7 +203,7 @@ func (i InputData) Get(key string) (string, bool) {
 type ParamData map[string]string
 
 //Get 获取指定键对应的数据
-func (i ParamData) Get(key string) (string, bool) {
+func (i ParamData) Get(key string) (interface{}, bool) {
 	r, ok := i[key]
 	return r, ok
 }

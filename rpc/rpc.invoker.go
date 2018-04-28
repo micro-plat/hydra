@@ -83,7 +83,7 @@ func NewInvoker(domain string, server string, address string, opts ...InvokerOpt
 }
 
 //RequestFailRetry 失败重试请求
-func (r *Invoker) RequestFailRetry(service string, method string, header map[string]string, form map[string]string, times int) (status int, result string, params map[string]string, err error) {
+func (r *Invoker) RequestFailRetry(service string, method string, header map[string]string, form map[string]interface{}, times int) (status int, result string, params map[string]string, err error) {
 	for i := 0; i < times; i++ {
 		status, result, params, err = r.Request(service, method, header, form, true)
 		if err == nil || status < 500 {
@@ -94,7 +94,7 @@ func (r *Invoker) RequestFailRetry(service string, method string, header map[str
 }
 
 //Request 使用RPC调用Request函数
-func (r *Invoker) Request(service string, method string, header map[string]string, form map[string]string, failFast bool) (status int, result string, params map[string]string, err error) {
+func (r *Invoker) Request(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, result string, params map[string]string, err error) {
 	status = 500
 	client, err := r.GetClient(service)
 	if err != nil {

@@ -7,6 +7,8 @@ import (
 	"github.com/micro-plat/hydra/rpc/balancer"
 	"github.com/micro-plat/hydra/servers/rpc/pb"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/qxnw-2/lib4go/jsons"
+	"github.com/qxnw-2/lib4go/types"
 
 	"errors"
 
@@ -114,22 +116,44 @@ func (c *Client) connect() (err error) {
 }
 
 //Request 发送Request请求
-func (c *Client) Request(service string, method string, header map[string]string, form map[string]string, failFast bool) (status int, result string, param map[string]string, err error) {
+func (c *Client) Request(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, result string, param map[string]string, err error) {
+	h, err := jsons.Marshal(header)
+	if err != nil {
+		return
+	}
+	if len(h) == 0 {
+		h = []byte("{}")
+	}
+	f, err := jsons.Marshal(form)
+	if err != nil {
+		return
+	}
+	if len(f) == 0 {
+		h = []byte("{}")
+	}
 	response, err := c.client.Request(context.Background(),
 		&pb.RequestContext{
 			Method:  method,
 			Service: service,
-			Header:  header,
-			Form:    form,
+			Header:  string(h),
+			Input:   string(f),
 		},
 		grpc.FailFast(failFast))
 	if err != nil {
 		status = 500
 		return
 	}
+
+	if response.Header != "" {
+		mh, err := jsons.Unmarshal([]byte(response.Header))
+		if err != nil {
+			return 400, "", nil, err
+		}
+		param, _ = types.ToStringMap(mh)
+	}
+
 	status = int(response.Status)
 	result = response.GetResult()
-	param = response.Header
 	return
 }
 

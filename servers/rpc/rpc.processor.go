@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/servers/rpc/pb"
+	"github.com/micro-plat/lib4go/jsons"
 )
 
 type Processor struct {
@@ -17,19 +18,18 @@ func NewProcessor() *Processor {
 	}
 }
 func (r *Processor) Request(context context.Context, request *pb.RequestContext) (p *pb.ResponseContext, err error) {
-	if request.Header == nil {
-		request.Header = make(map[string]string)
-	}
-	response, err := r.Dispatcher.HandleRequest(request)
+
+	response, err := r.Dispatcher.HandleRequest(&Request{RequestContext: request})
 	if err != nil {
 		return
 	}
 	p = &pb.ResponseContext{}
 	p.Status = int32(response.Status())
 	p.Result = string(response.Data())
-	p.Header = make(map[string]string)
-	for k, v := range response.Header() {
-		p.Header[k] = v[0]
+	h, err := jsons.Marshal(response.Header())
+	if err != nil {
+		return p, err
 	}
+	p.Header = string(h)
 	return p, nil
 }

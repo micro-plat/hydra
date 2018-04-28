@@ -11,7 +11,7 @@ import (
 )
 
 type IData interface {
-	Get(string) (string, bool)
+	Get(string) (interface{}, bool)
 }
 
 //Request 输入参数

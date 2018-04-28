@@ -33,7 +33,7 @@ type cronTask struct {
 	Executed int `json:"executed"`
 	round    int
 	method   string
-	form     map[string]string
+	form     map[string]interface{}
 	header   map[string]string
 	logger.ILogger
 	status int
@@ -53,7 +53,7 @@ func newCronTask(t *conf.Task) (r *cronTask, err error) {
 	}
 	r.form = t.Input
 	if r.form == nil {
-		r.form = make(map[string]string)
+		r.form = make(map[string]interface{})
 	}
 	return
 }
@@ -92,7 +92,7 @@ func (m *cronTask) GetService() string {
 func (m *cronTask) GetMethod() string {
 	return m.method
 }
-func (m *cronTask) GetForm() map[string]string {
+func (m *cronTask) GetForm() map[string]interface{} {
 	return m.form
 }
 func (m *cronTask) GetHeader() map[string]string {

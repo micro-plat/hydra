@@ -32,7 +32,7 @@ func (r *rpcWriter) Write(p []byte) (n int, err error) {
 	dst := snappy.Encode(nil, buff.Bytes())
 	_, _, _, err = r.rpcInvoker.Request(r.service, "GET", map[string]string{
 		"__encode_snappy_": "true",
-	}, map[string]string{
+	}, map[string]interface{}{
 		"__body_": string(dst),
 	}, true)
 	if err != nil {

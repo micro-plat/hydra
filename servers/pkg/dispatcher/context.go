@@ -13,7 +13,7 @@ const abortIndex int8 = math.MaxInt8 / 2
 type IRequest interface {
 	GetService() string
 	GetMethod() string
-	GetForm() map[string]string
+	GetForm() map[string]interface{}
 	GetHeader() map[string]string
 }
 
@@ -260,7 +260,7 @@ func (c *Context) Param(key string) string {
 
 // PostForm returns the specified key from a POST urlencoded form or multipart form
 // when it exists, otherwise it returns an empty string `("")`.
-func (c *Context) PostForm(key string) string {
+func (c *Context) PostForm(key string) interface{} {
 	value, _ := c.GetPostForm(key)
 	return value
 }
@@ -268,7 +268,7 @@ func (c *Context) PostForm(key string) string {
 // DefaultPostForm returns the specified key from a POST urlencoded form or multipart form
 // when it exists, otherwise it returns the specified defaultValue string.
 // See: PostForm() and GetPostForm() for further information.
-func (c *Context) DefaultPostForm(key, defaultValue string) string {
+func (c *Context) DefaultPostForm(key, defaultValue string) interface{} {
 	if value, ok := c.GetPostForm(key); ok {
 		return value
 	}
@@ -282,7 +282,7 @@ func (c *Context) DefaultPostForm(key, defaultValue string) string {
 //     email=mail@example.com  -->  ("mail@example.com", true) := GetPostForm("email") // set email to "mail@example.com"
 // 	   email=                  -->  ("", true) := GetPostForm("email") // set email to ""
 //                             -->  ("", false) := GetPostForm("email") // do nothing with email
-func (c *Context) GetPostForm(key string) (string, bool) {
+func (c *Context) GetPostForm(key string) (interface{}, bool) {
 	if values, ok := c.Request.GetForm()[key]; ok {
 		return values, ok
 	}
@@ -315,7 +315,7 @@ func (c *Context) GetHeader(key string) string {
 }
 
 // GetRawData return stream data.
-func (c *Context) GetRawData() (string, error) {
+func (c *Context) GetRawData() (interface{}, error) {
 	return c.Request.GetForm()["__body_"], nil
 }
 

@@ -22,7 +22,10 @@ func (i *inputParams) Check(names ...string) error {
 }
 
 func (i *inputParams) Get(name string) (string, bool) {
-	return i.data.Get(name)
+	if c, ok := i.data.Get(name); ok {
+		return fmt.Sprint(c), ok
+	}
+	return "", false
 }
 func (i *inputParams) GetString(name string, p ...string) string {
 	v, b := i.Get(name)
@@ -38,14 +41,14 @@ func (i *inputParams) GetString(name string, p ...string) string {
 //GetInt 获取int数字
 func (i *inputParams) GetInt(name string, p ...int) int {
 	value, b := i.Get(name)
-	var v int
-	var err error
+	fmt.Println("input.param:", value, b)
 	if b {
-		v, err = strconv.Atoi(value)
+		v, err := strconv.Atoi(value)
+		if err == nil {
+			return v
+		}
 	}
-	if err == nil {
-		return v
-	}
+
 	if len(p) > 0 {
 		return p[0]
 	}
@@ -55,13 +58,11 @@ func (i *inputParams) GetInt(name string, p ...int) int {
 //GetInt64 获取int64数字
 func (i *inputParams) GetInt64(name string, p ...int64) int64 {
 	value, b := i.Get(name)
-	var v int64
-	var err error
 	if b {
-		v, err = strconv.ParseInt(value, 10, 64)
-	}
-	if err == nil {
-		return v
+		v, err := strconv.ParseInt(value, 10, 64)
+		if err == nil {
+			return v
+		}
 	}
 	if len(p) > 0 {
 		return p[0]
@@ -72,13 +73,11 @@ func (i *inputParams) GetInt64(name string, p ...int64) int64 {
 //GetFloat64 获取float64数字
 func (i *inputParams) GetFloat64(name string, p ...float64) float64 {
 	value, b := i.Get(name)
-	var v float64
-	var err error
 	if b {
-		v, err = strconv.ParseFloat(value, 64)
-	}
-	if err == nil {
-		return v
+		v, err := strconv.ParseFloat(value, 64)
+		if err == nil {
+			return v
+		}
 	}
 	if len(p) > 0 {
 		return p[0]
@@ -96,9 +95,9 @@ func (i *inputParams) GetDataTimeByFormat(name string, format string, p ...time.
 	var err error
 	if b {
 		v, err = time.Parse(format, value)
-	}
-	if err == nil {
-		return v, nil
+		if err == nil {
+			return v, nil
+		}
 	}
 	if len(p) > 0 {
 		return p[0], nil

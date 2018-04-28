@@ -108,7 +108,7 @@ func makeFormData(ctx *dispatcher.Context) InputData {
 func makeQueyStringData(ctx *dispatcher.Context) InputData {
 	return nil
 }
-func makeParamsData(ctx *dispatcher.Context) InputData {
+func makeParamsData(ctx *dispatcher.Context) HeaderData {
 	return ctx.Params.Get
 }
 func makeSettingData(ctx *dispatcher.Context, m map[string]string) ParamData {
@@ -143,7 +143,7 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 	input["__func_body_get_"] = func(ch string) (string, error) {
 		if s, ok := c.Request.GetForm()["__body_"]; ok {
 			if v, ok := c.Request.GetHeader()["__encode_snappy_"]; ok && v == "true" {
-				buff := []byte(s)
+				buff := []byte(s.(string))
 				var nbuff []byte
 				nbuffer, err := snappy.Decode(nbuff, buff)
 				if err != nil {
@@ -151,22 +151,35 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 				}
 				return string(nbuffer), nil
 			}
-			return s, nil
+			return s.(string), nil
 		}
 		return "", errors.New("body读取错误")
 
 	}
-	input["__get_request_values_"] = func() map[string]string {
+	input["__get_request_values_"] = func() map[string]interface{} {
 		return c.Request.GetForm()
 	}
 	return input
 }
 
 //InputData 输入参数
-type InputData func(key string) (string, bool)
+type InputData func(key string) (interface{}, bool)
 
 //Get 获取指定键对应的数据
-func (i InputData) Get(key string) (string, bool) {
+func (i InputData) Get(key string) (interface{}, bool) {
+	if i != nil {
+		r, ok := i(key)
+		return r, ok
+	}
+
+	return "", false
+}
+
+//HeaderData 输入参数
+type HeaderData func(key string) (string, bool)
+
+//Get 获取指定键对应的数据
+func (i HeaderData) Get(key string) (interface{}, bool) {
 	if i != nil {
 		r, ok := i(key)
 		return r, ok
@@ -179,7 +192,7 @@ func (i InputData) Get(key string) (string, bool) {
 type ParamData map[string]string
 
 //Get 获取指定键对应的数据
-func (i ParamData) Get(key string) (string, bool) {
+func (i ParamData) Get(key string) (interface{}, bool) {
 	r, ok := i[key]
 	return r, ok
 }

@@ -60,8 +60,9 @@ func (w *extParams) GetSharding() (int, int) {
 	return 0, 0
 }
 
-func (w *extParams) GetBodyMap(encoding ...string) map[string]string {
-	if fun, ok := w.ext["__get_request_values_"].(func() map[string]string); ok {
+func (w *extParams) GetBodyMap(encoding ...string) map[string]interface{} {
+
+	if fun, ok := w.ext["__get_request_values_"].(func() map[string]interface{}); ok {
 		return fun()
 	}
 	return nil

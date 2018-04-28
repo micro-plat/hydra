@@ -10,18 +10,18 @@ import (
 
 type RPCInvoker interface {
 	PreInit(services ...string) (err error)
-	RequestFailRetry(service string, method string, header map[string]string, form map[string]string, times int) (status int, result string, params map[string]string, err error)
-	Request(service string, method string, header map[string]string, form map[string]string, failFast bool) (status int, result string, param map[string]string, err error)
-	AsyncRequest(service string, method string, header map[string]string, form map[string]string, failFast bool) rpc.IRPCResponse
+	RequestFailRetry(service string, method string, header map[string]string, input map[string]interface{}, times int) (status int, result string, params map[string]string, err error)
+	Request(service string, method string, header map[string]string, input map[string]interface{}, failFast bool) (status int, result string, param map[string]string, err error)
+	AsyncRequest(service string, method string, header map[string]string, input map[string]interface{}, failFast bool) rpc.IRPCResponse
 	WaitWithFailFast(callback func(string, int, string, error), timeout time.Duration, rs ...rpc.IRPCResponse) error
 }
 
 //IContextRPC rpc基础操作
 type IContextRPC interface {
 	PreInit(services ...string) error
-	RequestFailRetry(service string, input map[string]string, times int) (status int, r string, param map[string]string, err error)
-	Request(service string, input map[string]string, failFast bool) (status int, r string, param map[string]string, err error)
-	RequestMap(service string, input map[string]string, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error)
+	RequestFailRetry(service string, input map[string]interface{}, times int) (status int, r string, param map[string]string, err error)
+	Request(service string, input map[string]interface{}, failFast bool) (status int, r string, param map[string]string, err error)
+	RequestMap(service string, input map[string]interface{}, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error)
 }
 
 //ContextRPC rpc操作实例
@@ -42,7 +42,7 @@ func (cr *ContextRPC) PreInit(services ...string) error {
 }
 
 //AsyncRequest 异步请求
-func (cr *ContextRPC) AsyncRequest(service string, method string, header map[string]string, form map[string]string, failFast bool) rpc.IRPCResponse {
+func (cr *ContextRPC) AsyncRequest(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) rpc.IRPCResponse {
 	if header == nil {
 		header = make(map[string]string)
 	}
@@ -56,7 +56,7 @@ func (cr *ContextRPC) AsyncRequest(service string, method string, header map[str
 }
 
 //RequestFailRetry RPC请求
-func (cr *ContextRPC) RequestFailRetry(service string, method string, header map[string]string, form map[string]string, times int) (status int, r string, param map[string]string, err error) {
+func (cr *ContextRPC) RequestFailRetry(service string, method string, header map[string]string, form map[string]interface{}, times int) (status int, r string, param map[string]string, err error) {
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.Ext.GetUUID()
 	}
@@ -72,7 +72,7 @@ func (cr *ContextRPC) RequestFailRetry(service string, method string, header map
 }
 
 //Request RPC请求
-func (cr *ContextRPC) Request(service string, method string, header map[string]string, form map[string]string, failFast bool) (status int, r string, param map[string]string, err error) {
+func (cr *ContextRPC) Request(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r string, param map[string]string, err error) {
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.Ext.GetUUID()
 	}
@@ -88,7 +88,7 @@ func (cr *ContextRPC) Request(service string, method string, header map[string]s
 }
 
 //RequestMap RPC请求返回结果转换为map
-func (cr *ContextRPC) RequestMap(service string, method string, header map[string]string, form map[string]string, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error) {
+func (cr *ContextRPC) RequestMap(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error) {
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.Ext.GetUUID()
 	}

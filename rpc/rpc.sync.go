@@ -9,7 +9,7 @@ import (
 )
 
 //AsyncRequest 发起异步Request请求
-func (r *Invoker) AsyncRequest(service string, method string, header map[string]string, form map[string]string, failFast bool) rpc.IRPCResponse {
+func (r *Invoker) AsyncRequest(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) rpc.IRPCResponse {
 	result := NewResponse(service)
 	go func() {
 		data := &Result{Service: service}
