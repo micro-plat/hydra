@@ -18,6 +18,7 @@ const DBNameInVar = "db"
 
 //IComponentDB Component DB
 type IComponentDB interface {
+	GetRegularDB(names ...string) (d db.IDB)
 	GetDB(names ...string) (d db.IDB, err error)
 	GetDBBy(tpName string, name string) (c db.IDB, err error)
 	SaveDBObject(tpName string, name string, f func(c conf.IConf) (db.IDB, error)) (bool, db.IDB, error)
@@ -37,6 +38,15 @@ func NewStandardDB(c IContainer, name ...string) *StandardDB {
 		return &StandardDB{IContainer: c, name: name[0], dbMap: cmap.New(2)}
 	}
 	return &StandardDB{IContainer: c, name: DBNameInVar, dbMap: cmap.New(2)}
+}
+
+//GetRegularDB 获取正式的没有异常数据库实例
+func (s *StandardDB) GetRegularDB(names ...string) (d db.IDB) {
+	d, err := s.GetDB(names...)
+	if err != nil {
+		panic(err)
+	}
+	return d
 }
 
 //GetDB 获取数据库操作对象

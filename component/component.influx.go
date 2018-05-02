@@ -18,6 +18,7 @@ const InfluxDBNameInVar = "influxdb"
 
 //IComponentInfluxDB Component DB
 type IComponentInfluxDB interface {
+	GetRegularInflux(names ...string) (c influxdb.IInfluxClient)
 	GetInflux(names ...string) (d influxdb.IInfluxClient, err error)
 	GetInfluxBy(tpName string, name string) (c influxdb.IInfluxClient, err error)
 	SaveInfluxObject(tpName string, name string, f func(c conf.IConf) (influxdb.IInfluxClient, error)) (bool, influxdb.IInfluxClient, error)
@@ -37,6 +38,15 @@ func NewStandardInfluxDB(c IContainer, name ...string) *StandardInfluxDB {
 		return &StandardInfluxDB{IContainer: c, name: name[0], influxdbCache: cmap.New(2)}
 	}
 	return &StandardInfluxDB{IContainer: c, name: InfluxDBNameInVar, influxdbCache: cmap.New(2)}
+}
+
+//GetRegularInflux 获取正式的没有异常Influx实例
+func (s *StandardCache) GetRegularInflux(names ...string) (c influxdb.IInfluxClient) {
+	c, err := s.GetInflux(names...)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 //GetInflux get influxdb

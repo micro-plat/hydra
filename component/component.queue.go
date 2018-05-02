@@ -18,6 +18,7 @@ const QueueNameInVar = "queue"
 
 //IComponentQueue Component Queue
 type IComponentQueue interface {
+	GetRegularQueue(names ...string) (c queue.IQueue)
 	GetQueue(names ...string) (q queue.IQueue, err error)
 	GetQueueBy(tpName string, name string) (c queue.IQueue, err error)
 	SaveQueueObject(tpName string, name string, f func(c conf.IConf) (queue.IQueue, error)) (bool, queue.IQueue, error)
@@ -37,6 +38,15 @@ func NewStandardQueue(c IContainer, name ...string) *StandardQueue {
 		return &StandardQueue{IContainer: c, name: name[0], queueCache: cmap.New(2)}
 	}
 	return &StandardQueue{IContainer: c, name: QueueNameInVar, queueCache: cmap.New(2)}
+}
+
+//GetRegularQueue 获取正式的没有异常Queue实例
+func (s *StandardQueue) GetRegularQueue(names ...string) (c queue.IQueue) {
+	c, err := s.GetQueue(names...)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 //GetQueue GetQueue

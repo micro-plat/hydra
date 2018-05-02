@@ -18,6 +18,7 @@ const CacheNameInVar = "cache"
 
 //IComponentCache Component Cache
 type IComponentCache interface {
+	GetRegularCache(names ...string) (c cache.ICache)
 	GetCache(names ...string) (c cache.ICache, err error)
 	GetCacheBy(tpName string, name string) (c cache.ICache, err error)
 	SaveCacheObject(tpName string, name string, f func(c conf.IConf) (cache.ICache, error)) (bool, cache.ICache, error)
@@ -37,6 +38,15 @@ func NewStandardCache(c IContainer, name ...string) *StandardCache {
 		return &StandardCache{IContainer: c, name: name[0], cacheMap: cmap.New(2)}
 	}
 	return &StandardCache{IContainer: c, name: CacheNameInVar, cacheMap: cmap.New(2)}
+}
+
+//GetRegularCache 获取正式的没有异常缓存实例
+func (s *StandardCache) GetRegularCache(names ...string) (c cache.ICache) {
+	c, err := s.GetCache(names...)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 //GetCache 获取缓存操作对象

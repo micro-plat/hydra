@@ -18,6 +18,10 @@ type IContainer interface {
 
 	GetRegistry() registry.IRegistry
 
+	GetRegularCache(names ...string) (c cache.ICache)
+	GetRegularDB(names ...string) (d db.IDB)
+	GetRegularQueue(names ...string) (c queue.IQueue)
+
 	GetCache(names ...string) (c cache.ICache, err error)
 	GetCacheBy(tpName string, name string) (c cache.ICache, err error)
 	SaveCacheObject(tpName string, name string, f func(c conf.IConf) (cache.ICache, error)) (bool, cache.ICache, error)
