@@ -16,6 +16,8 @@ const InfluxDBTypeNameInVar = "influxdb"
 //InfluxDBNameInVar influxdb名称在var配置中的末节点名称
 const InfluxDBNameInVar = "influxdb"
 
+var _ IComponentInfluxDB = &StandardInfluxDB{}
+
 //IComponentInfluxDB Component DB
 type IComponentInfluxDB interface {
 	GetRegularInflux(names ...string) (c influxdb.IInfluxClient)
@@ -41,7 +43,7 @@ func NewStandardInfluxDB(c IContainer, name ...string) *StandardInfluxDB {
 }
 
 //GetRegularInflux 获取正式的没有异常Influx实例
-func (s *StandardCache) GetRegularInflux(names ...string) (c influxdb.IInfluxClient) {
+func (s *StandardInfluxDB) GetRegularInflux(names ...string) (c influxdb.IInfluxClient) {
 	c, err := s.GetInflux(names...)
 	if err != nil {
 		panic(err)
