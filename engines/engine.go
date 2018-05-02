@@ -169,11 +169,11 @@ func (r *ServiceEngine) Close() error {
 	}
 	r.StandardComponent.Close()
 	r.Invoker.Close()
-	r.IComponentCache.Close()
-	r.IComponentDB.Close()
-	r.IComponentInfluxDB.Close()
 	r.IComponentQueue.Close()
 	r.IComponentGlobalVarObject.Close()
+	r.IComponentDB.Close()
+	r.IComponentCache.Close()
+	r.IComponentInfluxDB.Close()
 	return nil
 }
 func formatName(name string) string {
