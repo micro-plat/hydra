@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type IQueryRow interface {
@@ -16,6 +17,7 @@ type IQueryRow interface {
 	GetMustInt(name string) (int, error)
 	GetMustFloat32(name string) (float32, error)
 	GetMustFloat64(name string) (float64, error)
+	GetDatatime(name string, format ...string) (time.Time, error)
 }
 
 type QueryRow map[string]interface{}
@@ -48,19 +50,38 @@ func (q QueryRow) GetInt64(name string, def ...int64) int64 {
 }
 
 //GetFloat32 从对象中获取数据值，如果不是字符串则返回0
-func (q QueryRow) GetFloat32(name string) float32 {
+func (q QueryRow) GetFloat32(name string, def ...float32) float32 {
 	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", q[name]), 32); err == nil {
 		return float32(value)
+	}
+	if len(def) > 0 {
+		return def[0]
 	}
 	return 0
 }
 
 //GetFloat64 从对象中获取数据值，如果不是字符串则返回0
-func (q QueryRow) GetFloat64(name string) float64 {
+func (q QueryRow) GetFloat64(name string, def ...float64) float64 {
 	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", q[name]), 64); err == nil {
 		return value
 	}
+	if len(def) > 0 {
+		return def[0]
+	}
 	return 0
+}
+
+//GetDatatime 获取时间字段
+func (q QueryRow) GetDatatime(name string, format ...string) (time.Time, error) {
+	t, b := q.GetMustString(name)
+	if !b {
+		return time.Now(), fmt.Errorf("%s列不存在", name)
+	}
+	f := "2006/01/02 15:04:05"
+	if len(format) > 0 {
+		f = format[0]
+	}
+	return time.Parse(f, t)
 }
 
 //Has 检查对象中是否存在某个值
@@ -70,33 +91,33 @@ func (q QueryRow) Has(name string) bool {
 }
 
 //GetMustString 从对象中获取数据值，如果不是字符串则返回空
-func (q QueryRow) GetMustString(name string) (string, error) {
+func (q QueryRow) GetMustString(name string) (string, bool) {
 	if value, ok := q[name].(string); ok {
-		return value, nil
+		return value, true
 	}
-	return "", fmt.Errorf("不存在列:%s", name)
+	return "", false
 }
 
 //GetMustInt 从对象中获取数据值，如果不是字符串则返回0
-func (q QueryRow) GetMustInt(name string) (int, error) {
+func (q QueryRow) GetMustInt(name string) (int, bool) {
 	if value, err := strconv.Atoi(fmt.Sprintf("%v", q[name])); err == nil {
-		return value, nil
+		return value, true
 	}
-	return 0, fmt.Errorf("不存在列:%s", name)
+	return 0, false
 }
 
 //GetMustFloat32 从对象中获取数据值，如果不是字符串则返回0
-func (q QueryRow) GetMustFloat32(name string) (float32, error) {
+func (q QueryRow) GetMustFloat32(name string) (float32, bool) {
 	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", q[name]), 32); err == nil {
-		return float32(value), nil
+		return float32(value), true
 	}
-	return 0, fmt.Errorf("不存在列:%s", name)
+	return 0, false
 }
 
 //GetMustFloat64 从对象中获取数据值，如果不是字符串则返回0
-func (q QueryRow) GetMustFloat64(name string) (float64, error) {
+func (q QueryRow) GetMustFloat64(name string) (float64, bool) {
 	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", q[name]), 64); err == nil {
-		return value, nil
+		return value, true
 	}
-	return 0, fmt.Errorf("不存在列:%s", name)
+	return 0, false
 }

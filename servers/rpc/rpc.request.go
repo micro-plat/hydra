@@ -3,7 +3,7 @@ package rpc
 import (
 	"github.com/micro-plat/hydra/servers/rpc/pb"
 	"github.com/micro-plat/lib4go/jsons"
-	"github.com/qxnw-2/lib4go/types"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type Request struct {

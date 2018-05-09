@@ -33,7 +33,7 @@ func ToStringMap(input map[string]interface{}) (map[string]string, error) {
 			}
 			rmap[k] = string(buff)
 		} else {
-			return nil, fmt.Errorf("不支持的数据类型:%+v", v)
+			rmap[k] = fmt.Sprint(v)
 		}
 	}
 	return rmap, nil
