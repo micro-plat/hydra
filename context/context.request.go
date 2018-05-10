@@ -57,6 +57,9 @@ func (r *Request) Bind(obj interface{}) error {
 		return err
 	}
 	val := reflect.ValueOf(obj)
+	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
 	if val.Kind() != reflect.Struct {
 		return nil
 	}
