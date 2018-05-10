@@ -59,11 +59,13 @@ func (c *Creator) Start() (err error) {
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
+		c.logger.Info("创建配置:", mainPath)
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		subNames := c.binder.GetSubConfNames(tp)
+		fmt.Println("subNames:", subNames)
 		for _, subName := range subNames {
 			ok, err := c.registry.Exists(filepath.Join(mainPath, subName))
 			if err != nil {
@@ -80,10 +82,13 @@ func (c *Creator) Start() (err error) {
 			if err := c.binder.ScanSubConf(mainPath, tp, subName); err != nil {
 				return err
 			}
+
+			path := filepath.Join("/", mainPath, subName)
 			content := c.binder.GetSubConf(tp, subName)
-			if err := c.createConf(filepath.Join("/", mainPath, subName), content); err != nil {
+			if err := c.createConf(path, content); err != nil {
 				return err
 			}
+			c.logger.Info("创建配置:", path)
 		}
 	}
 
@@ -105,10 +110,12 @@ func (c *Creator) Start() (err error) {
 		if err := c.binder.ScanVarConf(c.platName, varName); err != nil {
 			return err
 		}
+		path := filepath.Join("/", c.platName, "var", varName)
 		content := c.binder.GetVarConf(varName)
-		if err := c.createConf(filepath.Join("/", c.platName, "var", varName), content); err != nil {
+		if err := c.createConf(path, content); err != nil {
 			return err
 		}
+		c.logger.Info("创建配置:", path)
 	}
 	return nil
 
