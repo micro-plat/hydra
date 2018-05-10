@@ -1,6 +1,7 @@
 package creator
 
 import (
+	"fmt"
 	"path/filepath"
 )
 
@@ -19,6 +20,7 @@ type IBinder interface {
 	GetMainConfScanNum(serverType string) int
 	GetSubConfScanNum(serverType string, subName string) int
 	GetVarConfScanNum(nodeName string) int
+	Print()
 }
 type Binder struct {
 	API     IMainBinder
@@ -47,6 +49,9 @@ func NewBinder() *Binder {
 		"cron": s.CRON,
 	}
 	return s
+}
+func (s *Binder) Print() {
+	fmt.Println(s.binders)
 }
 
 //GetMainConfNames 获取已配置的主配置名称
