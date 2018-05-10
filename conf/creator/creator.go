@@ -65,7 +65,7 @@ func (c *Creator) Start() (err error) {
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		subNames := c.binder.GetSubConfNames(tp)
-		fmt.Println("subNames:", subNames)
+		fmt.Println("subNames:", tp, subNames, c.binder)
 		for _, subName := range subNames {
 			ok, err := c.registry.Exists(filepath.Join(mainPath, subName))
 			if err != nil {
