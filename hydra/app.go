@@ -20,7 +20,7 @@ import (
 type MicroApp struct {
 	app    *cli.App
 	logger *logger.Logger
-	Binder *creator.Binder
+	Conf   *creator.Binder
 	hydra  *Hydra
 	*option
 	remoteQueryService *rqs.RemoteQueryService
@@ -31,7 +31,7 @@ type MicroApp struct {
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry()}
-	m.Binder = creator.NewBinder()
+	m.Conf = creator.NewBinder()
 	for _, opt := range opts {
 		opt(m.option)
 	}
@@ -81,7 +81,7 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 	}
 
 	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
-		m.RegistryAddr, m.Binder, m.IsDebug, m.RemoteLogger, m.IComponentRegistry)
+		m.RegistryAddr, m.Conf, m.IsDebug, m.RemoteLogger, m.IComponentRegistry)
 	if err := m.hydra.Start(); err != nil {
 		m.logger.Error(err)
 		return err
