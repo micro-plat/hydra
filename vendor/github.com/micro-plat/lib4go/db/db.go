@@ -8,7 +8,7 @@ import (
 
 //IDB 数据库操作接口,安装可需能需要执行export LD_LIBRARY_PATH=/usr/local/lib
 type IDB interface {
-	Query(sql string, input map[string]interface{}) (data []QueryRow, query string, args []interface{}, err error)
+	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
 	Begin() (IDBTrans, error)
@@ -17,7 +17,7 @@ type IDB interface {
 
 //IDBTrans 数据库事务接口
 type IDBTrans interface {
-	Query(sql string, input map[string]interface{}) (data []QueryRow, query string, args []interface{}, err error)
+	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
 	Rollback() error
@@ -47,7 +47,7 @@ func (db *DB) GetTPL() tpl.ITPLContext {
 }
 
 //Query 查询数据
-func (db *DB) Query(sql string, input map[string]interface{}) (data []QueryRow, query string, args []interface{}, err error) {
+func (db *DB) Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error) {
 	query, args = db.tpl.GetSQLContext(sql, input)
 	data, _, err = db.db.Query(query, args...)
 	return
@@ -93,6 +93,8 @@ func (db *DB) Begin() (t IDBTrans, err error) {
 	tt.tpl = db.tpl
 	return tt, nil
 }
+
+//Close  关闭当前数据库连接
 func (db *DB) Close() {
 	db.db.Close()
 }

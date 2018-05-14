@@ -42,7 +42,7 @@ const (
 )
 
 type ISysDB interface {
-	Query(string, ...interface{}) ([]QueryRow, []string, error)
+	Query(string, ...interface{}) (QueryRows, []string, error)
 	Execute(string, ...interface{}) (int64, error)
 	Begin() (ISysDBTrans, error)
 	Close()
@@ -50,7 +50,7 @@ type ISysDB interface {
 
 //ISysDBTrans 数据库事务接口
 type ISysDBTrans interface {
-	Query(string, ...interface{}) ([]QueryRow, []string, error)
+	Query(string, ...interface{}) (QueryRows, []string, error)
 	Execute(string, ...interface{}) (int64, error)
 	Rollback() error
 	Commit() error
@@ -91,7 +91,7 @@ func NewSysDB(provider string, connString string, maxOpen int, maxIdle int, maxL
 }
 
 //Query 执行SQL查询语句
-func (db *SysDB) Query(query string, args ...interface{}) (dataRows []QueryRow, colus []string, err error) {
+func (db *SysDB) Query(query string, args ...interface{}) (dataRows QueryRows, colus []string, err error) {
 	rows, err := db.db.Query(query, args...)
 	if err != nil {
 		if rows != nil {

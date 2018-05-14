@@ -52,6 +52,7 @@ type Context struct {
 	Response  *Response
 	RPC       *ContextRPC
 	container IContainer
+	Meta      *Meta
 	Log       logger.ILogger
 	Name      string
 	Engine    string
@@ -67,6 +68,7 @@ func GetContext(name string, engine string, service string, container IContainer
 	c.Name = name
 	c.Engine = engine
 	c.Service = formatName(c.Request.Translate(service, false))
+	c.Meta = NewMeta()
 	return c
 }
 

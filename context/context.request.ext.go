@@ -1,9 +1,12 @@
 package context
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/micro-plat/lib4go/types"
 )
 
 type extParams struct {
@@ -82,6 +85,20 @@ func (w *extParams) GetBody(encoding ...string) (string, error) {
 //GetJWTBody 获取jwt存储数据
 func (w *extParams) GetJWTBody() interface{} {
 	return w.ext["__jwt_"]
+}
+
+//GetJWTBody 获取jwt存储数据
+func (w *extParams) GetJWT(out interface{}) error {
+	jwt := w.ext["__jwt_"]
+	switch v := jwt.(type) {
+	case string:
+		return json.Unmarshal([]byte(v), &out)
+	case map[string]interface{}:
+		return types.Map2Struct(v, out)
+	default:
+		out = jwt
+		return nil
+	}
 }
 
 //GetUUID

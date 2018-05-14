@@ -8,7 +8,7 @@ type SysDBTransaction struct {
 }
 
 //Query 执行查询
-func (t *SysDBTransaction) Query(query string, args ...interface{}) (dataRows []QueryRow, colus []string, err error) {
+func (t *SysDBTransaction) Query(query string, args ...interface{}) (dataRows QueryRows, colus []string, err error) {
 	rows, err := t.tx.Query(query, args...)
 	if err != nil {
 		return

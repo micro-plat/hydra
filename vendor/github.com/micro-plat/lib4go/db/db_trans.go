@@ -9,7 +9,7 @@ type DBTrans struct {
 }
 
 //Query 查询数据
-func (t *DBTrans) Query(sql string, input map[string]interface{}) (data []QueryRow, query string, args []interface{}, err error) {
+func (t *DBTrans) Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error) {
 	query, args = t.tpl.GetSQLContext(sql, input)
 	data, _, err = t.tx.Query(query, args...)
 	return
