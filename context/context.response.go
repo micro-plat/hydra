@@ -19,7 +19,7 @@ type IResponse interface {
 	GetHeaders() map[string]string
 	SetHeader(name string, value string)
 	SetHeaders(map[string]string)
-	SetJWTBody(data interface{})
+	SetJWT(data interface{})
 	ShouldStatus(status int)
 	HasError(v interface{}) bool
 	GetError() error
@@ -75,6 +75,6 @@ func (r *Response) IsSuccess() bool {
 	return r.Status >= 200 && r.Status < 400
 }
 
-func (r *Response) SetJWTBody(data interface{}) {
+func (r *Response) SetJWT(data interface{}) {
 	r.Params["__jwt_"] = data
 }
