@@ -62,7 +62,7 @@ type Context struct {
 //GetContext 从缓存池中获取一个context
 func GetContext(name string, engine string, service string, container IContainer, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}, logger *logger.Logger) *Context {
 	c := contextPool.Get().(*Context)
-	c.Request.reset(queryString, form, param, setting, ext)
+	c.Request.reset(c, queryString, form, param, setting, ext)
 	c.Log = logger
 	c.container = container
 	c.Name = name

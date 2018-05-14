@@ -13,6 +13,7 @@ import (
 
 type extParams struct {
 	ext map[string]interface{}
+	ctx *Context
 }
 
 // func (w *extParams) Get(name string) (interface{}, bool) {
@@ -115,10 +116,10 @@ func (w *extParams) GetUUID() string {
 }
 
 //GetJWTConfig 获取jwt配置信息
-func (w *extParams) GetJWTConfig(ctx *Context) (*conf.Auth, error) {
+func (w *extParams) GetJWTConfig() (*conf.Auth, error) {
 	var auths conf.Authes
 	var jwt *conf.Auth
-	if _, err := ctx.GetContainer().GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("jwt配置有误:%v", err)
 		return nil, err
 	}

@@ -38,7 +38,7 @@ func newRequest() *Request {
 	}
 }
 
-func (r *Request) reset(queryString IData, form IData, param IData, setting IData, ext map[string]interface{}) {
+func (r *Request) reset(ctx *Context, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}) {
 	r.QueryString.data = queryString
 	r.Form.data = form
 	r.Param.data = param
@@ -46,6 +46,7 @@ func (r *Request) reset(queryString IData, form IData, param IData, setting IDat
 	r.CircuitBreaker.inputParams.data = setting
 	r.CircuitBreaker.ext = ext
 	r.extParams.ext = ext
+	r.extParams.ctx = ctx
 	r.Http.ext = ext
 
 }
