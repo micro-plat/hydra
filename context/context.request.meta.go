@@ -30,3 +30,9 @@ func NewMeta() *Meta {
 func (m *Meta) Set(key string, value interface{}) {
 	m.m.d[key] = value
 }
+
+//Get 获取元数据
+func (m *Meta) Get(name string) (interface{}, bool) {
+	c, ok := m.data.Get(name)
+	return c, ok
+}
