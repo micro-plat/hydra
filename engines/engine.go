@@ -140,16 +140,17 @@ func (r *ServiceEngine) Execute(name string, engine string, service string, ctx 
 //Handling 每次handle执行前执行
 func (r *ServiceEngine) Handling(name string, engine string, service string, c *context.Context) (rs interface{}) {
 	c.SetRPC(r.Invoker)
-	switch engine {
-	case "rpc":
-		return nil
-	default:
-		if r.IsCustomerService(service, component.GetGroupName(r.GetServerType())...) {
-			return nil
-		}
-	}
-	c.Response.SetStatus(404)
-	return fmt.Errorf("%s未找到服务:%s", r.Name, service)
+	// switch engine {
+	// case "rpc":
+	// 	return nil
+	// default:
+	// 	if r.IsCustomerService(service, component.GetGroupName(r.GetServerType())...) {
+	// 		return nil
+	// 	}
+	// }
+	// c.Response.SetStatus(404)
+	// return fmt.Errorf("%s未找到服务:%s", r.Name, service)
+	return nil
 }
 
 //GetRegistry 获取注册中心
