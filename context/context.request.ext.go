@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/micro-plat/lib4go/types"
@@ -90,6 +91,9 @@ func (w *extParams) GetJWTBody() interface{} {
 //GetJWTBody 获取jwt存储数据
 func (w *extParams) GetJWT(out interface{}) error {
 	jwt := w.ext["__jwt_"]
+	if jwt == nil || reflect.ValueOf(jwt).IsNil() {
+		return fmt.Errorf("jwt未传入")
+	}
 	switch v := jwt.(type) {
 	case string:
 		return json.Unmarshal([]byte(v), &out)
