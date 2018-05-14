@@ -15,7 +15,7 @@ type IContainer interface {
 
 	conf.ISystemConf
 	conf.IVarConf
-
+	conf.IMainConf
 	GetRegistry() registry.IRegistry
 
 	GetRegularCache(names ...string) (c cache.ICache)
