@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -111,4 +112,19 @@ func (w *extParams) GetJWT(out interface{}) error {
 //GetUUID
 func (w *extParams) GetUUID() string {
 	return w.ext["__hydra_sid_"].(string)
+}
+
+//GetJWTConfig 获取jwt配置信息
+func (w *extParams) GetJWTConfig(ctx *Context) (*conf.Auth, error) {
+	var auths conf.Authes
+	var jwt *conf.Auth
+	if _, err := ctx.GetContainer().GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+		err = fmt.Errorf("jwt配置有误:%v", err)
+		return nil, err
+	}
+	jwt, enable := auths["jwt"]
+	if !enable {
+		return nil, fmt.Errorf("jwt:%v", conf.ErrNoSetting)
+	}
+	return jwt, nil
 }
