@@ -17,7 +17,7 @@ func main() {
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 	app.Initializing(func(c component.IContainer) error {
-		_, _, err := c.SaveObject("a", "b", func(c conf.IConf) (interface{}, error) {
+		_, _, err := c.SaveGlobalObject("a", "b", func(c conf.IConf) (interface{}, error) {
 			fmt.Println("name:", c.GetString("name"))
 			return "success", nil
 		})
@@ -28,7 +28,7 @@ func main() {
 		return nil
 	})
 	app.Initializing(func(c component.IContainer) error {
-		fmt.Println(c.GetObject("a", "b"))
+		fmt.Println(c.GetGlobalObject("a", "b"))
 		c.Set("efg", "2")
 		return nil
 	})
@@ -37,7 +37,7 @@ func main() {
 		return nil
 	})
 	app.Closing(func(c component.IContainer) error {
-		fmt.Println(c.GetObject("a", "b"))
+		fmt.Println(c.GetGlobalObject("a", "b"))
 		fmt.Println(c.Get("abc"))
 		return nil
 	})

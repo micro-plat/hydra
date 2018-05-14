@@ -155,7 +155,7 @@ func (h *RemoteQueryService) unpublish() {
 }
 
 func (h *RemoteQueryService) queryHandler() servers.IExecuteHandler {
-	return func(name string, method string, service string, ctx *context.Context) (rs interface{}) {
+	return func(ctx *context.Context) (rs interface{}) {
 		ctx.Response.SeTextJSON()
 		data := make(map[string]interface{})
 		data["cpu_used_precent"] = fmt.Sprintf("%.2f", cpu.GetInfo(time.Millisecond*200).UsedPercent)
@@ -171,7 +171,7 @@ func (h *RemoteQueryService) queryHandler() servers.IExecuteHandler {
 	}
 }
 func (h *RemoteQueryService) updateHandler() servers.IExecuteHandler {
-	return func(name string, method string, service string, ctx *context.Context) (rs interface{}) {		
+	return func(ctx *context.Context) (rs interface{}) {
 		ctx.Response.SeTextJSON()
 		v := ctx.Request.Param.GetString("v")
 		if v == "" {
@@ -183,9 +183,9 @@ func (h *RemoteQueryService) updateHandler() servers.IExecuteHandler {
 		}
 		if b {
 			if err = UpdateNow(pkg, h.logger, func() {
-				if h.HydraShutdown!=nil{
+				if h.HydraShutdown != nil {
 					h.HydraShutdown()
-				}			
+				}
 				//关闭服务器
 			}); err != nil {
 				return err

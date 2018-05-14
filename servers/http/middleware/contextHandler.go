@@ -102,13 +102,13 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 	return func(c *gin.Context) {
 		//处理输入参数
 		ctn, _ := exhandler.(context.IContainer)
-		ctx := context.GetContext(ctn, makeQueyStringData(c), makeFormData(c), makeParamsData(c), makeSettingData(c, mSetting), makeExtData(c), getLogger(c))
+		ctx := context.GetContext(name, engine, service, ctn, makeQueyStringData(c), makeFormData(c), makeParamsData(c), makeSettingData(c, mSetting), makeExtData(c), getLogger(c))
 
-		defer setServiceName(c, ctx.Request.Translate(service, false))
+		defer setServiceName(c, ctx.Service)
 		defer setCTX(c, ctx)
 		//调用执行引擎进行逻辑处理
 
-		result := handler.Execute(name, engine, ctx.Request.Translate(service, false), ctx)
+		result := handler.Execute(ctx)
 		if result != nil {
 			ctx.Response.ShouldContent(result)
 		}

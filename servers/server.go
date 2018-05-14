@@ -34,13 +34,13 @@ type IRegistryServer interface {
 }
 
 type IExecuter interface {
-	Execute(name string, method string, service string, ctx *context.Context) (rs interface{})
+	Execute(ctx *context.Context) (rs interface{})
 }
 
-type IExecuteHandler func(name string, method string, service string, ctx *context.Context) (rs interface{})
+type IExecuteHandler func(ctx *context.Context) (rs interface{})
 
-func (i IExecuteHandler) Execute(name string, method string, service string, ctx *context.Context) (rs interface{}) {
-	return i(name, method, service, ctx)
+func (i IExecuteHandler) Execute(ctx *context.Context) (rs interface{}) {
+	return i(ctx)
 }
 
 //IRegistryEngine 基于注册中心的执行引擎
@@ -50,7 +50,7 @@ type IRegistryEngine interface {
 	SetHandler(h component.IComponentHandler) error
 	UpdateVarConf(conf conf.IServerConf)
 	GetServices() []string
-	Fallback(name string, method string, service string, c *context.Context) (rs interface{})
+	Fallback(c *context.Context) (rs interface{})
 }
 
 //IServerResolver 服务器生成器

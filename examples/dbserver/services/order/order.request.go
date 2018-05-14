@@ -12,7 +12,7 @@ type RequestHandler struct {
 func NewRequestHandler(container component.IContainer) (u *RequestHandler) {
 	return &RequestHandler{container: container}
 }
-func (u *RequestHandler) Handle(name string, engine string, service string, ctx *context.Context) (r interface{}) {
+func (u *RequestHandler) Handle(ctx *context.Context) (r interface{}) {
 
 	db, err := u.container.GetDB()
 	if err != nil {

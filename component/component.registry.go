@@ -64,10 +64,10 @@ type IServiceRegistry interface {
 	//Closing 关闭组件
 	Closing(c func(IContainer) error)
 	//Handling 每个请求的预处理函数
-	Handling(h func(name string, mode string, service string, c *context.Context) (rs interface{}))
+	Handling(h func(c *context.Context) (rs interface{}))
 
 	//Handled 请求后处理函数
-	Handled(h func(name string, mode string, service string, c *context.Context) (rs interface{}))
+	Handled(h func(c *context.Context) (rs interface{}))
 }
 
 //ServiceRegistry 服务注册组件
@@ -290,12 +290,12 @@ func (s *ServiceRegistry) PutFallback(name string, h interface{}) {
 }
 
 //Handling 预处理程序
-func (s *ServiceRegistry) Handling(h func(name string, mode string, service string, c *context.Context) (rs interface{})) {
+func (s *ServiceRegistry) Handling(h func(c *context.Context) (rs interface{})) {
 	s.handlingFuncs = append(s.handlingFuncs, h)
 }
 
 //Handled 处理程序
-func (s *ServiceRegistry) Handled(h func(name string, mode string, service string, c *context.Context) (rs interface{})) {
+func (s *ServiceRegistry) Handled(h func(c *context.Context) (rs interface{})) {
 	s.handledFuncs = append(s.handledFuncs, h)
 }
 

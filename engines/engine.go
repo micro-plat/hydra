@@ -2,7 +2,6 @@ package engines
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
@@ -16,8 +15,8 @@ import (
 type IServiceEngine interface {
 	GetRegistry() registry.IRegistry
 	GetServices() []string
-	Fallback(name string, engine string, service string, c *context.Context) (rs interface{})
-	Execute(name string, engine string, service string, ctx *context.Context) (rs interface{})
+	Fallback(c *context.Context) (rs interface{})
+	Execute(ctx *context.Context) (rs interface{})
 	Close() error
 }
 
@@ -97,48 +96,47 @@ func (r *ServiceEngine) GetServices() []string {
 }
 
 //Execute 执行外部请求
-func (r *ServiceEngine) Execute(name string, engine string, service string, ctx *context.Context) (rs interface{}) {
-	service = formatName(service)
+func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
-		rf := r.StandardComponent.Fallback(name, engine, service, ctx)
+		rf := r.StandardComponent.Fallback(ctx)
 		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {
 			ctx.Response.MustContent(ctx.Request.CircuitBreaker.GetDefStatus(), ctx.Request.CircuitBreaker.GetDefContent())
 		}
 		return rf
 	}
-	if rh := r.Handling(name, engine, service, ctx); ctx.Response.HasError(rh) {
+	if rh := r.Handling(ctx); ctx.Response.HasError(rh) {
 		return rh
 	}
 
 	if r.cHandler != nil && r.cHandler.GetHandlings() != nil {
 		hds := r.cHandler.GetHandlings()
 		for _, h := range hds {
-			if rh := h(name, engine, service, ctx); ctx.Response.HasError(rh) {
+			if rh := h(ctx); ctx.Response.HasError(rh) {
 				return rh
 			}
 		}
 	}
 
-	if rs = r.Handle(name, engine, service, ctx); ctx.Response.HasError(rs) {
+	if rs = r.Handle(ctx); ctx.Response.HasError(rs) {
 		return rs
 	}
 	if r.cHandler != nil && r.cHandler.GetHandleds() != nil {
 		hdd := r.cHandler.GetHandleds()
 		for _, h := range hdd {
-			if rh := h(name, engine, service, ctx); ctx.Response.HasError(rh) {
+			if rh := h(ctx); ctx.Response.HasError(rh) {
 				return rh
 			}
 		}
 
 	}
-	if rd := r.Handled(name, engine, service, ctx); ctx.Response.HasError(rd) {
+	if rd := r.Handled(ctx); ctx.Response.HasError(rd) {
 		return rd
 	}
 	return rs
 }
 
 //Handling 每次handle执行前执行
-func (r *ServiceEngine) Handling(name string, engine string, service string, c *context.Context) (rs interface{}) {
+func (r *ServiceEngine) Handling(c *context.Context) (rs interface{}) {
 	c.SetRPC(r.Invoker)
 	// switch engine {
 	// case "rpc":
@@ -177,10 +175,7 @@ func (r *ServiceEngine) Close() error {
 	r.IComponentDB.Close()
 	return nil
 }
-func formatName(name string) string {
-	text := "/" + strings.Trim(strings.Trim(name, " "), "/")
-	return strings.ToLower(text)
-}
+
 func appendEngines(engines []string, ext ...string) []string {
 	addEngine := make([]string, 0, len(ext))
 	for _, n := range ext {

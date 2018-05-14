@@ -1,6 +1,7 @@
 package context
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/conf"
@@ -52,14 +53,20 @@ type Context struct {
 	RPC       *ContextRPC
 	container IContainer
 	Log       logger.ILogger
+	Name      string
+	Engine    string
+	Service   string
 }
 
 //GetContext 从缓存池中获取一个context
-func GetContext(container IContainer, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}, logger *logger.Logger) *Context {
+func GetContext(name string, engine string, service string, container IContainer, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}, logger *logger.Logger) *Context {
 	c := contextPool.Get().(*Context)
 	c.Request.reset(queryString, form, param, setting, ext)
 	c.Log = logger
 	c.container = container
+	c.Name = name
+	c.Engine = engine
+	c.Service = formatName(c.Request.Translate(service, false))
 	return c
 }
 
@@ -93,4 +100,8 @@ func (c *Context) Close() {
 	c.Response.clear()
 	c.container = nil
 	contextPool.Put(c)
+}
+func formatName(name string) string {
+	text := "/" + strings.Trim(strings.Trim(name, " "), "/")
+	return strings.ToLower(text)
 }

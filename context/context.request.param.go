@@ -41,7 +41,6 @@ func (i *inputParams) GetString(name string, p ...string) string {
 //GetInt 获取int数字
 func (i *inputParams) GetInt(name string, p ...int) int {
 	value, b := i.Get(name)
-	fmt.Println("input.param:", value, b)
 	if b {
 		v, err := strconv.Atoi(value)
 		if err == nil {
