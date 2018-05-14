@@ -92,7 +92,7 @@ func (w *extParams) GetJWTBody() interface{} {
 func (w *extParams) GetJWT(out interface{}) error {
 	jwt := w.ext["__jwt_"]
 	if jwt == nil || reflect.ValueOf(jwt).IsNil() {
-		return fmt.Errorf("jwt未传入")
+		return fmt.Errorf("未找到jwt,用户未登录")
 	}
 	switch v := jwt.(type) {
 	case string:
