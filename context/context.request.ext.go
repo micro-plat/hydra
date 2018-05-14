@@ -13,10 +13,10 @@ type extParams struct {
 	ext map[string]interface{}
 }
 
-func (w *extParams) Get(name string) (interface{}, bool) {
-	v, ok := w.ext[name]
-	return v, ok
-}
+// func (w *extParams) Get(name string) (interface{}, bool) {
+// 	v, ok := w.ext[name]
+// 	return v, ok
+// }
 func (w *extParams) GetMethod() string {
 	if m, ok := w.ext["__method_"].(string); ok {
 		return m

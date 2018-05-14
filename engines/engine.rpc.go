@@ -18,9 +18,9 @@ func (r *ServiceEngine) RPCProxy() component.ServiceFunc {
 		for k, v := range cookie {
 			header[k] = v
 		}
-		input := ctx.Request.Ext.GetBodyMap()
+		input := ctx.Request.GetBodyMap()
 		timeout := ctx.Request.Setting.GetInt("timeout", 3)
-		response := ctx.RPC.AsyncRequest(ctx.Service, strings.ToUpper(ctx.Request.Ext.GetMethod()), header, input, true)
+		response := ctx.RPC.AsyncRequest(ctx.Service, strings.ToUpper(ctx.Request.GetMethod()), header, input, true)
 		status, result, params, err := response.Wait(time.Second * time.Duration(timeout))
 		if err != nil {
 			err = fmt.Errorf("rpc.proxy %v(%d)", err, status)

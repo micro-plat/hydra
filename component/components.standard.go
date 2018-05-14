@@ -396,7 +396,7 @@ func (r *StandardComponent) GetHandler(engine string, service string, method str
 
 //Handle 组件服务执行
 func (r *StandardComponent) Handle(c *context.Context) (rs interface{}) {
-	h, ok := r.GetHandler(c.Engine, c.Service, c.Request.Ext.GetMethod())
+	h, ok := r.GetHandler(c.Engine, c.Service, c.Request.GetMethod())
 	if !ok {
 		c.Response.SetStatus(404)
 		return fmt.Errorf("%s:未找到服务:%s", r.Name, c.Service)
@@ -427,7 +427,7 @@ func (r *StandardComponent) GetFallbackHandler(engine string, service string, me
 //Fallback 降级处理
 func (r *StandardComponent) Fallback(c *context.Context) (rs interface{}) {
 	c.Response.SetStatus(404)
-	h, ok := r.GetFallbackHandler(c.Engine, c.Service, c.Request.Ext.GetMethod())
+	h, ok := r.GetFallbackHandler(c.Engine, c.Service, c.Request.GetMethod())
 	if !ok {
 		return ErrNotFoundService
 	}
