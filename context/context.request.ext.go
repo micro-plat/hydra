@@ -100,8 +100,11 @@ func (w *extParams) GetJWT(out interface{}) error {
 	case map[string]interface{}:
 		return types.Map2Struct(v, out)
 	default:
-		out = jwt
-		return nil
+		buff, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal(buff, out)
 	}
 }
 
