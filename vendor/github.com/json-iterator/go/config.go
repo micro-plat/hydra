@@ -2,12 +2,12 @@ package jsoniter
 
 import (
 	"encoding/json"
+	"github.com/modern-go/concurrent"
 	"github.com/modern-go/reflect2"
 	"io"
+	"reflect"
 	"sync"
 	"unsafe"
-	"github.com/modern-go/concurrent"
-	"reflect"
 )
 
 // Config customize how the API should behave.
@@ -40,6 +40,8 @@ type API interface {
 	NewDecoder(reader io.Reader) *Decoder
 	Valid(data []byte) bool
 	RegisterExtension(extension Extension)
+	DecoderOf(typ reflect2.Type) ValDecoder
+	EncoderOf(typ reflect2.Type) ValEncoder
 }
 
 // ConfigDefault the default API
@@ -60,7 +62,6 @@ var ConfigFastest = Config{
 	MarshalFloatWith6Digits:       true, // will lose precession
 	ObjectFieldMustBeSimpleString: true, // do not unescape object field
 }.Froze()
-
 
 type frozenConfig struct {
 	configBeforeFrozen            Config

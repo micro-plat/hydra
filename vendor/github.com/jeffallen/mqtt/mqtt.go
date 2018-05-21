@@ -431,14 +431,14 @@ func (c *incomingConn) start() {
 	go c.writer()
 }
 
-// Add this	connection to the map, or find out that an existing connection
+// Add this connection to the map, or find out that an existing connection
 // already exists for the same client-id.
 func (c *incomingConn) add() *incomingConn {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 
 	existing, ok := clients[c.clientid]
-	if !ok {
+	if ok {
 		// this client id already exists, return it
 		return existing
 	}
@@ -447,41 +447,11 @@ func (c *incomingConn) add() *incomingConn {
 	return nil
 }
 
-// Delete a connection; the conection must be closed by the caller first.
+// Delete a connection; the connection must be closed by the caller first.
 func (c *incomingConn) del() {
 	clientsMu.Lock()
-	defer clientsMu.Unlock()
 	delete(clients, c.clientid)
-	return
-}
-
-// Replace any existing connection with this one. The one to be replaced,
-// if any, must be closed first by the caller.
-func (c *incomingConn) replace() {
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
-
-	// Check that any existing connection is already closed.
-	existing, ok := clients[c.clientid]
-	if ok {
-		die := false
-		select {
-		case _, ok := <-existing.jobs:
-			// what? we are expecting that this channel is closed!
-			if ok {
-				die = true
-			}
-		default:
-			die = true
-		}
-		if die {
-			panic("attempting to replace a connection that is not closed")
-		}
-
-		delete(clients, c.clientid)
-	}
-
-	clients[c.clientid] = c
+	clientsMu.Unlock()
 	return
 }
 
@@ -532,9 +502,9 @@ func (c *incomingConn) reader() {
 		}
 		c.svr.stats.messageRecv()
 
-		//if c.svr.Dump {
-		//	log.Printf("dump  in: %T", m)
-		//	}
+		if c.svr.Dump {
+			log.Printf("dump  in: %T", m)
+		}
 
 		switch m := m.(type) {
 		case *proto.Connect:
@@ -557,9 +527,8 @@ func (c *incomingConn) reader() {
 				disconnect := &proto.Disconnect{}
 				r := existing.submitSync(disconnect)
 				r.wait()
-				existing.del()
+				c.add()
 			}
-			c.add()
 
 			// TODO: Last will
 
@@ -660,9 +629,9 @@ func (c *incomingConn) writer() {
 	}()
 
 	for job := range c.jobs {
-		//if c.svr.Dump {
-		//log.Printf("dump out: %T", job.m)
-		//}
+		if c.svr.Dump {
+			log.Printf("dump out: %T", job.m)
+		}
 
 		// TODO: write timeout
 		err := job.m.Encode(c.conn)
@@ -791,9 +760,9 @@ func (c *ClientConn) reader() {
 			return
 		}
 
-		//	if c.Dump {
-		//log.Printf("dump  in: %T", m)
-		///}
+		if c.Dump {
+			log.Printf("dump  in: %T", m)
+		}
 
 		switch m := m.(type) {
 		case *proto.Publish:
@@ -822,9 +791,9 @@ func (c *ClientConn) writer() {
 	}()
 
 	for job := range c.out {
-		//if c.Dump {
-		//	log.Printf("dump out: %T", job.m)
-		//	}
+		if c.Dump {
+			log.Printf("dump out: %T", job.m)
+		}
 
 		// TODO: write timeout
 		err := job.m.Encode(c.conn)

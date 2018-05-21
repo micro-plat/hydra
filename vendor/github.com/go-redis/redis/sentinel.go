@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"crypto/tls"
 	"errors"
 	"net"
 	"strings"
@@ -38,6 +39,8 @@ type FailoverOptions struct {
 	PoolTimeout        time.Duration
 	IdleTimeout        time.Duration
 	IdleCheckFrequency time.Duration
+
+	TLSConfig *tls.Config
 }
 
 func (opt *FailoverOptions) options() *Options {
@@ -59,6 +62,8 @@ func (opt *FailoverOptions) options() *Options {
 		PoolTimeout:        opt.PoolTimeout,
 		IdleTimeout:        opt.IdleTimeout,
 		IdleCheckFrequency: opt.IdleCheckFrequency,
+
+		TLSConfig: opt.TLSConfig,
 	}
 }
 
@@ -76,7 +81,7 @@ func NewFailoverClient(failoverOpt *FailoverOptions) *Client {
 		opt: opt,
 	}
 
-	client := Client{
+	c := Client{
 		baseClient: baseClient{
 			opt:      opt,
 			connPool: failover.Pool(),
@@ -86,9 +91,10 @@ func NewFailoverClient(failoverOpt *FailoverOptions) *Client {
 			},
 		},
 	}
-	client.setProcessor(client.Process)
+	c.baseClient.init()
+	c.setProcessor(c.Process)
 
-	return &client
+	return &c
 }
 
 //------------------------------------------------------------------------------
@@ -100,14 +106,15 @@ type sentinelClient struct {
 
 func newSentinel(opt *Options) *sentinelClient {
 	opt.init()
-	client := sentinelClient{
+	c := sentinelClient{
 		baseClient: baseClient{
 			opt:      opt,
 			connPool: newConnPool(opt),
 		},
 	}
-	client.cmdable = cmdable{client.Process}
-	return &client
+	c.baseClient.init()
+	c.cmdable.setProcessor(c.Process)
+	return &c
 }
 
 func (c *sentinelClient) PubSub() *PubSub {
@@ -301,8 +308,10 @@ func (d *sentinelFailover) listen(sentinel *sentinelClient) {
 
 		msg, err := pubsub.ReceiveMessage()
 		if err != nil {
-			internal.Logf("sentinel: ReceiveMessage failed: %s", err)
-			pubsub.Close()
+			if err != pool.ErrClosed {
+				internal.Logf("sentinel: ReceiveMessage failed: %s", err)
+				pubsub.Close()
+			}
 			d.resetSentinel()
 			return
 		}
