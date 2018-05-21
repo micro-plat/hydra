@@ -85,19 +85,16 @@ func (r *Request) BindWith(obj interface{}, contentType string) error {
 }
 
 //Check 检查输入参数和配置参数是否为空
-func (r *Request) Check(checker map[string][]string) (int, error) {
-	for _, field := range checker["input"] {
-		if err := r.Form.Check(field); err == nil {
+func (r *Request) Check(field ...string) error {
+	for _, fd := range field {
+		if err := r.Form.Check(fd); err == nil {
 			continue
 		}
-		if err := r.QueryString.Check(field); err != nil {
-			return ERR_NOT_ACCEPTABLE, fmt.Errorf("输入参数:%v", err)
+		if err := r.QueryString.Check(fd); err != nil {
+			return fmt.Errorf("输入参数:%v", err)
 		}
 	}
-	if err := r.Setting.Check(checker["setting"]...); err != nil {
-		return ERR_NOT_EXTENDED, fmt.Errorf("配置参数:%v", err)
-	}
-	return 0, nil
+	return nil
 }
 
 //Body2Input 根据编码格式解码body参数，并更新input参数
