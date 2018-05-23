@@ -435,9 +435,10 @@ func (d *Decoder) decodeBasic(name string, data interface{}, val reflect.Value) 
 }
 
 func (d *Decoder) decodeString(name string, data interface{}, val reflect.Value) error {
+
 	dataVal := reflect.ValueOf(data)
 	dataKind := d.getKind(dataVal)
-
+	fmt.Println("decodeString:", dataKind, dataVal.String())
 	switch {
 	case dataKind == reflect.String:
 		val.SetString(dataVal.String())

@@ -8,7 +8,7 @@ type DBConf struct {
 	LefeTime   int    `json:"lifeTime" valid:"required"`
 }
 type CacheConf struct {
-	Server string `json:"server" valid:"ascii,required"`
+	Proto string `json:"proto" valid:"ascii,required"`
 }
 type QueueConf struct {
 	Proto string `json:"proto" valid:"ascii,required"`

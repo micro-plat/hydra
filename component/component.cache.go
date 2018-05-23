@@ -68,7 +68,7 @@ func (s *StandardCache) GetCacheBy(tpName string, name string) (c cache.ICache, 
 		if b, err := govalidator.ValidateStruct(&chObjConf); !b {
 			return nil, err
 		}
-		return cache.NewCache(chObjConf.Server, string(chConf.GetRaw()))
+		return cache.NewCache(chObjConf.Proto, string(chConf.GetRaw()))
 	})
 	return c, err
 }

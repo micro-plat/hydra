@@ -51,16 +51,14 @@ func NewCache(address string, conf string) (ICache, error) {
 
 func getNames(address string) (proto string, raddr []string, err error) {
 	addr := strings.SplitN(address, "://", 2)
-	if len(addr) != 2 {
-		return "", nil, fmt.Errorf("cache地址配置错误%s，格式:memcached://192.168.0.1:11211", addr)
-	}
 	if len(addr[0]) == 0 {
 		return "", nil, fmt.Errorf("cache地址配置错误%s，格式:memcached://192.168.0.1:11211", addr)
 	}
-	if len(addr[1]) == 0 {
-		return "", nil, fmt.Errorf("cache地址配置错误%s，格式:memcached://192.168.0.1:11211", addr)
-	}
 	proto = addr[0]
-	raddr = strings.Split(addr[1], ",")
+	var rightAddr string
+	if len(addr) > 1 {
+		rightAddr = addr[1]
+	}
+	raddr = strings.Split(rightAddr, ",")
 	return
 }
