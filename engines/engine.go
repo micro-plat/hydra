@@ -1,8 +1,6 @@
 package engines
 
 import (
-	"fmt"
-
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -53,11 +51,11 @@ func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger *logger
 	if err = e.loadEngineServices(); err != nil {
 		return nil, err
 	}
-	if err = e.LoadComponents(fmt.Sprintf("./%s.so", conf.GetPlatName()),
-		fmt.Sprintf("./%s.so", conf.GetSysName()),
-		fmt.Sprintf("./%s_%s.so", conf.GetPlatName(), conf.GetSysName())); err != nil {
-		return
-	}
+	// if err = e.LoadComponents(fmt.Sprintf("./%s.so", conf.GetPlatName()),
+	// 	fmt.Sprintf("./%s.so", conf.GetSysName()),
+	// 	fmt.Sprintf("./%s_%s.so", conf.GetPlatName(), conf.GetSysName())); err != nil {
+	// 	return
+	// }
 	e.StandardComponent.AddRPCProxy(e.RPCProxy())
 	err = e.StandardComponent.LoadServices()
 	return
