@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 //Header 头设置
 func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		fmt.Println("method:", strings.ToUpper(ctx.Request.Method) != "OPTIONS", strings.ToUpper(ctx.Request.Method))
 		if strings.ToUpper(ctx.Request.Method) != "OPTIONS" {
 			ctx.Next()
 		}
