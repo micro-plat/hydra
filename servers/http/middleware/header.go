@@ -14,17 +14,16 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 			ctx.Next()
 		}
 		headers, ok := cnf.GetMetadata("headers").(conf.Headers)
-		if !ok {
-			return
-		}
-		origin := ctx.Request.Header.Get("Origin")
-		for k, v := range headers {
-			if k != "Access-Control-Allow-Origin" { //非跨域设置
-				ctx.Header(k, v)
-				continue
-			}
-			if origin != "" && strings.Contains(v, origin) {
-				ctx.Header(k, origin)
+		if ok {
+			origin := ctx.Request.Header.Get("Origin")
+			for k, v := range headers {
+				if k != "Access-Control-Allow-Origin" { //非跨域设置
+					ctx.Header(k, v)
+					continue
+				}
+				if origin != "" && strings.Contains(v, origin) {
+					ctx.Header(k, origin)
+				}
 			}
 		}
 
