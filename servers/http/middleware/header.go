@@ -10,7 +10,7 @@ import (
 //Header 头设置
 func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if strings.ToLower(ctx.Request.Method) != "options" {
+		if strings.ToUpper(ctx.Request.Method) != "OPTIONS" {
 			ctx.Next()
 		}
 		headers, ok := cnf.GetMetadata("headers").(conf.Headers)
