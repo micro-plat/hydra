@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +10,6 @@ import (
 //Header 头设置
 func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fmt.Println("method:", strings.ToUpper(ctx.Request.Method) != "OPTIONS", strings.ToUpper(ctx.Request.Method))
 		if strings.ToUpper(ctx.Request.Method) != "OPTIONS" {
 			ctx.Next()
 		}
@@ -19,21 +17,17 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 		if !ok {
 			return
 		}
+		origin := ctx.Request.Header.Get("Origin")
 		for k, v := range headers {
-			if k == "Access-Control-Allow-Origin" && strings.Contains(v, ",") {
-				if strings.Contains(v, ctx.Request.Host) {
-					hosts := strings.Split(v, ",")
-					for _, h := range hosts {
-						if strings.Contains(h, ctx.Request.Host) {
-							ctx.Header(k, h)
-							continue
-						}
-					}
-				}
+			if k != "Access-Control-Allow-Origin" { //非跨域设置
+				ctx.Header(k, v)
 				continue
 			}
-			ctx.Header(k, v)
+			if origin != "" && strings.Contains(v, origin) {
+				ctx.Header(k, origin)
+			}
 		}
+
 		context := getCTX(ctx)
 		if context == nil {
 			return
