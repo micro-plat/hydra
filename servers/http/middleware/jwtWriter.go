@@ -13,6 +13,5 @@ func JwtWriter(cnf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 		setJwtResponse(ctx, cnf, context.Response.GetParams()["__jwt_"])
-
 	}
 }

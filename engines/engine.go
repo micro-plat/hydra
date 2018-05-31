@@ -95,6 +95,9 @@ func (r *ServiceEngine) GetServices() []string {
 
 //Execute 执行外部请求
 func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
+	if ctx.Request.GetMethod() == "options" {
+		return nil
+	}
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
 		rf := r.StandardComponent.Fallback(ctx)
 		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {

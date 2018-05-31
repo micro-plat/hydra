@@ -16,7 +16,7 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 		for k, v := range headers {
-			if strings.Contains(v, ",") && k == "Access-Control-Allow-Origin" {
+			if k == "Access-Control-Allow-Origin" && strings.Contains(v, ",") {
 				if strings.Contains(v, ctx.Request.Host) {
 					hosts := strings.Split(v, ",")
 					for _, h := range hosts {

@@ -14,7 +14,10 @@ import (
 //JwtAuth jwt
 func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
+		if strings.ToUpper(ctx.Request.Method) == "OPTIONS" {
+			ctx.Next()
+			return
+		}
 		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
 		if !ok || jwtAuth == nil || jwtAuth.Disable {
 			ctx.Next()
