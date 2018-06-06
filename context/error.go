@@ -11,11 +11,11 @@ type IError interface {
 	GetError() error
 	GetCode() int
 	Error() string
-	IsFatal() bool
+	CanIgnore() bool
 }
 type Error struct {
-	code    int
-	isFatal bool
+	code      int
+	canIgnore bool
 	error
 }
 
@@ -25,20 +25,22 @@ func (a *Error) GetCode() int {
 func (a *Error) GetError() error {
 	return a
 }
-func (a *Error) IsFatal() bool {
-	return a.isFatal
+
+//CanIgnore 是否可以忽略错误
+func (a *Error) CanIgnore() bool {
+	return a.canIgnore
 }
 
 //NewIgnoreError 当前一个可忽略的错误
 func NewIgnoreError(code int, err interface{}) *Error {
 	ex := NewError(code, err)
-	ex.isFatal = false
+	ex.canIgnore = true
 	return ex
 }
 
 //NewError 创建一个致命的错误
 func NewError(code int, err interface{}) *Error {
-	r := &Error{code: code, isFatal: true}
+	r := &Error{code: code, canIgnore: false}
 	switch v := err.(type) {
 	case string:
 		r.error = errors.New(v)
