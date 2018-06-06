@@ -21,7 +21,7 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 					ctx.Header(k, v)
 					continue
 				}
-				if origin != "" && strings.Contains(v, origin) {
+				if origin != "" && (origin == "*" || strings.Contains(v, origin)) {
 					ctx.Header(k, origin)
 				}
 			}
