@@ -2,6 +2,7 @@ package context
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -89,4 +90,31 @@ func (c *httpRequest) GetCookie(name string) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+//GetImageExt 根据content-type获取文件扩展名
+func (w *httpRequest) GetImageExt() (string, error) {
+	header, err := w.GetHeader()
+	if err != nil {
+		return "", err
+	}
+	ct := header["Content-Type"]
+	if !strings.HasPrefix(ct, "image/") {
+		return "", fmt.Errorf("Content-Type:%s不是图片格式", ct)
+	}
+	switch ct {
+	case "image/x-icon":
+		return ".ico", nil
+	case "image/pnetvue":
+		return ".net", nil
+	case "vnd.rn-realpix":
+		return ".rp", nil
+	default:
+		imgs := strings.Split(ct, "/")
+		if len(imgs) < 2 {
+			return "", fmt.Errorf("Content-Type:%s不是图片格式", ct)
+		}
+		g := strings.Split(imgs[1], ".")
+		return fmt.Sprintf(".%s", g[len(g)-1]), nil
+	}
 }
