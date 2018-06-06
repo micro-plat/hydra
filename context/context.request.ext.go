@@ -129,10 +129,12 @@ func (w *extParams) GetJWTConfig() (*conf.Auth, error) {
 	}
 	return jwt, nil
 }
+
+//GetImageExt 根据content-type获取文件扩展名
 func (w *extParams) GetImageExt() (string, error) {
-	ct := w.GetHeader()["content-type"]
+	ct := w.GetHeader()["Content-Type"]
 	if !strings.HasPrefix(ct, "image/") {
-		return "", fmt.Errorf("content-type:%s不是图片格式", ct)
+		return "", fmt.Errorf("Content-Type:%s不是图片格式", ct)
 	}
 	switch ct {
 	case "image/x-icon":
@@ -144,7 +146,7 @@ func (w *extParams) GetImageExt() (string, error) {
 	default:
 		imgs := strings.Split(ct, "/")
 		if len(imgs) < 2 {
-			return "", fmt.Errorf("content-type:%s不是图片格式", ct)
+			return "", fmt.Errorf("Content-Type:%s不是图片格式", ct)
 		}
 		g := strings.Split(imgs[1], ".")
 		return fmt.Sprintf(".%s", g[len(g)-1]), nil
