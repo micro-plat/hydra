@@ -129,3 +129,24 @@ func (w *extParams) GetJWTConfig() (*conf.Auth, error) {
 	}
 	return jwt, nil
 }
+func (w *extParams) GetImageExt() (string, error) {
+	ct := w.GetHeader()["content-type"]
+	if !strings.HasPrefix(ct, "image/") {
+		return "", fmt.Errorf("content-type:%s不是图片格式", ct)
+	}
+	switch ct {
+	case "image/x-icon":
+		return ".ico", nil
+	case "image/pnetvue":
+		return ".net", nil
+	case "vnd.rn-realpix":
+		return ".rp", nil
+	default:
+		imgs := strings.Split(ct, "/")
+		if len(imgs) < 2 {
+			return "", fmt.Errorf("content-type:%s不是图片格式", ct)
+		}
+		g := strings.Split(imgs[1], ".")
+		return fmt.Sprintf(".%s", g[len(g)-1]), nil
+	}
+}
