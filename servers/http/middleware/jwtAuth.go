@@ -55,7 +55,6 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 				return
 			}
 			ctx.Redirect(301, fmt.Sprintf("%s?%s\n", l.Path, values.Encode()))
-
 			return
 		}
 		//jwt.token错误，返回错误码
