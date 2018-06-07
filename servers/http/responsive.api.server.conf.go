@@ -40,6 +40,9 @@ func (w *ApiResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if !comparer.IsChanged() {
 		return false, nil
 	}
+	if comparer.IsVarChanged() {
+		return true, nil
+	}
 
 	if comparer.IsValueChanged("status", "address", "host", "rTimeout", "wTimeout", "rhTimeout") {
 		return true, nil

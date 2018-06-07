@@ -40,6 +40,9 @@ func (w *WebResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if !comparer.IsChanged() {
 		return false, nil
 	}
+	if comparer.IsVarChanged() {
+		return true, nil
+	}
 	if comparer.IsValueChanged("status", "address", "host", "rTimeout", "wTimeout", "rhTimeout") {
 		return true, nil
 	}
@@ -48,7 +51,7 @@ func (w *WebResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 		return ok, nil
 	}
 	if err != nil {
-		return ok, fmt.Errorf("路由未配置或配置有误:%v",  err)
+		return ok, fmt.Errorf("路由未配置或配置有误:%v", err)
 	}
 	if ok := comparer.IsSubConfChanged("view"); ok {
 		return ok, nil

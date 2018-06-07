@@ -40,6 +40,10 @@ func (w *MqcResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if !comparer.IsChanged() {
 		return false, nil
 	}
+	if comparer.IsVarChanged() {
+		return true, nil
+	}
+
 	if comparer.IsValueChanged("status", "sharding") {
 		return true, nil
 	}
