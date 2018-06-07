@@ -14,6 +14,11 @@ func NewComparer(Oconf IServerConf, Nconf IServerConf) *Comparer {
 	}
 }
 
+//IsVarChanged var节点是否发生变化
+func (s *Comparer) IsVarChanged() bool {
+	return s.Oconf.GetVarVersion() != s.Nconf.GetVarVersion()
+}
+
 //IsSubConfChanged 检查节点是否发生变化
 func (s *Comparer) IsSubConfChanged(name string) (isChanged bool) {
 	oldConf, _ := s.Oconf.GetSubConf(name)

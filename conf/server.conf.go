@@ -38,6 +38,7 @@ type IMainConf interface {
 	SetSubConf(data map[string]JSONConf)
 }
 type IVarConf interface {
+	GetVarVersion() int32
 	GetVarConf(tp string, name string) (*JSONConf, error)
 	GetVarObject(tp string, name string, v interface{}) (int32, error)
 	HasVarConf(tp string, name string) bool
@@ -62,6 +63,7 @@ type ServerConf struct {
 	mainConfpath string
 	varConfPath  string
 	*metadata
+	varVersion   int32
 	subNodeConfs map[string]JSONConf
 	varNodeConfs map[string]JSONConf
 	registry     registry.IRegistry
@@ -138,12 +140,16 @@ func (c *ServerConf) loadChildNodeConf() error {
 }
 
 //初始化子节点配置
-func (c *ServerConf) loadVarNodeConf() error {
+func (c *ServerConf) loadVarNodeConf() (err error) {
 
 	//检查跟路径是否存在
 	if b, err := c.registry.Exists(c.varConfPath); err == nil && !b {
 		return nil
 	}
+	if _, c.varVersion, err = c.registry.GetValue(c.varConfPath); err != nil {
+		return err
+	}
+
 	//获取第一级目录
 	varfirstNodes, _, err := c.registry.GetChildren(c.varConfPath)
 	if err != nil {
@@ -231,6 +237,11 @@ func (c *ServerConf) GetSubObject(name string, v interface{}) (int32, error) {
 	}
 
 	return conf.version, nil
+}
+
+//GetVarVersion 获取var路径版本号
+func (c *ServerConf) GetVarVersion() int32 {
+	return c.varVersion
 }
 
 //GetSubConf 指定配置文件名称，获取系统配置信息
