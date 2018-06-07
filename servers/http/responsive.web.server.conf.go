@@ -53,6 +53,9 @@ func (w *WebResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if err != nil {
 		return ok, fmt.Errorf("路由未配置或配置有误:%v", err)
 	}
+	if ok := comparer.IsSubConfChanged("app"); ok {
+		return ok, nil
+	}
 	if ok := comparer.IsSubConfChanged("view"); ok {
 		return ok, nil
 	}

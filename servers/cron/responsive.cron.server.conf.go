@@ -53,6 +53,9 @@ func (w *CronResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("task未配置或配置有误:%v", err)
 	}
+	if ok := comparer.IsSubConfChanged("app"); ok {
+		return ok, nil
+	}
 	if ok := comparer.IsSubConfChanged("redis"); ok {
 		return true, nil
 	}

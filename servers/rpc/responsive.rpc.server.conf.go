@@ -54,6 +54,9 @@ func (w *RpcResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if err != nil {
 		return ok, fmt.Errorf("路由未配置或配置有误:%s(%+v)", cnf.GetServerName(), err)
 	}
+	if ok := comparer.IsSubConfChanged("app"); ok {
+		return ok, nil
+	}
 	return false, nil
 
 }
