@@ -41,18 +41,13 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 			}
 		}
 		if jwtAuth.Redirect != "" {
-			uris := strings.Split(ctx.Request.RequestURI, "?")
 			url := jwtAuth.Redirect
-			if len(uris) <= 1 {
-				ctx.Redirect(301, url)
-				return
-			}
 			if strings.Contains(url, "?") {
-				url += "&" + uris[1]
+				url += "&"
 			} else {
-				url += "?" + uris[1]
+				url += "?"
 			}
-			ctx.Redirect(301, url)
+			ctx.Redirect(301, fmt.Sprintf("%s%s", url, ctx.Request.RequestURI))
 			return
 		}
 		//jwt.token错误，返回错误码
