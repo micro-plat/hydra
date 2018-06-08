@@ -11,10 +11,15 @@ import (
 )
 
 const (
+
 	//MicroService 微服务
 	MicroService = "__micro_"
-	//AutoflowService 自动流程服务
-	AutoflowService = "__autoflow_"
+
+	//WSService websocket流程服务
+	WSService = "__websocket_"
+
+	//FlowService 自动流程服务
+	FlowService = "__flow_"
 
 	//PageService 页面服务
 	PageService = "__page_"
@@ -58,26 +63,26 @@ func NewStandardComponent(componentName string, c IContainer) *StandardComponent
 	return r
 }
 
-//AddMicroService 添加微服务(供http,rpc方式调用)
-func (r *StandardComponent) AddMicroService(service string, h interface{}) {
-	r.addService(MicroService, service, h)
-}
+// //AddMicroService 添加微服务(供http,rpc方式调用)
+// func (r *StandardComponent) AddMicroService(service string, h interface{}) {
+// 	r.addService(MicroService, service, h)
+// }
 
-//AddAutoflowService 添加自动流程服务(供cron，mq方式调用)
-func (r *StandardComponent) AddAutoflowService(service string, h interface{}) {
-	r.addService(AutoflowService, service, h)
-}
+// //AddFlowService 添加自动流程服务(供cron，mq方式调用)
+// func (r *StandardComponent) AddFlowService(service string, h interface{}) {
+// 	r.addService(FlowService, service, h)
+// }
 
-//AddPageService 添加页面服务
-func (r *StandardComponent) AddPageService(service string, h interface{}, pages ...string) {
-	r.addService(PageService, service, h)
-	r.ServicePages[service] = pages
-}
+// //AddPageService 添加页面服务
+// func (r *StandardComponent) AddPageService(service string, h interface{}, pages ...string) {
+// 	r.addService(PageService, service, h)
+// 	r.ServicePages[service] = pages
+// }
 
 //AddRPCProxy 添加RPC代理
 func (r *StandardComponent) AddRPCProxy(h interface{}) {
 	r.addService(MicroService, "__rpc_", h)
-	r.addService(AutoflowService, "__rpc_", h)
+	r.addService(FlowService, "__rpc_", h)
 }
 
 //AddTagPageService 添加带有标签的页面服务
@@ -96,20 +101,20 @@ func (r *StandardComponent) AddCustomerService(service string, h interface{}, gr
 	}
 }
 
-//IsMicroService 是否是微服务
-func (r *StandardComponent) IsMicroService(service string) bool {
-	return r.IsCustomerService(service, MicroService)
-}
+// //IsMicroService 是否是微服务
+// func (r *StandardComponent) IsMicroService(service string) bool {
+// 	return r.IsCustomerService(service, MicroService)
+// }
 
-//IsAutoflowService 是否是自动流程服务
-func (r *StandardComponent) IsAutoflowService(service string) bool {
-	return r.IsCustomerService(service, AutoflowService)
-}
+// //IsFlowService 是否是自动流程服务
+// func (r *StandardComponent) IsFlowService(service string) bool {
+// 	return r.IsCustomerService(service, FlowService)
+// }
 
-//IsPageService 是否是页面服务
-func (r *StandardComponent) IsPageService(service string) bool {
-	return r.IsCustomerService(service, PageService)
-}
+// //IsPageService 是否是页面服务
+// func (r *StandardComponent) IsPageService(service string) bool {
+// 	return r.IsCustomerService(service, PageService)
+// }
 
 //IsCustomerService 是否是指定的分组服务
 func (r *StandardComponent) IsCustomerService(service string, group ...string) bool {
@@ -401,7 +406,7 @@ func (r *StandardComponent) Handle(c *context.Context) (rs interface{}) {
 		c.Response.SetStatus(404)
 		return fmt.Errorf("%s:未找到服务:%s", r.Name, c.Service)
 	}
-	if r.IsPageService(c.Service) {
+	if r.IsCustomerService(c.Service, PageService) {
 		c.Response.SetTextHTML()
 	}
 	switch handler := h.(type) {
@@ -455,15 +460,17 @@ func (r *StandardComponent) Close() error {
 	return nil
 }
 
-//GetGroupName 获取分组类型[api,rpc > micro mq,cron > autoflow, web > page,others > customer]
+//GetGroupName 获取分组类型[api,rpc > micro mq,cron > flow, web > page,others > customer]
 func GetGroupName(serverType string) []string {
 	switch serverType {
 	case "api", "rpc":
 		return []string{MicroService}
 	case "mqc", "cron":
-		return []string{AutoflowService}
+		return []string{FlowService}
 	case "web":
 		return []string{PageService, MicroService}
+	case "ws":
+		return []string{WSService}
 	}
 	return []string{CustomerService}
 }

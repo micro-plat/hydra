@@ -6,12 +6,12 @@ import "github.com/micro-plat/hydra/context"
 type IComponent interface {
 	AddCustomerService(service string, h interface{}, groupNames ...string)
 	AddTagPageService(service string, h interface{}, pages ...string)
-	AddPageService(service string, h interface{}, pages ...string)
-	AddAutoflowService(service string, h interface{})
-	AddMicroService(service string, h interface{})
-	IsMicroService(service string) bool
-	IsAutoflowService(service string) bool
-	IsPageService(service string) bool
+	// AddPageService(service string, h interface{}, pages ...string)
+	// AddFlowService(service string, h interface{})
+	// AddMicroService(service string, h interface{})
+	// IsMicroService(service string) bool
+	// IsFlowService(service string) bool
+	// IsPageService(service string) bool
 	IsCustomerService(service string, group ...string) bool
 	GetFallbackHandlers() map[string]interface{}
 	AddFallbackHandlers(map[string]interface{})

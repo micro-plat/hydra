@@ -13,9 +13,9 @@ func main() {
 		hydra.WithServerTypes("cron-rpc"),
 		hydra.WithDebug())
 
-	app.Autoflow("/user/login", user.NewLoginHandler)
-	app.Autoflow("/order/query", order.NewQueryHandler)
-	app.Autoflow("/order/bind", order.NewBindHandler)
+	app.Flow("/user/login", user.NewLoginHandler)
+	app.Flow("/order/query", order.NewQueryHandler)
+	app.Flow("/order/bind", order.NewBindHandler)
 	app.Micro("/order/bind", order.NewBindHandler)
 	app.Start()
 }

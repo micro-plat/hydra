@@ -27,10 +27,16 @@ type IComponentHandler interface {
 type IServiceRegistry interface {
 	//Customer 添加自定义服务
 	Customer(group string, name string, h interface{})
+
 	//Micro 添加微服务（api,rpc）
 	Micro(name string, h interface{})
-	//Autoflow 添加自动流程(mqc,cron)
-	Autoflow(name string, h interface{})
+
+	//Flow 添加自动流程(mqc,cron)
+	Flow(name string, h interface{})
+
+	//WS 添加websocket(mqc,cron)
+	//WS(name string, h interface{})
+
 	//Page 添加web页面服务(web)
 	Page(name string, h interface{}, pages ...string)
 
@@ -45,6 +51,7 @@ type IServiceRegistry interface {
 
 	//Post RESTful POST请求服务
 	Post(name string, h interface{})
+
 	//PostFallback RESTful POST请求服务的降级服务
 	PostFallback(name string, h interface{})
 
@@ -143,9 +150,14 @@ func (s *ServiceRegistry) Micro(name string, h interface{}) {
 	s.Customer(MicroService, name, h)
 }
 
-//Autoflow 流程服务
-func (s *ServiceRegistry) Autoflow(name string, h interface{}) {
-	s.Customer(AutoflowService, name, h)
+//Flow 流程服务
+func (s *ServiceRegistry) Flow(name string, h interface{}) {
+	s.Customer(FlowService, name, h)
+}
+
+//WS websocket服务
+func (s *ServiceRegistry) WS(name string, h interface{}) {
+	s.Customer(WSService, name, h)
 }
 
 //Page 页面服务

@@ -13,8 +13,8 @@ func main() {
 		hydra.WithServerTypes("mqc-api-rpc"),
 		hydra.WithDebug())
 
-	app.Autoflow("/order/query", order.NewQueryHandler)
-	app.Autoflow("/order/bind", order.NewBindHandler)
+	app.Flow("/order/query", order.NewQueryHandler)
+	app.Flow("/order/bind", order.NewBindHandler)
 	app.Micro("/message/send", user.NewLoginHandler)
 	app.Micro("/order/bind", order.NewBindHandler)
 	app.Start()
