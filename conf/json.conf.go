@@ -51,10 +51,7 @@ func NewJSONConf(message []byte, version int32) (c *JSONConf, err error) {
 
 //Unmarshal 将当前[]byte反序列化为对象
 func (j *JSONConf) Unmarshal(v interface{}) error {
-	if err := json.Unmarshal(j.raw, v); err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(j.raw, v)
 }
 
 //GetVersion 获取当前配置的版本号

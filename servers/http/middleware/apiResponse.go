@@ -26,8 +26,6 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 			if !servers.IsDebug {
 				nctx.Response.ShouldContent(errors.New("请求发生错误"))
 			}
-			//ctx.AbortWithStatusJSON(nctx.Response.GetStatus())
-			//return
 		}
 		if ctx.Writer.Written() {
 			return

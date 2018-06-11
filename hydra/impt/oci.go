@@ -11,6 +11,7 @@ import (
 	_ "github.com/micro-plat/hydra/servers/http"
 	_ "github.com/micro-plat/hydra/servers/mqc"
 	_ "github.com/micro-plat/hydra/servers/rpc"
+	_ "github.com/micro-plat/hydra/servers/ws"
 	_ "github.com/micro-plat/lib4go/cache/memcache"
 	_ "github.com/micro-plat/lib4go/cache/redis"
 	_ "github.com/micro-plat/lib4go/mq/mqtt"

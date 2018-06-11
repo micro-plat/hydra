@@ -25,6 +25,7 @@ type IBinder interface {
 type Binder struct {
 	API     IMainBinder
 	RPC     IMainBinder
+	WS      IMainBinder
 	WEB     IMainBinder
 	MQC     IMainBinder
 	CRON    IMainBinder
@@ -37,6 +38,7 @@ func NewBinder() *Binder {
 	s := &Binder{}
 	s.API = NewMainBinder()
 	s.RPC = NewMainBinder()
+	s.WS = NewMainBinder()
 	s.WEB = NewMainBinder()
 	s.MQC = NewMainBinder()
 	s.CRON = NewMainBinder()
@@ -47,6 +49,7 @@ func NewBinder() *Binder {
 		"web":  s.WEB,
 		"mqc":  s.MQC,
 		"cron": s.CRON,
+		"ws":   s.WS,
 	}
 	return s
 }

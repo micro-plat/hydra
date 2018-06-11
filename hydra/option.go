@@ -8,7 +8,8 @@ import (
 var (
 	microServerType   = []string{"api", "rpc", "web"}
 	flowServerType    = []string{"cron", "mqc"}
-	supportServerType = []string{"api", "rpc", "web", "cron", "mqc", "micro", "flow"}
+	wsServerType      = []string{"ws"}
+	supportServerType = []string{"api", "rpc", "ws", "web", "cron", "mqc", "micro", "flow"}
 )
 
 type option struct {

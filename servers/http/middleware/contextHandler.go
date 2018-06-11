@@ -118,6 +118,7 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 			if !servers.IsDebug {
 				err = errors.New("error:Internal Server Error")
 			}
+			ctx.Response.ShouldContent(err)
 			return
 		}
 		//处理跳转3xx
@@ -137,6 +138,11 @@ func makeQueyStringData(ctx *gin.Context) InputData {
 func makeParamsData(ctx *gin.Context) InputData {
 	return ctx.Params.Get
 }
+
+func makeMapData(m map[string]interface{}) MapData {
+	return m
+}
+
 func makeSettingData(ctx *gin.Context, m map[string]string) ParamData {
 	return m
 }
@@ -188,6 +194,14 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 
 	}
 	return input
+}
+
+type MapData map[string]interface{}
+
+//Get 获取指定键对应的数据
+func (i MapData) Get(key string) (interface{}, bool) {
+	r, ok := i[key]
+	return r, ok
 }
 
 //InputData 输入参数

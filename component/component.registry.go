@@ -35,7 +35,7 @@ type IServiceRegistry interface {
 	Flow(name string, h interface{})
 
 	//WS 添加websocket(mqc,cron)
-	//WS(name string, h interface{})
+	WS(name string, h interface{})
 
 	//Page 添加web页面服务(web)
 	Page(name string, h interface{}, pages ...string)
