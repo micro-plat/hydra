@@ -75,9 +75,6 @@ hello start
 
 
 ### 2. 通过命令行指定运行参数
-* 1. 编写代码
-
-新建项目`hello`,并添加`main.go`文件输入以下代码
 
 ```go
 package main
@@ -108,19 +105,10 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 }
 
 ```
-
-* 2. 编译项目
-```sh
-go install hello
 ```
-* 3. 启动服务
+* 启动服务时指定注册中心
 ```sh
-hello start -c "fs://../"
-```
-* 4. 测试服务
-```sh
-  curl http://localhost:8090/hello
- hello world
+hello start --registry "fs://../"
 ```
 
 ### 3. 使用对象注册服务
