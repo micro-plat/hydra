@@ -74,7 +74,56 @@ hello start
 ```
 
 
-### 2. 使用对象注册服务
+### 2. 通过命令行指定运行参数
+* 1. 编写代码
+
+新建项目`hello`,并添加`main.go`文件输入以下代码
+
+```go
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+
+//以下hydra.With开头的参数都可以使用命令行传入
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("demo"), //系统名称
+		hydra.WithClusterName("test"), //集群名称
+		hydra.WithServerTypes("api"), //只启动http api 服务
+		//hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
+		hydra.WithDebug())
+
+	app.Micro("/hello", (component.ServiceFunc)(helloWorld))
+	app.Start()
+}
+
+func helloWorld(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+
+```
+
+* 2. 编译项目
+```sh
+go install hello
+```
+* 3. 启动服务
+```sh
+hello start -c "fs://../"
+```
+* 4. 测试服务
+```sh
+  curl http://localhost:8090/hello
+ hello world
+```
+
+### 3. 使用对象注册服务
 ```sh
 package main
 
@@ -111,7 +160,7 @@ func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
 
 
 
-### 3. RESTful服务
+### 4. RESTful服务
 ```sh
 package main
 
@@ -158,7 +207,7 @@ func (u *helloService) DeleteHandle(ctx *context.Context) (r interface{}) {
 
 
 
-### 4. 输入参数验证
+### 5. 输入参数验证
 ```sh
 package main
 
@@ -167,6 +216,17 @@ import (
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/hydra"
 )
+
+//NewsInfo 新的新闻消息
+type NewsInfo struct {
+	ID       string `json:"id"` //程序中指定
+	Title    string `form:"title" json:"title" valid:"required"`
+	Brief    string `form:"brief" json:"brief" valid:"required"`
+	Image    string `form:"image" json:"image" valid:"required"`
+	Keywords string `form:"keywords" json:"keywords" valid:"required"`
+	Creator  string `json:"creator"` //程序中指定
+	Content  string `form:"content" json:"content" valid:"required"`
+}
 
 func main() {
 	app := hydra.NewApp(
@@ -188,16 +248,11 @@ type helloService struct {
 func newHelloService(container component.IContainer) (u *helloService) {
 	return &helloService{container: container}
 }
-func (u *helloService) GetHandle(ctx *context.Context) (r interface{}) {
-	return "get ->  hello world"
-}
 func (u *helloService) PostHandle(ctx *context.Context) (r interface{}) {
-	return "post -> hello world"
-}
-func (u *helloService) PutHandle(ctx *context.Context) (r interface{}) {
-	return "put -> hello world"
-}
-func (u *helloService) DeleteHandle(ctx *context.Context) (r interface{}) {
-	return "delete -> hello world"
+		var input NewsInfo
+	if err := ctx.Request.Bind(&input); err != nil {
+		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
+	}
+	return input
 }
 ```
