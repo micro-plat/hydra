@@ -74,7 +74,7 @@ hello start
 * 4. 测试服务
 ```sh
   curl http://localhost:8090/hello
-hello world
+ hello world
 ```
 
 其它示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
