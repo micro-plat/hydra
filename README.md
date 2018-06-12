@@ -23,7 +23,11 @@ go get github.com/micro-plat/hydra
 
 ## 示例项目
 
-#### 1. 编写代码
+示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
+
+
+hello world 示例代码
+* 1. 编写代码
 
 新建项目`hello`,并添加`main.go`文件输入以下代码
 
@@ -59,16 +63,15 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 
 ```
 
-#### 2. 启动并测试
-编译项目
+* 2. 编译项目
 ```sh
 go install hello
 ```
-启动服务
+* 3. 启动服务
 ```sh
 hello start
 ```
-测试服务
+* 4. 测试服务
 ```sh
   curl http://localhost:8090/hello
 hello world
