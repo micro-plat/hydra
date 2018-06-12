@@ -4,14 +4,7 @@ import "github.com/micro-plat/hydra/context"
 
 //IComponent 提供一组或多组服务的组件
 type IComponent interface {
-	AddCustomerService(service string, h interface{}, groupNames ...string)
-	AddTagPageService(service string, h interface{}, pages ...string)
-	// AddPageService(service string, h interface{}, pages ...string)
-	// AddFlowService(service string, h interface{})
-	// AddMicroService(service string, h interface{})
-	// IsMicroService(service string) bool
-	// IsFlowService(service string) bool
-	// IsPageService(service string) bool
+	AddCustomerService(service string, h interface{}, groupName string, tags ...string)
 	IsCustomerService(service string, group ...string) bool
 	GetFallbackHandlers() map[string]interface{}
 	AddFallbackHandlers(map[string]interface{})
@@ -21,7 +14,7 @@ type IComponent interface {
 	GetServices() []string
 
 	GetGroups(service string) []string
-	GetPages(service string) []string
+	GetTags(service string) []string
 
 	Fallback(c *context.Context) (rs interface{})
 	Handling(c *context.Context) (rs interface{})

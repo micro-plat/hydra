@@ -76,7 +76,7 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 	svs := h.GetServices()
 	for group, handlers := range svs {
 		for name, handler := range handlers {
-			r.StandardComponent.AddCustomerService(name, handler, group)
+			r.StandardComponent.AddCustomerService(name, handler, group, h.GetTags(name)...)
 		}
 	}
 	return r.StandardComponent.LoadServices()

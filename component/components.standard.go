@@ -44,7 +44,7 @@ type StandardComponent struct {
 	Services         []string                          //所有服务
 	GroupServices    map[string][]string               //每个分组包含的服务
 	ServiceGroup     map[string][]string               //每个服务对应的分组
-	ServicePages     map[string][]string               //每个服务对应的页面
+	ServiceTags      map[string][]string               //每个服务对应的页面
 	CloseHandler     []interface{}                     //用于关闭所有handler
 }
 
@@ -58,26 +58,10 @@ func NewStandardComponent(componentName string, c IContainer) *StandardComponent
 	r.GroupServices = make(map[string][]string)
 	r.ServiceGroup = make(map[string][]string)
 	r.Services = make([]string, 0, 2)
-	r.ServicePages = make(map[string][]string)
+	r.ServiceTags = make(map[string][]string)
 	r.CloseHandler = make([]interface{}, 0, 2)
 	return r
 }
-
-// //AddMicroService 添加微服务(供http,rpc方式调用)
-// func (r *StandardComponent) AddMicroService(service string, h interface{}) {
-// 	r.addService(MicroService, service, h)
-// }
-
-// //AddFlowService 添加自动流程服务(供cron，mq方式调用)
-// func (r *StandardComponent) AddFlowService(service string, h interface{}) {
-// 	r.addService(FlowService, service, h)
-// }
-
-// //AddPageService 添加页面服务
-// func (r *StandardComponent) AddPageService(service string, h interface{}, pages ...string) {
-// 	r.addService(PageService, service, h)
-// 	r.ServicePages[service] = pages
-// }
 
 //AddRPCProxy 添加RPC代理
 func (r *StandardComponent) AddRPCProxy(h interface{}) {
@@ -85,20 +69,10 @@ func (r *StandardComponent) AddRPCProxy(h interface{}) {
 	r.addService(FlowService, "__rpc_", h)
 }
 
-//AddTagPageService 添加带有标签的页面服务
-func (r *StandardComponent) AddTagPageService(service string, h interface{}, pages ...string) {
-	r.addService(PageService, service, h)
-	r.ServicePages[service] = pages
-}
-
 //AddCustomerService 添加自定义分组服务
-func (r *StandardComponent) AddCustomerService(service string, h interface{}, groupNames ...string) {
-	if len(groupNames) == 0 {
-		panic(fmt.Sprintf("服务:%s未指定分组名称", service))
-	}
-	for _, group := range groupNames {
-		r.addService(group, service, h)
-	}
+func (r *StandardComponent) AddCustomerService(service string, h interface{}, groupName string, tags ...string) {
+	r.addService(groupName, service, h)
+	r.ServiceTags[service] = tags
 }
 
 //IsCustomerService 是否是指定的分组服务
@@ -334,9 +308,9 @@ func (r *StandardComponent) GetGroups(service string) []string {
 	return r.ServiceGroup[service]
 }
 
-//GetPages 获取服务的页面列表
-func (r *StandardComponent) GetPages(service string) []string {
-	return r.ServicePages[service]
+//GetTags 获取服务的tag列表
+func (r *StandardComponent) GetTags(service string) []string {
+	return r.ServiceTags[service]
 }
 
 //GetFallbackHandlers 获取fallback处理程序
@@ -437,7 +411,7 @@ func (r *StandardComponent) Close() error {
 	r.GroupServices = nil
 	r.ServiceGroup = nil
 	r.Services = nil
-	r.ServicePages = nil
+	r.ServiceTags = nil
 	for _, handler := range r.CloseHandler {
 		h := handler.(CloseHandler)
 		h.Close()
