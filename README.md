@@ -93,7 +93,7 @@ func main() {
 		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
 		hydra.WithDebug())
 
-	app.Micro("/hello", newHelloService)
+	app.Micro("/hello", newHelloService) //使用对象的构造函数注册服务
 	app.Start()
 }
 
