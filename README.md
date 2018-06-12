@@ -260,9 +260,13 @@ func (u *helloService) PostHandle(ctx *context.Context) (r interface{}) {
 
 ### 5. 完整示例
 `ctx.Request.Bind`绑定输入参数到指定的对象
+
 `ctx.Request.Check`检查输入参数
+
 `ctx.Request.Get...`获取输入参数
+
 `ctx.Log...`打印日志
+
 `返回值`可以是`error`,`context.IError`,`map`,`struct`
 ```sh
 package main
