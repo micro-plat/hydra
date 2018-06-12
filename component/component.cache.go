@@ -93,7 +93,6 @@ func (s *StandardCache) SaveCacheObject(tpName string, name string, f func(c con
 //Close 关闭缓存连接
 func (s *StandardCache) Close() error {
 	s.cacheMap.RemoveIterCb(func(k string, v interface{}) bool {
-		fmt.Println("StandardCache.close")
 		v.(cache.ICache).Close()
 		return true
 	})
