@@ -311,5 +311,5 @@ func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
 	return map[string]interface{}{
 		"user_id":uid,
 		"media_id":mid,
-	}
+	} //返回map,默然以json方式输出
 }
