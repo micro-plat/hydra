@@ -74,4 +74,4 @@ hello start
 hello world
 ```
 
-其它示例代码请参考[examples](http://github.com/micro-plat/hydra/examples)
+其它示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
