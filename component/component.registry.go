@@ -11,7 +11,11 @@ var _ IServiceRegistry = &ServiceRegistry{}
 var _ IComponentHandler = &ServiceRegistry{}
 
 type IComponentRegistry interface {
-	IComponentHandler
+	GetServices() map[string]map[string]interface{}
+	GetHandlings() []ServiceFunc
+	GetHandleds() []ServiceFunc
+	GetInitializings() []ComponentFunc
+	GetClosings() []ComponentFunc
 	IServiceRegistry
 }
 
@@ -78,6 +82,8 @@ type IServiceRegistry interface {
 
 	//Handled 请求后处理函数
 	Handled(h func(c *context.Context) (rs interface{}))
+
+	GetTags(name string) []string
 }
 
 //ServiceRegistry 服务注册组件
