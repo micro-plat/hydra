@@ -37,9 +37,7 @@ package main
 import (
 	"fmt"
 	"reflect"
-
 	"github.com/micro-plat/hydra/context"
-
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/hydra"
 )
