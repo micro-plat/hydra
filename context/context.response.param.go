@@ -29,7 +29,7 @@ func (r *Response) SetParam(key string, v interface{}) {
 func (r *Response) GetHeaders() map[string]string {
 	header := make(map[string]string)
 	for k, v := range r.Params {
-		if !strings.HasPrefix(k, "__") && v != nil && k != "Status" {
+		if !strings.HasPrefix(k, "__") && v != nil && k != "Status" && k != "Location" {
 			switch v.(type) {
 			case []string:
 				list := v.([]string)
