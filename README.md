@@ -207,7 +207,7 @@ func (u *helloService) DeleteHandle(ctx *context.Context) (r interface{}) {
 
 
 
-### 5. 输入参数验证
+### 5. 输入参数绑定到对象
 `ctx.Request.Bind`绑定输入参数到指定的对象
 `valid:"required"`参数用于设置参数验证方式，参考[govalidator](https://github.com/asaskevich/govalidator)
 ```sh
