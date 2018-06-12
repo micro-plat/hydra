@@ -138,6 +138,7 @@ func (s *ServiceRegistry) Customer(group string, name string, h interface{}, tag
 	}
 	if s.isConstructor(h) {
 		s.add(group, name, h)
+		s.tags[name] = tags
 		return
 	}
 	if !s.isHandler(h) {
