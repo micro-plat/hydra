@@ -107,6 +107,50 @@ func newHelloService(container component.IContainer) (u *helloService) {
 func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
 	return "hello world"
 }
+```
 
 
+
+### 3. RESTful服务
+```sh
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("demo"), //系统名称
+		hydra.WithClusterName("test"), //集群名称
+		hydra.WithServerTypes("api"), //只启动http api 服务
+		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
+		hydra.WithDebug())
+
+	app.Micro("/hello", newHelloService) //使用对象的构造函数注册服务
+	app.Start()
+}
+
+type helloService struct {
+	container component.IContainer
+}
+
+func newHelloService(container component.IContainer) (u *helloService) {
+	return &helloService{container: container}
+}
+func (u *helloService) GetHandle(ctx *context.Context) (r interface{}) {
+	return "get ->  hello world"
+}
+func (u *helloService) PostHandle(ctx *context.Context) (r interface{}) {
+	return "post -> hello world"
+}
+func (u *helloService) PutHandle(ctx *context.Context) (r interface{}) {
+	return "put -> hello world"
+}
+func (u *helloService) DeleteHandle(ctx *context.Context) (r interface{}) {
+	return "delete -> hello world"
+}
 ```
