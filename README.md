@@ -26,7 +26,7 @@ go get github.com/micro-plat/hydra
 示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
 
 
-hello world 示例代码
+### 1. hello world 示例代码
 * 1. 编写代码
 
 新建项目`hello`,并添加`main.go`文件输入以下代码
@@ -73,4 +73,40 @@ hello start
  hello world
 ```
 
-其它示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
+
+### 2. 使用对象注册服务
+```sh
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("demo"), //系统名称
+		hydra.WithClusterName("test"), //集群名称
+		hydra.WithServerTypes("api"), //只启动http api 服务
+		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
+		hydra.WithDebug())
+
+	app.Micro("/hello", newHelloService)
+	app.Start()
+}
+
+type helloService struct {
+	container component.IContainer
+}
+
+func newHelloService(container component.IContainer) (u *helloService) {
+	return &helloService{container: container}
+}
+func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+
+
+```
