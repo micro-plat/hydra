@@ -105,8 +105,8 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 }
 
 ```
-```
-* 启动服务时指定注册中心
+
+启动服务时指定注册中心
 ```sh
 hello start --registry "fs://../"
 ```
