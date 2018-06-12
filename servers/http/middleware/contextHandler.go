@@ -121,11 +121,6 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 			ctx.Response.ShouldContent(err)
 			return
 		}
-		//处理跳转3xx
-		if url, ok := ctx.Response.IsRedirect(); ok {
-			c.Redirect(ctx.Response.GetStatus(), url)
-			return
-		}
 	}
 }
 
@@ -155,7 +150,7 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 	input["__is_circuit_breaker_"] = getIsCircuitBreaker(c)
 	input["__jwt_"] = getJWTRaw(c)
 	input["__func_http_request_"] = c.Request
-	input["__func_http_response_"] = c.Request.Response
+	input["__func_http_response_"] = c.Writer
 	input["__binding_"] = c.ShouldBind
 	input["__binding_with_"] = func(v interface{}, ct string) error {
 		return c.BindWith(v, binding.Default(c.Request.Method, ct))

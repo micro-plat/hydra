@@ -28,6 +28,7 @@ func (s *ApiServer) getHandler(routers []*conf.Router) (x.Handler, error) {
 	engine.Use(middleware.APIResponse(s.conf)) //处理返回值
 	engine.Use(middleware.Header(s.conf))      //设置请求头
 	engine.Use(middleware.JwtWriter(s.conf))   //设置jwt回写
+	engine.Use(middleware.Redirect(s.conf))
 	err := setRouters(engine, routers)
 	return engine, err
 }

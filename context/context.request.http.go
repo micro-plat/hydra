@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 //Request http.request
@@ -34,6 +36,17 @@ func (c *httpRequest) GetCookies() (map[string]string, error) {
 		cookies[ck.Name] = ck.Value
 	}
 	return cookies, nil
+}
+
+func (c *httpRequest) GetResponse() (response gin.ResponseWriter, err error) {
+	r := c.ext["__func_http_response_"]
+	if r == nil {
+		return nil, errors.New("未找到__func_http_response_")
+	}
+	if f, ok := r.(gin.ResponseWriter); ok {
+		return f, nil
+	}
+	return nil, errors.New("未找到__func_http_response_传入类型错误")
 }
 
 //Get 获和取http.request对象

@@ -20,6 +20,10 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if nctx == nil {
 			return
 		}
+		if _, ok := nctx.Response.IsRedirect(); ok {
+			return
+		}
+
 		defer nctx.Close()
 		if err := nctx.Response.GetError(); err != nil {
 			getLogger(ctx).Error(err)
