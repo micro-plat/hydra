@@ -3,7 +3,7 @@ hydra是一个能够快速开发http接口, web应用，RPC服务，流程服务
 
 
   hydra特点
-* 多服务集成: 支持 http接口`api`,rpc服务器 `grpc`,web站点`web`,定时任务`cron`,MQ消费流程`mqc`,websocket `ws`
+* 多服务集成: 支持 http接口(`api`),rpc服务器(`grpc`),web站点(`web`),定时任务(`cron`),MQ消费流程(`mqc`),websocket(`ws`)
 * 开发简单: 不超过10行代码即可实现一个微服务，一次开发，多种服务运行。只需实现标准服务接口，可注册到`micro`,`flow`,`ws`以`api web rpc cron mqc ws`等方式启动对外提供服务
 * 部署简单: 编译后只有一个可执行程序，复制到目标服务器，通过自带的命令行参数启动即可 
 * 本地零配置: 本地无需任何配置，启动配置从注册中心拉取
