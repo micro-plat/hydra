@@ -2,6 +2,7 @@ package redis
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -88,6 +89,7 @@ func NewClientByJSON(j string) (r *Client, err error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("conf:", j)
 	return NewClientByConf(conf)
 }
 
@@ -110,6 +112,5 @@ func NewClientByConf(conf *ClientConf) (client *Client, err error) {
 	}
 	client.UniversalClient = redis.NewUniversalClient(opts)
 	_, err = client.UniversalClient.Ping().Result()
-	client.Close()
 	return
 }
