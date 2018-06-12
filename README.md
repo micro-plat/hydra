@@ -313,3 +313,4 @@ func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
 		"media_id":mid,
 	} //返回map,默然以json方式输出
 }
+```
