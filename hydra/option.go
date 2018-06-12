@@ -80,7 +80,7 @@ func WithRemoteQueryService(remoteQueryService bool) Option {
 	}
 }
 
-//WithName 设置系统全名
+//WithName 设置系统全名 格式:/[platName]/[sysName]/[typeName]/[clusterName]
 func WithName(name string) Option {
 	return func(o *option) {
 		o.Name = name

@@ -1,71 +1,76 @@
 # hydra 
-## 分布式高可用的微服务框架
-hydra是基于go语言及众多开源项目，实现的分布式服务框架。其核心设计目标是快速开发、使用简单、功能强大、轻量级、易扩展。简单而又强大，致力于快速打造企业级后端服务的解决方案
+hydra 是基于go语言和众多开源项目，实现的分布式服务框架。其核心设计目标是快速开发、使用简单、功能强大、轻量级、易扩展。敏捷开发，快速交付，致力于打造企业级后端服务的快速开发方案。使用hydra可开发`http接口`,`rpc服务器`,`web站点`,`定时任务`,`MQ消费流程`,`websocket` 等服务
 
   hydra特点
-* 简单轻量: 10行代码即可实现一个服务，并可以以6种服务(`api`,`rpc`,`web`,`cron`,`mqc`,`ws`)运行，对外提供服务
+* 简单轻量: 几行代码即可集成到自己的应用
 * 多服务集成: 支持 `http接口`,`rpc服务器`,`web站点`,`定时任务`,`MQ消费流程`,`websocket` 等服务
+* 优秀性能: 底层使用`gin`,`时间轮`等框架和算法，借助`golang`自身优势，提供优秀的服务性能 
 * 部署简单: 编译后只有一个可执行程序，复制到目标服务器，通过自带的命令行参数启动即可 
 * 本地零配置: 本地无需任何配置，启动时从注册中心拉取
 * 配置热更新: 配置发生变化后可自动通知到服务器，配置变更后自动更新到服务器，必要时自动重启服务器
 * 服务注册发现: 基于 zookeeper 和本地文件系统(用于单机测试)的服务注册与发现
 * 丰富功能: `智能路由`,`静态文件`,`安全认证`,`熔断降级`等
+* 性能调优： 集成`pprof`等提供可实时监控的性能调优工具
 * 实时监控: 服务器运行状况如:QPS,服务执行时长，执行结果，CPU，内存等信息自动上报到influxdb,通过grafana配置后即可实时查看服务状况
 * 统一日志: 配置远程日志接收接口，则本地日志每隔一定时间压缩后发送到远程日志服务([远程日志](https://github.com/micro-plat/logsaver))
 * 自动更新: 通过服务器远程控制接口，远程发送更新信息，服务器自动检查版本，并下载，更新服务
 
 
+##  安装hydra
+```sh
+go get github.com/micro-plat/hydra
+```
 
+## 示例项目
 
+#### 1. 编写代码
 
+新建项目`hello`,并添加`main.go`文件输入以下代码
 
-## hydra架构图
+```go
+package main
 
-![架构图](https://github.com/micro-plat/hydra/blob/master/quickstart/hydra.png?raw=true)
+import (
+	"fmt"
+	"reflect"
 
+	"github.com/micro-plat/hydra/context"
 
-## hydra启动过程
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
 
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("demo"), //系统名称
+		hydra.WithClusterName("test"), //集群名称
+		hydra.WithServerTypes("api"), //只启动http api 服务
+		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
+		hydra.WithDebug())
 
-![架构图](https://github.com/micro-plat/hydra/blob/master/quickstart/flow.png?raw=true)
+	app.Micro("/hello", (component.ServiceFunc)(helloWorld))
+	app.Start()
+}
 
-## 文档目录
-1. [快速入门](README.md#hydra)
-      * [hydra安装](https://github.com/micro-plat/hydra/blob/master/quickstart/2_install.md)
-      * [gaea工具简介](https://github.com/micro-plat/hydra/blob/master/quickstart/3.install_gaea.md)
-       * [创建第一个项目](https://github.com/micro-plat/hydra/blob/master/quickstart/6.first_project.md)
-      
-2. [服务器管理](https://github.com/micro-plat/hydra/blob/master/quickstart/7.server.intro.md)
-      * [接口服务器](https://github.com/micro-plat/hydra/blob/master/quickstart/api/1.api_intro.md)
-          + [路由配置](https://github.com/micro-plat/hydra/blob/master/quickstart/api/2.api_router.md)         
-          + [静态文件](https://github.com/micro-plat/hydra/blob/master/quickstart/api/3.api_static.md)
-          + [metric](https://github.com/micro-plat/hydra/blob/master/quickstart/api/4.api_metric.md)
-          + [jwt选项](https://github.com/micro-plat/hydra/blob/master/quickstart/api/5.api_auth.md)
-          + [附加header](https://github.com/micro-plat/hydra/blob/master/quickstart/api/6.api_header.md)
-          + [熔断降级](https://github.com/micro-plat/hydra/blob/master/quickstart/api/7.api_circuit.md)
-      * web服务器
-         + [路由配置](https://github.com/micro-plat/hydra/blob/master/quickstart/api/2.api_router.md)  
-         + view配置       
-          + [静态文件](https://github.com/micro-plat/hydra/blob/master/quickstart/api/3.api_static.md)
-          + [metric](https://github.com/micro-plat/hydra/blob/master/quickstart/api/4.api_metric.md)
-          + [jwt选项](https://github.com/micro-plat/hydra/blob/master/quickstart/api/5.api_auth.md)
-          + [附加header](https://github.com/micro-plat/hydra/blob/master/quickstart/api/6.api_header.md)
-      * rpc服务器
-          + 路由配置
-          + [jwt选项](https://github.com/micro-plat/hydra/blob/master/quickstart/api/5.api_auth.md)
-          + 限流配置
-          + [metric](https://github.com/micro-plat/hydra/blob/master/quickstart/api/4.api_metric.md)
-      * mq consumer
-          + 队列配置
-          + [metric](https://github.com/micro-plat/hydra/blob/master/quickstart/api/4.api_metric.md)
-      * 定时服务
-          + 任务配置
-          + [metric](https://github.com/micro-plat/hydra/blob/master/quickstart/api/4.api_metric.md)
-3. 日志组件
-4. Context
-      * 输入参数
-      * 缓存操作
-      * 数据库处理
-      * RPC请求
-5. Response
-6. [监控与报警](https://github.com/micro-plat/hydra/blob/master/quickstart/alarm/1.alarm.md)
+func helloWorld(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+
+```
+
+#### 2. 启动并测试
+编译项目
+```sh
+go install hello
+```
+启动服务
+```sh
+hello start
+```
+测试服务
+```sh
+  curl http://localhost:8090/hello
+	hello world
+```
+

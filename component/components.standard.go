@@ -101,21 +101,6 @@ func (r *StandardComponent) AddCustomerService(service string, h interface{}, gr
 	}
 }
 
-// //IsMicroService 是否是微服务
-// func (r *StandardComponent) IsMicroService(service string) bool {
-// 	return r.IsCustomerService(service, MicroService)
-// }
-
-// //IsFlowService 是否是自动流程服务
-// func (r *StandardComponent) IsFlowService(service string) bool {
-// 	return r.IsCustomerService(service, FlowService)
-// }
-
-// //IsPageService 是否是页面服务
-// func (r *StandardComponent) IsPageService(service string) bool {
-// 	return r.IsCustomerService(service, PageService)
-// }
-
 //IsCustomerService 是否是指定的分组服务
 func (r *StandardComponent) IsCustomerService(service string, group ...string) bool {
 	groups := r.GetGroups(service)
