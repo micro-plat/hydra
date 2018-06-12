@@ -224,7 +224,6 @@ type NewsInfo struct {
 	Brief    string `form:"brief" json:"brief" valid:"required"`
 	Image    string `form:"image" json:"image" valid:"required"`
 	Keywords string `form:"keywords" json:"keywords" valid:"required"`
-	Creator  string `json:"creator"` //程序中指定
 	Content  string `form:"content" json:"content" valid:"required"`
 }
 
@@ -249,10 +248,62 @@ func newHelloService(container component.IContainer) (u *helloService) {
 	return &helloService{container: container}
 }
 func (u *helloService) PostHandle(ctx *context.Context) (r interface{}) {
-		var input NewsInfo
-	if err := ctx.Request.Bind(&input); err != nil {
+	var input NewsInfo
+	if err := ctx.Request.Bind(&input); err != nil { //输入参数绑定到对象
 		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
 	}
 	return input
 }
 ```
+
+
+
+### 5. 完整示例
+`ctx.Request.Bind`绑定输入参数到指定的对象
+`ctx.Request.Check`检查输入参数
+`ctx.Request.Get...`获取输入参数
+`ctx.Log...`打印日志
+`返回值`可以是`error`,`context.IError`,`map`,`struct`
+```sh
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("demo"), //系统名称
+		hydra.WithClusterName("test"), //集群名称
+		hydra.WithServerTypes("api"), //只启动http api 服务
+		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心	
+		hydra.WithDebug())
+
+	app.Micro("/hello", newHelloService) //使用对象的构造函数注册服务
+	app.Start()
+}
+
+type helloService struct {
+	container component.IContainer
+}
+
+func newHelloService(container component.IContainer) (u *helloService) {
+	return &helloService{container: container}
+}
+func (u *helloService) Handle(ctx *context.Context) (r interface{}) {
+	ctx.Log.Info("--------------处理用户请求----------------")
+	ctx.Log.Info("1、获取参数")
+	err := ctx.Request.Check("user_id", "media_id")
+	if err != nil {
+		return context.NewError(context.ERR_NOT_ACCEPTABLE, err) //返回错误
+	}
+	uid := ctx.Request.GetInt("user_id", 0)
+	mid := ctx.Request.GetInt("media_id", 0)
+	return map[string]interface{}{
+		"user_id":uid,
+		"media_id":mid,
+	}
+}
