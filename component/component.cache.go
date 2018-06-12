@@ -70,8 +70,9 @@ func (s *StandardCache) GetCacheBy(tpName string, name string) (c cache.ICache, 
 		}
 		return cache.NewCache(chObjConf.Proto, string(chConf.GetRaw()))
 	})
-	fmt.Print("efg:")
-	fmt.Println(c.Get("efg"))
+	_, errx := c.Get("efg")
+	fmt.Print("efg:", errx)
+	fmt.Println()
 	return c, err
 }
 
