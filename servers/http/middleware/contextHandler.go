@@ -112,6 +112,7 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 		if result != nil {
 			ctx.Response.ShouldContent(result)
 		}
+		fmt.Println("jwt:", ctx.Response.GetParams()["__jwt_"])
 		//处理错误err,5xx
 		if err := ctx.Response.GetError(); err != nil {
 			err = fmt.Errorf("error:%v", err)
