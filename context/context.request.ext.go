@@ -107,7 +107,7 @@ func (w *extParams) GetJWT(out interface{}) error {
 		if err != nil {
 			return err
 		}
-		return json.Unmarshal(buff, out)
+		return json.Unmarshal(buff, &out)
 	}
 }
 
