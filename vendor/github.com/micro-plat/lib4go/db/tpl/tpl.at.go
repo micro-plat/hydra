@@ -9,7 +9,8 @@ import (
 
 //ATTPLContext 参数化时使用@+参数名作为占位符的SQL数据库如:oracle,sql server
 type ATTPLContext struct {
-	name string
+	name   string
+	prefix string
 }
 
 func (o ATTPLContext) getSPName(query string) string {
@@ -21,7 +22,7 @@ func (o ATTPLContext) GetSQLContext(tpl string, input map[string]interface{}) (s
 	index := 0
 	f := func() string {
 		index++
-		return fmt.Sprint(":", index)
+		return fmt.Sprint(o.prefix, index)
 	}
 	return AnalyzeTPLFromCache(o.name, tpl, input, f)
 }
@@ -35,10 +36,10 @@ func (o ATTPLContext) GetSPContext(tpl string, input map[string]interface{}) (sq
 
 //Replace 替换SQL中的占位符
 func (o ATTPLContext) Replace(sql string, args []interface{}) (r string) {
-	if strings.EqualFold(sql, "") || args == nil {
+	if sql == "" || args == nil {
 		return sql
 	}
-	word, _ := regexp.Compile(`:\d+([,|\) ;]|$)`)
+	word, _ := regexp.Compile(fmt.Sprintf(`%s\d+([,|\) ;]|$)`, o.prefix))
 	sql = word.ReplaceAllStringFunc(sql, func(s string) string {
 		c := len(s)
 		num := s[1 : c-1]
@@ -55,8 +56,4 @@ func (o ATTPLContext) Replace(sql string, args []interface{}) (r string) {
 	})
 	/*end*/
 	return sql
-}
-func init() {
-	// Register("oracle", ATTPLContext{name: "oracle"})
-	// Register("mysql", ATTPLContext{name: "mysql"})
 }

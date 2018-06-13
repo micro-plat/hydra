@@ -29,10 +29,12 @@ func init() {
 	tpls = make(map[string]ITPLContext)
 	tplCaches = cmap.New(8)
 
-	Register("oracle", ATTPLContext{name: "oracle"})
-	Register("ora", ATTPLContext{name: "ora"})
-	Register("mysql", MTPLContext{name: "mysql"})
-	Register("sqlite", MTPLContext{name: "sqlite"})
+	Register("oracle", ATTPLContext{name: "oracle", prefix: ":"})
+	Register("ora", ATTPLContext{name: "ora", prefix: ":"})
+	Register("mysql", MTPLContext{name: "mysql", prefix: "?"})
+	Register("sqlite", MTPLContext{name: "sqlite", prefix: "?"})
+	Register("postgres", ATTPLContext{name: "postgres", prefix: "$"})
+	Register("pg", MTPLContext{name: "pg", prefix: "?"})
 }
 func Register(name string, tpl ITPLContext) {
 	if _, ok := tpls[name]; ok {
