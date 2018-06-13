@@ -17,6 +17,8 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if nctx == nil {
 			return
 		}
+		fmt.Println("response:", nctx.Response.GetContentType(), nctx.Response.GetContent())
+
 		if _, ok := nctx.Response.IsRedirect(); ok {
 			fmt.Println("is redirect")
 			return
@@ -25,8 +27,6 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		// if ctx.Writer.Written() {
 		// 	return
 		// }
-
-		fmt.Println("response:", nctx.Response.GetContentType(), nctx.Response.GetContent())
 
 		switch nctx.Response.GetContentType() {
 		case context.CT_XML:
