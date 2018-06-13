@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/lib4go/types"
 )
 
 type extParams struct {
@@ -100,8 +99,6 @@ func (w *extParams) GetJWT(out interface{}) error {
 	switch v := jwt.(type) {
 	case string:
 		return json.Unmarshal([]byte(v), &out)
-	case map[string]interface{}:
-		return types.Map2Struct(v, out)
 	default:
 		buff, err := json.Marshal(v)
 		if err != nil {
