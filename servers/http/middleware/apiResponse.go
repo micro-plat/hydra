@@ -27,6 +27,9 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		// if ctx.Writer.Written() {
 		// 	return
 		// }
+
+		fmt.Println("response:", nctx.Response.GetContentType(), nctx.Response.GetContent())
+
 		switch nctx.Response.GetContentType() {
 		case context.CT_XML:
 			ctx.XML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
