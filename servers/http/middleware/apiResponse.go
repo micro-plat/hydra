@@ -2,10 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-
-	"github.com/micro-plat/hydra/servers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
@@ -23,13 +20,8 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if _, ok := nctx.Response.IsRedirect(); ok {
 			return
 		}
-
-		defer nctx.Close()
 		if err := nctx.Response.GetError(); err != nil {
 			getLogger(ctx).Error(err)
-			if !servers.IsDebug {
-				nctx.Response.ShouldContent(errors.New("请求发生错误"))
-			}
 		}
 		if ctx.Writer.Written() {
 			return

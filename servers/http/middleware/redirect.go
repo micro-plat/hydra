@@ -12,9 +12,9 @@ func Redirect(cnf *conf.MetadataConf) gin.HandlerFunc {
 		if context == nil {
 			return
 		}
+		defer context.Close()
 		//处理跳转3xx
 		if url, ok := context.Response.IsRedirect(); ok {
-			defer context.Close()
 			ctx.Redirect(context.Response.GetStatus(), url)
 			return
 		}
