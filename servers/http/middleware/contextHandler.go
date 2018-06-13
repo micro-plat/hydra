@@ -118,6 +118,7 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 			if !servers.IsDebug {
 				err = errors.New("error:Internal Server Error")
 			}
+			getLogger(c).Error(err)
 			ctx.Response.ShouldContent(err)
 			return
 		}

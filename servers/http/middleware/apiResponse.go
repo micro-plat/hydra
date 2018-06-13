@@ -21,9 +21,7 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 			fmt.Println("is redirect")
 			return
 		}
-		if err := nctx.Response.GetError(); err != nil {
-			getLogger(ctx).Error(err)
-		}
+
 		// if ctx.Writer.Written() {
 		// 	return
 		// }
