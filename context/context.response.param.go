@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/micro-plat/lib4go/types"
@@ -42,6 +41,5 @@ func (r *Response) GetHeaders() map[string]string {
 			}
 		}
 	}
-	fmt.Println("header:", header)
 	return header
 }
