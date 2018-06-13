@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/servers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,15 +19,11 @@ func WebResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if nctx == nil {
 			return
 		}
-		defer nctx.Close()
-		if err := nctx.Response.GetError(); err != nil {
-			getLogger(ctx).Error(err)
-			if !servers.IsDebug {
-				nctx.Response.ShouldContent(errors.New("请求发生错误"))
-			}
-			//ctx.AbortWithStatus(nctx.Response.GetStatus())
-			//return
+		if url, ok := nctx.Response.IsRedirect(); ok {
+			ctx.Redirect(nctx.Response.GetStatus(), url)
+			return
 		}
+
 		if ctx.Writer.Written() {
 			return
 		}
