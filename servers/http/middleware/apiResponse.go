@@ -18,14 +18,15 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 		if _, ok := nctx.Response.IsRedirect(); ok {
+			fmt.Println("is redirect")
 			return
 		}
 		if err := nctx.Response.GetError(); err != nil {
 			getLogger(ctx).Error(err)
 		}
-		if ctx.Writer.Written() {
-			return
-		}
+		// if ctx.Writer.Written() {
+		// 	return
+		// }
 		switch nctx.Response.GetContentType() {
 		case context.CT_XML:
 			ctx.XML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
