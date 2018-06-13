@@ -6,6 +6,7 @@ package gin
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -610,6 +611,7 @@ func (c *Context) Status(code int) {
 // It writes a header in the response.
 // If value == "", this method removes the header `c.Writer.Header().Del(key)`
 func (c *Context) Header(key, value string) {
+	fmt.Println("write.header:", key, value)
 	if value == "" {
 		c.Writer.Header().Del(key)
 	} else {
