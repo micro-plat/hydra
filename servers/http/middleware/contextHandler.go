@@ -143,7 +143,6 @@ func makeSettingData(ctx *gin.Context, m map[string]string) ParamData {
 }
 
 func makeExtData(c *gin.Context) map[string]interface{} {
-	fmt.Println("jwtx:", getJWTRaw(c))
 	input := make(map[string]interface{})
 	input["__hydra_sid_"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.Method)
