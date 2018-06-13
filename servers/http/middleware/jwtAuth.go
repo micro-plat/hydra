@@ -27,9 +27,8 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 
 		//检查jwt.token是否正确
 		data, err := checkJWT(ctx, jwtAuth)
-
+		getLogger(ctx).Info("jwt:", data, err)
 		if err == nil {
-			getLogger(ctx).Info("jwt:", data)
 			setJWTRaw(ctx, data)
 			ctx.Next()
 			return
