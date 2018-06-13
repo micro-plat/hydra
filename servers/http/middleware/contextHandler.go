@@ -120,8 +120,8 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 			}
 			getLogger(c).Error(err)
 			ctx.Response.ShouldContent(err)
-			return
 		}
+		fmt.Println("result:", result)
 	}
 }
 
