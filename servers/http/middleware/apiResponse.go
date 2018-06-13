@@ -17,7 +17,8 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if nctx == nil {
 			return
 		}
-		if _, ok := nctx.Response.IsRedirect(); ok {
+		if url, ok := nctx.Response.IsRedirect(); ok {
+			ctx.Redirect(nctx.Response.GetStatus(), url)
 			return
 		}
 

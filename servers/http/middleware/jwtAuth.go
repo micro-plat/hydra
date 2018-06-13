@@ -65,15 +65,12 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 	}
 }
 func setJwtResponse(ctx *gin.Context, cnf *conf.MetadataConf, data interface{}) {
-	fmt.Println("JwtWriter:2.1", data)
 	if data == nil {
 		data = getJWTRaw(ctx)
 	}
-	fmt.Println("JwtWriter:2.2", data)
 	if data == nil {
 		return
 	}
-	fmt.Println("JwtWriter:2.3", data)
 	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
 	if !ok || jwtAuth.Disable {
 		return
@@ -84,7 +81,6 @@ func setJwtResponse(ctx *gin.Context, cnf *conf.MetadataConf, data interface{}) 
 		ctx.AbortWithStatus(500)
 		return
 	}
-	fmt.Println("JwtWriter:2.2", jwtAuth.Name)
 	ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwtAuth.Name, jwtToken))
 }
 
