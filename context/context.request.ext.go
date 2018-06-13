@@ -93,6 +93,7 @@ func (w *extParams) GetJWTBody() interface{} {
 //GetJWTBody 获取jwt存储数据
 func (w *extParams) GetJWT(out interface{}) error {
 	jwt := w.ext["__jwt_"]
+	fmt.Println("jwtm:", jwt)
 	if jwt == nil || reflect.ValueOf(jwt).IsNil() {
 		return fmt.Errorf("未找到jwt,用户未登录")
 	}
