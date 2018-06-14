@@ -53,9 +53,11 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 			values.Add("redirect", ctx.Request.RequestURI)
 			if l.IsAbs() {
 				ctx.Redirect(301, fmt.Sprintf("%s://%s%s?%s\n", l.Scheme, l.Host, l.Path, values.Encode()))
+				ctx.Abort()
 				return
 			}
 			ctx.Redirect(301, fmt.Sprintf("%s?%s\n", l.Path, values.Encode()))
+			ctx.Abort()
 			return
 		}
 		//jwt.token错误，返回错误码
