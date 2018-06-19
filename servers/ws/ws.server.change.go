@@ -14,6 +14,12 @@ func (s *WSServer) SetRouters(routers []*conf.Router) (err error) {
 	return
 }
 
+//SetJWT Server
+func (s *WSServer) SetJWT(auth *conf.Auth) error {
+	s.conf.SetMetadata("jwt", auth)
+	return nil
+}
+
 //SetHosts 设置组件的host name
 func (s *WSServer) SetHosts(hosts conf.Hosts) error {
 	for _, host := range hosts {

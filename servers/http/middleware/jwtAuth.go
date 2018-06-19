@@ -42,10 +42,11 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 				return
 			}
 		}
-		if jwtAuth.Redirect != "" {
+		if jwtAuth.Redirect != "" && strings.ToUpper(ctx.Request.Method) == "GET" {
 			l, errx := url.Parse(jwtAuth.Redirect)
 			if errx != nil {
 				getLogger(ctx).Error(errx)
+				Header(cnf)(ctx)
 				ctx.AbortWithStatus(err.GetCode())
 				return
 			}
@@ -53,12 +54,12 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 			values.Add("redirect", ctx.Request.RequestURI)
 			if l.IsAbs() {
 				ctx.Redirect(301, fmt.Sprintf("%s://%s%s?%s\n", l.Scheme, l.Host, l.Path, values.Encode()))
-				Header(cnf)(ctx)
+				setHeader(cnf, ctx)
 				ctx.Abort()
 				return
 			}
 			ctx.Redirect(301, fmt.Sprintf("%s?%s\n", l.Path, values.Encode()))
-			Header(cnf)(ctx)
+			setHeader(cnf, ctx)
 			ctx.Abort()
 			return
 		}

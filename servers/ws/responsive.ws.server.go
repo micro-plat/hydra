@@ -20,7 +20,7 @@ type IServer interface {
 	GetAddress() string
 	CloseCircuitBreaker() error
 	SetCircuitBreaker(*conf.CircuitBreaker) error
-
+	SetJWT(auth *conf.Auth) error
 	SetRouters(routers []*conf.Router) (err error)
 	SetStatic(*conf.Static) error
 	SetMetric(*conf.Metric) error
@@ -61,7 +61,7 @@ func NewWSServerResponsiveServer(registryAddr string, cnf conf.IServerConf, logg
 		return nil, err
 	}
 	if h.server, err = NewWSServerServer(cnf.GetServerName(),
-		cnf.GetString("address", ":8090"),
+		cnf.GetString("address", ":8099"),
 		nil,
 		WithLogger(logger),
 		WithTimeout(cnf.GetInt("rTimeout", 3), cnf.GetInt("wTimeout", 3), cnf.GetInt("rhTimeout", 3))); err != nil {
@@ -89,7 +89,7 @@ func (w *WSServerResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		return err
 	}
 	if w.server, err = NewWSServerServer(cnf.GetServerName(),
-		cnf.GetString("address", ":8090"),
+		cnf.GetString("address", ":8099"),
 		nil,
 		WithLogger(w.Logger),
 		WithTimeout(cnf.GetInt("rTimeout", 3), cnf.GetInt("wTimeout", 3), cnf.GetInt("rhTimeout", 3))); err != nil {

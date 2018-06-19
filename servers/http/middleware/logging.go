@@ -13,6 +13,7 @@ func Logging(conf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		start := time.Now()
 		setStartTime(ctx)
+		setMetadataConf(ctx, conf)
 		p := ctx.Request.URL.Path
 		if ctx.Request.URL.RawQuery != "" {
 			p = p + "?" + ctx.Request.URL.RawQuery
@@ -35,5 +36,18 @@ func Logging(conf *conf.MetadataConf) gin.HandlerFunc {
 			defer context.Close()
 		}
 	}
+}
 
+func wLogHead(ctx *gin.Context, p string) {
+	conf := getMetadataConf(ctx)
+	getLogger(ctx).Info(conf.Type+".request", ctx.Request.Method, p, "from", ctx.ClientIP())
+}
+func wLogTail(ctx *gin.Context, p string, start time.Time) {
+	conf := getMetadataConf(ctx)
+	statusCode := getCTX(ctx).Response.GetStatus()
+	if statusCode >= 200 && statusCode < 400 {
+		getLogger(ctx).Info(conf.Type+".response", ctx.Request.Method, p, statusCode, time.Since(start))
+	} else {
+		getLogger(ctx).Error(conf.Type+".response", ctx.Request.Method, p, statusCode, time.Since(start))
+	}
 }

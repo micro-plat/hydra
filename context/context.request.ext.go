@@ -96,6 +96,12 @@ func (w *extParams) GetJWT(out interface{}) error {
 		return fmt.Errorf("未找到jwt,用户未登录")
 	}
 	switch v := jwt.(type) {
+	case func() interface{}:
+		buff, err := json.Marshal(v())
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal(buff, &out)
 	case string:
 		return json.Unmarshal([]byte(v), &out)
 	default:

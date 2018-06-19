@@ -8,24 +8,24 @@ package middleware
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*wxHandler]bool
+	clients map[*wsHandler]bool
 
 	// Inbound messages from the clients.
 	broadcast chan []byte
 
 	// Register requests from the clients.
-	register chan *wxHandler
+	register chan *wsHandler
 
 	// Unregister requests from clients.
-	unregister chan *wxHandler
+	unregister chan *wsHandler
 }
 
 func newHub() *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
-		register:   make(chan *wxHandler),
-		unregister: make(chan *wxHandler),
-		clients:    make(map[*wxHandler]bool),
+		register:   make(chan *wsHandler),
+		unregister: make(chan *wsHandler),
+		clients:    make(map[*wsHandler]bool),
 	}
 }
 

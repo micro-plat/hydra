@@ -8,13 +8,24 @@ import (
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("hydra-20"),
+		hydra.WithPlatName("hydra-22"),
 		hydra.WithSystemName("collector"),
-		hydra.WithServerTypes("ws"),
+		hydra.WithServerTypes("api-ws"),
 		hydra.WithDebug())
-	app.WS("/user/login", user.NewLoginHandler)
+	app.WS("/auth/login", user.NewLoginHandler)
 	app.WS("/order/query", order.NewQueryHandler)
 	app.WS("/order/bind", order.NewBindHandler)
-
+	app.Conf.WS.SetSubConf("auth", `
+		{
+			"jwt": {
+				"exclude": ["/auth/login"],
+				"expireAt": 36000,
+				"mode": "HS512",
+				"name": "__jwt__",
+				"redirect":"/auth/login",
+				"secret": "12345678"
+			}
+		}
+		`)
 	app.Start()
 }

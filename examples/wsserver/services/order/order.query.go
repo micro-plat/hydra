@@ -12,9 +12,11 @@ type QueryHandler struct {
 func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 	return &QueryHandler{container: container}
 }
-func (u *QueryHandler) GetHandle(ctx *context.Context) (r interface{}) {
-	return "get.success" + ctx.Request.Setting.GetString("db")
-}
+
 func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
-	return "success"
+	input := make(map[string]interface{})
+	if err := ctx.Request.GetJWT(&input); err != nil {
+		return err
+	}
+	return input
 }

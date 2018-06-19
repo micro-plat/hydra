@@ -18,8 +18,7 @@ func (s *WSServer) getHandler(routers []*conf.Router) (x.Handler, error) {
 	engine := gin.New()
 	engine.Use(middleware.Logging(s.conf)) //记录请求日志
 	engine.Use(gin.Recovery())
-	engine.Use(s.option.metric.Handle())  //生成metric报表
-	engine.Use(middleware.Static(s.conf)) //处理静态文件
+	//engine.Use(s.option.metric.Handle()) //生成metric报表
 	err := setRouters(engine, routers)
 	return engine, err
 }

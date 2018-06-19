@@ -73,17 +73,18 @@ func (w *WSServerResponsiveServer) SetConf(restart bool, cnf conf.IServerConf) (
 			return err
 		}
 	}
-	//设置静态文件
-	if ok, err = SetStatic(w.server, cnf); err != nil {
-		return err
-	}
-	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "静态文件")
 
 	//设置熔断配置
 	if ok, err = SetCircuitBreaker(w.server, cnf); err != nil {
 		return err
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "熔断设置")
+
+	//设置jwt安全认证
+	if ok, err = SetJWT(w.server, cnf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "jwt设置")
 
 	//设置metric
 	if ok, err = SetMetric(w.server, cnf); err != nil {

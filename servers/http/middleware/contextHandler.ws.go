@@ -16,13 +16,18 @@ func WSContextHandler(exhandler interface{}, name string, engine string, service
 	}
 	ctn, _ := exhandler.(context.IContainer)
 	return func(c *gin.Context) {
-		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+		cnf := getMetadataConf(c)
+		header := getCrossHeader(cnf, c)
+		upgrader.CheckOrigin = func(r *x.Request) bool {
+			return true
+		}
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, header)
 		if err != nil {
 			getLogger(c).Error(err)
 			c.AbortWithStatus(x.StatusNotAcceptable)
 			return
 		}
-		srvhandler := &wxHandler{conn: conn, send: make(chan []byte, 256)}
+		srvhandler := newWSHandler(conn)
 		go srvhandler.readPump(c, conn, handler, ctn, name, engine, service, mSetting)
 		srvhandler.writePump()
 	}

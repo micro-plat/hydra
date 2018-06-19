@@ -47,7 +47,9 @@ func SetStatic(set ISetStatic, cnf conf.IServerConf) (enable bool, err error) {
 		return false, err
 	}
 	if err == conf.ErrNoSetting {
-		static.Disable = true
+		static.Dir = "../static"
+		static.Exts = []string{".jpg", ".png", ".gif", ".ico", ".html", ".htm", ".js", ".css"}
+		static.FirstPage = "index.html"
 	} else {
 		if b, err := govalidator.ValidateStruct(&static); !b {
 			err = fmt.Errorf("static配置有误:%v", err)
