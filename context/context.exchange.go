@@ -59,6 +59,13 @@ func (e *Exchange) Relate(uuid string, name string) {
 	e.rRelation[name] = uuid
 }
 
+//Clear 清除所有订阅者
+func (e *Exchange) Clear() {
+	e.uuid = make(map[string]func(i ...interface{}) error)
+	e.lRelation = make(map[string]string)
+	e.rRelation = make(map[string]string)
+}
+
 //Notify 消息通知
 func (e *Exchange) Notify(name string, i ...interface{}) error {
 	e.lock.RLock()
@@ -67,5 +74,5 @@ func (e *Exchange) Notify(name string, i ...interface{}) error {
 	if v, ok := e.uuid[uuid]; ok {
 		return v(i...)
 	}
-	return fmt.Errorf("未找到消息订阅者:%s", uuid)
+	return fmt.Errorf("未找到消息订阅者:%s", name)
 }

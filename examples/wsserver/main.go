@@ -13,8 +13,8 @@ func main() {
 		hydra.WithServerTypes("api-ws"),
 		hydra.WithDebug())
 	app.WS("/auth/login", user.NewLoginHandler)
-	app.WS("/order/query", order.NewQueryHandler)
-	app.WS("/order/bind", order.NewBindHandler)
+	app.WS("/query", order.NewQueryHandler)
+	app.WS("/recv", order.NewBindHandler)
 	app.Conf.WS.SetSubConf("auth", `
 		{
 			"jwt": {

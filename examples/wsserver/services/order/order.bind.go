@@ -1,6 +1,9 @@
 package order
 
 import (
+	"sync"
+	"time"
+
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/context"
 )
@@ -11,15 +14,27 @@ type Input struct {
 }
 type BindHandler struct {
 	container component.IContainer
+	once      sync.Once
 }
 
 func NewBindHandler(container component.IContainer) (u *BindHandler) {
 	return &BindHandler{container: container}
 }
 func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
-	var input Input
-	if err := ctx.Request.Bind(&input); err != nil {
-		return err
-	}
-	return input
+	u.once.Do(func() {
+		uuid := ctx.Request.GetUUID()
+		go func() {
+		START:
+			for {
+				select {
+				case <-time.After(time.Second):
+					if err := context.WSExchange.Notify(uuid, time.Now().Unix()); err != nil {
+						ctx.Log.Error(err)
+						break START
+					}
+				}
+			}
+		}()
+	})
+	return "success"
 }

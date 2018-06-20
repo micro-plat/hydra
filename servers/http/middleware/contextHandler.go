@@ -191,6 +191,7 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 				data[k] = strings.Join(v, ",")
 			}
 		}
+
 		return data
 	}
 

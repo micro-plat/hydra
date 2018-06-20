@@ -113,7 +113,16 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 
 	//调用服务执行业务逻辑
 	wLogHead(ctx, service)
-	nctx := context.GetContext(name, engine, service, ctn, makeQueyStringData(ctx), makeMapData(input), makeParamsData(ctx), makeSettingData(ctx, mSetting), makeExtData(ctx), getLogger(ctx))
+	nctx := context.GetContext(name,
+		engine,
+		service,
+		ctn,
+		makeQueyStringData(ctx),
+		makeMapData(input),
+		makeParamsData(ctx),
+		makeSettingData(ctx, mSetting),
+		makeExtData(ctx),
+		getLogger(ctx))
 	setServiceName(ctx, nctx.Service)
 	setCTX(ctx, nctx)
 	defer nctx.Close()

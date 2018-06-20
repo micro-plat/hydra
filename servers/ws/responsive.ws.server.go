@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/context"
+
 	"github.com/micro-plat/hydra/component"
 
 	"github.com/micro-plat/hydra/conf"
@@ -120,6 +122,7 @@ func (w *WSServerResponsiveServer) Start() (err error) {
 
 //Shutdown 关闭服务器
 func (w *WSServerResponsiveServer) Shutdown() {
+	context.WSExchange.Clear()
 	w.done = true
 	w.once.Do(func() {
 		close(w.closeChan)

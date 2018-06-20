@@ -94,6 +94,7 @@ func (c *wsHandler) recvNotify(ctx *gin.Context) func(...interface{}) error {
 			getLogger(ctx).Error(err)
 			return err
 		}
+		getLogger(ctx).Info("ws.response", "PUSH", "/", code)
 		c.send <- buff
 		return nil
 	}

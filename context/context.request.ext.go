@@ -115,7 +115,7 @@ func (w *extParams) GetJWT(out interface{}) error {
 
 //GetUUID
 func (w *extParams) GetUUID() string {
-	return w.ext["__hydra_sid_"].(string)
+	return fmt.Sprint(w.ext["__hydra_sid_"])
 }
 
 //GetJWTConfig 获取jwt配置信息
