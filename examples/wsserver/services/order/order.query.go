@@ -1,6 +1,8 @@
 package order
 
 import (
+	"time"
+
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/context"
 )
@@ -18,5 +20,14 @@ func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
 	if err := ctx.Request.GetJWT(&input); err != nil {
 		return err
 	}
+	go func() {
+		for {
+			select {
+			case <-time.After(time.Second):
+				context.WSExchange.Notify(ctx.Request.GetUUID(), time.Now().Unix())
+			}
+		}
+
+	}()
 	return input
 }
