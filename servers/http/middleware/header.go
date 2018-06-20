@@ -60,7 +60,7 @@ func getCrossHeader(cnf *conf.MetadataConf, ctx *gin.Context) http.Header {
 					h[k] = []string{v}
 					continue
 				}
-				if origin != "" && (origin == "*" || strings.Contains(v, origin)) {
+				if v == "*" || strings.Contains(v, origin) {
 					h[k] = []string{origin}
 				}
 				continue
