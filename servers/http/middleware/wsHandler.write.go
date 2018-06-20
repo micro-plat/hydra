@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,6 @@ import (
 //writePump 向客户端写入响应消息
 func (c *wsHandler) writePump() {
 	ticker := time.NewTicker(pingPeriod)
-	var once sync.Once
 	defer func() {
 		ticker.Stop()
 		c.close()
@@ -23,9 +21,7 @@ func (c *wsHandler) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				once.Do(func() {
-					c.conn.Close()
-				})
+				c.conn.Close()
 				return
 			}
 			w, err := c.conn.NextWriter(websocket.TextMessage)
@@ -63,7 +59,7 @@ func (c *wsHandler) sendNow(ctx *gin.Context, code int, i interface{}) {
 	}
 	c.send <- buff
 }
-func getWSMessage(code int, i interface{}) ([]byte, error) {
+func getWSMessage(code interface{}, i interface{}) ([]byte, error) {
 	var input interface{}
 	switch v := i.(type) {
 	case error:
@@ -78,4 +74,27 @@ func getWSMessage(code int, i interface{}) ([]byte, error) {
 		}
 	}
 	return jsons.Marshal(input)
+}
+func (c *wsHandler) recvNotify(ctx *gin.Context) func(...interface{}) error {
+	return func(input ...interface{}) error {
+		if len(input) == 0 {
+			return nil
+		}
+		var code interface{}
+		var i interface{}
+		if len(input) == 1 {
+			code = 200
+			i = input[0]
+		} else {
+			code = input[0]
+			i = input[1]
+		}
+		buff, err := getWSMessage(code, i)
+		if err != nil {
+			getLogger(ctx).Error(err)
+			return err
+		}
+		c.send <- buff
+		return nil
+	}
 }

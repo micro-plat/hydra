@@ -84,7 +84,7 @@ func (c *wsHandler) readPump(cx *gin.Context, conn *websocket.Conn, handler serv
 //wsAction 调用内部服务处理类型逻辑
 func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler servers.IExecuter, ctn context.IContainer, name string, engine string, service string, mSetting map[string]string) bool {
 	defer gin.Recovery()(ctx)
-	defer setExt(ctx, "CLOSE")
+	defer setExt(ctx, "CONN")
 	//读取传入消息
 	_, msg, err := c.conn.ReadMessage()
 	if err != nil {
@@ -110,9 +110,9 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 		c.sendNow(ctx, 406, err)
 		return true
 	}
-	wLogHead(ctx, service)
 
 	//调用服务执行业务逻辑
+	wLogHead(ctx, service)
 	nctx := context.GetContext(name, engine, service, ctn, makeQueyStringData(ctx), makeMapData(input), makeParamsData(ctx), makeSettingData(ctx, mSetting), makeExtData(ctx), getLogger(ctx))
 	setServiceName(ctx, nctx.Service)
 	setCTX(ctx, nctx)
@@ -135,10 +135,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 	if result != nil {
 		nctx.Response.ShouldContent(result)
 	}
-	//设置jwt验证
-	if j, ok := makeJwtToken(ctx, nctx.Response.GetParams()["__jwt_"]); ok {
-		c.jwtToken = j
-	}
+
 	//处理错误err,5xx
 	if err := nctx.Response.GetError(); err != nil {
 		err = fmt.Errorf("error:%v", err)
@@ -154,6 +151,11 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 			"location": url,
 		})
 	}
+
+	//设置jwt验证
+	if j, ok := makeJwtToken(ctx, nctx.Response.GetParams()["__jwt_"]); ok {
+		c.jwtToken = j
+	}
 	//向客户端写入消息
 	c.sendNow(ctx, nctx.Response.GetStatus(), nctx.Response.GetContent())
 	return true
@@ -162,7 +164,6 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 //close 关闭当前连接
 func (c *wsHandler) close() {
 	c.once.Do(func() {
-		time.Sleep(time.Millisecond * 500) //延迟退出
 		close(c.closeChan)
 		close(c.send)
 	})

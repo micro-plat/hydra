@@ -27,8 +27,12 @@ func WSContextHandler(exhandler interface{}, name string, engine string, service
 			c.AbortWithStatus(x.StatusNotAcceptable)
 			return
 		}
-		srvhandler := newWSHandler(conn)
-		go srvhandler.readPump(c, conn, handler, ctn, name, engine, service, mSetting)
-		srvhandler.writePump()
+
+		h := newWSHandler(conn)
+		context.WSExchange.Subscribe(getUUID(c), h.recvNotify(c))
+		defer context.WSExchange.Unsubscribe(getUUID(c))
+
+		go h.readPump(c, conn, handler, ctn, name, engine, service, mSetting)
+		h.writePump()
 	}
 }
