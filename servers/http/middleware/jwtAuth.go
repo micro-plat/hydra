@@ -46,7 +46,7 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 			l, errx := url.Parse(jwtAuth.Redirect)
 			if errx != nil {
 				getLogger(ctx).Error(errx)
-				Header(cnf)(ctx)
+				setHeader(cnf, ctx)
 				ctx.AbortWithStatus(err.GetCode())
 				return
 			}
@@ -65,6 +65,7 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 		}
 		//jwt.token错误，返回错误码
 		getLogger(ctx).Error(err.GetError())
+		setHeader(cnf, ctx)
 		ctx.AbortWithStatus(err.GetCode())
 		return
 
