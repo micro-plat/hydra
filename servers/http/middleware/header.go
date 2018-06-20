@@ -49,7 +49,7 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 func getCrossHeader(cnf *conf.MetadataConf, ctx *gin.Context) http.Header {
 	h := make(map[string][]string)
 	origin := ctx.Request.Header.Get("Origin")
-	if origin != "" {
+	if origin == "" {
 		return nil
 	}
 	headers, ok := cnf.GetMetadata("headers").(conf.Headers)
