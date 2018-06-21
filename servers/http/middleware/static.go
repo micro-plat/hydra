@@ -58,8 +58,9 @@ func MustStatic(s *conf.Static, rPath string) (b bool, xname string) {
 	return false, ""
 }
 func getDefPath(s *conf.Static, p string) string {
+	pExt := filepath.Ext(p)
 	for _, c := range s.Rewriters {
-		if c == p || c == "*" {
+		if c == p || (c == "*" && pExt != "") {
 			if s.FirstPage != "" {
 				return filepath.Join("/", s.FirstPage)
 			}
