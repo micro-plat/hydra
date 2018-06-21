@@ -33,6 +33,9 @@ var ContentTypes = map[int]string{
 func (r *Response) SetJSON() {
 	r.Params["Content-Type"] = "application/json; charset=UTF-8"
 }
+func (r *Response) SetContentType(p string) {
+	r.Params["Content-Type"] = p
+}
 
 //SetTextXML 将content type设置为text/xml; charset=UTF-8
 func (r *Response) SetXML() {

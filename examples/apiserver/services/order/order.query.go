@@ -14,8 +14,12 @@ func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 }
 
 func (u *QueryHandler) GetHandle(ctx *context.Context) (r interface{}) {
-	ctx.Response.SetHTML()
-	return "get.success"
+	tp := ctx.Request.GetInt("t", context.CT_JSON)
+	ctx.Response.SetContentType(context.ContentTypes[tp])
+
+	return map[string]interface{}{
+		"a": "b",
+	}
 }
 func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
 	return "success"
