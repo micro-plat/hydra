@@ -46,16 +46,20 @@ func SetStatic(set ISetStatic, cnf conf.IServerConf) (enable bool, err error) {
 	if err != nil && err != conf.ErrNoSetting {
 		return false, err
 	}
-	if err == conf.ErrNoSetting {
-		static.Dir = "../static"
-		static.Exts = []string{".jpg", ".png", ".gif", ".ico", ".html", ".htm", ".js", ".css"}
-		static.FirstPage = "index.html"
-	} else {
+	if err != conf.ErrNoSetting {
 		if b, err := govalidator.ValidateStruct(&static); !b {
 			err = fmt.Errorf("static配置有误:%v", err)
 			return false, err
 		}
 	}
+	if static.Dir == "" {
+		static.Dir = "../static"
+	}
+	if static.FirstPage == "" {
+		static.FirstPage = "index.html"
+	}
+	static.Exts = append(static.Exts, ".jpg", ".png", ".gif", ".ico", ".html", ".htm", ".js", ".css", ".map")
+	static.Rewriters = append(static.Rewriters, "/", "index.htm", "default.html")
 	static.Exclude = append(static.Exclude, "/views/", ".exe", ".so")
 	err = set.SetStatic(&static)
 	return !static.Disable && err == nil, err

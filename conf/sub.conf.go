@@ -79,6 +79,7 @@ type Static struct {
 	Exts      []string `json:"exts" valid:"ascii"`
 	Exclude   []string `json:"exclude" valid:"ascii"`
 	FirstPage string   `json:"first-page" valid:"ascii"`
+	Rewriters []string `json:"rewriters" valid:"ascii"`
 	Disable   bool     `json:"disable"`
 }
 type Tasks struct {
