@@ -12,7 +12,8 @@ type IResponse interface {
 	GetParams() map[string]interface{}
 	SetParams(v map[string]interface{})
 	SetParam(key string, v interface{})
-	GetRenderContent(df int) (int, interface{}, error)
+	GetHTMLRenderContent() (int, interface{}, error)
+	GetJSONRenderContent() (int, interface{}, error)
 	ShouldContent(content interface{})
 	MustContent(status int, content interface{})
 	IsRedirect() (string, bool)

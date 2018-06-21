@@ -366,7 +366,7 @@ func (r *StandardComponent) Handle(c *context.Context) (rs interface{}) {
 		return fmt.Errorf("%s:未找到服务:%s", r.Name, c.Service)
 	}
 	if r.IsCustomerService(c.Service, PageService) {
-		c.Response.SetTextHTML()
+		c.Response.SetHTML()
 	}
 	switch handler := h.(type) {
 	case Handler:

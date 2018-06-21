@@ -28,7 +28,7 @@ func WebResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 
-		tp, content, err := nctx.Response.GetRenderContent(context.CT_HTML)
+		tp, content, err := nctx.Response.GetHTMLRenderContent()
 		if err != nil {
 			getLogger(ctx).Error(err)
 			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})

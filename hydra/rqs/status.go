@@ -156,7 +156,7 @@ func (h *RemoteQueryService) unpublish() {
 
 func (h *RemoteQueryService) queryHandler() servers.IExecuteHandler {
 	return func(ctx *context.Context) (rs interface{}) {
-		ctx.Response.SeTextJSON()
+		ctx.Response.SetJSON()
 		data := make(map[string]interface{})
 		data["cpu_used_precent"] = fmt.Sprintf("%.2f", cpu.GetInfo(time.Millisecond*200).UsedPercent)
 		data["mem_used_precent"] = fmt.Sprintf("%.2f", memory.GetInfo().UsedPercent)
@@ -172,7 +172,7 @@ func (h *RemoteQueryService) queryHandler() servers.IExecuteHandler {
 }
 func (h *RemoteQueryService) updateHandler() servers.IExecuteHandler {
 	return func(ctx *context.Context) (rs interface{}) {
-		ctx.Response.SeTextJSON()
+		ctx.Response.SetJSON()
 		v := ctx.Request.Param.GetString("v")
 		if v == "" {
 			return errors.New("未指定版本号")

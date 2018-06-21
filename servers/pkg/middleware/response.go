@@ -27,7 +27,7 @@ func Response(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 		if ctx.Writer.Written() {
 			return
 		}
-		tp, content, err := nctx.Response.GetRenderContent(context.CT_JSON)
+		tp, content, err := nctx.Response.GetJSONRenderContent()
 		if err != nil {
 			getLogger(ctx).Error(err)
 			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})
@@ -48,7 +48,11 @@ func Response(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 			}
 			ctx.YAML(nctx.Response.GetStatus(), content)
 		case context.CT_PLAIN, context.CT_HTML:
-			ctx.Data(nctx.Response.GetStatus(), tpName, content.([]byte))
+			if v, ok := content.([]byte); ok {
+				ctx.Data(nctx.Response.GetStatus(), tpName, v)
+				return
+			}
+			ctx.Data(nctx.Response.GetStatus(), tpName, ([]byte)(content.(string)))
 		default:
 			ctx.JSON(nctx.Response.GetStatus(), content)
 		}
