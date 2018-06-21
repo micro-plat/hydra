@@ -1,9 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -26,37 +23,30 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 
-		switch nctx.Response.GetContentType() {
+		tp, content, err := nctx.Response.GetRenderContent(context.CT_JSON)
+		if err != nil {
+			getLogger(ctx).Error(err)
+			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})
+			return
+		}
+		tpName := context.ContentTypes[tp]
+		switch tp {
 		case context.CT_XML:
-			ctx.XML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
+			if v, ok := content.([]byte); ok {
+				ctx.Data(nctx.Response.GetStatus(), tpName, v)
+				return
+			}
+			ctx.XML(nctx.Response.GetStatus(), content)
 		case context.CT_YMAL:
-			ctx.YAML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
-		case context.CT_PLAIN:
-			ctx.Data(nctx.Response.GetStatus(), "text/plain", []byte(fmt.Sprint(nctx.Response.GetContent())))
-		case context.CT_HTML:
-			ctx.Data(nctx.Response.GetStatus(), "text/html", []byte(fmt.Sprint(nctx.Response.GetContent())))
+			if v, ok := content.([]byte); ok {
+				ctx.Data(nctx.Response.GetStatus(), tpName, v)
+				return
+			}
+			ctx.YAML(nctx.Response.GetStatus(), content)
+		case context.CT_PLAIN, context.CT_HTML:
+			ctx.Data(nctx.Response.GetStatus(), tpName, content.([]byte))
 		default:
-			ctx.JSON(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
+			ctx.JSON(nctx.Response.GetStatus(), content)
 		}
-	}
-}
-func getMessage(i interface{}) interface{} {
-	switch v := i.(type) {
-	case string:
-		return json.RawMessage(v)
-	case bool:
-		return map[string]interface{}{
-			"bool": v,
-		}
-	case int, float32, float64:
-		return map[string]interface{}{
-			"num": v,
-		}
-	case error:
-		return map[string]interface{}{
-			"err": v.Error(),
-		}
-	default:
-		return i
 	}
 }

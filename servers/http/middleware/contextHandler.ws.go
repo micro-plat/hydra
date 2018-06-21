@@ -27,7 +27,6 @@ func WSContextHandler(exhandler interface{}, name string, engine string, service
 			c.AbortWithStatus(x.StatusNotAcceptable)
 			return
 		}
-
 		h := newWSHandler(conn)
 		context.WSExchange.Subscribe(getUUID(c), h.recvNotify(c))
 		defer context.WSExchange.Unsubscribe(getUUID(c))

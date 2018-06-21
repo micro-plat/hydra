@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -13,7 +14,6 @@ import (
 //WebResponse 处理web返回值
 func WebResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
 		ctx.Next()
 		nctx := getCTX(ctx)
 		if nctx == nil {
@@ -27,22 +27,41 @@ func WebResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if ctx.Writer.Written() {
 			return
 		}
-		switch nctx.Response.GetContentType() {
+
+		tp, content, err := nctx.Response.GetRenderContent(context.CT_HTML)
+		if err != nil {
+			getLogger(ctx).Error(err)
+			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})
+			return
+		}
+		tpName := context.ContentTypes[tp]
+		switch tp {
 		case context.CT_JSON:
-			ctx.JSON(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
+			ctx.JSON(nctx.Response.GetStatus(), content)
 		case context.CT_XML:
-			ctx.XML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
+			if v, ok := content.([]byte); ok {
+				ctx.Data(nctx.Response.GetStatus(), tpName, v)
+				return
+			}
+			ctx.XML(nctx.Response.GetStatus(), content)
 		case context.CT_YMAL:
-			ctx.YAML(nctx.Response.GetStatus(), getMessage(nctx.Response.GetContent()))
+			if v, ok := content.([]byte); ok {
+				ctx.Data(nctx.Response.GetStatus(), tpName, v)
+				return
+			}
+			ctx.YAML(nctx.Response.GetStatus(), content)
 		case context.CT_PLAIN:
-			ctx.Data(nctx.Response.GetStatus(), "text/plain", []byte(fmt.Sprint(nctx.Response.GetContent())))
-		case context.CT_HTML:
-			ctx.Data(nctx.Response.GetStatus(), "text/html", []byte(fmt.Sprint(nctx.Response.GetContent())))
+			ctx.Data(nctx.Response.GetStatus(), tpName, content.([]byte))
 		default:
 			if renderHTML(ctx, nctx.Response, conf) {
 				return
 			}
-			ctx.Data(nctx.Response.GetStatus(), "text/plain", []byte(fmt.Sprint(nctx.Response.GetContent())))
+			html := fmt.Sprint(content)
+			if strings.HasPrefix(html, "<!DOCTYPE html") {
+				ctx.Data(nctx.Response.GetStatus(), tpName, []byte(html))
+				return
+			}
+			ctx.Data(nctx.Response.GetStatus(), context.ContentTypes[context.CT_PLAIN], []byte(html))
 		}
 	}
 }

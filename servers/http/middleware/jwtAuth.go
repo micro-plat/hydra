@@ -100,7 +100,7 @@ func checkJWT(ctx *gin.Context, auth *conf.Auth) (data interface{}, err context.
 	data, er := jwt.Decrypt(token, auth.Secret)
 	if er != nil {
 		if strings.Contains(er.Error(), "Token is expired") {
-			return nil, context.NewError(types.ToInt(auth.FailedCode, 401), er)
+			return nil, context.NewError(types.ToInt(auth.FailedCode, 403), er)
 		}
 		return data, context.NewError(types.ToInt(auth.FailedCode, 403), er)
 	}

@@ -55,12 +55,16 @@ func (e *Exchange) Unsubscribe(uuid string) {
 
 //Relate 关联别名
 func (e *Exchange) Relate(uuid string, name string) {
+	e.lock.Lock()
+	defer e.lock.Unlock()
 	e.lRelation[uuid] = name
 	e.rRelation[name] = uuid
 }
 
 //Clear 清除所有订阅者
 func (e *Exchange) Clear() {
+	e.lock.Lock()
+	defer e.lock.Unlock()
 	e.uuid = make(map[string]func(i ...interface{}) error)
 	e.lRelation = make(map[string]string)
 	e.rRelation = make(map[string]string)
@@ -74,5 +78,5 @@ func (e *Exchange) Notify(name string, i ...interface{}) error {
 	if v, ok := e.uuid[uuid]; ok {
 		return v(i...)
 	}
-	return fmt.Errorf("未找到消息订阅者:%s", name)
+	return fmt.Errorf("未找到消息订阅者:%s %v", name, e.uuid)
 }

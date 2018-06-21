@@ -21,20 +21,19 @@ func NewBindHandler(container component.IContainer) (u *BindHandler) {
 	return &BindHandler{container: container}
 }
 func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
-	u.once.Do(func() {
-		uuid := ctx.Request.GetUUID()
-		go func() {
-		START:
-			for {
-				select {
-				case <-time.After(time.Second):
-					if err := context.WSExchange.Notify(uuid, time.Now().Unix()); err != nil {
-						ctx.Log.Error(err)
-						break START
-					}
+
+	uuid := ctx.Request.GetUUID()
+	go func() {
+	START:
+		for {
+			select {
+			case <-time.After(time.Second):
+				if err := context.WSExchange.Notify(uuid, time.Now().Unix()); err != nil {
+					ctx.Log.Error(err)
+					break START
 				}
 			}
-		}()
-	})
+		}
+	}()
 	return "success"
 }
