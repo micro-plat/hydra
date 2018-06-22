@@ -77,6 +77,9 @@ func (r *Response) GetJSONRenderContent() (int, interface{}, error) {
 	if data == nil {
 		return t, nil, nil
 	}
+	if err, ok := data.(error); ok {
+		data = err.Error()
+	}
 	val := reflect.ValueOf(data)
 	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -105,7 +108,7 @@ func (r *Response) GetJSONRenderContent() (int, interface{}, error) {
 		value := []byte(data.(string))
 		switch {
 		case (t == CT_JSON || t == CT_DEF) && json.Valid(value):
-			return CT_JSON, data, nil
+			return CT_JSON, json.RawMessage(value), nil
 		case (t == CT_XML || t == CT_DEF) && bytes.HasPrefix(value, []byte("<?xml")):
 			return CT_XML, value, nil
 		case (t == CT_HTML || t == CT_DEF) && bytes.HasPrefix(value, []byte("<!DOCTYPE html")):
@@ -130,7 +133,7 @@ func (r *Response) GetJSONRenderContent() (int, interface{}, error) {
 			}
 			return CT_YMAL, buff, nil
 		default:
-			return t, data, nil
+			return t, fmt.Sprint(data), nil
 		}
 	}
 }
@@ -140,6 +143,9 @@ func (r *Response) GetHTMLRenderContent() (int, interface{}, error) {
 	t := r.getContentType()
 	if data == nil {
 		return t, nil, nil
+	}
+	if err, ok := data.(error); ok {
+		data = err.Error()
 	}
 	val := reflect.ValueOf(data)
 	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
@@ -153,6 +159,7 @@ func (r *Response) GetHTMLRenderContent() (int, interface{}, error) {
 		case t == CT_XML:
 			buff, err := xml.Marshal(data)
 			if err != nil {
+				panic(err)
 				return t, nil, err
 			}
 			return CT_XML, buff, nil
@@ -169,7 +176,7 @@ func (r *Response) GetHTMLRenderContent() (int, interface{}, error) {
 		value := []byte(data.(string))
 		switch {
 		case (t == CT_JSON || t == CT_DEF) && json.Valid(value):
-			return CT_JSON, data, nil
+			return CT_JSON, json.RawMessage(value), nil
 		case (t == CT_XML || t == CT_DEF) && bytes.HasPrefix(value, []byte("<?xml")):
 			return CT_XML, value, nil
 		case (t == CT_HTML || t == CT_DEF) && bytes.HasPrefix(value, []byte("<!DOCTYPE html")):
@@ -195,7 +202,7 @@ func (r *Response) GetHTMLRenderContent() (int, interface{}, error) {
 			}
 			return CT_YMAL, buff, nil
 		default:
-			return t, data, nil
+			return t, fmt.Sprint(data), nil
 		}
 	}
 }
