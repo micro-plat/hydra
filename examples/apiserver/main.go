@@ -11,7 +11,7 @@ func main() {
 		hydra.WithPlatName("hydra-21"),
 		hydra.WithSystemName("collector"),
 		//hydra.WithServerTypes("api-web-rpc"),
-		hydra.WithServerTypes("web"),
+		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 	app.Micro("/user/login", user.NewLoginHandler)
 	app.Micro("/order/query", order.NewQueryHandler)
