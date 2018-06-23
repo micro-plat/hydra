@@ -38,7 +38,7 @@ func readFromFile() (appenders []*Appender) {
 		return
 	}
 	appenders = getDefConfig()
-	sysLoggerError(err)
+	//	sysLoggerError(err)
 	err = writeToFile(loggerPath, appenders)
 	if err != nil {
 		sysLoggerError(err)
@@ -109,7 +109,7 @@ func writeToFile(loggerPath string, appenders []*Appender) (err error) {
 		return
 	}
 	fwriter.Close()
-	sysLoggerError("已创建日志配置文件:", loggerPath)
+	//sysLoggerError("已创建日志配置文件:", loggerPath)
 	return
 }
 func getDefConfig() (appenders []*Appender) {
