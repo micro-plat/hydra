@@ -21,8 +21,8 @@ type IComponent interface {
 	Handled(c *context.Context) (rs interface{})
 	Handle(c *context.Context) interface{}
 
-	Get(key string) interface{}
-	Set(key string, value interface{})
+	GetMeta(key string) interface{}
+	SetMeta(key string, value interface{})
 
 	Close() error
 }

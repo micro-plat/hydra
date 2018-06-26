@@ -66,14 +66,14 @@ func NewStandardComponent(componentName string, c IContainer) *StandardComponent
 	return r
 }
 
-func (m *StandardComponent) Get(key string) interface{} {
+func (m *StandardComponent) GetMeta(key string) interface{} {
 	m.metaLock.RLocker().Lock()
 	defer m.metaLock.RLocker().Unlock()
 
 	data := m.metaData[key]
 	return data
 }
-func (m *StandardComponent) Set(key string, value interface{}) {
+func (m *StandardComponent) SetMeta(key string, value interface{}) {
 	m.metaLock.Lock()
 	defer m.metaLock.Unlock()
 	if m.metaData == nil {
