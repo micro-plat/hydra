@@ -9,6 +9,6 @@ ADD ./dockerserver /usr/local/bin
 #go构建可执行文件
 # RUN go build .
 #暴露端口
-EXPOSE 8070
+EXPOSE 8090
 #最终运行docker的命令
-ENTRYPOINT  ["./hello", "start"]
+ENTRYPOINT  ["./dockerserver", "start"]

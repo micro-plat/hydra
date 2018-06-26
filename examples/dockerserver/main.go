@@ -14,7 +14,6 @@ func main() {
 		hydra.WithServerTypes("api"),   //只启动http api 服务
 		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
 		hydra.WithDebug())
-	app.Conf.API.SetMainConf(`{"address":":8070"}`)
 	app.Micro("/hello", (component.ServiceFunc)(helloWorld))
 	app.Start()
 }
