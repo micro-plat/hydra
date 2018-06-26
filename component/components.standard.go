@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/micro-plat/hydra/context"
 )
@@ -46,6 +47,8 @@ type StandardComponent struct {
 	ServiceGroup     map[string][]string               //每个服务对应的分组
 	ServiceTags      map[string][]string               //每个服务对应的页面
 	CloseHandler     []interface{}                     //用于关闭所有handler
+	metaData         map[string]interface{}
+	metaLock         sync.RWMutex
 }
 
 //NewStandardComponent 构建标准组件
@@ -61,6 +64,22 @@ func NewStandardComponent(componentName string, c IContainer) *StandardComponent
 	r.ServiceTags = make(map[string][]string)
 	r.CloseHandler = make([]interface{}, 0, 2)
 	return r
+}
+
+func (m *StandardComponent) Get(key string) interface{} {
+	m.metaLock.RLocker().Lock()
+	defer m.metaLock.RLocker().Unlock()
+
+	data := m.metaData[key]
+	return data
+}
+func (m *StandardComponent) Set(key string, value interface{}) {
+	m.metaLock.Lock()
+	defer m.metaLock.Unlock()
+	if m.metaData == nil {
+		m.metaData = make(map[string]interface{})
+	}
+	m.metaData[key] = value
 }
 
 //AddRPCProxy 添加RPC代理

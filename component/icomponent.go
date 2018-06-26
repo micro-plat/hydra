@@ -20,6 +20,10 @@ type IComponent interface {
 	Handling(c *context.Context) (rs interface{})
 	Handled(c *context.Context) (rs interface{})
 	Handle(c *context.Context) interface{}
+
+	Get(key string) interface{}
+	Set(key string, value interface{})
+
 	Close() error
 }
 
