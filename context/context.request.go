@@ -86,11 +86,15 @@ func (r *Request) BindWith(obj interface{}, contentType string) error {
 
 //Check 检查输入参数和配置参数是否为空
 func (r *Request) Check(field ...string) error {
+	data, _ := r.GetBodyMap()
 	for _, fd := range field {
 		if err := r.Form.Check(fd); err == nil {
 			continue
 		}
-		if err := r.QueryString.Check(fd); err != nil {
+		if err := r.QueryString.Check(fd); err == nil {
+			continue
+		}
+		if _, ok := data[fd]; !ok {
 			return fmt.Errorf("输入参数:%v", err)
 		}
 	}

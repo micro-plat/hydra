@@ -11,8 +11,11 @@ import (
 )
 
 type extParams struct {
-	ext map[string]interface{}
-	ctx *Context
+	ext         map[string]interface{}
+	ctx         *Context
+	body        string
+	bodyReadErr error
+	hasReadBody bool
 }
 
 // func (w *extParams) Get(name string) (interface{}, bool) {
@@ -65,21 +68,34 @@ func (w *extParams) GetSharding() (int, int) {
 	return 0, 0
 }
 
-func (w *extParams) GetBodyMap(encoding ...string) map[string]interface{} {
+func (w *extParams) GetRequestMap(encoding ...string) map[string]interface{} {
 
 	if fun, ok := w.ext["__get_request_values_"].(func() map[string]interface{}); ok {
 		return fun()
 	}
 	return nil
-
+}
+func (w *extParams) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
+	body, err := w.GetBody(encoding...)
+	if err != nil {
+		return nil, err
+	}
+	data := make(map[string]interface{})
+	err = json.Unmarshal([]byte(body), &data)
+	return data, err
 }
 func (w *extParams) GetBody(encoding ...string) (string, error) {
 	e := "utf-8"
 	if len(encoding) > 0 {
 		e = encoding[0]
 	}
+	if w.hasReadBody {
+		return w.body, w.bodyReadErr
+	}
 	if fun, ok := w.ext["__func_body_get_"].(func(ch string) (string, error)); ok {
-		return fun(e)
+		w.body, w.bodyReadErr = fun(e)
+		w.hasReadBody = true
+		return w.body, w.bodyReadErr
 	}
 	return "", fmt.Errorf("无法根据%s格式转换数据", e)
 }
