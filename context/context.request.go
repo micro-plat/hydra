@@ -95,7 +95,7 @@ func (r *Request) Check(field ...string) error {
 			continue
 		}
 		if _, ok := data[fd]; !ok {
-			return fmt.Errorf("输入参数:%v", err)
+			return fmt.Errorf("输入参数:%s值不能为空", fd)
 		}
 	}
 	return nil
