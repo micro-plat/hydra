@@ -16,6 +16,9 @@ type extParams struct {
 	body        string
 	bodyReadErr error
 	hasReadBody bool
+	bodyMap     map[string]interface{}
+	bodyMapErr  error
+	hasTransMap bool
 }
 
 // func (w *extParams) Get(name string) (interface{}, bool) {
@@ -69,19 +72,24 @@ func (w *extParams) GetSharding() (int, int) {
 }
 
 func (w *extParams) GetRequestMap(encoding ...string) map[string]interface{} {
-
 	if fun, ok := w.ext["__get_request_values_"].(func() map[string]interface{}); ok {
 		return fun()
 	}
 	return nil
 }
 func (w *extParams) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
+	if w.hasTransMap {
+		return w.bodyMap, w.bodyMapErr
+	}
+	w.hasTransMap = true
 	body, err := w.GetBody(encoding...)
 	if err != nil {
 		return nil, err
 	}
 	data := make(map[string]interface{})
 	err = json.Unmarshal([]byte(body), &data)
+	w.bodyMap = data
+	w.bodyMapErr = err
 	return data, err
 }
 func (w *extParams) GetBody(encoding ...string) (string, error) {

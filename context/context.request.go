@@ -94,7 +94,7 @@ func (r *Request) Check(field ...string) error {
 		if err := r.QueryString.Check(fd); err == nil {
 			continue
 		}
-		if _, ok := data[fd]; !ok {
+		if v, ok := data[fd]; !ok && fmt.Sprint(v) != "" {
 			return fmt.Errorf("输入参数:%s值不能为空", fd)
 		}
 	}
@@ -125,7 +125,12 @@ func (r *Request) Get(name string) (result string, b bool) {
 	if result, b = r.QueryString.Get(name); b {
 		return result, b
 	}
-	return "", false
+	m, err := r.GetBodyMap()
+	if err != nil {
+		return "", false
+	}
+	v, b := m[name]
+	return fmt.Sprint(v), b
 }
 
 func (r *Request) GetString(name string, p ...string) string {
