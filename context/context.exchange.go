@@ -80,3 +80,15 @@ func (e *Exchange) Notify(name string, i ...interface{}) error {
 	}
 	return fmt.Errorf("未找到消息订阅者:%s %v", name, e.uuid)
 }
+
+//Broadcast 发送广播消息
+func (e *Exchange) Broadcast(v ...interface{}) error {
+	e.lock.RLock()
+	defer e.lock.RUnlock()
+	for _, f := range e.uuid {
+		if err := f(v...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
