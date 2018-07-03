@@ -18,6 +18,7 @@ const (
 	CT_YMAL
 	CT_HTML
 	CT_PLAIN
+	CT_OTHER
 )
 
 //ContentTypes content type map
@@ -67,6 +68,7 @@ func (r *Response) getContentType() int {
 		} else if strings.Contains(tp, "html") {
 			return CT_HTML
 		}
+		return CT_OTHER
 	}
 	return CT_DEF
 }

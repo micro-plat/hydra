@@ -43,7 +43,7 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 				return
 			}
 			ctx.YAML(nctx.Response.GetStatus(), content)
-		case context.CT_PLAIN, context.CT_HTML:
+		case context.CT_PLAIN, context.CT_HTML, context.CT_OTHER:
 			if v, ok := content.([]byte); ok {
 				ctx.Data(nctx.Response.GetStatus(), tpName, v)
 				return
