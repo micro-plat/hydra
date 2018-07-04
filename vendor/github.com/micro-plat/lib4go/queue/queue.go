@@ -8,6 +8,28 @@ import (
 
 var Nil = errors.New("nil")
 
+type Config struct {
+	Proto    string `json:"proto"`
+	Addr     string `json:"address"`
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+/*
+{
+			"proto":"redis",
+			"addrs":[
+				"192.168.106.204:6379"
+			],
+			"dial_timeout":10,
+			"read_timeout":10,
+			"write_timeout":10,
+			"pool_size":10
+	}
+
+
+*/
+
 type IQueue interface {
 	Push(key string, value string) error
 	Pop(key string) (string, error)
