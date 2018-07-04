@@ -16,6 +16,12 @@ const (
 	//MicroService 微服务
 	MicroService = "__micro_"
 
+	//APIService http api 服务
+	APIService = "__api_"
+
+	//RPCService rpc 服务
+	RPCService = "__rpc_"
+
 	//WSService websocket流程服务
 	WSService = "__websocket_"
 
@@ -24,6 +30,12 @@ const (
 
 	//PageService 页面服务
 	PageService = "__page_"
+
+	//MQCService mqc 服务
+	MQCService = "__mqc_"
+
+	//CRONService cron服务
+	CRONService = "__cron_"
 
 	//CustomerService 自定义服务
 	CustomerService = "__customer_"

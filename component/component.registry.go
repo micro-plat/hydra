@@ -156,12 +156,32 @@ func (s *ServiceRegistry) Customer(group string, name string, h interface{}, tag
 
 }
 
+//API http api服务
+func (s *ServiceRegistry) API(name string, h interface{}, tags ...string) {
+	s.Customer(APIService, name, h, tags...)
+}
+
+//RPC rpc服务
+func (s *ServiceRegistry) RPC(name string, h interface{}, tags ...string) {
+	s.Customer(RPCService, name, h, tags...)
+}
+
 //Micro 微服务
 func (s *ServiceRegistry) Micro(name string, h interface{}, tags ...string) {
 	s.Customer(MicroService, name, h, tags...)
 }
 
-//Flow 流程服务
+//MQC MQC流程服务
+func (s *ServiceRegistry) MQC(name string, h interface{}, tags ...string) {
+	s.Customer(MQCService, name, h, tags...)
+}
+
+//Cron Cron服务
+func (s *ServiceRegistry) Cron(name string, h interface{}, tags ...string) {
+	s.Customer(CRONService, name, h, tags...)
+}
+
+//Flow rpc服务
 func (s *ServiceRegistry) Flow(name string, h interface{}, tags ...string) {
 	s.Customer(FlowService, name, h, tags...)
 }
