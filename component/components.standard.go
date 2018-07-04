@@ -14,7 +14,7 @@ import (
 const (
 
 	//MicroService 微服务
-	MicroService = "__micro_"
+	// MicroService = "__micro_"
 
 	//APIService http api 服务
 	APIService = "__api_"
@@ -26,7 +26,7 @@ const (
 	WSService = "__websocket_"
 
 	//FlowService 自动流程服务
-	FlowService = "__flow_"
+	// FlowService = "__flow_"
 
 	//PageService 页面服务
 	PageService = "__page_"
@@ -96,8 +96,12 @@ func (m *StandardComponent) SetMeta(key string, value interface{}) {
 
 //AddRPCProxy 添加RPC代理
 func (r *StandardComponent) AddRPCProxy(h interface{}) {
-	r.addService(MicroService, "__rpc_", h)
-	r.addService(FlowService, "__rpc_", h)
+	r.addService(APIService, "__rpc_", h)
+	r.addService(RPCService, "__rpc_", h)
+	r.addService(WSService, "__rpc_", h)
+	r.addService(PageService, "__rpc_", h)
+	r.addService(MQCService, "__rpc_", h)
+	r.addService(CRONService, "__rpc_", h)
 }
 
 //AddCustomerService 添加自定义分组服务
@@ -453,12 +457,16 @@ func (r *StandardComponent) Close() error {
 //GetGroupName 获取分组类型[api,rpc > micro mq,cron > flow, web > page,others > customer]
 func GetGroupName(serverType string) []string {
 	switch serverType {
-	case "api", "rpc":
-		return []string{MicroService}
-	case "mqc", "cron":
-		return []string{FlowService}
+	case "api":
+		return []string{APIService}
+	case "rpc":
+		return []string{RPCService}
+	case "mqc":
+		return []string{MQCService}
+	case "cron":
+		return []string{CRONService}
 	case "web":
-		return []string{PageService, MicroService}
+		return []string{PageService, APIService}
 	case "ws":
 		return []string{WSService}
 	}
