@@ -36,8 +36,20 @@ type IServiceRegistry interface {
 	//Micro 添加微服务（api,rpc）
 	Micro(name string, h interface{}, tags ...string)
 
+	//API 添加微服务
+	API(name string, h interface{}, tags ...string)
+
+	//RPC 添加微服务
+	RPC(name string, h interface{}, tags ...string)
+
 	//Flow 添加自动流程(mqc,cron)
 	Flow(name string, h interface{}, tags ...string)
+
+	//MQC 添加自动流程
+	MQC(name string, h interface{}, tags ...string)
+
+	//CRON 添加自动流程
+	CRON(name string, h interface{}, tags ...string)
 
 	//WS 添加websocket(mqc,cron)
 	WS(name string, h interface{}, tags ...string)
@@ -177,8 +189,8 @@ func (s *ServiceRegistry) MQC(name string, h interface{}, tags ...string) {
 	s.Customer(MQCService, name, h, tags...)
 }
 
-//Cron Cron服务
-func (s *ServiceRegistry) Cron(name string, h interface{}, tags ...string) {
+//CRON Cron服务
+func (s *ServiceRegistry) CRON(name string, h interface{}, tags ...string) {
 	s.Customer(CRONService, name, h, tags...)
 }
 
