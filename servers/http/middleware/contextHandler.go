@@ -137,6 +137,11 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 }
 
 func makeFormData(ctx *gin.Context) InputData {
+	if ctx.ContentType() == binding.MIMEPOSTForm ||
+		ctx.ContentType() == binding.MIMEMultipartPOSTForm {
+		ctx.Request.ParseForm()
+		ctx.Request.ParseMultipartForm(32 << 20)
+	}
 	return ctx.GetPostForm
 }
 func makeQueyStringData(ctx *gin.Context) InputData {
