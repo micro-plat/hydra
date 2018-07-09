@@ -98,7 +98,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 	if err != nil {
 		err = fmt.Errorf("请求串不是有效的json:%s(%v)", msg, err)
 		getLogger(ctx).Error(err)
-		c.sendNow(ctx, 406, err)
+		c.sendNow(ctx, "init", 406, err)
 		return true
 	}
 
@@ -107,7 +107,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 	if service, ok = input["service"].(string); !ok {
 		err = errors.New("请求未包含服务名称字段")
 		getLogger(ctx).Error(err)
-		c.sendNow(ctx, 406, err)
+		c.sendNow(ctx, service, 406, err)
 		return true
 	}
 
@@ -135,7 +135,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 	if !wsCheckJwt(ctx, service, c.jwtToken) { //jwt 验证未通过则强制关闭客户端
 		err = fmt.Errorf("请求服务:%s未通过授权", service)
 		getLogger(ctx).Error(err)
-		c.sendNow(ctx, 406, err)
+		c.sendNow(ctx, service, 406, err)
 		nctx.Response.MustContent(406, err)
 		return false
 	}
@@ -166,7 +166,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 		c.jwtToken = j
 	}
 	//向客户端写入消息
-	c.sendNow(ctx, nctx.Response.GetStatus(), nctx.Response.GetContent())
+	c.sendNow(ctx, service, nctx.Response.GetStatus(), nctx.Response.GetContent())
 	return true
 }
 

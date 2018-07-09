@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -51,26 +52,28 @@ func (c *wsHandler) writePump() {
 	}
 }
 
-func (c *wsHandler) sendNow(ctx *gin.Context, code int, i interface{}) {
-	buff, err := getWSMessage(code, i)
+func (c *wsHandler) sendNow(ctx *gin.Context, service string, code int, i interface{}) {
+	buff, err := getWSMessage(service, code, i)
 	if err != nil {
 		getLogger(ctx).Error(err)
 		return
 	}
 	c.send <- buff
 }
-func getWSMessage(code interface{}, i interface{}) ([]byte, error) {
+func getWSMessage(service string, code interface{}, i interface{}) ([]byte, error) {
 	var input interface{}
 	switch v := i.(type) {
 	case error:
 		input = map[string]interface{}{
-			"code": code,
-			"err":  v.Error(),
+			"service": service,
+			"code":    code,
+			"err":     v.Error(),
 		}
 	default:
 		input = map[string]interface{}{
-			"code": code,
-			"data": v,
+			"service": service,
+			"code":    code,
+			"data":    v,
 		}
 	}
 	return jsons.Marshal(input)
@@ -82,14 +85,20 @@ func (c *wsHandler) recvNotify(ctx *gin.Context) func(...interface{}) error {
 		}
 		var code interface{}
 		var i interface{}
-		if len(input) == 1 {
+		var service = "notify"
+		switch len(input) {
+		case 1:
 			code = 200
 			i = input[0]
-		} else {
+		case 2:
 			code = input[0]
 			i = input[1]
+		case 3:
+			code = input[0]
+			service = fmt.Sprint(input[1])
+			i = input[2]
 		}
-		buff, err := getWSMessage(code, i)
+		buff, err := getWSMessage(service, code, i)
 		if err != nil {
 			getLogger(ctx).Error(err)
 			return err
