@@ -1,6 +1,8 @@
 package engines
 
 import (
+	"strings"
+
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -101,6 +103,9 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 			ctx.Response.MustContent(ctx.Request.CircuitBreaker.GetDefStatus(), ctx.Request.CircuitBreaker.GetDefContent())
 		}
 		return rf
+	}
+	if strings.ToUpper(ctx.Request.GetMethod()) == "OPTIONS" {
+		return
 	}
 	if rh := r.Handling(ctx); ctx.Response.HasError(rh) {
 		return rh

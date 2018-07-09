@@ -74,7 +74,7 @@ type Breaker struct {
 	Disable          bool   `json:"disable"`
 }
 type Static struct {
-	Dir       string   `json:"dir" valid:"ascii,required"`
+	Dir       string   `json:"dir" valid:"ascii"`
 	Prefix    string   `json:"prefix" valid:"ascii"`
 	Exts      []string `json:"exts" valid:"ascii"`
 	Exclude   []string `json:"exclude" valid:"ascii"`
