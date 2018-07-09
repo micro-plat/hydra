@@ -18,7 +18,6 @@ func setHeader(cnf *conf.MetadataConf, ctx *gin.Context) {
 //Header 头设置
 func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		getLogger(ctx).Warn("method:", strings.ToUpper(ctx.Request.Method))
 		if strings.ToUpper(ctx.Request.Method) != "OPTIONS" {
 			ctx.Next()
 		}
@@ -44,10 +43,6 @@ func Header(cnf *conf.MetadataConf) gin.HandlerFunc {
 		for k, v := range header {
 			ctx.Header(k, v)
 		}
-		if strings.ToUpper(ctx.Request.Method) == "OPTIONS" {
-			ctx.Abort()
-		}
-
 	}
 }
 
