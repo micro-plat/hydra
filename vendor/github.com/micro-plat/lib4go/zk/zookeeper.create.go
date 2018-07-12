@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/samuel/go-zookeeper/zk"
 )
 
@@ -77,11 +78,14 @@ func (client *ZookeeperClient) create(path string, data []byte, flags int32, acl
 		err = ErrColientCouldNotConnect
 		return
 	}
-
+	buff, err := encoding.ConvertBytes(data, "gbk")
+	if err != nil {
+		return "", err
+	}
 	// 开启一个协程，创建节点
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
-		data, err := client.conn.Create(path, data, flags, acl)
+		data, err := client.conn.Create(path, buff, flags, acl)
 		if err != nil {
 			ch <- createType{err: err}
 		} else {

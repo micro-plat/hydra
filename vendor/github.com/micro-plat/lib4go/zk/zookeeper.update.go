@@ -3,6 +3,8 @@ package zk
 import (
 	"fmt"
 	"time"
+
+	"github.com/micro-plat/lib4go/encoding"
 )
 
 // Update 更新一个节点的值，如果存在则更新，如果不存在则报错
@@ -23,7 +25,12 @@ func (client *ZookeeperClient) Update(path string, data string, version int32) (
 	// 启动一个协程，更新节点
 	ch := make(chan error, 1)
 	go func(ch chan error) {
-		_, err = client.conn.Set(path, []byte(data), version)
+		buff, err := encoding.ConvertBytes([]byte(data), "gbk")
+		if err != nil {
+			ch <- err
+			return
+		}
+		_, err = client.conn.Set(path, buff, version)
 		ch <- err
 	}(ch)
 
