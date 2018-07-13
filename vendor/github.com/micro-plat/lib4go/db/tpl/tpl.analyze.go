@@ -49,7 +49,7 @@ func AnalyzeTPLFromCache(name string, tpl string, input map[string]interface{}, 
 func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string) (sql string, params []interface{}, names []string) {
 	params = make([]interface{}, 0)
 	names = make([]string, 0)
-	word, _ := regexp.Compile(`[@|#|&|~|\||!]\w+[\.]?\w+`)
+	word, _ := regexp.Compile(`[@|#|&|~|\||!|\$|\?|>|<]\w?[\.]?\w+`)
 	//@变量, 将数据放入params中
 	sql = word.ReplaceAllStringFunc(tpl, func(s string) string {
 		//fullKey := s[1:]
@@ -68,13 +68,38 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string) 
 				names = append(names, key)
 				params = append(params, nil)
 			}
-
 			return prefix()
 		case "#":
 			if !isNil(value) {
 				return fmt.Sprintf("%v", value)
 			}
 			return "NULL"
+		case "?":
+			if !isNil(value) {
+				names = append(names, key)
+				params = append(params, value)
+				return fmt.Sprintf("and %s like '%%'||%s||'%%'", key, prefix())
+			}
+			return ""
+		case ">":
+			if !isNil(value) {
+				names = append(names, key)
+				params = append(params, value)
+				return fmt.Sprintf("and %s > %s", key, prefix())
+			}
+			return ""
+		case "<":
+			if !isNil(value) {
+				names = append(names, key)
+				params = append(params, value)
+				return fmt.Sprintf("and %s < %s", key, prefix())
+			}
+			return ""
+		case "$":
+			if !isNil(value) {
+				return fmt.Sprintf("%v", value)
+			}
+			return ""
 		case "&":
 			if !isNil(value) {
 				names = append(names, key)
