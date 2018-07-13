@@ -1,12 +1,15 @@
 package zk
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"time"
 
-	"github.com/axgle/mahonia"
 	"github.com/samuel/go-zookeeper/zk"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 //CreatePersistentNode 创建持久化的节点
@@ -78,12 +81,14 @@ func (client *ZookeeperClient) create(path string, data []byte, flags int32, acl
 		err = ErrColientCouldNotConnect
 		return
 	}
-	enc := mahonia.NewEncoder("gbk")
-	buff := []byte(enc.ConvertString(string(data)))
+	buff, err := utf82Gbk(string(data))
+	if err != nil {
+		return "", err
+	}
 	// 开启一个协程，创建节点
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
-		data, err := client.conn.Create(path, buff, flags, acl)
+		data, err := client.conn.Create(path, []byte(buff), flags, acl)
 		if err != nil {
 			ch <- createType{err: err}
 		} else {
@@ -125,4 +130,14 @@ func (client *ZookeeperClient) GetDir(path string) string {
 		return paths[len(paths)-2]
 	}
 	return "/"
+}
+func utf82Gbk(content string) (result string, err error) {
+	reader := transform.NewReader(bytes.NewReader([]byte(content)), simplifiedchinese.GBK.NewEncoder())
+	d, err := ioutil.ReadAll(reader)
+	if err != nil {
+		err = fmt.Errorf("编码转换失败:content:%s, err:%+v", content, err)
+		return
+	}
+	result = string(d)
+	return
 }
