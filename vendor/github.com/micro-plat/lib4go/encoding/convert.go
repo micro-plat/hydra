@@ -11,6 +11,17 @@ import (
 	"golang.org/x/text/transform"
 )
 
+//UTF82GBK utf8字符串转gbk bytes
+func UTF82GBK(content string) (result []byte, err error) {
+	reader := transform.NewReader(bytes.NewReader([]byte(content)), simplifiedchinese.GBK.NewEncoder())
+	d, err := ioutil.ReadAll(reader)
+	if err != nil {
+		err = fmt.Errorf("编码转换失败:content:%s, err:%+v", content, err)
+		return
+	}
+	return d, nil
+}
+
 // GetReader 获取
 // charset不区分大小写
 func GetReader(content string, charset string) io.Reader {

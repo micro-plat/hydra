@@ -1,15 +1,12 @@
 package zk
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/samuel/go-zookeeper/zk"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 )
 
 //CreatePersistentNode 创建持久化的节点
@@ -38,13 +35,13 @@ func (client *ZookeeperClient) CreatePersistentNode(path string, data string) (e
 		if b {
 			continue
 		}
-		_, err = client.create(paths[i], []byte(""), int32(0), zk.WorldACL(zk.PermAll))
+		_, err = client.create(paths[i], "", int32(0), zk.WorldACL(zk.PermAll))
 		if err != nil {
 			return err
 		}
 	}
 	//创建最后一级目录
-	_, err = client.create(path, []byte(data), int32(0), zk.WorldACL(zk.PermAll))
+	_, err = client.create(path, data, int32(0), zk.WorldACL(zk.PermAll))
 	if err != nil {
 		return
 	}
@@ -57,7 +54,7 @@ func (client *ZookeeperClient) CreateTempNode(path string, data string) (err err
 	if err != nil {
 		return
 	}
-	_, err = client.create(path, []byte(data), int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
+	_, err = client.create(path, data, int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
 	return
 }
 
@@ -67,7 +64,7 @@ func (client *ZookeeperClient) CreateSeqNode(path string, data string) (rpath st
 	if err != nil {
 		return
 	}
-	rpath, err = client.create(path, []byte(data), int32(zk.FlagSequence)|int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
+	rpath, err = client.create(path, data, int32(zk.FlagSequence)|int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
 	return
 }
 
@@ -76,19 +73,19 @@ type createType struct {
 	err   error
 }
 
-func (client *ZookeeperClient) create(path string, data []byte, flags int32, acl []zk.ACL) (rpath string, err error) {
+func (client *ZookeeperClient) create(path string, data string, flags int32, acl []zk.ACL) (rpath string, err error) {
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return
 	}
-	buff, err := utf82Gbk(string(data))
+	buff, err := encoding.UTF82GBK(data)
 	if err != nil {
 		return "", err
 	}
 	// 开启一个协程，创建节点
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
-		data, err := client.conn.Create(path, []byte(buff), flags, acl)
+		data, err := client.conn.Create(path, buff, flags, acl)
 		if err != nil {
 			ch <- createType{err: err}
 		} else {
@@ -130,14 +127,4 @@ func (client *ZookeeperClient) GetDir(path string) string {
 		return paths[len(paths)-2]
 	}
 	return "/"
-}
-func utf82Gbk(content string) (result string, err error) {
-	reader := transform.NewReader(bytes.NewReader([]byte(content)), simplifiedchinese.GBK.NewEncoder())
-	d, err := ioutil.ReadAll(reader)
-	if err != nil {
-		err = fmt.Errorf("编码转换失败:content:%s, err:%+v", content, err)
-		return
-	}
-	result = string(d)
-	return
 }
