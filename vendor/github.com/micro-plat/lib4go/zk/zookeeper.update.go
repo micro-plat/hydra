@@ -25,7 +25,7 @@ func (client *ZookeeperClient) Update(path string, data string, version int32) (
 	// 启动一个协程，更新节点
 	ch := make(chan error, 1)
 	go func(ch chan error) {
-		buff, err := encoding.ConvertBytes([]byte(data), "gbk")
+		buff, err := encoding.UTF82GBK(data)
 		if err != nil {
 			ch <- err
 			return
