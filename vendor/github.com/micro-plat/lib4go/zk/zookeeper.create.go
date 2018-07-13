@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/lib4go/encoding"
+	"github.com/axgle/mahonia"
 	"github.com/samuel/go-zookeeper/zk"
 )
 
@@ -78,10 +78,8 @@ func (client *ZookeeperClient) create(path string, data []byte, flags int32, acl
 		err = ErrColientCouldNotConnect
 		return
 	}
-	buff, err := encoding.ConvertBytes(data, "gbk")
-	if err != nil {
-		return "", err
-	}
+	enc := mahonia.NewEncoder("gbk")
+	buff := []byte(enc.ConvertString(string(data)))
 	// 开启一个协程，创建节点
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
