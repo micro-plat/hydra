@@ -151,9 +151,9 @@ func (r *Request) GetInt(name string, p ...int) int {
 	var err error
 	if b {
 		v, err = strconv.Atoi(value)
-	}
-	if err == nil {
-		return v
+		if err == nil {
+			return v
+		}
 	}
 	if len(p) > 0 {
 		return p[0]
@@ -168,10 +168,11 @@ func (r *Request) GetInt64(name string, p ...int64) int64 {
 	var err error
 	if b {
 		v, err = strconv.ParseInt(value, 10, 64)
+		if err == nil {
+			return v
+		}
 	}
-	if err == nil {
-		return v
-	}
+
 	if len(p) > 0 {
 		return p[0]
 	}
@@ -205,10 +206,11 @@ func (r *Request) GetFloat64(name string, p ...float64) float64 {
 	var err error
 	if b {
 		v, err = strconv.ParseFloat(value, 64)
+		if err == nil {
+			return v
+		}
 	}
-	if err == nil {
-		return v
-	}
+
 	if len(p) > 0 {
 		return p[0]
 	}
@@ -227,10 +229,11 @@ func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time
 	var err error
 	if b {
 		v, err = time.Parse(format, value)
+		if err == nil {
+			return v, nil
+		}
 	}
-	if err == nil {
-		return v, nil
-	}
+
 	if len(p) > 0 {
 		return p[0], nil
 	}
