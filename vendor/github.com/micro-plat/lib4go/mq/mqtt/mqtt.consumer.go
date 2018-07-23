@@ -91,6 +91,10 @@ func (consumer *Consumer) reconnectByChan() {
 				if b {
 					consumer.Logger.Info("consumer成功连接到服务器")
 					consumer.client = client
+					consumer.queues.IterCb(func(k string, v interface{}) bool {
+						consumer.subChan <- k
+						return true
+					})
 				}
 			default:
 
@@ -126,11 +130,6 @@ func (consumer *Consumer) reconnect() (*client.Client, bool, error) {
 	}); err != nil {
 		return nil, false, fmt.Errorf("连接失败:%v(%s-%s/%s)", err, consumer.conf.Address, consumer.conf.UserName, consumer.conf.Password)
 	}
-
-	consumer.queues.IterCb(func(k string, v interface{}) bool {
-		consumer.subChan <- k
-		return true
-	})
 
 	return cc, true, nil
 }
