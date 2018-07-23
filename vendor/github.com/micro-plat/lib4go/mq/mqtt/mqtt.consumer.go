@@ -108,6 +108,7 @@ func (consumer *Consumer) reconnect() (*client.Client, bool, error) {
 	}
 	cc := client.New(&client.Options{
 		ErrorHandler: func(err error) {
+			fmt.Println("err:", err)
 			select {
 			case consumer.connCh <- 1: //发送重连消息
 			default:
