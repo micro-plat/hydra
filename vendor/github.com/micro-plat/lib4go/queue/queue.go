@@ -13,6 +13,7 @@ type Config struct {
 	Addr     string `json:"address"`
 	UserName string `json:"userName"`
 	Password string `json:"password"`
+	CertPath string `json:"cert"`
 }
 
 /*

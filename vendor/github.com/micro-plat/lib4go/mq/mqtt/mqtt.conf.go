@@ -12,6 +12,7 @@ type Conf struct {
 	DumpData bool   `json:"dump"`
 	UserName string `json:"userName"`
 	Password string `json:"password"`
+	CertPath string `json:"cert"`
 }
 
 func NewConf(j string) (*Conf, error) {
