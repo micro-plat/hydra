@@ -84,6 +84,14 @@ func (m *MicroApp) installAction(c *cli.Context) (err error) {
 	fmt.Println(msg)
 	return nil
 }
+func (m *MicroApp) removeAction(c *cli.Context) (err error) {
+	msg, err := m.service.Remove()
+	if err != nil {
+		return err
+	}
+	fmt.Println(msg)
+	return nil
+}
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if m.remoteLogger {
 		m.RemoteLogger = m.remoteLogger

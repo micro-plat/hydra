@@ -50,6 +50,12 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Flags:  m.getStartFlags(),
 			Action: m.installAction,
 		},
+
+		{
+			Name:   "remove",
+			Usage:  "删除服务",
+			Action: m.removeAction,
+		},
 	}
 }
 func (m *MicroApp) getStartFlags() []cli.Flag {
