@@ -93,6 +93,7 @@ func (m *MicroApp) removeAction(c *cli.Context) (err error) {
 	return nil
 }
 func (m *MicroApp) action(c *cli.Context) (err error) {
+	fmt.Println("run...hydra....")
 	if m.remoteLogger {
 		m.RemoteLogger = m.remoteLogger
 	}
