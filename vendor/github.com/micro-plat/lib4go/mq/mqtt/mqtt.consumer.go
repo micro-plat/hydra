@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"sync"
+	"time"
 
 	"errors"
 
@@ -33,6 +34,7 @@ type Consumer struct {
 	subChan    chan string
 	connecting bool
 	closeCh    chan struct{}
+	connCh     chan int
 	done       bool
 	lk         sync.Mutex
 	header     []string
@@ -46,27 +48,72 @@ func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err err
 	consumer = &Consumer{address: address}
 	consumer.OptionConf = &mq.OptionConf{Logger: logger.GetSession("mqtt.consumer", logger.CreateSession())}
 	consumer.closeCh = make(chan struct{})
+	consumer.connCh = make(chan int, 1)
 	consumer.queues = cmap.New(2)
 	consumer.subChan = make(chan string, 3)
 	for _, opt := range opts {
 		opt(consumer.OptionConf)
 	}
 	consumer.conf, err = NewConf(consumer.Raw)
-	return
+	if err != nil {
+		return nil, err
+	}
+	return consumer, nil
 }
 
 //Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
-	cc := client.New(&client.Options{
-		ErrorHandler: func(err error) {
-			consumer.Logger.Error("mqtt.consumer出错:", err)
-		},
-	})
-
-	cert, err := consumer.getCert(consumer.conf)
+	cc, _, err := consumer.reconnect()
 	if err != nil {
 		return err
 	}
+	consumer.client = cc
+	go consumer.reconnectByChan()
+	go consumer.subscribe()
+	return nil
+}
+func (consumer *Consumer) reconnectByChan() {
+	for {
+		select {
+		case <-time.After(time.Second * 3): //延迟重连
+			select {
+			case <-consumer.connCh:
+				consumer.Logger.Debug("consumer与服务器断开连接，准备重连")
+				func() {
+					defer recover()
+					consumer.client.Disconnect()
+					consumer.client.Terminate()
+				}()
+				client, b, err := consumer.reconnect()
+				if err != nil {
+					consumer.Logger.Error("连接失败:", err)
+				}
+				if b {
+					consumer.Logger.Info("consumer成功连接到服务器")
+					consumer.client = client
+				}
+			default:
+
+			}
+		}
+	}
+}
+
+func (consumer *Consumer) reconnect() (*client.Client, bool, error) {
+	consumer.lk.Lock()
+	defer consumer.lk.Unlock()
+	cert, err := consumer.getCert(consumer.conf)
+	if err != nil {
+		return nil, false, err
+	}
+	cc := client.New(&client.Options{
+		ErrorHandler: func(err error) {
+			select {
+			case consumer.connCh <- 1: //发送重连消息
+			default:
+			}
+		},
+	})
 	if err := cc.Connect(&client.ConnectOptions{
 		Network:   "tcp",
 		Address:   consumer.conf.Address,
@@ -76,11 +123,15 @@ func (consumer *Consumer) Connect() (err error) {
 		TLSConfig: cert,
 		KeepAlive: 3,
 	}); err != nil {
-		return fmt.Errorf("连接失败:%v(%s-%s/%s)", err, consumer.conf.Address, consumer.conf.UserName, consumer.conf.Password)
+		return nil, false, fmt.Errorf("连接失败:%v(%s-%s/%s)", err, consumer.conf.Address, consumer.conf.UserName, consumer.conf.Password)
 	}
-	consumer.client = cc
-	go consumer.subscribe()
-	return nil
+
+	consumer.queues.IterCb(func(k string, v interface{}) bool {
+		consumer.subChan <- k
+		return true
+	})
+
+	return cc, true, nil
 }
 
 func (consumer *Consumer) getCert(conf *Conf) (*tls.Config, error) {
