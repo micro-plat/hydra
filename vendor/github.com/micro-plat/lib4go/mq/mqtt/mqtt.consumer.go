@@ -13,6 +13,8 @@ import (
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/mq"
+	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/utility"
 	"github.com/yosssi/gmq/mqtt"
 	"github.com/yosssi/gmq/mqtt/client"
 	"github.com/zkfy/stompngo"
@@ -57,7 +59,7 @@ func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err err
 func (consumer *Consumer) Connect() (err error) {
 	cc := client.New(&client.Options{
 		ErrorHandler: func(err error) {
-			consumer.Logger.Error("mqtt出错:", err)
+			consumer.Logger.Error("mqtt.consumer出错:", err)
 		},
 	})
 
@@ -70,12 +72,13 @@ func (consumer *Consumer) Connect() (err error) {
 		Address:   consumer.conf.Address,
 		UserName:  []byte(consumer.conf.UserName),
 		Password:  []byte(consumer.conf.Password),
-		ClientID:  []byte("hydra-client"),
+		ClientID:  []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
 		TLSConfig: cert,
 		KeepAlive: 3,
 	}); err != nil {
 		return fmt.Errorf("连接失败:%v(%s-%s/%s)", err, consumer.conf.Address, consumer.conf.UserName, consumer.conf.Password)
 	}
+	consumer.client = cc
 	go consumer.subscribe()
 	return nil
 }
@@ -113,7 +116,7 @@ START:
 				SubReqs: []*client.SubReq{
 					&client.SubReq{
 						TopicFilter: []byte(q),
-						QoS:         mqtt.QoS1,
+						QoS:         mqtt.QoS0,
 						Handler: func(topicName, message []byte) {
 							nmsg := NewMessage()
 							_, err := nmsg.Write(message)
@@ -185,6 +188,7 @@ func (consumer *Consumer) UnConsume(queue string) {
 
 //Close 关闭当前连接
 func (consumer *Consumer) Close() {
+	fmt.Println("close")
 	consumer.once.Do(func() {
 		close(consumer.closeCh)
 	})
