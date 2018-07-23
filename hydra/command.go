@@ -31,10 +31,24 @@ func (m *MicroApp) getCliApp() *cli.App {
 func (m *MicroApp) getCommands() []cli.Command {
 	return []cli.Command{
 		{
-			Name:   "start",
-			Usage:  "启动服务器",
+			Name:   "run",
+			Usage:  "运行服务器",
 			Flags:  m.getStartFlags(),
 			Action: m.action,
+		}, {
+			Name:   "start",
+			Usage:  "以服务方式运行服务器",
+			Action: m.startAction,
+		},
+		{
+			Name:   "stop",
+			Usage:  "停止正在运行的服务",
+			Action: m.stopAction,
+		}, {
+			Name:   "install",
+			Usage:  "安装服务",
+			Flags:  m.getStartFlags(),
+			Action: m.installAction,
 		},
 	}
 }

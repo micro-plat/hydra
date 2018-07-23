@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/micro-plat/hydra/conf/creator"
+	"github.com/zkfy/daemon"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
@@ -26,6 +27,7 @@ type MicroApp struct {
 	remoteQueryService *rqs.RemoteQueryService
 	registry           registry.IRegistry
 	component.IComponentRegistry
+	service daemon.Daemon
 }
 
 //NewApp 创建微服务应用
@@ -41,8 +43,14 @@ func NewApp(opts ...Option) (m *MicroApp) {
 
 //Start 启动服务器
 func (m *MicroApp) Start() {
+	var err error
 	defer logger.Close()
 	m.app = m.getCliApp()
+	m.service, err = daemon.New(m.app.Name, m.app.Usage)
+	if err != nil {
+		m.logger.Error(err)
+		return
+	}
 	if err := m.app.Run(os.Args); err != nil {
 		return
 	}
@@ -51,6 +59,30 @@ func (m *MicroApp) Start() {
 //Use 注册所有服务
 func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 	r(m.IComponentRegistry)
+}
+func (m *MicroApp) startAction(c *cli.Context) (err error) {
+	msg, err := m.service.Start()
+	if err != nil {
+		return err
+	}
+	fmt.Println(msg)
+	return nil
+}
+func (m *MicroApp) stopAction(c *cli.Context) (err error) {
+	msg, err := m.service.Stop()
+	if err != nil {
+		return err
+	}
+	fmt.Println(msg)
+	return nil
+}
+func (m *MicroApp) installAction(c *cli.Context) (err error) {
+	msg, err := m.service.Install()
+	if err != nil {
+		return err
+	}
+	fmt.Println(msg)
+	return nil
 }
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if m.remoteLogger {
@@ -83,7 +115,10 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
 		m.RegistryAddr, m.Conf, m.IsDebug, m.RemoteLogger, m.IComponentRegistry)
 
-	dStart(m.hydra.Start)
+	if _, err := m.hydra.Start(); err != nil {
+		m.logger.Error(err)
+		return err
+	}
 	return nil
 }
 

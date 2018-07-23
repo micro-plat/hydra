@@ -207,7 +207,7 @@ After={{.Dependencies}}
 [Service]
 PIDFile=/var/run/{{.Name}}.pid
 ExecStartPre=/bin/rm -f /var/run/{{.Name}}.pid
-ExecStart={{.Path}} {{.Args}}
+ExecStart={{.Path}} run {{.Args}}
 Restart=on-failure
 
 [Install]
