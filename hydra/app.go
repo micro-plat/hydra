@@ -82,10 +82,8 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 
 	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
 		m.RegistryAddr, m.Conf, m.IsDebug, m.RemoteLogger, m.IComponentRegistry)
-	if err := m.hydra.Start(); err != nil {
-		m.logger.Error(err)
-		return err
-	}
+
+	dStart(m.hydra.Start)
 	return nil
 }
 

@@ -69,7 +69,7 @@ func NewHydra(platName string, systemName string, serverTypes []string, clusterN
 }
 
 //Start 启动hydra服务器
-func (h *Hydra) Start() (err error) {
+func (h *Hydra) Start() (s string, err error) {
 	//非调试模式时设置日志写协程数为50个
 	if !h.isDebug {
 		logger.AddWriteThread(49)
@@ -77,7 +77,7 @@ func (h *Hydra) Start() (err error) {
 	if h.remoteLogger {
 		_, err := rpclog.NewRPCLogger(h.rpcLoggerPath, h.registryAddr, h.logger)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 	//创建trace性能跟踪
@@ -87,7 +87,7 @@ func (h *Hydra) Start() (err error) {
 
 	//开始监控服务器配置变更
 	if err = h.startWatch(); err != nil {
-		return err
+		return "", err
 	}
 	//定时释放内存
 
@@ -106,7 +106,7 @@ LOOP:
 	h.logger.Infof("hydra 正在退出...")
 	h.rspServer.Shutdown()
 	h.logger.Infof("hydra 已安全退出")
-	return nil
+	return "hydra 已安全退出", nil
 }
 
 //startWatch 启动服务器配置监控
