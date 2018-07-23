@@ -22,7 +22,7 @@ type MqcServer struct {
 
 //NewMqcServer 创建mqc服务器
 func NewMqcServer(name string, proto string, config string, queues []*conf.Queue, opts ...Option) (t *MqcServer, err error) {
-	t = &MqcServer{conf: &conf.MetadataConf{Name: name, Type: "cron"}}
+	t = &MqcServer{conf: &conf.MetadataConf{Name: name, Type: "mqc"}}
 	t.option = &option{metric: middleware.NewMetric(t.conf)}
 	for _, opt := range opts {
 		opt(t.option)
