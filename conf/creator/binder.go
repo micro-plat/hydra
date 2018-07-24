@@ -1,8 +1,11 @@
 package creator
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/micro-plat/hydra/component"
 )
@@ -23,6 +26,7 @@ type IBinder interface {
 	GetSubConfScanNum(serverType string, subName string) int
 	GetVarConfScanNum(nodeName string) int
 	GetInstallers(serverType string) []func(c component.IContainer) error
+	GetSQL(dir string) ([]string, error)
 	Print()
 }
 type Binder struct {
@@ -134,4 +138,25 @@ func (s *Binder) GetSubConf(serverType string, subName string) string {
 //GetVarConf 获取平台配置信息
 func (s *Binder) GetVarConf(nodeName string) string {
 	return s.Plat.GetNodeConf(nodeName)
+}
+
+//GetSQL 获取指定目录下所有.sql文件中的SQL语句，并用分号拆分
+func (s *Binder) GetSQL(dir string) ([]string, error) {
+	files, err := filepath.Glob(filepath.Join(dir, "*.sql"))
+	if err != nil {
+		return nil, err
+	}
+	buff := bytes.NewBufferString("")
+	for _, f := range files {
+		buf, err := ioutil.ReadFile(f)
+		if err != nil {
+			return nil, err
+		}
+		_, err = buff.Write(buf)
+		if err != nil {
+			return nil, err
+		}
+		buff.WriteString(";")
+	}
+	return strings.Split(buff.String(), ";"), nil
 }
