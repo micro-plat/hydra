@@ -121,7 +121,10 @@ func (c *Creator) Start() (err error) {
 		}
 		c.logger.Print("创建配置:", path)
 	}
-	return c.customerInstall()
+	if err = c.customerInstall(); err != nil {
+		return fmt.Errorf("安装程序执行失败:%v", err)
+	}
+	return nil
 
 }
 
