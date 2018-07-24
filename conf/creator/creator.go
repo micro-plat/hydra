@@ -47,7 +47,7 @@ func (c *Creator) Start() (err error) {
 		var value string
 		fmt.Scan(&value)
 		//c.subConfParamsForTranslate[nodeName][p] = value
-		c.binder.SetParam(k, v)
+		c.binder.SetParam(k, value)
 	}
 
 	for _, tp := range c.serverTypes {
