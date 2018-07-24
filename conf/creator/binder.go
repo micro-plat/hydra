@@ -27,6 +27,8 @@ type IBinder interface {
 	GetVarConfScanNum(nodeName string) int
 	GetInstallers(serverType string) []func(c component.IContainer) error
 	GetSQL(dir string) ([]string, error)
+	GetInput() map[string]string
+	SetParam(k, v string)
 	Print()
 }
 type Binder struct {
@@ -39,11 +41,12 @@ type Binder struct {
 	Plat    IPlatBinder
 	binders map[string]*MainBinder
 	params  map[string]string
+	Input   map[string]string
 	show    bool
 }
 
 func NewBinder() *Binder {
-	s := &Binder{params: make(map[string]string)}
+	s := &Binder{params: make(map[string]string), Input: make(map[string]string)}
 	s.API = NewMainBinder(s.params)
 	s.RPC = NewMainBinder(s.params)
 	s.WS = NewMainBinder(s.params)
@@ -63,6 +66,9 @@ func NewBinder() *Binder {
 }
 func (s *Binder) Print() {
 	fmt.Println(s.binders)
+}
+func (s *Binder) SetParam(k, v string) {
+	s.params[k] = v
 }
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
 	return s.binders[serverType].GetInstallers()
@@ -162,7 +168,7 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 	tbs := strings.Split(buff.String(), ";")
 	for _, t := range tbs {
 		if tb := strings.TrimSpace(t); len(tb) > 0 {
-			tables = append(tables, tb)
+			tables = append(tables, Translate(tb, s.params))
 		}
 	}
 	return tables, nil

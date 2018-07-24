@@ -41,6 +41,15 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 
 //Start 扫描并绑定所有参数
 func (c *Creator) Start() (err error) {
+	input := c.binder.GetInput()
+	for k, v := range input {
+		fmt.Printf("请输入%s:", v)
+		var value string
+		fmt.Scan(&value)
+		//c.subConfParamsForTranslate[nodeName][p] = value
+		c.binder.SetParam(k, v)
+	}
+
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		//检查主配置

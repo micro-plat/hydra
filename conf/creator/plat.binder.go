@@ -77,7 +77,7 @@ func (c *PlatBinder) Scan(platName string, nodeName string) error {
 		c.params[p] = value
 	}
 	if v, ok := c.varConf[nodeName]; ok {
-		c.rvarConf[nodeName] = translate(v, c.params)
+		c.rvarConf[nodeName] = Translate(v, c.params)
 	}
 	return nil
 }

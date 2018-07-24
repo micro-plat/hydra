@@ -109,7 +109,7 @@ func (c *MainBinder) Scan(mainConf string, nodeName string) error {
 			//	c.mainConfParamsForTranslate[p] = value
 			c.params[p] = value
 		}
-		c.rmainConf = translate(c.mainConf, c.params)
+		c.rmainConf = Translate(c.mainConf, c.params)
 	} else {
 		//c.subConfParamsForTranslate[nodeName] = make(map[string]string)
 		for _, p := range c.subParamsForInput[nodeName] {
@@ -123,7 +123,7 @@ func (c *MainBinder) Scan(mainConf string, nodeName string) error {
 			c.params[p] = value
 		}
 		if v, ok := c.subConf[nodeName]; ok {
-			c.rsubConf[nodeName] = translate(v, c.params)
+			c.rsubConf[nodeName] = Translate(v, c.params)
 		}
 	}
 
@@ -157,8 +157,8 @@ func getParams(format string) []string {
 	return r
 }
 
-//translate 翻译带有@变量的字符串
-func translate(format string, data map[string]string) string {
+//Translate 翻译带有@变量的字符串
+func Translate(format string, data map[string]string) string {
 	brackets, _ := regexp.Compile(`\{#\w+\}`)
 	result := brackets.ReplaceAllStringFunc(format, func(s string) string {
 		key := s[2 : len(s)-1]
