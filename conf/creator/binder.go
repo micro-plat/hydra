@@ -186,6 +186,5 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 			tables = append(tables, Translate(tb, s.params))
 		}
 	}
-	tables = append(tables, Translate(buff.String(), s.params))
 	return tables, nil
 }
