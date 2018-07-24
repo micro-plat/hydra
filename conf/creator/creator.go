@@ -4,32 +4,37 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/engines"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 )
 
 //Creator 配置文件创建器
 type Creator struct {
-	registry    registry.IRegistry
-	logger      *logger.Logger
-	showTitle   bool
-	binder      IBinder
-	platName    string
-	systemName  string
-	serverTypes []string
-	clusterName string
+	registry     registry.IRegistry
+	registryAddr string
+	logger       *logger.Logger
+	showTitle    bool
+	binder       IBinder
+	platName     string
+	systemName   string
+	serverTypes  []string
+	clusterName  string
+	customer     func() error
 }
 
 //NewCreator 配置文件创建器
-func NewCreator(platName string, systemName string, serverTypes []string, clusterName string, binder IBinder, rgst registry.IRegistry, logger *logger.Logger) (w *Creator) {
+func NewCreator(platName string, systemName string, serverTypes []string, clusterName string, binder IBinder, registryAddr string, rgst registry.IRegistry, logger *logger.Logger) (w *Creator) {
 	w = &Creator{
-		platName:    platName,
-		systemName:  systemName,
-		serverTypes: serverTypes,
-		clusterName: clusterName,
-		registry:    rgst,
-		logger:      logger,
-		binder:      binder,
+		platName:     platName,
+		systemName:   systemName,
+		serverTypes:  serverTypes,
+		clusterName:  clusterName,
+		registry:     rgst,
+		registryAddr: registryAddr,
+		logger:       logger,
+		binder:       binder,
 	}
 	return
 }
@@ -59,7 +64,7 @@ func (c *Creator) Start() (err error) {
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
-		c.logger.Info("创建配置:", mainPath)
+		c.logger.Print("创建配置:", mainPath)
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
@@ -87,7 +92,7 @@ func (c *Creator) Start() (err error) {
 			if err := c.createConf(path, content); err != nil {
 				return err
 			}
-			c.logger.Info("创建配置:", path)
+			c.logger.Print("创建配置:", path)
 		}
 	}
 
@@ -114,11 +119,41 @@ func (c *Creator) Start() (err error) {
 		if err := c.createConf(path, content); err != nil {
 			return err
 		}
-		c.logger.Info("创建配置:", path)
+		c.logger.Print("创建配置:", path)
 	}
-	return nil
+	return c.customerInstall()
 
 }
+
+func (c *Creator) customerInstall() error {
+	for _, tp := range c.serverTypes {
+		installs := c.binder.GetInstallers(tp)
+		if installs == nil || len(installs) == 0 {
+			continue
+		}
+		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
+		buffer, version, err := c.registry.GetValue(mainPath)
+		if err != nil {
+			return err
+		}
+		conf, err := conf.NewServerConf(mainPath, buffer, version, c.registry)
+		if err != nil {
+			return err
+		}
+		engine, err := engines.NewServiceEngine(conf, c.registryAddr, c.logger)
+		if err != nil {
+			return err
+		}
+		for _, install := range installs {
+			if err := install(engine); err != nil {
+				return err
+			}
+		}
+
+	}
+	return nil
+}
+
 func (c *Creator) createConf(path string, data string) error {
 	if data == "" {
 		return nil
@@ -147,7 +182,7 @@ func (c *Creator) checkContinue() bool {
 		return true
 	}
 	var index string
-	fmt.Print("当前注册中心有一些参数未配置，是否立即配置这些参数(yes|NO):")
+	fmt.Print("当前服务有一些参数未配置，立即配置(y|N):")
 	fmt.Scan(&index)
 	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
 		return false

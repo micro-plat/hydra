@@ -3,6 +3,8 @@ package creator
 import (
 	"fmt"
 	"path/filepath"
+
+	"github.com/micro-plat/hydra/component"
 )
 
 type IBinder interface {
@@ -20,17 +22,18 @@ type IBinder interface {
 	GetMainConfScanNum(serverType string) int
 	GetSubConfScanNum(serverType string, subName string) int
 	GetVarConfScanNum(nodeName string) int
+	GetInstallers(serverType string) []func(c component.IContainer) error
 	Print()
 }
 type Binder struct {
-	API     IMainBinder
-	RPC     IMainBinder
-	WS      IMainBinder
-	WEB     IMainBinder
-	MQC     IMainBinder
-	CRON    IMainBinder
+	API     *MainBinder
+	RPC     *MainBinder
+	WS      *MainBinder
+	WEB     *MainBinder
+	MQC     *MainBinder
+	CRON    *MainBinder
 	Plat    IPlatBinder
-	binders map[string]IMainBinder
+	binders map[string]*MainBinder
 	show    bool
 }
 
@@ -43,7 +46,7 @@ func NewBinder() *Binder {
 	s.MQC = NewMainBinder()
 	s.CRON = NewMainBinder()
 	s.Plat = NewPlatBinder()
-	s.binders = map[string]IMainBinder{
+	s.binders = map[string]*MainBinder{
 		"api":  s.API,
 		"rpc":  s.RPC,
 		"web":  s.WEB,
@@ -55,6 +58,9 @@ func NewBinder() *Binder {
 }
 func (s *Binder) Print() {
 	fmt.Println(s.binders)
+}
+func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
+	return s.binders[serverType].GetInstallers()
 }
 
 //GetMainConfNames 获取已配置的主配置名称

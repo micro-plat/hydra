@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+
+	"github.com/micro-plat/hydra/component"
 )
 
 var _ IMainBinder = &MainBinder{}
@@ -15,6 +17,7 @@ type IMainBinder interface {
 	Scan(mainConf string, nodeName string) error
 	NeedScanCount(nodeName string) int
 	GetNodeConf(nodeName string) string
+	Installer(func(c component.IContainer) error)
 }
 
 //MainBinder 主配置绑定
@@ -27,6 +30,7 @@ type MainBinder struct {
 	subConfParamsForTranslate  map[string]map[string]string //子系统参数,用于参数翻译
 	rmainConf                  string                       //翻译后的主配置
 	rsubConf                   map[string]string            //翻译后的子系统配置
+	installers                 []func(c component.IContainer) error
 }
 
 //NewMainBinder 构建主配置绑定
@@ -38,7 +42,14 @@ func NewMainBinder() *MainBinder {
 		mainConfParamsForTranslate: make(map[string]string),
 		subConfParamsForTranslate:  make(map[string]map[string]string),
 		rsubConf:                   make(map[string]string),
+		installers:                 make([]func(c component.IContainer) error, 0, 2),
 	}
+}
+func (c *MainBinder) GetInstallers() []func(c component.IContainer) error {
+	return c.installers
+}
+func (c *MainBinder) Installer(f func(c component.IContainer) error) {
+	c.installers = append(c.installers, f)
 }
 
 //SetMainConf 设置主配置内容

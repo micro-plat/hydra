@@ -38,6 +38,8 @@ func NewApp(opts ...Option) (m *MicroApp) {
 		opt(m.option)
 	}
 	m.logger = logger.GetSession("hydra", logger.CreateSession())
+	m.logger.DoPrint = nil
+	m.logger.DoPrintf = nil
 	return m
 }
 
@@ -60,20 +62,41 @@ func (m *MicroApp) Start() {
 func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 	r(m.IComponentRegistry)
 }
+
+func (m *MicroApp) install(p func(v ...interface{})) (err error) {
+	m.logger.PauseLogging()
+	defer m.logger.StartLogging()
+	//创建注册中心
+	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
+		m.logger.Error(err)
+		return err
+	}
+
+	//自动创建配置
+	vlogger := logger.New("creator")
+	vlogger.DoPrint = p
+	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, m.registry, vlogger)
+	return creator.Start()
+
+}
+
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if err := m.checkInput(); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
+	//初始化远程日志
 	if m.remoteLogger {
 		m.RemoteLogger = m.remoteLogger
 	}
-	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
-		m.logger.Error(err)
+
+	//安装配置服务
+	if err = m.install(m.logger.Info); err != nil {
 		return err
 	}
 
+	//启动服务查询
 	if m.RemoteQueryService {
 		m.remoteQueryService, err = rqs.NewHRemoteQueryService(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.registry, VERSION)
 		if err != nil {
@@ -89,7 +112,7 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 	}
 
 	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
-		m.RegistryAddr, m.Conf, m.IsDebug, m.RemoteLogger, m.IComponentRegistry)
+		m.RegistryAddr, m.IsDebug, m.RemoteLogger, m.logger, m.IComponentRegistry)
 
 	if _, err := m.hydra.Start(); err != nil {
 		m.logger.Error(err)

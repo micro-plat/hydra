@@ -96,13 +96,13 @@ func Close() {
 func ResolveAddress(address string) (proto string, raddr []string, err error) {
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
-		return "", nil, fmt.Errorf("%s错误，必须包含://", addr)
+		return "", nil, fmt.Errorf("%s错误，必须包含://", address)
 	}
 	if len(addr[0]) == 0 {
-		return "", nil, fmt.Errorf("%s错误，协议名不能为空", addr)
+		return "", nil, fmt.Errorf("%s错误，协议名不能为空", address)
 	}
 	if len(addr[1]) == 0 {
-		return "", nil, fmt.Errorf("%s错误，地址不能为空", addr)
+		return "", nil, fmt.Errorf("%s错误，地址不能为空", address)
 	}
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")

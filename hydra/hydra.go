@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/hydra/conf/creator"
 	"github.com/micro-plat/hydra/hydra/rpclog"
 	"github.com/micro-plat/hydra/servers"
 
@@ -23,10 +22,10 @@ import (
 
 //Hydra  hydra app
 type Hydra struct {
-	logger         *logger.Logger
-	closeChan      chan struct{}
-	interrupt      chan os.Signal
-	binder         creator.IBinder
+	logger    *logger.Logger
+	closeChan chan struct{}
+	interrupt chan os.Signal
+	//binder         creator.IBinder
 	isDebug        bool
 	platName       string
 	systemName     string
@@ -47,24 +46,24 @@ type Hydra struct {
 }
 
 //NewHydra 创建hydra服务器
-func NewHydra(platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, binder creator.IBinder, isDebug bool, remoteLogger bool, r component.IComponentHandler) *Hydra {
+func NewHydra(platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, isDebug bool, remoteLogger bool, logger *logger.Logger, r component.IComponentHandler) *Hydra {
 	servers.IsDebug = isDebug
 	return &Hydra{
 		cHandler:       r,
-		logger:         logger.New("hydra"),
+		logger:         logger,
 		systemRootName: filepath.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
 		rpcLoggerPath:  filepath.Join("/", platName, "/var/global/logger"),
-		binder:         binder,
-		closeChan:      make(chan struct{}),
-		interrupt:      make(chan os.Signal, 1),
-		isDebug:        isDebug,
-		platName:       platName,
-		systemName:     systemName,
-		serverTypes:    serverTypes,
-		clusterName:    clusterName,
-		registryAddr:   registryAddr,
-		remoteLogger:   remoteLogger,
-		trace:          trace,
+		//	binder:         binder,
+		closeChan:    make(chan struct{}),
+		interrupt:    make(chan os.Signal, 1),
+		isDebug:      isDebug,
+		platName:     platName,
+		systemName:   systemName,
+		serverTypes:  serverTypes,
+		clusterName:  clusterName,
+		registryAddr: registryAddr,
+		remoteLogger: remoteLogger,
+		trace:        trace,
 	}
 }
 
@@ -117,11 +116,6 @@ func (h *Hydra) startWatch() (err error) {
 		return
 	}
 
-	//自动创建配置
-	creator := creator.NewCreator(h.platName, h.systemName, h.serverTypes, h.clusterName, h.binder, h.registry, h.logger)
-	if err := creator.Start(); err != nil {
-		return err
-	}
 	//启动配置监听
 	h.watcher, err = watcher.NewConfWatcher(h.platName, h.systemName, h.serverTypes, h.clusterName, h.registry, h.logger)
 	if err != nil {
