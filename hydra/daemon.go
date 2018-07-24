@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/micro-plat/hydra/conf/creator"
+	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
 )
 
@@ -69,4 +72,22 @@ func (m *MicroApp) statusAction(c *cli.Context) (err error) {
 	}
 	fmt.Println(msg)
 	return nil
+}
+
+func (m *MicroApp) install(p func(v ...interface{})) (err error) {
+	m.logger.PauseLogging()
+	defer m.logger.StartLogging()
+	//创建注册中心
+	rgst, err := registry.NewRegistryWithAddress(m.RegistryAddr, m.logger)
+	if err != nil {
+		m.logger.Error(err)
+		return err
+	}
+
+	//自动创建配置
+	vlogger := logger.New("creator")
+	vlogger.DoPrint = p
+	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, rgst, vlogger)
+	return creator.Start()
+
 }

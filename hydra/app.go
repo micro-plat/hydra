@@ -21,11 +21,12 @@ import (
 type MicroApp struct {
 	app    *cli.App
 	logger *logger.Logger
-	Conf   *creator.Binder
-	hydra  *Hydra
+	//Conf 绑定安装程序
+	Conf  *creator.Binder
+	hydra *Hydra
 	*option
 	remoteQueryService *rqs.RemoteQueryService
-	registry           registry.IRegistry
+	//	registry           registry.IRegistry
 	component.IComponentRegistry
 	service daemon.Daemon
 }
@@ -63,23 +64,6 @@ func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 	r(m.IComponentRegistry)
 }
 
-func (m *MicroApp) install(p func(v ...interface{})) (err error) {
-	m.logger.PauseLogging()
-	defer m.logger.StartLogging()
-	//创建注册中心
-	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
-		m.logger.Error(err)
-		return err
-	}
-
-	//自动创建配置
-	vlogger := logger.New("creator")
-	vlogger.DoPrint = p
-	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, m.registry, vlogger)
-	return creator.Start()
-
-}
-
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if err := m.checkInput(); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
@@ -91,15 +75,16 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 		m.RemoteLogger = m.remoteLogger
 	}
 
-	//创建注册中心
-	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
-		m.logger.Error(err)
-		return err
-	}
-
 	//启动服务查询
 	if m.RemoteQueryService {
-		m.remoteQueryService, err = rqs.NewHRemoteQueryService(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.registry, VERSION)
+		//创建注册中心
+		rgst, err := registry.NewRegistryWithAddress(m.RegistryAddr, m.logger)
+		if err != nil {
+			m.logger.Error(err)
+			return err
+		}
+
+		m.remoteQueryService, err = rqs.NewHRemoteQueryService(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, rgst, VERSION)
 		if err != nil {
 			m.logger.Error(err)
 			return err
