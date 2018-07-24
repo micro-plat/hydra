@@ -41,12 +41,12 @@ type Binder struct {
 	Plat    IPlatBinder
 	binders map[string]*MainBinder
 	params  map[string]string
-	Input   map[string]string
+	input   map[string]string
 	show    bool
 }
 
 func NewBinder() *Binder {
-	s := &Binder{params: make(map[string]string), Input: make(map[string]string)}
+	s := &Binder{params: make(map[string]string), input: make(map[string]string)}
 	s.API = NewMainBinder(s.params)
 	s.RPC = NewMainBinder(s.params)
 	s.WS = NewMainBinder(s.params)
@@ -69,6 +69,12 @@ func (s *Binder) Print() {
 }
 func (s *Binder) SetParam(k, v string) {
 	s.params[k] = v
+}
+func (s *Binder) GetInput() map[string]string {
+	return s.input
+}
+func (s *Binder) SetInput(key, desc string) {
+	s.input[key] = desc
 }
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
 	return s.binders[serverType].GetInstallers()
