@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 
 	"github.com/micro-plat/hydra/component"
 )
@@ -180,11 +179,12 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 		buff.WriteString(";")
 	}
 	tables := make([]string, 0, 8)
-	tbs := strings.Split(buff.String(), ";")
-	for _, t := range tbs {
-		if tb := strings.TrimSpace(t); len(tb) > 0 {
-			tables = append(tables, Translate(tb, s.params))
-		}
-	}
+	// tbs := strings.Split(buff.String(), ";")
+	// for _, t := range tbs {
+	// 	if tb := strings.TrimSpace(t); len(tb) > 0 {
+	// 		tables = append(tables, Translate(tb, s.params))
+	// 	}
+	// }
+	tables = append(tables, Translate(buff.String(), s.params))
 	return tables, nil
 }
