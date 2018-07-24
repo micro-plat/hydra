@@ -91,8 +91,9 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 		m.RemoteLogger = m.remoteLogger
 	}
 
-	//安装配置服务
-	if err = m.install(m.logger.Info); err != nil {
+	//创建注册中心
+	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
+		m.logger.Error(err)
 		return err
 	}
 
