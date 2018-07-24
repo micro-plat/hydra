@@ -22,27 +22,29 @@ type IMainBinder interface {
 
 //MainBinder 主配置绑定
 type MainBinder struct {
-	mainConf                   string                       //系统主配置
-	subConf                    map[string]string            //子系统配置
-	mainParamsForInput         []string                     //主配置参数，用于用户输入
-	subParamsForInput          map[string][]string          //子系统参数,用于用户输入
-	mainConfParamsForTranslate map[string]string            //主配置参数，用于参数翻译
-	subConfParamsForTranslate  map[string]map[string]string //子系统参数,用于参数翻译
-	rmainConf                  string                       //翻译后的主配置
-	rsubConf                   map[string]string            //翻译后的子系统配置
-	installers                 []func(c component.IContainer) error
+	mainConf           string              //系统主配置
+	subConf            map[string]string   //子系统配置
+	mainParamsForInput []string            //主配置参数，用于用户输入
+	subParamsForInput  map[string][]string //子系统参数,用于用户输入
+	//	mainConfParamsForTranslate map[string]string            //主配置参数，用于参数翻译
+	//	subConfParamsForTranslate  map[string]map[string]string //子系统参数,用于参数翻译
+	params     map[string]string
+	rmainConf  string            //翻译后的主配置
+	rsubConf   map[string]string //翻译后的子系统配置
+	installers []func(c component.IContainer) error
 }
 
 //NewMainBinder 构建主配置绑定
-func NewMainBinder() *MainBinder {
+func NewMainBinder(params map[string]string) *MainBinder {
 	return &MainBinder{
-		subConf:                    make(map[string]string),
-		mainParamsForInput:         make([]string, 0, 2),
-		subParamsForInput:          make(map[string][]string),
-		mainConfParamsForTranslate: make(map[string]string),
-		subConfParamsForTranslate:  make(map[string]map[string]string),
-		rsubConf:                   make(map[string]string),
-		installers:                 make([]func(c component.IContainer) error, 0, 2),
+		subConf:            make(map[string]string),
+		mainParamsForInput: make([]string, 0, 2),
+		subParamsForInput:  make(map[string][]string),
+		params:             params,
+		//mainConfParamsForTranslate: make(map[string]string),
+		//	subConfParamsForTranslate:  make(map[string]map[string]string),
+		rsubConf:   make(map[string]string),
+		installers: make([]func(c component.IContainer) error, 0, 2),
 	}
 }
 func (c *MainBinder) GetInstallers() []func(c component.IContainer) error {
@@ -78,32 +80,50 @@ func (c *MainBinder) GetSubConfNames() []string {
 
 //NeedScanCount 待输入个数
 func (c *MainBinder) NeedScanCount(nodeName string) int {
+	count := 0
 	if nodeName == "" {
-		return len(c.mainParamsForInput)
+		for _, p := range c.mainParamsForInput {
+			if _, ok := c.params[p]; !ok {
+				count++
+			}
+		}
 	}
-	return len(c.subParamsForInput[nodeName])
+	for _, p := range c.subParamsForInput[nodeName] {
+		if _, ok := c.params[p]; !ok {
+			count++
+		}
+	}
+	return count
 }
 
 //Scan 绑定参数
 func (c *MainBinder) Scan(mainConf string, nodeName string) error {
 	if nodeName == "" {
 		for _, p := range c.mainParamsForInput {
+			if _, ok := c.params[p]; ok {
+				continue
+			}
 			fmt.Printf("请输入:%s中%s的值:", mainConf, p)
 			var value string
 			fmt.Scan(&value)
-			c.mainConfParamsForTranslate[p] = value
+			//	c.mainConfParamsForTranslate[p] = value
+			c.params[p] = value
 		}
-		c.rmainConf = translate(c.mainConf, c.mainConfParamsForTranslate)
+		c.rmainConf = translate(c.mainConf, c.params)
 	} else {
-		c.subConfParamsForTranslate[nodeName] = make(map[string]string)
+		//c.subConfParamsForTranslate[nodeName] = make(map[string]string)
 		for _, p := range c.subParamsForInput[nodeName] {
+			if _, ok := c.params[p]; ok {
+				continue
+			}
 			fmt.Printf("请输入:%s中%s的值:", filepath.Join(mainConf, nodeName), p)
 			var value string
 			fmt.Scan(&value)
-			c.subConfParamsForTranslate[nodeName][p] = value
+			//c.subConfParamsForTranslate[nodeName][p] = value
+			c.params[p] = value
 		}
 		if v, ok := c.subConf[nodeName]; ok {
-			c.rsubConf[nodeName] = translate(v, c.subConfParamsForTranslate[nodeName])
+			c.rsubConf[nodeName] = translate(v, c.params)
 		}
 	}
 

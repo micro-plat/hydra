@@ -34,18 +34,19 @@ type Binder struct {
 	CRON    *MainBinder
 	Plat    IPlatBinder
 	binders map[string]*MainBinder
+	params  map[string]string
 	show    bool
 }
 
 func NewBinder() *Binder {
-	s := &Binder{}
-	s.API = NewMainBinder()
-	s.RPC = NewMainBinder()
-	s.WS = NewMainBinder()
-	s.WEB = NewMainBinder()
-	s.MQC = NewMainBinder()
-	s.CRON = NewMainBinder()
-	s.Plat = NewPlatBinder()
+	s := &Binder{params: make(map[string]string)}
+	s.API = NewMainBinder(s.params)
+	s.RPC = NewMainBinder(s.params)
+	s.WS = NewMainBinder(s.params)
+	s.WEB = NewMainBinder(s.params)
+	s.MQC = NewMainBinder(s.params)
+	s.CRON = NewMainBinder(s.params)
+	s.Plat = NewPlatBinder(s.params)
 	s.binders = map[string]*MainBinder{
 		"api":  s.API,
 		"rpc":  s.RPC,
