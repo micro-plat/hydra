@@ -37,7 +37,7 @@ Example:
 	)
 
   // dependencies that are NOT required by the service, but might be used
-  var dependencies = []string{"dummy.service"}
+  // var dependencies = []string{"dummy.service"}
 
 	var stdlog, errlog *log.Logger
 

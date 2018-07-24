@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/micro-plat/hydra/conf/creator"
-	"github.com/zkfy/daemon"
+	"github.com/micro-plat/hydra/hydra/daemon"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
@@ -46,7 +46,7 @@ func (m *MicroApp) Start() {
 	var err error
 	defer logger.Close()
 	m.app = m.getCliApp()
-	m.service, err = daemon.New(m.app.Name, m.app.Usage)
+	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
 		m.logger.Error(err)
 		return
@@ -60,47 +60,14 @@ func (m *MicroApp) Start() {
 func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 	r(m.IComponentRegistry)
 }
-func (m *MicroApp) startAction(c *cli.Context) (err error) {
-	msg, err := m.service.Start()
-	if err != nil {
-		return err
-	}
-	fmt.Println(msg)
-	return nil
-}
-func (m *MicroApp) stopAction(c *cli.Context) (err error) {
-	msg, err := m.service.Stop()
-	if err != nil {
-		return err
-	}
-	fmt.Println(msg)
-	return nil
-}
-func (m *MicroApp) installAction(c *cli.Context) (err error) {
-	msg, err := m.service.Install()
-	if err != nil {
-		return err
-	}
-	fmt.Println(msg)
-	return nil
-}
-func (m *MicroApp) removeAction(c *cli.Context) (err error) {
-	msg, err := m.service.Remove()
-	if err != nil {
-		return err
-	}
-	fmt.Println(msg)
-	return nil
-}
 func (m *MicroApp) action(c *cli.Context) (err error) {
-	fmt.Println("run...hydra....")
-	if m.remoteLogger {
-		m.RemoteLogger = m.remoteLogger
-	}
 	if err := m.checkInput(); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
+	}
+	if m.remoteLogger {
+		m.RemoteLogger = m.remoteLogger
 	}
 	if m.registry, err = registry.NewRegistryWithAddress(m.RegistryAddr, m.logger); err != nil {
 		m.logger.Error(err)

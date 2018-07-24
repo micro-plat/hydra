@@ -7,6 +7,7 @@ package daemon
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
@@ -84,12 +85,13 @@ func (linux *systemDRecord) Install(args ...string) (string, error) {
 	if err := templ.Execute(
 		file,
 		&struct {
-			Name, Description, Dependencies, Path, Args string
+			Name, Description, Dependencies, Path, WorkDir, Args string
 		}{
 			linux.name,
 			linux.description,
 			strings.Join(linux.dependencies, " "),
 			execPatch,
+			filepath.Dir(execPatch),
 			strings.Join(args, " "),
 		},
 	); err != nil {
@@ -206,9 +208,12 @@ After={{.Dependencies}}
 
 [Service]
 PIDFile=/var/run/{{.Name}}.pid
-ExecStartPre=/bin/rm -f /var/run/{{.Name}}.pid
+ExecStartPre=rm -f /var/run/{{.Name}}.pid
+WorkingDirectory={{.WorkDir}}
 ExecStart={{.Path}} run {{.Args}}
-Restart=on-failure
+Restart=on-success
+
+
 
 [Install]
 WantedBy=multi-user.target
