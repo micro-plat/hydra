@@ -42,11 +42,15 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 //Start 扫描并绑定所有参数
 func (c *Creator) Start() (err error) {
 	input := c.binder.GetInput()
+	if len(input) > 0 {
+		if !c.checkContinue() {
+			return nil
+		}
+	}
 	for k, v := range input {
 		fmt.Printf("请输入%s:", v.Desc)
 		var value string
 		fmt.Scan(&value)
-		//c.subConfParamsForTranslate[nodeName][p] = value
 		nvalue := value
 		for _, f := range v.Filters {
 			nvalue, err = f(nvalue)
