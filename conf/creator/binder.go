@@ -10,6 +10,11 @@ import (
 	"github.com/micro-plat/hydra/component"
 )
 
+type Input struct {
+	Name    string
+	Desc    string
+	Filters []func(string) (string, error)
+}
 type IBinder interface {
 	GetMainConfNames(platName string, systemName string, tp string, clusterName string) []string
 	GetSubConfNames(serverType string) []string
@@ -27,7 +32,7 @@ type IBinder interface {
 	GetVarConfScanNum(nodeName string) int
 	GetInstallers(serverType string) []func(c component.IContainer) error
 	GetSQL(dir string) ([]string, error)
-	GetInput() map[string]string
+	GetInput() map[string]*Input
 	SetParam(k, v string)
 	Print()
 }
@@ -41,12 +46,12 @@ type Binder struct {
 	Plat    IPlatBinder
 	binders map[string]*MainBinder
 	params  map[string]string
-	input   map[string]string
+	input   map[string]*Input
 	show    bool
 }
 
 func NewBinder() *Binder {
-	s := &Binder{params: make(map[string]string), input: make(map[string]string)}
+	s := &Binder{params: make(map[string]string), input: make(map[string]*Input)}
 	s.API = NewMainBinder(s.params)
 	s.RPC = NewMainBinder(s.params)
 	s.WS = NewMainBinder(s.params)
@@ -70,11 +75,15 @@ func (s *Binder) Print() {
 func (s *Binder) SetParam(k, v string) {
 	s.params[k] = v
 }
-func (s *Binder) GetInput() map[string]string {
+func (s *Binder) GetInput() map[string]*Input {
 	return s.input
 }
-func (s *Binder) SetInput(key, desc string) {
-	s.input[key] = desc
+func (s *Binder) SetInput(key, desc string, filters ...func(v string) (string, error)) {
+	s.input[key] = &Input{
+		Name:    key,
+		Desc:    desc,
+		Filters: filters,
+	}
 }
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
 	return s.binders[serverType].GetInstallers()

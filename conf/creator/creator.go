@@ -43,11 +43,18 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 func (c *Creator) Start() (err error) {
 	input := c.binder.GetInput()
 	for k, v := range input {
-		fmt.Printf("请输入%s:", v)
+		fmt.Printf("请输入%s:", v.Desc)
 		var value string
 		fmt.Scan(&value)
 		//c.subConfParamsForTranslate[nodeName][p] = value
-		c.binder.SetParam(k, value)
+		nvalue := value
+		for _, f := range v.Filters {
+			nvalue, err = f(nvalue)
+			if err != nil {
+				return err
+			}
+		}
+		c.binder.SetParam(k, nvalue)
 	}
 
 	for _, tp := range c.serverTypes {
