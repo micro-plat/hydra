@@ -144,6 +144,7 @@ func (c *Creator) customerInstall() error {
 		if err != nil {
 			return err
 		}
+		defer engine.Close()
 		for _, install := range installs {
 			if err := install(engine); err != nil {
 				return err
