@@ -158,5 +158,12 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 		}
 		buff.WriteString(";")
 	}
-	return strings.Split(buff.String(), ";"), nil
+	tables := make([]string, 0, 8)
+	tbs := strings.Split(buff.String(), ";")
+	for _, t := range tbs {
+		if tb := strings.TrimSpace(t); len(tb) > 0 {
+			tables = append(tables, tb)
+		}
+	}
+	return tables, nil
 }
