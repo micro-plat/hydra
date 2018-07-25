@@ -84,7 +84,9 @@ func (m *MicroApp) install() (err error) {
 	}
 
 	//自动创建配置
-	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, rgst, xlogger)
+	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf,
+		m.RegistryAddr, rgst,
+		xlogger)
 	err = creator.Start()
 	if err != nil {
 		xlogger.Error(err)
