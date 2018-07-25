@@ -90,7 +90,6 @@ func WithName(name string) Option {
 			panic(fmt.Errorf("%s %v", name, err))
 		}
 		o.ServerTypeNames = strings.Join(o.ServerTypes, "-")
-
 	}
 }
 
@@ -98,7 +97,6 @@ func WithName(name string) Option {
 func WithDebug() Option {
 	return func(o *option) {
 		o.IsDebug = true
-		o.PlatName += "_debug"
 	}
 }
 

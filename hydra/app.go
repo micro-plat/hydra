@@ -45,8 +45,6 @@ func NewApp(opts ...Option) (m *MicroApp) {
 		opt(m.option)
 	}
 	m.logger = logger.GetSession("hydra", logger.CreateSession())
-	m.logger.DoPrint = nil
-	m.logger.DoPrintf = nil
 	return m
 }
 
@@ -55,6 +53,9 @@ func (m *MicroApp) Start() {
 	var err error
 	defer logger.Close()
 	m.app = m.getCliApp()
+	if m.IsDebug {
+		m.PlatName += "_debug"
+	}
 	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
 		m.logger.Error(err)
