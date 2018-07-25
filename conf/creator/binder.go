@@ -220,7 +220,6 @@ func (s *Binder) Print() {
 func (s *Binder) Confirm(msg string) bool {
 	var value string
 	fmt.Print("\t\033[;33m" + msg + " 是(y|yes),否(n|no):\033[0m")
-
 	fmt.Scan(&value)
 	nvalue := strings.ToUpper(value)
 	return nvalue == "Y" || nvalue == "YES"

@@ -61,9 +61,9 @@ func (c *Creator) installParams() error {
 }
 func (c *Creator) installRegistry() error {
 	//检查配置模式
-	mode := c.binder.GetMode()
+	mode, cn := c.checkRegistry()
 	//创建主配置
-	if !c.checkRegistry(mode) {
+	if !cn {
 		return nil
 	}
 	for _, tp := range c.serverTypes {
@@ -226,15 +226,20 @@ func (c *Creator) updateMainConf(path string, data string) error {
 	return c.registry.Update(rpath, data, v)
 }
 
-func (c *Creator) checkRegistry(mode int) bool {
-	if !c.binder.Confirm("创建注册中心配置数据?") {
-		return false
+func (c *Creator) checkRegistry() (mode int, cn bool) {
+	msg := "创建注册中心配置数据?,存在则不创建(y|yes),如果存在则覆盖(1),删除所有配置并重建(2),退出(n|no):"
+
+	var value string
+	fmt.Print("\t\033[;33m" + msg + "\033[0m")
+	fmt.Scan(&value)
+	nvalue := strings.ToUpper(value)
+	switch nvalue {
+	case "Y", "YES":
+		return ModeAuto, true
+	case "1":
+		return ModeCover, true
+	case "2":
+		return ModeNew, true
 	}
-	switch mode {
-	case ModeCover:
-		return c.binder.Confirm("\t\t覆盖已存在配置?")
-	case ModeNew:
-		return c.binder.Confirm("\t\t删除所有配置?")
-	}
-	return true
+	return 0, false
 }
