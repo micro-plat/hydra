@@ -249,7 +249,7 @@ func (c *Creator) checkContinue() bool {
 		return true
 	}
 	var index string
-	c.logger.Print("当前服务有一些参数未配置，立即配置(y|N):")
+	fmt.Print("当前服务有一些参数未配置，立即配置(y|N):")
 	fmt.Scan(&index)
 	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
 		return false
@@ -261,9 +261,9 @@ func (c *Creator) checkMode(mode int) bool {
 	var index string
 	switch mode {
 	case ModeCover:
-		c.logger.Print("\t\033[;33m当前安装程序试图覆盖已存在配置，是否继续(y|N):\033[0m")
+		fmt.Print("\t\033[;33m当前安装程序试图覆盖已存在配置，是否继续(y|N):\033[0m")
 	case ModeNew:
-		c.logger.Print("\t\033[;33m当前安装程序试图删除所有配置，是否继续(y|N):\033[0m")
+		fmt.Print("\t\033[;33m当前安装程序试图删除所有配置，是否继续(y|N):\033[0m")
 	default:
 		return true
 	}
