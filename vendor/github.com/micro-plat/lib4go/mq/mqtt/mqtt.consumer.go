@@ -63,16 +63,16 @@ func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err err
 
 //Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
-	cc, _, err := consumer.reconnect()
+	cc, _, err := consumer.connect()
 	if err != nil {
 		return err
 	}
 	consumer.client = cc
-	go consumer.reconnectByChan()
+	go consumer.reconnect()
 	go consumer.subscribe()
 	return nil
 }
-func (consumer *Consumer) reconnectByChan() {
+func (consumer *Consumer) reconnect() {
 	for {
 		select {
 		case <-time.After(time.Second * 3): //延迟重连
@@ -84,7 +84,7 @@ func (consumer *Consumer) reconnectByChan() {
 					consumer.client.Disconnect()
 					consumer.client.Terminate()
 				}()
-				client, b, err := consumer.reconnect()
+				client, b, err := consumer.connect()
 				if err != nil {
 					consumer.Logger.Error("连接失败:", err)
 				}
@@ -103,7 +103,7 @@ func (consumer *Consumer) reconnectByChan() {
 	}
 }
 
-func (consumer *Consumer) reconnect() (*client.Client, bool, error) {
+func (consumer *Consumer) connect() (*client.Client, bool, error) {
 	consumer.lk.Lock()
 	defer consumer.lk.Unlock()
 	cert, err := consumer.getCert(consumer.conf)
@@ -112,7 +112,6 @@ func (consumer *Consumer) reconnect() (*client.Client, bool, error) {
 	}
 	cc := client.New(&client.Options{
 		ErrorHandler: func(err error) {
-			fmt.Println("err:", err)
 			select {
 			case consumer.connCh <- 1: //发送重连消息
 			default:
