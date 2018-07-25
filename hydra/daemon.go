@@ -45,7 +45,7 @@ func (m *MicroApp) installAction(c *cli.Context) (err error) {
 		m.xlogger.Error(err)
 		return err
 	}
-	m.xlogger.Info("\t" + msg)
+	m.xlogger.Info(msg)
 	return nil
 }
 func (m *MicroApp) removeAction(c *cli.Context) (err error) {
