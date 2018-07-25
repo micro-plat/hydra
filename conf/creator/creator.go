@@ -43,7 +43,7 @@ func (c *Creator) installParams() error {
 	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
-		if !c.binder.Confirm("\t当前服务有一些参数未配置，立即配置") {
+		if !c.binder.Confirm("\t设置基础参数值?") {
 			return nil
 		}
 	}
@@ -249,15 +249,15 @@ func (c *Creator) checkRegistry() bool {
 	} else {
 		return true
 	}
-	if !c.binder.Confirm("\t注册中心一些参数未配置,是否配置") {
+	if !c.binder.Confirm("\t创建注册中心配置数据?") {
 		return false
 	}
 	mode := c.binder.GetMode()
 	switch mode {
 	case ModeCover:
-		return c.binder.Confirm("\t\t当前安装程序试图覆盖已存在配置")
+		return c.binder.Confirm("\t\t覆盖已存在配置?")
 	case ModeNew:
-		return c.binder.Confirm("\t\t当前安装程序试图删除所有配置")
+		return c.binder.Confirm("\t\t删除所有配置?")
 	}
 	return true
 }
