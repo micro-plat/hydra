@@ -43,6 +43,7 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 //Start 扫描并绑定所有参数
 func (c *Creator) Start() (err error) {
 
+	//检查配置模式
 	mode := c.binder.GetMode()
 	if mode != ModeAuto {
 		if !c.checkContinue() {
@@ -53,6 +54,7 @@ func (c *Creator) Start() (err error) {
 		}
 	}
 
+	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
 		if !c.checkContinue() {
@@ -70,9 +72,9 @@ func (c *Creator) Start() (err error) {
 		c.binder.SetParam(k, nvalue)
 	}
 
+	//创建主配置
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
-		//检查主配置
 		rpath := c.getRealMainPath(mainPath)
 		ok, err := c.registry.Exists(rpath)
 		if err != nil {
@@ -168,6 +170,8 @@ func (c *Creator) Start() (err error) {
 		}
 		c.logger.Print("创建配置:", path)
 	}
+
+	//执行用户自定义安装
 	if err = c.customerInstall(); err != nil {
 		return fmt.Errorf("安装程序执行失败:%v", err)
 	}
