@@ -177,7 +177,7 @@ func Translate(format string, data map[string]string) string {
 
 func getInputValue(param string, inputs map[string]*Input, path string) (v string, err error) {
 	desc := param
-	input, ok := inputs[param]
+	input, ok := inputs["#"+param]
 	if ok {
 		desc = input.Desc
 	}
