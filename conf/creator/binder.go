@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 const (
@@ -59,6 +60,7 @@ type Binder struct {
 	MQC     *MainBinder
 	CRON    *MainBinder
 	Plat    IPlatBinder
+	Log     logger.ILogging
 	mode    int
 	binders map[string]*MainBinder
 	params  map[string]string
@@ -67,8 +69,8 @@ type Binder struct {
 	step    int
 }
 
-func NewBinder() *Binder {
-	s := &Binder{params: make(map[string]string), input: make(map[string]*Input)}
+func NewBinder(log logger.ILogging) *Binder {
+	s := &Binder{params: make(map[string]string), input: make(map[string]*Input), Log: log}
 	s.API = NewMainBinder(s.params, s.input)
 	s.RPC = NewMainBinder(s.params, s.input)
 	s.WS = NewMainBinder(s.params, s.input)

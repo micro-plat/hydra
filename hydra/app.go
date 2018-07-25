@@ -7,6 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/creator"
 	"github.com/micro-plat/hydra/hydra/daemon"
+	"github.com/zkfy/log"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
@@ -19,8 +20,9 @@ import (
 
 //MicroApp  微服务应用
 type MicroApp struct {
-	app    *cli.App
-	logger *logger.Logger
+	app     *cli.App
+	logger  *logger.Logger
+	xlogger logger.ILogging
 	//Conf 绑定安装程序
 	Conf  *creator.Binder
 	hydra *Hydra
@@ -35,6 +37,9 @@ type MicroApp struct {
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry()}
 	m.Conf = creator.NewBinder()
+	logging := log.New(os.Stdout, "", log.Llongcolor)
+	logging.SetOutputLevel(log.Ldebug)
+	m.xlogger = logging
 	for _, opt := range opts {
 		opt(m.option)
 	}
