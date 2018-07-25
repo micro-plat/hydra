@@ -10,6 +10,15 @@ import (
 	"github.com/micro-plat/hydra/component"
 )
 
+const (
+	//ModeAuto 存在是不再修改
+	ModeAuto = iota
+	//ModeCover 如果存在则覆盖
+	ModeCover
+	//ModeNew 每次都重建
+	ModeNew
+)
+
 type Input struct {
 	Name    string
 	Desc    string
@@ -22,11 +31,9 @@ type IBinder interface {
 	ScanMainConf(mainPath string, serverType string) error
 	ScanSubConf(mainPath string, serverType string, subName string) error
 	ScanVarConf(platName string, nodeName string) error
-
 	GetMainConf(serverType string) string
 	GetSubConf(serverType string, subName string) string
 	GetVarConf(nodeName string) string
-
 	GetMainConfScanNum(serverType string) int
 	GetSubConfScanNum(serverType string, subName string) int
 	GetVarConfScanNum(nodeName string) int
@@ -34,6 +41,7 @@ type IBinder interface {
 	GetSQL(dir string) ([]string, error)
 	GetInput() map[string]*Input
 	SetParam(k, v string)
+	GetMode() int
 	Print()
 }
 type Binder struct {
@@ -44,6 +52,7 @@ type Binder struct {
 	MQC     *MainBinder
 	CRON    *MainBinder
 	Plat    IPlatBinder
+	mode    int
 	binders map[string]*MainBinder
 	params  map[string]string
 	input   map[string]*Input
@@ -52,13 +61,13 @@ type Binder struct {
 
 func NewBinder() *Binder {
 	s := &Binder{params: make(map[string]string), input: make(map[string]*Input)}
-	s.API = NewMainBinder(s.params)
-	s.RPC = NewMainBinder(s.params)
-	s.WS = NewMainBinder(s.params)
-	s.WEB = NewMainBinder(s.params)
-	s.MQC = NewMainBinder(s.params)
-	s.CRON = NewMainBinder(s.params)
-	s.Plat = NewPlatBinder(s.params)
+	s.API = NewMainBinder(s.params, s.input)
+	s.RPC = NewMainBinder(s.params, s.input)
+	s.WS = NewMainBinder(s.params, s.input)
+	s.WEB = NewMainBinder(s.params, s.input)
+	s.MQC = NewMainBinder(s.params, s.input)
+	s.CRON = NewMainBinder(s.params, s.input)
+	s.Plat = NewPlatBinder(s.params, s.input)
 	s.binders = map[string]*MainBinder{
 		"api":  s.API,
 		"rpc":  s.RPC,
@@ -69,8 +78,11 @@ func NewBinder() *Binder {
 	}
 	return s
 }
-func (s *Binder) Print() {
-	fmt.Println(s.binders)
+func (s *Binder) GetMode() int {
+	return s.mode
+}
+func (s *Binder) SetMode(m int) {
+	s.mode = m
 }
 func (s *Binder) SetParam(k, v string) {
 	s.params[k] = v
@@ -85,6 +97,7 @@ func (s *Binder) SetInput(key, desc string, filters ...func(v string) (string, e
 		Filters: filters,
 	}
 }
+
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
 	return s.binders[serverType].GetInstallers()
 }
@@ -187,4 +200,7 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 		}
 	}
 	return tables, nil
+}
+func (s *Binder) Print() {
+	fmt.Println(s.binders)
 }

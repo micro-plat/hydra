@@ -3,6 +3,7 @@ package creator
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/engines"
@@ -48,6 +49,9 @@ func (c *Creator) Start() (err error) {
 		}
 	}
 	for k, v := range input {
+		if strings.HasPrefix(k, "#") {
+			continue
+		}
 		fmt.Printf("请输入%s:", v.Desc)
 		var value string
 		fmt.Scan(&value)
@@ -60,17 +64,22 @@ func (c *Creator) Start() (err error) {
 		}
 		c.binder.SetParam(k, nvalue)
 	}
-
+	mode := c.binder.GetMode()
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		//检查主配置
-		ok, err := c.registry.Exists(c.getRealMainPath(mainPath))
+		rpath := c.getRealMainPath(mainPath)
+		ok, err := c.registry.Exists(rpath)
 		if err != nil {
 			return err
 		}
-		if ok {
+		if ok && mode == ModeAuto {
 			continue
 		}
+		if mode == ModeNew {
+			c.registry.Delete(rpath)
+		}
+
 		if c.binder.GetMainConfScanNum(tp) > 0 {
 			if !c.checkContinue() {
 				return nil
@@ -81,6 +90,12 @@ func (c *Creator) Start() (err error) {
 		}
 
 		content := c.binder.GetMainConf(tp)
+		if ok && mode == ModeCover {
+			if err := c.createMainConf(mainPath, content); err != nil {
+				return err
+			}
+			c.logger.Print("修改配置:", mainPath)
+		}
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
@@ -95,9 +110,12 @@ func (c *Creator) Start() (err error) {
 			if err != nil {
 				return err
 			}
-			if ok {
+			if ok && mode == ModeAuto {
 				continue
 			}
+			//删除配置重建
+			c.registry.Delete(filepath.Join(mainPath, subName))
+
 			if c.binder.GetSubConfScanNum(tp, subName) > 0 {
 				if !c.checkContinue() {
 					return nil
@@ -123,9 +141,13 @@ func (c *Creator) Start() (err error) {
 		if err != nil {
 			return err
 		}
-		if ok {
+		if ok && mode == ModeAuto {
 			continue
 		}
+
+		//删除配置重建
+		c.registry.Delete(filepath.Join("/", c.platName, "var", varName))
+
 		if c.binder.GetVarConfScanNum(varName) > 0 {
 			if !c.checkContinue() {
 				return nil
@@ -199,6 +221,18 @@ func (c *Creator) createMainConf(path string, data string) error {
 	rpath := c.getRealMainPath(path)
 	return c.registry.CreatePersistentNode(rpath, data)
 }
+func (c *Creator) updateMainConf(path string, data string) error {
+	if data == "" {
+		data = "{}"
+	}
+	rpath := c.getRealMainPath(path)
+	_, v, err := c.registry.GetValue(rpath)
+	if err != nil {
+		return err
+	}
+	return c.registry.Update(rpath, data, v)
+}
+
 func (c *Creator) checkContinue() bool {
 	if !c.showTitle {
 		c.showTitle = true

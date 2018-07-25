@@ -26,25 +26,23 @@ type MainBinder struct {
 	subConf            map[string]string   //子系统配置
 	mainParamsForInput []string            //主配置参数，用于用户输入
 	subParamsForInput  map[string][]string //子系统参数,用于用户输入
-	//	mainConfParamsForTranslate map[string]string            //主配置参数，用于参数翻译
-	//	subConfParamsForTranslate  map[string]map[string]string //子系统参数,用于参数翻译
-	params     map[string]string
-	rmainConf  string            //翻译后的主配置
-	rsubConf   map[string]string //翻译后的子系统配置
-	installers []func(c component.IContainer) error
+	params             map[string]string
+	inputs             map[string]*Input
+	rmainConf          string            //翻译后的主配置
+	rsubConf           map[string]string //翻译后的子系统配置
+	installers         []func(c component.IContainer) error
 }
 
 //NewMainBinder 构建主配置绑定
-func NewMainBinder(params map[string]string) *MainBinder {
+func NewMainBinder(params map[string]string, inputs map[string]*Input) *MainBinder {
 	return &MainBinder{
 		subConf:            make(map[string]string),
 		mainParamsForInput: make([]string, 0, 2),
 		subParamsForInput:  make(map[string][]string),
 		params:             params,
-		//mainConfParamsForTranslate: make(map[string]string),
-		//	subConfParamsForTranslate:  make(map[string]map[string]string),
-		rsubConf:   make(map[string]string),
-		installers: make([]func(c component.IContainer) error, 0, 2),
+		inputs:             inputs,
+		rsubConf:           make(map[string]string),
+		installers:         make([]func(c component.IContainer) error, 0, 2),
 	}
 }
 func (c *MainBinder) GetInstallers() []func(c component.IContainer) error {
@@ -97,30 +95,29 @@ func (c *MainBinder) NeedScanCount(nodeName string) int {
 }
 
 //Scan 绑定参数
-func (c *MainBinder) Scan(mainConf string, nodeName string) error {
+func (c *MainBinder) Scan(mainConf string, nodeName string) (err error) {
 	if nodeName == "" {
 		for _, p := range c.mainParamsForInput {
 			if _, ok := c.params[p]; ok {
 				continue
 			}
-			fmt.Printf("请输入:%s中%s的值:", mainConf, p)
-			var value string
-			fmt.Scan(&value)
-			//	c.mainConfParamsForTranslate[p] = value
-			c.params[p] = value
+			nvalue, err := getInputValue(p, c.inputs, mainConf)
+			if err != nil {
+				return err
+			}
+			c.params[p] = nvalue
 		}
 		c.rmainConf = Translate(c.mainConf, c.params)
 	} else {
-		//c.subConfParamsForTranslate[nodeName] = make(map[string]string)
 		for _, p := range c.subParamsForInput[nodeName] {
 			if _, ok := c.params[p]; ok {
 				continue
 			}
-			fmt.Printf("请输入:%s中%s的值:", filepath.Join(mainConf, nodeName), p)
-			var value string
-			fmt.Scan(&value)
-			//c.subConfParamsForTranslate[nodeName][p] = value
-			c.params[p] = value
+			nvalue, err := getInputValue(p, c.inputs, filepath.Join(mainConf, nodeName))
+			if err != nil {
+				return err
+			}
+			c.params[p] = nvalue
 		}
 		if v, ok := c.subConf[nodeName]; ok {
 			c.rsubConf[nodeName] = Translate(v, c.params)
@@ -176,4 +173,23 @@ func Translate(format string, data map[string]string) string {
 		return s
 	})
 	return result
+}
+
+func getInputValue(param string, inputs map[string]*Input, path string) (v string, err error) {
+	desc := param
+	input, ok := inputs[param]
+	if ok {
+		desc = input.Desc
+	}
+
+	fmt.Printf("请输入%s(%s)的值:", desc, path)
+	var value string
+	fmt.Scan(&value)
+	nvalue := value
+	for _, f := range input.Filters {
+		if nvalue, err = f(nvalue); err != nil {
+			return "", err
+		}
+	}
+	return nvalue, nil
 }

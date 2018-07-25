@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"fmt"
 	"path/filepath"
 )
 
@@ -19,19 +18,19 @@ type IPlatBinder interface {
 type PlatBinder struct {
 	varConf           map[string]string   //var环境参数配置
 	varParamsForInput map[string][]string //环境参数，用于用户输入
-	//varConfParamsForTranslate map[string]map[string]string //环境参数，用于参数翻译
-	params   map[string]string
-	rvarConf map[string]string //翻译后的环境参数配置
+	inputs            map[string]*Input
+	params            map[string]string
+	rvarConf          map[string]string //翻译后的环境参数配置
 }
 
 //NewPlatBinder 平台绑定
-func NewPlatBinder(params map[string]string) *PlatBinder {
+func NewPlatBinder(params map[string]string, inputs map[string]*Input) *PlatBinder {
 	return &PlatBinder{
 		varConf:           make(map[string]string),
 		varParamsForInput: make(map[string][]string),
-		//	varConfParamsForTranslate: make(map[string]map[string]string),
-		params:   params,
-		rvarConf: make(map[string]string),
+		inputs:            inputs,
+		params:            params,
+		rvarConf:          make(map[string]string),
 	}
 }
 
@@ -64,17 +63,17 @@ func (c *PlatBinder) NeedScanCount(nodeName string) int {
 
 //Scan 绑定参数
 func (c *PlatBinder) Scan(platName string, nodeName string) error {
-	//c.varConfParamsForTranslate[nodeName] = make(map[string]string)
 	for _, p := range c.varParamsForInput[nodeName] {
 		if _, ok := c.params[p]; ok {
 			continue
 		}
 
-		fmt.Printf("请输入:%s中%s的值:", filepath.Join("/", platName, "var", nodeName), p)
-		var value string
-		fmt.Scan(&value)
-		//	c.varConfParamsForTranslate[nodeName][p] = value
-		c.params[p] = value
+		nvalue, err := getInputValue(p, c.inputs, filepath.Join("/", platName, "var", nodeName))
+		if err != nil {
+			return err
+		}
+		c.params[p] = nvalue
+
 	}
 	if v, ok := c.varConf[nodeName]; ok {
 		c.rvarConf[nodeName] = Translate(v, c.params)
