@@ -6,7 +6,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/creator"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
 	"github.com/zkfy/log"
 )
@@ -41,11 +40,7 @@ func (m *MicroApp) installAction(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
-	//安装配置服务
-	p := func(v ...interface{}) {
-		xlogger.Info(v)
-	}
-	if err = m.install(p); err != nil {
+	if err = m.install(); err != nil {
 		xlogger.Error(err)
 		return err
 	}
@@ -78,7 +73,7 @@ func (m *MicroApp) statusAction(c *cli.Context) (err error) {
 	return nil
 }
 
-func (m *MicroApp) install(p func(v ...interface{})) (err error) {
+func (m *MicroApp) install() (err error) {
 	m.logger.PauseLogging()
 	defer m.logger.StartLogging()
 	//创建注册中心
@@ -89,9 +84,7 @@ func (m *MicroApp) install(p func(v ...interface{})) (err error) {
 	}
 
 	//自动创建配置
-	vlogger := logger.New("creator")
-	vlogger.DoPrint = p
-	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, rgst, vlogger)
+	creator := creator.NewCreator(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Conf, m.RegistryAddr, rgst, xlogger)
 	err = creator.Start()
 	if err != nil {
 		xlogger.Error(err)
