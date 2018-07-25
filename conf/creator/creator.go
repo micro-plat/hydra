@@ -42,29 +42,34 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 
 //Start 扫描并绑定所有参数
 func (c *Creator) Start() (err error) {
+
+	mode := c.binder.GetMode()
+	if mode != ModeAuto {
+		if !c.checkContinue() {
+			return nil
+		}
+		if !c.checkMode(mode) {
+			return nil
+		}
+	}
+
 	input := c.binder.GetInput()
 	if len(input) > 0 {
 		if !c.checkContinue() {
 			return nil
 		}
 	}
-	for k, v := range input {
+	for k := range input {
 		if strings.HasPrefix(k, "#") {
 			continue
 		}
-		fmt.Printf("请输入%s:", v.Desc)
-		var value string
-		fmt.Scan(&value)
-		nvalue := value
-		for _, f := range v.Filters {
-			nvalue, err = f(nvalue)
-			if err != nil {
-				return err
-			}
+		nvalue, err := getInputValue(k, input, "")
+		if err != nil {
+			return err
 		}
 		c.binder.SetParam(k, nvalue)
 	}
-	mode := c.binder.GetMode()
+
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		//检查主配置
@@ -241,6 +246,23 @@ func (c *Creator) checkContinue() bool {
 	}
 	var index string
 	fmt.Print("当前服务有一些参数未配置，立即配置(y|N):")
+	fmt.Scan(&index)
+	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
+		return false
+	}
+	return true
+}
+
+func (c *Creator) checkMode(mode int) bool {
+	var index string
+	switch mode {
+	case ModeCover:
+		fmt.Print("当前安装程序试图覆盖已存在配置，是否继续(y|N):")
+	case ModeNew:
+		fmt.Print("当前安装程序试图删除所有配置，是否继续(y|N):")
+	default:
+		return true
+	}
 	fmt.Scan(&index)
 	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
 		return false

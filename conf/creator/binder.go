@@ -20,9 +20,10 @@ const (
 )
 
 type Input struct {
-	Name    string
-	Desc    string
-	Filters []func(string) (string, error)
+	FiledName string
+	ShowName  string
+	Desc      string
+	Filters   []func(string) (string, error)
 }
 type IBinder interface {
 	GetMainConfNames(platName string, systemName string, tp string, clusterName string) []string
@@ -90,11 +91,15 @@ func (s *Binder) SetParam(k, v string) {
 func (s *Binder) GetInput() map[string]*Input {
 	return s.input
 }
-func (s *Binder) SetInput(key, desc string, filters ...func(v string) (string, error)) {
-	s.input[key] = &Input{
-		Name:    key,
-		Desc:    desc,
-		Filters: filters,
+func (s *Binder) SetInput(fieldName, showName, desc string, filters ...func(v string) (string, error)) {
+	s.input[fieldName] = &Input{
+		FiledName: fieldName,
+		ShowName:  showName,
+		Desc:      desc,
+		Filters:   filters,
+	}
+	if !strings.HasPrefix(fieldName, "#") {
+		s.input["#"+fieldName] = s.input[fieldName]
 	}
 }
 
