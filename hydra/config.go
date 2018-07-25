@@ -104,7 +104,7 @@ func getPrintNode(path string, index int, f int) string {
 		for c := 0; c < len(ps)-1; c++ {
 			buff.WriteString("  ")
 		}
-		buff.WriteString("└╌")
+		buff.WriteString("└─")
 		buff.WriteString(fmt.Sprintf("[%d]", index))
 		buff.WriteString(ps[len(ps)-1])
 	case 0:
@@ -113,7 +113,7 @@ func getPrintNode(path string, index int, f int) string {
 				buff.WriteString("  ")
 			}
 			if i > 0 {
-				buff.WriteString("└╌")
+				buff.WriteString("└─")
 			}
 			if i == len(ps)-1 {
 				buff.WriteString(fmt.Sprintf("[%d]", index))
@@ -126,7 +126,7 @@ func getPrintNode(path string, index int, f int) string {
 			for c := -1; c < i-1; c++ {
 				buff.WriteString("  ")
 			}
-			buff.WriteString("└╌")
+			buff.WriteString("└─")
 			if i == len(ps)-1 {
 				buff.WriteString(fmt.Sprintf("[%d]", index))
 			}
