@@ -37,19 +37,16 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 			return err
 		}
 		fmt.Println(getPrintNode(mainPath, true))
-		sc.IterSubConf(func(k string, conf *conf.JSONConf) bool {
-			fmt.Println(getPrintNode(k, false))
-			return true
-		})
-		fmt.Println(getPrintNode(mainPath, true))
-		sc.IterSubConf(func(k string, conf *conf.JSONConf) bool {
-			fmt.Println(getPrintNode(k, false))
-			return true
-		})
-		sc.IterVarConf(func(k string, conf *conf.JSONConf) bool {
-			fmt.Println(getPrintNode(k, false))
-			return true
-		})
+
+		// fmt.Println(getPrintNode(mainPath, true))
+		// sc.IterSubConf(func(k string, conf *conf.JSONConf) bool {
+		// 	fmt.Println(getPrintNode(k, false))
+		// 	return true
+		// })
+		// sc.IterVarConf(func(k string, conf *conf.JSONConf) bool {
+		// 	fmt.Println(getPrintNode(k, false))
+		// 	return true
+		// })
 	}
 
 	return nil
