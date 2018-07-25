@@ -101,12 +101,12 @@ func (c *Creator) Start() (err error) {
 			if err := c.createMainConf(mainPath, content); err != nil {
 				return err
 			}
-			c.logger.Print("修改配置:", mainPath)
+			//	c.logger.Print("修改配置:", mainPath)
 		}
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
-		c.logger.Print("创建配置:", mainPath)
+		//	c.logger.Print("创建配置:", mainPath)
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
@@ -137,7 +137,7 @@ func (c *Creator) Start() (err error) {
 			if err := c.createConf(path, content); err != nil {
 				return err
 			}
-			c.logger.Print("创建配置:", path)
+			//	c.logger.Print("创建配置:", path)
 		}
 	}
 
@@ -168,7 +168,7 @@ func (c *Creator) Start() (err error) {
 		if err := c.createConf(path, content); err != nil {
 			return err
 		}
-		c.logger.Print("创建配置:", path)
+		//	c.logger.Print("创建配置:", path)
 	}
 
 	//执行用户自定义安装
