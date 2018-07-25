@@ -73,7 +73,7 @@ func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if err := m.checkInput(); err != nil {
-		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
+		m.logger.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
