@@ -64,6 +64,7 @@ type Binder struct {
 	params  map[string]string
 	input   map[string]*Input
 	show    bool
+	step    int
 }
 
 func NewBinder() *Binder {

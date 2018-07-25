@@ -43,7 +43,7 @@ func (c *Creator) installParams() error {
 	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
-		if !c.binder.Confirm("设置基础参数值(这些参数可能用于创建配置数据，数据库数据等)?") {
+		if !c.binder.Confirm("1. 设置基础参数值(这些参数可能用于创建配置数据，数据库数据等)?") {
 			return nil
 		}
 	}
@@ -62,7 +62,6 @@ func (c *Creator) installParams() error {
 func (c *Creator) installRegistry() error {
 	//检查配置模式
 	mode, cn := c.checkRegistry()
-	fmt.Println("mode:", mode)
 	//创建主配置
 	if !cn {
 		return nil
@@ -228,18 +227,18 @@ func (c *Creator) updateMainConf(path string, data string) error {
 }
 
 func (c *Creator) checkRegistry() (mode int, cn bool) {
-	msg := "创建注册中心配置数据?,如存在则不修改(y|yes),如果存在则覆盖(1),删除所有配置并重建(2),退出(n|no):"
+	msg := "2. 创建注册中心配置数据?,如存在则不修改(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):"
 
 	var value string
 	fmt.Print("\t\033[;33m" + msg + "\033[0m")
 	fmt.Scan(&value)
 	nvalue := strings.ToUpper(value)
 	switch nvalue {
-	case "Y", "YES":
-		return ModeAuto, true
 	case "1":
-		return ModeCover, true
+		return ModeAuto, true
 	case "2":
+		return ModeCover, true
+	case "3":
 		return ModeNew, true
 	}
 	return 0, false
