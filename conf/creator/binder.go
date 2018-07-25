@@ -219,7 +219,7 @@ func (s *Binder) Print() {
 //Confirm 用户确认
 func (s *Binder) Confirm(msg string) bool {
 	var value string
-	fmt.Print("\t\033[;33m" + msg + "，继续(y|yes),结束(n|no):\033[0m")
+	fmt.Print("\t\033[;33m" + msg + "，继续(y|yes),退出(n|no):\033[0m")
 
 	fmt.Scan(&value)
 	nvalue := strings.ToUpper(value)
