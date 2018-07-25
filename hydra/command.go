@@ -61,6 +61,7 @@ func (m *MicroApp) getCommands() []cli.Command {
 		}, {
 			Name:   "config",
 			Usage:  "查询配置信息",
+			Flags:  m.getStartFlags(),
 			Action: m.queryConfigAction,
 		},
 	}
