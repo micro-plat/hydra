@@ -182,7 +182,7 @@ func getInputValue(param string, inputs map[string]*Input, path string) (v strin
 		desc = input.Desc
 	}
 
-	fmt.Printf("请输入%s(%s)的值:", desc, path)
+	fmt.Printf("请输入\"%s\"(%s中使用)的值:", desc, path)
 	var value string
 	fmt.Scan(&value)
 	nvalue := value
