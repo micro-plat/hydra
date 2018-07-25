@@ -101,12 +101,12 @@ func (c *Creator) Start() (err error) {
 			if err := c.createMainConf(mainPath, content); err != nil {
 				return err
 			}
-			c.logger.Info("/t修改配置:", mainPath)
+			c.logger.Info("\t修改配置:", mainPath)
 		}
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
-		c.logger.Info("/t创建配置:", mainPath)
+		c.logger.Info("\t创建配置:", mainPath)
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
@@ -137,7 +137,7 @@ func (c *Creator) Start() (err error) {
 			if err := c.createConf(path, content); err != nil {
 				return err
 			}
-			c.logger.Info("/t创建配置:", path)
+			c.logger.Info("\t创建配置:", path)
 		}
 	}
 
@@ -168,7 +168,7 @@ func (c *Creator) Start() (err error) {
 		if err := c.createConf(path, content); err != nil {
 			return err
 		}
-		c.logger.Info("/t创建配置:", path)
+		c.logger.Info("\t创建配置:", path)
 	}
 
 	//执行用户自定义安装
@@ -249,7 +249,7 @@ func (c *Creator) checkContinue() bool {
 		return true
 	}
 	var index string
-	fmt.Print("当前服务有一些参数未配置，立即配置(y|N):")
+	fmt.Print("\t当前服务有一些参数未配置，立即配置(y|N):")
 	fmt.Scan(&index)
 	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
 		return false
