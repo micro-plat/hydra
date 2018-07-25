@@ -56,7 +56,7 @@ func (m *MicroApp) Start() {
 		m.PlatName += "_debug"
 	}
 	m.app.ErrWriter = (logger.LogWriter)(m.xlogger.Error)
-	m.app.Writer = (logger.LogWriter)(m.xlogger.Info)
+	//m.app.Writer = (logger.LogWriter)(m.xlogger.Info)
 
 	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
