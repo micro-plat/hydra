@@ -14,6 +14,9 @@ import (
 
 var xlogger = log.New(bytes.NewBufferString(""), "", log.Llongcolor)
 
+func init() {
+	xlogger.SetOutputLevel(log.Ldebug)
+}
 func (m *MicroApp) startAction(c *cli.Context) (err error) {
 	msg, err := m.service.Start()
 	if err != nil {
