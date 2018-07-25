@@ -207,6 +207,7 @@ Requires={{.Dependencies}}
 After={{.Dependencies}}
 
 [Service]
+EnvironmentFile=/etc/profile
 PIDFile=/var/run/{{.Name}}.pid
 ExecStartPre=rm -f /var/run/{{.Name}}.pid
 WorkingDirectory={{.WorkDir}}
