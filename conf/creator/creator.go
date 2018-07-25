@@ -261,9 +261,9 @@ func (c *Creator) checkMode(mode int) bool {
 	var index string
 	switch mode {
 	case ModeCover:
-		fmt.Print("当前安装程序试图覆盖已存在配置，是否继续(y|N):")
+		fmt.Print("\t当前安装程序试图覆盖已存在配置，是否继续(y|N):")
 	case ModeNew:
-		fmt.Print("当前安装程序试图删除所有配置，是否继续(y|N):")
+		fmt.Print("\t当前安装程序试图删除所有配置，是否继续(y|N):")
 	default:
 		return true
 	}
