@@ -177,14 +177,16 @@ func Translate(format string, data map[string]string) string {
 
 func getInputValue(param string, inputs map[string]*Input, path string) (v string, err error) {
 	showName := param
+	desc := ""
 	input, ok := inputs["#"+param]
 	if ok {
 		showName = input.ShowName
+		desc = input.Desc
 	}
 	if path == "" {
-		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s):", showName, input.Desc)
+		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s):", showName, desc)
 	} else {
-		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s,%s等配置中使用):", showName, input.Desc, path)
+		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s,%s等配置中使用):", showName, desc, path)
 	}
 
 	var value string
