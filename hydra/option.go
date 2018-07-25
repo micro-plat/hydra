@@ -98,6 +98,7 @@ func WithName(name string) Option {
 func WithDebug() Option {
 	return func(o *option) {
 		o.IsDebug = true
+		o.PlatName += "_debug"
 	}
 }
 
