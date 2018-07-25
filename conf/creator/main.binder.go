@@ -192,10 +192,13 @@ func getInputValue(param string, inputs map[string]*Input, path string) (v strin
 	var value string
 	fmt.Scan(&value)
 	nvalue := value
-	for _, f := range input.Filters {
-		if nvalue, err = f(nvalue); err != nil {
-			return "", err
+	if input != nil {
+		for _, f := range input.Filters {
+			if nvalue, err = f(nvalue); err != nil {
+				return "", err
+			}
 		}
 	}
+
 	return nvalue, nil
 }
