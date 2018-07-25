@@ -36,10 +36,11 @@ type MicroApp struct {
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry()}
-	m.Conf = creator.NewBinder()
+
 	logging := log.New(os.Stdout, "", log.Llongcolor)
 	logging.SetOutputLevel(log.Ldebug)
 	m.xlogger = logging
+	m.Conf = creator.NewBinder(logging)
 	for _, opt := range opts {
 		opt(m.option)
 	}
