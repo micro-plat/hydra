@@ -67,9 +67,10 @@ func getPrintNode(path string, f bool) string {
 	}
 	for i, v := range ps {
 		for c := 0; c < i; c++ {
-			buff.WriteString("--\n")
+			buff.WriteString("--")
 		}
 		buff.WriteString(v)
+		buff.WriteString("\n")
 	}
 	return buff.String()
 }
