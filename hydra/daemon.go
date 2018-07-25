@@ -2,7 +2,6 @@
 package hydra
 
 import (
-	"bytes"
 	"os"
 
 	"github.com/micro-plat/hydra/conf/creator"
@@ -12,7 +11,7 @@ import (
 	"github.com/zkfy/log"
 )
 
-var xlogger = log.New(bytes.NewBufferString(""), "", log.Llongcolor)
+var xlogger = log.New(os.Stdout, "", log.Llongcolor)
 
 func init() {
 	xlogger.SetOutputLevel(log.Ldebug)
