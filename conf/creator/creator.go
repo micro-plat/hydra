@@ -39,25 +39,11 @@ func NewCreator(platName string, systemName string, serverTypes []string, cluste
 	}
 	return
 }
-
-//Start 扫描并绑定所有参数
-func (c *Creator) Start() (err error) {
-
-	//检查配置模式
-	mode := c.binder.GetMode()
-	if mode != ModeAuto {
-		if !c.checkContinue() {
-			return nil
-		}
-		if !c.checkMode(mode) {
-			return nil
-		}
-	}
-
+func (c *Creator) installParams() error {
 	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
-		if !c.checkContinue() {
+		if !c.binder.Confirm("\t当前服务有一些参数未配置，立即配置") {
 			return nil
 		}
 	}
@@ -71,7 +57,11 @@ func (c *Creator) Start() (err error) {
 		}
 		c.binder.SetParam(k, nvalue)
 	}
-
+	return nil
+}
+func (c *Creator) installRegistry() error {
+	//检查配置模式
+	mode := c.binder.GetMode()
 	//创建主配置
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
@@ -88,7 +78,7 @@ func (c *Creator) Start() (err error) {
 		}
 
 		if c.binder.GetMainConfScanNum(tp) > 0 {
-			if !c.checkContinue() {
+			if !c.checkRegistry() {
 				return nil
 			}
 		}
@@ -101,12 +91,12 @@ func (c *Creator) Start() (err error) {
 			if err := c.createMainConf(mainPath, content); err != nil {
 				return err
 			}
-			c.logger.Info("\t修改配置:", mainPath)
+			c.logger.Info("\t\t修改配置:", mainPath)
 		}
 		if err := c.createMainConf(mainPath, content); err != nil {
 			return err
 		}
-		c.logger.Info("\t创建配置:", mainPath)
+		c.logger.Info("\t\t创建配置:", mainPath)
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
@@ -124,7 +114,7 @@ func (c *Creator) Start() (err error) {
 			c.registry.Delete(filepath.Join(mainPath, subName))
 
 			if c.binder.GetSubConfScanNum(tp, subName) > 0 {
-				if !c.checkContinue() {
+				if !c.checkRegistry() {
 					return nil
 				}
 			}
@@ -137,7 +127,7 @@ func (c *Creator) Start() (err error) {
 			if err := c.createConf(path, content); err != nil {
 				return err
 			}
-			c.logger.Info("\t创建配置:", path)
+			c.logger.Info("\t\t创建配置:", path)
 		}
 	}
 
@@ -156,7 +146,7 @@ func (c *Creator) Start() (err error) {
 		c.registry.Delete(filepath.Join("/", c.platName, "var", varName))
 
 		if c.binder.GetVarConfScanNum(varName) > 0 {
-			if !c.checkContinue() {
+			if !c.checkRegistry() {
 				return nil
 			}
 		}
@@ -168,9 +158,20 @@ func (c *Creator) Start() (err error) {
 		if err := c.createConf(path, content); err != nil {
 			return err
 		}
-		c.logger.Info("\t创建配置:", path)
+		c.logger.Info("\t\t创建配置:", path)
 	}
+	return nil
 
+}
+
+//Start 扫描并绑定所有参数
+func (c *Creator) Start() (err error) {
+	if err = c.installParams(); err != nil {
+		return err
+	}
+	if err = c.installRegistry(); err != nil {
+		return err
+	}
 	//执行用户自定义安装
 	if err = c.customerInstall(); err != nil {
 		return fmt.Errorf("安装程序执行失败:%v", err)
@@ -242,34 +243,21 @@ func (c *Creator) updateMainConf(path string, data string) error {
 	return c.registry.Update(rpath, data, v)
 }
 
-func (c *Creator) checkContinue() bool {
+func (c *Creator) checkRegistry() bool {
 	if !c.showTitle {
 		c.showTitle = true
 	} else {
 		return true
 	}
-	var index string
-	fmt.Print("\t当前服务有一些参数未配置，立即配置(y|N):")
-	fmt.Scan(&index)
-	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
+	if !c.binder.Confirm("\t注册中心一些参数未配置,是否配置") {
 		return false
 	}
-	return true
-}
-
-func (c *Creator) checkMode(mode int) bool {
-	var index string
+	mode := c.binder.GetMode()
 	switch mode {
 	case ModeCover:
-		fmt.Print("\t\033[;33m当前安装程序试图覆盖已存在配置，是否继续(y|N):\033[0m")
+		return c.binder.Confirm("\t\t当前安装程序试图覆盖已存在配置")
 	case ModeNew:
-		fmt.Print("\t\033[;33m当前安装程序试图删除所有配置，是否继续(y|N):\033[0m")
-	default:
-		return true
-	}
-	fmt.Scan(&index)
-	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
-		return false
+		return c.binder.Confirm("\t\t当前安装程序试图删除所有配置")
 	}
 	return true
 }

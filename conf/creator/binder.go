@@ -47,6 +47,7 @@ type IBinder interface {
 	GetSQL(dir string) ([]string, error)
 	GetInput() map[string]*Input
 	SetParam(k, v string)
+	Confirm(msg string) bool
 	GetMode() int
 	Print()
 }
@@ -213,4 +214,14 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 }
 func (s *Binder) Print() {
 	fmt.Println(s.binders)
+}
+
+//Confirm 用户确认
+func (s *Binder) Confirm(msg string) bool {
+	var value string
+	fmt.Print("\t\033[;33m" + msg + "，继续(y|yes),结束(n|no):\033[0m")
+
+	fmt.Scan(&value)
+	nvalue := strings.ToUpper(value)
+	return nvalue == "Y" || nvalue == "YES"
 }
