@@ -2,12 +2,14 @@ package hydra
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
 )
 
@@ -17,6 +19,7 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
+	print := m.xlogger.Info
 
 	m.logger.PauseLogging()
 	defer m.logger.StartLogging()
@@ -26,48 +29,110 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 		m.xlogger.Error(err)
 		return err
 	}
-	for _, tp := range m.ServerTypes {
+	queryIndex := 0
+	queryList := make(map[int][]byte)
+	for i, tp := range m.ServerTypes {
 		mainPath := filepath.Join("/", m.PlatName, m.SystemName, tp, m.ClusterName, "conf")
 		buffer, version, err := rgst.GetValue(mainPath)
 		if err != nil {
 			return err
 		}
-		_, err = conf.NewServerConf(mainPath, buffer, version, rgst)
+		sc, err := conf.NewServerConf(mainPath, buffer, version, rgst)
 		if err != nil {
 			return err
 		}
-		fmt.Println(getPrintNode(mainPath, true))
+		queryIndex++
+		if i == 0 {
+			print(getPrintNode(mainPath, queryIndex, 0))
+		} else {
+			print(getPrintNode(mainPath, queryIndex, 2))
+		}
+		queryList[queryIndex] = buffer
 
-		// fmt.Println(getPrintNode(mainPath, true))
-		// sc.IterSubConf(func(k string, conf *conf.JSONConf) bool {
-		// 	fmt.Println(getPrintNode(k, false))
-		// 	return true
-		// })
-		// sc.IterVarConf(func(k string, conf *conf.JSONConf) bool {
-		// 	fmt.Println(getPrintNode(k, false))
-		// 	return true
-		// })
+		sc.IterSubConf(func(k string, cn *conf.JSONConf) bool {
+			queryIndex++
+			print(getPrintNode(filepath.Join(mainPath, k), queryIndex, -1))
+			queryList[queryIndex] = cn.GetRaw()
+			return true
+		})
+		if i == len(m.ServerTypes)-1 {
+			index := -1
+			sc.IterVarConf(func(k string, cn *conf.JSONConf) bool {
+				queryIndex++
+				if index == -1 {
+					index++
+					print(getPrintNode(filepath.Join(m.PlatName, "var", k), queryIndex, 1))
+				} else {
+					print(getPrintNode(filepath.Join(m.PlatName, "var", k), queryIndex, -1))
+				}
+				queryList[queryIndex] = cn.GetRaw()
+				return true
+			})
+		}
 	}
-
-	return nil
+	for {
+		fmt.Print("请输入数字序号 > ")
+		var value string
+		fmt.Scan(&value)
+		if strings.ToUpper(value) == "Q" {
+			return nil
+		}
+		nv := types.ToInt(value, -1)
+		content, ok := queryList[nv]
+		if !ok {
+			continue
+		}
+		data := map[string]interface{}{}
+		if err := json.Unmarshal(content, &data); err != nil {
+			print(string(content))
+			continue
+		}
+		buff, err := json.MarshalIndent(data, "", "    ")
+		if err != nil {
+			print(string(content))
+			continue
+		}
+		print(string(buff))
+	}
 }
-func getPrintNode(path string, f bool) string {
+func getPrintNode(path string, index int, f int) string {
 	p := strings.Trim(path, "/")
 	ps := strings.Split(p, "/")
 	buff := bytes.NewBufferString("")
-	if !f {
-		for c := 0; c < len(ps); c++ {
-			buff.WriteString("--")
+	switch f {
+	case -1:
+		for c := 0; c < len(ps)-1; c++ {
+			buff.WriteString("  ")
 		}
+		buff.WriteString("└╌")
+		buff.WriteString(fmt.Sprintf("[%d]", index))
 		buff.WriteString(ps[len(ps)-1])
-		return buff.String()
-	}
-	for i, v := range ps {
-		for c := 0; c < i; c++ {
-			buff.WriteString("--")
+	case 0:
+		for i, v := range ps {
+			for c := 0; c < i; c++ {
+				buff.WriteString("  ")
+			}
+			if i > 0 {
+				buff.WriteString("└╌")
+			}
+			if i == len(ps)-1 {
+				buff.WriteString(fmt.Sprintf("[%d]", index))
+			}
+			buff.WriteString(v)
+			buff.WriteString("\n")
 		}
-		buff.WriteString(v)
-		buff.WriteString("\n")
+	default:
+		for i := f; i < len(ps); i++ {
+			for c := -1; c < i-1; c++ {
+				buff.WriteString("  ")
+			}
+			buff.WriteString("└╌")
+			if i == len(ps)-1 {
+				buff.WriteString(fmt.Sprintf("[%d]", index))
+			}
+			buff.WriteString(ps[i])
+			buff.WriteString("\n")
+		}
 	}
-	return buff.String()
+	return strings.Trim(buff.String(), "\n")
 }
