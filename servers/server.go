@@ -84,25 +84,25 @@ func NewRegistryServer(identifier string, registryAddr string, conf conf.IServer
 
 //Trace 打印跟踪信息
 func Trace(print func(f string, args ...interface{}), args ...interface{}) {
-	if !IsDebug {
-		return
-	}
+	// if !IsDebug {
+	// 	return
+	// }
 	print("%s", args)
 }
 
 //Tracef 根据格式打印跟踪信息
 func Tracef(print func(f string, args ...interface{}), format string, args ...interface{}) {
-	if !IsDebug {
-		return
-	}
+	// if !IsDebug {
+	// 	return
+	// }
 	print(format, args...)
 }
 
 //TraceIf 根据条件打印跟踪信息
 func TraceIf(b bool, okPrint func(f string, args ...interface{}), print func(f string, args ...interface{}), args ...interface{}) {
-	if !IsDebug {
-		return
-	}
+	// if !IsDebug {
+	// 	return
+	// }
 	if b {
 		okPrint("%s", args)
 		return
