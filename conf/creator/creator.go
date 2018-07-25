@@ -43,7 +43,7 @@ func (c *Creator) installParams() error {
 	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
-		if !c.binder.Confirm("\t设置基础参数值?") {
+		if !c.binder.Confirm("设置基础参数值?") {
 			return nil
 		}
 	}
@@ -63,6 +63,9 @@ func (c *Creator) installRegistry() error {
 	//检查配置模式
 	mode := c.binder.GetMode()
 	//创建主配置
+	if !c.checkRegistry(mode) {
+		return nil
+	}
 	for _, tp := range c.serverTypes {
 		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		rpath := c.getRealMainPath(mainPath)
@@ -76,16 +79,9 @@ func (c *Creator) installRegistry() error {
 		if mode == ModeNew {
 			c.registry.Delete(rpath)
 		}
-
-		if c.binder.GetMainConfScanNum(tp) > 0 {
-			if !c.checkRegistry() {
-				return nil
-			}
-		}
 		if err := c.binder.ScanMainConf(mainPath, tp); err != nil {
 			return err
 		}
-
 		content := c.binder.GetMainConf(tp)
 		if ok && mode == ModeCover {
 			if err := c.createMainConf(mainPath, content); err != nil {
@@ -112,12 +108,6 @@ func (c *Creator) installRegistry() error {
 			}
 			//删除配置重建
 			c.registry.Delete(filepath.Join(mainPath, subName))
-
-			if c.binder.GetSubConfScanNum(tp, subName) > 0 {
-				if !c.checkRegistry() {
-					return nil
-				}
-			}
 			if err := c.binder.ScanSubConf(mainPath, tp, subName); err != nil {
 				return err
 			}
@@ -141,15 +131,8 @@ func (c *Creator) installRegistry() error {
 		if ok && mode == ModeAuto {
 			continue
 		}
-
 		//删除配置重建
 		c.registry.Delete(filepath.Join("/", c.platName, "var", varName))
-
-		if c.binder.GetVarConfScanNum(varName) > 0 {
-			if !c.checkRegistry() {
-				return nil
-			}
-		}
 		if err := c.binder.ScanVarConf(c.platName, varName); err != nil {
 			return err
 		}
@@ -243,16 +226,10 @@ func (c *Creator) updateMainConf(path string, data string) error {
 	return c.registry.Update(rpath, data, v)
 }
 
-func (c *Creator) checkRegistry() bool {
-	if !c.showTitle {
-		c.showTitle = true
-	} else {
-		return true
-	}
-	if !c.binder.Confirm("\t创建注册中心配置数据?") {
+func (c *Creator) checkRegistry(mode int) bool {
+	if !c.binder.Confirm("创建注册中心配置数据?") {
 		return false
 	}
-	mode := c.binder.GetMode()
 	switch mode {
 	case ModeCover:
 		return c.binder.Confirm("\t\t覆盖已存在配置?")
