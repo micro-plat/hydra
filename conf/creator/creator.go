@@ -73,17 +73,17 @@ func (c *Creator) installRegistry() error {
 		if err != nil {
 			return err
 		}
-		if ok && mode == ModeAuto {
+		if ok && mode == modeAuto {
 			continue
 		}
-		if mode == ModeNew {
+		if mode == modeNew {
 			c.registry.Delete(rpath)
 		}
 		if err := c.binder.ScanMainConf(mainPath, tp); err != nil {
 			return err
 		}
 		content := c.binder.GetMainConf(tp)
-		if ok && mode == ModeCover {
+		if ok && mode == modeCover {
 			if err := c.createMainConf(mainPath, content); err != nil {
 				return err
 			}
@@ -103,7 +103,7 @@ func (c *Creator) installRegistry() error {
 			if err != nil {
 				return err
 			}
-			if ok && mode == ModeAuto {
+			if ok && mode == modeAuto {
 				continue
 			}
 			//删除配置重建
@@ -128,7 +128,7 @@ func (c *Creator) installRegistry() error {
 		if err != nil {
 			return err
 		}
-		if ok && mode == ModeAuto {
+		if ok && mode == modeAuto {
 			continue
 		}
 		//删除配置重建
@@ -144,7 +144,6 @@ func (c *Creator) installRegistry() error {
 		c.logger.Info("\t\t创建配置:", path)
 	}
 	return nil
-
 }
 
 //Start 扫描并绑定所有参数
@@ -160,7 +159,6 @@ func (c *Creator) Start() (err error) {
 		return fmt.Errorf("安装程序执行失败:%v", err)
 	}
 	return nil
-
 }
 
 func (c *Creator) customerInstall() error {
@@ -188,7 +186,6 @@ func (c *Creator) customerInstall() error {
 				return err
 			}
 		}
-
 	}
 	return nil
 }
@@ -235,11 +232,11 @@ func (c *Creator) checkRegistry() (mode int, cn bool) {
 	nvalue := strings.ToUpper(value)
 	switch nvalue {
 	case "1":
-		return ModeAuto, true
+		return modeAuto, true
 	case "2":
-		return ModeCover, true
+		return modeCover, true
 	case "3":
-		return ModeNew, true
+		return modeNew, true
 	}
 	return 0, false
 }

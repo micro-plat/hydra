@@ -13,17 +13,12 @@ import (
 
 const (
 	//ModeAuto 存在是不再修改
-	ModeAuto = iota
+	modeAuto = iota
 	//ModeCover 如果存在则覆盖
-	ModeCover
+	modeCover
 	//ModeNew 每次都重建
-	ModeNew
+	modeNew
 )
-
-type ILogger interface {
-	Debug(v ...interface{})
-	Debugf(f string, v ...interface{})
-}
 
 type Input struct {
 	FiledName string
@@ -49,7 +44,6 @@ type IBinder interface {
 	GetInput() map[string]*Input
 	SetParam(k, v string)
 	Confirm(msg string) bool
-	GetMode() int
 	Print()
 }
 type Binder struct {
@@ -61,7 +55,6 @@ type Binder struct {
 	CRON    *MainBinder
 	Plat    IPlatBinder
 	Log     logger.ILogging
-	mode    int
 	binders map[string]*MainBinder
 	params  map[string]string
 	input   map[string]*Input
@@ -88,12 +81,6 @@ func NewBinder(log logger.ILogging) *Binder {
 	}
 	return s
 }
-func (s *Binder) GetMode() int {
-	return s.mode
-}
-func (s *Binder) SetMode(m int) {
-	s.mode = m
-}
 func (s *Binder) SetParam(k, v string) {
 	s.params[k] = v
 }
@@ -119,10 +106,7 @@ func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer)
 //GetMainConfNames 获取已配置的主配置名称
 func (s *Binder) GetMainConfNames(platName string, systemName string, tp string, clusterName string) []string {
 	names := make([]string, 0, 1)
-	//	binder := s.binders[tp]
-	//	if v := binder.NeedScanCount(""); v > 0 {
 	names = append(names, filepath.Join("/", platName, systemName, tp, clusterName, "conf"))
-	//	}
 	return names
 }
 
@@ -215,6 +199,8 @@ func (s *Binder) GetSQL(dir string) ([]string, error) {
 	}
 	return tables, nil
 }
+
+//Print 输出配置信息
 func (s *Binder) Print() {
 	fmt.Println(s.binders)
 }
