@@ -19,6 +19,11 @@ const (
 	ModeNew
 )
 
+type ILogger interface {
+	Debug(v ...interface{})
+	Debugf(f string, v ...interface{})
+}
+
 type Input struct {
 	FiledName string
 	ShowName  string

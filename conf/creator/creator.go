@@ -15,7 +15,7 @@ import (
 type Creator struct {
 	registry     registry.IRegistry
 	registryAddr string
-	logger       *logger.Logger
+	logger       logger.ILogging
 	showTitle    bool
 	binder       IBinder
 	platName     string
@@ -26,7 +26,7 @@ type Creator struct {
 }
 
 //NewCreator 配置文件创建器
-func NewCreator(platName string, systemName string, serverTypes []string, clusterName string, binder IBinder, registryAddr string, rgst registry.IRegistry, logger *logger.Logger) (w *Creator) {
+func NewCreator(platName string, systemName string, serverTypes []string, clusterName string, binder IBinder, registryAddr string, rgst registry.IRegistry, logger logger.ILogging) (w *Creator) {
 	w = &Creator{
 		platName:     platName,
 		systemName:   systemName,
@@ -249,7 +249,7 @@ func (c *Creator) checkContinue() bool {
 		return true
 	}
 	var index string
-	fmt.Print("当前服务有一些参数未配置，立即配置(y|N):")
+	c.logger.Print("当前服务有一些参数未配置，立即配置(y|N):")
 	fmt.Scan(&index)
 	if index != "y" && index != "Y" && index != "yes" && index != "YES" {
 		return false
@@ -261,9 +261,9 @@ func (c *Creator) checkMode(mode int) bool {
 	var index string
 	switch mode {
 	case ModeCover:
-		fmt.Print("\t\033[;33m当前安装程序试图覆盖已存在配置，是否继续(y|N):\033[0m")
+		c.logger.Print("\t\033[;33m当前安装程序试图覆盖已存在配置，是否继续(y|N):\033[0m")
 	case ModeNew:
-		fmt.Print("\t\033[;33m当前安装程序试图删除所有配置，是否继续(y|N):\033[0m")
+		c.logger.Print("\t\033[;33m当前安装程序试图删除所有配置，是否继续(y|N):\033[0m")
 	default:
 		return true
 	}

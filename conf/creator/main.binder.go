@@ -186,7 +186,11 @@ func getInputValue(param string, inputs map[string]*Input, path string) (v strin
 	if path == "" {
 		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s):", showName, desc)
 	} else {
-		fmt.Printf("\t\033[;32m请输入%s\033[0m(%s,%s等配置中使用):", showName, desc, path)
+		if desc == "" {
+			fmt.Printf("\t\033[;32m请输入%s\033[0m(%s等配置中使用):", showName, path)
+		} else {
+			fmt.Printf("\t\033[;32m请输入%s\033[0m(%s,%s等配置中使用):", showName, desc, path)
+		}
 	}
 
 	var value string

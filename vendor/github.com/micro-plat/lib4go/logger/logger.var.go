@@ -50,9 +50,8 @@ func GetLevel(name string) int {
 	return ILevel_ALL
 }
 
-//ILogger 日志接口
-type ILogger interface {
-	SetTag(name string, value string)
+//ILogging 基础日志记录接口
+type ILogging interface {
 	Printf(format string, content ...interface{})
 	Print(content ...interface{})
 	Println(args ...interface{})
@@ -72,5 +71,11 @@ type ILogger interface {
 
 	Warnf(format string, v ...interface{})
 	Warn(v ...interface{})
+}
+
+//ILogger 日志接口
+type ILogger interface {
+	SetTag(name string, value string)
+	ILogging
 	GetSessionID() string
 }

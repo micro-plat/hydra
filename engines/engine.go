@@ -27,7 +27,7 @@ type ServiceEngine struct {
 	conf.IServerConf
 	registryAddr string
 	*rpc.Invoker
-	logger   *logger.Logger
+	logger   logger.ILogging
 	registry registry.IRegistry
 	component.IComponentCache
 	component.IComponentDB
@@ -37,7 +37,7 @@ type ServiceEngine struct {
 }
 
 //NewServiceEngine 构建服务引擎
-func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger *logger.Logger) (e *ServiceEngine, err error) {
+func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger logger.ILogging) (e *ServiceEngine, err error) {
 	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: logger}
 	e.StandardComponent = component.NewStandardComponent("sys.engine", e)
 	e.Invoker = rpc.NewInvoker(conf.GetPlatName(), conf.GetSysName(), registryAddr)

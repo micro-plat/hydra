@@ -49,7 +49,7 @@ func AnalyzeTPLFromCache(name string, tpl string, input map[string]interface{}, 
 func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string) (sql string, params []interface{}, names []string) {
 	params = make([]interface{}, 0)
 	names = make([]string, 0)
-	word, _ := regexp.Compile(`[@|#|&|~|\||!|\$|\?|>|<]\w?[\.]?\w+`)
+	word, _ := regexp.Compile(`[\\]?[@|#|&|~|\||!|\$|\?|>|<]\w?[\.]?\w+`)
 	//@变量, 将数据放入params中
 	sql = word.ReplaceAllStringFunc(tpl, func(s string) string {
 		//fullKey := s[1:]
@@ -124,6 +124,12 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string) 
 		default:
 			return s
 		}
+	})
+
+	word2, _ := regexp.Compile(`[\\][@|#|&|~|\||!|\$|\?|>|<]`)
+	//@变量, 将数据放入params中
+	sql = word2.ReplaceAllStringFunc(sql, func(s string) string {
+		return s[1:]
 	})
 	return
 }
