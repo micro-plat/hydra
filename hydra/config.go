@@ -32,7 +32,7 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 		if err != nil {
 			return err
 		}
-		_, err := conf.NewServerConf(mainPath, buffer, version, rgst)
+		_, err = conf.NewServerConf(mainPath, buffer, version, rgst)
 		if err != nil {
 			return err
 		}
