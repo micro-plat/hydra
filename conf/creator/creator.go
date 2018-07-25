@@ -62,6 +62,7 @@ func (c *Creator) installParams() error {
 func (c *Creator) installRegistry() error {
 	//检查配置模式
 	mode, cn := c.checkRegistry()
+	fmt.Println("mode:", mode)
 	//创建主配置
 	if !cn {
 		return nil
