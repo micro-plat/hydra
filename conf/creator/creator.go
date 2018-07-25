@@ -43,7 +43,7 @@ func (c *Creator) installParams() error {
 	//检查必须输入参数
 	input := c.binder.GetInput()
 	if len(input) > 0 {
-		if !c.binder.Confirm("1. 设置基础参数值(这些参数可能用于创建配置数据，数据库数据等)?") {
+		if !c.binder.Confirm("1. 设置基础参数值(这些参数用于创建配置数据)?") {
 			return nil
 		}
 	}
