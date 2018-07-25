@@ -36,6 +36,7 @@ type IMainConf interface {
 	HasSubConf(name ...string) bool
 	GetSubConfClone() map[string]JSONConf
 	SetSubConf(data map[string]JSONConf)
+	IterSubConf(f func(k string, conf *JSONConf) bool)
 }
 type IVarConf interface {
 	GetVarVersion() int32
@@ -44,6 +45,7 @@ type IVarConf interface {
 	HasVarConf(tp string, name string) bool
 	GetVarConfClone() map[string]JSONConf
 	SetVarConf(map[string]JSONConf)
+	IterVarConf(f func(k string, conf *JSONConf) bool)
 }
 
 //IServerConf 服务器配置
@@ -283,6 +285,24 @@ func (c *ServerConf) HasSubConf(names ...string) bool {
 		}
 	}
 	return false
+}
+
+//IterSubConf 迭代所有子配置
+func (c *ServerConf) IterSubConf(f func(k string, conf *JSONConf) bool) {
+	for k, v := range c.subNodeConfs {
+		if !f(k, &v) {
+			break
+		}
+	}
+}
+
+//IterVarConf 迭代所有子配置
+func (c *ServerConf) IterVarConf(f func(k string, conf *JSONConf) bool) {
+	for k, v := range c.varNodeConfs {
+		if !f(k, &v) {
+			break
+		}
+	}
 }
 
 //GetVarConf 指定配置文件名称，获取var配置信息

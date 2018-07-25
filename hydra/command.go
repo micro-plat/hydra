@@ -58,6 +58,10 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Name:   "status",
 			Usage:  "查询服务状态",
 			Action: m.statusAction,
+		}, {
+			Name:   "config",
+			Usage:  "查询配置信息",
+			Action: m.queryConfigAction,
 		},
 	}
 }
