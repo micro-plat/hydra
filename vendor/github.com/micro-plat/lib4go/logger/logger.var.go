@@ -50,6 +50,14 @@ func GetLevel(name string) int {
 	return ILevel_ALL
 }
 
+//LogWriter 提供Write函数的日志方法
+type LogWriter func(content ...interface{})
+
+func (l LogWriter) Write(p []byte) (n int, err error) {
+	l(string(p))
+	return len(p), nil
+}
+
 //ILogging 基础日志记录接口
 type ILogging interface {
 	Printf(format string, content ...interface{})

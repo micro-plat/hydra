@@ -36,7 +36,6 @@ type MicroApp struct {
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry()}
-
 	logging := log.New(os.Stdout, "", log.Llongcolor)
 	logging.SetOutputLevel(log.Ldebug)
 	m.xlogger = logging
@@ -56,6 +55,9 @@ func (m *MicroApp) Start() {
 	if m.IsDebug {
 		m.PlatName += "_debug"
 	}
+	var writer logger.LogWriter = m.xlogger.Error
+	m.app.ErrWriter = writer
+
 	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
 		m.logger.Error(err)
@@ -73,7 +75,7 @@ func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if err := m.checkInput(); err != nil {
-		m.logger.Error(err)
+		m.xlogger.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
