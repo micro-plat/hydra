@@ -13,13 +13,13 @@ var (
 )
 
 type option struct {
-	RegistryAddr       string   `json:"--registry" valid:"ascii,required"`
-	Name               string   `json:"--name" `
-	PlatName           string   `json:"--plat" valid:"ascii,required"`
-	SystemName         string   `json:"--system" valid:"ascii,required"`
-	ServerTypeNames    string   `json:"--serverTypes" valid:"ascii,required"`
-	ServerTypes        []string `valid:"ascii,required"`
-	ClusterName        string   `json:"--cluster" valid:"ascii,required"`
+	RegistryAddr       string `json:"--registry" valid:"ascii,required"`
+	Name               string `json:"--name" `
+	PlatName           string `json:"--plat" valid:"ascii,required"`
+	SystemName         string `json:"--system" valid:"ascii,required"`
+	ServerTypeNames    string `json:"--serverTypes" valid:"ascii,required"`
+	ServerTypes        []string
+	ClusterName        string `json:"--cluster" valid:"ascii,required"`
 	IsDebug            bool
 	Trace              string
 	remoteLogger       bool

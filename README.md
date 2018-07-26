@@ -41,7 +41,7 @@ hydra 的优势
 
 ## 安装 hydra
 
-hydra 使用 godep 管理依赖包，只需执行`go get`即可下载项目完整源码
+hydra 使用 godep 管理依赖包，执行`go get`即可下载完整源码
 
 ```sh
 go get github.com/micro-plat/hydra
@@ -101,5 +101,5 @@ go install hello
 ```sh
 curl http://localhost:8090/hello
 
-hello world
+{"data":"hello world"}
 ```

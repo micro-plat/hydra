@@ -3,7 +3,6 @@ package hydra
 import (
 	"fmt"
 	"os"
-	"reflect"
 
 	"github.com/micro-plat/hydra/conf/creator"
 	"github.com/micro-plat/hydra/hydra/daemon"
@@ -75,7 +74,7 @@ func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 
 func (m *MicroApp) action(c *cli.Context) (err error) {
 	if err := m.checkInput(); err != nil {
-		m.xlogger.Error(err)
+		m.xlogger.Warn(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
@@ -125,7 +124,7 @@ func (m *MicroApp) checkInput() (err error) {
 	}
 
 	if b, err := govalidator.ValidateStruct(m.option); !b {
-		err = fmt.Errorf("validate(%v) %v", reflect.TypeOf(m.option), err)
+		err = fmt.Errorf("服务器运行缺少参数，请查看以下帮助信息")
 		return err
 	}
 	return
