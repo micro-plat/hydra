@@ -74,7 +74,7 @@ app := hydra.NewApp()
 app.Start()
 ```
 
-以上代码通过`hydra.NewApp()`创建了 hydra app 实例， 并通过`app.Start()`运行该实例。但实例需要一些必须参数才能正常启动。
+以上代码通过`hydra.NewApp()`创建了 hydra app 实例， 并通过`app.Start()`运行该实例。但要成功运行服务还需要指定以下参数：
 
 1.  注册中心地址，服务器通过`注册中心`管理`配置`，服务`注册`，`发现`等
 2.  完整名称, 当前应用在`注册中心`的路径，hydra 通过该路径从注册中心拉取`配置数据`。该参数可以通过完整的路径方式传入`hydra.WithName`
@@ -87,5 +87,5 @@ app.Start()
 2.  通过命令行指定参数，如: app run --registry zk://192.168.0.168 -name /plat/sys/api/t
 3.  通过环境变量指定参数,查看应用程序帮助信息 如 `app run -h` 获取各参数的环境变量名，配置完成后执行`app run`即可启动服务
 
-- 考虑到生产环境环境实际情况,部分参数如：`PlatName`,`SystemName`,`ServerTypes`,可以通过`hydra.With...`指定; `注册中心地址`,`集群名称`可以在生产环境安装时指定;
+- 考虑到生产环境环境实际情况,部分参数如：`PlatName`,`SystemName`,`ServerTypes`,可以通过`hydra.With...`指定; `注册中心地址`,`集群名称`可以在生产环境安装时指定
 - 便于开发环境简单启动， 可以将`注册中心地址`,`集群名称`配置到环境变量中。
