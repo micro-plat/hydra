@@ -74,18 +74,11 @@ app := hydra.NewApp()
 app.Start()
 ```
 
-以上代码通过`hydra.NewApp()`创建了 hydra app 实例， 并通过`app.Start()`运行该实例。但要成功运行服务还需要指定以下参数：
+以上代码通过`hydra.NewApp()`创建了 hydra app 实例， 并通过`app.Start()`启动服务。但要成功运行服务还需要指定以下参数：
 
-1.  注册中心地址，服务器通过`注册中心`管理`配置`，服务`注册`，`发现`等
-2.  完整名称, 当前应用在`注册中心`的路径，hydra 通过该路径从注册中心拉取`配置数据`。该参数可以通过完整的路径方式传入`hydra.WithName`
-    如:/平台名称/系统名称/服务器类型/集群名称，也分为 4 个字段分别传入。如 `hydra.WithPlatName`,`hydra.WithSystemName`,`hydra.WithServerTypes`,`hydra.WithClusterName`,`hydra.WithRegistry`, 其中`ServerTypes`可传`api`,`web`,`ws`,`cron`,`mqc`,也可以传多个服务类型，用`-`连接，如:`api-rpc-cron`。
-    通过`hydra.With...`指定运行参数中是方法之一， 其它方式指定参数，请继续往下阅读。
+1.  注册中心地址，支持 zookeeper(zk)和本地文件系统(fs)。用于保存服务启动和运行参数，服务注册与发现等数据，格式:proto://host。proto 的取值有 zk,fs; host 的取值各不相同,如 zookeeper 则为 ip 地址(加端口号),多个 ip 用逗号分隔:zk://192.168.0.2，192.168.0.107:12181。本地文件系统为本地文件路径，可以是相对路径或绝对路径,如:fs://../; 此参数可以通过命令行参数(--registry 或-r)指定,或通过环境变量($hydra_registry)指定,或在程序中通过 hydra.WithRegistry 指定
 
-我们可以通过以下三种方式指定运行参数：
-
-1.  `hydra.NewApp()`初始化时通过`hydra.With...`参数指定
-2.  通过命令行指定参数，如: app run --registry zk://192.168.0.168 -name /plat/sys/api/t
-3.  通过环境变量指定参数,查看应用程序帮助信息 如 `app run -h` 获取各参数的环境变量名，配置完成后执行`app run`即可启动服务
-
-- 考虑到生产环境环境实际情况,部分参数如：`PlatName`,`SystemName`,`ServerTypes`,可以通过`hydra.With...`指定; `注册中心地址`,`集群名称`可以在生产环境安装时指定
-- 便于开发环境简单启动， 可以将`注册中心地址`,`集群名称`配置到环境变量中。
+2.  完整名称, 当前应用在`注册中心`的路径，hydra 通过该路径从注册中心拉取配置数据。以`/`分隔的多级目录结构，完整的表示该服务所在平台，系统，服务
+    类型，集群名称，格式：/平台名称/系统名称/服务器类型/集群名称; 平台名称，系统名称，集群名称可以是任意字母
+    下划线或数字，服务器类型则为目前支持的几种服务器:api,web,rpc,mqc,cron,ws。该参数可以通过完整的路径方式传入`hydra.WithName`
+    如: /平台名称/系统名称/服务器类型/集群名称，也分为 4 个字段分别传入： `hydra.WithPlatName`,`hydra.WithSystemName`,`hydra.WithServerTypes`,`hydra.WithClusterName`,`hydra.WithRegistry`， 这些参数都可以通过程序指定，命令行指定，或环境变量指定
