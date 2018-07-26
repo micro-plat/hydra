@@ -109,7 +109,7 @@ func (m *MicroApp) getStartFlags() []cli.Flag {
 		}
 		if len(m.ServerTypes) == 0 {
 			flags = append(flags, cli.StringFlag{
-				Name:        "server-types,s",
+				Name:        "server-types,S",
 				Destination: &m.ServerTypeNames,
 				EnvVar:      "hydra_server_types",
 				Usage:       fmt.Sprintf("\033[;31m*\033[0m服务类型，目前支持的服务器类型有%v", supportServerType),

@@ -82,3 +82,16 @@ app.Start()
     类型，集群名称，格式：/平台名称/系统名称/服务器类型/集群名称; 平台名称，系统名称，集群名称可以是任意字母
     下划线或数字，服务器类型则为目前支持的几种服务器:api,web,rpc,mqc,cron,ws。该参数可以通过完整的路径方式传入`hydra.WithName`
     如: /平台名称/系统名称/服务器类型/集群名称，也分为 4 个字段分别传入： `hydra.WithPlatName`,`hydra.WithSystemName`,`hydra.WithServerTypes`,`hydra.WithClusterName`,`hydra.WithRegistry`， 这些参数都可以通过程序指定，命令行指定，或环境变量指定
+
+| 参数名称     | 必须 | 程序传入              | 命令行参数           | 环境变量           | 说明                                   |
+| ------------ | ---- | --------------------- | -------------------- | ------------------ | -------------------------------------- |
+| 注册中心地址 | √    | hydra.WithRegistry    | --registry 或-r      | hydra_registry     | proto://host                           |
+| 系统全名     | √    | hydra.WithName        | --name 或 -n         | hydra_name         | /平台名称/系统名称/服务器类型/集群名称 |
+| 平台名称     | √    | hydra.WithPlatName    | --plat 或-p          | hydra_plat         | 字母下划线或数字                       |
+| 系统名称     | √    | hydra.WithSystemName  | --system 或-s        | hydra_system       | 字母下划线或数字                       |
+| 服务类型     | √    | hydra.WithServerTypes | --server-types 或 -S | hydra_server_types | api,web,rpc,mqc,cron,ws                |
+| 集群名称     | √    | hydra.WithClusterName | --cluster 或 -c      | hydra_cluster      | 字母下划线或数字                       |
+| 调试模式     | ×    | hydra.WithDebug       | ---                  | ---                | ---                                    |
+| 性能跟踪     | ×    | ---                   | --trace 或-t         | hydra_trace        | cpu,mem,block,mutex,web                |
+| 远程日志     | ×    | ---                   | --rpclog 或-r        | hydra_rpclog       | ---                                    |
+| 远程服务     | ×    | ---                   | --rs,-R              | hydra-rs           | ---                                    |
