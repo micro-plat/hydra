@@ -150,6 +150,8 @@ yanglei@yanglei-H97-HD3:~/work/bin$
 
 ### 2. 服务注册
 
+#### 1. 注册函数
+
 ```go
 package main
 
@@ -168,6 +170,10 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 }
 ```
 
+`/hello`为服务名称，一般以`/`开头，用户未自定义路由时，该名称与外部请求的资源名一致
+
+`helloWorld` 为服务执行`handle`,当外部请求`/hello`资源时，调用`helloWorld`执行具体的业务逻辑
+
 通过`app.Micro`注册了一个微服务，既然是微服务那么只有对外提供接口服务的`api`,`rpc`,`web`服务器上可见，对流程服务`mqc`,`cron`,`ws`中是不可见的。例如`订单定时同步服务`我们期望每隔 1 分钟执行一次并且不希望用户通过接口访问到该服务，则我们可使用`app.Cron`或`app.Flow`注册服务。
 
 不同注册函数对服务器的可见性见下表：
@@ -182,6 +188,91 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 | WS       | ×   | ×   | ×   | √   | ×   | ×    |
 | MQC      | ×   | ×   | ×   | ×   | √   | ×    |
 | CRON     | ×   | ×   | ×   | ×   | ×   | √    |
+
+服务函数类型约束：
+
+> 1.  注册的服务必须为函数类型，每种服务器初始化时都会调用这些函数进行初始化，关健配置变更后还会重新初始化服务。为保证每次重启和不同服务器之间相同的服务执行环境不相互影响做到无状态，所以限制了服务注册类型必须是函数。同时开发中也要减少全局全变量的使用，必须使用时请使用`component.IContainer`中的元数据存储进行传值。否则系统可能出现不可预知的行为
+
+> 2.  函数输入参数输出参数为：`func(c *context.Context) (rs interface{})`
+> 3.  返回对象 T，T 必须实现了接口`type Handler interface { Handle(c *context.Context) interface{} }`传入值为构建 T 对象的函数，函数必须满足：`func()(interface{})`或`func(component.IContainer) (interface{})`或`func(component.IContainer) (interface{}，error)`
+
+以下服务函数是合法的：
+
+```go
+func NewBindHandler(container component.IContainer) (u *BindHandler) {
+	return &BindHandler{container: container}
+}
+func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+	return "success"
+}
+```
+
+```go
+func NewBindHandler(container component.IContainer) (u *BindHandler,err error) {
+	return &BindHandler{container: container},nil
+}
+func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+	return "success"
+}
+```
+
+```go
+func NewBindHandler() (u *BindHandler) {
+	return &BindHandler{},nil
+}
+func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+	return "success"
+}
+```
+
+```go
+func NewBindHandler() (u *BindHandler,err error) {
+	return &BindHandler{},nil
+}
+func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+```
+
+#### 2. RESTful 接口类型支持
+
+当客户端发起 GET,PUT,POST,DELETE 请求时执行对应的`GetHandle`,`PutHandle`,`PostHandle`,`DeleteHandle`函数，如下:
+
+```go
+func NewBindHandler() (u *BindHandler,err error) {
+	return &BindHandler{},nil
+}
+func (u *BindHandler) GetHandle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+func (u *BindHandler) PutHandle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+func (u *BindHandler) PostHandle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+func (u *BindHandler) DeleteHandle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+```
+
+> 服务器收到客户端请求时，首先会根据请求的方法(http 动词)GET,PUT,POST,DELETE 查找对应的`xxxHandle`，未找到时则查找`Handle`函数执行。
+
+#### 3. 服务中的资源释放
+
+某些服务系统退出时做一些清理工作，比如关闭网络连接，退出 goroutine 等，此时可以添加函数`Close() error{}`执行清理工作，
+
+```go
+func NewBindHandler() (u *BindHandler,err error) {
+	return &BindHandler{},nil
+}
+func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+return "success"
+}
+func (u *BindHandler) Close() error{
+	return nil
+}
+```
 
 ### 3. 服务安装
 

@@ -218,7 +218,7 @@ func (s *ServiceRegistry) WS(name string, h interface{}, tags ...string) {
 	s.Customer(WSService, name, h, tags...)
 }
 
-//Page 页面服务
+//Web 页面服务
 func (s *ServiceRegistry) Web(name string, h interface{}, tags ...string) {
 	s.Customer(PageService, name, h, tags...)
 }
