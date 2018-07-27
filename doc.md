@@ -97,7 +97,7 @@ app.Start()
 | 集群名称     | √    | hydra.WithClusterName | --cluster 或 -c      | hydra_cluster      | 字母下划线或数字                       |
 | 调试模式     | ×    | hydra.WithDebug       | ---                  | ---                | ---                                    |
 | 性能跟踪     | ×    | ---                   | --trace 或-t         | hydra_trace        | cpu,mem,block,mutex,web                |
-| 远程日志     | ×    | ---                   | --rpclog 或-r        | hydra_rpclog       | ---                                    |
+| 远程日志     | ×    | ---                   | --rlog 或-r          | hydra_rlog         | ---                                    |
 | 远程服务     | ×    | ---                   | --rs,-R              | hydra-rs           | ---                                    |
 
 试图启动程序:

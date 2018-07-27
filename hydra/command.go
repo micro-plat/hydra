@@ -133,9 +133,9 @@ func (m *MicroApp) getStartFlags() []cli.Flag {
 	 服务的方式提供pprof数据。该参数可从环境变量中获取，环境变量名为:`,
 	})
 	flags = append(flags, cli.BoolFlag{
-		Name:        "rpclog,l",
+		Name:        "rlog,l",
 		Destination: &m.remoteLogger,
-		EnvVar:      "hydra_rpclog",
+		EnvVar:      "hydra_rlog",
 		Usage: `-启用远程日志,可选项。默认不启用。指定此参数后启动时自动从注册中心拉取远程日志配置数据，根据配置自动将本地日志以json格
     	 式压缩后定时发送到远程服务器。该参数可从环境变量中获取，环境变量名为:`,
 	})
