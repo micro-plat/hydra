@@ -77,11 +77,11 @@ func main() {
 		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
 		hydra.WithDebug())
 
-	app.Micro("/hello", (component.ServiceFunc)(helloWorld))
+	app.Micro("/hello",hello)
 	app.Start()
 }
 
-func helloWorld(ctx *context.Context) (r interface{}) {
+func hello(ctx *context.Context) (r interface{}) {
 	return "hello world"
 }
 ```

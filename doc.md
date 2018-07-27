@@ -2,9 +2,9 @@
 
 ## 一、 hydra 是什么
 
-hydra(读音: ['haɪdrə])是一套构建后端服务，流程的快速开发框架。
+hydra(读音: ['haɪdrə])是基于 go 语言和众多开源项目实现的分布式微服务框架
 
-通常后端系统包括接口服务和自动流程。接口服务有`http接口`，`rpc接口`，自动流程有`定时任务`，`MQ消息消费`。另外系统间实时推送消息还会用到`websocket`，前端静态网页还需要`web站点`来运行。这些服务器`hydra`都提供。
+通常后端系统包括接口服务和自动流程。接口服务有`http接口`，`rpc接口`，自动流程有`定时任务`，`MQ消息消费`，前后端消息推送还会用到`websocket`，前端静态网页还需要`web服务器`来运行。每种服务的架构模式不同, 编码风格各不相同, 服务化需要服务治理，分布式部署需要对等，主备，分片等模式支持。服务器数量达到一定规模还需要集群监控,日志归集等。`hydra`致力于解决这些痛点，搭建统一框架，统一开发模式， 持续完善基础设施; 提供快速开发、使用简单、功能强大、轻量级、易扩展的基础框架; 打造敏捷开发，快速交付的企业级后端服务开发方案
 
 ## 二、 起步
 
@@ -40,11 +40,11 @@ func main() {
 		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
 		hydra.WithDebug())
 
-	app.Micro("/hello", (component.ServiceFunc)(helloWorld))
+	app.Micro("/hello", hello)
 	app.Start()
 }
 
-func helloWorld(ctx *context.Context) (r interface{}) {
+func hello(ctx *context.Context) (r interface{}) {
 	return "hello world"
 }
 ```
@@ -70,6 +70,8 @@ curl http://localhost:8090/hello
 ```
 
 ## 三、 hydra 服务构建
+
+### 1. 构建服务实例
 
 ```go
 app := hydra.NewApp()
@@ -98,7 +100,7 @@ app.Start()
 | 远程日志     | ×    | ---                   | --rpclog 或-r        | hydra_rpclog       | ---                                    |
 | 远程服务     | ×    | ---                   | --rs,-R              | hydra-rs           | ---                                    |
 
-了解了启动参数，我们尝试启动程序:
+试图启动程序:
 
 ```sh
 ~/work/bin$ sudo app run --registry zk://192.168.0.107 --name /myapp/sys/api/t
@@ -144,6 +146,43 @@ yanglei@yanglei-H97-HD3:~/work/bin$
 [2018/07/26 18:31:43.499808][i][4c4f2ec06]启动成功(http://192.168.5.71:8090,0)
 ```
 
-看到`启动成功...`,恭喜你服务成功启动了。但是后面有一个`0`，是因为我们还没注册服务。
+看到`启动成功...`,恭喜你服务成功启动了。但是显示启动的服务数`0`，是因为我们还没注册服务。
 
-## 四、 服务注册
+### 2. 服务注册
+
+```go
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp()
+	app.Micro("/hello", helloWorld)
+	app.Start()
+}
+func helloWorld(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+```
+
+通过`app.Micro`注册了一个微服务，既然是微服务那么只有对外提供接口服务的`api`,`rpc`,`web`服务器上可见，对流程服务`mqc`,`cron`,`ws`中是不可见的。例如`订单定时同步服务`我们期望每隔 1 分钟执行一次并且不希望用户通过接口访问到该服务，则我们可使用`app.Cron`或`app.Flow`注册服务。
+
+不同注册函数对服务器的可见性见下表：
+
+| 注册函数 | api | rpc | web | ws  | mqc | cron |
+| -------- | --- | --- | --- | --- | --- | ---- |
+| Micro    | √   | √   | √   | ×   | ×   | ×    |
+| Flow     | ×   | ×   | ×   | ×   | √   | √    |
+| API      | √   | ×   | ×   | ×   | ×   | ×    |
+| RPC      | ×   | √   | ×   | ×   | ×   | ×    |
+| WEB      | ×   | ×   | √   | ×   | ×   | ×    |
+| WS       | ×   | ×   | ×   | √   | ×   | ×    |
+| MQC      | ×   | ×   | ×   | ×   | √   | ×    |
+| CRON     | ×   | ×   | ×   | ×   | ×   | √    |
+
+### 3. 服务安装
+
+### 4. 服务启动流程

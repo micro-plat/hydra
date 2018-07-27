@@ -55,7 +55,7 @@ type IServiceRegistry interface {
 	WS(name string, h interface{}, tags ...string)
 
 	//Page 添加web页面服务(web)
-	Page(name string, h interface{}, tags ...string)
+	Web(name string, h interface{}, tags ...string)
 
 	//Fallback 默认降级函数
 	Fallback(name string, h interface{})
@@ -123,12 +123,21 @@ func NewServiceRegistry() *ServiceRegistry {
 func (s *ServiceRegistry) isConstructor(h interface{}) bool {
 	fv := reflect.ValueOf(h)
 	tp := reflect.TypeOf(h)
-	return fv.Kind() == reflect.Func && tp.NumIn() <= 2 && tp.NumOut() >= 1 && tp.NumOut() <= 2
+	if fv.Kind() != reflect.Func || tp.NumIn() > 1 || tp.NumOut() > 2 || tp.NumOut() == 0 {
+		return false
+	}
+	if tp.NumIn() == 1 && tp.In(0).Name() == "IContainer" {
+		return true
+	}
+	if tp.NumIn() == 0 {
+		return true
+	}
+	return false
 }
 func (s *ServiceRegistry) isHandler(h interface{}) bool {
 	fv := reflect.ValueOf(h)
 	tp := reflect.TypeOf(h)
-	return fv.Kind() == reflect.Func && tp.NumIn() == 4 && tp.NumOut() == 1
+	return fv.Kind() == reflect.Func && tp.NumIn() == 1 && tp.NumOut() == 1
 }
 func (s *ServiceRegistry) add(group string, name string, h interface{}) {
 	g, ok := s.services[group]
@@ -162,7 +171,11 @@ func (s *ServiceRegistry) Customer(group string, name string, h interface{}, tag
 	case Handler:
 		s.add(group, name, v)
 	default:
-		panic("不是有效的服务类型")
+		nf, ok := h.(func(*context.Context) interface{})
+		if !ok {
+			panic("不是有效的服务类型")
+		}
+		s.add(group, name, (ServiceFunc)(nf))
 	}
 	s.tags[name] = tags
 
@@ -206,7 +219,7 @@ func (s *ServiceRegistry) WS(name string, h interface{}, tags ...string) {
 }
 
 //Page 页面服务
-func (s *ServiceRegistry) Page(name string, h interface{}, tags ...string) {
+func (s *ServiceRegistry) Web(name string, h interface{}, tags ...string) {
 	s.Customer(PageService, name, h, tags...)
 }
 
