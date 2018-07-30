@@ -9,7 +9,7 @@ import (
 	"github.com/micro-plat/lib4go/redis"
 )
 
-// redisClient memcache配置文件
+// redisClient redis配置文件
 type redisClient struct {
 	servers []string
 	client  *redis.Client
@@ -25,7 +25,7 @@ func New(addrs []string, conf string) (m *redisClient, err error) {
 	return
 }
 
-// Get 根据key获取memcache中的数据
+// Get 根据key获取redis中的数据
 func (c *redisClient) Get(key string) (string, error) {
 	data, err := c.client.Get(key).Result()
 	if err != nil {
@@ -60,7 +60,7 @@ func (c *redisClient) Gets(key ...string) (r []string, err error) {
 	return
 }
 
-// Add 添加数据到memcache中,如果memcache存在，则报错
+// Add 添加数据到redis中,如果redis存在，则报错
 func (c *redisClient) Add(key string, value string, expiresAt int) error {
 	expires := time.Duration(expiresAt) * time.Second
 	if expiresAt == 0 {
@@ -78,7 +78,7 @@ func (c *redisClient) Add(key string, value string, expiresAt int) error {
 	return err
 }
 
-// Set 更新数据到memcache中，没有则添加
+// Set 更新数据到redis中，没有则添加
 func (c *redisClient) Set(key string, value string, expiresAt int) error {
 	expires := time.Duration(expiresAt) * time.Second
 	if expiresAt == 0 {
@@ -88,7 +88,6 @@ func (c *redisClient) Set(key string, value string, expiresAt int) error {
 	return err
 }
 
-// Delete 删除memcache中的数据
 func (c *redisClient) Delete(key string) error {
 	if !strings.Contains(key, "*") {
 		_, err := c.client.Del(key).Result()
@@ -97,27 +96,18 @@ func (c *redisClient) Delete(key string) error {
 		}
 		return nil
 	}
-	keys, err := c.client.Keys(key).Result()
-	if err != nil {
-		return fmt.Errorf("%v(%s)", err, key)
-	}
-	if len(keys) == 0 {
-		return nil
-	}
-	_, err = c.client.Del(keys...).Result()
-	if err != nil {
-		return fmt.Errorf("%v(%v)%s", err, keys, key)
-	}
-	return nil
+	_, err := c.client.Eval(`return redis.call('DEL',unpack(redis.call('KEYS',KEYS[1])))`, []string{key}).Result()
+	//fmt.Println("rs:", rs)
+	return err
 }
 
-// Delete 删除memcache中的数据
+// Delete 删除redis中的数据
 func (c *redisClient) Exists(key string) bool {
 	r, err := c.client.Exists(key).Result()
 	return err == nil && r == 1
 }
 
-// Delay 延长数据在memcache中的时间
+// Delay 延长数据在redis中的时间
 func (c *redisClient) Delay(key string, expiresAt int) error {
 	expires := time.Duration(expiresAt) * time.Second
 	if expiresAt == 0 {
