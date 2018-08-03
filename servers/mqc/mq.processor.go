@@ -66,7 +66,7 @@ func (s *Processor) Consumes() (err error) {
 	}
 	if s.MQConsumer == nil {
 		s.once = sync.Once{}
-		s.MQConsumer, err = mq.NewMQConsumer(s.addrss, mq.WithRaw(s.raw))
+		s.MQConsumer, err = mq.NewMQConsumer(s.addrss, mq.WithRaw(s.raw), mq.WithQueueCount(len(s.queues)))
 		if err != nil {
 			return err
 		}

@@ -11,6 +11,7 @@ type OptionConf struct {
 	Retry      bool   `json:"retry"`
 	Key        string `json:"key"`
 	Raw        string `json:"raw"`
+	QueueCount int
 }
 
 //Option 配置选项
@@ -62,6 +63,13 @@ func WithRaw(raw string) Option {
 func WithRetrySend(b bool) Option {
 	return func(o *OptionConf) {
 		o.Retry = b
+	}
+}
+
+//WithQueueCount 队列总数
+func WithQueueCount(c int) Option {
+	return func(o *OptionConf) {
+		o.QueueCount = c
 	}
 }
 
