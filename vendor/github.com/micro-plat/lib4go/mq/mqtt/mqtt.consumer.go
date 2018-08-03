@@ -3,13 +3,13 @@ package mqtt
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	xnet "net"
 	"strings"
 	"sync"
 	"time"
-
-	"errors"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
@@ -118,19 +118,25 @@ func (consumer *Consumer) connect() (*client.Client, bool, error) {
 			}
 		},
 	})
-	if err := cc.Connect(&client.ConnectOptions{
-		Network:   "tcp",
-		Address:   consumer.conf.Address,
-		UserName:  []byte(consumer.conf.UserName),
-		Password:  []byte(consumer.conf.Password),
-		ClientID:  []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
-		TLSConfig: cert,
-		KeepAlive: 3,
-	}); err != nil {
-		return nil, false, fmt.Errorf("连接失败:%v(%s-%s/%s)", err, consumer.conf.Address, consumer.conf.UserName, consumer.conf.Password)
-	}
 
-	return cc, true, nil
+	addrs, err := xnet.LookupHost(consumer.conf.Address)
+	if err != nil {
+		return nil, false, err
+	}
+	for _, addr := range addrs {
+		if err := cc.Connect(&client.ConnectOptions{
+			Network:   "tcp",
+			Address:   addr,
+			UserName:  []byte(consumer.conf.UserName),
+			Password:  []byte(consumer.conf.Password),
+			ClientID:  []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
+			TLSConfig: cert,
+			KeepAlive: 3,
+		}); err == nil {
+			return cc, true, nil
+		}
+	}
+	return nil, false, fmt.Errorf("连接失败:%v[%v](%s-%s/%s)", err, consumer.conf.Address, addrs, consumer.conf.UserName, consumer.conf.Password)
 }
 
 func (consumer *Consumer) getCert(conf *Conf) (*tls.Config, error) {

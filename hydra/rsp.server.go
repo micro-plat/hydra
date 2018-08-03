@@ -100,7 +100,6 @@ func (s *rspServer) Change(u *watcher.ContentChangeArgs) {
 				server.Shutdown()
 				server.logger.Info("服务器已关闭")
 				delete(s.servers, u.Path)
-
 				return
 			}
 		}()
