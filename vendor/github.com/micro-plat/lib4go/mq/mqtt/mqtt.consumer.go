@@ -118,15 +118,21 @@ func (consumer *Consumer) connect() (*client.Client, bool, error) {
 			}
 		},
 	})
-
-	addrs, err := xnet.LookupHost(consumer.conf.Address)
+	host, port, err := xnet.SplitHostPort(consumer.conf.Address)
+	if err != nil {
+		return nil, false, err
+	}
+	addrs, err := xnet.LookupHost(host)
+	if err != nil {
+		return nil, false, err
+	}
 	if err != nil {
 		return nil, false, err
 	}
 	for _, addr := range addrs {
 		if err := cc.Connect(&client.ConnectOptions{
 			Network:   "tcp",
-			Address:   addr,
+			Address:   addr + ":" + port,
 			UserName:  []byte(consumer.conf.UserName),
 			Password:  []byte(consumer.conf.Password),
 			ClientID:  []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
