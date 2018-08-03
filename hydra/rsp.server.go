@@ -2,6 +2,7 @@ package hydra
 
 import (
 	"sync"
+	"time"
 
 	"github.com/micro-plat/hydra/component"
 
@@ -111,7 +112,18 @@ func (s *rspServer) Shutdown() {
 	s.done = true
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	for _, server := range s.servers {
-		server.Shutdown()
+	cl := make(chan struct{})
+	go func() {
+		for _, server := range s.servers {
+			server.Shutdown()
+		}
+		close(cl)
+	}()
+	select {
+	case <-time.After(time.Second * 30):
+		return
+	case <-cl:
+		return
 	}
+
 }
