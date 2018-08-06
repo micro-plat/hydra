@@ -88,12 +88,12 @@ func setJwtResponse(ctx *gin.Context, cnf *conf.MetadataConf, data interface{}) 
 		ctx.AbortWithStatus(500)
 		return
 	}
-	ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwtAuth.Name, jwtToken))
+	setToken(ctx, jwtAuth, jwtToken)
 }
 
 // CheckJWT 检查jwk参数是否合法
 func checkJWT(ctx *gin.Context, auth *conf.Auth) (data interface{}, err context.IError) {
-	token := getToken(ctx, auth.Name)
+	token := getToken(ctx, auth)
 	if token == "" {
 		return nil, context.NewError(types.ToInt(auth.FailedCode, 403), fmt.Errorf("获取%s失败或未传入该参数", auth.Name))
 	}
@@ -106,12 +106,21 @@ func checkJWT(ctx *gin.Context, auth *conf.Auth) (data interface{}, err context.
 	}
 	return data, nil
 }
-func getToken(ctx *gin.Context, key string) string {
-	if cookie, err := ctx.Cookie(key); err == nil {
+func getToken(ctx *gin.Context, jwt *conf.Auth) string {
+	switch strings.ToUpper(jwt.Source) {
+	case "HEADER", "H":
+		return ctx.GetHeader(jwt.Name)
+	default:
+		cookie, _ := ctx.Cookie(jwt.Name)
 		return cookie
 	}
-	return ""
 }
-func setToken(ctx *gin.Context, name string, token string) {
-	ctx.Header(name, token)
+
+func setToken(ctx *gin.Context, jwt *conf.Auth, token string) {
+	switch strings.ToUpper(jwt.Source) {
+	case "HEADER", "H":
+		ctx.Header(jwt.Name, token)
+	default:
+		ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwt.Name, token))
+	}
 }

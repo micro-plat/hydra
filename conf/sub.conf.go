@@ -32,6 +32,7 @@ type Auth struct {
 	Name       string   `json:"name" valid:"ascii,required"`
 	ExpireAt   int64    `json:"expireAt" valid:"required"`
 	Mode       string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required"`
+	Source     string   `json:"source" valid:"in(header|cookie|HEADER|COOKIE|H)"`
 	Secret     string   `json:"secret" valid:"ascii,required"`
 	Exclude    []string `json:"exclude"`
 	FailedCode string   `json:"failed-code" valid:"numeric,range(400|999)"`
