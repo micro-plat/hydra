@@ -324,6 +324,11 @@ func (r *StandardComponent) LoadServices() error {
 	return nil
 }
 
+//GetComponent 获取当前组件
+func (r *StandardComponent) GetComponent() IComponent {
+	return r
+}
+
 //GetServices 获取组件提供的所有服务
 func (r *StandardComponent) GetServices() []string {
 	return r.Services

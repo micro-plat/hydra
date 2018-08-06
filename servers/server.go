@@ -47,6 +47,7 @@ func (i IExecuteHandler) Execute(ctx *context.Context) (rs interface{}) {
 type IRegistryEngine interface {
 	context.IContainer
 	IExecuter
+	GetComponent() component.IComponent
 	SetHandler(h component.IComponentHandler) error
 	UpdateVarConf(conf conf.IServerConf)
 	GetServices() []string
