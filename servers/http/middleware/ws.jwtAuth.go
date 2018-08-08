@@ -57,14 +57,14 @@ func makeJwtToken(ctx *gin.Context, data interface{}) (string, bool) {
 // CheckJWT 检查jwk参数是否合法
 func checkWSJWT(ctx *gin.Context, auth *conf.Auth, token string) (data interface{}, err context.IError) {
 	if token == "" {
-		return nil, context.NewError(types.ToInt(auth.FailedCode, 403), fmt.Errorf("获取%s失败或未传入该参数", auth.Name))
+		return nil, context.NewError(types.GetInt(auth.FailedCode, 403), fmt.Errorf("获取%s失败或未传入该参数", auth.Name))
 	}
 	data, er := jwt.Decrypt(token, auth.Secret)
 	if er != nil {
 		if strings.Contains(er.Error(), "Token is expired") {
-			return nil, context.NewError(types.ToInt(auth.FailedCode, 401), er)
+			return nil, context.NewError(types.GetInt(auth.FailedCode, 401), er)
 		}
-		return data, context.NewError(types.ToInt(auth.FailedCode, 403), er)
+		return data, context.NewError(types.GetInt(auth.FailedCode, 403), er)
 	}
 	return data, nil
 }

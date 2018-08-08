@@ -77,7 +77,7 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 		if strings.ToUpper(value) == "Q" {
 			return nil
 		}
-		nv := types.ToInt(value, -1)
+		nv := types.GetInt(value, -1)
 		content, ok := queryList[nv]
 		if !ok {
 			continue

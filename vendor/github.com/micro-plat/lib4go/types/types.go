@@ -1,83 +1,118 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-	"strings"
+	"time"
 )
 
-//DecodeString 判断变量的值与指定相等时设置为另一个值，否则使用原值
-func DecodeString(def interface{}, a interface{}, b interface{}, e ...interface{}) string {
-	values := make([]interface{}, 0, len(e)+2)
-	values = append(values, a)
-	values = append(values, b)
-	values = append(values, e...)
-
-	for i := 0; i < len(values)-1; i = i + 2 {
-		if def == values[i] {
-			return fmt.Sprint(values[i+1])
-		}
-	}
-	if len(values)%2 == 1 {
-		return fmt.Sprint(values[len(values)-1])
-	}
-	if s, ok := def.(string); ok {
-		return s
-	}
-	return ""
+//GetString 获取字符串
+func GetString(v interface{}) string {
+	return fmt.Sprintf("%v", v)
 }
 
-//DecodeInt 判断变量的值与指定相等时设置为另一个值，否则使用原值
-func DecodeInt(def interface{}, a interface{}, b interface{}, e ...interface{}) int {
-	values := make([]interface{}, 0, len(e)+2)
-	values = append(values, a)
-	values = append(values, b)
-	values = append(values, e...)
-
-	for i := 0; i < len(values)-1; i = i + 2 {
-		if def == values[i] {
-			v, err := Convert2Int(values[i+1])
-			if err == nil {
-				return v
-			}
-		}
+//GetInt 获取int数据，不是有效的数字则返回默然值或0
+func GetInt(v interface{}, def ...int) int {
+	if value, err := strconv.Atoi(fmt.Sprintf("%v", v)); err == nil {
+		return value
 	}
-	if len(values)%2 == 1 {
-		v, err := Convert2Int(values[len(values)-1])
-		if err == nil {
-			return v
-		}
-	}
-	if r, ok := def.(int); ok {
-		return r
+	if len(def) > 0 {
+		return def[0]
 	}
 	return 0
 }
 
-//Convert2Int 转换为int类型
-func Convert2Int(i interface{}) (int, error) {
-	switch i.(type) {
-	case int:
-		return i.(int), nil
-	case string:
-		return strconv.Atoi(i.(string))
-	default:
-		return strconv.Atoi(fmt.Sprint(i))
+//GetInt64 获取int64数据，不是有效的数字则返回默然值或0
+func GetInt64(v interface{}, def ...int64) int64 {
+	if value, err := strconv.ParseInt(fmt.Sprintf("%v", v), 10, 64); err == nil {
+		return value
 	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return 0
 }
 
-func ToInt(i interface{}, def ...int) int {
-	v, err := Convert2Int(i)
-	if err != nil {
-		if len(def) > 0 {
-			return def[0]
-		}
-		return 0
+//GetFloat32 获取float32数据，不是有效的数字则返回默然值或0
+func GetFloat32(v interface{}, def ...float32) float32 {
+	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 32); err == nil {
+		return float32(value)
 	}
-	return v
+	if len(def) > 0 {
+		return def[0]
+	}
+	return 0
 }
 
-//IsEmpty 当前对像是否是字符串空
+//GetFloat64 获取float64数据，不是有效的数字则返回默然值或0
+func GetFloat64(v interface{}, def ...float64) float64 {
+	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 64); err == nil {
+		return value
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return 0
+}
+
+//GetBool 获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
+func GetBool(v interface{}, def ...bool) bool {
+	if value, err := parseBool(v); err == nil {
+		return value
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return false
+}
+
+//GetDatatime 获取时间
+func GetDatatime(v interface{}, format ...string) (time.Time, error) {
+	t, b := MustString(v)
+	if !b {
+		return time.Now(), errors.New("值不能为空")
+	}
+	f := "2006/01/02 15:04:05"
+	if len(format) > 0 {
+		f = format[0]
+	}
+	return time.ParseInLocation(f, t, time.Local)
+}
+
+//MustString 获取字符串，不是字符串格式则返回false
+func MustString(v interface{}) (string, bool) {
+	if value, ok := v.(string); ok {
+		return value, true
+	}
+	return "", false
+}
+
+//MustInt 获取int，不是有效的数字则返回false
+func MustInt(v interface{}) (int, bool) {
+	if value, err := strconv.Atoi(fmt.Sprintf("%v", v)); err == nil {
+		return value, true
+	}
+	return 0, false
+}
+
+//MustFloat32 获取float32，不是有效的数字则返回false
+func MustFloat32(v interface{}) (float32, bool) {
+	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 32); err == nil {
+		return float32(value), true
+	}
+	return 0, false
+}
+
+//MustFloat64 获取float64，不是有效的数字则返回false
+func MustFloat64(v interface{}) (float64, bool) {
+	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 64); err == nil {
+		return value, true
+	}
+	return 0, false
+}
+
+//IsEmpty 值是否为空
 func IsEmpty(v interface{}) bool {
 	if v == nil {
 		return true
@@ -90,17 +125,8 @@ func IsEmpty(v interface{}) bool {
 	}
 	return false
 }
-func GetString(i interface{}) string {
-	if i == nil {
-		return ""
-	}
-	switch i.(type) {
-	case []string:
-		return strings.Join(i.([]string), ";")
-	default:
-		return fmt.Sprint(i)
-	}
-}
+
+//IntContains int数组中是否包含指定值
 func IntContains(input []int, v int) bool {
 	for _, i := range input {
 		if i == v {
