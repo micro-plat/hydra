@@ -7,6 +7,7 @@ package daemon
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
@@ -84,8 +85,15 @@ func (linux *systemVRecord) Install(args ...string) (string, error) {
 	if err := templ.Execute(
 		file,
 		&struct {
-			Name, Description, Path, Args string
-		}{linux.name, linux.description, execPatch, strings.Join(args, " ")},
+			Name, Description, Dependencies, Path, WorkDir, Args string
+		}{
+			linux.name,
+			linux.description,
+			strings.Join(linux.dependencies, " "),
+			execPatch,
+			filepath.Dir(execPatch),
+			strings.Join(args, " "),
+		},
 	); err != nil {
 		return installAction + failed, err
 	}
