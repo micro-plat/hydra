@@ -195,6 +195,6 @@ stop on runlevel [016]
 
 respawn
 #kill timeout 5
-
-exec {{.Path}} {{.Args}} >> /var/log/{{.Name}}.log 2>> /var/log/{{.Name}}.err
+chdir {{.WorkDir}}
+exec {{.Path}} run {{.Args}}
 `
