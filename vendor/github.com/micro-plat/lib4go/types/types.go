@@ -68,7 +68,7 @@ func GetBool(v interface{}, def ...bool) bool {
 }
 
 //GetDatatime 获取时间
-func GetDatatime(v interface{}, format ...string) (time.Time, error) {
+func GetDatetime(v interface{}, format ...string) (time.Time, error) {
 	t, b := MustString(v)
 	if !b {
 		return time.Now(), errors.New("值不能为空")

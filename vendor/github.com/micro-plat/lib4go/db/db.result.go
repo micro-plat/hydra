@@ -6,8 +6,6 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//var _ IQueryRow = QueryRow{}
-
 type IQueryRow interface {
 	GetString(name string) string
 	GetInt(name string, def ...int) int
@@ -19,12 +17,12 @@ type IQueryRow interface {
 	GetMustInt(name string) (int, bool)
 	GetMustFloat32(name string) (float32, bool)
 	GetMustFloat64(name string) (float64, bool)
-	GetDatatime(name string, format ...string) (time.Time, error)
+	GetDatetime(name string, format ...string) (time.Time, error)
 	ToStruct(o interface{}) error
 }
 
 //QueryRow 查询的数据行
-type QueryRow types.XMap
+type QueryRow = types.XMap
 
 //QueryRows 多行数据
 type QueryRows []QueryRow

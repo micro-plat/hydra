@@ -18,7 +18,7 @@ type IXMap interface {
 	GetMustInt(name string) (int, bool)
 	GetMustFloat32(name string) (float32, bool)
 	GetMustFloat64(name string) (float64, bool)
-	GetDatatime(name string, format ...string) (time.Time, error)
+	GetDatetime(name string, format ...string) (time.Time, error)
 	ToStruct(o interface{}) error
 }
 
@@ -54,9 +54,9 @@ func (q XMap) GetBool(name string, def ...bool) bool {
 	return GetBool(q[name], def...)
 }
 
-//GetDatatime 获取时间字段
-func (q XMap) GetDatatime(name string, format ...string) (time.Time, error) {
-	return GetDatatime(q[name], format...)
+//GetDatetime 获取时间字段
+func (q XMap) GetDatetime(name string, format ...string) (time.Time, error) {
+	return GetDatetime(q[name], format...)
 }
 
 //Has 检查对象中是否存在某个值
