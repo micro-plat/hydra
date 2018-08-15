@@ -199,6 +199,22 @@ func (r *Request) Translate(format string, a bool) string {
 	return str
 }
 
+//GetFloat32 获取float64数字
+func (r *Request) GetFloat32(name string, p ...float32) float32 {
+	value, b := r.Get(name)
+	if b {
+		x, err := strconv.ParseFloat(value, 32)
+		if err == nil {
+			return float32(x)
+		}
+	}
+
+	if len(p) > 0 {
+		return p[0]
+	}
+	return 0
+}
+
 //GetFloat64 获取float64数字
 func (r *Request) GetFloat64(name string, p ...float64) float64 {
 	value, b := r.Get(name)

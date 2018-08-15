@@ -130,7 +130,6 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 				return rh
 			}
 		}
-
 	}
 	if rd := r.Handled(ctx); ctx.Response.HasError(rd) {
 		return rd
