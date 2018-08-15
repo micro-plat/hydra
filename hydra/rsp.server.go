@@ -51,7 +51,6 @@ func (s *rspServer) Change(u *watcher.ContentChangeArgs) {
 				return
 			}
 			conf.Set("__component_handler_", s.handler)
-
 			if _, ok := s.servers[u.Path]; !ok {
 				//添加新服务器
 				if conf.IsStop() {

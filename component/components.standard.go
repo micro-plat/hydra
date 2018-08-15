@@ -12,7 +12,6 @@ import (
 )
 
 const (
-
 	//MicroService 微服务
 	// MicroService = "__micro_"
 
