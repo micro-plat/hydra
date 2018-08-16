@@ -38,26 +38,26 @@ func Check(query string, trf *Transform) bool {
 				return false
 			}
 		case SymbolLess:
-			l := types.ToInt(left, 0)
-			r := types.ToInt(right, -1)
+			l := types.GetInt(left, 0)
+			r := types.GetInt(right, -1)
 			if l >= r {
 				return false
 			}
 		case SymbolLessOrEqual:
-			l := types.ToInt(left, 0)
-			r := types.ToInt(right, -1)
+			l := types.GetInt(left, 0)
+			r := types.GetInt(right, -1)
 			if l > r {
 				return false
 			}
 		case SymbolMore:
-			l := types.ToInt(left, -1)
-			r := types.ToInt(right, 0)
+			l := types.GetInt(left, -1)
+			r := types.GetInt(right, 0)
 			if l <= r {
 				return false
 			}
 		case SymbolMoreOrEqual:
-			l := types.ToInt(left, -1)
-			r := types.ToInt(right, 0)
+			l := types.GetInt(left, -1)
+			r := types.GetInt(right, 0)
 			if l < r {
 				return false
 			}
