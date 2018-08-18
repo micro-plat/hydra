@@ -232,7 +232,9 @@ func (r *Response) MustContent(status int, content interface{}) {
 }
 func (r *Response) getStatus(c interface{}) int {
 	switch c.(type) {
-	case IError, error:
+	case IError:
+		return c.(IError).GetCode()
+	case error:
 		if r.Status < 400 {
 			return 400
 		}
