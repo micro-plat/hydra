@@ -20,8 +20,14 @@ func main() {
 		"interval":"1s",
 		"layout":{"name":"%name","time":"%datetime","content":"%content","level":"%l","session":"%session"},
     "service":"/hydra/log/save@logging.logging_debug"
-}
-	`)
+}`)
+	app.Conf.API.SetSubConf("metric", `{
+	"host":"http://192.168.0.185:8086",
+	"dataBase":"rlogserver",
+	"cron":"@every 10s",
+	"userName":"",
+	"password":""
+	}`)
 
 	app.Micro("/hello", helloWorld)
 	app.Start()
