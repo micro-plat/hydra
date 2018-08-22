@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
+	"github.com/micro-plat/lib4go/encoding/base64"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -148,11 +149,13 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 	input["__func_body_get_"] = func(ch string) (string, error) {
 		if s, ok := c.Request.GetForm()["__body_"]; ok {
 			if v, ok := c.Request.GetHeader()["__encode_snappy_"]; ok && v == "true" {
-				buff := []byte(s.(string))
-				var nbuff []byte
-				nbuffer, err := snappy.Decode(nbuff, buff)
+				buff, err := base64.DecodeBytes(s.(string))
 				if err != nil {
-					return "", err
+					return "", fmt.Errorf("snappy压缩过的串必须是base64编码")
+				}
+				nbuffer, err := snappy.Decode(nil, buff)
+				if err != nil {
+					return "", fmt.Errorf("snappy.decode.err:%v %s", err, v)
 				}
 				return string(nbuffer), nil
 			}

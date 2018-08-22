@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/snappy"
 	"github.com/micro-plat/hydra/rpc"
+	"github.com/micro-plat/lib4go/encoding/base64"
 )
 
 type rpcWriter struct {
@@ -28,12 +29,12 @@ func (r *rpcWriter) Write(p []byte) (n int, err error) {
 		err = fmt.Errorf("json.compact.err:%v", err)
 		return 0, err
 	}
-
 	dst := snappy.Encode(nil, buff.Bytes())
 	_, _, _, err = r.rpcInvoker.Request(r.service, "GET", map[string]string{
 		"__encode_snappy_": "true",
 	}, map[string]interface{}{
-		"__body_": string(dst),
+		"__body_": base64.EncodeBytes(dst),
+		//	"__body_": buff.String(),
 	}, true)
 	if err != nil {
 		return 0, err
