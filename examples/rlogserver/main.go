@@ -49,5 +49,5 @@ func helloWorld(ctx *context.Context) (r interface{}) {
 	// 	ErrCode:     "0001",
 	// 	ErrMsg:      "success",
 	// }
-	return context.NewResult(400, "success")
+	return context.NewResult(204, "success")
 }
