@@ -48,7 +48,12 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return nil, err
 	}
-	if h.server, err = NewMqcServer(cnf.GetServerName(), "", "", nil, WithLogger(logger)); err != nil {
+	if h.server, err = NewMqcServer(cnf.GetServerName(),
+		"",
+		"",
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(logger)); err != nil {
 		return
 	}
 	if err = h.SetConf(true, h.currentConf); err != nil {
@@ -72,7 +77,12 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return err
 	}
-	if w.server, err = NewMqcServer(cnf.GetServerName(), "", "", nil, WithLogger(w.Logger)); err != nil {
+	if w.server, err = NewMqcServer(cnf.GetServerName(),
+		"",
+		"",
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(w.Logger)); err != nil {
 		return
 	}
 	if err = w.SetConf(true, cnf); err != nil {

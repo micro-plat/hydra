@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/snappy"
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
@@ -60,12 +61,24 @@ func setServiceName(c *dispatcher.Context, v string) {
 func setCTX(c *dispatcher.Context, r *context.Context) {
 	c.Set("__context_", r)
 }
+func getTrace(cnf *conf.MetadataConf) bool {
+	return cnf.GetMetadata("show-trace").(bool)
+}
 func getCTX(c *dispatcher.Context) *context.Context {
 	result, _ := c.Get("__context_")
 	if result == nil {
 		return nil
 	}
 	return result.(*context.Context)
+}
+func setResponseRaw(c *dispatcher.Context, raw string) {
+	c.Set("__response_raw_", raw)
+}
+func getResponseRaw(c *dispatcher.Context) (string, bool) {
+	if v, ok := c.Get("__response_raw_"); ok {
+		return v.(string), true
+	}
+	return "", false
 }
 
 //ContextHandler api请求处理程序

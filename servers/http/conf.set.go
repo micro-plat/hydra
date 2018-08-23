@@ -193,8 +193,8 @@ type IAjaxRequest interface {
 
 //SetAjaxRequest 设置ajax
 func SetAjaxRequest(set IAjaxRequest, cnf conf.IServerConf) (enable bool, err error) {
-	if enable, err = cnf.GetBool("onlyAllowAjaxRequest", false); err != nil {
-		return false, err
+	if enable = cnf.GetBool("onlyAllowAjaxRequest", false); !enable {
+		return false, nil
 	}
 	err = set.SetAjaxRequest(enable)
 	return enable && err == nil, err

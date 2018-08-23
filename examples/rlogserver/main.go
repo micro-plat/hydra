@@ -6,6 +6,13 @@ import (
 	"github.com/micro-plat/hydra/hydra"
 )
 
+type OrderResult struct {
+	OrderNO     string `xml:"qxOrderNo"`
+	OrderStatus string `xml:"orderStatus"`
+	ErrCode     string `xml:"failedCode"`
+	ErrMsg      string `xml:"failedReason"`
+}
+
 func main() {
 	app := hydra.NewApp(
 		hydra.WithPlatName("myplat_test_rlogger"),
@@ -14,7 +21,8 @@ func main() {
 		hydra.WithRemoteLogger(),
 		hydra.WithDebug())
 
-	app.Conf.API.SetMainConf(`{"address":":7890"}`)
+	app.Conf.API.SetMainConf(`{"address":":7892","trace":true}`)
+	//	app.Conf.API.SetMainConf(`{"address":":7892"}`)
 	app.Conf.Plat.SetVarConf("global", "logger", `{
     "level":"All",
 		"interval":"1s",
@@ -34,5 +42,12 @@ func main() {
 }
 
 func helloWorld(ctx *context.Context) (r interface{}) {
-	return "hello world"
+	ctx.Response.SetXML()
+	return &OrderResult{
+		OrderNO:     "QX09099999",
+		OrderStatus: "UNDERWAY",
+		ErrCode:     "0001",
+		ErrMsg:      "success",
+	}
+	//	return "succcess"
 }

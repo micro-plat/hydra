@@ -37,7 +37,7 @@ type RpcServer struct {
 func NewRpcServer(name string, address string, routers []*conf.Router, opts ...Option) (t *RpcServer, err error) {
 	t = &RpcServer{conf: &conf.MetadataConf{
 		Name: name,
-		Type:"rpc",
+		Type: "rpc",
 	}}
 	if t.addr, err = t.getAddress(address); err != nil {
 		return nil, err
@@ -56,6 +56,7 @@ func NewRpcServer(name string, address string, routers []*conf.Router, opts ...O
 			return
 		}
 	}
+	t.SetTrace(t.showTrace)
 	return
 }
 

@@ -92,6 +92,18 @@ func getCTX(c *gin.Context) *context.Context {
 	}
 	return result.(*context.Context)
 }
+func getTrace(cnf *conf.MetadataConf) bool {
+	return cnf.GetMetadata("show-trace").(bool)
+}
+func setResponseRaw(c *gin.Context, raw string) {
+	c.Set("__response_raw_", raw)
+}
+func getResponseRaw(c *gin.Context) (string, bool) {
+	if v, ok := c.Get("__response_raw_"); ok {
+		return v.(string), true
+	}
+	return "", false
+}
 
 func setMetadataConf(c *gin.Context, cnf *conf.MetadataConf) {
 	c.Set("__metadata-conf_", cnf)

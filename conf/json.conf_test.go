@@ -56,12 +56,10 @@ func TestJsonConfString(t *testing.T) {
 func TestJsonConfBool(t *testing.T) {
 	jc, _ := NewJSONConf([]byte("{}"), 9999)
 
-	b, err := jc.GetBool("a")
-	ut.Refute(t, err, nil)
+	b := jc.GetBool("a")
 	ut.Expect(t, b, false)
 
-	b, err = jc.GetBool("a", true)
-	ut.Expect(t, err, nil)
+	b = jc.GetBool("a", true)
 	ut.Expect(t, b, true)
 	tbs := []struct {
 		input string
@@ -84,7 +82,7 @@ func TestJsonConfBool(t *testing.T) {
 	for _, tb := range tbs {
 		jc, _ = NewJSONConf([]byte(tb.input), 9999)
 
-		b, _ = jc.GetBool("a")
+		b = jc.GetBool("a")
 		ut.Expect(t, b, tb.value)
 	}
 

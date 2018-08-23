@@ -45,7 +45,11 @@ func NewRpcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return nil, err
 	}
-	if h.server, err = NewRpcServer(cnf.GetServerName(), cnf.GetString("address", "8081"), nil, WithLogger(logger)); err != nil {
+	if h.server, err = NewRpcServer(cnf.GetServerName(),
+		cnf.GetString("address", "8081"),
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(logger)); err != nil {
 		return
 	}
 	if err = h.SetConf(true, h.currentConf); err != nil {
@@ -70,7 +74,11 @@ func (w *RpcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return err
 	}
-	if w.server, err = NewRpcServer(cnf.GetServerName(), cnf.GetString("address", "8080"), nil, WithLogger(w.Logger)); err != nil {
+	if w.server, err = NewRpcServer(cnf.GetServerName(),
+		cnf.GetString("address", "8080"),
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(w.Logger)); err != nil {
 		return
 	}
 	if err = w.SetConf(true, cnf); err != nil {

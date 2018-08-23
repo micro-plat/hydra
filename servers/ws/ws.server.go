@@ -60,6 +60,7 @@ func NewWSServerServer(name string, addr string, routers []*conf.Router, opts ..
 	if routers != nil {
 		t.engine.Handler, err = t.getHandler(routers)
 	}
+	t.SetTrace(t.showTrace)
 	return
 }
 

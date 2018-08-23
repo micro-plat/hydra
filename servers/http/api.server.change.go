@@ -26,6 +26,12 @@ func (s *ApiServer) SetAjaxRequest(allow bool) error {
 	return nil
 }
 
+//SetTrace 显示跟踪信息
+func (s *ApiServer) SetTrace(b bool) {
+	s.conf.SetMetadata("show-trace", b)
+	return
+}
+
 //SetHosts 设置组件的host name
 func (s *ApiServer) SetHosts(hosts conf.Hosts) error {
 	for _, host := range hosts {

@@ -48,7 +48,11 @@ func NewCronResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *
 	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return nil, err
 	}
-	h.server, err = NewCronServer(h.currentConf.GetServerName(), "", nil, WithLogger(logger))
+	h.server, err = NewCronServer(h.currentConf.GetServerName(),
+		"",
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(logger))
 	if err != nil {
 		return
 	}
@@ -75,7 +79,11 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return err
 	}
-	w.server, err = NewCronServer(w.currentConf.GetServerName(), "", nil, WithLogger(w.Logger))
+	w.server, err = NewCronServer(w.currentConf.GetServerName(),
+		"",
+		nil,
+		WithShowTrace(cnf.GetBool("trace", false)),
+		WithLogger(w.Logger))
 	if err != nil {
 		return
 	}

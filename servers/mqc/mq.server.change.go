@@ -34,3 +34,9 @@ func (s *MqcServer) SetQueues(proto string, raw string, queues []*conf.Queue) (e
 	}
 	return nil
 }
+
+//SetTrace 显示跟踪信息
+func (s *MqcServer) SetTrace(b bool) {
+	s.conf.SetMetadata("show-trace", b)
+	return
+}

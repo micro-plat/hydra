@@ -26,6 +26,12 @@ func (s *RpcServer) SetHosts(hosts conf.Hosts) error {
 	return nil
 }
 
+//SetTrace 显示跟踪信息
+func (s *RpcServer) SetTrace(b bool) {
+	s.conf.SetMetadata("show-trace", b)
+	return
+}
+
 //SetMetric 重置metric
 func (s *RpcServer) SetMetric(metric *conf.Metric) error {
 	s.metric.Stop()

@@ -13,7 +13,7 @@ type IConf interface {
 	GetStrings(key string, def ...string) (r []string)
 	GetInt(key string, def ...int) int
 	GetArray(key string, def ...interface{}) (r []interface{})
-	GetBool(key string, def ...bool) (r bool, err error)
+	GetBool(key string, def ...bool) (r bool)
 	GeJSON(section string) (r []byte, version int32, err error)
 	GetSection(section string) (c *JSONConf, err error)
 	HasSection(section string) bool
@@ -126,14 +126,16 @@ func (j *JSONConf) GetArray(key string, def ...interface{}) (r []interface{}) {
 }
 
 //GetBool 获取bool类型值
-func (j *JSONConf) GetBool(key string, def ...bool) (r bool, err error) {
+func (j *JSONConf) GetBool(key string, def ...bool) (r bool) {
 	if val := j.GetString(key); val != "" {
-		return parseBool(val)
+		if b, err := parseBool(val); err == nil {
+			return b
+		}
 	}
 	if len(def) > 0 {
-		return def[0], nil
+		return def[0]
 	}
-	return false, fmt.Errorf("%s不是bool类型值", key)
+	return false
 }
 
 //GeJSON 获取section原始JSON串

@@ -76,8 +76,18 @@ func (c *Creator) installRegistry() error {
 		if ok && mode == modeAuto {
 			continue
 		}
+		pc, _, err := c.registry.GetChildren(rpath)
+		if err != nil {
+			return err
+		}
+		for _, v := range pc {
+			if err = c.registry.Delete(filepath.Join(rpath, v)); err != nil {
+				return err
+			}
+		}
+		err = c.registry.Delete(rpath)
 		if mode == modeNew {
-			c.registry.Delete(rpath)
+			c.logger.Info("\t\t删除配置:", rpath)
 		}
 		if err := c.binder.ScanMainConf(mainPath, tp); err != nil {
 			return err

@@ -30,3 +30,9 @@ func (s *CronServer) SetTasks(redisSetting string, tasks []*conf.Task) (err erro
 	s.Processor, err = s.getProcessor(redisSetting, tasks)
 	return err
 }
+
+//SetTrace 显示跟踪信息
+func (s *CronServer) SetTrace(b bool) {
+	s.conf.SetMetadata("show-trace", b)
+	return
+}

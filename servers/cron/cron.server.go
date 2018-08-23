@@ -33,6 +33,7 @@ func NewCronServer(name string, config string, tasks []*conf.Task, opts ...Optio
 	if tasks != nil && len(tasks) > 0 {
 		err = t.SetTasks(config, tasks)
 	}
+	t.SetTrace(t.showTrace)
 	return
 }
 func (s *CronServer) Start() error {

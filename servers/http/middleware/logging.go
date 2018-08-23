@@ -25,12 +25,15 @@ func Logging(conf *conf.MetadataConf) gin.HandlerFunc {
 		setLogger(ctx, log)
 		ctx.Next()
 
+		v, _ := getResponseRaw(ctx)
+
 		statusCode := ctx.Writer.Status()
 		if statusCode >= 200 && statusCode < 400 {
-			log.Info(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start))
+			log.Info(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start), v)
 		} else {
-			log.Error(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start))
+			log.Error(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start), v)
 		}
+
 		context := getCTX(ctx)
 		if context != nil {
 			defer context.Close()

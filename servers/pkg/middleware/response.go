@@ -1,7 +1,11 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
+	"encoding/xml"
 	"errors"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -28,6 +32,7 @@ func Response(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 			return
 		}
 		tp, content, err := nctx.Response.GetJSONRenderContent()
+		writeTrace(getTrace(conf), tp, ctx, content)
 		if err != nil {
 			getLogger(ctx).Error(err)
 			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})
@@ -73,5 +78,26 @@ func Response(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 		// 	}
 		// 	ctx.Data(nctx.Response.GetStatus(), "text/plain", []byte(fmt.Sprint(nctx.Response.GetContent())))
 		// }
+	}
+}
+func writeTrace(b bool, tp int, ctx *dispatcher.Context, c interface{}) {
+	if !b {
+		return
+	}
+	switch v := c.(type) {
+	case []byte:
+		setResponseRaw(ctx, string(v))
+	case string:
+		setResponseRaw(ctx, v)
+	default:
+		var buff = bytes.NewBufferString("")
+		switch tp {
+		case context.CT_XML:
+			xml.NewEncoder(buff).Encode(c)
+		default:
+			json.NewEncoder(buff).Encode(c)
+		}
+		setResponseRaw(ctx, strings.Trim(buff.String(), "\n"))
+		buff.Reset()
 	}
 }

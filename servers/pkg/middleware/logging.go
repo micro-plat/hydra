@@ -21,11 +21,12 @@ func Logging(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 		setLogger(ctx, log)
 		ctx.Next()
 
+		v, _ := getResponseRaw(ctx)
 		statusCode := ctx.Writer.Status()
 		if statusCode >= 200 && statusCode < 400 {
-			log.Info(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start))
+			log.Info(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start), v)
 		} else {
-			log.Error(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start))
+			log.Error(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start), v)
 		}
 	}
 

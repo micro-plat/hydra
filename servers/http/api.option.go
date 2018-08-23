@@ -14,6 +14,7 @@ type option struct {
 	readTimeout       int
 	writeTimeout      int
 	readHeaderTimeout int
+	showTrace         bool
 	metric            *middleware.Metric
 }
 
@@ -24,6 +25,13 @@ type Option func(*option)
 func WithLogger(logger *logger.Logger) Option {
 	return func(o *option) {
 		o.Logger = logger
+	}
+}
+
+//WithShowTrace 显示跟踪信息
+func WithShowTrace(b bool) Option {
+	return func(o *option) {
+		o.showTrace = b
 	}
 }
 

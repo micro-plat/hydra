@@ -37,6 +37,12 @@ func (s *WSServer) SetStatic(static *conf.Static) error {
 	return nil
 }
 
+//SetTrace 显示跟踪信息
+func (s *WSServer) SetTrace(b bool) {
+	s.conf.SetMetadata("show-trace", b)
+	return
+}
+
 //SetMetric 重置metric
 func (s *WSServer) SetMetric(metric *conf.Metric) error {
 	s.metric.Stop()

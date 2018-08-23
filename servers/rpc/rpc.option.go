@@ -12,7 +12,8 @@ type Handler interface {
 type option struct {
 	ip string
 	*logger.Logger
-	metric *middleware.Metric
+	metric    *middleware.Metric
+	showTrace bool
 }
 
 //Option 配置选项
@@ -22,6 +23,13 @@ type Option func(*option)
 func WithLogger(logger *logger.Logger) Option {
 	return func(o *option) {
 		o.Logger = logger
+	}
+}
+
+//WithShowTrace 显示跟踪信息
+func WithShowTrace(b bool) Option {
+	return func(o *option) {
+		o.showTrace = b
 	}
 }
 

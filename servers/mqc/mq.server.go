@@ -33,6 +33,7 @@ func NewMqcServer(name string, proto string, config string, queues []*conf.Queue
 	if queues != nil && proto != "" && len(queues) > 0 {
 		err = t.SetQueues(proto, config, queues)
 	}
+	t.SetTrace(t.showTrace)
 	return
 }
 
