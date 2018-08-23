@@ -42,12 +42,12 @@ func main() {
 }
 
 func helloWorld(ctx *context.Context) (r interface{}) {
-	ctx.Response.SetXML()
-	return &OrderResult{
-		OrderNO:     "QX09099999",
-		OrderStatus: "UNDERWAY",
-		ErrCode:     "0001",
-		ErrMsg:      "success",
-	}
-	//	return "succcess"
+	// ctx.Response.SetXML()
+	// return &OrderResult{
+	// 	OrderNO:     "QX09099999",
+	// 	OrderStatus: "UNDERWAY",
+	// 	ErrCode:     "0001",
+	// 	ErrMsg:      "success",
+	// }
+	return context.NewResult(400, "success")
 }

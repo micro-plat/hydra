@@ -215,6 +215,10 @@ func (r *Response) GetContent() interface{} {
 
 func (r *Response) ShouldContent(content interface{}) {
 	switch v := content.(type) {
+	case IResult:
+		r.Status = v.GetCode()
+		r.Content = v.GetResult()
+		return
 	case IError:
 		r.err = v.GetError()
 		r.Status = v.GetCode()
@@ -231,9 +235,11 @@ func (r *Response) MustContent(status int, content interface{}) {
 	r.ShouldContent(content)
 }
 func (r *Response) getStatus(c interface{}) int {
-	switch c.(type) {
+	switch v := c.(type) {
+	case IResult:
+		return v.GetCode()
 	case IError:
-		return c.(IError).GetCode()
+		return v.GetCode()
 	case error:
 		if r.Status < 400 {
 			return 400
