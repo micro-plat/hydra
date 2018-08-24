@@ -76,9 +76,9 @@ func (c *Creator) installRegistry() error {
 		if ok && mode == modeAuto {
 			continue
 		}
-		pc, _, _ := c.registry.GetChildren(rpath)		i
+		pc, _, _ := c.registry.GetChildren(rpath)
 		for _, v := range pc {
-			c.registry.Delete(filepath.Join(rpath, v)); 
+			c.registry.Delete(filepath.Join(rpath, v))
 		}
 		err = c.registry.Delete(rpath)
 		if mode == modeNew {
