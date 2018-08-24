@@ -89,6 +89,7 @@ func (m *Metric) Restart(host string, dataBase string, userName string, password
 	go m.loopCollectCPU()
 	go m.loopCollectDisk()
 	go m.loopCollectMem()
+	go m.loopNetConnCount()
 	m.timer.Start()
 	return nil
 }
