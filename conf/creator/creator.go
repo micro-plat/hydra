@@ -81,9 +81,7 @@ func (c *Creator) installRegistry() error {
 			return err
 		}
 		for _, v := range pc {
-			if err = c.registry.Delete(filepath.Join(rpath, v)); err != nil {
-				return err
-			}
+			c.registry.Delete(filepath.Join(rpath, v)); 
 		}
 		err = c.registry.Delete(rpath)
 		if mode == modeNew {
