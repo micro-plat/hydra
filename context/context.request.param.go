@@ -131,3 +131,6 @@ func (i *inputParams) Translate(format string, a bool) (string, int) {
 	})
 	return result, v
 }
+func (i *inputParams) Clear() {
+	i.data = nil
+}

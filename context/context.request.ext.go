@@ -21,6 +21,17 @@ type extParams struct {
 	hasTransMap bool
 }
 
+func (w *extParams) Clear() {
+	w.ext = nil
+	w.ctx = nil
+	w.body = ""
+	w.bodyReadErr = nil
+	w.hasReadBody = false
+	w.bodyMap = nil
+	w.bodyMapErr = nil
+	w.hasTransMap = false
+}
+
 // func (w *extParams) Get(name string) (interface{}, bool) {
 // 	v, ok := w.ext[name]
 // 	return v, ok

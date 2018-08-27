@@ -14,6 +14,9 @@ type httpRequest struct {
 	ext map[string]interface{}
 }
 
+func (c *httpRequest) Clear() {
+	c.ext = nil
+}
 func (c *httpRequest) GetHeader() (map[string]string, error) {
 	header := make(map[string]string)
 	request, err := c.Get()

@@ -98,9 +98,9 @@ func (m *Metric) Handle() dispatcher.HandlerFunc {
 	return func(ctx *dispatcher.Context) {
 		url := ctx.Request.GetService()
 
-		conterName := metrics.MakeName(m.conf.Type+".server.request", metrics.WORKING, "server", m.conf.Name, "ip", m.ip, "url", url) //堵塞计数
-		timerName := metrics.MakeName(m.conf.Type+".server.request", metrics.TIMER, "server", m.conf.Name, "ip", m.ip, "url", url)    //堵塞计数
-		requestName := metrics.MakeName(m.conf.Type+".server.request", metrics.QPS, "server", m.conf.Name, "ip", m.ip, "url", url)    //请求数
+		conterName := metrics.MakeName(m.conf.Type+".server.request", metrics.WORKING, "server", m.conf.Name, "host", m.ip, "url", url) //堵塞计数
+		timerName := metrics.MakeName(m.conf.Type+".server.request", metrics.TIMER, "server", m.conf.Name, "host", m.ip, "url", url)    //堵塞计数
+		requestName := metrics.MakeName(m.conf.Type+".server.request", metrics.QPS, "server", m.conf.Name, "host", m.ip, "url", url)    //请求数
 
 		metrics.GetOrRegisterQPS(requestName, m.currentRegistry).Mark(1)
 
@@ -110,7 +110,7 @@ func (m *Metric) Handle() dispatcher.HandlerFunc {
 		counter.Dec(1)
 
 		statusCode := ctx.Writer.Status()
-		responseName := metrics.MakeName(m.conf.Type+".server.response", metrics.METER, "server", m.conf.Name, "ip", m.ip,
+		responseName := metrics.MakeName(m.conf.Type+".server.response", metrics.METER, "server", m.conf.Name, "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
 		metrics.GetOrRegisterMeter(responseName, m.currentRegistry).Mark(1)
 	}

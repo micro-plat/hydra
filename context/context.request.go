@@ -26,6 +26,17 @@ type Request struct {
 	*extParams
 }
 
+//clear 清空数据
+func (r *Request) clear() {
+	r.Form.Clear()
+	r.QueryString.Clear()
+	r.Param.Clear()
+	r.Setting.Clear()
+	r.CircuitBreaker.Clear()
+	r.Http.Clear()
+	r.extParams.Clear()
+}
+
 func newRequest() *Request {
 	return &Request{
 		QueryString:    &inputParams{},
@@ -254,16 +265,4 @@ func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time
 		return p[0], nil
 	}
 	return v, err
-}
-
-//clear 清空数据
-func (r *Request) clear() {
-	r.QueryString.data = nil
-	r.Form.data = nil
-	r.Param.data = nil
-	r.Setting.data = nil
-	r.CircuitBreaker.inputParams.data = nil
-	r.CircuitBreaker.ext = nil
-	r.extParams.ext = nil
-	r.Http.ext = nil
 }
