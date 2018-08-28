@@ -100,6 +100,7 @@ func init() {
 func (c *Context) Close() {
 	c.Request.clear()
 	c.Response.clear()
+	c.RPC.clear()
 	c.container = nil
 	contextPool.Put(c)
 }

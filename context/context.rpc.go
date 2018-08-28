@@ -30,6 +30,11 @@ type ContextRPC struct {
 	rpc RPCInvoker
 }
 
+func (cr *ContextRPC) clear() {
+	cr.ctx = nil
+	cr.rpc = nil
+}
+
 //Reset 重置context
 func (cr *ContextRPC) reset(ctx *Context, rpc RPCInvoker) {
 	cr.ctx = ctx
