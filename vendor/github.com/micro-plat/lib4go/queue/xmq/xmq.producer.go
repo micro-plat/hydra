@@ -99,11 +99,14 @@ func (producer *XMQProducer) writeMessage(msg string) error {
 	producer.lastWrite = time.Now()
 	result, err := encoding.ConvertBytes([]byte(msg), "gbk")
 	if err != nil {
-		producer.disconnect()
+		//producer.disconnect()
 		return err
 	}
 	_, err = producer.conn.Write(result)
 	producer.lastWrite = time.Now()
+	if err != nil {
+		producer.disconnect()
+	}
 	return err
 }
 
