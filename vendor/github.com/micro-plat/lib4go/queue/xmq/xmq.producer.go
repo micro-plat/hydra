@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/mq"
@@ -18,31 +17,29 @@ import (
 type XMQProducer struct {
 	conf        *Conf
 	conn        net.Conn
-	queues      cmap.ConcurrentMap
 	connecting  bool
 	isConnected bool
 	closeCh     chan struct{}
 	done        bool
 	lk          sync.Mutex
 	writeLock   sync.Mutex
-	header      []string
-	lastWrite   time.Time
-	*mq.OptionConf
+	//	header      []string
+	lastWrite time.Time
+	Logger    *logger.Logger
 }
 
 //New 创建新的producer
 func New(address []string, c string) (producer *XMQProducer, err error) {
 	producer = &XMQProducer{}
-	producer.OptionConf = &mq.OptionConf{}
 	producer.closeCh = make(chan struct{})
 	producer.conf, err = NewConf(c)
 	if err != nil {
 		return nil, err
 	}
 	if producer.Logger == nil {
-		producer.Logger = logger.GetSession("xmq.producer", logger.CreateSession())
+		producer.Logger = logger.GetSession("xmq.queue", logger.CreateSession())
 	}
-	producer.header = make([]string, 0, 4)
+	//	producer.header = make([]string, 0, 4)
 	return producer, producer.Connect()
 }
 
@@ -59,6 +56,9 @@ func (producer *XMQProducer) Connect() error {
 			case <-producer.closeCh:
 				break START
 			case <-time.After(time.Second * 3):
+				if producer.done {
+					return
+				}
 				if producer.isConnected {
 					if time.Since(producer.lastWrite).Seconds() > 3 {
 						message, err := NewXMQHeartBit().MakeMessage()
@@ -94,14 +94,15 @@ func (producer *XMQProducer) writeMessage(msg string) error {
 		return fmt.Errorf("未连接到服务器")
 	}
 	producer.writeLock.Lock()
+	defer producer.writeLock.Unlock()
 	producer.lastWrite = time.Now()
 	result, err := encoding.ConvertBytes([]byte(msg), "gbk")
 	if err != nil {
+		producer.disconnect()
 		return err
 	}
 	_, err = producer.conn.Write(result)
 	producer.lastWrite = time.Now()
-	producer.writeLock.Unlock()
 	return err
 }
 
@@ -117,7 +118,7 @@ func (producer *XMQProducer) disconnect() {
 //reconnect 自动重连
 func (producer *XMQProducer) reconnect() {
 	producer.conn.Close()
-	producer.isConnected = false
+	producer.disconnect()
 	err := producer.Connect()
 	if err != nil {
 		producer.Logger.Errorf("连接到MQ服务器失败:%v", err)
