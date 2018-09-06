@@ -15,7 +15,7 @@ import (
 
 //XMQProducer Producer
 type XMQProducer struct {
-	address     string
+	conf        *Conf
 	conn        net.Conn
 	messages    chan *mq.ProcuderMessage
 	backupMsg   chan *mq.ProcuderMessage
@@ -33,13 +33,17 @@ type XMQProducer struct {
 
 //NewXMQProducer 创建新的producer
 func NewXMQProducer(address string, opts ...mq.Option) (producer *XMQProducer, err error) {
-	producer = &XMQProducer{address: address}
+	producer = &XMQProducer{}
 	producer.OptionConf = &mq.OptionConf{}
 	producer.messages = make(chan *mq.ProcuderMessage, 10000)
 	producer.backupMsg = make(chan *mq.ProcuderMessage, 100)
 	producer.closeCh = make(chan struct{})
 	for _, opt := range opts {
 		opt(producer.OptionConf)
+	}
+	producer.conf, err = NewConf(producer.Raw)
+	if err != nil {
+		return nil, err
 	}
 	if producer.Logger == nil {
 		producer.Logger = logger.GetSession("xmq.producer", logger.CreateSession())
@@ -205,8 +209,8 @@ func (producer *XMQProducer) connectOnce() (err error) {
 	defer func() {
 		producer.connecting = false
 	}()
-	producer.Logger.Infof("连接到服务器:%s", producer.address)
-	producer.conn, err = net.DialTimeout("tcp", producer.address, time.Second*2)
+	producer.Logger.Infof("连接到服务器:%s", producer.conf.Address)
+	producer.conn, err = net.DialTimeout("tcp", producer.conf.Address, time.Second*2)
 	if err != nil {
 		return fmt.Errorf("mq 无法连接到远程服务器:%v", err)
 	}
@@ -222,7 +226,7 @@ func (producer *XMQProducer) Send(queue string, msg string, timeout time.Duratio
 		return errors.New("mq producer 已关闭")
 	}
 	if !producer.connecting && producer.Retry {
-		return fmt.Errorf("producer无法连接到MQ服务器:%s", producer.address)
+		return fmt.Errorf("producer无法连接到MQ服务器:%s", producer.conf.Address)
 	}
 	message := NewXMQMessage(queue, msg, int(timeout/time.Second))
 	if producer.OptionConf.Key != "" {

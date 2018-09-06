@@ -8,8 +8,32 @@ import (
 )
 
 //GetString 获取字符串
-func GetString(v interface{}) string {
-	return fmt.Sprintf("%v", v)
+func GetString(v interface{}, def ...string) string {
+	if r := fmt.Sprintf("%v", v); r != "" {
+		return r
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return ""
+}
+
+//GetMax 获取指定参数的最大值
+func GetMax(v interface{}, o ...int) int {
+	r := GetInt(v)
+	if len(o) > 0 && o[0] > r {
+		return o[0]
+	}
+	return r
+}
+
+//GetMin 获取指定参数的最小值
+func GetMin(v interface{}, o ...int) int {
+	r := GetInt(v)
+	if len(o) > 0 && o[0] < r {
+		return o[0]
+	}
+	return r
 }
 
 //GetInt 获取int数据，不是有效的数字则返回默然值或0

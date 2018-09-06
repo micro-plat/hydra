@@ -20,4 +20,5 @@ import (
 	_ "github.com/micro-plat/lib4go/mq/xmq"
 	_ "github.com/micro-plat/lib4go/queue"
 	_ "github.com/micro-plat/lib4go/queue/redis"
+	_ "github.com/micro-plat/lib4go/queue/xmq"
 )
