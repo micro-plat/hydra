@@ -9,6 +9,7 @@ import (
 
 type Conf struct {
 	Address string `json:"address" valid:"dialstring,required"`
+	Key     string `json:"key"`
 }
 
 func NewConf(j string) (*Conf, error) {
