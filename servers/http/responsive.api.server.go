@@ -64,7 +64,6 @@ func NewApiResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return nil, err
 	}
-	fmt.Println("------------------------trace:", cnf.GetString("trace"), cnf.GetBool("trace", false))
 	if h.server, err = NewApiServer(cnf.GetServerName(),
 		cnf.GetString("address", ":8090"),
 		nil,
@@ -95,7 +94,6 @@ func (w *ApiResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
 		return err
 	}
-	fmt.Println("------------------------trace:", cnf.GetString("trace"), cnf.GetBool("trace", false))
 	if w.server, err = NewApiServer(cnf.GetServerName(),
 		cnf.GetString("address", ":8090"),
 		nil,
