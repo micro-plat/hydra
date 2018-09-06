@@ -24,8 +24,9 @@ type XMQProducer struct {
 	lk          sync.Mutex
 	writeLock   sync.Mutex
 	//	header      []string
-	lastWrite time.Time
-	Logger    *logger.Logger
+	lastWrite      time.Time
+	firstConnected bool
+	Logger         *logger.Logger
 }
 
 //New 创建新的producer
@@ -143,6 +144,11 @@ func (producer *XMQProducer) connectOnce() (err error) {
 	producer.conn, err = net.DialTimeout("tcp", producer.conf.Address, time.Second*2)
 	if err != nil {
 		return fmt.Errorf("mq 无法连接到远程服务器:%v", err)
+	}
+	if !producer.firstConnected {
+		producer.firstConnected = true
+	} else {
+		producer.Logger.Info("恢复连接:", producer.conf.Address)
 	}
 	producer.isConnected = true
 	producer.lastWrite = time.Now()
