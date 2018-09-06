@@ -103,9 +103,10 @@ func (producer *XMQProducer) writeMessage(msg string) error {
 	}
 	_, err = producer.conn.Write(result)
 	producer.lastWrite = time.Now()
-	// if err != nil {
-	// 	producer.disconnect()
-	// }
+	if err != nil {
+		producer.Logger.Warn("发送数据失败:", err)
+		//producer.disconnect()
+	}
 	return err
 }
 
