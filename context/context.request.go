@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -178,6 +179,13 @@ func (r *Request) GetInt64(name string, p ...int64) int64 {
 	var v int64
 	var err error
 	if b {
+		if strings.Contains(strings.ToUpper(value), "E+") {
+			var n float64
+			_, err := fmt.Sscanf(value, "%e", &n)
+			if err == nil {
+				return int64(n)
+			}
+		}
 		v, err = strconv.ParseInt(value, 10, 64)
 		if err == nil {
 			return v
@@ -232,6 +240,14 @@ func (r *Request) GetFloat64(name string, p ...float64) float64 {
 	var v float64
 	var err error
 	if b {
+		if strings.Contains(strings.ToUpper(value), "E+") {
+			var n float64
+			_, err := fmt.Sscanf(value, "%e", &n)
+			if err == nil {
+				return n
+			}
+		}
+
 		v, err = strconv.ParseFloat(value, 64)
 		if err == nil {
 			return v
