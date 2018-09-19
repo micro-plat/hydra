@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/metrics"
 	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/xsync"
 )
 
 type reporter struct {
@@ -27,6 +28,7 @@ type Metric struct {
 	logger          *logger.Logger
 	reporter        *reporter
 	registry        cmap.ConcurrentMap
+	ticket          *xsync.Ticket
 	mu              sync.Mutex
 	currentRegistry metrics.Registry
 	conf            *conf.MetadataConf
@@ -43,6 +45,7 @@ func NewMetric(conf *conf.MetadataConf) *Metric {
 		currentRegistry: metrics.NewRegistry(),
 		ip:              net.GetLocalIPAddress(),
 		closeChan:       make(chan struct{}),
+		ticket:          xsync.Sequence.Get(),
 	}
 }
 
@@ -50,6 +53,7 @@ func NewMetric(conf *conf.MetadataConf) *Metric {
 func (m *Metric) Stop() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.ticket.Done()
 	if !m.done {
 		close(m.closeChan)
 	}
@@ -60,7 +64,6 @@ func (m *Metric) Stop() {
 	if m.timer != nil {
 		m.timer.Close()
 	}
-
 }
 
 //Restart restart metric
@@ -86,12 +89,18 @@ func (m *Metric) Restart(host string, dataBase string, userName string, password
 	}
 
 	go m.reporter.reporter.Run()
+	go m.collectSys()
+	m.timer.Start()
+	return nil
+}
+func (m *Metric) collectSys() {
+	if !m.ticket.Wait() {
+		return
+	}
 	go m.loopCollectCPU()
 	go m.loopCollectDisk()
 	go m.loopCollectMem()
 	go m.loopNetConnCount()
-	m.timer.Start()
-	return nil
 }
 
 //Handle 处理请求
