@@ -98,7 +98,6 @@ func (m *Metric) collectSys() {
 	if !m.ticket.Wait() {
 		return
 	}
-	m.logger.Debugf("metric:", m.conf.Name, m.conf.Type)
 	go m.loopCollectCPU()
 	go m.loopCollectDisk()
 	go m.loopCollectMem()

@@ -12,7 +12,27 @@ func main() {
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("mqc-api-rpc"),
 		hydra.WithDebug())
-
+	app.Conf.MQC.SetSubConf("metric", `{
+		"host":"http://192.168.0.185:8086",
+	"dataBase":"mqcserver",
+	"cron":"@every 10s",
+	"userName":"",
+	"password":""
+	}	`)
+	app.Conf.API.SetSubConf("metric", `{
+		"host":"http://192.168.0.185:8086",
+	"dataBase":"mqcserver",
+	"cron":"@every 10s",
+	"userName":"",
+	"password":""
+	}	`)
+	app.Conf.RPC.SetSubConf("metric", `{
+		"host":"http://192.168.0.185:8086",
+	"dataBase":"mqcserver",
+	"cron":"@every 10s",
+	"userName":"",
+	"password":""
+	}	`)
 	app.Flow("/order/query", order.NewQueryHandler)
 	app.Flow("/order/bind", order.NewBindHandler)
 	app.Micro("/message/send", user.NewLoginHandler)
