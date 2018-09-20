@@ -26,6 +26,10 @@ func (a *Error) GetError() error {
 	return a
 }
 
+func (a *Error) String() string {
+	return fmt.Sprintf("%d %s", a.code, a.Error())
+}
+
 //CanIgnore 是否可以忽略错误
 func (a *Error) CanIgnore() bool {
 	return a.canIgnore
