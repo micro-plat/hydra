@@ -97,6 +97,9 @@ func (w *extParams) GetBodyMap(encoding ...string) (map[string]interface{}, erro
 	if err != nil {
 		return nil, err
 	}
+	if body == "" {
+		return nil, nil
+	}
 	data := make(map[string]interface{})
 	err = json.Unmarshal([]byte(body), &data)
 	w.bodyMap = data

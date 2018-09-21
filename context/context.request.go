@@ -98,7 +98,7 @@ func (r *Request) BindWith(obj interface{}, contentType string) error {
 
 //Check 检查输入参数和配置参数是否为空
 func (r *Request) Check(field ...string) error {
-	data, _ := r.GetBodyMap()
+	data, err := r.GetBodyMap()
 	for _, fd := range field {
 		if err := r.Form.Check(fd); err == nil {
 			continue
@@ -107,7 +107,7 @@ func (r *Request) Check(field ...string) error {
 			continue
 		}
 		if v, ok := data[fd]; !ok && fmt.Sprint(v) != "" {
-			return fmt.Errorf("输入参数:%s值不能为空", fd)
+			return fmt.Errorf("输入参数:%s值不能为空 %v", fd, err)
 		}
 	}
 	return nil
