@@ -103,6 +103,7 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 		//处理错误err,5xx
 		if err := ctx.Response.GetError(); err != nil {
 			err = fmt.Errorf("error:%v", err)
+			getLogger(c).Error(err)
 			if !servers.IsDebug {
 				err = errors.New("error:Internal Server Error")
 			}

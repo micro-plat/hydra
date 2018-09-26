@@ -148,6 +148,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 	//处理错误err,5xx
 	if err := nctx.Response.GetError(); err != nil {
 		err = fmt.Errorf("error:%v", err)
+		getLogger(ctx).Error(err)
 		if !servers.IsDebug {
 			err = errors.New("error:Internal Server Error")
 		}
