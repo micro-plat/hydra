@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -217,11 +218,11 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 			return "", err
 		}
 		// fmt.Println("ch:", ch)
-		// nbuff, err := encoding.DecodeBytes(buff, ch)
-		// if err != nil {
-		// 	return "", err
-		// }
-		return string(buff), nil
+		nbuff, err := encoding.DecodeBytes(buff, ch)
+		if err != nil {
+			return "", err
+		}
+		return string(nbuff), nil
 
 	}
 	return input
