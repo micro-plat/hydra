@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-)
 
-//	_ "github.com/micro-plat/hydra/hydra"
+	_ "github.com/micro-plat/hydra/hydra"
+)
 
 func main() {
 	idx := []int{1, 2, 3, 4, 5, 6}
