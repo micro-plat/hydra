@@ -34,10 +34,11 @@ type IResponse interface {
 var _ IResponse = &Response{}
 
 type Response struct {
-	Status  int
-	err     error
-	Content interface{}
-	Params  map[string]interface{}
+	Status      int
+	err         error
+	Content     interface{}
+	Params      map[string]interface{}
+	BreakHandle bool
 }
 
 func NewResponse() *Response {

@@ -107,22 +107,29 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	if strings.ToUpper(ctx.Request.GetMethod()) == "OPTIONS" {
 		return
 	}
-	if rh := r.Handling(ctx); ctx.Response.HasError(rh) {
+	var rh interface{}
+	//当前引擎预处理
+	if rh = r.Handling(ctx); ctx.Response.HasError(rh) {
 		return rh
 	}
 
+	//当前服务器预处理
 	if r.cHandler != nil && r.cHandler.GetHandlings() != nil {
 		hds := r.cHandler.GetHandlings()
 		for _, h := range hds {
-			if rh := h(ctx); ctx.Response.HasError(rh) {
+			if rh = h(ctx); ctx.Response.HasError(rh) {
 				return rh
 			}
 		}
 	}
-
-	if rs = r.Handle(ctx); ctx.Response.HasError(rs) {
-		return rs
+	if !ctx.Response.BreakHandle {
+		//当前服务处理
+		if rs = r.Handle(ctx); ctx.Response.HasError(rs) {
+			return rs
+		}
 	}
+
+	//当前服务器后处理
 	if r.cHandler != nil && r.cHandler.GetHandleds() != nil {
 		hdd := r.cHandler.GetHandleds()
 		for _, h := range hdd {
@@ -131,6 +138,8 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 			}
 		}
 	}
+
+	//当前引擎后处理
 	if rd := r.Handled(ctx); ctx.Response.HasError(rd) {
 		return rd
 	}
@@ -140,16 +149,6 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 //Handling 每次handle执行前执行
 func (r *ServiceEngine) Handling(c *context.Context) (rs interface{}) {
 	c.SetRPC(r.Invoker)
-	// switch engine {
-	// case "rpc":
-	// 	return nil
-	// default:
-	// 	if r.IsCustomerService(service, component.GetGroupName(r.GetServerType())...) {
-	// 		return nil
-	// 	}
-	// }
-	// c.Response.SetStatus(404)
-	// return fmt.Errorf("%s未找到服务:%s", r.Name, service)
 	return nil
 }
 
