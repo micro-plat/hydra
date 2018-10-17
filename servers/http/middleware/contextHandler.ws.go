@@ -31,7 +31,7 @@ func WSContextHandler(exhandler interface{}, name string, engine string, service
 		context.WSExchange.Subscribe(getUUID(c), h.recvNotify(c))
 		defer context.WSExchange.Unsubscribe(getUUID(c))
 
-		go h.readPump(c, conn, handler, ctn, name, engine, service, mSetting)
+		go h.readPump(exhandler, c, conn, handler, ctn, name, engine, service, mSetting)
 		h.writePump()
 	}
 }

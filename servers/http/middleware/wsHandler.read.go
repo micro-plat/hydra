@@ -62,7 +62,7 @@ func newWSHandler(conn *websocket.Conn) *wsHandler {
 }
 
 //readPump 循环从读取客户端传入数据
-func (c *wsHandler) readPump(cx *gin.Context, conn *websocket.Conn, handler servers.IExecuter, ctn context.IContainer, name string, engine string, service string, mSetting map[string]string) {
+func (c *wsHandler) readPump(exhandler interface{}, cx *gin.Context, conn *websocket.Conn, handler servers.IExecuter, ctn context.IContainer, name string, engine string, service string, mSetting map[string]string) {
 	defer func() {
 		c.close()
 	}()
@@ -74,7 +74,7 @@ func (c *wsHandler) readPump(cx *gin.Context, conn *websocket.Conn, handler serv
 		case <-c.closeChan:
 			return
 		default:
-			if !c.wsAction(cx, conn, handler, ctn, name, engine, service, mSetting) {
+			if !c.wsAction(exhandler, cx, conn, handler, ctn, name, engine, service, mSetting) {
 				return
 			}
 		}
@@ -82,7 +82,7 @@ func (c *wsHandler) readPump(cx *gin.Context, conn *websocket.Conn, handler serv
 }
 
 //wsAction 调用内部服务处理类型逻辑
-func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler servers.IExecuter, ctn context.IContainer, name string, engine string, service string, mSetting map[string]string) bool {
+func (c *wsHandler) wsAction(exhandler interface{}, ctx *gin.Context, conn *websocket.Conn, handler servers.IExecuter, ctn context.IContainer, name string, engine string, service string, mSetting map[string]string) bool {
 	defer gin.Recovery()(ctx)
 	defer setExt(ctx, "CONN")
 	//读取传入消息
@@ -113,7 +113,7 @@ func (c *wsHandler) wsAction(ctx *gin.Context, conn *websocket.Conn, handler ser
 
 	//调用服务执行业务逻辑
 	wLogHead(ctx, service)
-	nctx := context.GetContext(name,
+	nctx := context.GetContext(exhandler, name,
 		engine,
 		service,
 		ctn,

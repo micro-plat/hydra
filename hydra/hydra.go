@@ -22,10 +22,9 @@ import (
 
 //Hydra  hydra app
 type Hydra struct {
-	logger    *logger.Logger
-	closeChan chan struct{}
-	interrupt chan os.Signal
-	//binder         creator.IBinder
+	logger         *logger.Logger
+	closeChan      chan struct{}
+	interrupt      chan os.Signal
 	isDebug        bool
 	platName       string
 	systemName     string

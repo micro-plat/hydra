@@ -52,6 +52,7 @@ type Context struct {
 	Response  *Response
 	RPC       *ContextRPC
 	container IContainer
+	Component interface{}
 	Meta      *Meta
 	Log       logger.ILogger
 	Name      string
@@ -60,10 +61,11 @@ type Context struct {
 }
 
 //GetContext 从缓存池中获取一个context
-func GetContext(name string, engine string, service string, container IContainer, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}, logger *logger.Logger) *Context {
+func GetContext(component interface{}, name string, engine string, service string, container IContainer, queryString IData, form IData, param IData, setting IData, ext map[string]interface{}, logger *logger.Logger) *Context {
 	c := contextPool.Get().(*Context)
 	c.Request.reset(c, queryString, form, param, setting, ext)
 	c.Log = logger
+	c.Component = component
 	c.container = container
 	c.Name = name
 	c.Engine = engine
