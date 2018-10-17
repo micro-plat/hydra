@@ -1,6 +1,0 @@
-{
-	"ImportPath": "github.com/micro-plat/hydra",
-	"GoVersion": "go1.11",
-	"GodepVersion": "v80",
-	"Deps": []
-}
