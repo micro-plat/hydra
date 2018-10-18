@@ -107,18 +107,17 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	if strings.ToUpper(ctx.Request.GetMethod()) == "OPTIONS" {
 		return
 	}
-	var rh interface{}
 	//当前引擎预处理
-	if rh = r.Handling(ctx); ctx.Response.HasError(rh) {
-		return rh
+	if rs = r.Handling(ctx); ctx.Response.HasError(rs) {
+		return rs
 	}
 
 	//当前服务器预处理
 	if r.cHandler != nil && r.cHandler.GetHandlings() != nil {
 		hds := r.cHandler.GetHandlings()
 		for _, h := range hds {
-			if rh = h(ctx); ctx.Response.HasError(rh) {
-				return rh
+			if rs = h(ctx); ctx.Response.HasError(rs) {
+				return rs
 			}
 		}
 	}
