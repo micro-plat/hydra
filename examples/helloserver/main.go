@@ -13,6 +13,7 @@ func main() {
 		hydra.WithPlatName("myplat_test_9_1"),
 		hydra.WithSystemName("demo"),
 		hydra.WithServerTypes("api"),
+		hydra.WithDebug(),
 		//	hydra.WithRegistry("zk://192.168.0.107"),
 		//	hydra.WithClusterName("test")
 	)

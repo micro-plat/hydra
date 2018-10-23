@@ -193,6 +193,34 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 		r.registerAddService(name, group, h)
 		found = true
 	}
+
+	obj := reflect.ValueOf(h)
+	var t = reflect.TypeOf(h)
+	for {
+		if t.Kind() == reflect.Ptr {
+			for i := 0; i < t.NumMethod(); i++ {
+				mName := t.Method(i).Name
+				if !strings.HasSuffix(mName, "Handle") || strings.EqualFold(mName, "Handle") {
+					continue
+				}
+				if strings.HasPrefix(mName, "GET") || strings.HasPrefix(mName, "PUT") || strings.HasPrefix(mName, "POST") ||
+					strings.HasPrefix(mName, "DELETE") {
+					continue
+				}
+
+				method := obj.MethodByName(mName)
+				nf, ok := method.Interface().(func(*context.Context) interface{})
+				if !ok {
+					panic("不是有效的服务类型")
+				}
+				var f ServiceFunc = nf
+				r.registerAddService(filepath.Join(name, strings.ToLower(mName[0:len(mName)-6])), group, f)
+				found = true
+			}
+		}
+		break
+	}
+
 	if !found {
 		r.checkFuncType(name, h)
 		if _, ok := r.funcs[group]; !ok {
@@ -269,11 +297,11 @@ func (r *StandardComponent) checkFuncType(name string, h interface{}) {
 	if tp.NumIn() > 2 || tp.NumOut() == 0 || tp.NumOut() > 2 {
 		panic(fmt.Sprintf("服务:%s只能包含最多1个输入参数(%d)，最多2个返回值(%d)", name, tp.NumIn(), tp.NumOut()))
 	}
-	if tp.NumIn() == 1 {
-		if tp.In(0).Name() != "IContainer" {
-			panic(fmt.Sprintf("服务:%s输入参数必须为component.IContainer类型(%s)", name, tp.In(0).Name()))
-		}
-	}
+	// if tp.NumIn() == 1 {
+	// 	if tp.In(0).Name() != "IContainer" {
+	// 		panic(fmt.Sprintf("服务:%s输入参数必须为component.IContainer类型(%s)", name, tp.In(0).Name()))
+	// 	}
+	// }
 	if tp.NumOut() == 2 {
 		if tp.Out(1).Name() != "error" {
 			panic(fmt.Sprintf("服务:%s的2个返回值必须为error类型", name))
