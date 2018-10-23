@@ -121,7 +121,7 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 			}
 		}
 	}
-	if !ctx.Response.BreakHandle {
+	if !ctx.Response.SkipHandle {
 		//当前服务处理
 		if rs = r.Handle(ctx); ctx.Response.HasError(rs) {
 			return rs

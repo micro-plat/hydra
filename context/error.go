@@ -42,7 +42,12 @@ func NewIgnoreError(code int, err interface{}) *Error {
 	return ex
 }
 
-//NewError 创建一个致命的错误
+//NewErrorf 创建错误对象
+func NewErrorf(code int, f string, args ...interface{}) *Error {
+	return NewError(code, fmt.Sprintf(f, args...))
+}
+
+//NewError 创建错误对象
 func NewError(code int, err interface{}) *Error {
 	r := &Error{code: code, canIgnore: false}
 	switch v := err.(type) {

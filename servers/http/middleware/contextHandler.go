@@ -154,6 +154,7 @@ func makeFormData(ctx *gin.Context) InputData {
 		ctx.Request.ParseForm()
 		ctx.Request.ParseMultipartForm(32 << 20)
 	}
+
 	return ctx.GetPostForm
 }
 func makeQueyStringData(ctx *gin.Context) InputData {
@@ -217,7 +218,6 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 		if err != nil {
 			return "", err
 		}
-		// fmt.Println("ch:", ch)
 		nbuff, err := encoding.DecodeBytes(buff, ch)
 		if err != nil {
 			return "", err
