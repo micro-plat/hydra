@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/micro-plat/hydra/context"
 
 	"github.com/micro-plat/hydra/hydra"
@@ -24,7 +22,12 @@ func main() {
 	app.Start()
 }
 
+type Input struct {
+	Id int `json:"id" form:"id"`
+}
+
 func helloWorld(ctx *context.Context) (r interface{}) {
-	//	return "hello world"
-	return errors.New("执行SQL语句出现异常")
+	var input Input
+	ctx.Request.Bind(&input)
+	return &input
 }

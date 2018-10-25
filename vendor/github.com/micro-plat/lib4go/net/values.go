@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/url"
 	"sort"
+	"strings"
 )
 
 type val struct {
@@ -67,7 +68,7 @@ func (s *Values) JoinAll(a string, b string) string {
 			buffer.WriteString(b)
 		}
 	}
-	return buffer.String()
+	return strings.Trim(buffer.String(), b)
 }
 
 //Join 只拼接值不为空的参数
@@ -82,7 +83,6 @@ func (s *Values) Join(a string, b string) string {
 				buffer.WriteString(b)
 			}
 		}
-
 	}
-	return buffer.String()
+	return strings.Trim(buffer.String(), b)
 }
