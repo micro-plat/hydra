@@ -11,6 +11,7 @@ type IDB interface {
 	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
+	ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error)
 	Begin() (IDBTrans, error)
 	Close()
 }
@@ -72,9 +73,10 @@ func (db *DB) Execute(sql string, input map[string]interface{}) (row int64, quer
 }
 
 //ExecuteSP 根据包含@名称占位符的语句执行查询语句
-func (db *DB) ExecuteSP(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error) {
-	query, args = db.tpl.GetSPContext(sql, input)
-	row, err = db.db.Execute(query, args...)
+func (db *DB) ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error) {
+	query, args := db.tpl.GetSPContext(procName, input)
+	ni := append(args, output...)
+	row, err = db.db.Execute(query, ni...)
 	return
 }
 
