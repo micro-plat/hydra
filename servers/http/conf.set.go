@@ -58,7 +58,7 @@ func SetStatic(set ISetStatic, cnf conf.IServerConf) (enable bool, err error) {
 	if static.FirstPage == "" {
 		static.FirstPage = "index.html"
 	}
-	static.Exts = append(static.Exts, ".jpg", ".png", ".gif", ".ico", ".html", ".htm", ".js", ".css", ".map")
+	static.Exts = append(static.Exts, ".txt", ".jpg", ".png", ".gif", ".ico", ".html", ".htm", ".js", ".css", ".map")
 	static.Rewriters = append(static.Rewriters, "/", "index.htm", "default.html")
 	static.Exclude = append(static.Exclude, "/views/", ".exe", ".so")
 	err = set.SetStatic(&static)
