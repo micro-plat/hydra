@@ -148,12 +148,10 @@ func (c *ServerConf) loadVarNodeConf() (err error) {
 	if b, err := c.registry.Exists(c.varConfPath); err == nil && !b {
 		return nil
 	}
-	if _, c.varVersion, err = c.registry.GetValue(c.varConfPath); err != nil {
-		return err
-	}
-
+	
 	//获取第一级目录
-	varfirstNodes, _, err := c.registry.GetChildren(c.varConfPath)
+	var varfirstNodes []string
+	varfirstNodes, c.varVersion, err = c.registry.GetChildren(c.varConfPath)
 	if err != nil {
 		return err
 	}
