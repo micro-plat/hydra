@@ -16,9 +16,6 @@ func NoResponse(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 			return
 		}
 		defer context.Close()
-		if err := context.Response.GetError(); err != nil {
-			getLogger(ctx).Error(err)
-		}
 		if ctx.Writer.Written() {
 			return
 		}
