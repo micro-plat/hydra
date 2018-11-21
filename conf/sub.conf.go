@@ -37,6 +37,7 @@ type Auth struct {
 	Exclude    []string `json:"exclude"`
 	FailedCode string   `json:"failed-code" valid:"numeric,range(400|999)"`
 	Redirect   string   `json:"redirect" valid:"ascii"`
+	Domain     string   `json:"domain" valid:"ascii"`
 	Disable    bool     `json:"disable"`
 }
 type Routers struct {

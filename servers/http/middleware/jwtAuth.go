@@ -121,6 +121,10 @@ func setToken(ctx *gin.Context, jwt *conf.Auth, token string) {
 	case "HEADER", "H":
 		ctx.Header(jwt.Name, token)
 	default:
+		if jwt.Domain != "" {
+			ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;", jwt.Name, jwt.Domain, token))
+			return
+		}
 		ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwt.Name, token))
 	}
 }
