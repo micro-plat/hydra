@@ -80,30 +80,47 @@ func (s *Values) Sort() *Values {
 }
 
 //JoinAll 对参数进行拼接
-func (s *Values) JoinAll(a string, b string) string {
+func (s *Values) JoinAll(a string, b string, e ...string) string {
 	buffer := bytes.NewBufferString("")
-	for i, v := range s.s {
+	for _, v := range s.s {
 		buffer.WriteString(v.k)
 		buffer.WriteString(a)
 		buffer.WriteString(v.v)
-		if i < len(s.s)-1 {
+	}
+	if len(e) > 0 {
+		for i := 0; i < len(e)/2; i++ {
+			buffer.WriteString(e[i*2])
+			buffer.WriteString(a)
+			buffer.WriteString(e[i*2+1])
 			buffer.WriteString(b)
+		}
+		if len(e)%2 == 1 {
+			buffer.WriteString(e[len(e)-1])
 		}
 	}
 	return strings.Trim(buffer.String(), b)
 }
 
 //Join 只拼接值不为空的参数
-func (s *Values) Join(a string, b string) string {
+func (s *Values) Join(a string, b string, e ...string) string {
 	buffer := bytes.NewBufferString("")
-	for i, v := range s.s {
+	for _, v := range s.s {
 		if v.v != "" {
 			buffer.WriteString(v.k)
 			buffer.WriteString(a)
 			buffer.WriteString(v.v)
-			if i < len(s.s)-1 {
-				buffer.WriteString(b)
-			}
+			buffer.WriteString(b)
+		}
+	}
+	if len(e) > 0 {
+		for i := 0; i < len(e)/2; i++ {
+			buffer.WriteString(e[i*2])
+			buffer.WriteString(a)
+			buffer.WriteString(e[i*2+1])
+			buffer.WriteString(b)
+		}
+		if len(e)%2 == 1 {
+			buffer.WriteString(e[len(e)-1])
 		}
 	}
 	return strings.Trim(buffer.String(), b)
