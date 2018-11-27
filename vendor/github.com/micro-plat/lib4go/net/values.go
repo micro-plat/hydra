@@ -51,7 +51,6 @@ func (s *Values) SetMap(m map[string]interface{}) *Values {
 		value := fmt.Sprint(v)
 		s.u[k] = []string{value}
 		s.s = append(s.s, val{k: k, v: value})
-		return s
 	}
 	return s
 }
@@ -61,7 +60,6 @@ func (s *Values) SetSMap(m map[string]string) *Values {
 	for k, value := range m {
 		s.u[k] = []string{value}
 		s.s = append(s.s, val{k: k, v: value})
-		return s
 	}
 	return s
 }
