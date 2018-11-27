@@ -2,6 +2,7 @@ package net
 
 import (
 	"bytes"
+	"fmt"
 	"net/url"
 	"sort"
 	"strings"
@@ -41,6 +42,27 @@ func (s *Values) Get(key string) string {
 func (s *Values) Set(key, value string) *Values {
 	s.u[key] = []string{value}
 	s.s = append(s.s, val{k: key, v: value})
+	return s
+}
+
+//SetMap 指定map[string]interface{}并添加到values中
+func (s *Values) SetMap(m map[string]interface{}) *Values {
+	for k, v := range m {
+		value := fmt.Sprint(v)
+		s.u[k] = []string{value}
+		s.s = append(s.s, val{k: k, v: value})
+		return s
+	}
+	return s
+}
+
+//SetSMap 指定map[string]string并添加到values中
+func (s *Values) SetSMap(m map[string]string) *Values {
+	for k, value := range m {
+		s.u[k] = []string{value}
+		s.s = append(s.s, val{k: k, v: value})
+		return s
+	}
 	return s
 }
 
