@@ -69,9 +69,14 @@ func checkWSJWT(ctx *gin.Context, auth *conf.Auth, token string) (data interface
 	return data, nil
 }
 func getJWTToken(ctx *gin.Context) string {
-	cnf := getMetadataConf(ctx)
-	if cookie, err := ctx.Cookie(cnf.Name); err == nil {
-		return cookie
+	jwtAuth, ok := getMetadataConf(ctx).GetMetadata("jwt").(*conf.Auth)
+	if !ok || jwtAuth == nil || jwtAuth.Disable {
+		return ""
 	}
-	return ""
+	return getToken(ctx, jwtAuth)
+	// cnf := getMetadataConf(ctx)
+	// if cookie, err := ctx.Cookie(cnf.Name); err == nil {
+	// 	return cookie
+	// }
+	// return ""
 }
