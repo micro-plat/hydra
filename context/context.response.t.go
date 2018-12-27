@@ -225,7 +225,7 @@ func (r *Response) ShouldContent(content interface{}) {
 	case error:
 		r.err = content.(error)
 	}
-	r.Status = r.getStatus(content)
+	r.Status = r.GetCode(content)
 	r.Content = content
 	return
 }
@@ -234,7 +234,7 @@ func (r *Response) MustContent(status int, content interface{}) {
 	r.Status = status
 	r.ShouldContent(content)
 }
-func (r *Response) getStatus(c interface{}) int {
+func (r *Response) GetCode(c interface{}) int {
 	switch v := c.(type) {
 	case IResult:
 		return v.GetCode()

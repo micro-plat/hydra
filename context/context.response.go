@@ -7,6 +7,7 @@ import (
 //IResponse 响应
 type IResponse interface {
 	GetContent() interface{}
+	GetCode(interface{}) int
 	GetStatus() int
 	SetStatus(int)
 	GetParams() map[string]interface{}
