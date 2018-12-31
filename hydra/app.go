@@ -22,7 +22,7 @@ type MicroApp struct {
 	app     *cli.App
 	logger  *logger.Logger
 	xlogger logger.ILogging
-	argCtx *ArgContext
+	ArgCtx *ArgContext
 	//Conf 绑定安装程序
 	Conf  *creator.Binder
 	hydra *Hydra
@@ -35,7 +35,7 @@ type MicroApp struct {
 
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
-	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry(),argCtx:newArgsContext()}
+	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry(),ArgCtx:newArgsContext()}
 	logging := log.New(os.Stdout, "", log.Llongcolor)
 	logging.SetOutputLevel(log.Ldebug)
 	m.xlogger = logging
@@ -74,7 +74,7 @@ func (m *MicroApp) Use(r func(r component.IServiceRegistry)) {
 }
 
 func (m *MicroApp) action(c *cli.Context) (err error) {
-	m.argCtx.setCtx(c)
+	m.ArgCtx.setCtx(c)
 	if err := m.checkInput(); err != nil {
 		m.xlogger.Warn(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
