@@ -147,5 +147,6 @@ func (m *MicroApp) getStartFlags() []cli.Flag {
 	 服务状态，通过http://host/update/:version远程更新系统，执行远程更新后服务器将自动从注册中心下载安装包，自动安装并重启服务。
 	 该参数可从环境变量中获取，环境变量名为:`,
 	})
+	flags=append(flags,m.argCtx.cmds...)
 	return flags
 }
