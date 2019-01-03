@@ -12,11 +12,13 @@ import (
 func main() {
 	app := hydra.NewApp()
 	app.Micro("/hello", helloWorld)
+	//添加命令行参数
 	app.ArgCtx.Append(cli.StringFlag{
 		Name:  "ip,i",
 		Usage: "IP地址",
 	})
 
+	//参数验证
 	app.ArgCtx.Validate = func() error {
 		if !app.ArgCtx.IsSet("ip") {
 			return fmt.Errorf("未指定ip地址")
@@ -25,6 +27,7 @@ func main() {
 	}
 
 	app.Initializing(func(c component.IContainer) error {
+		//获取参数值
 		fmt.Println("ip.address:", app.ArgCtx.String("ip"))
 		return nil
 	})
