@@ -17,7 +17,6 @@ func main() {
 		Name:  "ip,i",
 		Usage: "IP地址",
 	})
-
 	//参数验证
 	app.ArgCtx.Validate = func() error {
 		if !app.ArgCtx.IsSet("ip") {
@@ -27,6 +26,7 @@ func main() {
 	}
 
 	app.Initializing(func(c component.IContainer) error {
+
 		//获取参数值
 		fmt.Println("ip.address:", app.ArgCtx.String("ip"))
 		return nil
