@@ -29,11 +29,19 @@ func (m *MicroApp) stopAction(c *cli.Context) (err error) {
 }
 func (m *MicroApp) installAction(c *cli.Context) (err error) {
 
+	m.ArgCtx.setCtx(c)
 	if err = m.checkInput(); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
+
+	if err := m.ArgCtx.Validate(); err != nil {
+		m.xlogger.Warn(err)
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return nil
+	}
+
 	if err = m.install(); err != nil {
 		m.xlogger.Error(err)
 		return err
