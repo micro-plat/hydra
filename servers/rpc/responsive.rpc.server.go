@@ -49,6 +49,7 @@ func NewRpcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		cnf.GetString("address", "8081"),
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(logger)); err != nil {
 		return
 	}
@@ -78,6 +79,7 @@ func (w *RpcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		cnf.GetString("address", "8080"),
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(w.Logger)); err != nil {
 		return
 	}

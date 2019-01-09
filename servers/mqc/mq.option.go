@@ -8,12 +8,25 @@ import (
 type option struct {
 	ip string
 	*logger.Logger
-	metric    *middleware.Metric
-	showTrace bool
+	metric      *middleware.Metric
+	showTrace   bool
+	platName    string
+	systemName  string
+	clusterName string
+	serverType  string
 }
 
 //Option 配置选项
 type Option func(*option)
+
+func WithName(platName string, systemName string, clusterName string, serverType string) Option {
+	return func(o *option) {
+		o.platName = platName
+		o.systemName = systemName
+		o.clusterName = clusterName
+		o.serverType = serverType
+	}
+}
 
 //WithLogger 设置日志记录组件
 func WithLogger(logger *logger.Logger) Option {

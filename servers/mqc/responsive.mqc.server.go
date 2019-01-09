@@ -53,6 +53,7 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		"",
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(logger)); err != nil {
 		return
 	}
@@ -82,6 +83,7 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		"",
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(w.Logger)); err != nil {
 		return
 	}

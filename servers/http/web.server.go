@@ -41,6 +41,7 @@ func NewWebServer(name string, addr string, routers []*conf.Router, opts ...Opti
 	for _, opt := range opts {
 		opt(t.option)
 	}
+	t.conf.Name = fmt.Sprintf("%s.%s.%s", t.platName, t.systemName, t.clusterName)
 	if t.Logger == nil {
 		t.Logger = logger.GetSession(name, logger.CreateSession())
 	}

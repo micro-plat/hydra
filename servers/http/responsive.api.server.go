@@ -69,6 +69,7 @@ func NewApiResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
 		WithLogger(logger),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithTimeout(cnf.GetInt("rTimeout", 10), cnf.GetInt("wTimeout", 10), cnf.GetInt("rhTimeout", 10))); err != nil {
 		return
 	}
@@ -99,6 +100,7 @@ func (w *ApiResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
 		WithLogger(w.Logger),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithTimeout(cnf.GetInt("rTimeout", 10), cnf.GetInt("wTimeout", 10), cnf.GetInt("rhTimeout", 10))); err != nil {
 		return
 	}

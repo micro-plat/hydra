@@ -27,6 +27,7 @@ func NewMqcServer(name string, proto string, config string, queues []*conf.Queue
 	for _, opt := range opts {
 		opt(t.option)
 	}
+	t.conf.Name = fmt.Sprintf("%s.%s.%s", t.platName, t.systemName, t.clusterName)
 	if t.Logger == nil {
 		t.Logger = logger.GetSession(name, logger.CreateSession())
 	}
