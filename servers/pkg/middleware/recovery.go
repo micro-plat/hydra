@@ -3,10 +3,7 @@ package middleware
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
-	"os"
 	"runtime"
 
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
@@ -18,25 +15,21 @@ var (
 	dot       = []byte(".")
 	slash     = []byte("/")
 )
-var DefaultErrorWriter io.Writer = os.Stderr
 
 // Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.
 func Recovery() dispatcher.HandlerFunc {
-	return RecoveryWithWriter(DefaultErrorWriter)
+	return RecoveryWithWriter()
 }
 
 // RecoveryWithWriter returns a middleware for a given writer that recovers from any panics and writes a 500 if there was one.
-func RecoveryWithWriter(out io.Writer) dispatcher.HandlerFunc {
-	var logger *log.Logger
-	if out != nil {
-		logger = log.New(out, "\n\n\x1b[31m", log.LstdFlags)
-	}
+func RecoveryWithWriter() dispatcher.HandlerFunc {
 	return func(c *dispatcher.Context) {
 		defer func() {
+			logger := getLogger(c)
 			if err := recover(); err != nil {
 				if logger != nil {
 					stack := stack(3)
-					logger.Printf("[Recovery] panic recovered:\n%s%s", err, stack)
+					logger.Printf("[Recovery] panic recovered:\n%s\n%s", err, stack)
 				}
 				c.AbortWithStatus(500)
 			}

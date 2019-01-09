@@ -21,8 +21,10 @@ func (s *WebServer) getHandler(routers []*conf.Router) (h x.Handler, err error) 
 		s.Logger.Debugf("%s未找到模板:%v", s.conf.Name, err)
 		return nil, err
 	}
-	engine.Use(middleware.Logging(s.conf)) //记录请求日志
 	engine.Use(gin.Recovery())
+	engine.Use(middleware.Logging(s.conf)) //记录请求日志
+	engine.Use(middleware.Recovery())
+
 	engine.Use(s.option.metric.Handle())       //生成metric报表
 	engine.Use(middleware.Host(s.conf))        // 检查主机头是否合法
 	engine.Use(middleware.Static(s.conf))      //处理静态文件
