@@ -38,6 +38,8 @@ func (a *ArgContext) setCtx(c *cli.Context) {
 		a.RunMode = ModeRemove
 	case "registry":
 		a.RunMode = ModeRegistry
+	case "service":
+		a.RunMode = ModeService
 
 	}
 }

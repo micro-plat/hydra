@@ -46,7 +46,7 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Action: m.stopAction,
 		}, {
 			Name:   "install",
-			Usage:  "安装本地服务",
+			Usage:  "安装注册中心配置和本地服务",
 			Flags:  m.getStartFlags(),
 			Action: m.installAction,
 		}, {
@@ -54,6 +54,11 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Usage:  "注册中心配置",
 			Flags:  m.getStartFlags(),
 			Action: m.registryAction,
+		}, {
+			Name:   "service",
+			Usage:  "本地服务配置",
+			Flags:  m.getStartFlags(),
+			Action: m.serviceAction,
 		},
 		{
 			Name:   "remove",
