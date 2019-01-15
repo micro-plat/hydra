@@ -46,9 +46,14 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Action: m.stopAction,
 		}, {
 			Name:   "install",
-			Usage:  "安装服务",
+			Usage:  "安装本地服务",
 			Flags:  m.getStartFlags(),
 			Action: m.installAction,
+		}, {
+			Name:   "registry",
+			Usage:  "注册中心配置",
+			Flags:  m.getStartFlags(),
+			Action: m.registryAction,
 		},
 		{
 			Name:   "remove",
@@ -147,6 +152,6 @@ func (m *MicroApp) getStartFlags() []cli.Flag {
 	 服务状态，通过http://host/update/:version远程更新系统，执行远程更新后服务器将自动从注册中心下载安装包，自动安装并重启服务。
 	 该参数可从环境变量中获取，环境变量名为:`,
 	})
-	flags=append(flags,m.ArgCtx.cmds...)
+	flags = append(flags, m.ArgCtx.cmds...)
 	return flags
 }
