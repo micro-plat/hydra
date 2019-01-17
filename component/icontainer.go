@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/lib4go/cache"
 	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/influxdb"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/queue"
 )
 
@@ -17,6 +18,7 @@ type IContainer interface {
 	conf.IVarConf
 	conf.IMainConf
 	GetRegistry() registry.IRegistry
+	GetLooger() logger.ILogging
 
 	GetRegularCache(names ...string) (c cache.ICache)
 	GetCache(names ...string) (c cache.ICache, err error)
