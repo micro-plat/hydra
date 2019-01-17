@@ -73,7 +73,7 @@ func (h *Hydra) Start() (s string, err error) {
 		logger.AddWriteThread(49)
 	}
 	if h.remoteLogger {
-		_, err := rpclog.NewRPCLogger(h.rpcLoggerPath, h.registryAddr, h.logger)
+		_, err := rpclog.NewRPCLogger(h.rpcLoggerPath, h.registryAddr, h.logger, h.platName, h.systemName, h.clusterName, h.serverTypes)
 		if err != nil {
 			return "", err
 		}
