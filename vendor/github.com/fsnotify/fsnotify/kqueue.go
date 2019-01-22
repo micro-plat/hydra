@@ -15,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/registry"
 	"golang.org/x/sys/unix"
 )
 
@@ -396,7 +395,7 @@ func (w *Watcher) watchDirectoryFiles(dirPath string) error {
 	}
 
 	for _, fileInfo := range files {
-		filePath := registry.Join(dirPath, fileInfo.Name())
+		filePath := filepath.Join(dirPath, fileInfo.Name())
 		filePath, err = w.internalWatch(filePath, fileInfo)
 		if err != nil {
 			return err
@@ -427,7 +426,7 @@ func (w *Watcher) sendDirectoryChangeEvents(dirPath string) {
 
 	// Search for new files
 	for _, fileInfo := range files {
-		filePath := registry.Join(dirPath, fileInfo.Name())
+		filePath := filepath.Join(dirPath, fileInfo.Name())
 		err := w.sendFileCreatedEventIfNew(filePath, fileInfo)
 
 		if err != nil {
