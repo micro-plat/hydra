@@ -1,7 +1,7 @@
 package creator
 
 import (
-	"path/filepath"
+	"github.com/micro-plat/hydra/registry"
 )
 
 var _ IPlatBinder = &PlatBinder{}
@@ -36,10 +36,10 @@ func NewPlatBinder(params map[string]string, inputs map[string]*Input) *PlatBind
 
 //SetVarConf 设置var配置内容
 func (c *PlatBinder) SetVarConf(t string, s string, v string) {
-	c.varConf[filepath.Join(t, s)] = v
+	c.varConf[registry.Join(t, s)] = v
 	params := getParams(v)
 	if len(params) > 0 {
-		c.varParamsForInput[filepath.Join(t, s)] = params
+		c.varParamsForInput[registry.Join(t, s)] = params
 	}
 }
 func (c *PlatBinder) GetVarNames() []string {
@@ -68,7 +68,7 @@ func (c *PlatBinder) Scan(platName string, nodeName string) error {
 			continue
 		}
 
-		nvalue, err := getInputValue(p, c.inputs, filepath.Join("/", platName, "var", nodeName))
+		nvalue, err := getInputValue(p, c.inputs, registry.Join("/", platName, "var", nodeName))
 		if err != nil {
 			return err
 		}

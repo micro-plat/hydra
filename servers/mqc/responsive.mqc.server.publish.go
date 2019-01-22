@@ -2,10 +2,10 @@ package mqc
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/jsons"
 )
 
@@ -13,7 +13,7 @@ import (
 func (w *MqcResponsiveServer) publish() (err error) {
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
-	pubPath := filepath.Join(w.currentConf.GetServerPubRootPath(), ipPort)
+	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort)
 	data := map[string]string{
 		"service": addr,
 	}

@@ -1,7 +1,6 @@
 package watcher
 
 import (
-	"path/filepath"
 	"time"
 
 	"github.com/micro-plat/hydra/registry"
@@ -37,7 +36,7 @@ func NewConfWatcher(platName string, systemName string, serverTypes []string, cl
 	}
 	w.paths = make([]string, 0, len(serverTypes))
 	for _, tp := range serverTypes {
-		w.paths = append(w.paths, filepath.Join("/", platName, systemName, tp, clusterName, "conf"))
+		w.paths = append(w.paths, registry.Join("/", platName, systemName, tp, clusterName, "conf"))
 	}
 
 	w.watchers = make([]*Watcher, 0, len(w.paths))

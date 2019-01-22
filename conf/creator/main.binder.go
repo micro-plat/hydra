@@ -2,10 +2,10 @@ package creator
 
 import (
 	"fmt"
-	"path/filepath"
 	"regexp"
 
 	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/registry"
 )
 
 var _ IMainBinder = &MainBinder{}
@@ -113,7 +113,7 @@ func (c *MainBinder) Scan(mainConf string, nodeName string) (err error) {
 			if _, ok := c.params[p]; ok {
 				continue
 			}
-			nvalue, err := getInputValue(p, c.inputs, filepath.Join(mainConf, nodeName))
+			nvalue, err := getInputValue(p, c.inputs, registry.Join(mainConf, nodeName))
 			if err != nil {
 				return err
 			}

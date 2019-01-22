@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -32,7 +31,7 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 	queryIndex := 0
 	queryList := make(map[int][]byte)
 	for i, tp := range m.ServerTypes {
-		mainPath := filepath.Join("/", m.PlatName, m.SystemName, tp, m.ClusterName, "conf")
+		mainPath := registry.Join("/", m.PlatName, m.SystemName, tp, m.ClusterName, "conf")
 		buffer, version, err := rgst.GetValue(mainPath)
 		if err != nil {
 			return err
@@ -51,7 +50,7 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 
 		sc.IterSubConf(func(k string, cn *conf.JSONConf) bool {
 			queryIndex++
-			print(getPrintNode(filepath.Join(mainPath, k), queryIndex, -1))
+			print(getPrintNode(registry.Join(mainPath, k), queryIndex, -1))
 			queryList[queryIndex] = cn.GetRaw()
 			return true
 		})
@@ -61,9 +60,9 @@ func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
 				queryIndex++
 				if index == -1 {
 					index++
-					print(getPrintNode(filepath.Join(m.PlatName, "var", k), queryIndex, 1))
+					print(getPrintNode(registry.Join(m.PlatName, "var", k), queryIndex, 1))
 				} else {
-					print(getPrintNode(filepath.Join(m.PlatName, "var", k), queryIndex, -1))
+					print(getPrintNode(registry.Join(m.PlatName, "var", k), queryIndex, -1))
 				}
 				queryList[queryIndex] = cn.GetRaw()
 				return true

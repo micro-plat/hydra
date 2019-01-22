@@ -3,10 +3,10 @@ package rpc
 import (
 	"fmt"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/jsons"
 )
 
@@ -15,7 +15,7 @@ func (w *RpcResponsiveServer) publish() (err error) {
 
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
-	pubPath := filepath.Join(w.currentConf.GetServerPubRootPath(), ipPort)
+	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort)
 	data := map[string]string{
 		"service": addr,
 	}
@@ -35,7 +35,7 @@ func (w *RpcResponsiveServer) publish() (err error) {
 	srvs := w.GetServices()
 	for _, host := range names {
 		for _, srv := range srvs {
-			servicePath := path.Join(w.currentConf.GetServicePubRootPath(filepath.Join(host, srv)), ipPort)
+			servicePath := path.Join(w.currentConf.GetServicePubRootPath(registry.Join(host, srv)), ipPort)
 			err := w.engine.GetRegistry().CreateTempNode(servicePath, nodeData)
 			if err != nil {
 				err = fmt.Errorf("服务发布失败:(%s)[%v]", servicePath, err)

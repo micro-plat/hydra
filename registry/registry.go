@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"bytes"
 	"fmt"
 
 	"strings"
@@ -107,4 +108,14 @@ func ResolveAddress(address string) (proto string, raddr []string, err error) {
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")
 	return
+}
+
+//Join 地址连接
+func Join(elem ...string) string {
+	buff := bytes.NewBufferString("")
+	for _, i := range elem {
+		buff.WriteString("/")
+		buff.WriteString(strings.Trim(i, "/"))
+	}
+	return buff.String()
 }

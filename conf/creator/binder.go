@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -106,7 +107,7 @@ func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer)
 //GetMainConfNames 获取已配置的主配置名称
 func (s *Binder) GetMainConfNames(platName string, systemName string, tp string, clusterName string) []string {
 	names := make([]string, 0, 1)
-	names = append(names, filepath.Join("/", platName, systemName, tp, clusterName, "conf"))
+	names = append(names, registry.Join("/", platName, systemName, tp, clusterName, "conf"))
 	return names
 }
 
@@ -174,7 +175,7 @@ func (s *Binder) GetVarConf(nodeName string) string {
 
 //GetSQL 获取指定目录下所有.sql文件中的SQL语句，并用分号拆分
 func (s *Binder) GetSQL(dir string) ([]string, error) {
-	files, err := filepath.Glob(filepath.Join(dir, "*.sql"))
+	files, err := filepath.Glob(registry.Join(dir, "*.sql"))
 	if err != nil {
 		return nil, err
 	}

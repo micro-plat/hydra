@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -50,8 +49,8 @@ func NewHydra(platName string, systemName string, serverTypes []string, clusterN
 	return &Hydra{
 		cHandler:       r,
 		logger:         logger,
-		systemRootName: filepath.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
-		rpcLoggerPath:  filepath.Join("/", platName, "/var/global/logger"),
+		systemRootName: registry.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
+		rpcLoggerPath:  registry.Join("/", platName, "/var/global/logger"),
 		//	binder:         binder,
 		closeChan:    make(chan struct{}),
 		interrupt:    make(chan os.Signal, 1),
@@ -118,7 +117,7 @@ func (h *Hydra) startWatch() (err error) {
 	//启动配置监听
 	h.watcher, err = watcher.NewConfWatcher(h.platName, h.systemName, h.serverTypes, h.clusterName, h.registry, h.logger)
 	if err != nil {
-		err = fmt.Errorf("watcher初始化失败 %s,%+v", filepath.Join(h.platName, h.systemName), err)
+		err = fmt.Errorf("watcher初始化失败 %s,%+v", registry.Join(h.platName, h.systemName), err)
 		return
 	}
 	h.logger.Infof("初始化 %s", h.systemRootName)
@@ -126,7 +125,7 @@ func (h *Hydra) startWatch() (err error) {
 		return err
 	}
 	if err != nil {
-		err = fmt.Errorf("watcher启动失败 %s,%+v", filepath.Join(h.platName, h.systemName), err)
+		err = fmt.Errorf("watcher启动失败 %s,%+v", registry.Join(h.platName, h.systemName), err)
 		return
 	}
 
