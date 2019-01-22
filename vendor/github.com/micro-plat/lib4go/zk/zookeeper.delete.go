@@ -7,6 +7,7 @@ import (
 
 //Delete 修改指定节点的值
 func (client *ZookeeperClient) Delete(path string) (err error) {
+	fmt.Println("path:", path)
 	if !client.isConnect {
 		return ErrColientCouldNotConnect
 	}
