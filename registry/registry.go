@@ -113,9 +113,12 @@ func ResolveAddress(address string) (proto string, raddr []string, err error) {
 //Join 地址连接
 func Join(elem ...string) string {
 	buff := bytes.NewBufferString("")
-	for _, i := range elem {
+	if len(elem) > 0 && elem[0] == "/" {
 		buff.WriteString("/")
-		buff.WriteString(strings.Trim(i, "/"))
 	}
-	return buff.String()
+	for i := 1; i < len(elem); i++ {
+		buff.WriteString(strings.Trim(elem[i], "/"))
+		buff.WriteString("/")
+	}
+	return strings.TrimRight(buff.String(), "/")
 }
