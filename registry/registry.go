@@ -24,6 +24,7 @@ type IRegistry interface {
 	CreateSeqNode(path string, data string) (rpath string, err error)
 	Update(path string, data string, version int32) (err error)
 	Delete(path string) error
+	GetSeparator() string
 	Close() error
 }
 

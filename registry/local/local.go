@@ -261,6 +261,10 @@ func (v *valuesEntity) GetError() error {
 func (v *valuesEntity) GetPath() string {
 	return v.path
 }
+func (v *valuesEntity) GetSeparator() string {
+	return string(filepath.Separator)
+}
+
 func checkPrivileges() error {
 	if output, err := exec.Command("id", "-g").Output(); err == nil {
 		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {

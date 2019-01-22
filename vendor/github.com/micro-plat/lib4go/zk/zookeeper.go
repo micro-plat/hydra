@@ -119,3 +119,6 @@ func (client *ZookeeperClient) Close() error {
 	})
 	return nil
 }
+func (client *ZookeeperClient) GetSeparator() string {
+	return "/"
+}
