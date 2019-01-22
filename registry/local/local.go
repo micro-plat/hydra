@@ -216,6 +216,10 @@ func (l *local) CreateSeqNode(path string, data string) (rpath string, err error
 	rpath = r.Join(l.formatPath(path), fmt.Sprint(nid))
 	return rpath, l.CreateTempNode(rpath, data)
 }
+func (l *local) GetSeparator() string {
+	return string(filepath.Separator)
+}
+
 func (l *local) CanWirteDataInDir() bool {
 	return false
 }
@@ -260,9 +264,6 @@ func (v *valuesEntity) GetError() error {
 }
 func (v *valuesEntity) GetPath() string {
 	return v.path
-}
-func (v *valuesEntity) GetSeparator() string {
-	return string(filepath.Separator)
 }
 
 func checkPrivileges() error {
