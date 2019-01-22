@@ -27,6 +27,7 @@ func (client *ZookeeperClient) GetValue(path string) (value []byte, version int3
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
 		data, stat, err := client.conn.Get(path)
+		fmt.Println("data:", stat, err)
 		ch <- getValueType{data: data, err: err, version: stat.Version}
 	}(ch)
 
