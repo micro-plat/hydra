@@ -120,5 +120,8 @@ func Join(elem ...string) string {
 		buff.WriteString(strings.Trim(elem[i], "/"))
 		buff.WriteString("/")
 	}
-	return strings.TrimRight(buff.String(), "/")
+	if buff.Len() > 1 {
+		return strings.TrimRight(buff.String(), "/")
+	}
+	return buff.String()
 }
