@@ -11,7 +11,6 @@ import (
 
 //CreatePersistentNode 创建持久化的节点
 func (client *ZookeeperClient) CreatePersistentNode(path string, data string) (err error) {
-	fmt.Println("path:", path)
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return
@@ -51,7 +50,6 @@ func (client *ZookeeperClient) CreatePersistentNode(path string, data string) (e
 
 //CreateTempNode 创建临时节点
 func (client *ZookeeperClient) CreateTempNode(path string, data string) (err error) {
-	fmt.Println("path:", path)
 	err = client.CreatePersistentNode(client.GetDir(path), "")
 	if err != nil {
 		return
@@ -62,7 +60,6 @@ func (client *ZookeeperClient) CreateTempNode(path string, data string) (err err
 
 //CreateSeqNode 创建临时节点
 func (client *ZookeeperClient) CreateSeqNode(path string, data string) (rpath string, err error) {
-	fmt.Println("path:", path)
 	err = client.CreatePersistentNode(client.GetDir(path), "")
 	if err != nil {
 		return
@@ -77,7 +74,6 @@ type createType struct {
 }
 
 func (client *ZookeeperClient) create(path string, data string, flags int32, acl []zk.ACL) (rpath string, err error) {
-	fmt.Println("path:", path)
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return

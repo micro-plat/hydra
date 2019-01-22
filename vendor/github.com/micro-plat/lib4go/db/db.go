@@ -11,6 +11,7 @@ type IDB interface {
 	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
+	Executes(sql string, input map[string]interface{}) (lastInsertId, affectedRow int64, query string, args []interface{}, err error)
 	ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error)
 	Begin() (IDBTrans, error)
 	Close()
@@ -21,6 +22,7 @@ type IDBTrans interface {
 	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
+	Executes(sql string, input map[string]interface{}) (lastInsertId int64, affectedRow int64, query string, args []interface{}, err error)
 	Rollback() error
 	Commit() error
 }
@@ -62,6 +64,13 @@ func (db *DB) Scalar(sql string, input map[string]interface{}) (data interface{}
 		return
 	}
 	data = result[0][colus[0]]
+	return
+}
+
+//Executes 根据包含@名称占位符的语句执行查询语句
+func (db *DB) Executes(sql string, input map[string]interface{}) (insertID int64, row int64, query string, args []interface{}, err error) {
+	query, args = db.tpl.GetSQLContext(sql, input)
+	insertID, row, err = db.db.Executes(query, args...)
 	return
 }
 

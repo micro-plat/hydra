@@ -26,6 +26,13 @@ func (t *DBTrans) Scalar(sql string, input map[string]interface{}) (data interfa
 	return
 }
 
+//Executes 执行SQL操作语句
+func (t *DBTrans) Executes(sql string, input map[string]interface{}) (lastInsertId, affectedRow int64, query string, args []interface{}, err error) {
+	query, args = t.tpl.GetSQLContext(sql, input)
+	lastInsertId, affectedRow, err = t.tx.Executes(query, args...)
+	return
+}
+
 //Execute 根据包含@名称占位符的语句执行查询语句
 func (t *DBTrans) Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error) {
 	query, args = t.tpl.GetSQLContext(sql, input)

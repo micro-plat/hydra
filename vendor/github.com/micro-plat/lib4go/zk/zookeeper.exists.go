@@ -7,7 +7,6 @@ import (
 
 //ExistsAny 是否有一个路径已经存在
 func (client *ZookeeperClient) ExistsAny(paths ...string) (b bool, path string, err error) {
-	fmt.Println("path:", path)
 	for _, path = range paths {
 		if b, err = client.Exists(path); err != nil || b {
 			return
@@ -23,7 +22,6 @@ type existsType struct {
 
 //Exists 检查路径是否存在
 func (client *ZookeeperClient) Exists(path string) (b bool, err error) {
-	fmt.Println("path:", path)
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return

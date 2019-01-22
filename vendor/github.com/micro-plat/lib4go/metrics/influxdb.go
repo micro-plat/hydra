@@ -51,12 +51,12 @@ func MakeName(name string, tp string, params ...string) string {
 	if len(params)%2 != 0 {
 		panic("MakeName params必须成对输入")
 	}
-	return name + "." + tp + "-" + strings.Join(params, "-")
+	return name + "." + tp + ":>" + strings.Join(params, ":>")
 }
 
 //timer.merchant.api.request-server-192.168.0.240-client-127.0.0.1-url-/colin
 func splitGroup(name string) (string, map[string]string) {
-	names := strings.Split(name, "-")
+	names := strings.Split(name, ":>")
 	tags := make(map[string]string)
 	count := len(names)
 	for i := 1; i < count; i++ {

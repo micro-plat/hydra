@@ -44,6 +44,7 @@ const (
 type ISysDB interface {
 	Query(string, ...interface{}) (QueryRows, []string, error)
 	Execute(string, ...interface{}) (int64, error)
+	Executes(string, ...interface{}) (int64, int64, error)
 	Begin() (ISysDBTrans, error)
 	Close()
 }
@@ -52,6 +53,7 @@ type ISysDB interface {
 type ISysDBTrans interface {
 	Query(string, ...interface{}) (QueryRows, []string, error)
 	Execute(string, ...interface{}) (int64, error)
+	Executes(query string, args ...interface{}) (lastInsertId, affectedRow int64, err error)
 	Rollback() error
 	Commit() error
 }
@@ -143,18 +145,24 @@ func resolveRows(rows *sql.Rows, col int) (dataRows []QueryRow, columns []string
 	return
 }
 
+//Executes 执行SQL操作语句
+func (db *SysDB) Executes(query string, args ...interface{}) (lastInsertId, affectedRow int64, err error) {
+	result, err := db.db.Exec(query, args...)
+	if err != nil {
+		return
+	}
+	lastInsertId, err = result.LastInsertId()
+	affectedRow, err = result.RowsAffected()
+	return
+}
+
 //Execute 执行SQL操作语句
 func (db *SysDB) Execute(query string, args ...interface{}) (affectedRow int64, err error) {
 	result, err := db.db.Exec(query, args...)
 	if err != nil {
 		return
 	}
-	lastInsertID, err := result.LastInsertId()
-	if err == nil && lastInsertID != 0 {
-		return lastInsertID, nil
-	}
-	affectedRow, err = result.RowsAffected()
-	return
+	return result.RowsAffected()
 }
 
 //Begin 创建一个事务请求

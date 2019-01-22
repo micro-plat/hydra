@@ -15,7 +15,6 @@ type getValueType struct {
 
 //GetValue 获取节点的值
 func (client *ZookeeperClient) GetValue(path string) (value []byte, version int32, err error) {
-	fmt.Println("path:", path)
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return
@@ -63,7 +62,6 @@ type getChildrenType struct {
 
 //GetChildren 获取节点下的子节点
 func (client *ZookeeperClient) GetChildren(path string) (paths []string, version int32, err error) {
-	fmt.Println("path:", path)
 	if !client.isConnect {
 		err = ErrColientCouldNotConnect
 		return
