@@ -1,8 +1,8 @@
 package registry
 
 import (
-	"bytes"
 	"fmt"
+	"path/filepath"
 
 	"strings"
 
@@ -112,16 +112,8 @@ func ResolveAddress(address string) (proto string, raddr []string, err error) {
 
 //Join 地址连接
 func Join(elem ...string) string {
-	buff := bytes.NewBufferString("")
-	if len(elem) > 0 && elem[0] == "/" {
-		buff.WriteString("/")
-	}
-	for i := 1; i < len(elem); i++ {
-		buff.WriteString(strings.Trim(elem[i], "/"))
-		buff.WriteString("/")
-	}
-	if buff.Len() > 1 {
-		return strings.TrimRight(buff.String(), "/")
-	}
-	return buff.String()
+
+	path := filepath.Join(elem...)
+	return strings.Replace(path, "\\", "/", -1)
+
 }
