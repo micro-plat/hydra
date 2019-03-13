@@ -63,11 +63,12 @@ func (consumer *RedisConsumer) Consume(queue string, concurrency int, callback f
 	_, _, err = consumer.queues.SetIfAbsentCb(queue, func(input ...interface{}) (c interface{}, err error) {
 		queue := input[0].(string)
 		unconsumeCh := make(chan struct{}, 1)
+		nconcurrency := concurrency
 		if concurrency <= 0 {
-			concurrency = 10
+			nconcurrency = 10
 		}
-		msgChan := make(chan *RedisMessage, concurrency)
-		for i := 0; i < concurrency; i++ {
+		msgChan := make(chan *RedisMessage, nconcurrency)
+		for i := 0; i < nconcurrency; i++ {
 			go func() {
 			START:
 				for {
@@ -76,11 +77,16 @@ func (consumer *RedisConsumer) Consume(queue string, concurrency int, callback f
 						if !ok {
 							break START
 						}
-						go callback(message)
+						if concurrency == 0 {
+							go callback(message)
+						} else {
+							callback(message)
+						}
 					}
 				}
 			}()
 		}
+
 		go func() {
 		START:
 			for {
