@@ -97,7 +97,6 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 		//创建注册中心
 		rgst, err := registry.NewRegistryWithAddress(m.RegistryAddr, m.logger)
 		if err != nil {
-			m.logger.Error("xfes:")
 			m.logger.Error(err)
 			return err
 		}
