@@ -183,9 +183,7 @@ func (l *local) CreatePersistentNode(path string, data string) (err error) {
 	rpath := l.formatPath(path)
 	_, err = os.Stat(rpath)
 	if err == nil || os.IsExist(err) {
-		if errr := os.Remove(rpath); errr != nil {
-			return fmt.Errorf("移除文件%s失败(%v)", rpath, errr)
-		}
+		os.Remove(rpath)
 	}
 	if err = os.MkdirAll(filepath.Dir(rpath), 0777); err != nil {
 		return err
