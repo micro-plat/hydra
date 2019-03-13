@@ -124,7 +124,6 @@ func (m *MicroApp) install() (err error) {
 	//创建注册中心
 	rgst, err := registry.NewRegistryWithAddress(m.RegistryAddr, m.logger)
 	if err != nil {
-		m.xlogger.Error(err)
 		return err
 	}
 
@@ -134,7 +133,6 @@ func (m *MicroApp) install() (err error) {
 		m.xlogger)
 	err = creator.Start()
 	if err != nil {
-		m.xlogger.Error(err)
 		return err
 	}
 	return nil
