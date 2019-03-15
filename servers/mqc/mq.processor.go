@@ -14,6 +14,7 @@ type Processor struct {
 	*dispatcher.Dispatcher
 	mq.MQConsumer
 	queues        []*conf.Queue
+	handles       map[string]dispatcher.HandlerFunc
 	isConsume     bool
 	lock          sync.Mutex
 	once          sync.Once
@@ -27,6 +28,7 @@ type Processor struct {
 func NewProcessor(addrss, raw string, queues []*conf.Queue) (p *Processor, err error) {
 	p = &Processor{
 		Dispatcher: dispatcher.New(),
+		handles:    make(map[string]dispatcher.HandlerFunc),
 		addrss:     addrss,
 		raw:        raw,
 		queues:     queues,
@@ -41,10 +43,16 @@ func (s *Processor) AddRouters() {
 		return
 	}
 	for _, r := range s.queues {
-		s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), r.Handler.(dispatcher.HandlerFunc))
+		if _, ok := s.handles[r.Name]; !ok {
+			handler := r.Handler.(dispatcher.HandlerFunc)
+			s.handles[r.Name] = handler
+			s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
+		}
+
 	}
 	s.hasAddRouters = true
 }
+
 func (s *Processor) Close() {
 	s.lock.Lock()
 	defer s.lock.Unlock()

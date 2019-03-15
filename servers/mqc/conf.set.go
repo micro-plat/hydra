@@ -40,7 +40,7 @@ type IQueues interface {
 }
 
 //SetQueues 设置queue
-func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf, ext map[string]interface{}) (enable bool, err error) {
+func SetQueues(checkQueue bool, engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf, ext map[string]interface{}) (enable bool, err error) {
 
 	serverConf, err := cnf.GetSubConf("server")
 	if err == conf.ErrNoSetting {
@@ -59,20 +59,23 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 		return false, err
 	}
 	var queues conf.Queues
-	if _, err = cnf.GetSubObject("queue", &queues); err == conf.ErrNoSetting {
-		err = fmt.Errorf("queue:%v", err)
-		return false, err
+	if checkQueue {
+		if _, err = cnf.GetSubObject("queue", &queues); err == conf.ErrNoSetting {
+			err = fmt.Errorf("queue:%v", err)
+			return false, err
+		}
+		if err != nil {
+			return false, err
+		}
+		if len(queues.Queues) == 0 {
+			return false, errors.New("queue:未配置")
+		}
+		if b, err := govalidator.ValidateStruct(&queues); !b {
+			err = fmt.Errorf("queue配置有误:%v", err)
+			return false, err
+		}
 	}
-	if err != nil {
-		return false, err
-	}
-	if len(queues.Queues) == 0 {
-		return false, errors.New("queue:未配置")
-	}
-	if b, err := govalidator.ValidateStruct(&queues); !b {
-		err = fmt.Errorf("queue配置有误:%v", err)
-		return false, err
-	}
+
 	nqueues := make([]*conf.Queue, 0, len(queues.Queues))
 	for _, queue := range queues.Queues {
 		if queue.Disable {
@@ -95,5 +98,5 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 	if err = set.SetQueues(server.Proto, string(serverConf.GetRaw()), nqueues); err != nil {
 		return false, err
 	}
-	return len(nqueues) > 0, nil
+	return len(nqueues) > 0 || !checkQueue, nil
 }

@@ -2,6 +2,7 @@ package mqc
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -88,4 +89,46 @@ func (s *MqcServer) GetAddress() string {
 //GetStatus 获取当前服务器状态
 func (s *MqcServer) GetStatus() string {
 	return s.running
+}
+
+//Dynamic 动态注册或撤销消息队列
+func (s *MqcServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Queue) {
+	for {
+		select {
+		case <-time.After(time.Millisecond * 100):
+			if s.running != servers.ST_RUNNING {
+				return
+			}
+		case r := <-c:
+			if !r.Disable {
+
+				//检查队列是否已注册
+				for _, queue := range s.queues {
+					if queue.Queue == r.Queue {
+						s.Logger.Infof("队列%s已经订阅", r.Queue)
+						break
+					}
+				}
+				//处理服务名称
+				if r.Name == "" {
+					r.Name = r.Service
+				}
+
+				//注册服务
+				if _, ok := s.handles[r.Name]; !ok {
+					handler := middleware.ContextHandler(engine, r.Name, r.Engine, r.Service, r.Setting, nil)
+					s.handles[r.Name] = handler
+					s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
+				}
+				s.Logger.Infof("订阅队列:%s", r.Queue)
+				if err := s.Consume(r); err != nil {
+					s.Logger.Errorf("订阅:%s失败:%v", r.Queue, err)
+				}
+			} else {
+				s.Logger.Infof("取消订阅队列%s消息", r.Queue)
+				s.UnConsume(r.Queue)
+			}
+		}
+	}
+
 }

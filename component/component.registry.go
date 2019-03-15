@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 )
 
@@ -26,6 +27,8 @@ type IComponentHandler interface {
 	GetInitializings() []ComponentFunc
 	GetClosings() []ComponentFunc
 	GetTags(name string) []string
+	SetMQCDynamicQueue(c chan *conf.Queue)
+	GetMQCDynamicQueue() (bool, chan *conf.Queue)
 }
 
 //IServiceRegistry 服务注册接口
@@ -87,6 +90,12 @@ type IServiceRegistry interface {
 	//Initializing 初始化
 	Initializing(c func(IContainer) error)
 
+	//SetMQCDynamicQueue 设置动态队列注册消息
+	SetMQCDynamicQueue(c chan *conf.Queue)
+
+	//GetMQCDynamicQueue 获取动态队列注册消息
+	GetMQCDynamicQueue() (bool, chan *conf.Queue)
+
 	//Closing 关闭组件
 	Closing(c func(IContainer) error)
 	//Handling 每个请求的预处理函数
@@ -105,6 +114,7 @@ type ServiceRegistry struct {
 	handledFuncs      []ServiceFunc
 	initializingFuncs []ComponentFunc
 	closingFuncs      []ComponentFunc
+	exts              map[string]interface{}
 	tags              map[string][]string
 }
 
@@ -116,6 +126,7 @@ func NewServiceRegistry() *ServiceRegistry {
 		initializingFuncs: make([]ComponentFunc, 0, 1),
 		closingFuncs:      make([]ComponentFunc, 0, 1),
 		services:          make(map[string]map[string]interface{}),
+		exts:              make(map[string]interface{}),
 		tags:              make(map[string][]string),
 	}
 }
@@ -376,6 +387,32 @@ func (s *ServiceRegistry) Initializing(c func(c IContainer) error) {
 //Closing 关闭组件
 func (s *ServiceRegistry) Closing(c func(c IContainer) error) {
 	s.closingFuncs = append(s.closingFuncs, c)
+}
+
+//GetMQCDynamicQueue 动态队列注册消息
+func (s *ServiceRegistry) GetMQCDynamicQueue() (bool, chan *conf.Queue) {
+	f, b := s.exts["_mqc_dynamic_queue_notify_func_"]
+	if !b {
+		return false, nil
+	}
+	c, b := f.(chan *conf.Queue)
+	return b, c
+}
+
+//SetMQCDynamicQueue 动态队列注册消息
+func (s *ServiceRegistry) SetMQCDynamicQueue(c chan *conf.Queue) {
+	s.exts["_mqc_dynamic_queue_notify_func_"] = c
+}
+
+//Ext 注册扩展
+func (s *ServiceRegistry) Ext(name string, i interface{}) {
+	s.exts[name] = i
+}
+
+//GetExt 获取扩展
+func (s *ServiceRegistry) GetExt(name string) (bool, interface{}) {
+	f, b := s.exts[name]
+	return b, f
 }
 
 func (s *ServiceRegistry) GetServices() map[string]map[string]interface{} {
