@@ -1,8 +1,6 @@
 package mqc
 
 import (
-	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/conf"
@@ -37,20 +35,6 @@ func NewProcessor(addrss, raw string, queues []*conf.Queue) (p *Processor, err e
 		return
 	}
 	return p, nil
-}
-func (s *Processor) AddRouters() {
-	if s.hasAddRouters {
-		return
-	}
-	for _, r := range s.queues {
-		if _, ok := s.handles[r.Name]; !ok {
-			handler := r.Handler.(dispatcher.HandlerFunc)
-			s.handles[r.Name] = handler
-			s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
-		}
-
-	}
-	s.hasAddRouters = true
 }
 
 func (s *Processor) Close() {

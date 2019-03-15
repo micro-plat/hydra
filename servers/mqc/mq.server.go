@@ -105,7 +105,7 @@ func (s *MqcServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Queue) 
 				//检查队列是否已注册
 				for _, queue := range s.queues {
 					if queue.Queue == r.Queue {
-						s.Logger.Infof("队列%s已经订阅", r.Queue)
+						s.Logger.Debugf("消息(%s)已经订阅", r.Queue)
 						break
 					}
 				}
@@ -120,12 +120,12 @@ func (s *MqcServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Queue) 
 					s.handles[r.Name] = handler
 					s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
 				}
-				s.Logger.Infof("订阅队列:%s", r.Queue)
+				s.Logger.Debugf("订阅(%s)消息", r.Queue)
 				if err := s.Consume(r); err != nil {
-					s.Logger.Errorf("订阅:%s失败:%v", r.Queue, err)
+					s.Logger.Errorf("订阅(%s)消息失败:%v", r.Queue, err)
 				}
 			} else {
-				s.Logger.Infof("取消订阅队列%s消息", r.Queue)
+				s.Logger.Debugf("取消订阅(%s)消息", r.Queue)
 				s.UnConsume(r.Queue)
 			}
 		}

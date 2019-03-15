@@ -84,7 +84,6 @@ func (consumer *RedisConsumer) Consume(queue string, concurrency int, callback f
 						}
 					}
 				}
-				//consumer.Logger.Warn("队列关闭,所有处理线程退出:", queue)
 			}()
 		}
 
@@ -108,7 +107,6 @@ func (consumer *RedisConsumer) Consume(queue string, concurrency int, callback f
 
 				}
 			}
-			consumer.Logger.Warn("队列关闭,不再拉取消息:", queue)
 			close(msgChan)
 		}()
 		return unconsumeCh, nil
@@ -122,7 +120,6 @@ func (consumer *RedisConsumer) UnConsume(queue string) {
 		return
 	}
 	if c, ok := consumer.queues.Get(queue); ok {
-		consumer.Logger.Warn("客户端取消订阅消息:", queue)
 		close(c.(chan struct{}))
 	}
 	consumer.queues.Remove(queue)
