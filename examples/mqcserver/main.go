@@ -27,14 +27,14 @@ func main() {
 		"pool_size":10
 }
 `)
-	app.Conf.MQC.SetSubConf("queue", `{
-	"queues":[
-		{
-			"queue":"hydra:100:0",
-			"service":"/message/handle"
-		}
-	]
-}`)
+	// 	app.Conf.MQC.SetSubConf("queue", `{
+	// 	"queues":[
+	// 		{
+	// 			"queue":"hydra:100:0",
+	// 			"service":"/message/handle"
+	// 		}
+	// 	]
+	// }`)
 	app.Conf.Plat.SetVarConf("queue", "queue", `
 {
 	"proto":"redis",
