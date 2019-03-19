@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -58,7 +59,9 @@ func setJwtResponse(ctx *dispatcher.Context, cnf *conf.MetadataConf, data interf
 		ctx.AbortWithError(500, fmt.Errorf("jwt配置出错：%v", err))
 		return
 	}
-	ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwtAuth.Name, jwtToken))
+	expireTime := time.Now().Add(time.Duration(time.Duration(jwtAuth.ExpireAt)*time.Second - 8*60*60*time.Second))
+	expireVal := expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
+	ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwtAuth.Name, jwtToken, expireVal))
 }
 
 // CheckJWT 检查jwk参数是否合法
