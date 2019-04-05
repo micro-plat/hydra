@@ -103,4 +103,6 @@ curl http://localhost:8090/hello
 下一节 [服务配置与安装](https://github.com/micro-plat/hydra/tree/master/docs/service.conf.install.md)
 
 
+[服务注册与启动]((https://github.com/micro-plat/hydra/tree/master/docs/service.types.register.md))
+
 更多示例请查看[examples](https://github.com/micro-plat/hydra/tree/master/examples)
