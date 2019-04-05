@@ -16,8 +16,13 @@ func main() {
 		//	hydra.WithClusterName("test")
 	)
 
-	app.Conf.API.SetMainConf(`{"address":":9067"}`)
-
+	app.Conf.Plat.SetVarConf("db", "db", `{			
+		"provider":"mysql",
+		"connString":"#connstring",
+		"maxOpen":10,
+		"maxIdle":1,
+		"lifeTime":300		
+}`)
 	app.Micro("/hello", helloWorld)
 	app.Start()
 }

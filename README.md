@@ -20,7 +20,7 @@ hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后�
 
 ###  示例
 
-- 1.  编写代码
+1.  编写代码
 
 新建文件夹`hello`,并添加`main.go`文件,输入以下代码:
 
@@ -51,24 +51,25 @@ func hello(ctx *context.Context) (r interface{}) {
 }
 ```
 
-- 2.  编译安装
+2.  编译安装
 
 ```sh
 go install hello
 
 ```
+
 3. 安装服务
 ```sh
 hello install
 ```
 
-- 4.  运行服务
+4.  运行服务
 
 ```sh
 ./hello run
 ```
 
-- 5.  测试服务
+5.  测试服务
 
 ```sh
 curl http://localhost:8090/hello
@@ -99,7 +100,7 @@ curl http://localhost:8090/hello
 3. 将`hello`发布到注册中心`/myplat/services/api/hello/providers`
 4. 将当前服务器到监控目录`/mysql/demo/api/test/servers/[ip:port]...`
 
-
+下一节 [服务配置与安装](https://github.com/micro-plat/hydra/tree/master/docs/service.conf.install.md)
 
 
 更多示例请查看[examples](https://github.com/micro-plat/hydra/tree/master/examples)

@@ -228,7 +228,7 @@ func (c *Creator) updateMainConf(path string, data string) error {
 }
 
 func (c *Creator) checkRegistry() (mode int, cn bool) {
-	msg := "创建注册中心配置数据?,如存在则不修改(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):"
+	msg := "创建注册中心配置数据?如存在则不安装(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):"
 
 	var value string
 	fmt.Print("\t\033[;33m-> " + msg + "\033[0m")
