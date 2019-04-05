@@ -22,7 +22,7 @@ hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后�
 
 - 1.  编写代码
 
-新建文件夹`hello`,并添加`main.go`输入代码
+新建文件夹`hello`,并添加`main.go`文件,输入以下代码:
 
 ```go
 package main
@@ -57,18 +57,18 @@ func hello(ctx *context.Context) (r interface{}) {
 go install hello
 
 ```
-1. 安装服务
+3. 安装服务
 ```sh
 hello install
 ```
 
-- 3.  运行服务
+- 4.  运行服务
 
 ```sh
 ./hello run
 ```
 
-- 4.  测试服务
+- 5.  测试服务
 
 ```sh
 curl http://localhost:8090/hello
