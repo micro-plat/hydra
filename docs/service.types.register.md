@@ -33,14 +33,14 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
             return "hello world"
     }
 ```
-   * 2. 实例注册: 服务实现代码放到`struct`中,传入`struct`实例的构建函数
+   * 2. 实例注册: 服务实现代码放到`struct`中,传入`struct`实例的构造函数
   
         示例:
   ```go
              app.API("/hello",token.NewQueryHandler)
 ```
 
-添加服务实现文件`query.handler.go`
+        添加服务实现文件`query.handler.go`
 
 ```go
 
@@ -74,9 +74,12 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
   ```
 该`struct`需具备两个条件:
 
-1. 服务构建函数`NewQueryHandler`,只能是两种格式之一:`(container component.IContainer) (*QueryHandler) `或`(container component.IContainer) (*QueryHandler,error) `
+1. 服务构造函数`NewQueryHandler`,只能是两种格式之一:
+   `(container component.IContainer) (*QueryHandler) ` 或
+   `(container component.IContainer) (*QueryHandler,error) `
 
-2. 对象中至少包含一个命名为`...Handle`的函数,且签名为:`(*context.Context) (interface{})`格式
+2. 对象中至少包含一个命名为`...Handle`的函数,且签名为:
+   `(*context.Context) (interface{})`格式
 
 
 ### 二. 服务启动
@@ -101,11 +104,11 @@ $ sudo ./helloserver run -r fs://../ -c test -S "api-rpc"
 ```
 
 #### 3. 服务启动
-   命令`run`和`start`启动服务
+   可使用命令`run`和`start`启动服务,区别是:
 
 > `run` 直接运行服务. 所有日志输出到控制台, 并根据级别显示不同颜色,便于调试,一般开发时使用此命令
 
-> `start` 服务安装后可使用`start`命令启动, 应用程序在后台运行, 异常关闭后会自动重启. 日志存入日志文件或远程日志归集系统, 控制台不显示日志. 可使用`stop`停止服务,`status`查看服务是否运行,`remove`卸载服务.
+> `start` 服务安装后可使用`start`命令启动, 服务将在在后台运行, 异常关闭或服务器重启会自动启动应用. 日志存入日志文件或远程日志归集系统, 控制台不显示日志. 可使用`stop`停止服务,`status`查看服务是否运行,`remove`卸载服务.
 
 * 修改任何配置,请重新执行`install`命令
  > 执行`install`时返回`Service has already been installed`错误,则需执行`remove`命令
@@ -127,7 +130,7 @@ $ sudo ./helloserver install -r fs://../ -c test -S "api-rpc"
 		创建配置: /myplat_debug/helloserver/rpc/test/conf
 Install helloserver:					[  OK  ]
 ```
-* 启动服务
+* `run`启动服务
   
   一般`run`命令参数与`install`一致(`start`时不需要任何参数)
   
@@ -154,6 +157,15 @@ $ sudo ./helloserver run -r fs://../ -c test -S "api-rpc"
 控制台打印出了两次`启动成功`,分别是`api`服务器(http协议),`rpc`服务器(甚于grpc,tcp协议),包含服务提供地址和启动的服务个数
 
 同一个服务器的日志可根据`session_id`(当前启动实例为:`8edb58733`,`7650a8ecf`)查看上下文日志
+
+* `start`启动服务
+```sh
+$ sudo ./helloserver start
+Starting helloserver:					[  OK  ]
+```
+控制台只会输出启动成功,不会显示运行时日志
+
+
 
 #### 4. 服务状态查询
 
