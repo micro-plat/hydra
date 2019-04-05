@@ -196,34 +196,32 @@ Starting helloserver:					[  OK  ]
 
 
 
-#### 4. 服务状态查询
+#### 4. 服务发布信息查询
 
-* 服务发布信息
-  
-  服务器启动时会自动将当前服务器和服务添加到注册中心, 便于监控服务运行状况和服务发现者查找服务.
+  服务器启动时会自动将服务器及服务路径等添加到注册中心, 便于监控服务和服务发现者查找服务.
 
-* 服务器监控节点
+* 1. 服务器监控节点
 
- `api`服务: `/myplat_debug/helloserver/api/test/servers/192.168.1.8:8090`
-`rpc`服务:`/myplat_debug/helloserver/rpc/test/servers/192.168.1.8:8081`
+        `api`服务: `/myplat_debug/helloserver/api/test/servers/192.168.1.8:8090`
+        `rpc`服务:`/myplat_debug/helloserver/rpc/test/servers/192.168.1.8:8081`
 
 
 
-* 服务提供者节点
+* 2. 服务提供者节点
 
-`api`服务: `/myplat_debug/services/api/helloserver/hello/providers/192.168.1.8:8090`
+        `api`服务: `/myplat_debug/services/api/helloserver/hello/providers/192.168.1.8:8090`
 
-`rpc`服务: `/myplat_debug/services/rpc/helloserver/hello/providers/192.168.1.8:8081`
+        `rpc`服务: `/myplat_debug/services/rpc/helloserver/hello/providers/192.168.1.8:8081`
 
-如使用`fs://../`指定的注册中心,则运行以下命令查看:
-```sh
-$ cd ../myplat_debug/helloserver/api/test/servers/
+        如使用`fs://../`指定的注册中心,则运行以下命令查看:
+        ```sh
+        $ cd ../myplat_debug/helloserver/api/test/servers/
 
-$ ls
-192.168.1.8:8090
+        $ ls
+        192.168.1.8:8090
 
-$ cat 192.168.1.8\:8090 
-{"service":"http://192.168.1.8:8090"}
-```
+        $ cat 192.168.1.8\:8090 
+        {"service":"http://192.168.1.8:8090"}
+        ```
 
-其它节点内容请自行查询
+其它节点内容请自行查看
