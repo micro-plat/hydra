@@ -201,13 +201,18 @@ Starting helloserver:					[  OK  ]
   服务器启动时会自动将服务器及服务路径等添加到注册中心, 便于监控服务和服务发现者查找服务.
 
 * 1. 服务器监控节点
+   
+   监控服务查询`/plat/system/[server-type]/cluster/servers`目录可获得正在运行的服务器
 
         `api`服务: `/myplat_debug/helloserver/api/test/servers/192.168.1.8:8090`
+
         `rpc`服务:`/myplat_debug/helloserver/rpc/test/servers/192.168.1.8:8081`
 
 
 
 * 2. 服务提供者节点
+     
+     服务发布到`/plat/services/[server-type]/system/service-name/providers`目录,便于服务调用方获取服务:
 
         `api`服务: `/myplat_debug/services/api/helloserver/hello/providers/192.168.1.8:8090`
 
