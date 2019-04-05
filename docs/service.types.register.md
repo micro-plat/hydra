@@ -110,6 +110,35 @@ $ sudo ./helloserver run -r fs://../ -c test -S "api-rpc"
 
 > `start` 服务安装后可使用`start`命令启动, 服务将在在后台运行, 异常关闭或服务器重启会自动启动应用. 日志存入日志文件或远程日志归集系统, 控制台不显示日志. 可使用`stop`停止服务,`status`查看服务是否运行,`remove`卸载服务.
 
+示例代码:
+
+```go
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"), //平台名称
+		hydra.WithSystemName("helloserver"), //系统名称
+		hydra.WithDebug())
+
+	app.Micro("/hello",hello)
+	app.Start()
+}
+
+func hello(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+```
+  使用`Micro`注册服务
+  
+重新编译`go install`并安装服务
+
 * 修改任何配置,请重新执行`install`命令
  > 执行`install`时返回`Service has already been installed`错误,则需执行`remove`命令
 
