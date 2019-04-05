@@ -21,60 +21,60 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
     app.API("/hello",hello)
     app.MQC("/hello",hello)
 
-func hello(ctx *context.Context) (r interface{}) {
-	return "hello world"
-}
+    func hello(ctx *context.Context) (r interface{}) {
+	    return "hello world"
+    }   
 ```
 
-注册函数类型:
-   * 1. 服务实现代码放在函数中,函数签名格式为:`(*context.Context) (interface{})`,示例:
+注册函数支持两种类型:
+   * 1. 函数注册: 服务实现代码放在函数中,函数签名格式为:`(*context.Context) (interface{})`,示例:
 ```go
-func hello(ctx *context.Context) (r interface{}) {
-	return "hello world"
-}
+        func hello(ctx *context.Context) (r interface{}) {
+            return "hello world"
+    }
 ```
-   * 2. 服务实现代码放到`struct`中,传入`struct`实例的构建函数
+   * 2. 实例注册: 服务实现代码放到`struct`中,传入`struct`实例的构建函数
   
-示例:
+        示例:
   ```go
-app.API("/hello",token.NewQueryHandler)
+             app.API("/hello",token.NewQueryHandler)
 ```
 
 添加服务实现文件`query.handler.go`
 
 ```go
 
-package token
+            package token
 
-import (
-	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/hydra/context"
-)
+            import (
+                "github.com/micro-plat/hydra/component"
+                "github.com/micro-plat/hydra/context"
+            )
 
-type QueryHandler struct {
-	container component.IContainer
-}
+            type QueryHandler struct {
+                container component.IContainer
+            }
 
 
-//NewQueryHandler 创建服务
-func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
-	return &QueryHandler{
-		container: container,
-	}
-}
-func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
-	var result struct {
-		ErrCode int64  `json:"errcode"`
-		ErrMsg  string `json:"errmsg"`
-	}
-	result.ErrCode = 0
-	result.ErrMsg = "success"
-	return result
-}
+            //NewQueryHandler 创建服务
+            func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
+                return &QueryHandler{
+                    container: container,
+                }
+            }
+            func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
+                var result struct {
+                    ErrCode int64  `json:"errcode"`
+                    ErrMsg  string `json:"errmsg"`
+                }
+                result.ErrCode = 0
+                result.ErrMsg = "success"
+                return result
+            }
   ```
 该`struct`需具备两个条件:
 
-1. 服务构建函数`NewQueryHandler`,只能是两种格式:`(container component.IContainer) (*QueryHandler) `或`(container component.IContainer) (*QueryHandler,error) `
+1. 服务构建函数`NewQueryHandler`,只能是两种格式之一:`(container component.IContainer) (*QueryHandler) `或`(container component.IContainer) (*QueryHandler,error) `
 
 2. 对象中至少包含一个命名为`...Handle`的函数,且签名为:`(*context.Context) (interface{})`格式
 
