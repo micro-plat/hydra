@@ -12,6 +12,7 @@ hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后�
 * 微服务的基础设施, 服务注册发现，熔断降级，监控与配置管理
 * 多集群模式支持，对等，主备等
 * 丰富后端库支持redis,memcache,activieMQ,mqtt,influxdb,mysql,oracle,elasticsearch,jwt等等
+* 跨平台支持,可运行在(`linux`,`macOS 10.9+`,`windows 7+`)
 * 20+线上项目实践经验
 * 全golang原生实现
 
@@ -56,7 +57,7 @@ func hello(ctx *context.Context) (r interface{}) {
 go install hello
 
 ```
-3. 安装服务
+1. 安装服务
 ```sh
 hello install
 ```
