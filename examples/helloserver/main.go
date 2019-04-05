@@ -8,21 +8,12 @@ import (
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("myplat_test_9_1"),
-		hydra.WithSystemName("demo"),
-		hydra.WithServerTypes("api"),
+		hydra.WithPlatName("myplat"),
+		hydra.WithSystemName("helloserver"),
+
 		hydra.WithDebug(),
-		//	hydra.WithRegistry("zk://192.168.0.107"),
-		//	hydra.WithClusterName("test")
 	)
 
-	app.Conf.Plat.SetVarConf("db", "db", `{			
-		"provider":"mysql",
-		"connString":"#connstring",
-		"maxOpen":10,
-		"maxIdle":1,
-		"lifeTime":300		
-}`)
 	app.Micro("/hello", helloWorld)
 	app.Start()
 }

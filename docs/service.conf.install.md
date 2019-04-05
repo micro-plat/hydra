@@ -170,3 +170,5 @@ Password:
 ### 二. 本地服务安装
 执行`install`命令执行的第二步为安装本地服务, 安装成功后可直接使用`start`启动,`stop`停止,`status`查看服务是否运行,`remove`卸载服务.
 
+
+下一节[服务注册与启动]((https://github.com/micro-plat/hydra/tree/master/docs/service.types.register.md))
