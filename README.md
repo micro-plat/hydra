@@ -2,65 +2,26 @@
 
 hydra 是基于 go 语言和众多开源项目实现的分布式微服务框架
 
-通常后端系统包括接口服务和自动流程。接口服务有`http接口`，`rpc接口`，自动流程有`定时任务`，`MQ消息消费`，前后端消息推送还会用到`websocket`，前端静态网页还需要`web服务器`来运行。每种服务的架构模式不同, 编码风格各不相同, 服务化需要服务治理，分布式部署需要对等，主备，分片等模式支持。服务器数量达到一定规模还需要集群监控,日志归集等。`hydra`致力于解决这些痛点，搭建统一框架，统一开发模式， 持续完善基础设施; 提供快速开发、使用简单、功能强大、轻量级、易扩展的基础框架; 打造敏捷开发，快速交付的企业级后端服务开发平台
+hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后端开发的复杂性，提高开发效率。目前已支持的服务类型有：`http api`服务，`rpc`服务，`websocket`,`mqc`消息消费服务，`cron`定时任务,`web`服务，静态文件服务。
 
 
-hydra 的优势
+特性
 
-1.  使用简单
 
-    > 只需几行代码便可集成到自己的应用，并具备 hydra 丰富的功能；扔到服务器通过命令启动起来即可，后台运行，自动重启。
+* 后端一体化框架, 支持6+服务器类型
+* 微服务的基础设施, 服务注册发现，熔断降级，监控与配置管理
+* 多集群模式支持，对等，主备等
+* 丰富后端库支持redis,memcache,activieMQ,mqtt,influxdb,mysql,oracle,elasticsearch,jwt等等
+* 20+线上项目实践经验
+* 全golang原生实现
 
-2.  易学习，适合快速开发
 
-    > 标准化输入输出`request`,`response`，统一公共组件`db`,`cache`，`mq`,`logger`,`metric`,`registry`等。所有服务的代码都相同， 只需注册为`api接口`，`web服务`,`rpc服务`,`定时任务`,`MQ消费流程`,`websocket`等运行即可。
 
-3.  分布式服务协调
-
-    > 自带`zookeeper`,`文件系统`作为`配置管理中心`和`注册中心`。集中管理配置信息，变更后自动下发到各服务器， 服务自动`注册`与`发现`，`监控`, 管理服务以不同模式运行(`主`，`备`)和处理流程任务分片等。 服务器初始化完成后`配置中心`，`注册中心`宕机不影响服务运行。恢复后自动连接到`注册中心`，`配置中心`
-
-4.  服务器初始化与安装
-
-    > 提供安装程序 可`配置中心数据`，`数据库`，`本地配置`等
-
-5.  本地服务化运行
-
-    > 以本地服务方式运行 `后台运行`，`自动重启`
-
-6.  服务监控
-
-    > 服务状态`cpu,内存，QPS,服务执行时长，执行结果统计`等自动上报到 influxdb,通过 grafana 实时查看状态
-
-7.  统一日志服务
-
-    > 为执行流程分配统一的`全局编号`，通过全局编号串联所有日志，可根据`全局编号`查询位于不同服务器， 不同流程服务的所有日志。并可以配置远程日志服务，自动上传日志。
-
-8.  丰富功能
-
-    > 支持服务`熔断`，`降级`,`RESTful`,`jwt`,`智能路由`，`静态文件服务`，支持数据库`oracle`,`mysql`,`sqlite`,`sqlserver`,`postgreSQL`,`influxdb` 缓存 `redis`,`memcache`,`本地缓存`,消息队列 `activeMQ`,`mqtt`,`redis`，websocket `消息推送`，定时任务和 MQ 消息消费以`主备模式，分片模式，对等模式运行`等
-
-9.  易扩展
-    > `数据库`，`缓存`，`消息队列`，`注册中心`等组件可自已扩展
-
-### [hydra 开发手册](https://github.com/micro-plat/hydra/blob/master/doc.md)
-
-## 安装 hydra
-
-hydra 使用 godep 管理依赖包，执行`go get`即可下载完整源码
-
-```sh
-go get github.com/micro-plat/hydra
-```
-
-## 示例项目
-
-示例代码请参考[examples](https://github.com/micro-plat/hydra/tree/master/examples)
-
-### 1. hello world 示例
+###  示例
 
 - 1.  编写代码
 
-新建文件夹`hello`,并添加`main.go`文件输入以下代码，实现一个简单的`http api服务`
+新建文件夹`hello`,并添加`main.go`输入代码
 
 ```go
 package main
@@ -76,11 +37,11 @@ func main() {
 		hydra.WithPlatName("myplat"), //平台名称
 		hydra.WithSystemName("demo"), //系统名称
 		hydra.WithClusterName("test"), //集群名称
-		hydra.WithServerTypes("api"), //只启动http api 服务
+		hydra.WithServerTypes("api"), //服务器类型为http api
 		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
 		hydra.WithDebug())
 
-	app.Micro("/hello",hello)
+	app.API("/hello",hello)
 	app.Start()
 }
 
@@ -93,6 +54,11 @@ func hello(ctx *context.Context) (r interface{}) {
 
 ```sh
 go install hello
+
+```
+3. 安装服务
+```sh
+hello install
 ```
 
 - 3.  运行服务
@@ -108,3 +74,31 @@ curl http://localhost:8090/hello
 
 {"data":"hello world"}
 ```
+
+以上代码可理解为:
+  
+  1. 使用`文件系统`(`fs://`)作为注册中心, `../`作为注册中心的根目录
+  2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根路径
+  3. 将传入的`hello`函数作为`api`服务注册到服务器
+  4. 执行服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{}) `
+  5. 可从`*context.Context`获取请求相关参数
+  6. `func hello`的返回值作为当前接口的输出内容
+   
+
+执行`hello install`可理解为:
+   
+   1. 安装配置数据,在注册中心创建节点`/myplat/demo/api/test/` , 数据库配置`/myplat/var/db/...`(当前未指定), 服务启动端口`/myplat/demo/api/test/conf`(当前未指定启动端口,默认启动`9090`),当前示例采用了默认配置,未指定额外参数
+   2. 安装本地服务(后台运行服务,开机自动启动如:`systemd`等等)
+   3. 安装后的服务配置可通过`hello conf`查看
+
+执行`hello run`可理解为:
+
+1. 连接注册中心(`fs://../`),拉取服务配置,如:`/myplat/demo/api/test/conf/...`,`/myplat/var/...` 并监控`/myplat/demo/api/test`下所有配置的变化, 变动后进行热更新
+2. 启动服务器`api`,挂载注册的服务`hello`
+3. 将`hello`发布到注册中心`/myplat/services/api/hello/providers`
+4. 将当前服务器到监控目录`/mysql/demo/api/test/servers/[ip:port]...`
+
+
+
+
+更多示例请查看[examples](https://github.com/micro-plat/hydra/tree/master/examples)
