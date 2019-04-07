@@ -91,12 +91,12 @@ hydra已支持6种服务器类型:`http api`服务，`rpc`服务，`websocket`�
 ```go
     app.API("/order",order.NewOrderHandler)
 ```
-第一个参数`/order`为服务名, 一般都以`/`开头,可以包含以`/`分隔的多段名称如:
+第一个参数`/order`为服务名, 一般都以`/`开头,支持`/`分隔的多段名称如:
 ```go
     app.API("/order/request",order.NewOrderRequestHandler)
 ```
 
-第二个参数`order.NewOrderHandler`为服务函数
+第二个参数`order.NewOrderHandler`为服务实现函数
 
 请求的服务名一般与注册的服务器名一致, 但服务注册函数返回的是引用`实例`,且内部实现的函数名为`xxxHandle`签名为`(*context.Context) (interface{})`的函数时,请求的服务器为`注册名`+`/`+`函数名`
 如:
