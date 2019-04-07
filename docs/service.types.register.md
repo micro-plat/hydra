@@ -1,9 +1,11 @@
 ## 服务注册与启动
-hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc`消息消费服务，`cron`定时任务,`web`服务. 
+hydra已支持6种服务器类型:`http api`服务，`rpc`服务，`websocket`服务,`mqc`消息消费服务，`cron`定时任务,`web`服务. 分别对应的服务器类型名为:`api`,`rpc`,`ws`,`mqc`,`cron`,`web`
 
 ### 一. 服务注册
 
-`hydra`实例提供了8个函数进行服务注册, 不同的函数可注册到不同的服务器,见下表:
+#### 1. 服务注册函数
+
+`hydra`实例提供了8个服务注册函数, 可注册到不同的服务器,见下表:
 
 | 注册函数 | api | rpc | web | ws  | mqc | cron |
 | -------- | --- | --- | --- | --- | --- | ---- |
@@ -16,7 +18,7 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
 | MQC      | ×   | ×   | ×   | ×   | √   | ×    |
 | CRON     | ×   | ×   | ×   | ×   | ×   | √    |
 
-代码示例:
+示例:
 ```go
     app.API("/hello",hello)
     app.MQC("/hello",hello)
@@ -26,21 +28,21 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
     }   
 ```
 
-注册函数支持两种类型:
+服务支持两种类型注册:
    * 1. 函数注册: 服务实现代码放在函数中,函数签名格式为:`(*context.Context) (interface{})`,示例:
 ```go
         func hello(ctx *context.Context) (r interface{}) {
             return "hello world"
     }
 ```
-   * 2. 实例注册: 服务实现代码放到`struct`中,传入`struct`实例的构造函数
+   * 2. 实例注册: 服务实现代码放到`struct`中,传入`struct`实例的引用的构造函数
   
         示例:
   ```go
              app.API("/hello",token.NewQueryHandler)
 ```
 
-        添加服务实现文件`query.handler.go`
+          添加服务实现文件`query.handler.go`
 
 ```go
 
@@ -74,12 +76,60 @@ hydra已支持6种服务类型:`http api`服务，`rpc`服务，`websocket`,`mqc
   ```
 该`struct`需具备两个条件:
 
-1. 服务构造函数`NewQueryHandler`,只能是两种格式之一:
-   `(container component.IContainer) (*QueryHandler) ` 或
+1. 服务构造函数`NewQueryHandler`, 只能有两种格式:
+   
+   `(container component.IContainer) (*QueryHandler) ` 
+   
+   或
+
    `(container component.IContainer) (*QueryHandler,error) `
 
 2. 对象中至少包含一个命名为`...Handle`的函数,且签名为:
-   `(*context.Context) (interface{})`格式
+   `(*context.Context) (interface{})`格式. 
+
+#### 2. 服务名称
+```go
+    app.API("/order",order.NewOrderHandler)
+```
+第一个参数`/order`为服务名, 一般都以`/`开头,可以包含以`/`分隔的多段名称如:
+```go
+    app.API("/order/request",order.NewOrderRequestHandler)
+```
+
+第二个参数`order.NewOrderHandler`为服务函数
+
+请求的服务名一般与注册的服务器名一致, 但服务注册函数返回的是引用`实例`,且内部实现的函数名为`xxxHandle`签名为`(*context.Context) (interface{})`的函数时,请求的服务器为`注册名`+`/`+`函数名`
+如:
+```go
+    app.API("/order",order.NewOrderHandler)
+```
+```go
+package order
+
+import (
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/context"
+)
+
+type OrderHandler struct {
+	container component.IContainer
+}
+
+func NewOrderHandler(container component.IContainer) (u *QueryHandler) {
+	return &OrderHandler{container: container}
+}
+
+func (u *OrderHandler) RequestHandle(ctx *context.Context) (r interface{}) {
+	return "success"
+}
+func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
+	return "success"
+}
+```
+以上示例实际注册了两个服务:
+`/order/request`,`/order/query`,分别对应`RequestHandle`,
+`QueryHandle`服务处理函数
+
 
 
 ### 二. 服务启动
