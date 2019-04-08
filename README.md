@@ -2,11 +2,10 @@
 
 hydra 是基于 go 语言和众多开源项目实现的分布式微服务框架
 
-hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后端开发的复杂性，提高开发效率。目前已支持的服务器类型有：`http api`服务，`rpc`服务，`websocket`,`mqc`消息消费服务，`cron`定时任务,`web`服务，静态文件服务。
+hydra['haɪdrə]致力于提供统一的，高性能的后端开发框架，降低后端开发的复杂性，提高开发效率。目前已支持的服务器类型有：`http api`服务，`rpc`服务，`websocket`,`mqc`消息消费服务，`cron`定时任务,`web`服务。
 
 
 特性
-
 
 * 后端一体化框架, 支持6种类型服务器
 * 微服务的基础设施, 服务注册发现，熔断降级，监控与配置管理
@@ -20,7 +19,11 @@ hydra['haɪdrə]致力于提供统一，丰富的后端开发框架，降低后�
 
 ###  示例
 
-1.  编写代码
+1. 安装hydra库
+```sh
+go install github.com/micro-plat/hydra
+```
+2.  编写代码
 
 新建文件夹`hello`,并添加`main.go`文件,输入以下代码:
 
@@ -51,25 +54,25 @@ func hello(ctx *context.Context) (r interface{}) {
 }
 ```
 
-2.  编译安装
+3.  编译安装
 
 ```sh
 go install hello
 
 ```
 
-3. 安装服务
+4. 安装服务
 ```sh
 ./hello install
 ```
 
-4.  运行服务
+5.  运行服务
 
 ```sh
 ./hello run
 ```
 
-5.  测试服务
+6.  测试服务
 
 ```sh
 curl http://localhost:8090/hello
@@ -79,8 +82,8 @@ curl http://localhost:8090/hello
 
 以上代码可理解为:
   
-  1. 使用`文件系统`(`fs://`)作为注册中心, `../`作为注册中心的根目录
-  2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根目录
+  1. 使用`本地文件系统`(`fs://`)作为注册中心, `../`作为注册中心的根目录
+  2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根目录，并安装默认配置
   3. 将传入的`hello`函数作为`api`服务注册到服务器
   4. 请求服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{}) `
   5. 可从`*context.Context`获取请求相关参数
