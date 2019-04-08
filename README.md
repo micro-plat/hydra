@@ -83,11 +83,10 @@ curl http://localhost:8090/hello
 以上代码可理解为:
   
   1. 使用`本地文件系统`(`fs://`)作为注册中心, `../`作为注册中心的根目录
-  2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根目录，并安装默认配置
-  3. 将传入的`hello`函数作为`api`服务注册到服务器
+  2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的配置目录，并安装默认配置
+  3. 将传入的`func hello` 作为服务名`hello`注册到`api`服务器
   4. 请求服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{}) `
-  5. 可从`*context.Context`获取请求相关参数
-  6. `func hello`的返回值作为当前接口的输出内容
+  5. `func hello`的返回值作为当前接口的输出内容
    
 
 执行`./hello install`可理解为:
