@@ -18,7 +18,7 @@ type IContainer interface {
 	conf.IVarConf
 	conf.IMainConf
 	GetRegistry() registry.IRegistry
-	GetLooger() logger.ILogging
+	GetLogger() logger.ILogging
 
 	GetRegularCache(names ...string) (c cache.ICache)
 	GetCache(names ...string) (c cache.ICache, err error)

@@ -175,7 +175,7 @@ func (r *ServiceEngine) Close() error {
 	r.IComponentDB.Close()
 	return nil
 }
-func (r *ServiceEngine) GetLooger() logger.ILogging {
+func (r *ServiceEngine) GetLogger() logger.ILogging {
 	return r.logger
 }
 func appendEngines(engines []string, ext ...string) []string {

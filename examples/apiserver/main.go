@@ -12,6 +12,6 @@ func main() {
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 	app.Micro("/order/query", order.NewQueryHandler)
-	app.Micro("/order", order.NewBindHandler)
+	app.Micro("/order/bind", order.NewBindHandler)
 	app.Start()
 }
