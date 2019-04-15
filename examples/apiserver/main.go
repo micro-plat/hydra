@@ -7,14 +7,11 @@ import (
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("hydra-21"),
-		hydra.WithSystemName("collector"),
-		//hydra.WithServerTypes("api-web-rpc"),
+		hydra.WithPlatName("hydra"),
+		hydra.WithSystemName("apiserver"),
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
-	//app.Micro("/user/login", user.NewLoginHandler)
 	app.Micro("/order/query", order.NewQueryHandler)
-	app.Micro("/order/bind", order.NewBindHandler)
-
+	app.Micro("/order", order.NewBindHandler)
 	app.Start()
 }

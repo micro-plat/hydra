@@ -138,7 +138,8 @@ func (r *StandardComponent) addService(group string, service string, h interface
 	return
 }
 func (r *StandardComponent) registerAddService(name string, group string, handler interface{}) {
-	if _, ok := r.Handlers[name]; !ok {
+	_, hok := r.Handlers[name]
+	if !hok {
 		r.Handlers[name] = handler
 		r.Services = append(r.Services, name)
 	}
@@ -148,7 +149,9 @@ func (r *StandardComponent) registerAddService(name string, group string, handle
 	if _, ok := r.GroupServices[group]; !ok {
 		r.GroupServices[group] = make([]string, 0, 2)
 	}
-	r.GroupServices[group] = append(r.GroupServices[group], name)
+	if !hok {
+		r.GroupServices[group] = append(r.GroupServices[group], name)
+	}
 
 	if _, ok := r.ServiceGroup[name]; !ok {
 		r.ServiceGroup[name] = make([]string, 0, 2)
