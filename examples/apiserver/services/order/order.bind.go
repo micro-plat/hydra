@@ -17,8 +17,6 @@ func NewBindHandler(container component.IContainer) (u *BindHandler) {
 	return &BindHandler{container: container}
 }
 func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
-	ctx.Log.Info("1....")
-	u.container.GetLogger().Info("2.binder....now")
 	var input Input
 	if err := ctx.Request.Bind(&input); err != nil {
 		return err
