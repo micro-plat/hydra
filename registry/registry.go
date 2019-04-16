@@ -37,7 +37,7 @@ func init() {
 
 //RegistryResolver 定义配置文件转换方法
 type RegistryResolver interface {
-	Resolve(servers []string, log *logger.Logger) (IRegistry, error)
+	Resolve(servers []string, u string, p string, log *logger.Logger) (IRegistry, error)
 }
 
 var registryResolvers = make(map[string]RegistryResolver)
@@ -54,7 +54,7 @@ func Register(name string, resolver RegistryResolver) {
 }
 
 //newRegistry 创建注册中心
-func newRegistry(name string, servers []string, log logger.ILogging) (r IRegistry, err error) {
+func newRegistry(name string, servers []string, u string, p string, log logger.ILogging) (r IRegistry, err error) {
 	resolver, ok := registryResolvers[name]
 	if !ok {
 		return nil, fmt.Errorf("registry: unknown adapter name %q (forgotten import?)", name)
@@ -64,7 +64,7 @@ func newRegistry(name string, servers []string, log logger.ILogging) (r IRegistr
 		rsvr := input[0].(RegistryResolver)
 		srvs := input[1].([]string)
 		log := input[2].(*logger.Logger)
-		return rsvr.Resolve(srvs, log)
+		return rsvr.Resolve(srvs, u, p, log)
 	}, resolver, servers, log)
 	if err != nil {
 		return
@@ -75,11 +75,11 @@ func newRegistry(name string, servers []string, log logger.ILogging) (r IRegistr
 
 //NewRegistryWithAddress 根据协议地址创建注册中心
 func NewRegistryWithAddress(address string, log logger.ILogging) (r IRegistry, err error) {
-	proto, addrss, err := ResolveAddress(address)
+	proto, addrss, u, p, err := ResolveAddress(address)
 	if err != nil {
 		return nil, err
 	}
-	return newRegistry(proto, addrss, log)
+	return newRegistry(proto, addrss, u, p, log)
 }
 
 //Close 关闭注册中心的服务
@@ -95,26 +95,47 @@ func Close() {
 //ResolveAddress 解析地址
 //如:zk://192.168.0.155:2181
 //如:standalone://localhost
-func ResolveAddress(address string) (proto string, raddr []string, err error) {
+func ResolveAddress(address string) (proto string, raddr []string, u string, p string, err error) {
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
-		return "", nil, fmt.Errorf("%s错误，必须包含://", address)
+		return "", nil, "", "", fmt.Errorf("%s错误，必须包含://", address)
 	}
 	if len(addr[0]) == 0 {
-		return "", nil, fmt.Errorf("%s错误，协议名不能为空", address)
+		return "", nil, "", "", fmt.Errorf("%s错误，协议名不能为空", address)
 	}
 	if len(addr[1]) == 0 {
-		return "", nil, fmt.Errorf("%s错误，地址不能为空", address)
+		return "", nil, "", "", fmt.Errorf("%s错误，地址不能为空", address)
 	}
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")
+	var addr0 string
+	u, p, addr0, err = getUPAddress(raddr[0])
+	raddr[0] = addr0
 	return
 }
 
 //Join 地址连接
 func Join(elem ...string) string {
-
 	path := filepath.Join(elem...)
 	return strings.Replace(path, "\\", "/", -1)
 
+}
+func getUPAddress(addr string) (u string, p string, address string, err error) {
+	if !strings.Contains(addr, "@") {
+		return "", "", addr, nil
+	}
+	addrs := strings.Split(addr, "@")
+	if len(addrs) != 2 {
+		return "", "", "", fmt.Errorf("地址非法%s", addr)
+	}
+	address = addrs[1]
+	up := strings.Split(addrs[0], ":")
+	switch len(up) {
+	case 1:
+		return up[0], up[0], address, nil
+	case 2:
+		return up[0], up[1], address, nil
+	default:
+		return "", "", "", fmt.Errorf("地址非法%s", addrs[0])
+	}
 }

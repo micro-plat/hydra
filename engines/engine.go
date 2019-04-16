@@ -53,11 +53,6 @@ func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger logger.
 	if err = e.loadEngineServices(); err != nil {
 		return nil, err
 	}
-	// if err = e.LoadComponents(fmt.Sprintf("./%s.so", conf.GetPlatName()),
-	// 	fmt.Sprintf("./%s.so", conf.GetSysName()),
-	// 	fmt.Sprintf("./%s_%s.so", conf.GetPlatName(), conf.GetSysName())); err != nil {
-	// 	return
-	// }
 	e.StandardComponent.AddRPCProxy(e.RPCProxy())
 	err = e.StandardComponent.LoadServices()
 	return
@@ -81,7 +76,8 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 			r.StandardComponent.AddCustomerService(name, handler, group, h.GetTags(name)...)
 		}
 	}
-	return r.StandardComponent.LoadServices()
+	err := r.StandardComponent.LoadServices()
+	return err
 }
 
 //UpdateVarConf 更新var配置参数
@@ -92,7 +88,8 @@ func (r *ServiceEngine) UpdateVarConf(conf conf.IServerConf) {
 
 //GetServices 获取组件提供的所有服务
 func (r *ServiceEngine) GetServices() []string {
-	return r.GetGroupServices(component.GetGroupName(r.GetServerType())...)
+	srvs := r.GetGroupServices(component.GetGroupName(r.GetServerType())...)
+	return srvs
 }
 
 //Execute 执行外部请求

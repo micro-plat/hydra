@@ -78,7 +78,6 @@ func getRouters(services []string) conf.Routers {
 		routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}, Name: "/*name", Service: "/@name", Engine: "*"})
 		return routers
 	}
-	fmt.Println("services:", services)
 	routers.Routers = make([]*conf.Router, 0, len(services))
 	for _, srvs := range services {
 		routers.Routers = append(routers.Routers,

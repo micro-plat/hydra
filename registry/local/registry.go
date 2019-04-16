@@ -10,7 +10,7 @@ type lkRegistry struct {
 }
 
 //Resolve 根据配置生成zookeeper客户端
-func (z *lkRegistry) Resolve(servers []string, log *logger.Logger) (registry.IRegistry, error) {
+func (z *lkRegistry) Resolve(servers []string, u string, p string, log *logger.Logger) (registry.IRegistry, error) {
 	prefix := "."
 	if len(servers) > 0 {
 		prefix = servers[0]

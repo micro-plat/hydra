@@ -80,6 +80,9 @@ func (c *Creator) installRegistry() error {
 			c.registry.Delete(registry.Join(rpath, v))
 		}
 		err = c.registry.Delete(rpath)
+		if err != nil {
+			return fmt.Errorf("%v,delete path: %s failed", err, rpath)
+		}
 		if mode == modeNew {
 			c.logger.Info("\t\t删除配置:", rpath)
 		}
