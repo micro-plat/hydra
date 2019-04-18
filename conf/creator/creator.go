@@ -79,13 +79,17 @@ func (c *Creator) installRegistry() error {
 		for _, v := range pc {
 			c.registry.Delete(registry.Join(rpath, v))
 		}
-		err = c.registry.Delete(rpath)
-		if err != nil {
-			return fmt.Errorf("%v,delete path: %s failed", err, rpath)
+		b, _ := c.registry.Exists(rpath)
+		if b {
+			err = c.registry.Delete(rpath)
+			if err != nil {
+				return fmt.Errorf("%v,delete path: %s failed", err, rpath)
+			}
+			if mode == modeNew {
+				c.logger.Info("\t\t删除配置:", rpath)
+			}
 		}
-		if mode == modeNew {
-			c.logger.Info("\t\t删除配置:", rpath)
-		}
+
 		if err := c.binder.ScanMainConf(mainPath, tp); err != nil {
 			return err
 		}

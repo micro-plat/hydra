@@ -17,7 +17,7 @@ type IServer interface {
 	Run() error
 	Shutdown(timeout time.Duration)
 	GetStatus() string
-	GetAddress() string
+	GetAddress(h ...string) string
 	CloseCircuitBreaker() error
 	SetCircuitBreaker(*conf.CircuitBreaker) error
 
@@ -36,7 +36,7 @@ type ApiResponsiveServer struct {
 	server       IServer
 	engine       servers.IRegistryEngine
 	registryAddr string
-	pubs         []string
+	pubs         map[string]string
 	currentConf  conf.IServerConf
 	closeChan    chan struct{}
 	once         sync.Once
@@ -53,7 +53,7 @@ func NewApiResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		closeChan:    make(chan struct{}),
 		currentConf:  cnf,
 		Logger:       logger,
-		pubs:         make([]string, 0, 2),
+		pubs:         make(map[string]string),
 		registryAddr: registryAddr,
 	}
 	// 启动执行引擎
@@ -108,7 +108,6 @@ func (w *ApiResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		return
 	}
 	if err = w.Start(); err == nil {
-		w.currentConf = cnf
 		w.restarted = true
 		return
 	}

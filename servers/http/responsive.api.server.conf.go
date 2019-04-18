@@ -44,7 +44,7 @@ func (w *ApiResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 		return true, nil
 	}
 
-	if comparer.IsValueChanged("status", "address", "host", "rTimeout", "wTimeout", "rhTimeout") {
+	if comparer.IsValueChanged("status", "address", "host", "dn", "rTimeout", "wTimeout", "rhTimeout") {
 		return true, nil
 	}
 	ok, err := comparer.IsRequiredSubConfChanged("router")
@@ -114,6 +114,7 @@ func (w *ApiResponsiveServer) SetConf(restart bool, cnf conf.IServerConf) (err e
 		return err
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "host设置")
+	w.currentConf = cnf
 	return nil
 }
 func getEnableName(b bool) string {

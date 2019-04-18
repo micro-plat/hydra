@@ -25,7 +25,7 @@ func NewWebResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	h.closeChan = make(chan struct{})
 	h.currentConf = cnf
 	h.Logger = logger
-	h.pubs = make([]string, 0, 2)
+	h.pubs = make(map[string]string)
 	// 启动执行引擎
 	h.engine, err = engines.NewServiceEngine(cnf, registryAddr, h.Logger)
 	if err != nil {
@@ -76,7 +76,6 @@ func (w *WebResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	}
 
 	if err = w.SetConf(true, cnf); err != nil {
-		w.currentConf = cnf
 		w.restarted = true
 		return
 	}

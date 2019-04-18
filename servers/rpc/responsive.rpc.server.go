@@ -17,7 +17,7 @@ type RpcResponsiveServer struct {
 	server       *RpcServer
 	engine       servers.IRegistryEngine
 	registryAddr string
-	pubs         []string
+	pubs         map[string]string
 	currentConf  conf.IServerConf
 	closeChan    chan struct{}
 	once         sync.Once
@@ -34,7 +34,7 @@ func NewRpcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		closeChan:    make(chan struct{}),
 		currentConf:  cnf,
 		Logger:       logger,
-		pubs:         make([]string, 0, 2),
+		pubs:         make(map[string]string),
 		registryAddr: registryAddr,
 	}
 	// 启动执行引擎

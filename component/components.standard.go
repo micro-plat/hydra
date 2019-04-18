@@ -141,7 +141,7 @@ func (r *StandardComponent) registerAddService(name string, group string, handle
 	_, hok := r.Handlers[name]
 	if !hok {
 		r.Handlers[name] = handler
-		r.Services = append(r.Services, name)
+
 	}
 	if strings.HasPrefix(name, "__") {
 		return
@@ -149,9 +149,11 @@ func (r *StandardComponent) registerAddService(name string, group string, handle
 	if _, ok := r.GroupServices[group]; !ok {
 		r.GroupServices[group] = make([]string, 0, 2)
 	}
-	if !hok {
-		r.GroupServices[group] = append(r.GroupServices[group], name)
-	}
+	// if !hok {
+	r.GroupServices[group] = append(r.GroupServices[group], name)
+	// }
+
+	r.Services = append(r.Services, name)
 
 	if _, ok := r.ServiceGroup[name]; !ok {
 		r.ServiceGroup[name] = make([]string, 0, 2)

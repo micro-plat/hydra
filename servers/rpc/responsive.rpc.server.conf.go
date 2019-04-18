@@ -44,7 +44,7 @@ func (w *RpcResponsiveServer) NeedRestart(cnf conf.IServerConf) (bool, error) {
 	if comparer.IsVarChanged() {
 		return true, nil
 	}
-	if comparer.IsValueChanged("status", "address", "host") {
+	if comparer.IsValueChanged("status", "address", "host", "dn") {
 		return true, nil
 	}
 	ok, err := comparer.IsRequiredSubConfChanged("router")

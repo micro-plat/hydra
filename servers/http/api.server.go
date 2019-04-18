@@ -121,7 +121,10 @@ func (s *ApiServer) Shutdown(timeout time.Duration) {
 }
 
 //GetAddress 获取当前服务地址
-func (s *ApiServer) GetAddress() string {
+func (s *ApiServer) GetAddress(h ...string) string {
+	if len(h) > 0 && h[0] != "" {
+		return fmt.Sprintf("%s://%s:%s", s.proto, h[0], s.port)
+	}
 	return fmt.Sprintf("%s://%s:%s", s.proto, s.host, s.port)
 }
 

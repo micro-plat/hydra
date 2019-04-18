@@ -76,5 +76,6 @@ func (w *WebResponsiveServer) SetConf(restart bool, conf conf.IServerConf) (err 
 		return err
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "view设置")
+	w.currentConf = conf
 	return nil
 }

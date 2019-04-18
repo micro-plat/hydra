@@ -69,6 +69,7 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 			return err
 		}
 	}
+
 	r.cHandler = h
 	svs := h.GetServices()
 	for group, handlers := range svs {

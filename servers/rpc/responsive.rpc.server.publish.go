@@ -12,7 +12,16 @@ import (
 
 //publish 将当前服务器的节点信息发布到注册中心
 func (w *RpcResponsiveServer) publish() (err error) {
-
+	if err = w.pubServerNode(); err != nil {
+		return err
+	}
+	if err = w.pubServiceNode(); err != nil {
+		return
+	}
+	go w.publishCheck()
+	return
+}
+func (w *RpcResponsiveServer) pubServerNode() error {
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
 	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort)
@@ -21,36 +30,48 @@ func (w *RpcResponsiveServer) publish() (err error) {
 	}
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)
-	err = w.engine.GetRegistry().CreateTempNode(pubPath, nodeData)
+	if b, _ := w.engine.GetRegistry().Exists(pubPath); b {
+		w.engine.GetRegistry().Delete(pubPath)
+	}
+	err := w.engine.GetRegistry().CreateTempNode(pubPath, nodeData)
 	if err != nil {
 		err = fmt.Errorf("服务发布失败:(%s)[%v]", pubPath, err)
-		return
+		return err
 	}
-	w.pubs = []string{pubPath}
-
+	w.pubs[pubPath] = nodeData
+	return nil
+}
+func (w *RpcResponsiveServer) pubServiceNode() error {
+	addr := w.server.GetAddress(w.currentConf.GetString("dn"))
+	ipPort := strings.Split(addr, "://")[1]
+	data := map[string]string{
+		"service": addr,
+	}
+	jsonData, _ := jsons.Marshal(data)
+	nodeData := string(jsonData)
 	names := w.currentConf.GetStrings("host")
 	if len(names) == 0 {
 		names = append(names, w.currentConf.GetSysName())
 	}
+
 	srvs := w.GetServices()
 	for _, host := range names {
 		for _, srv := range srvs {
-			servicePath := path.Join(w.currentConf.GetServicePubRootPath(registry.Join(host, srv)), ipPort)
-			err := w.engine.GetRegistry().CreateTempNode(servicePath, nodeData)
+			servicePath := path.Join(w.currentConf.GetServicePubRootPath(registry.Join(host, srv)), ipPort+"_")
+			rpath, err := w.engine.GetRegistry().CreateSeqNode(servicePath, nodeData)
 			if err != nil {
 				err = fmt.Errorf("服务发布失败:(%s)[%v]", servicePath, err)
 				return err
 			}
-			w.pubs = append(w.pubs, servicePath)
+			w.pubs[rpath] = nodeData
 		}
-
 	}
-	go w.publishCheck(nodeData)
-	return
+
+	return nil
 }
 
 //publishCheck 定时检查节点数据是否存在
-func (w *RpcResponsiveServer) publishCheck(data string) {
+func (w *RpcResponsiveServer) publishCheck() {
 LOOP:
 	for {
 		select {
@@ -60,16 +81,16 @@ LOOP:
 			if w.done {
 				break LOOP
 			}
-			w.checkPubPath(data)
+			w.checkPubPath()
 		}
 	}
 }
 
 //checkPubPath 检查已发布的节点，不存在则创建
-func (w *RpcResponsiveServer) checkPubPath(data string) {
+func (w *RpcResponsiveServer) checkPubPath() {
 	w.pubLock.Lock()
 	defer w.pubLock.Unlock()
-	for _, path := range w.pubs {
+	for path, data := range w.pubs {
 		if w.done {
 			break
 		}
@@ -91,8 +112,8 @@ func (w *RpcResponsiveServer) checkPubPath(data string) {
 func (w *RpcResponsiveServer) unpublish() {
 	w.pubLock.Lock()
 	defer w.pubLock.Unlock()
-	for _, path := range w.pubs {
+	for path := range w.pubs {
 		w.engine.GetRegistry().Delete(path)
 	}
-	w.pubs = make([]string, 0, 0)
+	w.pubs = make(map[string]string)
 }
