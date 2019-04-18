@@ -12,7 +12,7 @@ func main() {
 		hydra.WithServerTypes("rpc-api"),
 		hydra.WithDebug())
 
-	app.Micro("/order/query", order.NewQueryHandler)
-	app.Micro("/order/bind", order.NewBindHandler)
+	app.API("/order/query", order.NewQueryHandler)
+	app.RPC("/order/bind", order.NewBindHandler)
 	app.Start()
 }
