@@ -20,7 +20,6 @@ func main() {
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 	app.Handling(func(c *context.Context) interface{} {
-		fmt.Println("go id:", Goid())
 		return nil
 	})
 	app.Micro("/order/query", order.NewQueryHandler)
