@@ -7,7 +7,7 @@ import (
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("hydra-20"),
+		hydra.WithPlatName("hydra-20-test"),
 		hydra.WithSystemName("collector"),
 		hydra.WithServerTypes("rpc-api"),
 		hydra.WithDebug())
