@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -27,7 +29,7 @@ type IServiceEngine interface {
 type ServiceEngine struct {
 	*component.StandardComponent
 	cHandler component.IComponentHandler
-	loggers  map[int]logger.ILogging
+	loggers  cmap.ConcurrentMap
 	conf.IServerConf
 	registryAddr string
 	*rpc.Invoker
@@ -50,7 +52,7 @@ func NewServiceEngine(conf conf.IServerConf, registryAddr string, log logger.ILo
 	e.IComponentInfluxDB = component.NewStandardInfluxDB(e, "influx")
 	e.IComponentQueue = component.NewStandardQueue(e, "queue")
 	e.IComponentGlobalVarObject = component.NewGlobalVarObjectCache(e)
-	e.loggers = make(map[int]logger.ILogging)
+	e.loggers = cmap.New(8)
 	if e.registry, err = registry.NewRegistryWithAddress(registryAddr, log); err != nil {
 		return
 	}
@@ -100,9 +102,9 @@ func (r *ServiceEngine) GetServices() []string {
 
 //Execute 执行外部请求
 func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
-	id := goid()
-	r.loggers[id] = ctx.Log
-	defer delete(r.loggers, id)
+	id := fmt.Sprint(goid())
+	r.loggers.Set(id, ctx.Log)
+	defer r.loggers.Remove(id)
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
 		rf := r.StandardComponent.Fallback(ctx)
 		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {
@@ -179,12 +181,13 @@ func (r *ServiceEngine) Close() error {
 	r.IComponentInfluxDB.Close()
 	r.IComponentQueue.Close()
 	r.IComponentDB.Close()
-	r.loggers = nil
+	r.loggers.Clear()
 	return nil
 }
 func (r *ServiceEngine) GetLogger() logger.ILogging {
-	if l, ok := r.loggers[goid()]; ok {
-		return l
+	id := fmt.Sprint(goid())
+	if l, ok := r.loggers.Get(id); ok {
+		return l.(logger.ILogging)
 	}
 	return r.logger
 }
