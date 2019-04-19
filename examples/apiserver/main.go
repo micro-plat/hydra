@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/micro-plat/hydra/context"
-
 	"github.com/micro-plat/hydra/examples/apiserver/services/order"
 	"github.com/micro-plat/hydra/hydra"
 )
@@ -14,9 +12,6 @@ func main() {
 		hydra.WithSystemName("apiserver"),
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
-	app.Handling(func(c *context.Context) interface{} {
-		return nil
-	})
 	app.Micro("/order/query", order.NewQueryHandler)
 	app.Micro("/order/bind", order.NewBindHandler)
 	app.Start()

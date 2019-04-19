@@ -21,9 +21,6 @@ func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 }
 
 func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
-	ctx.Log.Info("1.test")
-	u.container.GetLogger().Info("2.test")
-
 	tp := ctx.Request.GetInt("t", 0)
 	ctx.Response.SetContentType(context.ContentTypes[tp])
 	m := ctx.Request.GetInt("m", 0)
