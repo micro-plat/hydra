@@ -5,8 +5,8 @@ import "github.com/urfave/cli"
 type ICli interface {
 	Append(string, cli.Flag)
 	Validate(string, func(*cli.Context) error)
-	GetFlags(mode string) []cli.Flag
-	GetValidators(mode string) []func(*cli.Context) error
+	getFlags(mode string) []cli.Flag
+	getValidators(mode string) []func(*cli.Context) error
 	setContext(ctx *cli.Context)
 	Context() *cli.Context
 }
@@ -35,13 +35,13 @@ func (c *Cli) Validate(mode string, f func(*cli.Context) error) {
 	}
 	c.validators[mode] = append(c.validators[mode], f)
 }
-func (c *Cli) GetFlags(mode string) []cli.Flag {
+func (c *Cli) getFlags(mode string) []cli.Flag {
 	if v, ok := c.flags[mode]; ok {
 		return v
 	}
 	return make([]cli.Flag, 0, 0)
 }
-func (c *Cli) GetValidators(mode string) []func(*cli.Context) error {
+func (c *Cli) getValidators(mode string) []func(*cli.Context) error {
 	if v, ok := c.validators[mode]; ok {
 		return v
 	}

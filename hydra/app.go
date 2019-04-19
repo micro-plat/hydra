@@ -132,7 +132,7 @@ func (m *MicroApp) checkInput(c *cli.Context) (err error) {
 	}
 
 	//获取外部验证
-	vds := m.Cli.GetValidators(c.Command.Name)
+	vds := m.Cli.getValidators(c.Command.Name)
 	for _, validator := range vds {
 		if err := validator(c); err != nil {
 			return err
