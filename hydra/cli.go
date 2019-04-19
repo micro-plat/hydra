@@ -2,13 +2,20 @@ package hydra
 
 import "github.com/urfave/cli"
 
+//ICli 命令行参数
 type ICli interface {
-	Append(string, cli.Flag)
-	Validate(string, func(*cli.Context) error)
+
+	//Append 添加命令行参数
+	Append(mode string, flag cli.Flag)
+
+	//Validate 添加验证函数
+	Validate(mode string, f func(*cli.Context) error)
+
+	//Context 获取命令行上下文
+	Context() *cli.Context
 	getFlags(mode string) []cli.Flag
 	getValidators(mode string) []func(*cli.Context) error
 	setContext(ctx *cli.Context)
-	Context() *cli.Context
 }
 type Cli struct {
 	flags      map[string][]cli.Flag
@@ -35,6 +42,9 @@ func (c *Cli) Validate(mode string, f func(*cli.Context) error) {
 	}
 	c.validators[mode] = append(c.validators[mode], f)
 }
+func (c *Cli) Context() *cli.Context {
+	return c.cli
+}
 func (c *Cli) getFlags(mode string) []cli.Flag {
 	if v, ok := c.flags[mode]; ok {
 		return v
@@ -49,7 +59,4 @@ func (c *Cli) getValidators(mode string) []func(*cli.Context) error {
 }
 func (c *Cli) setContext(ctx *cli.Context) {
 	c.cli = ctx
-}
-func (c *Cli) Context() *cli.Context {
-	return c.cli
 }

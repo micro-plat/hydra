@@ -15,9 +15,7 @@ func main() {
 		//	hydra.WithRegistry("zk://192.168.0.107"),
 		//	hydra.WithClusterName("test"),
 		hydra.WithDebug())
-
 	app.Conf.API.SetMainConf(`{"address":"#address"}`)
-
 	app.Conf.Plat.SetVarConf("db", "db", `{			
 			"provider":"ora",
 			"connString":"sso/123456@orcl136",

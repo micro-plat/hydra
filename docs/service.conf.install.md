@@ -139,7 +139,45 @@ app.Conf.Plat.SetVarConf("db", "db", `{
 ```
 以上代码在执行`install`后, 自动向注册中心创建节点`/myplat_debug/var/db/db`并保存内容.
 
-#### 2.3 生产环境配置
+#### 2.3 应用程序配置
+
+应用配置，字段可自定义：
+
+```go
+app.Conf.API.SetSubConf("app", `
+	{
+		"appid":"wxb15bb0e712538",
+		"token":"253a9eb3ac7173125a9"
+	}`)
+```
+
+#### 2.4 跨域配置
+```go
+app.Conf.API.SetSubConf("header", `
+		{
+			"Access-Control-Allow-Origin": "*", 
+			"Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS", 
+			"Access-Control-Allow-Headers": "X-Requested-With,Content-Type,sid",
+			"Access-Control-Allow-Credentials": "true"
+		}`)
+```
+#### 2.5 JWT配置
+
+```go
+	app.Conf.API.SetSubConf("auth", `{
+			"jwt": {
+				"exclude": ["/member/login"],
+				"expireAt": 36000,
+				"mode": "HS512",
+				"name": "sid",
+				"secret": "4dc6882eb672f119d2dd160188802a10f",
+				"source":"H"
+				
+			}
+		}`)
+```
+
+#### 2.6 生产环境配置
 
 如果是生产环境,则连接字符串无法写在代码中,则用`#`开头的变量名作为占位符,在执行`install`命令时会由安装人员输入,代码如下: 
 ```go

@@ -101,7 +101,7 @@ func (s *Binder) SetInput(fieldName, showName, desc string, filters ...func(v st
 }
 
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
-	return s.binders[serverType].GetInstallers()
+	return s.binders[serverType].getInstallers()
 }
 
 //GetMainConfNames 获取已配置的主配置名称
@@ -114,63 +114,63 @@ func (s *Binder) GetMainConfNames(platName string, systemName string, tp string,
 //GetSubConfNames 获取已配置的主配置名称
 func (s *Binder) GetSubConfNames(serverType string) []string {
 	binder := s.binders[serverType]
-	return binder.GetSubConfNames()
+	return binder.getSubConfNames()
 }
 
 //GetVarConfNames 获取已配置的主配置名称
 func (s *Binder) GetVarConfNames() []string {
-	return s.Plat.GetVarNames()
+	return s.Plat.getVarNames()
 }
 
 //GetMainConfScanNum 获取主配置待扫描参数个数
 func (s *Binder) GetMainConfScanNum(serverType string) int {
 	binder := s.binders[serverType]
-	return binder.NeedScanCount("")
+	return binder.needScanCount("")
 }
 
 //GetSubConfScanNum 获取子配置待扫描参数个数
 func (s *Binder) GetSubConfScanNum(serverType string, subName string) int {
 	binder := s.binders[serverType]
-	return binder.NeedScanCount(subName)
+	return binder.needScanCount(subName)
 }
 
 //GetVarConfScanNum 获取var配置待扫描参数个数
 func (s *Binder) GetVarConfScanNum(nodeName string) int {
-	return s.Plat.NeedScanCount(nodeName)
+	return s.Plat.needScanCount(nodeName)
 }
 
 //ScanMainConf 扫描主配置
 func (s *Binder) ScanMainConf(mainPath string, serverType string) error {
 	binder := s.binders[serverType]
-	return binder.Scan(mainPath, "")
+	return binder.scan(mainPath, "")
 }
 
 //ScanSubConf 扫描子配置
 func (s *Binder) ScanSubConf(mainPath string, serverType string, subName string) error {
 	binder := s.binders[serverType]
-	return binder.Scan(mainPath, subName)
+	return binder.scan(mainPath, subName)
 }
 
 //ScanVarConf 扫描平台配置
 func (s *Binder) ScanVarConf(platName string, nodeName string) error {
-	return s.Plat.Scan(platName, nodeName)
+	return s.Plat.scan(platName, nodeName)
 }
 
 //GetMainConf 获取主配置信息
 func (s *Binder) GetMainConf(serverType string) string {
 	binder := s.binders[serverType]
-	return binder.GetNodeConf("")
+	return binder.getNodeConf("")
 }
 
 //GetSubConf 获取子配置信息
 func (s *Binder) GetSubConf(serverType string, subName string) string {
 	binder := s.binders[serverType]
-	return binder.GetNodeConf(subName)
+	return binder.getNodeConf(subName)
 }
 
 //GetVarConf 获取平台配置信息
 func (s *Binder) GetVarConf(nodeName string) string {
-	return s.Plat.GetNodeConf(nodeName)
+	return s.Plat.getNodeConf(nodeName)
 }
 
 //GetSQL 获取指定目录下所有.sql文件中的SQL语句，并用分号拆分

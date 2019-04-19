@@ -1,6 +1,9 @@
 package engines
 
 import (
+	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/micro-plat/hydra/component"
@@ -24,6 +27,7 @@ type IServiceEngine interface {
 type ServiceEngine struct {
 	*component.StandardComponent
 	cHandler component.IComponentHandler
+	loggers  map[int]logger.ILogging
 	conf.IServerConf
 	registryAddr string
 	*rpc.Invoker
@@ -37,8 +41,8 @@ type ServiceEngine struct {
 }
 
 //NewServiceEngine 构建服务引擎
-func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger logger.ILogging) (e *ServiceEngine, err error) {
-	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: logger}
+func NewServiceEngine(conf conf.IServerConf, registryAddr string, log logger.ILogging) (e *ServiceEngine, err error) {
+	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: log}
 	e.StandardComponent = component.NewStandardComponent("sys.engine", e)
 	e.Invoker = rpc.NewInvoker(conf.GetPlatName(), conf.GetSysName(), registryAddr)
 	e.IComponentCache = component.NewStandardCache(e, "cache")
@@ -46,7 +50,8 @@ func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger logger.
 	e.IComponentInfluxDB = component.NewStandardInfluxDB(e, "influx")
 	e.IComponentQueue = component.NewStandardQueue(e, "queue")
 	e.IComponentGlobalVarObject = component.NewGlobalVarObjectCache(e)
-	if e.registry, err = registry.NewRegistryWithAddress(registryAddr, logger); err != nil {
+	e.loggers = make(map[int]logger.ILogging)
+	if e.registry, err = registry.NewRegistryWithAddress(registryAddr, log); err != nil {
 		return
 	}
 
@@ -95,6 +100,9 @@ func (r *ServiceEngine) GetServices() []string {
 
 //Execute 执行外部请求
 func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
+	id := goid()
+	r.loggers[id] = ctx.Log
+	defer delete(r.loggers, id)
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
 		rf := r.StandardComponent.Fallback(ctx)
 		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {
@@ -171,11 +179,16 @@ func (r *ServiceEngine) Close() error {
 	r.IComponentInfluxDB.Close()
 	r.IComponentQueue.Close()
 	r.IComponentDB.Close()
+	r.loggers = nil
 	return nil
 }
 func (r *ServiceEngine) GetLogger() logger.ILogging {
+	if l, ok := r.loggers[goid()]; ok {
+		return l
+	}
 	return r.logger
 }
+
 func appendEngines(engines []string, ext ...string) []string {
 	addEngine := make([]string, 0, len(ext))
 	for _, n := range ext {
@@ -191,4 +204,20 @@ func appendEngines(engines []string, ext ...string) []string {
 		}
 	}
 	return append(engines, addEngine...)
+}
+func goid() int {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("panic recover:panic info:%v", err)
+		}
+	}()
+
+	var buf [64]byte
+	n := runtime.Stack(buf[:], false)
+	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	id, err := strconv.Atoi(idField)
+	if err != nil {
+		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
+	}
+	return id
 }

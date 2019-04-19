@@ -18,6 +18,8 @@ func NewBindHandler(container component.IContainer) (u *BindHandler) {
 }
 func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
 
+	ctx.Log.Info("1.test")
+	u.container.GetLogger().Info("2.test")
 	var input Input
 	if err := ctx.Request.Bind(&input); err != nil {
 		return err
