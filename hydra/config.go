@@ -13,7 +13,7 @@ import (
 )
 
 func (m *MicroApp) queryConfigAction(c *cli.Context) (err error) {
-	if err := m.checkInput(); err != nil {
+	if err := m.checkInput(c); err != nil {
 		m.xlogger.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil

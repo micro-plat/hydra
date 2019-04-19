@@ -11,27 +11,22 @@ import (
 
 func main() {
 	app := hydra.NewApp()
+
 	app.Micro("/hello", helloWorld)
-	//添加命令行参数
-	app.ArgCtx.Append(cli.StringFlag{
+	app.Cli.Append(hydra.ModeRun, cli.StringFlag{
 		Name:  "ip,i",
 		Usage: "IP地址",
 	})
-	//参数验证
-	app.ArgCtx.Validate = func() error {
-		if !app.ArgCtx.IsSet("ip") {
-			return fmt.Errorf("未指定ip地址")
+	app.Cli.Validate(hydra.ModeRun, func(c *cli.Context) error {
+		if !c.IsSet("ip") {
+			return fmt.Errorf("未设置ip地址")
 		}
 		return nil
-	}
-
-	app.Initializing(func(c component.IContainer) error {
-
-		//获取参数值
-		fmt.Println("ip.address:", app.ArgCtx.String("ip"))
+	})
+	app.Initializing(func(component.IContainer) error {
+		fmt.Println("ip:", app.Cli.Context().String("ip"))
 		return nil
 	})
-
 	app.Start()
 }
 func helloWorld(ctx *context.Context) (r interface{}) {
