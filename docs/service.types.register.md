@@ -87,6 +87,7 @@ hydra已支持6种服务器类型:`http api`服务，`rpc`服务，`websocket`�
 2. 对象中至少包含一个命名为`...Handle`的函数,且签名为:
    `(*context.Context) (interface{})`格式. 
 
+
 #### 2. 服务名称
 ```go
     app.API("/order",order.NewOrderHandler)
@@ -130,6 +131,57 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 `/order/request`,`/order/query`,分别对应`RequestHandle`,
 `QueryHandle`服务处理函数
 
+
+
+
+#### 3. 服务生命周期
+
+服务是在服务器初始化时挂载的，外部请求到达时直接执行服务名对应的服务处理函数(`Handle`,`...Handle`)，服务实例可实现`func Close()error`函数，用于释放服务相关资源。服务器关闭时会自动调用每个服务已实现的`Close`函数。
+
+服务函数尽量不要依赖全局资源，必须依赖时应充分考虑多个服务器启，停对该资源的影响。
+
+如：
+```go
+type Input struct {
+	ID   string `form:"id" json:"id" valid:"int,required"` //绑定输入参数，并验证类型否是否必须输入
+	Name string `form:"name" json:"name"`
+}
+type BindHandler struct {
+	container component.IContainer
+}
+
+func NewBindHandler(container component.IContainer) (u *BindHandler) {
+	return &BindHandler{container: container}
+}
+func (u *BindHandler) GetHandle(ctx *context.Context) (r interface{}) {
+	var input Input
+	if err := ctx.Request.Bind(&input); err != nil {
+		return err
+	}
+	return input
+}
+func (u *BindHandler) Close()error{
+    return nil
+}
+
+```
+
+服务注册代码:
+```go
+app := hydra.NewApp(
+		hydra.WithPlatName("hydra-test"),
+		hydra.WithSystemName("micro"),
+		hydra.WithServerTypes("api-rpc"),
+		hydra.WithDebug())
+	app.Micro("/order/bind",NewBindHandler)
+	app.Start()
+```
+
+1. `api`服务器和`rpc`服务器启动时会分别执行`NewBindHandler`创建两个`BindHandler`实例
+
+2. 某一个服务器关闭时(通过注册中心配置关闭),会调用每一个服务实例的`Close`函数(假如实现了`Close`函数),如当前示例的`BindHandler.Close`函数
+
+> 全局数据保存与获取，可使用`component.IContainer`中提供的`SaveGlobalObject`和`GetGlobalObject`函数。
 
 
 ### 二. 服务启动

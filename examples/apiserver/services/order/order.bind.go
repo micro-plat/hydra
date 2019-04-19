@@ -17,6 +17,7 @@ func NewBindHandler(container component.IContainer) (u *BindHandler) {
 	return &BindHandler{container: container}
 }
 func (u *BindHandler) Handle(ctx *context.Context) (r interface{}) {
+
 	var input Input
 	if err := ctx.Request.Bind(&input); err != nil {
 		return err
