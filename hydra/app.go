@@ -120,7 +120,7 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 	return nil
 }
 func (m *MicroApp) run() {
-	p := executable{app: m}
+	p := &once{app: m}
 	p.run()
 }
 func (m *MicroApp) checkInput(c *cli.Context) (err error) {
