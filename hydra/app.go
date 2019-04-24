@@ -67,6 +67,7 @@ func (m *MicroApp) Start() {
 	if err := m.app.Run(os.Args); err != nil {
 		return
 	}
+
 }
 
 //Use 注册所有服务
@@ -111,13 +112,17 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
 		m.RegistryAddr, m.IsDebug, m.RemoteLogger, m.logger, m.IComponentRegistry)
 
-	if _, err := m.hydra.Start(); err != nil {
-		m.logger.Error(err)
-		return err
-	}
+	m.run()
+	// if _, err := m.hydra.Start(); err != nil {
+	// 	m.logger.Error(err)
+	// 	return err
+	// }
 	return nil
 }
-
+func (m *MicroApp) run() {
+	p := executable{app: m}
+	p.run()
+}
 func (m *MicroApp) checkInput(c *cli.Context) (err error) {
 	m.Cli.setContext(c)
 	if m.ServerTypeNames != "" && len(m.ServerTypes) == 0 {
