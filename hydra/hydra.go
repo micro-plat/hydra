@@ -21,6 +21,7 @@ import (
 
 //Hydra  hydra app
 type Hydra struct {
+	appName        string
 	logger         *logger.Logger
 	closeChan      chan struct{}
 	interrupt      chan os.Signal
@@ -44,9 +45,10 @@ type Hydra struct {
 }
 
 //NewHydra 创建hydra服务器
-func NewHydra(platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, isDebug bool, remoteLogger bool, logger *logger.Logger, r component.IComponentHandler) *Hydra {
+func NewHydra(appName string, platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, isDebug bool, remoteLogger bool, logger *logger.Logger, r component.IComponentHandler) *Hydra {
 	servers.IsDebug = isDebug
 	return &Hydra{
+		appName:        appName,
 		cHandler:       r,
 		logger:         logger,
 		systemRootName: registry.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
@@ -100,9 +102,9 @@ LOOP:
 			break LOOP
 		}
 	}
-	h.logger.Infof("hydra 正在退出...")
+	h.logger.Infof("%s 正在退出...", h.appName)
 	h.rspServer.Shutdown()
-	return "hydra 已安全退出", nil
+	return fmt.Sprintf("%s 已安全退出", h.appName), nil
 }
 
 //startWatch 启动服务器配置监控

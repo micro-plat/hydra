@@ -109,7 +109,7 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 		defer m.remoteQueryService.Shutdown()
 	}
 
-	m.hydra = NewHydra(m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
+	m.hydra = NewHydra(m.app.Name, m.PlatName, m.SystemName, m.ServerTypes, m.ClusterName, m.Trace,
 		m.RegistryAddr, m.IsDebug, m.RemoteLogger, m.logger, m.IComponentRegistry)
 
 	m.run()
