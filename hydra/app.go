@@ -10,7 +10,6 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
-	_ "github.com/micro-plat/hydra/hydra/impt"
 	"github.com/micro-plat/hydra/hydra/rqs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
