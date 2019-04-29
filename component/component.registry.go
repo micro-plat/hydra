@@ -29,6 +29,7 @@ type IComponentHandler interface {
 	GetTags(name string) []string
 	SetMQCDynamicQueue(c chan *conf.Queue)
 	GetMQCDynamicQueue() (bool, chan *conf.Queue)
+	GetRPCTLS() map[string][]string
 }
 
 //IServiceRegistry 服务注册接口
@@ -105,6 +106,8 @@ type IServiceRegistry interface {
 	Handled(h func(c *context.Context) (rs interface{}))
 
 	GetTags(name string) []string
+
+	AddRpcTLS(addr string, cert string, key string) error
 }
 
 //ServiceRegistry 服务注册组件
@@ -116,6 +119,7 @@ type ServiceRegistry struct {
 	closingFuncs      []ComponentFunc
 	exts              map[string]interface{}
 	tags              map[string][]string
+	tls               map[string][]string
 }
 
 //NewServiceRegistry 创建ServiceRegistry
@@ -128,6 +132,7 @@ func NewServiceRegistry() *ServiceRegistry {
 		services:          make(map[string]map[string]interface{}),
 		exts:              make(map[string]interface{}),
 		tags:              make(map[string][]string),
+		tls:               make(map[string][]string),
 	}
 }
 
@@ -433,4 +438,14 @@ func (s *ServiceRegistry) GetInitializings() []ComponentFunc {
 }
 func (s *ServiceRegistry) GetClosings() []ComponentFunc {
 	return s.closingFuncs
+}
+func (s *ServiceRegistry) AddRpcTLS(addr string, cert string, key string) error {
+	if cert == "" || key == "" {
+		return fmt.Errorf("rpc证书文件cert:%s,key:%s不能为空", cert, key)
+	}
+	s.tls[addr] = []string{cert, key}
+	return nil
+}
+func (s *ServiceRegistry) GetRPCTLS() map[string][]string {
+	return s.tls
 }

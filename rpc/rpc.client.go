@@ -14,6 +14,7 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 //Client rpc client, 用于构建基础的RPC调用,并提供基于服务器的限流工具，轮询、本地优先等多种负载算法
@@ -33,6 +34,7 @@ type clientOption struct {
 	balancer          balancer.CustomerBalancer
 	resolver          balancer.ServiceResolver
 	service           string
+	tls               []string
 }
 
 //ClientOption 客户端配置选项
@@ -49,6 +51,15 @@ func WithConnectionTimeout(t time.Duration) ClientOption {
 func WithLogger(log *logger.Logger) ClientOption {
 	return func(o *clientOption) {
 		o.log = log
+	}
+}
+
+//WithTLS 设置TLS证书(pem,key)
+func WithTLS(tls []string) ClientOption {
+	return func(o *clientOption) {
+		if len(tls) == 2 {
+			o.tls = tls
+		}
 	}
 }
 
@@ -103,10 +114,42 @@ func (c *Client) connect() (err error) {
 		return nil
 	}
 	if c.balancer == nil {
-		c.conn, err = grpc.Dial(c.address, grpc.WithInsecure(), grpc.WithTimeout(c.connectionTimeout))
+		switch len(c.tls) {
+		case 2: //使用安全证书
+			creds, err := credentials.NewClientTLSFromFile(c.tls[0], c.tls[1])
+			if err != nil {
+				return err
+			}
+			c.conn, err = grpc.Dial(c.address,
+				grpc.WithInsecure(),
+				grpc.WithTimeout(c.connectionTimeout),
+				grpc.WithTransportCredentials(creds))
+		default:
+			c.conn, err = grpc.Dial(c.address,
+				grpc.WithInsecure(),
+				grpc.WithTimeout(c.connectionTimeout))
+
+		}
 	} else {
 		ctx, _ := context.WithTimeout(context.Background(), c.connectionTimeout)
-		c.conn, err = grpc.DialContext(ctx, c.address, grpc.WithInsecure(), grpc.WithBalancer(c.balancer))
+		switch len(c.tls) {
+		case 2: //使用安全证书
+			creds, err := credentials.NewClientTLSFromFile(c.tls[0], c.tls[1])
+			if err != nil {
+				return err
+			}
+			c.conn, err = grpc.DialContext(ctx,
+				c.address,
+				grpc.WithInsecure(),
+				grpc.WithBalancer(c.balancer),
+				grpc.WithTransportCredentials(creds))
+		default:
+			c.conn, err = grpc.DialContext(ctx,
+				c.address,
+				grpc.WithInsecure(),
+				grpc.WithBalancer(c.balancer))
+		}
+
 	}
 	if err != nil {
 		return

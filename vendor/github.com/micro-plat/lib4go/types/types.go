@@ -108,7 +108,7 @@ func GetFloat64(v interface{}, def ...float64) float64 {
 
 //GetBool 获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
 func GetBool(v interface{}, def ...bool) bool {
-	if value, err := parseBool(v); err == nil {
+	if value, err := ParseBool(v); err == nil {
 		return value
 	}
 	if len(def) > 0 {

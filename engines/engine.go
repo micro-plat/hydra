@@ -46,7 +46,6 @@ type ServiceEngine struct {
 func NewServiceEngine(conf conf.IServerConf, registryAddr string, log logger.ILogging) (e *ServiceEngine, err error) {
 	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: log}
 	e.StandardComponent = component.NewStandardComponent("sys.engine", e)
-	e.Invoker = rpc.NewInvoker(conf.GetPlatName(), conf.GetSysName(), registryAddr)
 	e.IComponentCache = component.NewStandardCache(e, "cache")
 	e.IComponentDB = component.NewStandardDB(e, "db")
 	e.IComponentInfluxDB = component.NewStandardInfluxDB(e, "influx")
@@ -70,6 +69,9 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 	if h == nil {
 		return nil
 	}
+
+	//初始化服务器
+	r.cHandler = h
 	funcs := h.GetInitializings()
 	for _, f := range funcs {
 		if err := f(r); err != nil {
@@ -77,7 +79,19 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 		}
 	}
 
-	r.cHandler = h
+	//初始化RPC调用证书
+	tls := h.GetRPCTLS()
+	opts := make([]rpc.InvokerOption, 0, 0)
+	for k, v := range tls {
+		opts = append(opts, rpc.WithRPCTLS(k, v))
+	}
+	r.Invoker = rpc.NewInvoker(
+		r.IServerConf.GetPlatName(),
+		r.IServerConf.GetSysName(),
+		r.registryAddr,
+		opts...)
+
+	//初始化服务注册
 	svs := h.GetServices()
 	for group, handlers := range svs {
 		for name, handler := range handlers {

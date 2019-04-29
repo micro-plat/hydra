@@ -67,33 +67,25 @@ func NewApiServer(name string, addr string, routers []*conf.Router, opts ...Opti
 
 // Run the http server
 func (s *ApiServer) Run() error {
-	s.proto = "http"
 	s.running = servers.ST_RUNNING
 	errChan := make(chan error, 1)
-	go func(ch chan error) {
-		if err := s.engine.ListenAndServe(); err != nil {
-			ch <- err
-		}
-	}(errChan)
-	select {
-	case <-time.After(time.Millisecond * 500):
-		return nil
-	case err := <-errChan:
-		s.running = servers.ST_STOP
-		return err
-	}
-}
+	switch len(s.tls) {
+	case 2:
+		s.proto = "https"
+		go func(ch chan error) {
+			if err := s.engine.ListenAndServeTLS(s.tls[0], s.tls[1]); err != nil {
+				ch <- err
+			}
+		}(errChan)
+	default:
+		s.proto = "http"
+		go func(ch chan error) {
+			if err := s.engine.ListenAndServe(); err != nil {
+				ch <- err
+			}
+		}(errChan)
 
-//RunTLS RunTLS server
-func (s *ApiServer) RunTLS(certFile, keyFile string) error {
-	s.proto = "https"
-	s.running = servers.ST_RUNNING
-	errChan := make(chan error, 1)
-	go func(ch chan error) {
-		if err := s.engine.ListenAndServeTLS(certFile, keyFile); err != nil {
-			ch <- err
-		}
-	}(errChan)
+	}
 	select {
 	case <-time.After(time.Millisecond * 500):
 		return nil

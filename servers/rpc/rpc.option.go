@@ -18,6 +18,7 @@ type option struct {
 	systemName  string
 	clusterName string
 	serverType  string
+	tls         []string
 }
 
 //Option 配置选项
@@ -57,5 +58,14 @@ func WithIP(ip string) Option {
 func WithMetric(host string, dataBase string, userName string, password string, cron string) Option {
 	return func(o *option) {
 		o.metric.Restart(host, dataBase, userName, password, cron, o.Logger)
+	}
+}
+
+//WithTLS 设置TLS证书(pem,key)
+func WithTLS(tls []string) Option {
+	return func(o *option) {
+		if len(tls) == 2 {
+			o.tls = tls
+		}
 	}
 }

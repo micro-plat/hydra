@@ -167,167 +167,167 @@
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/cache",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/cache/memcache",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/cache/redis",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/concurrent/cmap",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/db",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/db/tpl",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/encoding",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/encoding/base64",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/file",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/influxdb",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/influxdb/escape",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/influxdb/models",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/jsons",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/logger",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/metrics",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/mq",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/mq/mqtt",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/mq/redis",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/mq/stomp",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/mq/xmq",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/net",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/osext",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/queue",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/queue/redis",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/queue/xmq",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/redis",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/registry",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/rpc",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/security/crc32",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/security/des",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/security/jwt",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/security/md5",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/sysinfo/cpu",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/sysinfo/disk",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/sysinfo/memory",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/sysinfo/pipes",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/transform",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/types",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/utility",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/xsync",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/zk",
-			"Rev": "f418985574620f17e53c89a51e610d513ef3509d"
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		},
 		{
 			"ImportPath": "github.com/modern-go/concurrent",
@@ -679,6 +679,138 @@
 			"ImportPath": "gopkg.in/yaml.v2",
 			"Comment": "v2.2.1",
 			"Rev": "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/encoding/vendor/golang.org/x/text/encoding/simplifiedchinese",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/encoding/vendor/golang.org/x/text/transform",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/encoding/vendor/golang.org/x/text/encoding",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/encoding/vendor/golang.org/x/text/encoding/internal",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/encoding/vendor/golang.org/x/text/encoding/internal/identifier",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/logger/vendor/github.com/zkfy/log",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/metrics/vendor/github.com/zkfy/cron",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/metrics/vendor/github.com/zkfy/go-metrics",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/concurrent/cmap",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/logger",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/mq",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/redis",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/zkfy/stompngo",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis/internal",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis/internal/consistenthash",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis/internal/hashtag",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis/internal/pool",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/go-redis/redis/internal/proto",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/file",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/jsons",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/net",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/utility",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/zkfy/log",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/types",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/redis/vendor/github.com/micro-plat/lib4go/security/md5",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq/stomp/vendor/github.com/zkfy/stompngo",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis/internal",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis/internal/consistenthash",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis/internal/hashtag",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis/internal/pool",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/redis/vendor/github.com/go-redis/redis/internal/proto",
+			"Rev": "40b333d881de1dfa9699e1eefdbbb6cf401ba31a"
 		}
 	]
 }

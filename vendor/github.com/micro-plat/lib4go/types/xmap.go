@@ -127,7 +127,7 @@ func (q XMaps) Get(i int) XMap {
 }
 
 //ParseBool 将字符串转换为bool值
-func parseBool(val interface{}) (value bool, err error) {
+func ParseBool(val interface{}) (value bool, err error) {
 	if val != nil {
 		switch v := val.(type) {
 		case bool:
