@@ -6,6 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/rpc"
 )
 
 var _ IServiceRegistry = &ServiceRegistry{}
@@ -30,6 +31,8 @@ type IComponentHandler interface {
 	SetMQCDynamicQueue(c chan *conf.Queue)
 	GetMQCDynamicQueue() (bool, chan *conf.Queue)
 	GetRPCTLS() map[string][]string
+	//GetBalancer 获取负载均衡模式
+	GetBalancer() map[string]*rpc.BalancerMode
 }
 
 //IServiceRegistry 服务注册接口
@@ -107,7 +110,14 @@ type IServiceRegistry interface {
 
 	GetTags(name string) []string
 
-	AddRpcTLS(addr string, cert string, key string) error
+	//AddRPCTLS 添加RPC安全认证证书
+	AddRPCTLS(platName string, cert string, key string) error
+
+	//SetBalancer 设置平台对应的负载均衡器 platName:平台名称 mode:rpc.RoundRobin 或rpc.LocalFirst
+	SetBalancer(platName string, mode int, p ...string) error
+
+	//GetBalancer 获取负载均衡模式
+	GetBalancer() map[string]*rpc.BalancerMode
 }
 
 //ServiceRegistry 服务注册组件
@@ -120,6 +130,7 @@ type ServiceRegistry struct {
 	exts              map[string]interface{}
 	tags              map[string][]string
 	tls               map[string][]string
+	rpcBalancers      map[string]*rpc.BalancerMode
 }
 
 //NewServiceRegistry 创建ServiceRegistry
@@ -132,7 +143,7 @@ func NewServiceRegistry() *ServiceRegistry {
 		services:          make(map[string]map[string]interface{}),
 		exts:              make(map[string]interface{}),
 		tags:              make(map[string][]string),
-		tls:               make(map[string][]string),
+		rpcBalancers:      make(map[string]*rpc.BalancerMode),
 	}
 }
 
@@ -439,13 +450,28 @@ func (s *ServiceRegistry) GetInitializings() []ComponentFunc {
 func (s *ServiceRegistry) GetClosings() []ComponentFunc {
 	return s.closingFuncs
 }
-func (s *ServiceRegistry) AddRpcTLS(addr string, cert string, key string) error {
+
+//AddRPCTLS 添加RPC认证证书
+func (s *ServiceRegistry) AddRPCTLS(platName string, cert string, key string) error {
 	if cert == "" || key == "" {
 		return fmt.Errorf("rpc证书文件cert:%s,key:%s不能为空", cert, key)
 	}
-	s.tls[addr] = []string{cert, key}
+	s.tls[platName] = []string{cert, key}
 	return nil
 }
 func (s *ServiceRegistry) GetRPCTLS() map[string][]string {
 	return s.tls
+}
+
+//SetBalancer 设置平台对应的负载均衡器 platName:平台名称 mode:rpc.RoundRobin 或rpc.LocalFirst
+func (s *ServiceRegistry) SetBalancer(platName string, mode int, p ...string) error {
+	if len(p) > 0 {
+		s.rpcBalancers[platName] = &rpc.BalancerMode{mode, p[0]}
+		return nil
+	}
+	s.rpcBalancers[platName] = &rpc.BalancerMode{Mode: mode}
+	return nil
+}
+func (s *ServiceRegistry) GetBalancer() map[string]*rpc.BalancerMode {
+	return s.rpcBalancers
 }

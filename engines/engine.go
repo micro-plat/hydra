@@ -85,6 +85,13 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 	for k, v := range tls {
 		opts = append(opts, rpc.WithRPCTLS(k, v))
 	}
+
+	//设置负载均衡器
+	balancers := h.GetBalancer()
+	for v, p := range balancers {
+		opts = append(opts, rpc.WithBalancerMode(v, p.Mode, p.Param))
+	}
+
 	r.Invoker = rpc.NewInvoker(
 		r.IServerConf.GetPlatName(),
 		r.IServerConf.GetSysName(),
