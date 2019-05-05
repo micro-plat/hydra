@@ -1,7 +1,12 @@
 package engines
 
 import (
+	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
+
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
@@ -24,6 +29,7 @@ type IServiceEngine interface {
 type ServiceEngine struct {
 	*component.StandardComponent
 	cHandler component.IComponentHandler
+	loggers  cmap.ConcurrentMap
 	conf.IServerConf
 	registryAddr string
 	*rpc.Invoker
@@ -37,27 +43,22 @@ type ServiceEngine struct {
 }
 
 //NewServiceEngine 构建服务引擎
-func NewServiceEngine(conf conf.IServerConf, registryAddr string, logger logger.ILogging) (e *ServiceEngine, err error) {
-	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: logger}
+func NewServiceEngine(conf conf.IServerConf, registryAddr string, log logger.ILogging) (e *ServiceEngine, err error) {
+	e = &ServiceEngine{IServerConf: conf, registryAddr: registryAddr, logger: log}
 	e.StandardComponent = component.NewStandardComponent("sys.engine", e)
-	e.Invoker = rpc.NewInvoker(conf.GetPlatName(), conf.GetSysName(), registryAddr)
 	e.IComponentCache = component.NewStandardCache(e, "cache")
 	e.IComponentDB = component.NewStandardDB(e, "db")
 	e.IComponentInfluxDB = component.NewStandardInfluxDB(e, "influx")
 	e.IComponentQueue = component.NewStandardQueue(e, "queue")
 	e.IComponentGlobalVarObject = component.NewGlobalVarObjectCache(e)
-	if e.registry, err = registry.NewRegistryWithAddress(registryAddr, logger); err != nil {
+	e.loggers = cmap.New(8)
+	if e.registry, err = registry.NewRegistryWithAddress(registryAddr, log); err != nil {
 		return
 	}
 
 	if err = e.loadEngineServices(); err != nil {
 		return nil, err
 	}
-	// if err = e.LoadComponents(fmt.Sprintf("./%s.so", conf.GetPlatName()),
-	// 	fmt.Sprintf("./%s.so", conf.GetSysName()),
-	// 	fmt.Sprintf("./%s_%s.so", conf.GetPlatName(), conf.GetSysName())); err != nil {
-	// 	return
-	// }
 	e.StandardComponent.AddRPCProxy(e.RPCProxy())
 	err = e.StandardComponent.LoadServices()
 	return
@@ -68,20 +69,44 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 	if h == nil {
 		return nil
 	}
+
+	//初始化服务器
+	r.cHandler = h
 	funcs := h.GetInitializings()
 	for _, f := range funcs {
 		if err := f(r); err != nil {
 			return err
 		}
 	}
-	r.cHandler = h
+
+	//初始化RPC调用证书
+	tls := h.GetRPCTLS()
+	opts := make([]rpc.InvokerOption, 0, 0)
+	for k, v := range tls {
+		opts = append(opts, rpc.WithRPCTLS(k, v))
+	}
+
+	//设置负载均衡器
+	balancers := h.GetBalancer()
+	for v, p := range balancers {
+		opts = append(opts, rpc.WithBalancerMode(v, p.Mode, p.Param))
+	}
+
+	r.Invoker = rpc.NewInvoker(
+		r.IServerConf.GetPlatName(),
+		r.IServerConf.GetSysName(),
+		r.registryAddr,
+		opts...)
+
+	//初始化服务注册
 	svs := h.GetServices()
 	for group, handlers := range svs {
 		for name, handler := range handlers {
 			r.StandardComponent.AddCustomerService(name, handler, group, h.GetTags(name)...)
 		}
 	}
-	return r.StandardComponent.LoadServices()
+	err := r.StandardComponent.LoadServices()
+	return err
 }
 
 //UpdateVarConf 更新var配置参数
@@ -92,11 +117,15 @@ func (r *ServiceEngine) UpdateVarConf(conf conf.IServerConf) {
 
 //GetServices 获取组件提供的所有服务
 func (r *ServiceEngine) GetServices() []string {
-	return r.GetGroupServices(component.GetGroupName(r.GetServerType())...)
+	srvs := r.GetGroupServices(component.GetGroupName(r.GetServerType())...)
+	return srvs
 }
 
 //Execute 执行外部请求
 func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
+	id := fmt.Sprint(goid())
+	r.loggers.Set(id, ctx.Log)
+	defer r.loggers.Remove(id)
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
 		rf := r.StandardComponent.Fallback(ctx)
 		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {
@@ -173,7 +202,15 @@ func (r *ServiceEngine) Close() error {
 	r.IComponentInfluxDB.Close()
 	r.IComponentQueue.Close()
 	r.IComponentDB.Close()
+	r.loggers.Clear()
 	return nil
+}
+func (r *ServiceEngine) GetLogger() logger.ILogging {
+	id := fmt.Sprint(goid())
+	if l, ok := r.loggers.Get(id); ok {
+		return l.(logger.ILogging)
+	}
+	return r.logger
 }
 
 func appendEngines(engines []string, ext ...string) []string {
@@ -191,4 +228,20 @@ func appendEngines(engines []string, ext ...string) []string {
 		}
 	}
 	return append(engines, addEngine...)
+}
+func goid() int {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("panic recover:panic info:", err)
+		}
+	}()
+
+	var buf [64]byte
+	n := runtime.Stack(buf[:], false)
+	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	id, err := strconv.Atoi(idField)
+	if err != nil {
+		return 0
+	}
+	return id
 }

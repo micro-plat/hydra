@@ -17,7 +17,7 @@ type RpcResponsiveServer struct {
 	server       *RpcServer
 	engine       servers.IRegistryEngine
 	registryAddr string
-	pubs         []string
+	pubs         map[string]string
 	currentConf  conf.IServerConf
 	closeChan    chan struct{}
 	once         sync.Once
@@ -34,7 +34,7 @@ func NewRpcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		closeChan:    make(chan struct{}),
 		currentConf:  cnf,
 		Logger:       logger,
-		pubs:         make([]string, 0, 2),
+		pubs:         make(map[string]string),
 		registryAddr: registryAddr,
 	}
 	// 启动执行引擎
@@ -48,7 +48,9 @@ func NewRpcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if h.server, err = NewRpcServer(cnf.GetServerName(),
 		cnf.GetString("address", "8081"),
 		nil,
+		WithTLS(cnf.GetStrings("tls")),
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(logger)); err != nil {
 		return
 	}
@@ -77,7 +79,9 @@ func (w *RpcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if w.server, err = NewRpcServer(cnf.GetServerName(),
 		cnf.GetString("address", "8080"),
 		nil,
+		WithTLS(cnf.GetStrings("tls")),
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(w.Logger)); err != nil {
 		return
 	}

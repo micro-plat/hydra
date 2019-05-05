@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/rpc"
 )
 
 var _ IServiceRegistry = &ServiceRegistry{}
@@ -26,6 +28,11 @@ type IComponentHandler interface {
 	GetInitializings() []ComponentFunc
 	GetClosings() []ComponentFunc
 	GetTags(name string) []string
+	SetMQCDynamicQueue(c chan *conf.Queue)
+	GetMQCDynamicQueue() (bool, chan *conf.Queue)
+	GetRPCTLS() map[string][]string
+	//GetBalancer 获取负载均衡模式
+	GetBalancer() map[string]*rpc.BalancerMode
 }
 
 //IServiceRegistry 服务注册接口
@@ -87,6 +94,12 @@ type IServiceRegistry interface {
 	//Initializing 初始化
 	Initializing(c func(IContainer) error)
 
+	//SetMQCDynamicQueue 设置动态队列注册消息
+	SetMQCDynamicQueue(c chan *conf.Queue)
+
+	//GetMQCDynamicQueue 获取动态队列注册消息
+	GetMQCDynamicQueue() (bool, chan *conf.Queue)
+
 	//Closing 关闭组件
 	Closing(c func(IContainer) error)
 	//Handling 每个请求的预处理函数
@@ -96,6 +109,15 @@ type IServiceRegistry interface {
 	Handled(h func(c *context.Context) (rs interface{}))
 
 	GetTags(name string) []string
+
+	//AddRPCTLS 添加RPC安全认证证书
+	AddRPCTLS(platName string, cert string, key string) error
+
+	//SetBalancer 设置平台对应的负载均衡器 platName:平台名称 mode:rpc.RoundRobin 或rpc.LocalFirst
+	SetBalancer(platName string, mode int, p ...string) error
+
+	//GetBalancer 获取负载均衡模式
+	GetBalancer() map[string]*rpc.BalancerMode
 }
 
 //ServiceRegistry 服务注册组件
@@ -105,7 +127,10 @@ type ServiceRegistry struct {
 	handledFuncs      []ServiceFunc
 	initializingFuncs []ComponentFunc
 	closingFuncs      []ComponentFunc
+	exts              map[string]interface{}
 	tags              map[string][]string
+	tls               map[string][]string
+	rpcBalancers      map[string]*rpc.BalancerMode
 }
 
 //NewServiceRegistry 创建ServiceRegistry
@@ -116,7 +141,9 @@ func NewServiceRegistry() *ServiceRegistry {
 		initializingFuncs: make([]ComponentFunc, 0, 1),
 		closingFuncs:      make([]ComponentFunc, 0, 1),
 		services:          make(map[string]map[string]interface{}),
+		exts:              make(map[string]interface{}),
 		tags:              make(map[string][]string),
+		rpcBalancers:      make(map[string]*rpc.BalancerMode),
 	}
 }
 
@@ -378,6 +405,32 @@ func (s *ServiceRegistry) Closing(c func(c IContainer) error) {
 	s.closingFuncs = append(s.closingFuncs, c)
 }
 
+//GetMQCDynamicQueue 动态队列注册消息
+func (s *ServiceRegistry) GetMQCDynamicQueue() (bool, chan *conf.Queue) {
+	f, b := s.exts["_mqc_dynamic_queue_notify_func_"]
+	if !b {
+		return false, nil
+	}
+	c, b := f.(chan *conf.Queue)
+	return b, c
+}
+
+//SetMQCDynamicQueue 动态队列注册消息
+func (s *ServiceRegistry) SetMQCDynamicQueue(c chan *conf.Queue) {
+	s.exts["_mqc_dynamic_queue_notify_func_"] = c
+}
+
+//Ext 注册扩展
+func (s *ServiceRegistry) Ext(name string, i interface{}) {
+	s.exts[name] = i
+}
+
+//GetExt 获取扩展
+func (s *ServiceRegistry) GetExt(name string) (bool, interface{}) {
+	f, b := s.exts[name]
+	return b, f
+}
+
 func (s *ServiceRegistry) GetServices() map[string]map[string]interface{} {
 	return s.services
 }
@@ -396,4 +449,29 @@ func (s *ServiceRegistry) GetInitializings() []ComponentFunc {
 }
 func (s *ServiceRegistry) GetClosings() []ComponentFunc {
 	return s.closingFuncs
+}
+
+//AddRPCTLS 添加RPC认证证书
+func (s *ServiceRegistry) AddRPCTLS(platName string, cert string, key string) error {
+	if cert == "" || key == "" {
+		return fmt.Errorf("rpc证书文件cert:%s,key:%s不能为空", cert, key)
+	}
+	s.tls[platName] = []string{cert, key}
+	return nil
+}
+func (s *ServiceRegistry) GetRPCTLS() map[string][]string {
+	return s.tls
+}
+
+//SetBalancer 设置平台对应的负载均衡器 platName:平台名称 mode:rpc.RoundRobin 或rpc.LocalFirst
+func (s *ServiceRegistry) SetBalancer(platName string, mode int, p ...string) error {
+	if len(p) > 0 {
+		s.rpcBalancers[platName] = &rpc.BalancerMode{mode, p[0]}
+		return nil
+	}
+	s.rpcBalancers[platName] = &rpc.BalancerMode{Mode: mode}
+	return nil
+}
+func (s *ServiceRegistry) GetBalancer() map[string]*rpc.BalancerMode {
+	return s.rpcBalancers
 }

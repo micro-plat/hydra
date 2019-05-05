@@ -2,10 +2,10 @@ package component
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/cache"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -77,7 +77,7 @@ func (s *StandardCache) GetCacheBy(tpName string, name string) (c cache.ICache, 
 func (s *StandardCache) SaveCacheObject(tpName string, name string, f func(c conf.IConf) (cache.ICache, error)) (bool, cache.ICache, error) {
 	cacheConf, err := s.IContainer.GetVarConf(tpName, name)
 	if err != nil {
-		return false, nil, fmt.Errorf("%s %v", filepath.Join("/", s.GetPlatName(), "var", tpName, name), err)
+		return false, nil, fmt.Errorf("%s %v", registry.Join("/", s.GetPlatName(), "var", tpName, name), err)
 	}
 	key := fmt.Sprintf("%s/%s:%d", tpName, name, cacheConf.GetVersion())
 	ok, ch, err := s.cacheMap.SetIfAbsentCb(key, func(input ...interface{}) (c interface{}, err error) {

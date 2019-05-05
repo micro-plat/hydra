@@ -1,8 +1,6 @@
 package mqc
 
 import (
-	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/conf"
@@ -14,6 +12,7 @@ type Processor struct {
 	*dispatcher.Dispatcher
 	mq.MQConsumer
 	queues        []*conf.Queue
+	handles       map[string]dispatcher.HandlerFunc
 	isConsume     bool
 	lock          sync.Mutex
 	once          sync.Once
@@ -27,6 +26,7 @@ type Processor struct {
 func NewProcessor(addrss, raw string, queues []*conf.Queue) (p *Processor, err error) {
 	p = &Processor{
 		Dispatcher: dispatcher.New(),
+		handles:    make(map[string]dispatcher.HandlerFunc),
 		addrss:     addrss,
 		raw:        raw,
 		queues:     queues,
@@ -36,15 +36,7 @@ func NewProcessor(addrss, raw string, queues []*conf.Queue) (p *Processor, err e
 	}
 	return p, nil
 }
-func (s *Processor) AddRouters() {
-	if s.hasAddRouters {
-		return
-	}
-	for _, r := range s.queues {
-		s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), r.Handler.(dispatcher.HandlerFunc))
-	}
-	s.hasAddRouters = true
-}
+
 func (s *Processor) Close() {
 	s.lock.Lock()
 	defer s.lock.Unlock()

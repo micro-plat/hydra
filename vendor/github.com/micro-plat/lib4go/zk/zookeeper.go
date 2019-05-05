@@ -2,6 +2,7 @@ package zk
 
 import (
 	"errors"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -43,23 +44,33 @@ type ZookeeperClient struct {
 	isConnect bool
 	once      sync.Once
 	CloseCh   chan struct{}
+	ACL       []zk.ACL
+	digest    bool
+	userName  string
+	password  string
 	// 是否是手动关闭
 	done bool
 }
 
 //New 连接到Zookeeper服务器
-func New(servers []string, timeout time.Duration) (*ZookeeperClient, error) {
-	client := &ZookeeperClient{servers: servers, timeout: timeout, useCount: 0}
-	client.CloseCh = make(chan struct{})
-	client.Log = logger.GetSession("zk", logger.CreateSession())
-	return client, nil
+func New(servers []string, timeout time.Duration, opts ...Option) (*ZookeeperClient, error) {
+	log := logger.GetSession("zk", logger.CreateSession())
+	return NewWithLogger(servers, timeout, log, opts...)
 }
 
 //NewWithLogger 连接到Zookeeper服务器
-func NewWithLogger(servers []string, timeout time.Duration, logger *logger.Logger) (*ZookeeperClient, error) {
+func NewWithLogger(servers []string, timeout time.Duration, logger *logger.Logger, opts ...Option) (*ZookeeperClient, error) {
 	client := &ZookeeperClient{servers: servers, timeout: timeout, useCount: 0}
 	client.CloseCh = make(chan struct{})
 	client.Log = logger
+	for _, opt := range opts {
+		opt(client)
+	}
+	if client.digest {
+		client.ACL = zk.DigestACL(zk.PermAll, client.userName, client.password)
+	} else {
+		client.ACL = zk.WorldACL(zk.PermAll)
+	}
 	return client, nil
 }
 
@@ -70,13 +81,24 @@ func (client *ZookeeperClient) Connect() (err error) {
 		if err != nil {
 			return err
 		}
+		if client.digest {
+			if err := conn.AddAuth("digest",
+				[]byte(fmt.Sprintf("%s:%s",
+					client.userName,
+					client.password))); err != nil {
+				return nil
+			}
+		}
 		client.conn = conn
 		client.conn.SetLogger(&zkLogger{logger: client.Log})
 		client.eventChan = eventChan
 		go client.eventWatch()
 	}
 	atomic.AddInt32(&client.useCount, 1)
-	time.Sleep(time.Second)
+	for client.conn.State() != zk.StateHasSession {
+		time.Sleep(50 * time.Millisecond)
+	}
+	// time.Sleep(time.Second)
 	client.isConnect = true
 	return
 }
@@ -118,4 +140,7 @@ func (client *ZookeeperClient) Close() error {
 		close(client.CloseCh)
 	})
 	return nil
+}
+func (client *ZookeeperClient) GetSeparator() string {
+	return "/"
 }

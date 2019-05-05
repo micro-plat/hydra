@@ -27,13 +27,41 @@ func (m *MicroApp) stopAction(c *cli.Context) (err error) {
 	m.xlogger.Info(msg)
 	return nil
 }
-func (m *MicroApp) installAction(c *cli.Context) (err error) {
 
-	if err = m.checkInput(); err != nil {
+func (m *MicroApp) registryAction(c *cli.Context) (err error) {
+	if err = m.checkInput(c); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
+	if err = m.install(); err != nil {
+		m.xlogger.Error(err)
+		return err
+	}
+	return nil
+}
+func (m *MicroApp) serviceAction(c *cli.Context) (err error) {
+	if err = m.checkInput(c); err != nil {
+		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return err
+	}
+	//安装配置文件
+	msg, err := m.service.Install(os.Args[2:]...)
+	if err != nil {
+		m.xlogger.Error(err)
+		return err
+	}
+	m.xlogger.Info(msg)
+	return nil
+}
+func (m *MicroApp) installAction(c *cli.Context) (err error) {
+	if err = m.checkInput(c); err != nil {
+		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return err
+	}
+
 	if err = m.install(); err != nil {
 		m.xlogger.Error(err)
 		return err
@@ -73,7 +101,6 @@ func (m *MicroApp) install() (err error) {
 	//创建注册中心
 	rgst, err := registry.NewRegistryWithAddress(m.RegistryAddr, m.logger)
 	if err != nil {
-		m.xlogger.Error(err)
 		return err
 	}
 
@@ -83,7 +110,6 @@ func (m *MicroApp) install() (err error) {
 		m.xlogger)
 	err = creator.Start()
 	if err != nil {
-		m.xlogger.Error(err)
 		return err
 	}
 	return nil

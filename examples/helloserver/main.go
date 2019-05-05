@@ -8,15 +8,11 @@ import (
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("myplat_test_9_1"),
-		hydra.WithSystemName("demo"),
-		hydra.WithServerTypes("api"),
-		hydra.WithDebug(),
-		//	hydra.WithRegistry("zk://192.168.0.107"),
-		//	hydra.WithClusterName("test")
-	)
+		hydra.WithPlatName("myplat"),
+		hydra.WithSystemName("helloserver"),
 
-	app.Conf.API.SetMainConf(`{"address":":9067"}`)
+		hydra.WithDebug(),
+	)
 
 	app.Micro("/hello", helloWorld)
 	app.Start()

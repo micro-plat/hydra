@@ -3,7 +3,6 @@ package rqs
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -98,7 +97,7 @@ func (h *RemoteQueryService) publish() (err error) {
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)
 	h.pubs = []string{}
-	pubPath := filepath.Join("/", h.platName, "services", "rcs", ipPort)
+	pubPath := registry.Join("/", h.platName, "services", "rcs", ipPort)
 	r, err := h.registry.CreateSeqNode(pubPath, nodeData)
 	if err != nil {
 		err = fmt.Errorf("服务发布失败:(%s)[%v]", pubPath, err)

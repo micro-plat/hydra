@@ -13,5 +13,11 @@ func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 	return &QueryHandler{container: container}
 }
 func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
-	return "success"
+	status, r, params, err := ctx.RPC.Request("/order/bind", "GET", nil, nil, true)
+	ctx.Log.Info("handle:", status, r, params, err)
+	// ctx.Response.SetHeaders(params)
+	ctx.Response.MustContent(status, r)
+
+	return
+
 }

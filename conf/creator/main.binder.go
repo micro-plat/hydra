@@ -2,10 +2,10 @@ package creator
 
 import (
 	"fmt"
-	"path/filepath"
 	"regexp"
 
 	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/registry"
 )
 
 var _ IMainBinder = &MainBinder{}
@@ -13,10 +13,10 @@ var _ IMainBinder = &MainBinder{}
 type IMainBinder interface {
 	SetMainConf(s string)
 	SetSubConf(n string, s string)
-	GetSubConfNames() []string
-	Scan(mainConf string, nodeName string) error
-	NeedScanCount(nodeName string) int
-	GetNodeConf(nodeName string) string
+	getSubConfNames() []string
+	scan(mainConf string, nodeName string) error
+	needScanCount(nodeName string) int
+	getNodeConf(nodeName string) string
 	Installer(func(c component.IContainer) error)
 }
 
@@ -45,7 +45,7 @@ func NewMainBinder(params map[string]string, inputs map[string]*Input) *MainBind
 		installers:         make([]func(c component.IContainer) error, 0, 2),
 	}
 }
-func (c *MainBinder) GetInstallers() []func(c component.IContainer) error {
+func (c *MainBinder) getInstallers() []func(c component.IContainer) error {
 	return c.installers
 }
 func (c *MainBinder) Installer(f func(c component.IContainer) error) {
@@ -68,7 +68,7 @@ func (c *MainBinder) SetSubConf(n string, s string) {
 }
 
 //GetSubConfNames 获取子系统名称
-func (c *MainBinder) GetSubConfNames() []string {
+func (c *MainBinder) getSubConfNames() []string {
 	v := make([]string, 0, len(c.subConf))
 	for k := range c.subConf {
 		v = append(v, k)
@@ -77,7 +77,7 @@ func (c *MainBinder) GetSubConfNames() []string {
 }
 
 //NeedScanCount 待输入个数
-func (c *MainBinder) NeedScanCount(nodeName string) int {
+func (c *MainBinder) needScanCount(nodeName string) int {
 	count := 0
 	if nodeName == "" {
 		for _, p := range c.mainParamsForInput {
@@ -95,7 +95,7 @@ func (c *MainBinder) NeedScanCount(nodeName string) int {
 }
 
 //Scan 绑定参数
-func (c *MainBinder) Scan(mainConf string, nodeName string) (err error) {
+func (c *MainBinder) scan(mainConf string, nodeName string) (err error) {
 	if nodeName == "" {
 		for _, p := range c.mainParamsForInput {
 			if _, ok := c.params[p]; ok {
@@ -113,7 +113,7 @@ func (c *MainBinder) Scan(mainConf string, nodeName string) (err error) {
 			if _, ok := c.params[p]; ok {
 				continue
 			}
-			nvalue, err := getInputValue(p, c.inputs, filepath.Join(mainConf, nodeName))
+			nvalue, err := getInputValue(p, c.inputs, registry.Join(mainConf, nodeName))
 			if err != nil {
 				return err
 			}
@@ -128,7 +128,7 @@ func (c *MainBinder) Scan(mainConf string, nodeName string) (err error) {
 }
 
 //GetNodeConf 获取节点配置
-func (c *MainBinder) GetNodeConf(nodeName string) string {
+func (c *MainBinder) getNodeConf(nodeName string) string {
 	if nodeName == "" {
 		return c.rmainConf
 	}

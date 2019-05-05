@@ -16,8 +16,9 @@ func (s *ApiServer) getHandler(routers []*conf.Router) (x.Handler, error) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	engine := gin.New()
-	engine.Use(middleware.Logging(s.conf)) //记录请求日志
 	engine.Use(gin.Recovery())
+	engine.Use(middleware.Logging(s.conf)) //记录请求日志
+	engine.Use(middleware.Recovery())
 	engine.Use(s.option.metric.Handle())        //生成metric报表
 	engine.Use(middleware.Host(s.conf))         // 检查主机头是否合法
 	engine.Use(middleware.Static(s.conf))       //处理静态文件

@@ -70,7 +70,6 @@ func (cr *ContextRPC) RequestFailRetry(service string, method string, header map
 	}
 	status, r, param, err = cr.rpc.RequestFailRetry(service, method, header, form, times)
 	if err != nil || status != 200 {
-		err = fmt.Errorf("rpc请求(%s)失败:%d,err:%v", service, status, err)
 		return
 	}
 	return
@@ -78,6 +77,12 @@ func (cr *ContextRPC) RequestFailRetry(service string, method string, header map
 
 //Request RPC请求
 func (cr *ContextRPC) Request(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r string, param map[string]string, err error) {
+	if header == nil {
+		header = map[string]string{}
+	}
+	if form == nil {
+		form = map[string]interface{}{}
+	}
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.GetUUID()
 	}
@@ -86,7 +91,6 @@ func (cr *ContextRPC) Request(service string, method string, header map[string]s
 	}
 	status, r, param, err = cr.rpc.Request(service, method, header, form, failFast)
 	if err != nil || status != 200 {
-		err = fmt.Errorf("rpc请求(%s)失败:%d,err:%v", service, status, err)
 		return
 	}
 	return

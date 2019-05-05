@@ -35,13 +35,13 @@ func (client *ZookeeperClient) CreatePersistentNode(path string, data string) (e
 		if b {
 			continue
 		}
-		_, err = client.create(paths[i], "", int32(0), zk.WorldACL(zk.PermAll))
+		_, err = client.create(paths[i], "", int32(0), client.ACL)
 		if err != nil {
 			return err
 		}
 	}
 	//创建最后一级目录
-	_, err = client.create(path, data, int32(0), zk.WorldACL(zk.PermAll))
+	_, err = client.create(path, data, int32(0), client.ACL)
 	if err != nil {
 		return
 	}
@@ -54,7 +54,7 @@ func (client *ZookeeperClient) CreateTempNode(path string, data string) (err err
 	if err != nil {
 		return
 	}
-	_, err = client.create(path, data, int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
+	_, err = client.create(path, data, int32(zk.FlagEphemeral), client.ACL)
 	return
 }
 
@@ -64,7 +64,7 @@ func (client *ZookeeperClient) CreateSeqNode(path string, data string) (rpath st
 	if err != nil {
 		return
 	}
-	rpath, err = client.create(path, data, int32(zk.FlagSequence)|int32(zk.FlagEphemeral), zk.WorldACL(zk.PermAll))
+	rpath, err = client.create(path, data, int32(zk.FlagSequence)|int32(zk.FlagEphemeral), client.ACL)
 	return
 }
 

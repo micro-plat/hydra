@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/lib4go/influxdb"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/queue"
+	"github.com/micro-plat/lib4go/security/jwt"
 )
 
 type IContainer interface {
@@ -82,6 +83,15 @@ func (c *Context) GetContainer() IContainer {
 //SetRPC 根据输入的context创建插件的上下文对象
 func (c *Context) SetRPC(rpc RPCInvoker) {
 	c.RPC.reset(c, rpc)
+}
+
+//BuildJwt 构建JWT
+func (c *Context) BuildJwt(data interface{}) (string, error) {
+	jwtAuth, err := c.Request.GetJWTConfig()
+	if err != nil {
+		return "", err
+	}
+	return jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
 }
 
 var contextPool *sync.Pool

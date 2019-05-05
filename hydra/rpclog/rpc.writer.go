@@ -11,12 +11,23 @@ import (
 )
 
 type rpcWriter struct {
-	rpcInvoker *rpc.Invoker
-	service    string
+	rpcInvoker  *rpc.Invoker
+	service     string
+	platName    string
+	systemName  string
+	serverTypes []string
+	clusterName string
 }
 
-func newRPCWriter(service string, invoker *rpc.Invoker) (r *rpcWriter) {
-	return &rpcWriter{service: service, rpcInvoker: invoker}
+func newRPCWriter(service string, invoker *rpc.Invoker, platName string, systemName string, clusterName string, serverTypes []string) (r *rpcWriter) {
+	return &rpcWriter{
+		service:     service,
+		rpcInvoker:  invoker,
+		platName:    platName,
+		systemName:  systemName,
+		clusterName: clusterName,
+		serverTypes: serverTypes,
+	}
 }
 func (r *rpcWriter) Write(p []byte) (n int, err error) {
 	if len(p) == 0 {
@@ -33,7 +44,11 @@ func (r *rpcWriter) Write(p []byte) (n int, err error) {
 	_, _, _, err = r.rpcInvoker.Request(r.service, "GET", map[string]string{
 		"__encode_snappy_": "true",
 	}, map[string]interface{}{
-		"__body_": base64.EncodeBytes(dst),
+		"__body_":      base64.EncodeBytes(dst),
+		"plat":         r.platName,
+		"system":       r.systemName,
+		"cluster":      r.clusterName,
+		"server-types": r.serverTypes,
 		//	"__body_": buff.String(),
 	}, true)
 	if err != nil {

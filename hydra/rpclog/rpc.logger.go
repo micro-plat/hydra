@@ -20,6 +20,10 @@ type loggerSetting struct {
 }
 
 type RPCLogger struct {
+	platName     string
+	systemName   string
+	serverTypes  []string
+	clusterName  string
 	rpcInvoker   *rpc.Invoker
 	logger       *logger.Logger
 	registryAddr string
@@ -36,8 +40,12 @@ type RPCLogger struct {
 }
 
 //NewRPCLogger 创建RPC日志程序
-func NewRPCLogger(spath string, registryAddr string, log *logger.Logger) (r *RPCLogger, err error) {
+func NewRPCLogger(spath string, registryAddr string, log *logger.Logger, platName string, systemName string, clusterName string, serverTypes []string) (r *RPCLogger, err error) {
 	r = &RPCLogger{
+		platName:     platName,
+		systemName:   systemName,
+		clusterName:  clusterName,
+		serverTypes:  serverTypes,
 		closeChan:    make(chan struct{}),
 		logger:       log,
 		registryAddr: registryAddr,
@@ -143,7 +151,7 @@ func (r *RPCLogger) changed(c *conf.JSONConf) error {
 		r.service = setting.Service
 	}
 
-	writer := newRPCWriter(setting.Service, r.rpcInvoker)
+	writer := newRPCWriter(setting.Service, r.rpcInvoker, r.platName, r.systemName, r.clusterName, r.serverTypes)
 	r.writer = writer
 
 	r.appender.Type = "rpc"

@@ -3,7 +3,6 @@ package conf
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -76,7 +75,7 @@ type ServerConf struct {
 //NewServerConf 构建服务器配置缓存
 func NewServerConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int32, rgst registry.IRegistry) (s *ServerConf, err error) {
 
-	sections := strings.Split(strings.Trim(mainConfpath, string(filepath.Separator)), string(filepath.Separator))
+	sections := strings.Split(strings.Trim(mainConfpath, rgst.GetSeparator()), rgst.GetSeparator())
 	if len(sections) != 5 {
 		err = fmt.Errorf("conf配置文件格式错误，格式:/platName/sysName/serverType/clusterName/conf 当前值：%s", mainConfpath)
 		return
@@ -88,7 +87,7 @@ func NewServerConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int3
 		sysName:      sections[1],
 		serverType:   sections[2],
 		clusterName:  sections[3],
-		varConfPath:  filepath.Join("/", sections[0], "var"),
+		varConfPath:  registry.Join("/", sections[0], "var"),
 		registry:     rgst,
 		subNodeConfs: make(map[string]JSONConf),
 		varNodeConfs: make(map[string]JSONConf),
@@ -122,7 +121,7 @@ func (c *ServerConf) loadChildNodeConf() error {
 		return err
 	}
 	for _, p := range paths {
-		childConfPath := filepath.Join(c.mainConfpath, p)
+		childConfPath := registry.Join(c.mainConfpath, p)
 		data, version, err := c.registry.GetValue(childConfPath)
 		if err != nil {
 			return err
@@ -148,7 +147,7 @@ func (c *ServerConf) loadVarNodeConf() (err error) {
 	if b, err := c.registry.Exists(c.varConfPath); err == nil && !b {
 		return nil
 	}
-	
+
 	//获取第一级目录
 	var varfirstNodes []string
 	varfirstNodes, c.varVersion, err = c.registry.GetChildren(c.varConfPath)
@@ -158,7 +157,7 @@ func (c *ServerConf) loadVarNodeConf() (err error) {
 
 	for _, p := range varfirstNodes {
 		//获取第二级目录
-		firstNodePath := filepath.Join(c.varConfPath, p)
+		firstNodePath := registry.Join(c.varConfPath, p)
 		varSecondChildren, _, err := c.registry.GetChildren(firstNodePath)
 		if err != nil {
 			return err
@@ -166,7 +165,7 @@ func (c *ServerConf) loadVarNodeConf() (err error) {
 
 		//获取二级目录的值
 		for _, node := range varSecondChildren {
-			nodePath := filepath.Join(firstNodePath, node)
+			nodePath := registry.Join(firstNodePath, node)
 			data, version, err := c.registry.GetValue(nodePath)
 			if err != nil {
 				return err
@@ -180,7 +179,7 @@ func (c *ServerConf) loadVarNodeConf() (err error) {
 				err = fmt.Errorf("%s配置有误:%v", nodePath, err)
 				return err
 			}
-			c.varNodeConfs[filepath.Join(p, node)] = *varConf
+			c.varNodeConfs[registry.Join(p, node)] = *varConf
 		}
 	}
 	return nil
@@ -198,22 +197,22 @@ func (c *ServerConf) ForceRestart() bool {
 
 //GetMainConfPath 获取主配置文件路径
 func (c *ServerConf) GetMainConfPath() string {
-	return filepath.Join("/", c.mainConfpath)
+	return registry.Join("/", c.mainConfpath)
 }
 
 //GetSystemRootfPath 获取系统根路径
 func (c *ServerConf) GetSystemRootfPath() string {
-	return filepath.Join("/", c.platName, c.sysName, c.serverType, c.clusterName)
+	return registry.Join("/", c.platName, c.sysName, c.serverType, c.clusterName)
 }
 
 //GetServicePubRootPath 获取服务发布跟路径
 func (c *ServerConf) GetServicePubRootPath(svName string) string {
-	return filepath.Join("/", c.platName, "services", c.serverType, svName, "providers")
+	return registry.Join("/", c.platName, "services", c.serverType, svName, "providers")
 }
 
 //GetServerPubRootPath 获取服务器发布的跟路径
 func (c *ServerConf) GetServerPubRootPath() string {
-	return filepath.Join("/", c.GetSystemRootfPath(), "servers")
+	return registry.Join("/", c.GetSystemRootfPath(), "servers")
 }
 
 //GetAppConf 获取系统配置
@@ -307,7 +306,7 @@ func (c *ServerConf) IterVarConf(f func(k string, conf *JSONConf) bool) {
 func (c *ServerConf) GetVarConf(tp string, name string) (*JSONConf, error) {
 	c.varLock.RLock()
 	defer c.varLock.RUnlock()
-	if v, ok := c.varNodeConfs[filepath.Join(tp, name)]; ok {
+	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
 	return nil, ErrNoSetting
@@ -346,7 +345,7 @@ func (c *ServerConf) GetVarObject(tp string, name string, v interface{}) (int32,
 
 //HasVarConf 是否存在子级配置
 func (c *ServerConf) HasVarConf(tp string, name string) bool {
-	_, ok := c.varNodeConfs[filepath.Join(tp, name)]
+	_, ok := c.varNodeConfs[registry.Join(tp, name)]
 	return ok
 }
 

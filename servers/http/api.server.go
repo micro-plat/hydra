@@ -43,6 +43,7 @@ func NewApiServer(name string, addr string, routers []*conf.Router, opts ...Opti
 	for _, opt := range opts {
 		opt(t.option)
 	}
+	t.conf.Name = fmt.Sprintf("%s.%s.%s", t.platName, t.systemName, t.clusterName)
 	if t.Logger == nil {
 		t.Logger = logger.GetSession(name, logger.CreateSession())
 	}
@@ -66,33 +67,25 @@ func NewApiServer(name string, addr string, routers []*conf.Router, opts ...Opti
 
 // Run the http server
 func (s *ApiServer) Run() error {
-	s.proto = "http"
 	s.running = servers.ST_RUNNING
 	errChan := make(chan error, 1)
-	go func(ch chan error) {
-		if err := s.engine.ListenAndServe(); err != nil {
-			ch <- err
-		}
-	}(errChan)
-	select {
-	case <-time.After(time.Millisecond * 500):
-		return nil
-	case err := <-errChan:
-		s.running = servers.ST_STOP
-		return err
-	}
-}
+	switch len(s.tls) {
+	case 2:
+		s.proto = "https"
+		go func(ch chan error) {
+			if err := s.engine.ListenAndServeTLS(s.tls[0], s.tls[1]); err != nil {
+				ch <- err
+			}
+		}(errChan)
+	default:
+		s.proto = "http"
+		go func(ch chan error) {
+			if err := s.engine.ListenAndServe(); err != nil {
+				ch <- err
+			}
+		}(errChan)
 
-//RunTLS RunTLS server
-func (s *ApiServer) RunTLS(certFile, keyFile string) error {
-	s.proto = "https"
-	s.running = servers.ST_RUNNING
-	errChan := make(chan error, 1)
-	go func(ch chan error) {
-		if err := s.engine.ListenAndServeTLS(certFile, keyFile); err != nil {
-			ch <- err
-		}
-	}(errChan)
+	}
 	select {
 	case <-time.After(time.Millisecond * 500):
 		return nil
@@ -120,7 +113,10 @@ func (s *ApiServer) Shutdown(timeout time.Duration) {
 }
 
 //GetAddress 获取当前服务地址
-func (s *ApiServer) GetAddress() string {
+func (s *ApiServer) GetAddress(h ...string) string {
+	if len(h) > 0 && h[0] != "" {
+		return fmt.Sprintf("%s://%s:%s", s.proto, h[0], s.port)
+	}
 	return fmt.Sprintf("%s://%s:%s", s.proto, s.host, s.port)
 }
 

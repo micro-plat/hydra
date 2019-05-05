@@ -35,8 +35,8 @@ func (s *ApiServer) SetTrace(b bool) {
 //SetHosts 设置组件的host name
 func (s *ApiServer) SetHosts(hosts conf.Hosts) error {
 	for _, host := range hosts {
-		if !govalidator.IsDNSName(host) {
-			return fmt.Errorf("%s不是有效的dns名称", host)
+		if !govalidator.IsHost(host) {
+			return fmt.Errorf("%s不是有效的host名称", host)
 		}
 	}
 	s.conf.SetMetadata("hosts", hosts)

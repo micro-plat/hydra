@@ -11,6 +11,9 @@ func (r *Response) SetHeader(name string, value string) {
 	r.Params[name] = value
 }
 func (r *Response) SetHeaders(h map[string]string) {
+	if h == nil {
+		return
+	}
 	for k, v := range h {
 		r.Params[k] = v
 	}

@@ -82,7 +82,7 @@ func (l *local) Start() {
 }
 func (l *local) formatPath(path string) string {
 	if !strings.HasPrefix(path, l.prefix) {
-		return l.prefix + filepath.Join("/", path)
+		return l.prefix + r.Join("/", path)
 	}
 	return path
 }
@@ -101,7 +101,7 @@ func (l *local) GetValue(path string) (data []byte, version int32, err error) {
 		version = int32(fs.ModTime().Unix())
 		return
 	}
-	return l.GetValue(filepath.Join(path, ".init"))
+	return l.GetValue(r.Join(path, ".init"))
 }
 func (l *local) Update(path string, data string, version int32) (err error) {
 	if b, _ := l.Exists(path); !b {
@@ -136,7 +136,7 @@ func (l *local) WatchValue(path string) (data chan registry.ValueWatcher, err er
 	absPath := rpath
 	fs, _ := os.Stat(rpath)
 	if fs != nil && fs.IsDir() {
-		absPath = filepath.Join(rpath, ".init")
+		absPath = r.Join(rpath, ".init")
 	}
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
@@ -183,7 +183,7 @@ func (l *local) CreatePersistentNode(path string, data string) (err error) {
 	rpath := l.formatPath(path)
 	_, err = os.Stat(rpath)
 	if err == nil || os.IsExist(err) {
-		return fmt.Errorf("%s已存在", rpath)
+		os.Remove(rpath)
 	}
 	if err = os.MkdirAll(filepath.Dir(rpath), 0777); err != nil {
 		return err
@@ -213,9 +213,13 @@ func (l *local) CreateTempNode(path string, data string) (err error) {
 }
 func (l *local) CreateSeqNode(path string, data string) (rpath string, err error) {
 	nid := atomic.AddInt32(&l.seqNode, 1)
-	rpath = filepath.Join(l.formatPath(path), fmt.Sprint(nid))
+	rpath = r.Join(l.formatPath(path), fmt.Sprint(nid))
 	return rpath, l.CreateTempNode(rpath, data)
 }
+func (l *local) GetSeparator() string {
+	return string(filepath.Separator)
+}
+
 func (l *local) CanWirteDataInDir() bool {
 	return false
 }
@@ -261,6 +265,7 @@ func (v *valuesEntity) GetError() error {
 func (v *valuesEntity) GetPath() string {
 	return v.path
 }
+
 func checkPrivileges() error {
 	if output, err := exec.Command("id", "-g").Output(); err == nil {
 		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {

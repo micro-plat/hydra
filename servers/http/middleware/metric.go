@@ -89,7 +89,7 @@ func (m *Metric) Restart(host string, dataBase string, userName string, password
 	}
 
 	go m.reporter.reporter.Run()
-	go m.collectSys()
+	//	go m.collectSys()
 	m.timer.Start()
 	return nil
 }

@@ -12,8 +12,8 @@ import (
 
 func (s *RpcServer) getProcessor(routers []*conf.Router) (*Processor, error) {
 	engine := NewProcessor()
-	engine.Use(middleware.Recovery())
 	engine.Use(middleware.Logging(s.conf)) //记录请求日志
+	engine.Use(middleware.Recovery())
 	engine.Use(s.option.metric.Handle())   //生成metric报表
 	engine.Use(middleware.Host(s.conf))    // 检查主机头是否合法
 	engine.Use(middleware.JwtAuth(s.conf)) //jwt安全认证

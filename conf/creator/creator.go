@@ -2,7 +2,6 @@ package creator
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -67,7 +66,7 @@ func (c *Creator) installRegistry() error {
 		return nil
 	}
 	for _, tp := range c.serverTypes {
-		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
+		mainPath := registry.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		rpath := c.getRealMainPath(mainPath)
 		ok, err := c.registry.Exists(rpath)
 		if err != nil {
@@ -78,12 +77,19 @@ func (c *Creator) installRegistry() error {
 		}
 		pc, _, _ := c.registry.GetChildren(rpath)
 		for _, v := range pc {
-			c.registry.Delete(filepath.Join(rpath, v))
+			c.registry.Delete(registry.Join(rpath, v))
 		}
-		err = c.registry.Delete(rpath)
-		if mode == modeNew {
-			c.logger.Info("\t\t删除配置:", rpath)
+		b, _ := c.registry.Exists(rpath)
+		if b {
+			err = c.registry.Delete(rpath)
+			if err != nil {
+				return fmt.Errorf("%v,delete path: %s failed", err, rpath)
+			}
+			if mode == modeNew {
+				c.logger.Info("\t\t删除配置:", rpath)
+			}
 		}
+
 		if err := c.binder.ScanMainConf(mainPath, tp); err != nil {
 			return err
 		}
@@ -101,10 +107,10 @@ func (c *Creator) installRegistry() error {
 	}
 	//检查子配置
 	for _, tp := range c.serverTypes {
-		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
+		mainPath := registry.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		subNames := c.binder.GetSubConfNames(tp)
 		for _, subName := range subNames {
-			ok, err := c.registry.Exists(filepath.Join(mainPath, subName))
+			ok, err := c.registry.Exists(registry.Join(mainPath, subName))
 			if err != nil {
 				return err
 			}
@@ -112,12 +118,12 @@ func (c *Creator) installRegistry() error {
 				continue
 			}
 			//删除配置重建
-			c.registry.Delete(filepath.Join(mainPath, subName))
+			c.registry.Delete(registry.Join(mainPath, subName))
 			if err := c.binder.ScanSubConf(mainPath, tp, subName); err != nil {
 				return err
 			}
 
-			path := filepath.Join("/", mainPath, subName)
+			path := registry.Join("/", mainPath, subName)
 			content := c.binder.GetSubConf(tp, subName)
 			if err := c.createConf(path, content); err != nil {
 				return err
@@ -129,7 +135,7 @@ func (c *Creator) installRegistry() error {
 	//检查平台配置
 	varNames := c.binder.GetVarConfNames()
 	for _, varName := range varNames {
-		ok, err := c.registry.Exists(filepath.Join("/", c.platName, "var", varName))
+		ok, err := c.registry.Exists(registry.Join("/", c.platName, "var", varName))
 		if err != nil {
 			return err
 		}
@@ -137,11 +143,11 @@ func (c *Creator) installRegistry() error {
 			continue
 		}
 		//删除配置重建
-		c.registry.Delete(filepath.Join("/", c.platName, "var", varName))
+		c.registry.Delete(registry.Join("/", c.platName, "var", varName))
 		if err := c.binder.ScanVarConf(c.platName, varName); err != nil {
 			return err
 		}
-		path := filepath.Join("/", c.platName, "var", varName)
+		path := registry.Join("/", c.platName, "var", varName)
 		content := c.binder.GetVarConf(varName)
 		if err := c.createConf(path, content); err != nil {
 			return err
@@ -172,7 +178,7 @@ func (c *Creator) customerInstall() error {
 		if installs == nil || len(installs) == 0 {
 			continue
 		}
-		mainPath := filepath.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
+		mainPath := registry.Join("/", c.platName, c.systemName, tp, c.clusterName, "conf")
 		buffer, version, err := c.registry.GetValue(mainPath)
 		if err != nil {
 			return err
@@ -207,7 +213,7 @@ func (c *Creator) getRealMainPath(path string) string {
 	if !c.registry.CanWirteDataInDir() {
 		extPath = ".init"
 	}
-	return filepath.Join(path, extPath)
+	return registry.Join(path, extPath)
 }
 func (c *Creator) createMainConf(path string, data string) error {
 	if data == "" {
@@ -229,7 +235,7 @@ func (c *Creator) updateMainConf(path string, data string) error {
 }
 
 func (c *Creator) checkRegistry() (mode int, cn bool) {
-	msg := "创建注册中心配置数据?,如存在则不修改(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):"
+	msg := "创建注册中心配置数据?如存在则不安装(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):"
 
 	var value string
 	fmt.Print("\t\033[;33m-> " + msg + "\033[0m")

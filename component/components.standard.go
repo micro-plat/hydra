@@ -3,12 +3,12 @@ package component
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/registry"
 )
 
 const (
@@ -138,9 +138,10 @@ func (r *StandardComponent) addService(group string, service string, h interface
 	return
 }
 func (r *StandardComponent) registerAddService(name string, group string, handler interface{}) {
-	if _, ok := r.Handlers[name]; !ok {
+	_, hok := r.Handlers[name]
+	if !hok {
 		r.Handlers[name] = handler
-		r.Services = append(r.Services, name)
+
 	}
 	if strings.HasPrefix(name, "__") {
 		return
@@ -148,7 +149,11 @@ func (r *StandardComponent) registerAddService(name string, group string, handle
 	if _, ok := r.GroupServices[group]; !ok {
 		r.GroupServices[group] = make([]string, 0, 2)
 	}
+	// if !hok {
 	r.GroupServices[group] = append(r.GroupServices[group], name)
+	// }
+
+	r.Services = append(r.Services, name)
 
 	if _, ok := r.ServiceGroup[name]; !ok {
 		r.ServiceGroup[name] = make([]string, 0, 2)
@@ -167,25 +172,25 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	switch handler := h.(type) {
 	case GetHandler:
 		var f ServiceFunc = handler.GetHandle
-		r.registerAddService(filepath.Join(name, "get"), group, f)
+		r.registerAddService(registry.Join(name, "get"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case PostHandler:
 		var f ServiceFunc = handler.PostHandle
-		r.registerAddService(filepath.Join(name, "post"), group, f)
+		r.registerAddService(registry.Join(name, "post"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case PutHandler:
 		var f ServiceFunc = handler.PutHandle
-		r.registerAddService(filepath.Join(name, "put"), group, f)
+		r.registerAddService(registry.Join(name, "put"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case DeleteHandler:
 		var f ServiceFunc = handler.DeleteHandle
-		r.registerAddService(filepath.Join(name, "delete"), group, f)
+		r.registerAddService(registry.Join(name, "delete"), group, f)
 		found = true
 	}
 	switch h.(type) {
@@ -214,7 +219,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 					panic("不是有效的服务类型")
 				}
 				var f ServiceFunc = nf
-				r.registerAddService(filepath.Join(name, strings.ToLower(mName[0:len(mName)-6])), group, f)
+				r.registerAddService(registry.Join(name, strings.ToLower(mName[0:len(mName)-6])), group, f)
 				found = true
 			}
 		}
@@ -243,7 +248,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//get降级服务
 	switch handler := h.(type) {
 	case GetFallbackHandler:
-		name := filepath.Join(name, "get")
+		name := registry.Join(name, "get")
 		var f FallbackServiceFunc = handler.GetFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -253,7 +258,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//post降级服务
 	switch handler := h.(type) {
 	case PostFallbackHandler:
-		name := filepath.Join(name, "post")
+		name := registry.Join(name, "post")
 		var f FallbackServiceFunc = handler.PostFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -263,7 +268,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//put降级服务
 	switch handler := h.(type) {
 	case PutFallbackHandler:
-		name := filepath.Join(name, "put")
+		name := registry.Join(name, "put")
 		var f FallbackServiceFunc = handler.PutFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -273,7 +278,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//delete降级服务
 	switch handler := h.(type) {
 	case DeleteFallbackHandler:
-		name := filepath.Join(name, "delete")
+		name := registry.Join(name, "delete")
 		var f FallbackServiceFunc = handler.DeleteFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -417,7 +422,7 @@ func (r *StandardComponent) GetHandler(engine string, service string, method str
 		r, ok := r.Handlers["__rpc_"]
 		return r, ok
 	default:
-		if r, ok := r.Handlers[filepath.Join(service, method)]; ok {
+		if r, ok := r.Handlers[registry.Join(service, method)]; ok {
 			return r, ok
 		}
 		r, ok := r.Handlers[service]
@@ -447,7 +452,7 @@ func (r *StandardComponent) Handle(c *context.Context) (rs interface{}) {
 
 //GetFallbackHandler 获取失败降级处理函数
 func (r *StandardComponent) GetFallbackHandler(engine string, service string, method string) (interface{}, bool) {
-	if f, ok := r.FallbackHandlers[filepath.Join(service, method)]; ok {
+	if f, ok := r.FallbackHandlers[registry.Join(service, method)]; ok {
 		return f, ok
 	}
 	f, ok := r.FallbackHandlers[service]

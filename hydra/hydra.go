@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -22,6 +21,7 @@ import (
 
 //Hydra  hydra app
 type Hydra struct {
+	appName        string
 	logger         *logger.Logger
 	closeChan      chan struct{}
 	interrupt      chan os.Signal
@@ -45,13 +45,14 @@ type Hydra struct {
 }
 
 //NewHydra 创建hydra服务器
-func NewHydra(platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, isDebug bool, remoteLogger bool, logger *logger.Logger, r component.IComponentHandler) *Hydra {
+func NewHydra(appName string, platName string, systemName string, serverTypes []string, clusterName string, trace string, registryAddr string, isDebug bool, remoteLogger bool, logger *logger.Logger, r component.IComponentHandler) *Hydra {
 	servers.IsDebug = isDebug
 	return &Hydra{
+		appName:        appName,
 		cHandler:       r,
 		logger:         logger,
-		systemRootName: filepath.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
-		rpcLoggerPath:  filepath.Join("/", platName, "/var/global/logger"),
+		systemRootName: registry.Join("/", platName, systemName, strings.Join(serverTypes, "-"), clusterName),
+		rpcLoggerPath:  registry.Join("/", platName, "/var/global/logger"),
 		//	binder:         binder,
 		closeChan:    make(chan struct{}),
 		interrupt:    make(chan os.Signal, 1),
@@ -73,7 +74,7 @@ func (h *Hydra) Start() (s string, err error) {
 		logger.AddWriteThread(49)
 	}
 	if h.remoteLogger {
-		_, err := rpclog.NewRPCLogger(h.rpcLoggerPath, h.registryAddr, h.logger)
+		_, err := rpclog.NewRPCLogger(h.rpcLoggerPath, h.registryAddr, h.logger, h.platName, h.systemName, h.clusterName, h.serverTypes)
 		if err != nil {
 			return "", err
 		}
@@ -101,10 +102,9 @@ LOOP:
 			break LOOP
 		}
 	}
-	h.logger.Infof("hydra 正在退出...")
+	h.logger.Infof("%s 正在退出...", h.appName)
 	h.rspServer.Shutdown()
-	h.logger.Infof("hydra 已安全退出")
-	return "hydra 已安全退出", nil
+	return fmt.Sprintf("%s 已安全退出", h.appName), nil
 }
 
 //startWatch 启动服务器配置监控
@@ -118,7 +118,7 @@ func (h *Hydra) startWatch() (err error) {
 	//启动配置监听
 	h.watcher, err = watcher.NewConfWatcher(h.platName, h.systemName, h.serverTypes, h.clusterName, h.registry, h.logger)
 	if err != nil {
-		err = fmt.Errorf("watcher初始化失败 %s,%+v", filepath.Join(h.platName, h.systemName), err)
+		err = fmt.Errorf("watcher初始化失败 %s,%+v", registry.Join(h.platName, h.systemName), err)
 		return
 	}
 	h.logger.Infof("初始化 %s", h.systemRootName)
@@ -126,7 +126,7 @@ func (h *Hydra) startWatch() (err error) {
 		return err
 	}
 	if err != nil {
-		err = fmt.Errorf("watcher启动失败 %s,%+v", filepath.Join(h.platName, h.systemName), err)
+		err = fmt.Errorf("watcher启动失败 %s,%+v", registry.Join(h.platName, h.systemName), err)
 		return
 	}
 

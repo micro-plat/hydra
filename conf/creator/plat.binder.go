@@ -1,17 +1,17 @@
 package creator
 
 import (
-	"path/filepath"
+	"github.com/micro-plat/hydra/registry"
 )
 
 var _ IPlatBinder = &PlatBinder{}
 
 type IPlatBinder interface {
 	SetVarConf(t string, s string, v string)
-	Scan(platName string, nodeName string) error
-	GetVarNames() []string
-	NeedScanCount(nodeName string) int
-	GetNodeConf(nodeName string) string
+	scan(platName string, nodeName string) error
+	getVarNames() []string
+	needScanCount(nodeName string) int
+	getNodeConf(nodeName string) string
 }
 
 //PlatBinder 平台配置绑定
@@ -36,13 +36,13 @@ func NewPlatBinder(params map[string]string, inputs map[string]*Input) *PlatBind
 
 //SetVarConf 设置var配置内容
 func (c *PlatBinder) SetVarConf(t string, s string, v string) {
-	c.varConf[filepath.Join(t, s)] = v
+	c.varConf[registry.Join(t, s)] = v
 	params := getParams(v)
 	if len(params) > 0 {
-		c.varParamsForInput[filepath.Join(t, s)] = params
+		c.varParamsForInput[registry.Join(t, s)] = params
 	}
 }
-func (c *PlatBinder) GetVarNames() []string {
+func (c *PlatBinder) getVarNames() []string {
 	v := make([]string, 0, len(c.varConf))
 	for k := range c.varConf {
 		v = append(v, k)
@@ -51,7 +51,7 @@ func (c *PlatBinder) GetVarNames() []string {
 }
 
 //NeedScanCount 待输入个数
-func (c *PlatBinder) NeedScanCount(nodeName string) int {
+func (c *PlatBinder) needScanCount(nodeName string) int {
 	count := 0
 	for _, p := range c.varParamsForInput[nodeName] {
 		if _, ok := c.params[p]; !ok {
@@ -62,13 +62,13 @@ func (c *PlatBinder) NeedScanCount(nodeName string) int {
 }
 
 //Scan 绑定参数
-func (c *PlatBinder) Scan(platName string, nodeName string) error {
+func (c *PlatBinder) scan(platName string, nodeName string) error {
 	for _, p := range c.varParamsForInput[nodeName] {
 		if _, ok := c.params[p]; ok {
 			continue
 		}
 
-		nvalue, err := getInputValue(p, c.inputs, filepath.Join("/", platName, "var", nodeName))
+		nvalue, err := getInputValue(p, c.inputs, registry.Join("/", platName, "var", nodeName))
 		if err != nil {
 			return err
 		}
@@ -82,6 +82,6 @@ func (c *PlatBinder) Scan(platName string, nodeName string) error {
 }
 
 //GetNodeConf 获取节点配置
-func (c *PlatBinder) GetNodeConf(nodeName string) string {
+func (c *PlatBinder) getNodeConf(nodeName string) string {
 	return c.rvarConf[nodeName]
 }

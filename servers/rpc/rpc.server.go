@@ -18,6 +18,7 @@ import (
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/logger"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 //RpcServer rpc服务器
@@ -46,10 +47,20 @@ func NewRpcServer(name string, address string, routers []*conf.Router, opts ...O
 	for _, opt := range opts {
 		opt(t.option)
 	}
+	t.conf.Name = fmt.Sprintf("%s.%s.%s", t.platName, t.systemName, t.clusterName)
 	if t.Logger == nil {
 		t.Logger = logger.GetSession(name, logger.CreateSession())
 	}
-	t.engine = grpc.NewServer()
+	switch len(t.option.tls) {
+	case 2:
+		creds, err := credentials.NewServerTLSFromFile(t.option.tls[0], t.option.tls[1])
+		if err != nil {
+			return nil, fmt.Errorf("tls证书错误:%v", err)
+		}
+		t.engine = grpc.NewServer(grpc.Creds(creds))
+	default:
+		t.engine = grpc.NewServer()
+	}
 	if routers != nil {
 		t.Processor, err = t.getProcessor(routers)
 		if err != nil {
@@ -72,6 +83,7 @@ func (s *RpcServer) Run() error {
 			ch <- err
 			return
 		}
+
 		if err := s.engine.Serve(lis); err != nil {
 			ch <- err
 		}
@@ -96,7 +108,10 @@ func (s *RpcServer) Shutdown(timeout time.Duration) {
 }
 
 //GetAddress 获取当前服务地址
-func (s *RpcServer) GetAddress() string {
+func (s *RpcServer) GetAddress(h ...string) string {
+	if len(h) > 0 && h[0] != "" {
+		return fmt.Sprintf("%s://%s:%s", s.proto, h[0], s.port)
+	}
 	return fmt.Sprintf("%s://%s:%s", s.proto, s.host, s.port)
 }
 

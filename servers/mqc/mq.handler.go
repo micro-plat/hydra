@@ -2,8 +2,10 @@ package mqc
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
 )
 
@@ -20,9 +22,19 @@ func (s *MqcServer) getProcessor(addr string, raw string, queues []*conf.Queue) 
 	engine.Use(middleware.Recovery())
 	engine.Use(s.option.metric.Handle()) //生成metric报表
 	engine.Use(middleware.NoResponse(s.conf))
-	engine.AddRouters()
+	s.AddRouters(engine)
 	if err = engine.Consumes(); err != nil {
 		return nil, err
 	}
 	return engine, nil
+}
+func (s *MqcServer) AddRouters(p *Processor) {
+	for _, r := range p.queues {
+		if _, ok := p.handles[r.Name]; !ok {
+			s.Logger.Debugf("[订阅 队列(%s)消息]", r.Queue)
+			handler := r.Handler.(dispatcher.HandlerFunc)
+			p.handles[r.Name] = handler
+			p.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
+		}
+	}
 }

@@ -25,7 +25,7 @@ func NewWebResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	h.closeChan = make(chan struct{})
 	h.currentConf = cnf
 	h.Logger = logger
-	h.pubs = make([]string, 0, 2)
+	h.pubs = make(map[string]string)
 	// 启动执行引擎
 	h.engine, err = engines.NewServiceEngine(cnf, registryAddr, h.Logger)
 	if err != nil {
@@ -39,6 +39,7 @@ func NewWebResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
 		WithLogger(logger),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithTimeout(cnf.GetInt("rTimeout", 10), cnf.GetInt("wTimeout", 10), cnf.GetInt("rhTimeout", 10))); err != nil {
 		return
 	}
@@ -69,13 +70,12 @@ func (w *WebResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
 		WithLogger(w.Logger),
-		WithLogger(w.Logger),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithTimeout(cnf.GetInt("rTimeout", 10), cnf.GetInt("wTimeout", 10), cnf.GetInt("rhTimeout", 10))); err != nil {
 		return
 	}
 
 	if err = w.SetConf(true, cnf); err != nil {
-		w.currentConf = cnf
 		w.restarted = true
 		return
 	}

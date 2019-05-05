@@ -22,11 +22,18 @@ type Invoker struct {
 }
 
 type invokerOption struct {
-	logger       *logger.Logger
-	timerout     time.Duration
-	balancerType int
-	servers      string
-	localPrefix  string
+	logger   *logger.Logger
+	timerout time.Duration
+	// balancerType int
+	balancers map[string]BalancerMode
+	servers   string
+	// localPrefix  string
+	tls map[string][]string
+}
+
+type BalancerMode struct {
+	Mode  int
+	Param string
 }
 
 const (
@@ -46,18 +53,54 @@ func WithInvokerLogger(log *logger.Logger) InvokerOption {
 	}
 }
 
+func WithBalancerMode(platName string, mode int, p string) InvokerOption {
+
+	switch mode {
+	case RoundRobin:
+		return WithRoundRobin(platName)
+	case LocalFirst:
+		return WithLocalFirst(p, platName)
+	default:
+		return func(o *invokerOption) {
+		}
+	}
+}
+
 //WithRoundRobin 设置为轮询负载
-func WithRoundRobin() InvokerOption {
+func WithRoundRobin(platName ...string) InvokerOption {
 	return func(o *invokerOption) {
-		o.balancerType = RoundRobin
+		if len(platName) == 0 {
+			o.balancers["*"] = BalancerMode{Mode: RoundRobin}
+			return
+		}
+		for _, v := range platName {
+			o.balancers[v] = BalancerMode{Mode: RoundRobin}
+		}
+
 	}
 }
 
 //WithLocalFirst 设置为本地优先负载
-func WithLocalFirst(prefix string) InvokerOption {
+func WithLocalFirst(prefix string, platName ...string) InvokerOption {
 	return func(o *invokerOption) {
-		o.balancerType = LocalFirst
-		o.localPrefix = prefix
+		if prefix != "" {
+			if len(platName) == 0 {
+				o.balancers["*"] = BalancerMode{Mode: LocalFirst, Param: prefix}
+				return
+			}
+			for _, v := range platName {
+				o.balancers[v] = BalancerMode{Mode: LocalFirst, Param: prefix}
+			}
+		}
+	}
+}
+
+//WithRPCTLS 设置TLS证书(pem,key)
+func WithRPCTLS(platName string, tls []string) InvokerOption {
+	return func(o *invokerOption) {
+		if len(tls) == 2 {
+			o.tls[platName] = tls
+		}
 	}
 }
 
@@ -67,11 +110,17 @@ func WithLocalFirst(prefix string) InvokerOption {
 //addrss: 注册中心地址格式: zk://192.168.0.1166:2181或standalone://localhost
 func NewInvoker(domain string, server string, address string, opts ...InvokerOption) (f *Invoker) {
 	f = &Invoker{
-		domain:        domain,
-		server:        server,
-		address:       address,
-		cache:         cmap.New(8),
-		invokerOption: &invokerOption{balancerType: RoundRobin},
+		domain:  domain,
+		server:  server,
+		address: address,
+		cache:   cmap.New(8),
+		invokerOption: &invokerOption{
+			// balancerType: RoundRobin,
+			balancers: map[string]BalancerMode{
+				"*": BalancerMode{Mode: RoundRobin},
+			},
+			tls: make(map[string][]string),
+		},
 	}
 	for _, opt := range opts {
 		opt(f.invokerOption)
@@ -111,6 +160,15 @@ func (r *Invoker) Request(service string, method string, header map[string]strin
 	}
 	return
 }
+func (r *Invoker) getBalancer(domain string) (int, string) {
+	if b, ok := r.balancers[domain]; ok {
+		return b.Mode, b.Param
+	}
+	if b, ok := r.balancers["*"]; ok {
+		return b.Mode, b.Param
+	}
+	return RoundRobin, ""
+}
 
 //GetClient 获取RPC客户端
 //addr 支持格式:
@@ -127,13 +185,22 @@ func (r *Invoker) GetClient(addr string) (c *Client, err error) {
 		rsrvs := i[0].(string)
 		opts := make([]ClientOption, 0, 0)
 		opts = append(opts, WithLogger(r.logger))
-		rs := balancer.NewResolver(rsrvs, time.Second, r.localPrefix)
-		switch r.balancerType {
+		mode, p := r.getBalancer(domain)
+		rs := balancer.NewResolver(rsrvs, time.Second, p)
+
+		//设置负载均衡算法
+		switch mode {
 		case RoundRobin:
 			opts = append(opts, WithRoundRobinBalancer(rs, rsrvs, time.Second, map[string]int{}))
 		case LocalFirst:
-			opts = append(opts, WithLocalFirstBalancer(rs, rsrvs, r.localPrefix, map[string]int{}))
+			opts = append(opts, WithLocalFirstBalancer(rs, rsrvs, p, map[string]int{}))
 		default:
+		}
+
+		//设置安全证书
+		switch len(r.tls[domain]) {
+		case 2:
+			opts = append(opts, WithTLS(r.tls[domain]))
 		}
 		return NewClient(r.address, opts...)
 	}, fullService)

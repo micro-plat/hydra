@@ -14,19 +14,20 @@ import (
 
 //MqcResponsiveServer rpc 响应式服务器
 type MqcResponsiveServer struct {
-	server        *MqcServer
-	engine        servers.IRegistryEngine
-	registryAddr  string
-	pubs          []string
-	currentConf   conf.IServerConf
-	closeChan     chan struct{}
-	once          sync.Once
-	done          bool
-	shardingIndex int
-	shardingCount int
-	master        bool
-	pubLock       sync.Mutex
-	restarted     bool
+	server          *MqcServer
+	engine          servers.IRegistryEngine
+	registryAddr    string
+	pubs            []string
+	currentConf     conf.IServerConf
+	closeChan       chan struct{}
+	hasDynamicQueue bool
+	once            sync.Once
+	done            bool
+	shardingIndex   int
+	shardingCount   int
+	master          bool
+	pubLock         sync.Mutex
+	restarted       bool
 	*logger.Logger
 	mu sync.Mutex
 }
@@ -45,7 +46,10 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if err != nil {
 		return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
-	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
+	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	hasDynamicQueue, ch := chandler.GetMQCDynamicQueue()
+	h.hasDynamicQueue = hasDynamicQueue
+	if err = h.engine.SetHandler(chandler); err != nil {
 		return nil, err
 	}
 	if h.server, err = NewMqcServer(cnf.GetServerName(),
@@ -53,8 +57,12 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		"",
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(logger)); err != nil {
 		return
+	}
+	if hasDynamicQueue {
+		go h.server.Dynamic(h.engine, ch)
 	}
 	if err = h.SetConf(true, h.currentConf); err != nil {
 		return
@@ -74,16 +82,23 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err != nil {
 		return fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
-	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
+	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	if err = w.engine.SetHandler(chandler); err != nil {
 		return err
 	}
+	hasDynamicQueue, ch := chandler.GetMQCDynamicQueue()
+	w.hasDynamicQueue = hasDynamicQueue
 	if w.server, err = NewMqcServer(cnf.GetServerName(),
 		"",
 		"",
 		nil,
 		WithShowTrace(cnf.GetBool("trace", false)),
+		WithName(cnf.GetPlatName(), cnf.GetSysName(), cnf.GetClusterName(), cnf.GetServerType()),
 		WithLogger(w.Logger)); err != nil {
 		return
+	}
+	if hasDynamicQueue {
+		w.server.Dynamic(w.engine, ch)
 	}
 	if err = w.SetConf(true, cnf); err != nil {
 		return

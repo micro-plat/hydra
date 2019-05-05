@@ -132,16 +132,16 @@ type updaterOptions struct {
 }
 
 //NeedUpdate 检查当前服务是否需要更新
-func NeedUpdate(registry registry.IRegistry, platName string, systemName string, v string) (bool, *conf.Package, error) {
-	path := filepath.Join("/", platName, "package", systemName, v)
-	b, err := registry.Exists(path)
+func NeedUpdate(r registry.IRegistry, platName string, systemName string, v string) (bool, *conf.Package, error) {
+	path := registry.Join("/", platName, "package", systemName, v)
+	b, err := r.Exists(path)
 	if err != nil {
 		return false, nil, context.NewError(406, err)
 	}
 	if !b {
-		return false, nil, context.NewError(406, fmt.Sprintf("版本%s不存在(%s未配置)",v, path))
+		return false, nil, context.NewError(406, fmt.Sprintf("版本%s不存在(%s未配置)", v, path))
 	}
-	buffer, vr, err := registry.GetValue(path)
+	buffer, vr, err := r.GetValue(path)
 	if err != nil {
 		return false, nil, context.NewError(406, err)
 	}

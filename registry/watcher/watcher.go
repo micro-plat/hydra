@@ -79,6 +79,7 @@ LOOP:
 	data, version, err := w.registry.GetValue(w.path)
 	if err != nil {
 		w.logger.Debugf("获取节点值失败：%s(err:%v)", w.path, err)
+		time.Sleep(time.Second)
 		goto LOOP
 	}
 	w.notifyChanged(data, version)

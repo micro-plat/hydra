@@ -53,13 +53,15 @@ func (windows *windowsRecord) Install(args ...string) (string, error) {
 		s.Close()
 		return installAction + failed, err
 	}
-
+	nagrs := make([]string, 0, len(args)+1)
+	nagrs = append(nagrs, "run")
+	nagrs = append(nagrs, args...)
 	s, err = m.CreateService(windows.name, execp, mgr.Config{
 		DisplayName:  windows.name,
 		Description:  windows.description,
 		StartType:    mgr.StartAutomatic,
 		Dependencies: windows.dependencies,
-	}, args...)
+	}, nagrs...)
 	if err != nil {
 		return installAction + failed, err
 	}
