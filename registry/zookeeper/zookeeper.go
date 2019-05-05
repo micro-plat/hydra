@@ -27,5 +27,6 @@ func (z *zkRegistry) Resolve(servers []string, u string, p string, log *logger.L
 }
 
 func init() {
+	fmt.Println("zk.registry...")
 	registry.Register("zk", &zkRegistry{})
 }

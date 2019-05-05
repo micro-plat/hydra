@@ -18,6 +18,7 @@ type IComponentRegistry interface {
 	GetHandleds() []ServiceFunc
 	GetInitializings() []ComponentFunc
 	GetClosings() []ComponentFunc
+	GetRPCTLS() map[string][]string
 	IServiceRegistry
 }
 
