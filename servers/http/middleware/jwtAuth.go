@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
@@ -36,12 +37,11 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 
 		//不需要校验的URL自动跳过
 		curl := ctx.Request.URL.Path
-		for _, u := range jwtAuth.Exclude {
-			if u == curl {
-				ctx.Next()
-				return
-			}
+		if jwtAuth.IsExcluded(curl) {
+			ctx.Next()
+			return
 		}
+
 		if jwtAuth.Redirect != "" && strings.ToUpper(ctx.Request.Method) == "GET" {
 			l, errx := url.Parse(jwtAuth.Redirect)
 			if errx != nil {
@@ -121,10 +121,13 @@ func setToken(ctx *gin.Context, jwt *conf.Auth, token string) {
 	case "HEADER", "H":
 		ctx.Header(jwt.Name, token)
 	default:
+		expireTime := time.Now().Add(time.Duration(time.Duration(jwt.ExpireAt)*time.Second - 8*60*60*time.Second))
+		expireVal := expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
+
 		if jwt.Domain != "" {
-			ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;", jwt.Name, token, jwt.Domain))
+			ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
 			return
 		}
-		ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;", jwt.Name, token))
+		ctx.Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
 	}
 }
