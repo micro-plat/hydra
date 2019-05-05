@@ -1,7 +1,11 @@
 package types
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"io"
+	"strings"
 	"time"
 )
 
@@ -26,8 +30,40 @@ type IXMap interface {
 type XMap map[string]interface{}
 
 //GetString 从对象中获取数据值，如果不是字符串则返回空
+func (q XMap) Keys() []string {
+	keys := make([]string, len(q))
+	idx := 0
+	for k := range q {
+		keys[idx] = k
+		idx++
+	}
+	return keys
+}
+
+func (q XMap) GetValue(name string) interface{} {
+	return q[name]
+}
+
+//GetString 从对象中获取数据值，如果不是字符串则返回空
 func (q XMap) GetString(name string) string {
-	return GetString(q[name])
+	parties := strings.Split(name, ":")
+	if len(parties) == 1 {
+		return GetString(q[name])
+	}
+	tmpv := q[parties[0]]
+	for i, cnt := 1, len(parties); i < cnt; i++ {
+		if v, ok := tmpv.(map[string]interface{}); ok {
+			tmpv = v[parties[i]]
+			continue
+		}
+		if v, ok := tmpv.(string); ok {
+			tmp := map[string]interface{}{}
+			json.Unmarshal([]byte(v), &tmp)
+			tmpv = tmp[parties[i]]
+			continue
+		}
+	}
+	return GetString(tmpv)
 }
 
 //GetInt 从对象中获取数据值，如果不是字符串则返回0
@@ -98,6 +134,50 @@ func (q XMap) ToStruct(o interface{}) error {
 		input[k] = fmt.Sprint(v)
 	}
 	return Map2Struct(&input, &o)
+}
+
+type xmlMapEntry struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
+}
+
+func (m *XMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if len(*m) == 0 {
+		return nil
+	}
+
+	err := e.EncodeToken(start)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range *m {
+		if v == nil || GetString(v) == "" {
+			continue
+		}
+		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: GetString(v)})
+	}
+
+	return e.EncodeToken(start.End())
+}
+
+func (m *XMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	if m == nil {
+		m = &XMap{}
+	}
+	for {
+		var e xmlMapEntry
+
+		err := d.Decode(&e)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		(*m)[e.XMLName.Local] = e.Value
+	}
+	return nil
 }
 
 //XMaps 多行数据
