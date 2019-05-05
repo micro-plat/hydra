@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/micro-plat/hydra/conf/creator"
-	"github.com/micro-plat/hydra/hydra/daemon"
-	"github.com/zkfy/log"
-
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/conf/creator"
+	"github.com/micro-plat/hydra/hydra/daemon"
+	_ "github.com/micro-plat/hydra/hydra/impt"
 	"github.com/micro-plat/hydra/hydra/rqs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
+	"github.com/zkfy/log"
 )
 
 //MicroApp  微服务应用
