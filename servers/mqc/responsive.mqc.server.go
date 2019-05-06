@@ -61,11 +61,11 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		WithLogger(logger)); err != nil {
 		return
 	}
-	if hasDynamicQueue {
-		go h.server.Dynamic(h.engine, ch)
-	}
 	if err = h.SetConf(true, h.currentConf); err != nil {
 		return
+	}
+	if hasDynamicQueue {
+		go h.server.Dynamic(h.engine, ch)
 	}
 	return
 }
@@ -97,11 +97,11 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		WithLogger(w.Logger)); err != nil {
 		return
 	}
-	if hasDynamicQueue {
-		w.server.Dynamic(w.engine, ch)
-	}
 	if err = w.SetConf(true, cnf); err != nil {
 		return
+	}
+	if hasDynamicQueue {
+		w.server.Dynamic(w.engine, ch)
 	}
 	if err = w.Start(); err == nil {
 		w.currentConf = cnf
