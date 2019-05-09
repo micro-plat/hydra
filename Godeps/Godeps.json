@@ -198,6 +198,10 @@
 			"Rev": "8812c12a5d6290d18d49c0aaa645b56faca1de06"
 		},
 		{
+			"ImportPath": "github.com/micro-plat/lib4go/envs",
+			"Rev": "8812c12a5d6290d18d49c0aaa645b56faca1de06"
+		},
+		{
 			"ImportPath": "github.com/micro-plat/lib4go/file",
 			"Rev": "8812c12a5d6290d18d49c0aaa645b56faca1de06"
 		},
@@ -247,6 +251,10 @@
 		},
 		{
 			"ImportPath": "github.com/micro-plat/lib4go/net",
+			"Rev": "8812c12a5d6290d18d49c0aaa645b56faca1de06"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/net/http",
 			"Rev": "8812c12a5d6290d18d49c0aaa645b56faca1de06"
 		},
 		{
