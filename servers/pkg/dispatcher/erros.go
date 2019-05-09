@@ -6,10 +6,9 @@ package dispatcher
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"reflect"
-
-	"github.com/gin-gonic/gin/json"
 )
 
 type ErrorType uint64
@@ -67,7 +66,7 @@ func (msg *Error) JSON() interface{} {
 
 // MarshalJSON implements the json.Marshaller interface.
 func (msg *Error) MarshalJSON() ([]byte, error) {
-	return json.Marshal(msg.JSON())
+	return Marshal(msg.JSON())
 }
 
 // Error implements the error interface
