@@ -98,6 +98,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		// routers = conf.Routers{}
 		// routers.Routers = make([]*conf.Router, 0, 1)
 		// routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}, Name: "/*name", Service: "/@name", Engine: "*"})
+
 		routers = getRouters(engine.GetServices())
 	}
 	if err != nil && err != conf.ErrNoSetting {
