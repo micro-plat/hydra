@@ -173,6 +173,7 @@ func makeSettingData(ctx *gin.Context, m map[string]string) ParamData {
 }
 
 func makeExtData(c *gin.Context) map[string]interface{} {
+	
 	input := make(map[string]interface{})
 	input["__hydra_sid_"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.Method)
@@ -181,12 +182,12 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 	input["__jwt_"] = func() interface{} {
 		return getJWTRaw(c)
 	}
+	
 	input["__func_http_request_"] = c.Request
 	input["__func_http_response_"] = c.Writer
 	input["__binding_"] = c.ShouldBind
 	input["__binding_with_"] = func(v interface{}, ct string) error {
 		return c.BindWith(v, binding.Default(c.Request.Method, ct))
-
 	}
 	input["__get_request_values_"] = func() map[string]interface{} {
 		c.Request.ParseForm()
@@ -209,7 +210,6 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 				data[k] = strings.Join(v, ",")
 			}
 		}
-
 		return data
 	}
 

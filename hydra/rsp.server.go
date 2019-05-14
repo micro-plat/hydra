@@ -3,7 +3,7 @@ package hydra
 import (
 	"sync"
 	"time"
-
+ "strings"
 	"github.com/micro-plat/hydra/component"
 
 	"github.com/micro-plat/hydra/servers"
@@ -58,13 +58,14 @@ func (s *rspServer) Change(u *watcher.ContentChangeArgs) {
 					return
 				}
 				server := newServer(conf, s.registryAddr, s.registry)
-				server.logger.Infof("开始启动...")
+				
+				server.logger.Infof("开始启动[%s]服务...",strings.ToUpper(conf.GetServerType()))
 				if err = server.Start(); err != nil {
 					server.logger.Errorf("启动失败 %v", err)
 					return
 				}
 				s.servers[u.Path] = server
-				server.logger.Infof("启动成功(%s,%d)", server.GetAddress(), len(server.GetServices()))
+				server.logger.Infof("服务启动成功(%s,%s,%d)",strings.ToUpper(conf.GetServerType()), server.GetAddress(), len(server.GetServices()))
 			} else {
 				//修改服务器
 				server := s.servers[u.Path]
