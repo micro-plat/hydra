@@ -9,6 +9,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
+	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -281,4 +283,43 @@ func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time
 		return p[0], nil
 	}
 	return v, err
+}
+
+//GetSignRaw 检查签名原串
+func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string, string) {
+	input := make(map[string]interface{})
+	if len(f) == 0 {
+		input = r.GetRequestMap()
+	} else {
+		for _, k := range f {
+			input[k] = r.GetString(k)
+		}
+	}
+	values := net.NewValues()
+	values.SetMap(input)
+
+	sign := values.Get("sign")
+	if sign == "" {
+		sign = values.Get("signature")
+	}
+	values.Remove("sign")
+	values.Remove("signature")
+	values.Sort()
+	if all {
+		return sign, values.JoinAll(a, b)
+	}
+	return sign, values.Join(a, b)
+
+}
+
+//CheckSign 检查签名是否正确(只值为空不参与签名，键值及每个串之前使用空进行连接)
+func (r *Request) CheckSign(key string, f ...string) bool {
+	org, sign := r.GetSignRaw(false, "", "", f...)
+	return strings.EqualFold(md5.Encrypt(org+key), sign)
+}
+
+//CheckSignAll 检查签名是否正确
+func (r *Request) CheckSignAll(key string, a string, b string, f ...string) bool {
+	org, sign := r.GetSignRaw(true, a, b, f...)
+	return strings.EqualFold(md5.Encrypt(org+key), sign)
 }
