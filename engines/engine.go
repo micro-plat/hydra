@@ -118,7 +118,16 @@ func (r *ServiceEngine) UpdateVarConf(conf conf.IServerConf) {
 //GetServices 获取组件提供的所有服务
 func (r *ServiceEngine) GetServices() []string {
 	srvs := r.GetGroupServices(component.GetGroupName(r.GetServerType())...)
-	return srvs
+	nsrvmap := make(map[string]string)
+	nsrvs := make([]string, 0, len(srvs)/2)
+	for _, s := range srvs {
+		if _, ok := nsrvmap[s]; !ok {
+			nsrvmap[s] = s
+			nsrvs = append(nsrvs, s)
+		}
+	}
+	nsrvmap = nil
+	return nsrvs
 }
 
 //Execute 执行外部请求
