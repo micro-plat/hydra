@@ -1,0 +1,13 @@
+[
+    {
+        "type": "file",
+        "level": "All",
+        "path": "./logs/%name/%level_%date.log",
+        "layout": "[%time][%L][%session] %content"
+    },
+    {
+        "type": "stdout",
+        "level": "All",
+        "layout": ""
+    }
+]
