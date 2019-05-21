@@ -37,7 +37,7 @@ func init() {
 
 //RegistryResolver 定义配置文件转换方法
 type RegistryResolver interface {
-	Resolve(servers []string, u string, p string, log *logger.Logger) (IRegistry, error)
+	Resolve(servers []string, u string, p string, log logger.ILogging) (IRegistry, error)
 }
 
 var registryResolvers = make(map[string]RegistryResolver)
@@ -63,7 +63,7 @@ func newRegistry(name string, servers []string, u string, p string, log logger.I
 	_, value, err := registryMap.SetIfAbsentCb(key, func(input ...interface{}) (interface{}, error) {
 		rsvr := input[0].(RegistryResolver)
 		srvs := input[1].([]string)
-		log := input[2].(*logger.Logger)
+		log := input[2].(logger.ILogging)
 		return rsvr.Resolve(srvs, u, p, log)
 	}, resolver, servers, log)
 	if err != nil {

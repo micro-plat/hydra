@@ -14,7 +14,7 @@ type zkRegistry struct {
 }
 
 //Resolve 根据配置生成zookeeper客户端
-func (z *zkRegistry) Resolve(servers []string, u string, p string, log *logger.Logger) (registry.IRegistry, error) {
+func (z *zkRegistry) Resolve(servers []string, u string, p string, log logger.ILogging) (registry.IRegistry, error) {
 	if len(servers) == 0 {
 		return nil, fmt.Errorf("未指定zk服务器地址")
 	}

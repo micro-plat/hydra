@@ -39,7 +39,7 @@ type ZookeeperClient struct {
 	timeout   time.Duration
 	conn      *zk.Conn
 	eventChan <-chan zk.Event
-	Log       *logger.Logger
+	Log       logger.ILogging
 	useCount  int32
 	isConnect bool
 	once      sync.Once
@@ -59,7 +59,7 @@ func New(servers []string, timeout time.Duration, opts ...Option) (*ZookeeperCli
 }
 
 //NewWithLogger 连接到Zookeeper服务器
-func NewWithLogger(servers []string, timeout time.Duration, logger *logger.Logger, opts ...Option) (*ZookeeperClient, error) {
+func NewWithLogger(servers []string, timeout time.Duration, logger logger.ILogging, opts ...Option) (*ZookeeperClient, error) {
 	client := &ZookeeperClient{servers: servers, timeout: timeout, useCount: 0}
 	client.CloseCh = make(chan struct{})
 	client.Log = logger
@@ -90,7 +90,7 @@ func (client *ZookeeperClient) Connect() (err error) {
 			}
 		}
 		client.conn = conn
-		client.conn.SetLogger(&zkLogger{logger: client.Log})
+		client.conn.SetLogger(client.Log)
 		client.eventChan = eventChan
 		go client.eventWatch()
 	}
