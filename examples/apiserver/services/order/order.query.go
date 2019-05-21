@@ -19,9 +19,10 @@ type QueryHandler struct {
 func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 	return &QueryHandler{container: container}
 }
-func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
-	return nil
-}
+
+// func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
+// 	return "success"
+// }
 func (u *QueryHandler) GetHandle(ctx *context.Context) (r interface{}) {
 	tp := ctx.Request.GetInt("t", 0)
 	ctx.Response.SetContentType(context.ContentTypes[tp])

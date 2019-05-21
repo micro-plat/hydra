@@ -169,10 +169,20 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 
 	//注册get,post,put,delete,handle服务
 	found := false
+	hasHandle := false
+	switch h.(type) {
+	case Handler:
+		r.registerAddService(name, group, h)
+		found = true
+		hasHandle = true
+	}
 	switch handler := h.(type) {
 	case GetHandler:
 		var f ServiceFunc = handler.GetHandle
 		r.registerAddService(registry.Join(name, "get"), group, f)
+		if !hasHandle {
+			r.registerAddService(name, group, f)
+		}
 		found = true
 	}
 	switch handler := h.(type) {
@@ -191,11 +201,6 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	case DeleteHandler:
 		var f ServiceFunc = handler.DeleteHandle
 		r.registerAddService(registry.Join(name, "delete"), group, f)
-		found = true
-	}
-	switch h.(type) {
-	case Handler:
-		r.registerAddService(name, group, h)
 		found = true
 	}
 
