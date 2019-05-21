@@ -496,6 +496,23 @@ func (r *StandardComponent) Close() error {
 	return nil
 }
 
+func (r *StandardComponent) GetRegistryNames(groups ...string) []string {
+	srvs := r.GetGroupServices(groups...)
+	nsvs := make([]string, 0, len(srvs)/3)
+	for _, srv := range srvs {
+		if strings.HasSuffix(srv, "/get") ||
+			strings.HasSuffix(srv, "/post") ||
+			strings.HasSuffix(srv, "/put") ||
+			strings.HasSuffix(srv, "/delete") ||
+			strings.HasSuffix(srv, "/options") {
+			continue
+		}
+		nsvs = append(nsvs, srv)
+
+	}
+	return nsvs
+}
+
 //GetGroupName 获取分组类型[api,rpc > micro mq,cron > flow, web > page,others > customer]
 func GetGroupName(serverType string) []string {
 	switch serverType {
