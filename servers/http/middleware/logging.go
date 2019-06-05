@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ func Logging(conf *conf.MetadataConf) gin.HandlerFunc {
 		setUUID(ctx, uuid)
 		log := logger.GetSession(conf.Name, uuid)
 		log.Info(conf.Type+".request", ctx.Request.Method, p, "from", ctx.ClientIP())
+		log.SetTag("biz", strings.Replace(strings.Trim(ctx.Request.URL.Path, "/"), "/", "_", -1))
 		setLogger(ctx, log)
 		ctx.Next()
 
