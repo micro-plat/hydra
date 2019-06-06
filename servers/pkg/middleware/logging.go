@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -18,6 +19,7 @@ func Logging(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 		setUUID(ctx, uuid)
 		log := logger.GetSession(conf.Name, uuid)
 		log.Info(conf.Type+".request:", conf.Name, ctx.Request.GetMethod(), p, "from", ctx.ClientIP())
+		log.SetTag("biz", strings.Replace(strings.Trim(ctx.Request.GetService(), "/"), "/", "_", -1))
 		setLogger(ctx, log)
 		ctx.Next()
 
