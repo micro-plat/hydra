@@ -1,24 +1,23 @@
 package db
 
 import (
-	"time"
-
 	"github.com/micro-plat/lib4go/types"
 )
 
 type IQueryRow interface {
-	GetString(name string) string
-	GetInt(name string, def ...int) int
-	GetInt64(name string, def ...int64) int64
-	GetFloat32(name string, def ...float32) float32
-	GetFloat64(name string, def ...float64) float64
-	Has(name string) bool
-	GetMustString(name string) (string, bool)
-	GetMustInt(name string) (int, bool)
-	GetMustFloat32(name string) (float32, bool)
-	GetMustFloat64(name string) (float64, bool)
-	GetDatetime(name string, format ...string) (time.Time, error)
-	ToStruct(o interface{}) error
+	types.IXMap
+	// GetString(name string) string
+	// GetInt(name string, def ...int) int
+	// GetInt64(name string, def ...int64) int64
+	// GetFloat32(name string, def ...float32) float32
+	// GetFloat64(name string, def ...float64) float64
+	// Has(name string) bool
+	// GetMustString(name string) (string, bool)
+	// GetMustInt(name string) (int, bool)
+	// GetMustFloat32(name string) (float32, bool)
+	// GetMustFloat64(name string) (float64, bool)
+	// GetDatetime(name string, format ...string) (time.Time, error)
+	// ToStruct(o interface{}) error
 }
 
 //QueryRow 查询的数据行

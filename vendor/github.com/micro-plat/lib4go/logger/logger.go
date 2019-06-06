@@ -242,11 +242,11 @@ func (logger *Logger) Println(content ...interface{}) {
 
 }
 func (logger *Logger) logfmt(f string, level string, content ...interface{}) {
-	event := NewLogEvent(logger.names, level, logger.sessions, fmt.Sprintf(f, content...), nil, atomic.AddInt64(&logger.index, 1))
+	event := NewLogEvent(logger.names, level, logger.sessions, fmt.Sprintf(f, content...), logger.tags, atomic.AddInt64(&logger.index, 1))
 	loggerEventChan <- event
 }
 func (logger *Logger) log(level string, content ...interface{}) {
-	event := NewLogEvent(logger.names, level, logger.sessions, getString(content...), nil, atomic.AddInt64(&logger.index, 1))
+	event := NewLogEvent(logger.names, level, logger.sessions, getString(content...), logger.tags, atomic.AddInt64(&logger.index, 1))
 	loggerEventChan <- event
 }
 func logNow() {

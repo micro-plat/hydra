@@ -16,7 +16,7 @@ func init() {
 //QueryStringToMap 将URL查询字符串中的参数转换成map
 func QueryStringToMap(urlQuery string) (result map[string]interface{}, err error) {
 	index := strings.IndexAny(urlQuery, "?")
-	if index == -1 || index >= len(urlQuery)-1 {
+	if index >= len(urlQuery)-1 {
 		return
 	}
 	values, err := url.ParseQuery(urlQuery[index+1:])
