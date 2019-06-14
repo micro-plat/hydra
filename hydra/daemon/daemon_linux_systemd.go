@@ -212,8 +212,8 @@ PIDFile=/var/run/{{.Name}}.pid
 ExecStartPre=rm -f /var/run/{{.Name}}.pid
 WorkingDirectory={{.WorkDir}}
 ExecStart={{.Path}} run {{.Args}}
-Restart=on-success
-
+Restart=on-failure
+RestartSec=50s
 
 
 [Install]
