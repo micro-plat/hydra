@@ -82,7 +82,7 @@ type ILogging interface {
 
 //ILogger 日志接口
 type ILogger interface {
-	SetTag(name string, value string)
+	// SetTag(name string, value string)
 	ILogging
 	GetSessionID() string
 }
