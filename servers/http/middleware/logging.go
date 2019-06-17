@@ -21,8 +21,7 @@ func Logging(conf *conf.MetadataConf) gin.HandlerFunc {
 		}
 		uuid := getUUID(ctx)
 		setUUID(ctx, uuid)
-		log := logger.GetSession(conf.Name, uuid)
-		log.SetTag("biz", strings.Replace(strings.Trim(ctx.Request.URL.Path, "/"), "/", "_", -1))
+		log := logger.GetSession(conf.Name, uuid, "biz", strings.Replace(strings.Trim(ctx.Request.URL.Path, "/"), "/", "_", -1))
 		log.Info(conf.Type+".request", ctx.Request.Method, p, "from", ctx.ClientIP())
 		setLogger(ctx, log)
 		ctx.Next()
