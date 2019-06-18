@@ -30,5 +30,4 @@ func Logging(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 			log.Error(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start), v)
 		}
 	}
-
 }

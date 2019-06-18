@@ -9,10 +9,10 @@ hydra['haɪdrə]致力于提供统一的，丰富功能的后端开发框架，�
 
 
 * 后端一体化框架, 支持6+服务器类型
-* 微服务的基础设施, 服务注册发现，熔断降级，监控与配置管理
-* 多集群模式支持，对等，主备等
+* 微服务的基础设施, 服务注册发现，熔断降级，集成监控与统一配置管理
+* 多集群模式支持，对等，主备，分片等
 * 丰富的后端库支持redis,memcache,activieMQ,mqtt,influxdb,mysql,oracle,elasticsearch,jwt等等
-* 跨平台支持,可运行在(`linux`,`macOS 10.9+`,`windows 7+`)
+* 跨平台支持(linux,macOS 10.9+,windows 7+)
 * 20+线上项目实践经验
 * 全golang原生实现
 
@@ -51,14 +51,14 @@ func hello(ctx *context.Context) (r interface{}) {
 }
 ```
 
-2.  编译安装
+2. 编译生成服务
 
 ```sh
 go install hello
 
 ```
 
-3. 安装服务
+3. 安装本地服务和生成注册中心配置
 ```sh
 hello install
 ```
@@ -79,7 +79,7 @@ curl http://localhost:8090/hello
 
 以上代码可理解为:
   
-  1. 使用`文件系统`(`fs://`)作为注册中心, `../`作为注册中心的根目录
+  1. 使用`文件系统`(`fs://`)作为服务的注册中心和配置中心, `../`作为服务的跟目录
   2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根路径
   3. 将传入的`hello`函数作为`api`服务注册到服务器
   4. 执行服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{}) `
