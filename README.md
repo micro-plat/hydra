@@ -79,7 +79,7 @@ curl http://localhost:8090/hello
 
 以上代码可理解为:
   
-  1. 使用`文件系统`(`fs://`)作为服务的注册中心和配置中心, `../`作为服务的跟目录
+  1. 使用`文件系统`(`fs://`)作为服务的注册中心和配置中心, `../`作为服务的跟路径
   2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根路径
   3. 将传入的`hello`函数作为`api`服务注册到服务器
   4. 执行服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{}) `
