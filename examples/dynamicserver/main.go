@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 
@@ -17,34 +18,24 @@ func main() {
 		hydra.WithServerTypes("mqc-api"),
 		hydra.WithDebug())
 
-	app.Conf.MQC.SetSubConf("server", `
-	{
-		"proto":"redis",
-		"addrs":[
-				"192.168.0.111:6379",
-				"192.168.0.112:6379"
-		],
-		"db":1,
-		"dial_timeout":10,
-		"read_timeout":10,
-		"write_timeout":10,
-		"pool_size":10
-}
-`)
+	app.Initializing(func(c component.IContainer) error {
+		if _, err := c.GetQueue(); err != nil {
+			return err
+		}
+		return nil
+	})
 
-app.Conf.Plat.SetVarConf("queue", "queue", `
-{
-	"proto":"redis",
-	"addrs":[
-			"192.168.0.111:6379",
-			"192.168.0.112:6379"
-	],
-	"db":1,
-	"dial_timeout":10,
-	"read_timeout":10,
-	"write_timeout":10,
-	"pool_size":10
-}
+	app.Conf.MQC.SetSubConf("server", `{
+			"proto":"mqtt",
+			"address":"192.168.0.222:1883",
+			"userName":"mqtt",
+			"password":"123456"}`)
+
+	app.Conf.Plat.SetVarConf("queue", "queue", `{
+			"proto":"mqtt",
+			"address":"192.168.0.222:1883",
+			"userName":"mqtt",
+			"password":"123456"}
 `)
 	app.SetMQCDynamicQueue(ch)
 	app.Flow("/message/handle", msgHandle)

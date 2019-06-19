@@ -47,6 +47,8 @@ var queueResolvers = make(map[string]IQueueResover)
 
 //Register 注册配置文件适配器
 func Register(proto string, resolver IQueueResover) {
+	defer fmt.Printf("queues:%v\n", queueResolvers)
+	fmt.Println("proto:", proto)
 	if resolver == nil {
 		panic("queue: Register adapter is nil")
 	}

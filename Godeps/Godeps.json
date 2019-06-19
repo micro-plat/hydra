@@ -266,6 +266,10 @@
 			"Rev": "d03a1aea7f111768fc7ac35ca7b8e261f97edfec"
 		},
 		{
+			"ImportPath": "github.com/micro-plat/lib4go/queue/mqtt",
+			"Rev": "d03a1aea7f111768fc7ac35ca7b8e261f97edfec"
+		},
+		{
 			"ImportPath": "github.com/micro-plat/lib4go/queue/redis",
 			"Rev": "d03a1aea7f111768fc7ac35ca7b8e261f97edfec"
 		},
