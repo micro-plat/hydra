@@ -116,7 +116,7 @@ func main() {
 
 > 参数说明
 
-- `address`: 服务器启动地址，合法格式为:`[ip或localhost]:port`，未配置默值为`:8090`，即：本机所有 ip 的 8090 均可访问此服务器
+- `address`: 服务器启动 ip 和端口，合法格式为:`[ip或localhost]:port`，未配置默值为`:8090`，即：本机所有 ip 的 8090 均可访问此服务器。
 
 - `trace`:显示 response 响应信息
 
