@@ -10,7 +10,7 @@ func main() {
 	app := hydra.NewApp(
 		hydra.WithPlatName("myplat"),
 		hydra.WithSystemName("helloserver"),
-
+		hydra.WithServerTypes("api"), //服务器类型为http api
 		hydra.WithDebug(),
 	)
 
@@ -18,12 +18,11 @@ func main() {
 	app.Start()
 }
 
-type Input struct {
-	Id int `json:"id" form:"id"`
+type result struct {
+	Name string `json:"name" xml:"name"`
 }
 
 func helloWorld(ctx *context.Context) (r interface{}) {
-	var input Input
-	ctx.Request.Bind(&input)
-	return &input
+	// ctx.Response.SetXML()
+	return &result{Name: "hello"}
 }

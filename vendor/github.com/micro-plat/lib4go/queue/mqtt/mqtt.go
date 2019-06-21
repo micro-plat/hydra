@@ -166,6 +166,5 @@ func (s *redisResolver) Resolve(address []string, conf string) (queue.IQueue, er
 	return New(address, conf)
 }
 func init() {
-	fmt.Println("mqtt.init")
 	queue.Register("mqtt", &redisResolver{})
 }

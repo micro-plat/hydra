@@ -225,7 +225,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 						if !ok {
 							break START
 						}
-						go callback(message)
+						callback(message)
 					}
 				}
 			}()
