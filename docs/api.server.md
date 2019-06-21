@@ -133,6 +133,6 @@ func main() {
 
 ```
 
-\*http 请求超时时长
+- http 请求超时时长
 
 > rTimeout，wTimeout：http 请求读写超时时长,默认 10 秒
