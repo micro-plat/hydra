@@ -1,5 +1,7 @@
 ## API 服务器示例
 
+##### 一、返回结果为 json 或 xml
+
 ```go
 
 package main
@@ -88,11 +90,49 @@ func (u *OrderHandler) RequestHandle(ctx *context.Context) (r interface{}) {
 <order><order_no>89769037987666</order_no><pid>5989234</pid><amount>10</amount></order>
 
 
-~/work/bin\$ curl http://localhost:8090/order/request?result_type=json
+~/work/bin$ curl http://localhost:8090/order/request?result_type=json
 {"order_no":"89769037987666","pid":5989234,"amount":10}
 
 ~/work/bin$ curl http://localhost:8090/order/request
 {"order_no":"89769037987666","pid":5989234,"amount":10}
+```
 
+##### 二、服务器参数配置
+
+```go
+func main() {
+	app := hydra.NewApp(
+		hydra.WithPlatName("myplat"),
+		hydra.WithSystemName("helloserver"),
+		hydra.WithServerTypes("api"), //服务器类型为http api
+		hydra.WithDebug(),
+    )
+    app.Conf.API.SetMainConf(`{"address":":9098","trace":true,"rTimeout":"30","wTimeout":30}`)
+
+	app.Micro("/order", NewOrderHandler)
+	app.Start()
+}
+```
+
+> 参数说明
+
+- `address`: 服务器启动地址，合法格式为:`[ip或localhost]:port`
+
+- `trace`:显示 response 响应信息
+
+> 未设置 trace 参数或 trace 参数值为 false
+
+```sh
+[2019/06/21 14:44:33.115273][i][158ebae99]api.response GET /order/request 200  276.616µs
+```
+
+> trace 参数值设置为 true
+
+```sh
+[2019/06/21 14:44:33.115273][i][158ebae99]api.response GET /order/request 200  276.616µs {"order_no":"89769037987666","pid":5989234,"amount":10}
 
 ```
+
+\*http 请求超时时长
+
+> rTimeout，wTimeout：http 请求读写超时时长,默认 10 秒

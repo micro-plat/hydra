@@ -15,6 +15,8 @@ func main() {
 		hydra.WithDebug(),
 	)
 
+	app.Conf.API.SetMainConf(`{"address":":9098","trace":true}`)
+
 	app.Micro("/order", NewOrderHandler)
 	app.Start()
 }
