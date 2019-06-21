@@ -9,6 +9,7 @@ type Input struct {
 	ID   string `form:"id" json:"id" valid:"int,required"` //绑定输入参数，并验证类型否是否必须输入
 	Name string `form:"name" json:"name"`
 }
+
 type BindHandler struct {
 	container component.IContainer
 }
