@@ -120,13 +120,13 @@ func main() {
 
 - `trace`:显示 response 响应信息
 
-> 未设置 trace 参数或 trace 参数值为 false
+> 未设置 trace 或 trace 值为 false，日志如下:
 
 ```sh
 [2019/06/21 14:44:33.115273][i][158ebae99]api.response GET /order/request 200  276.616µs
 ```
 
-> trace 参数值设置为 true
+> trace 值为 true，日志如下:
 
 ```sh
 [2019/06/21 14:44:33.115273][i][158ebae99]api.response GET /order/request 200  276.616µs {"order_no":"89769037987666","pid":5989234,"amount":10}
