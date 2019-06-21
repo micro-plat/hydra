@@ -1,6 +1,6 @@
 ## API 服务器示例
 
-##### 一、返回结果为 json 或 xml
+#### 一、返回类型
 
 ```go
 
@@ -97,7 +97,7 @@ func (u *OrderHandler) RequestHandle(ctx *context.Context) (r interface{}) {
 {"order_no":"89769037987666","pid":5989234,"amount":10}
 ```
 
-##### 二、服务器参数配置
+#### 二、参数配置
 
 ```go
 func main() {
