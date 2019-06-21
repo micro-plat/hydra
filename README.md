@@ -101,3 +101,5 @@ curl http://localhost:8090/hello
 [服务注册](https://github.com/micro-plat/hydra/tree/master/docs/service.types.register.md)
 
 [服务启动](https://github.com/micro-plat/hydra/tree/master/docs/service.run.md)
+
+[API 示例](https://github.com/micro-plat/hydra/blob/master/docs/api.server.md)
