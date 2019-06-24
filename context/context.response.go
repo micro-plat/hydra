@@ -1,6 +1,8 @@
 package context
 
 import (
+	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -80,4 +82,45 @@ func (r *Response) IsSuccess() bool {
 
 func (r *Response) SetJWT(data interface{}) {
 	r.Params["__jwt_"] = data
+}
+
+//GetSignRaw 检查签名原串
+func (r *Response) GetSignRaw(all bool, a string, b string, f ...string) (string, string) {
+	input := make(map[string]interface{})
+	if len(f) == 0 {
+		input = r.GetRequestMap()
+	} else {
+		for _, k := range f {
+			input[k] = r.GetString(k)
+		}
+	}
+	values := net.NewValues()
+	values.SetMap(input)
+
+	sign := values.Get("sign")
+	if sign == "" {
+		sign = values.Get("signature")
+	}
+	values.Remove("sign")
+	values.Remove("signature")
+	values.Sort()
+	if all {
+		return sign, values.JoinAll(a, b)
+	}
+	return sign, values.Join(a, b)
+
+}
+
+//MakeSignAll 生成签名串，排序，并将key放到原串最后
+func (r *Response) MakeSignAll(input map[string]interface{}, key string, a string, b string) (string, string) {
+	values := net.NewValues()
+	values.SetMap(input)
+	values.Sort()
+	raw := values.Join(a, b)
+	return md5.Encrypt(raw + key), raw
+}
+
+//MakeSign 生成签名串
+func (r *Response) MakeSign(input map[string]interface{}, key string) (string, string) {
+	return r.MakeSignAll(input, key, "", "")
 }
