@@ -289,7 +289,7 @@ func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time
 func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string, string) {
 	input := make(map[string]interface{})
 	if len(f) == 0 {
-		input = r.GetRequestMap()
+		input, _ = r.GetBodyMap()
 	} else {
 		for _, k := range f {
 			input[k] = r.GetString(k)
