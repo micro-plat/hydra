@@ -31,6 +31,7 @@ type IComponentHandler interface {
 	GetTags(name string) []string
 	SetMQCDynamicQueue(c chan *conf.Queue)
 	GetMQCDynamicQueue() (bool, chan *conf.Queue)
+	GetOrSetMQCDynamicQueue(c chan *conf.Queue) chan *conf.Queue
 	GetRPCTLS() map[string][]string
 	//GetBalancer 获取负载均衡模式
 	GetBalancer() map[string]*rpc.BalancerMode
@@ -419,6 +420,17 @@ func (s *ServiceRegistry) GetMQCDynamicQueue() (bool, chan *conf.Queue) {
 //SetMQCDynamicQueue 动态队列注册消息
 func (s *ServiceRegistry) SetMQCDynamicQueue(c chan *conf.Queue) {
 	s.exts["_mqc_dynamic_queue_notify_func_"] = c
+}
+
+//GetOrSetMQCDynamicQueue 获取或设置动态队列
+func (s *ServiceRegistry) GetOrSetMQCDynamicQueue(c chan *conf.Queue) chan *conf.Queue {
+	e, c := s.GetMQCDynamicQueue()
+	if e {
+		return c
+	}
+	s.SetMQCDynamicQueue(c)
+	return c
+
 }
 
 //Ext 注册扩展
