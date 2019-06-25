@@ -99,6 +99,7 @@ func (s *Values) JoinAll(a string, b string, e ...string) string {
 		buffer.WriteString(v.k)
 		buffer.WriteString(a)
 		buffer.WriteString(v.v)
+		buffer.WriteString(b)
 	}
 	if len(e) > 0 {
 		for i := 0; i < len(e)/2; i++ {
