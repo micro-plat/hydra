@@ -47,7 +47,7 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
 	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
-	hasDynamicQueue, ch := chandler.GetMQCDynamicQueue()
+	hasDynamicQueue, ch := chandler.GetDynamicQueue()
 	h.hasDynamicQueue = hasDynamicQueue
 	if err = h.engine.SetHandler(chandler); err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(chandler); err != nil {
 		return err
 	}
-	hasDynamicQueue, ch := chandler.GetMQCDynamicQueue()
+	hasDynamicQueue, ch := chandler.GetDynamicQueue()
 	w.hasDynamicQueue = hasDynamicQueue
 	if w.server, err = NewMqcServer(cnf.GetServerName(),
 		"",

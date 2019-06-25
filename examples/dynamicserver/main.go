@@ -37,7 +37,7 @@ func main() {
 			"userName":"mqtt",
 			"password":"123456"}
 `)
-	app.SetMQCDynamicQueue(ch)
+	app.SetDynamicQueue(ch)
 	app.Flow("/message/handle", msgHandle)
 	app.Micro("/message/send", send)
 	app.Micro("/consume", consume)
