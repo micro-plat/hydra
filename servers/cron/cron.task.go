@@ -102,6 +102,12 @@ func (m *cronTask) SetResult(status int, result []byte) {
 	m.status = status
 	m.result = result
 }
+func (m *cronTask) Enable() bool {
+	return !m.Disable
+}
+func (m *cronTask) SetDisable() {
+	m.Disable = true
+}
 func (m *cronTask) GetTaskExecutionRecord() (string, error) {
 	data := map[string]interface{}{
 		"name":     m.Name,

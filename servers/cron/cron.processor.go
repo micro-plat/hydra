@@ -82,7 +82,7 @@ func (s *Processor) execute() {
 	})
 }
 func (s *Processor) handle(task iCronTask) error {
-	if s.done {
+	if s.done || !task.Enable() {
 		return nil
 	}
 	if !s.isPause {
@@ -101,6 +101,20 @@ func (s *Processor) handle(task iCronTask) error {
 	}
 	return err
 
+}
+func (s *Processor) Remove(name string) {
+	if name == "" {
+		return
+	}
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	for _, slot := range s.slots {
+		slot.RemoveIterCb(func(k string, value interface{}) bool {
+			task := value.(iCronTask)
+			task.SetDisable()
+			return task.GetName() == name
+		})
+	}
 }
 
 //Add 添加任务
