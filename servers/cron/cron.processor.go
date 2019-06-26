@@ -135,7 +135,10 @@ func (s *Processor) Add(task iCronTask, r bool) (offset int, round int, err erro
 	task.SetRound(round)
 	s.slots[offset].Set(utility.GetGUID(), task)
 	if r {
-		s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
+		if !s.Dispatcher.Find(task.GetService()) {
+			s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
+		}
+
 	}
 	return
 }
