@@ -109,7 +109,6 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 		case task := <-c:
 			task.Name = types.DecodeString(task.Name, "", task.Service, task.Name)
 			if task.Disable {
-
 				s.Debugf("取消定时任务[%s](%s)", task.Name, task.Cron)
 				s.Processor.Remove(task.Name)
 				continue
