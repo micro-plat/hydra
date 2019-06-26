@@ -107,8 +107,11 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 				return
 			}
 		case task := <-c:
+			task.Name = types.DecodeString(task.Name, "", task.Service, task.Name)
 			if task.Disable {
-				s.Processor.Remove(types.DecodeString(task.Name, "", task.Service, task.Name))
+
+				s.Debugf("取消定时任务[%s](%s)", task.Name, task.Cron)
+				s.Processor.Remove(task.Name)
 				continue
 			}
 
@@ -118,7 +121,6 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 				continue
 			}
 
-			task.Name = types.DecodeString(task.Name, "", task.Service, task.Name)
 			if task.Setting == nil {
 				task.Setting = make(map[string]string)
 			}
