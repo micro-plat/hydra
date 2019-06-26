@@ -59,7 +59,7 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 	}
 	var queues conf.Queues
 
-	if _, err = cnf.GetSubObject("queue", &queues); err != nill && err != conf.ErrNoSetting {
+	if _, err = cnf.GetSubObject("queue", &queues); err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("queue:%v", err)
 		return false, err
 	}
