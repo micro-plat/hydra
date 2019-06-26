@@ -95,7 +95,7 @@ func (consumer *RedisConsumer) Consume(queue string, concurrency int, callback f
 					break START
 				case <-unconsumeCh:
 					break START
-				case <-time.After(time.Millisecond * 50):
+				case <-time.After(time.Millisecond * (time.Duration((1000 / nconcurrency / 2)) + 1)):
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
 						message := NewRedisMessage(cmd)
