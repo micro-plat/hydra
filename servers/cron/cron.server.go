@@ -109,7 +109,7 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 		case task := <-c:
 			task.Name = types.DecodeString(task.Name, "", task.Service, task.Name)
 			if task.Disable {
-				s.Debugf("取消定时任务[%s]", task.Name)
+				s.Debugf("[取消定时任务(%s)]", task.Name)
 				s.Processor.Remove(task.Name)
 				continue
 			}
@@ -132,7 +132,7 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 			if _, _, err = s.Processor.Add(ct, true); err != nil {
 				s.Logger.Error("添加cron到任务列表失败:", err)
 			}
-			s.Debugf("注册定时任务[%s](%s)", task.Cron, task.Name)
+			s.Debugf("[注册定时任务(%s)(%s)]", task.Cron, task.Name)
 		}
 
 	}
