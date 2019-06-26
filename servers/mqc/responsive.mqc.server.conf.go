@@ -77,7 +77,7 @@ func (w *MqcResponsiveServer) SetConf(restart bool, conf conf.IServerConf) (err 
 	var ok bool
 	//设置task
 	if restart {
-		if _, err := SetQueues(false, w.engine, w.server, conf, map[string]interface{}{
+		if _, err := SetQueues(w.engine, w.server, conf, map[string]interface{}{
 			"__get_sharding_index_": func() (int, int) {
 				return w.shardingIndex, w.shardingCount
 			},

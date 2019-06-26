@@ -46,22 +46,17 @@ func SetTasks(engine servers.IRegistryEngine, set ITasks, cnf conf.IServerConf, 
 	}
 
 	var tasks conf.Tasks
-	if _, err = cnf.GetSubObject("task", &tasks); err == conf.ErrNoSetting {
+	if _, err = cnf.GetSubObject("task", &tasks); err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("task:%v", err)
 		return false, err
 	}
-	if err != nil {
-		return false, err
-	}
-	if len(tasks.Tasks) == 0 {
-		// err = errors.New("task:未配置")
-		return true, nil
+	if len(tasks.Tasks) > 0 {
+		if b, err := govalidator.ValidateStruct(&tasks); !b {
+			err = fmt.Errorf("task配置有误:%v", err)
+			return false, err
+		}
 	}
 
-	if b, err := govalidator.ValidateStruct(&tasks); !b {
-		err = fmt.Errorf("task配置有误:%v", err)
-		return false, err
-	}
 	ntasks := make([]*conf.Task, 0, len(tasks.Tasks))
 	for _, task := range tasks.Tasks {
 		if task.Disable {
