@@ -1,7 +1,6 @@
 package cron
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -55,8 +54,8 @@ func SetTasks(engine servers.IRegistryEngine, set ITasks, cnf conf.IServerConf, 
 		return false, err
 	}
 	if len(tasks.Tasks) == 0 {
-		err = errors.New("task:未配置")
-		return false, err
+		// err = errors.New("task:未配置")
+		return true, nil
 	}
 
 	if b, err := govalidator.ValidateStruct(&tasks); !b {
