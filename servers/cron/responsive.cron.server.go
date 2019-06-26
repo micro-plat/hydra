@@ -93,6 +93,7 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.SetConf(true, cnf); err != nil {
 		return
 	}
+
 	go w.server.Dynamic(w.engine, chandler.GetDynamicCron())
 
 	if err = w.Start(); err == nil {
