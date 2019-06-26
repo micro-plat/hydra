@@ -34,7 +34,11 @@ func (s *MqcServer) AddRouters(p *Processor) {
 			s.Logger.Debugf("[订阅 队列(%s)消息]", r.Queue)
 			handler := r.Handler.(dispatcher.HandlerFunc)
 			p.handles[r.Name] = handler
-			p.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
+			path := fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/"))
+			if !s.Dispatcher.Find(path) {
+				p.Dispatcher.Handle(strings.ToUpper("GET"), path, handler)
+			}
+
 		}
 	}
 }
