@@ -14,20 +14,19 @@ import (
 
 //MqcResponsiveServer rpc 响应式服务器
 type MqcResponsiveServer struct {
-	server          *MqcServer
-	engine          servers.IRegistryEngine
-	registryAddr    string
-	pubs            []string
-	currentConf     conf.IServerConf
-	closeChan       chan struct{}
-	hasDynamicQueue bool
-	once            sync.Once
-	done            bool
-	shardingIndex   int
-	shardingCount   int
-	master          bool
-	pubLock         sync.Mutex
-	restarted       bool
+	server        *MqcServer
+	engine        servers.IRegistryEngine
+	registryAddr  string
+	pubs          []string
+	currentConf   conf.IServerConf
+	closeChan     chan struct{}
+	once          sync.Once
+	done          bool
+	shardingIndex int
+	shardingCount int
+	master        bool
+	pubLock       sync.Mutex
+	restarted     bool
 	*logger.Logger
 	mu sync.Mutex
 }
@@ -47,8 +46,6 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 		return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
 	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
-	hasDynamicQueue, ch := chandler.GetDynamicQueue()
-	h.hasDynamicQueue = hasDynamicQueue
 	if err = h.engine.SetHandler(chandler); err != nil {
 		return nil, err
 	}
@@ -64,9 +61,8 @@ func NewMqcResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *l
 	if err = h.SetConf(true, h.currentConf); err != nil {
 		return
 	}
-	if hasDynamicQueue {
-		go h.server.Dynamic(h.engine, ch)
-	}
+	go h.server.Dynamic(h.engine, chandler.GetDynamicQueue())
+
 	return
 }
 
@@ -86,8 +82,6 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.engine.SetHandler(chandler); err != nil {
 		return err
 	}
-	hasDynamicQueue, ch := chandler.GetDynamicQueue()
-	w.hasDynamicQueue = hasDynamicQueue
 	if w.server, err = NewMqcServer(cnf.GetServerName(),
 		"",
 		"",
@@ -100,9 +94,8 @@ func (w *MqcResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.SetConf(true, cnf); err != nil {
 		return
 	}
-	if hasDynamicQueue {
-		w.server.Dynamic(w.engine, ch)
-	}
+
+	go w.server.Dynamic(w.engine, chandler.GetDynamicQueue())
 	if err = w.Start(); err == nil {
 		w.currentConf = cnf
 		w.restarted = true

@@ -45,7 +45,8 @@ func NewCronResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *
 	if err != nil {
 		return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
-	if err = h.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
+	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	if err = h.engine.SetHandler(chandler); err != nil {
 		return nil, err
 	}
 	h.server, err = NewCronServer(h.currentConf.GetServerName(),
@@ -60,6 +61,7 @@ func NewCronResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *
 	if err != nil {
 		return
 	}
+	go h.server.Dynamic(h.engine, chandler.GetDynamicCron())
 	return
 }
 
@@ -76,7 +78,8 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err != nil {
 		return fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
 	}
-	if err = w.engine.SetHandler(cnf.Get("__component_handler_").(component.IComponentHandler)); err != nil {
+	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	if err = w.engine.SetHandler(chandler); err != nil {
 		return err
 	}
 	w.server, err = NewCronServer(w.currentConf.GetServerName(),
@@ -90,6 +93,8 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	if err = w.SetConf(true, cnf); err != nil {
 		return
 	}
+	go w.server.Dynamic(w.engine, chandler.GetDynamicCron())
+
 	if err = w.Start(); err == nil {
 		w.currentConf = cnf
 		w.restarted = true

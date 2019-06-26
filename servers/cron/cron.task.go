@@ -22,6 +22,8 @@ type iCronTask interface {
 	AddExecuted()
 	NextTime(time.Time) time.Time
 	GetHandler() interface{}
+	Enable() bool
+	SetDisable()
 	GetTaskExecutionRecord() (string, error)
 	SetResult(status int, result []byte)
 	dispatcher.IRequest
