@@ -35,7 +35,7 @@ func (s *MqcServer) AddRouters(p *Processor) {
 			handler := r.Handler.(dispatcher.HandlerFunc)
 			p.handles[r.Name] = handler
 			path := fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/"))
-			if !s.Dispatcher.Find(path) {
+			if !p.Dispatcher.Find(path) {
 				p.Dispatcher.Handle(strings.ToUpper("GET"), path, handler)
 			}
 
