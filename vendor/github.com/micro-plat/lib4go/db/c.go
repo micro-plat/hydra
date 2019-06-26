@@ -30,10 +30,15 @@ func CreateDB(db IDB, dir string) error {
 		if sql != "" {
 			if _, q, _, err := db.Execute(sql, map[string]interface{}{}); err != nil {
 				c := err.Error()
+				exists := false
 				for _, code := range errCodes {
-					if !strings.Contains(c, code) {
-						return fmt.Errorf("执行SQL失败： %v %s", err, q)
+					if strings.Contains(c, code) {
+						exists = true
+						break
 					}
+				}
+				if !exists {
+					return fmt.Errorf("执行SQL失败： %v %s", err, q)
 				}
 			}
 		}
