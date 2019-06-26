@@ -111,6 +111,7 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 				s.Processor.Remove(types.DecodeString(task.Name, "", task.Service, task.Name))
 				continue
 			}
+
 			if b, err := govalidator.ValidateStruct(task); !b {
 				err = fmt.Errorf("task配置有误:%v", err)
 				s.Logger.Error(err)
@@ -130,6 +131,7 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 			if _, _, err = s.Processor.Add(ct, true); err != nil {
 				s.Logger.Error("添加cron到任务列表失败:", err)
 			}
+			s.Debugf("注册定时任务[%s](%s)", task.Name, task.Cron)
 		}
 
 	}
