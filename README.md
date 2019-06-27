@@ -99,6 +99,7 @@ curl http://localhost:8090/hello
 
 [hydra微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started.md)
 
+[hydra服务开发规范](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_01.md)
 
  [服务配置与安装](https://github.com/micro-plat/hydra/tree/master/docs/service.conf.install.md)
 
