@@ -12,7 +12,7 @@ hydra为api接口，消息服务，定时任务，RPC服务,websocket等提供�
 　　go get github.com/micro-plat/hydra
 ``` 
 
-#### 1. 构建API接口服务
+### 1. 构建API接口服务
 
 hydra提供的是完整的服务解决方案。包括启动，配置初始化，本地服务安装、启动，优雅关闭，日志打印等，所以需要将hydra提供的hydra.MicroApp直接集成到系统，调用Start()启动服务器。对外提供的服务则按照hydra的规范实现，并注册。
 
@@ -22,7 +22,7 @@ hydra提供的是完整的服务解决方案。包括启动，配置初始化，
 
 |-------- main.go               
 
-#####  1. `main.go`文件中添加如下内容:
+####  1. `main.go`文件中添加如下内容:
 
 ```go
 package main
@@ -36,12 +36,12 @@ func main() {
 	app.Start()
 }
 ```
-##### 2. 使用go命令安装服务
+#### 2. 使用go命令安装服务
 ```sh
   go install github.com/micro-plat/hydra/quickstart/demo/apiserver01
 ```
 
-##### 3. 查看服务帮助信息
+#### 3. 查看服务帮助信息
   
 ```sh
 ~/work/bin$ apiserver01 -h
@@ -103,7 +103,7 @@ OPTIONS:
                                 该参数可从环境变量中获取，环境变量名为: [$hydra-rs]
 ```
 
-##### 4. 配置信息安装:
+#### 4. 配置信息安装:
 
 ```sh
  ~/work/bin$ sudo apiserver01 install -r zk://192.168.0.109 -n /mall/apiserver/api/test
@@ -118,7 +118,7 @@ Install apiserver01:					[  OK  ]
 -n参数，由于代码中未指定`平台名称`，`系统名称`，`服务类型`,`集群名称`。故运行时需通过`-n`指定，格式为：`/平台名称/系统名称/服务器类型/集群名称`。可在初始化MicroApp时指定以上参数(参见示例`apiserver02`)，重新执行`install -h`命令，查看参数变化。
 
 
-##### 5. 运行服务:
+#### 5. 运行服务:
 
 ```sh
 ~/work/bin$ apiserver01 run -r zk://192.168.0.109 -n /mall/apiserver/api/test
@@ -157,7 +157,7 @@ Escape character is '^]'.
 
 ```
 
-##### 6. 通过start命令启动
+#### 6. 通过start命令启动
  通过第4步安装显示信息`Install apiserver01:					[  OK  ]`说明服务已安装到本地。
 ubuntu查看已安装服务的配置文件
 ```sh
@@ -224,7 +224,7 @@ Stopping apiserver01:					[  OK  ]
 
 
 
-##### 7. 注册服务
+#### 7. 注册服务
 通过以上示例清楚服务器的创建，安装，启动，停止等功能。但还不能对外提供有用的服务。
 修改代码如下 (可参考示例`apiserver03`):
 
