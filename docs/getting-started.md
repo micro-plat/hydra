@@ -290,3 +290,100 @@ func hello(ctx *context.Context) (r interface{}) {
 
 由于接口中未处理任何逻辑，处理时长只有0.295毫秒
 
+#### 8. 修改API启动端口
+
+上述示例中未指定服务器端口，默认是以`:8090`进行启动。可通过以下代码指定端口号为`:8091`
+
+ ```go
+package main
+
+import (
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/hydra"
+)
+
+func main() {
+	app := hydra.NewApp()
+    app.API("/hello", hello)
+    app.Conf.API.SetMainConf(`{"address":":8091"}`)
+	app.Start()
+}
+
+func hello(ctx *context.Context) (r interface{}) {
+	return "hello world"
+}
+```
+> app.Conf中提供了各服务器配置指定函数
+
+> 目前只支持`json`串方式指定
+
+重新编译安装。由于更改了服务器配置，需重新调用`install`命令进行安装
+
+```go
+~/work/bin$ apiserver01 install -r zk://192.168.0.109 -n /mall/apiserver/api/test
+	-> 创建注册中心配置数据?如存在则不安装(1),如果存在则覆盖(2),删除所有配置并重建(3),退出(n|no):2
+		修改配置: /mall/apiserver/api/test/conf
+```
+重新运行服务
+```sh
+~/work/bin$ apiserver01 run -r zk://192.168.0.109 -n /mall/apiserver/api/test
+[2019/06/27 13:50:44.17175][i][a2999c2c6]Connected to 192.168.0.109:2181
+[2019/06/27 13:50:44.22069][i][a2999c2c6]Re-submitting `0` credentials after reconnect
+[2019/06/27 13:50:44.22063][i][a2999c2c6]Authenticated: id=246395503264334049, timeout=4000
+[2019/06/27 13:50:44.66213][i][a2999c2c6]初始化 /mall/apiserver/api/test
+[2019/06/27 13:50:44.74639][i][82d7383b1]开始启动[API]服务...
+[2019/06/27 13:50:44.75079][d][82d7383b1][未启用 header设置]
+[2019/06/27 13:50:44.75083][d][82d7383b1][未启用 熔断设置]
+[2019/06/27 13:50:44.75092][d][82d7383b1][未启用 ajax请求限制设置]
+[2019/06/27 13:50:44.75068][i][82d7383b1][启用 静态文件]
+[2019/06/27 13:50:44.75087][d][82d7383b1][未启用 jwt设置]
+[2019/06/27 13:50:44.75097][d][82d7383b1][未启用 metric设置]
+[2019/06/27 13:50:44.75101][d][82d7383b1][未启用 host设置]
+[2019/06/27 13:50:44.598265][i][82d7383b1]服务启动成功(API,http://192.168.4.121:8091,1)
+```
+服务器端口已经发生变化
+
+
+#### 9. 查看服务器配置
+可通过`conf`命令或`ZooInspector`工具进行查看。这里只介绍`conf`命令:
+
+```sh
+~/work/bin$ apiserver01 conf -r zk://192.168.0.109 -n /mall/apiserver/api/test
+mall
+  └─apiserver
+    └─api
+      └─test
+        └─[1]conf
+请输入数字序号 > 
+```
+注册中心只有一个配置即/mall/apiserver/api/test/conf
+输入配置前的序号查看内容:
+
+```sh
+~/work/bin$ apiserver01 conf -r zk://192.168.0.109 -n /mall/apiserver/api/test
+mall
+  └─apiserver
+    └─api
+      └─test
+        └─[1]conf
+请输入数字序号 > 1
+{
+    "address": ":8091"
+}
+```
+内容即是通过代码指定的启动地址信息。
+
+
+#### 总结
+
+1. 每个服务都是hydra.MicroApp实例，调用Start()即可获取hydra提供的功能
+   
+2. 首次运行需使用`install`或`registry`命令，初始化配置数据
+
+3. 通过app.Conf中提供的函数进行常用配置编写。配置变更后需重新调用`install`或`registry`命令更新配置。通过`conf`命令可以查看配置  
+
+4. `run`命令日志会输出到终端，`start`是后台运行。所以开发，测试时一般用`run`启动，生产环境用`start`启动
+
+5. 日志文件存储于../logs/目录，修改日志输出目录或内容，可直接修改../conf/logger.json文件
+
+6. 服务启动必须指定`平台名称`，`系统名称`，`服务类型`,`集群名称`,`注册中心地址`。这些参数可以通过代码指定，也可以启动参数指定

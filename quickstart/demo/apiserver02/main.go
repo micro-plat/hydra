@@ -7,7 +7,7 @@ import (
 func main() {
 	app := hydra.NewApp(
 		hydra.WithPlatName("mall"),
-		hydra.WithSystemName("apiserver02"),
+		hydra.WithSystemName("apiserver"),
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 
