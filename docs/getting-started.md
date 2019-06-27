@@ -285,6 +285,8 @@ func hello(ctx *context.Context) (r interface{}) {
 [2019/06/27 12:24:02.567139][i][cdde16581]api.response GET /hello 200  295.959µs 
 ```
 > api.request 接口请求。请求方式，请求地址，及来源IP
+
 > api.response 接口响应。请求方式，请求地址，状态码，请求处理的总时长
+
 由于接口中未处理任何逻辑，处理时长只有0.295毫秒
 
