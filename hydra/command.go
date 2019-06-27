@@ -32,37 +32,37 @@ func (m *MicroApp) getCommands() []cli.Command {
 	return []cli.Command{
 		{
 			Name:   "run",
-			Usage:  "运行服务",
+			Usage:  "运行服务。前台运行，日志直接输出到客户端，输入ctl+c命令时退出服务",
 			Flags:  m.getStartFlags("run"),
 			Action: m.action,
 		}, {
 			Name:   "start",
-			Usage:  "启动服务",
+			Usage:  "启动服务。后台运行服务，日志存入本地文件或日志中心。异常退出或服务器重启会自动启动",
 			Action: m.startAction,
 		},
 		{
 			Name:   "stop",
-			Usage:  "停止服务",
+			Usage:  "停止服务。通过start启动的服务，使用此命令可停止服务",
 			Action: m.stopAction,
 		}, {
 			Name:   "install",
-			Usage:  "安装注册中心配置和本地服务",
+			Usage:  "安装配置信息和本地服务。初次运行服务前使用，同一集群只需安装一次。配置信息变更后需再次调用",
 			Flags:  m.getStartFlags("install"),
 			Action: m.installAction,
 		}, {
 			Name:   "registry",
-			Usage:  "注册中心配置",
+			Usage:  "安装配置信息。只安装配置信息，同一集群只需安装一次。配置信息变更后需再次调用",
 			Flags:  m.getStartFlags("registry"),
 			Action: m.registryAction,
 		}, {
 			Name:   "service",
-			Usage:  "本地服务配置",
+			Usage:  "安装本地服务。初次运行服务前调用",
 			Flags:  m.getStartFlags("service"),
 			Action: m.serviceAction,
 		},
 		{
 			Name:   "remove",
-			Usage:  "删除服务",
+			Usage:  "删除服务。应用启动参数发生变化后，需调用remove删除本地服务后再重新安装",
 			Action: m.removeAction,
 		}, {
 			Name:   "status",
@@ -70,7 +70,7 @@ func (m *MicroApp) getCommands() []cli.Command {
 			Action: m.statusAction,
 		}, {
 			Name:   "conf",
-			Usage:  "查看配置信息",
+			Usage:  "查看配置信息。查看当前服务在配置中心的配置信息",
 			Flags:  m.getStartFlags("conf"),
 			Action: m.queryConfigAction,
 		},
