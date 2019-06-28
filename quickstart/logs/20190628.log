@@ -1,0 +1,14 @@
+
+--------------------begin------------------------
+
+[2019/06/28 11:05:56.116641][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/main.go
+[2019/06/28 11:05:56.116742][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/init.go
+[2019/06/28 11:05:56.116811][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/install.dev.go
+[2019/06/28 11:05:56.116861][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/install.prod.go
+[2019/06/28 11:05:56.116907][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/handling.go
+[2019/06/28 11:05:56.116952][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/.gitignore
+[2019/06/28 11:05:56.117106][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/modules/const/sql/sql.go
+[2019/06/28 11:05:56.117186][i][1d94c63d2] 生成文件: /home/yanglei/work/src/github.com/micro-plat/hydra/quickstart/demo/services/server.go
+[2019/06/28 11:05:56.117222][i][1d94c63d2] 项目生成完成
+
+---------------------end-------------------------
