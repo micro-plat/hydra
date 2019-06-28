@@ -101,10 +101,14 @@ curl http://localhost:8090/hello
 
 [hydra微服务开发规范](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_01.md)
 
+[构建API服务器](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_02.md)
+
+
+<!-- 
  [服务配置与安装](https://github.com/micro-plat/hydra/tree/master/docs/service.conf.install.md)
 
 [服务注册](https://github.com/micro-plat/hydra/tree/master/docs/service.types.register.md)
 
 [服务启动](https://github.com/micro-plat/hydra/tree/master/docs/service.run.md)
 
-[API 示例](https://github.com/micro-plat/hydra/blob/master/docs/api.server.md)
+[API 示例](https://github.com/micro-plat/hydra/blob/master/docs/api.server.md) -->
