@@ -1,5 +1,4 @@
-# 构建API服务器
-
+# 构建API服务器一
 本示例构建一个api服务器，提供两个API接口：会员充值订单提交，充值结果查询。接口通过md5签名验证。
 
 | 接口地址       | 功能     |说明|
@@ -249,7 +248,7 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 
 >返回非`error`类型值，http状态码为200 
 
-> 使用ctx.Log进行日志输出，可保证同一流程使用共同的`session id`, 便于对请求过程进行分析
+> 使用ctx.Log进行日志输出，可保证同一个请求过程有相同的`session id`, 便于对执行流程进行准确分析
 
 > ctx.Request中提供了请求参数获取，检查等功能
 
