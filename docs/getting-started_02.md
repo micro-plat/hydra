@@ -328,7 +328,7 @@ func NewOrderDB(c component.IContainer) *OrderDB {
 	}
 }
 func (d *OrderDB) Create(merchantID string, orderNO string, account string, face int, num int) (map[string]interface{}, error) {
-	db := d.c.GetDB()
+	db := d.c.GetRegularDB()
 	input := map[string]interface{}{
 		"merchant_id": merchantID,
 		"order_no":    orderNO,
@@ -351,10 +351,10 @@ func (d *OrderDB) Create(merchantID string, orderNO string, account string, face
 }
 
 func (d *OrderDB) Query(merchantID string, orderNO string) (map[string]interface{}, error) {
-	db := d.c.GetDB()
-	row, _, _, err := db.Execute(sqls.ORDER_QUERY, map[string]interface{}{})
+	db := d.c.GetRegularDB()
+	row, sql, param, err := db.Execute(sqls.ORDER_QUERY, map[string]interface{}{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("sql执行错误:%s %+v,%v",sql,param,err)
 	}
 	if row.IsEmpty(){
 		return nil,context.NewError(901,"订单不存在")
@@ -364,3 +364,5 @@ func (d *OrderDB) Query(merchantID string, orderNO string) (map[string]interface
 ```
 
 > 返回指定的状态码可使用`context.NewError`
+
+> 数据库执行失败可打印执行SQL与输入参数
