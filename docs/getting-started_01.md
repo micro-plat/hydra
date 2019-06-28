@@ -16,7 +16,7 @@
 
 |-----init.go
 
-|-----handing.go
+|-----handling.go
 
 |-----conf.dev.go
 
@@ -58,7 +58,7 @@
 | init.go       |              应用初始化。检查配置是否正确，注册服务等              |
 | conf.dev.go   |                            开发环境配置                            |
 | conf.prod.go  |                            生产环境配置                            |
-| handing.go    |                 请求预处理。如登录检查，权限检查等                 |
+| handling.go   |                 请求预处理。如登录检查，权限检查等                 |
 | services      |       服务目录。存放所有服务实现类，init.go直接调用进行注册        |
 | modules       |   业务模块目录。业务具体实现，如数据库操作，缓存操作，队列发送等   |
 | modules/const | 存放业务操作的静态配置信息。如sql语句、缓存key、系统枚举、错误码等 |
@@ -173,8 +173,8 @@ import (
 	"github.com/micro-plat/hydra/context"
 )
 
-func (api *apiserver) handing() {
-	api.Handling(func(ctx *context.Context) (rt interface{}) {
+func (api *apiserver) handling() {
+	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
 		//检验登录状态或权限
 		return nil
 	})
