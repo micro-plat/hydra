@@ -74,28 +74,6 @@ curl http://localhost:8090/hello
 {"data":"hello world"}
 ```
 
-以上代码可理解为:
-
-1. 使用`文件系统`(`fs://`)作为服务的注册中心和配置中心, `../`作为服务的跟路径
-2. 在注册中心创建`/myplat/demo/api/test/` 节点作为服务的根路径
-3. 将传入的`hello`函数作为`api`服务注册到服务器
-4. 执行服务`http://host:port/hello`时执行服务`func hello(ctx *context.Context) (r interface{})`
-5. 可从`*context.Context`获取请求相关参数
-6. `func hello`的返回值作为当前接口的输出内容
-
-执行`hello install`可理解为:
-
-1.  安装配置数据,在注册中心创建节点`/myplat/demo/api/test/` , 数据库配置`/myplat/var/db/...`(当前未指定), 服务启动端口`/myplat/demo/api/test/conf`(当前未指定启动端口,默认启动`9090`),当前示例采用了默认配置,未指定额外参数
-2.  安装本地服务(后台运行服务,开机自动启动如:`systemd`等等)
-3.  安装后的服务配置可通过`hello conf`查看
-
-执行`hello run`可理解为:
-
-1. 连接注册中心(`fs://../`),拉取服务配置,如:`/myplat/demo/api/test/conf/...`,`/myplat/var/...` 并监控`/myplat/demo/api/test`下所有配置的变化, 变动后进行热更新
-2. 启动服务器`api`,挂载注册的服务`hello`
-3. 将`hello`发布到注册中心`/myplat/services/api/hello/providers`
-4. 将当前服务器到监控目录`/mysql/demo/api/test/servers/[ip:port]...`
-
 
 [hydra微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started.md)
 
