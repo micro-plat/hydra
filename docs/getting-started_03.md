@@ -45,7 +45,7 @@ func (api *apiserver) config() {
 ```
 
 
-#### 2. RESTfull接口
+#### 2. RESTfull服务
 ```go
 package order
 
@@ -76,7 +76,7 @@ func (u *OrderHandler) PostHandle(ctx *context.Context) (r interface{}) {
  func (u *OrderHandler) PutHandle(ctx *context.Context) (r interface{}) {
  }
 
-//DeleteHandle删除
+//DeleteHandle 删除
  func (u *OrderHandler) DeleteHandle(ctx *context.Context) (r interface{}) {
  }
 ```
