@@ -23,23 +23,23 @@ package main
 func (api *apiserver) config() {
 	api.IsDebug = true
 	api.Conf.API.SetSubConf("header", `
-				{
-					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-					"Access-Control-Allow-Headers": "X-Requested-With,Content-Type",
-					"Access-Control-Allow-Credentials": "true"
-				}
+	{
+		"Access-Control-Allow-Origin": "*",
+		"Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+		"Access-Control-Allow-Headers": "X-Requested-With,Content-Type",
+		"Access-Control-Allow-Credentials": "true"
+	}
             `)
     api.Conf.API.SetSubConf("auth", `
-		{
-			"jwt": {
-				"exclude": ["/member/login"],
-				"expireAt": 36000,
-				"mode": "HS512",
-				"name": "__jwt__",
-				"secret": "45d25cb71f3bee254c2bc6fc0dc0caf1"
-			}
+	{
+		"jwt": {
+			"exclude": ["/member/login"],
+			"expireAt": 36000,
+			"mode": "HS512",
+			"name": "__jwt__",
+			"secret": "45d25cb71f3bee254c2bc6fc0dc0caf1"
 		}
+	}
 		`)
 }
 ```
