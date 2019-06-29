@@ -133,17 +133,18 @@ func NewLoginHandler(container component.IContainer) (u *LoginHandler) {
 func (u *LoginHandler) Handle(ctx *context.Context) (r interface{}) {
 	ctx.Log.Info("-------用户登录---------")
 	//检查输入参数
+	ctx.Log.Info("1. 检查输入参数")
 	if err := ctx.Request.Check("username", "password"); err != nil {
 		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
 	}
-	ctx.Log.Info("2.执行操作")
+	ctx.Log.Info("2. 开始登录")
 	//处理用户登录
 	member, err := u.m.Login(ctx.Request.GetString("username"),ctx.Request.GetString("password"))
 	if err != nil {
 		return err
 	}
 	
-	ctx.Log.Info("3.返回数据")
+	ctx.Log.Info("3. 返回数据")
 	//设置jwt数据
 	ctx.Response.SetJWT(member)
 	//记录登录行为
