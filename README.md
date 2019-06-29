@@ -81,6 +81,10 @@ curl http://localhost:8090/hello
 
 [构建API服务器一](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_02.md)
 
+[构建API服务器二](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_03.md)
+
+
+
 
 <!-- 
  [服务配置与安装](https://github.com/micro-plat/hydra/tree/master/docs/service.conf.install.md)

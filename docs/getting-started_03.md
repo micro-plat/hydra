@@ -44,8 +44,118 @@ func (api *apiserver) config() {
 }
 ```
 
+#### 2. 检查用户登录状态
+```go
+package main
 
-#### 2. RESTfull服务
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/component"
+
+	"github.com/micro-plat/hydra/context"
+	mem "github.com/micro-plat/sso/flowserver/modules/member"
+	xmenu "github.com/micro-plat/sso/flowserver/modules/menu"
+)
+
+//bind 检查应用程序配置文件，并根据配置初始化服务
+func (api *apiserver) handling() {
+	//每个请求执行前执行
+	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+
+		//获取jwt
+		jwt, err := ctx.Request.GetJWTConfig() //获取jwt配置
+		if err != nil {
+			return err
+		}
+		for _, u := range jwt.Exclude { //排除请求
+			if u == ctx.Service {
+				return nil
+			}
+		}
+
+		//缓存用户信息
+		var m mem.LoginState
+		if err = ctx.Request.GetJWT(&m); err != nil {
+			return context.NewError(context.ERR_FORBIDDEN, err)
+		}
+		if err = mem.Save(ctx, &m); err != nil {
+			return err
+		}
+
+
+		//检查用户权限
+		tags := r.GetTags(ctx.Service)
+		menu := xmenu.Get(ctx.GetContainer().(component.IContainer))
+		for _, tag := range tags {
+			if tag == "*" {
+				return nil
+			}
+			if err = menu.Verify(m.UserID, m.SystemID, tag, ctx.Request.GetMethod()); err == nil {
+				return nil
+			}
+		}
+		return context.NewError(context.ERR_NOT_ACCEPTABLE, fmt.Sprintf("没有权限:%v", tags))
+	})
+}
+
+```
+
+
+
+#### 2. 编写登录接口
+```go
+package member
+
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/quickstart/demo/apiserver11/modules/member")
+
+//LoginHandler 用户登录对象
+type LoginHandler struct {
+	c      component.IContainer
+	m      member.IMember
+}
+
+//NewLoginHandler 创建登录对象
+func NewLoginHandler(container component.IContainer) (u *LoginHandler) {
+	return &LoginHandler{
+		c:      container,
+		m:      member.NewMember(container),
+	}
+}
+
+
+//SysHandle 子系统远程登录
+func (u *LoginHandler) Handle(ctx *context.Context) (r interface{}) {
+	ctx.Log.Info("-------用户登录---------")
+	//检查输入参数
+	if err := ctx.Request.Check("username", "password"); err != nil {
+		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
+	}
+	ctx.Log.Info("2.执行操作")
+	//处理用户登录
+	member, err := u.m.Login(ctx.Request.GetString("username"),ctx.Request.GetString("password"))
+	if err != nil {
+		return err
+	}
+	
+	ctx.Log.Info("3.返回数据")
+	//设置jwt数据
+	ctx.Response.SetJWT(member)
+	//记录登录行为
+	return member
+
+}
+
+
+```
+
+
+#### 3. RESTfull服务
 ```go
 package order
 
