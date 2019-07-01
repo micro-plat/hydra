@@ -84,7 +84,8 @@ flow.Conf.MQC.SetSubConf("queue", `{
 			},
 			{
 	            "queue":"coupon:base:down_payment",
-	            "service":"/order/pay"
+                "service":"/order/pay",
+                "concurrency":1000
 			}
 	    ]
 	}`)
