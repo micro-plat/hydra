@@ -139,7 +139,7 @@ func (flow *flowserver) init() {
 
 
 #### 5. 服务编写
-与其它服务器代码相同
+与其它服务层代码相同
 ```go
 
 package order
