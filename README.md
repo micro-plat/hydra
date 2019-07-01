@@ -83,4 +83,4 @@ curl http://localhost:8090/hello
 
 [构建API服务器二](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_api_02.md)
 
-[构建消息消费服务（MQC](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_mqc_01.md)
+[构建消息消费服务（MQC)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_mqc_01.md)
