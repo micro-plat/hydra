@@ -20,5 +20,5 @@ func NewOrderCache(c component.IContainer) *OrderCache {
 
 func (o *OrderCache) Query(orderNO string) (string, error) {
 	cache := o.c.GetRegularCache()
-	rows, err := cache.Get(keys.ORDER_QUERY)
+	return cache.Get(keys.ORDER_QUERY)
 }
