@@ -92,9 +92,19 @@ flow.Conf.MQC.SetSubConf("queue", `{
 ```
 > 使用动态队列则无需设置
 
+> 通过`concurrency`设置并行处理协程数，未设置为`10`
+
+#### 4. 设置主备，分片，对等模式
+
+主配置中设置变量`sharding`的值，值为1则为主备模式，`>1`为分片模式，`=0`或不设置为对等模式
+
+```go
+flow.Conf.API.SetMainConf(`{"sharding":1}
+```
 
 
-#### 4. 使用动态队列订阅和取消订阅
+
+#### 5. 使用动态队列订阅和取消订阅
 
 ```go
 package main
@@ -138,7 +148,7 @@ func (flow *flowserver) init() {
 ```
 
 
-#### 5. 服务编写
+#### 6. 服务编写
 与其它服务层代码相同
 ```go
 
