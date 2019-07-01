@@ -132,6 +132,8 @@ func (flow *flowserver) init() {
 
 > 服务注册使用`flow.MQC`（仅注册到MQC服务）或`flow.Flow`(注册到MQC服务和CRON服务)。
 
+> 通过`concurrency`设置并行处理协程数，未设置为`10`
+
 > 订阅成功后日志会显示:`订阅(mall:flow:order_pay)消息`:
 
 ```sh
