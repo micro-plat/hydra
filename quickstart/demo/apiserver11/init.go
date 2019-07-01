@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/hydra/quickstart/demo/apiserver10/services/order"
+	"github.com/micro-plat/hydra/quickstart/demo/apiserver11/services/order"
 )
 
 //init 检查应用程序配置文件，并根据配置初始化服务

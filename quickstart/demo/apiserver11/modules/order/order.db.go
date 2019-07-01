@@ -3,13 +3,15 @@ package order
 import (
 	"fmt"
 
+	"github.com/micro-plat/lib4go/db"
+
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/quickstart/demo/apiserver11/modules/const/sqls"
 )
 
 type IOrderDB interface {
 	Create(merchantID string, orderNO string, account string, face int, num int) (map[string]interface{}, error)
-	Query(merchantID string, orderNO string) (map[string]interface{}, error)
+	Query(merchantID string, orderNO string) (db.QueryRows, error)
 }
 
 type OrderDB struct {
@@ -22,7 +24,7 @@ func NewOrderDB(c component.IContainer) *OrderDB {
 	}
 }
 func (d *OrderDB) Create(merchantID string, orderNO string, account string, face int, num int) (map[string]interface{}, error) {
-	db := d.c.GetDB()
+	db := d.c.GetRegularDB()
 	input := map[string]interface{}{
 		"merchant_id": merchantID,
 		"order_no":    orderNO,
@@ -44,11 +46,11 @@ func (d *OrderDB) Create(merchantID string, orderNO string, account string, face
 	}, nil
 }
 
-func (d *OrderDB) Query(merchantID string, orderNO string) (map[string]interface{}, error) {
-	db := d.c.GetDB()
-	row, _, _, err := db.Execute(sqls.ORDER_QUERY, map[string]interface{}{})
+func (d *OrderDB) Query(merchantID string, orderNO string) (db.QueryRows, error) {
+	db := d.c.GetRegularDB()
+	rows, _, _, err := db.Query(sqls.ORDER_QUERY, map[string]interface{}{})
 	if err != nil {
 		return nil, err
 	}
-	return row, nil
+	return rows, nil
 }
