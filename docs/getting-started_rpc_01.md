@@ -188,11 +188,17 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 当前服务的节点如下:
 
 mall_debug
+
 -------services
+
 -----------rpc
+
 --------------order
+
 -----------------query
+
 --------------------providers
+
 -----------------------192.168.4.121
 
 > 启动多台服务器则所有服务器都会注册到`/[platName]/services/rpc/[systeName]/[serviceName]/providers/`目录
