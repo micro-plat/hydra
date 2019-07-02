@@ -74,18 +74,18 @@ curl http://localhost:8090/hello
 {"data":"hello world"}
 ```
 
+[hydra 微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_00.md)
 
-[hydra微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_00.md)
+[hydra 微服务开发规范](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_01.md)
 
-[hydra微服务开发规范](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_01.md)
+[构建 API 服务一](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_api_01.md)
 
-[构建API服务一](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_api_01.md)
-
-[构建API服务二](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_api_02.md)
+[构建 API 服务二](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_api_02.md)
 
 [构建消息消费服务（MQC)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_mqc_01.md)
 
 [构建任务调度服务（CRON)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_cron_01.md)
 
-
 [构建远程调用服务(RPC)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_rpc_01.md)
+
+[构建静态文件服务](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_static_01.md)
