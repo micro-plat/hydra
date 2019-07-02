@@ -9,7 +9,7 @@ MQC：订阅消息队列的topic，收到消息后执行本地服务，支持的
 | stomp | 支持activeMQ，rabbitMQ |
 
 特点：
-* 支持主备，对等，分片
+* 支持对等，主备，分片
 * 消息执行线程可配置，默认为10个协程
 * 可动态订阅，取消订阅消息
 
@@ -183,6 +183,10 @@ func (u *OrderHandler) PayHandle(ctx *context.Context) (r interface{}) {
     //业务逻辑
 	return "success"
 }
-
-
+func (u *OrderHandler) Handle(ctx *context.Context) (r interface{}) {
+	current, totoal := ctx.Request.GetSharding()
+	return nil
+}
 ```
+
+>  ctx.Request.GetSharding() 获取分片信息，返回值为当前分片索引和总分片数量
