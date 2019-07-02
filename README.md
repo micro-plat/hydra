@@ -75,7 +75,7 @@ curl http://localhost:8090/hello
 ```
 
 
-[hydra微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started.md)
+[hydra微服务开发入门](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_00.md)
 
 [hydra微服务开发规范](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_01.md)
 
@@ -87,3 +87,5 @@ curl http://localhost:8090/hello
 
 [构建任务调度服务（CRON)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_cron_01.md)
 
+
+[构建远程调用服务(RPC)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_rpc_01.md)
