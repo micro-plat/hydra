@@ -178,14 +178,13 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 ```
 
 
-#### 5. 查看服务注册
+#### 5. 查看注册中心
 
 使用`ZooInspector`连接到zookeeper
 
-查找当前服务节点`/[platName]/services/rpc/[systeName]/[serviceName]/providers/`
+节点`/[platName]/services/rpc/[systeName]/[serviceName]/providers/`显示了当前服务的所有提供者
 
-
-当前服务的节点如下:
+当前服务注册路径为:
 
 mall_debug
 
@@ -201,4 +200,69 @@ mall_debug
 
 -----------------------192.168.4.121
 
-> 启动多台服务器则所有服务器都会注册到`/[platName]/services/rpc/[systeName]/[serviceName]/providers/`目录
+
+#### 6. 远程调用
+
+##### 1. 内置实例
+
+
+使用`ctx`中提供的`RPC`对象调用
+
+ ```go
+package order
+
+import (
+	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra/context"
+)
+
+type QueryHandler struct {
+	container component.IContainer
+}
+
+func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
+	return &QueryHandler{container: container}
+}
+func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
+    //构建输入参数
+    header:=map[string]string{}
+    input:=map[string]interface{}{
+        "order_no":ctx.GetString("order_no"),
+    }
+
+    //发起远程调用
+    status, result, params, err := ctx.RPC.Request("/order/query@apiserver.mall", "GET", header, input, true)
+    if err!=nil{
+        return err
+    }
+
+    //处理响应
+    ctx.Response.SetHeaders(params) //将RPC服务设置的头，设置到当前的response中
+	ctx.Response.MustContent(status, result)//根据状态和内容强制设置输出
+	return
+
+}
+
+```
+说明：
+
+* RPC调用的服务名全称为:`[serverName]@[systemName].[platName]`,调用系统与RPC系统的平台名相同时，可简写为：`[serverName]@[systemName]`,调用系统与RPC系统的平台名与系统名相同时可直接写作:`[serverName]`
+
+* 使用`ctx.RPC`请求的优势是会自动将当前请求的`session id`传给`rpc`服务，即：rpc服务打印的`session id`与调用方的`session id`相同，方便查找日志
+
+
+
+##### 2. 独立实例
+
+一般服务使用方与提供方未共用同一个注册中心时，需单独创建`rpc`实例
+
+```go
+    //初始化RPC调用服务
+    invoker:=rpc.NewInvoker(platName,sysName,registryAddr,opts)
+    
+    //发起远程调用
+    status, result, params, err := ctx.RPC.Request("/order/query", "GET", nil, nil, true)
+```
+> 通过`opts`可指定`日志组件`，`负载均衡器`，`ssl证书`等
+
+> 负载均衡器支持轮询与本地优先
