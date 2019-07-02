@@ -89,3 +89,5 @@ curl http://localhost:8090/hello
 [构建远程调用服务(RPC)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_rpc_01.md)
 
 [构建静态文件服务](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_static_01.md)
+
+[构建 websocket 服务(WS)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_ws_01.md)

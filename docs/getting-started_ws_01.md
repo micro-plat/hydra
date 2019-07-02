@@ -1,4 +1,4 @@
-# 构建 webscoket 服务(WS)
+# 构建 websocket 服务(WS)
 
 本示例介绍如何构建 websocket 服务器，以及通过后端流程推送消息给 websocket 客户端。
 
@@ -155,7 +155,7 @@ func (u *PushHandler) Handle(ctx *context.Context) (r interface{}) {
 `services/member.go`
 
 1. 检查用户名密码是否正确
-2. 保存用户登录信息，并存储用户 webscoket 客户端 uuid
+2. 保存用户登录信息，并存储用户 websocket 客户端 uuid
 
 ```go
 package member
