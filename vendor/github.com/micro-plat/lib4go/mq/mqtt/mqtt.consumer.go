@@ -86,6 +86,7 @@ func (consumer *Consumer) reconnect() {
 				}()
 				client, b, err := consumer.connect()
 				if err != nil {
+					consumer.connCh <- 1
 					consumer.Logger.Error("连接失败:", err)
 				}
 				if b {
