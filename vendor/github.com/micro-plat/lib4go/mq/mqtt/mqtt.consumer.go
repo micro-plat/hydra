@@ -39,6 +39,7 @@ type Consumer struct {
 	lk         sync.Mutex
 	header     []string
 	once       sync.Once
+	clientOnce sync.Once
 	*mq.OptionConf
 	conf *Conf
 }
@@ -81,8 +82,7 @@ func (consumer *Consumer) reconnect() {
 				consumer.Logger.Debug("consumer与服务器断开连接，准备重连")
 				func() {
 					defer recover()
-					consumer.client.Disconnect()
-					consumer.client.Terminate()
+					consumer.clientOnce.Do(consumer.client.Terminate)
 				}()
 				client, b, err := consumer.connect()
 				if err != nil {
@@ -139,6 +139,7 @@ func (consumer *Consumer) connect() (*client.Client, bool, error) {
 			TLSConfig: cert,
 			KeepAlive: 3,
 		}); err == nil {
+			consumer.clientOnce = sync.Once{}
 			return cc, true, nil
 		}
 	}
