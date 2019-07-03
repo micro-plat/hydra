@@ -91,3 +91,5 @@ curl http://localhost:8090/hello
 [构建静态文件服务](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_static_01.md)
 
 [构建 websocket 服务(WS)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_ws_01.md)
+
+[性能指标收集(metric)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_metric_01.md)
