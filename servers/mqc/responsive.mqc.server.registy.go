@@ -76,6 +76,7 @@ func (s *MqcResponsiveServer) isMaster(path string, cldrs []string) bool {
 			break
 		}
 	}
+	s.Logger.Info("is.master:", path, cldrs)
 	s.shardingIndex = getSharding(index, s.shardingCount)
 	return s.shardingIndex > -1
 

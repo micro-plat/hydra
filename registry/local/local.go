@@ -213,7 +213,7 @@ func (l *local) CreateTempNode(path string, data string) (err error) {
 }
 func (l *local) CreateSeqNode(path string, data string) (rpath string, err error) {
 	nid := atomic.AddInt32(&l.seqNode, 1)
-	rpath = r.Join(l.formatPath(path), fmt.Sprint(nid))
+	rpath = fmt.Sprintf("%s_%d", l.formatPath(path), nid)
 	return rpath, l.CreateTempNode(rpath, data)
 }
 func (l *local) GetSeparator() string {
