@@ -20,14 +20,15 @@ import (
 
 // MQTTClient memcache配置文件
 type MQTTClient struct {
-	servers []string
-	client  *client.Client
-	once    sync.Once
-	Logger  *logger.Logger
-	lk      sync.Mutex
-	connCh  chan int
-	done    bool
-	conf    *queue.Config
+	servers    []string
+	client     *client.Client
+	once       sync.Once
+	Logger     *logger.Logger
+	clientOnce sync.Once
+	lk         sync.Mutex
+	connCh     chan int
+	done       bool
+	conf       *queue.Config
 }
 
 //New 根据配置文件创建一个redis连接
@@ -56,8 +57,7 @@ func (c *MQTTClient) reconnect() {
 				c.Logger.Debug("publisher与服务器断开连接，准备重连")
 				func() {
 					defer recover()
-					c.client.Disconnect()
-					c.client.Terminate()
+					c.clientOnce.Do(c.client.Terminate)
 				}()
 				client, b, err := c.connect()
 				if err != nil {
@@ -96,10 +96,10 @@ func (c *MQTTClient) connect() (*client.Client, bool, error) {
 		Password:        []byte(c.conf.Password),
 		ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
 		TLSConfig:       cert,
-		PINGRESPTimeout: time.Second,
-		CleanSession:    true,
-		KeepAlive:       3,
+		PINGRESPTimeout: 3,
+		KeepAlive:       10,
 	}); err != nil {
+		c.clientOnce = sync.Once{}
 		return nil, false, fmt.Errorf("连接失败:%v(%s-%s/%s)", err, c.conf.Addr, c.conf.UserName, c.conf.Password)
 	}
 	return cc, true, nil

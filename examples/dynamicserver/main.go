@@ -27,13 +27,13 @@ func main() {
 
 	app.Conf.MQC.SetSubConf("server", `{
 			"proto":"mqtt",
-			"address":"192.168.0.224:8883",
+			"address":"222.209.84.37:8883",
 			"userName":"mqtt",
 			"password":"123456"}`)
 
 	app.Conf.Plat.SetVarConf("queue", "queue", `{
 			"proto":"mqtt",
-			"address":"192.168.0.224:8883",
+			"address":"222.209.84.37:8883",
 			"userName":"mqtt",
 			"password":"123456"}
 `)

@@ -132,13 +132,14 @@ func (consumer *Consumer) connect() (*client.Client, bool, error) {
 	}
 	for _, addr := range addrs {
 		if err := cc.Connect(&client.ConnectOptions{
-			Network:   "tcp",
-			Address:   addr + ":" + port,
-			UserName:  []byte(consumer.conf.UserName),
-			Password:  []byte(consumer.conf.Password),
-			ClientID:  []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
-			TLSConfig: cert,
-			KeepAlive: 3,
+			Network:         "tcp",
+			Address:         addr + ":" + port,
+			UserName:        []byte(consumer.conf.UserName),
+			Password:        []byte(consumer.conf.Password),
+			ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
+			TLSConfig:       cert,
+			PINGRESPTimeout: 3,
+			KeepAlive:       10,
 		}); err == nil {
 			consumer.clientOnce = sync.Once{}
 			return cc, true, nil
