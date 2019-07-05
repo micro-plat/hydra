@@ -57,6 +57,9 @@ func (s *CronResponsiveServer) watchMasterChange(root, path string) error {
 }
 
 func (s *CronResponsiveServer) isMaster(path string, cldrs []string) bool {
+	if len(cldrs) == 0 {
+		return s.master
+	}
 	ncldrs := make([]string, 0, len(cldrs))
 	for _, v := range cldrs {
 		args := strings.SplitN(v, "_", 2)
@@ -72,6 +75,9 @@ func (s *CronResponsiveServer) isMaster(path string, cldrs []string) bool {
 			index = i
 			break
 		}
+	}
+	if index == -1 {
+		return s.master
 	}
 	s.shardingIndex = getSharding(index, s.shardingCount)
 	return s.shardingIndex > -1
