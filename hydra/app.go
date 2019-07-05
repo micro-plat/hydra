@@ -58,7 +58,7 @@ func (m *MicroApp) Start() {
 	//	m.app.ErrWriter = (logger.LogWriter)(m.xlogger.Error)
 	//m.app.Writer = (logger.LogWriter)(m.xlogger.Info)
 
-	m.service, err = daemon.New(m.app.Name, m.app.Name, "network.target")
+	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
 		m.logger.Error(err)
 		return
