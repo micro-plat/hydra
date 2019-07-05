@@ -1,5 +1,6 @@
-# 构建API服务器一
-本示例构建一个api服务器，提供两个API接口：会员充值订单提交，充值结果查询。接口通过md5签名验证。
+# 构建 API 服务器一
+
+本示例构建一个 api 服务器，提供两个 API 接口：会员充值订单提交，充值结果查询。接口通过 md5 签名验证。
 
 | 接口地址       | 功能         | 说明                                         |
 | -------------- | ------------ | -------------------------------------------- |
@@ -8,15 +9,15 @@
 
 知识点:
 
-*  数据库配置与操作
-*  消息队列配置与发送
-*  自定义服务名
-*  md5签名
+- 数据库配置与操作
+- 消息队列配置与发送
+- 自定义服务名
+- md5 签名
 
 #### 1. 搭建基础代码
 
-
 `main.go`
+
 ```go
 package main
 
@@ -38,11 +39,11 @@ func main() {
 }
 
 ```
+
 > app.init 用于挂载服务配置，注册等处理
 
-
-
 `config.dev.go`
+
 ```go
 // +build !prod
 
@@ -51,12 +52,12 @@ package main
 func (api *apiserver) config() {
 	api.IsDebug = true
 	api.Conf.API.SetMainConf(`{"address":":8090","trace":true}`)
-	api.Conf.Plat.SetVarConf("db", "db", `{			
+	api.Conf.Plat.SetVarConf("db", "db", `{
 			"provider":"mysql",
 			"connString":"mrss:123456@tcp(192.168.0.36)/mrss?charset=utf8",
 			"maxOpen":20,
 			"maxIdle":10,
-			"lifeTime":600		
+			"lifeTime":600
 	}`)
 	api.Conf.Plat.SetVarConf("queue", "queue", `
 		{
@@ -75,6 +76,7 @@ func (api *apiserver) config() {
 	`)
 }
 ```
+
 > 数据库配置，消息队列等属于平台共用配置，需使用`api.Conf.Plat`提供的函数进行设置
 
 `config.prod.go`
@@ -87,12 +89,12 @@ package main
 
 func (api *apiserver) config() {
 	api.Conf.API.SetMainConf(`{"address":":8090","trace":true}`)
-	api.Conf.Plat.SetVarConf("db", "db", `{			
+	api.Conf.Plat.SetVarConf("db", "db", `{
 			"provider":"mysql",
 			"connString":"#connString",
 			"maxOpen":20,
 			"maxIdle":10,
-			"lifeTime":600		
+			"lifeTime":600
 	}`)
 	api.Conf.Plat.SetVarConf("queue", "queue", `
 		{
@@ -110,10 +112,7 @@ func (api *apiserver) config() {
 }
 ```
 
-
 #### 2. 初始化检查与服务注册
-
-
 
 ```go
 package main
@@ -125,8 +124,8 @@ import (
 
 //init 检查应用程序配置文件，并根据配置初始化服务
 func (api *apiserver) init() {
-	app.config()
-	app.handling()
+	api.config()
+	api.handling()
 
 	api.Initializing(func(c component.IContainer) error {
 		//检查db配置是否正确
@@ -135,7 +134,7 @@ func (api *apiserver) init() {
 		}
 		if _, err := c.GetQueue(); err != nil {
 			return err
-		}	
+		}
 
 		return nil
 	})
@@ -144,10 +143,10 @@ func (api *apiserver) init() {
 	api.Micro("/order", order.NewOrderHandler)
 }
 ```
+
 > 初始化时创建数据库，消息队列对象，创建失败则返回错误系统，系统则会启动失败
 
->Initializing函数为每个服务器都会执行，不同的服务器处理不同的逻辑，则可以使用`component.IContainer`提供的`服务器类型`等参数进行判断
-
+> Initializing 函数为每个服务器都会执行，不同的服务器处理不同的逻辑，则可以使用`component.IContainer`提供的`服务器类型`等参数进行判断
 
 #### 3. 请求预处理，验证签名
 
@@ -178,11 +177,9 @@ func (api *apiserver) handling() {
 }
 ```
 
-
 #### 3. 构建服务
 
-
-`servers/order.go`
+`services/order.go`
 
 ```go
 package order
@@ -244,17 +241,18 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 	return result
 }
 ```
-> 返回`error` 则http状态码为400，返回其它状态码可使用`context.NewError`设置，或使用`ctx.Response.SetStatus`设置
 
->返回非`error`类型值，http状态码为200 
+> 返回`error` 则 http 状态码为 400，返回其它状态码可使用`context.NewError`设置，或使用`ctx.Response.SetStatus`设置
 
-> 使用ctx.Log进行日志输出，可保证同一个请求过程有相同的`session id`, 便于对执行流程进行准确分析
+> 返回非`error`类型值，http 状态码为 200
 
-> ctx.Request中提供了请求参数获取，检查等功能
+> 使用 ctx.Log 进行日志输出，可保证同一个请求过程有相同的`session id`, 便于对执行流程进行准确分析
 
-> ctx.Response可处理响应参数，如修改返回类型为`json`,`xml`,`plain`，设置状态码等
+> ctx.Request 中提供了请求参数获取，检查等功能
 
-> RequestHandle, QueryHandle 在Handle前有其它名称（非GET,POST,PUT,DELETE）则会注册为路由的一部分。当前注册代码为`api.Micro("/order", order.NewOrderHandler)`，则实际注册的服务有`/order/request`,`/order/query`
+> ctx.Response 可处理响应参数，如修改返回类型为`json`,`xml`,`plain`，设置状态码等
+
+> RequestHandle, QueryHandle 在 Handle 前有其它名称（非 GET,POST,PUT,DELETE）则会注册为路由的一部分。当前注册代码为`api.Micro("/order", order.NewOrderHandler)`，则实际注册的服务有`/order/request`,`/order/query`
 
 #### 4. 业务逻辑
 
@@ -262,7 +260,7 @@ func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
 
 根据请求参数，查询订单信息并返回
 
-`modules/order/order.go`调用数据库保存，并调用qtask提供的队列管理工具进行消息任务发送
+`modules/order/order.go`调用数据库保存，并调用 qtask 提供的队列管理工具进行消息任务发送
 
 ```go
 package order
@@ -298,7 +296,6 @@ func (d *OrderDB) Create(merchantID string, orderNO string, account string, face
 	return order, err
 }
 ```
-
 
 `modules/order/order.db.go` 保存订单信息
 
@@ -364,4 +361,4 @@ func (d *OrderDB) Query(merchantID string, orderNO string) (map[string]interface
 
 > 返回指定的状态码可使用`context.NewError`
 
-> 数据库执行失败可打印执行SQL与输入参数
+> 数据库执行失败可打印执行 SQL 与输入参数

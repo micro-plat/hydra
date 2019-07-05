@@ -57,6 +57,9 @@ func (s *MqcResponsiveServer) watchMasterChange(root, path string) error {
 }
 
 func (s *MqcResponsiveServer) isMaster(path string, cldrs []string) bool {
+	if len(cldrs) == 0 {
+		return s.master
+	}
 	ncldrs := make([]string, 0, len(cldrs))
 	for _, v := range cldrs {
 		args := strings.SplitN(v, "_", 2)
