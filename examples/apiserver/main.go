@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/micro-plat/hydra/context"
+
 	"github.com/micro-plat/hydra/examples/apiserver/services/order"
 	"github.com/micro-plat/hydra/hydra"
 )
@@ -14,6 +16,11 @@ func main() {
 		hydra.WithDebug())
 
 	app.Micro("/order/query", order.NewQueryHandler)
+	app.Micro("/hello/get", helloWorld)
 
 	app.Start()
+}
+func helloWorld(ctx *context.Context) (r interface{}) {
+	// ctx.Response.SetXML()
+	return "hello"
 }
