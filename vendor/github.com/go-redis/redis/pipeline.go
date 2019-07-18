@@ -10,6 +10,7 @@ type pipelineExecer func([]Cmder) error
 
 type Pipeliner interface {
 	StatefulCmdable
+	Do(args ...interface{}) *Cmd
 	Process(cmd Cmder) error
 	Close() error
 	Discard() error
@@ -31,6 +32,13 @@ type Pipeline struct {
 	closed bool
 }
 
+func (c *Pipeline) Do(args ...interface{}) *Cmd {
+	cmd := NewCmd(args...)
+	_ = c.Process(cmd)
+	return cmd
+}
+
+// Process queues the cmd for later execution.
 func (c *Pipeline) Process(cmd Cmder) error {
 	c.mu.Lock()
 	c.cmds = append(c.cmds, cmd)

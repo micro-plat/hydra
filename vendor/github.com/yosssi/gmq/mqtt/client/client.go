@@ -961,23 +961,6 @@ func (cli *Client) sendPackets(keepAlive time.Duration, pingrespTimeout time.Dur
 				return
 			}
 		case <-keepAlivec:
-			// Lock for appending the channel to pingrespcs.
-			cli.conn.muPINGRESPs.Lock()
-
-			// Create a channel which handles the signal to notify the arrival of
-			// the PINGRESP Packet.
-			pingresp := make(chan struct{}, 1)
-
-			// Append the channel to pingrespcs.
-			cli.conn.pingresps = append(cli.conn.pingresps, pingresp)
-
-			// Launch a goroutine which waits for receiving the PINGRESP Packet.
-			cli.conn.wg.Add(1)
-			go cli.waitPacket(pingresp, pingrespTimeout, ErrPINGRESPTimeout)
-
-			// Unlock.
-			cli.conn.muPINGRESPs.Unlock()
-
 			// Lock for sending the Packet.
 			cli.muConn.RLock()
 
@@ -994,6 +977,23 @@ func (cli *Client) sendPackets(keepAlive time.Duration, pingrespTimeout time.Dur
 				// End this function.
 				return
 			}
+
+			// Create a channel which handles the signal to notify the arrival of
+			// the PINGRESP Packet.
+			pingresp := make(chan struct{})
+
+			// Lock for appending the channel to pingrespcs.
+			cli.conn.muPINGRESPs.Lock()
+
+			// Append the channel to pingrespcs.
+			cli.conn.pingresps = append(cli.conn.pingresps, pingresp)
+
+			// Unlock.
+			cli.conn.muPINGRESPs.Unlock()
+
+			// Launch a goroutine which waits for receiving the PINGRESP Packet.
+			cli.conn.wg.Add(1)
+			go cli.waitPacket(pingresp, pingrespTimeout, ErrPINGRESPTimeout)
 		case <-cli.conn.sendEnd:
 			// End this function.
 			return

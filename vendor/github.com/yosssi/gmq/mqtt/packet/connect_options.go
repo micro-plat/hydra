@@ -8,11 +8,11 @@ import (
 
 // Error values
 var (
-	ErrClientIDExceedsMaxStringsLen    = errors.New("the length of the Client Identifier exceeds the maximum strings length")
-	ErrUserNameExceedsMaxStringsLen    = errors.New("the length of the User Name exceeds the maximum strings length")
-	ErrPasswordExceedsMaxStringsLen    = errors.New("the length of the Password exceeds the maximum strings length")
-	ErrWillTopicExceedsMaxStringsLen   = errors.New("the length of the Will Topic exceeds the maximum strings length")
-	ErrWillMessageExceedsMaxStringsLen = errors.New("the length of the Will Message exceeds the maximum strings length")
+	ErrClientIDExceedsMaxStringsLen    = errors.New("the length of the Client Identifier exceeds the maximum strings legnth")
+	ErrUserNameExceedsMaxStringsLen    = errors.New("the length of the User Name exceeds the maximum strings legnth")
+	ErrPasswordExceedsMaxStringsLen    = errors.New("the length of the Password exceeds the maximum strings legnth")
+	ErrWillTopicExceedsMaxStringsLen   = errors.New("the length of the Will Topic exceeds the maximum strings legnth")
+	ErrWillMessageExceedsMaxStringsLen = errors.New("the length of the Will Message exceeds the maximum strings legnth")
 	ErrInvalidClientIDCleanSession     = errors.New("the Clean Session must be true if the Client Identifier is zero-byte")
 	ErrInvalidClientIDPassword         = errors.New("the Password must be zero-byte if the Client Identifier is zero-byte")
 	ErrInvalidWillTopicMessage         = errors.New("the Will Topic (Message) must not be zero-byte if the Will Message (Topic) is not zero-byte")

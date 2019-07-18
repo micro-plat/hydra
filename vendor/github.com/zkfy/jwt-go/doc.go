@@ -2,7 +2,3 @@
 //
 // See README.md for more info.
 package jwt
-
-func main() {
-
-}

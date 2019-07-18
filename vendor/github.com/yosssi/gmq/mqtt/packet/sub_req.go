@@ -9,7 +9,7 @@ import (
 // Error values
 var (
 	ErrNoTopicFilter                   = errors.New("the Topic Filter must be specified")
-	ErrTopicFilterExceedsMaxStringsLen = errors.New("the length of the Topic Filter exceeds the maximum strings length")
+	ErrTopicFilterExceedsMaxStringsLen = errors.New("the length of the Topic Filter exceeds the maximum strings legnth")
 )
 
 // SubReq represents subscription request.
