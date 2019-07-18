@@ -6,9 +6,11 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-gonic/gin v1.4.0
+	github.com/gmallard/stompngo v1.0.11 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
@@ -16,11 +18,14 @@ require (
 	github.com/golang/snappy v0.0.1
 	github.com/gorilla/websocket v1.4.0
 	github.com/json-iterator/go v1.1.6
+	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/lib4go v0.0.0-20190705091641-a9c3303797f1
 	github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b
 	github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/onsi/ginkgo v1.8.0 // indirect
+	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/profile v1.3.0
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
