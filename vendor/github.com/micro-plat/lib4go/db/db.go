@@ -8,10 +8,7 @@ import (
 
 //IDB 数据库操作接口,安装可需能需要执行export LD_LIBRARY_PATH=/usr/local/lib
 type IDB interface {
-	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
-	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
-	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
-	Executes(sql string, input map[string]interface{}) (lastInsertId, affectedRow int64, query string, args []interface{}, err error)
+	IDBExecuter
 	ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error)
 	Begin() (IDBTrans, error)
 	Close()
@@ -19,12 +16,17 @@ type IDB interface {
 
 //IDBTrans 数据库事务接口
 type IDBTrans interface {
+	IDBExecuter
+	Rollback() error
+	Commit() error
+}
+
+//IDBExecuter 数据库操作对象集合
+type IDBExecuter interface {
 	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
 	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
 	Executes(sql string, input map[string]interface{}) (lastInsertId int64, affectedRow int64, query string, args []interface{}, err error)
-	Rollback() error
-	Commit() error
 }
 
 //DB 数据库操作类

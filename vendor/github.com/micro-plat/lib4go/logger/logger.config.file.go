@@ -14,7 +14,7 @@ import (
 	"github.com/micro-plat/lib4go/file"
 )
 
-var loggerPath, _ = file.GetAbs("../conf/logger.json")
+var loggerPath, _ = file.GetAbs(filepath.Join(os.Args[0], "../conf/logger.json"))
 var configAdapter map[string]func() []*Appender
 var defaultConfigAdapter string
 
@@ -114,7 +114,7 @@ func writeToFile(loggerPath string, appenders []*Appender) (err error) {
 }
 func getDefConfig() (appenders []*Appender) {
 	fileAppender := &Appender{Type: "file", Level: SLevel_ALL}
-	fileAppender.Path, _ = file.GetAbs("../logs/%date.log")
+	fileAppender.Path, _ = file.GetAbs(filepath.Join(os.Args[0], "../logs/%date.log"))
 	fileAppender.Layout = "[%datetime.%ms][%l][%session] %content%n"
 	appenders = append(appenders, fileAppender)
 
