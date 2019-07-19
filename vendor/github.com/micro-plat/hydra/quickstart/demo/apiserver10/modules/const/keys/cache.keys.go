@@ -1,0 +1,3 @@
+package keys
+
+const ORDER_QUERY = "MALL:APISERVER:ORDER:QUERY_BY_ORDER_NO"
