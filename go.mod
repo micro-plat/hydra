@@ -1,4 +1,4 @@
-module hydra
+module github.com/micro-plat/hydra
 
 go 1.12
 
