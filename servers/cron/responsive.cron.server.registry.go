@@ -1,11 +1,10 @@
 package cron
 
 import (
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/hydra/servers/pkg/sharding"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -56,31 +55,9 @@ func (s *CronResponsiveServer) watchMasterChange(root, path string) error {
 	return nil
 }
 
-func (s *CronResponsiveServer) isMaster(path string, cldrs []string) bool {
-	if len(cldrs) == 0 {
-		return s.master
-	}
-	ncldrs := make([]string, 0, len(cldrs))
-	for _, v := range cldrs {
-		args := strings.SplitN(v, "_", 2)
-		ncldrs = append(ncldrs, args[len(args)-1])
-	}
-	sort.Strings(ncldrs)
-	if s.shardingCount == 0 {
-		s.shardingCount = len(ncldrs)
-	}
-	index := -1
-	for i, v := range ncldrs {
-		if strings.HasSuffix(path, v) {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
-		return s.master
-	}
-	s.shardingIndex = getSharding(index, s.shardingCount)
-	return s.shardingIndex > -1
+func (s *CronResponsiveServer) isMaster(path string, cldrs []string)(isMaster bool) {
+	s.shardingIndex, isMaster = sharding.IsMaster(s.master, s.shardingCount, path, cldrs)
+	return isMaster
 
 }
 func (s *CronResponsiveServer) notifyConsumer(v bool) error {
