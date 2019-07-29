@@ -82,7 +82,7 @@ func (s *StandardInfluxDB) SaveInfluxObject(tpName string, name string, f func(c
 	if err != nil {
 		return false, nil, fmt.Errorf("%s %v", registry.Join("/", s.GetPlatName(), "var", tpName, name), err)
 	}
-	key := fmt.Sprintf("%s/%s:%d", tpName, name, cacheConf.GetVersion())
+	key := fmt.Sprintf("%s/%s:%s", tpName, name, cacheConf.GetSignature())
 	ok, ch, err := s.influxdbCache.SetIfAbsentCb(key, func(input ...interface{}) (c interface{}, err error) {
 		return f(cacheConf)
 	})

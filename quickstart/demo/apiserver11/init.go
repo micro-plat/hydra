@@ -20,6 +20,6 @@ func (api *apiserver) init() {
 	})
 
 	//服务注册
-	api.Micro("/order/request", order.NewRequestHandler)
+	api.Micro("/order", order.NewRequestHandler)
 
 }

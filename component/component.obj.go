@@ -35,7 +35,7 @@ func (s *GlobalVarObjectCache) GetGlobalObject(tpName string, name string) (c in
 	if err != nil {
 		return nil, fmt.Errorf("%s %v", registry.Join("/", s.GetPlatName(), "var", tpName, name), err)
 	}
-	key := fmt.Sprintf("%s/%s:%d", tpName, name, cacheConf.GetVersion())
+	key := fmt.Sprintf("%s/%s:%s", tpName, name, cacheConf.GetSignature())
 	c, ok := s.cacheMap.Get(key)
 	if !ok {
 		err = fmt.Errorf("缓存对象未创建:%s", registry.Join("/", s.GetPlatName(), "var", tpName, name))
@@ -50,7 +50,7 @@ func (s *GlobalVarObjectCache) SaveGlobalObject(tpName string, name string, f fu
 	if err != nil {
 		return false, nil, fmt.Errorf("%s %v", registry.Join("/", s.GetPlatName(), "var", tpName, name), err)
 	}
-	key := fmt.Sprintf("%s/%s:%d", tpName, name, cacheConf.GetVersion())
+	key := fmt.Sprintf("%s/%s:%s", tpName, name, cacheConf.GetSignature())
 	ok, ch, err := s.cacheMap.SetIfAbsentCb(key, func(input ...interface{}) (c interface{}, err error) {
 		c, err = f(cacheConf)
 		if err != nil {

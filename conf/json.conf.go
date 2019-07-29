@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/micro-plat/lib4go/security/md5"
 )
 
 type IConf interface {
@@ -19,20 +21,28 @@ type IConf interface {
 	HasSection(section string) bool
 	GetRaw() []byte
 	Unmarshal(v interface{}) error
+	GetSignature() string
 }
 
 //JSONConf json配置文件
 type JSONConf struct {
-	raw     json.RawMessage
-	version int32
-	data    map[string]interface{}
+	raw       json.RawMessage
+	version   int32
+	signature string
+	data      map[string]interface{}
 }
 
 //NewJSONConfByMap 根据map初始化对象
 func NewJSONConfByMap(data map[string]interface{}, version int32) (c *JSONConf, err error) {
+	buf, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
 	c = &JSONConf{
-		data:    data,
-		version: version,
+		data:      data,
+		version:   version,
+		raw:       buf,
+		signature: md5.EncryptBytes(buf),
 	}
 	return c, nil
 }
@@ -40,8 +50,9 @@ func NewJSONConfByMap(data map[string]interface{}, version int32) (c *JSONConf, 
 //NewJSONConf 初始化JsonConf
 func NewJSONConf(message []byte, version int32) (c *JSONConf, err error) {
 	c = &JSONConf{
-		raw:     json.RawMessage(message),
-		version: version,
+		raw:       json.RawMessage(message),
+		signature: md5.EncryptBytes(message),
+		version:   version,
 	}
 	if err = json.Unmarshal(message, &c.data); err != nil {
 		return nil, err
@@ -169,6 +180,11 @@ func (j *JSONConf) GetSection(section string) (c *JSONConf, err error) {
 	}
 	err = fmt.Errorf("节点:%s不是有效的json对象", section)
 	return
+}
+
+//GetSignature 获取当前对象的唯一标识
+func (j *JSONConf) GetSignature() string {
+	return j.signature
 }
 
 //ParseBool 将字符串转换为bool值

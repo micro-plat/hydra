@@ -79,7 +79,7 @@ func (s *StandardQueue) SaveQueueObject(tpName string, name string, f func(c con
 	if err != nil {
 		return false, nil, fmt.Errorf("%s %v", registry.Join("/", s.GetPlatName(), "var", tpName, name), err)
 	}
-	key := fmt.Sprintf("%s/%s:%d", tpName, name, cacheConf.GetVersion())
+	key := fmt.Sprintf("%s/%s:%s", tpName, name, cacheConf.GetSignature())
 	ok, ch, err := s.queueCache.SetIfAbsentCb(key, func(input ...interface{}) (c interface{}, err error) {
 		return f(cacheConf)
 	})
