@@ -11,7 +11,6 @@ import (
 
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/security/md5"
-	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -100,7 +99,7 @@ func (r *Request) BindWith(obj interface{}, contentType string) error {
 }
 
 //Check 检查输入参数和配置参数是否为空
-func (r *Request) Check(field ...string) error {
+func (r *Request) Check(field ...string) (err error) {
 	data, err := r.GetBodyMap()
 	for _, fd := range field {
 		if err = r.Form.Check(fd); err == nil {
@@ -110,10 +109,10 @@ func (r *Request) Check(field ...string) error {
 			continue
 		}
 		if v, ok := data[fd]; !ok && fmt.Sprint(v) != "" {
-			return fmt.Errorf("输入参数:%s值不能为空 %v", fd, types.GetString(err))
+			return fmt.Errorf("输入参数:%s值不能为空", fd)
 		}
 	}
-	return nil
+	return
 }
 
 //Body2Input 根据编码格式解码body参数，并更新input参数
