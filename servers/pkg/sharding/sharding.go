@@ -1,7 +1,6 @@
 package sharding
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
@@ -21,7 +20,6 @@ func IsMaster(master bool, scount int, path string, cldrs []string) (int, bool) 
 		rcount = len(ncldrs)
 	}
 	index := -1
-	fmt.Println("cldrs:", ncldrs)
 	for i, v := range ncldrs {
 		if strings.HasSuffix(path, v) {
 			index = i
@@ -34,7 +32,6 @@ func IsMaster(master bool, scount int, path string, cldrs []string) (int, bool) 
 	if scount == 1 {
 		return 0, index == 0
 	}
-	fmt.Println("get.sharding:", index, rcount)
 	shardingIndex := getSharding(index, rcount)
 	return shardingIndex, shardingIndex > -1
 

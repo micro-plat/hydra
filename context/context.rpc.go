@@ -47,7 +47,7 @@ func (cr *ContextRPC) PreInit(services ...string) error {
 }
 
 //AsyncRequest 异步请求
-func (cr *ContextRPC) AsyncRequest(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) rpc.IRPCResponse {
+func (cr *ContextRPC) AsyncRequest(service string, header map[string]string, form map[string]interface{}, failFast bool) rpc.IRPCResponse {
 	if header == nil {
 		header = make(map[string]string)
 	}
@@ -57,16 +57,24 @@ func (cr *ContextRPC) AsyncRequest(service string, method string, header map[str
 	if _, ok := header["__body"]; !ok {
 		header["__body"], _ = cr.ctx.Request.GetBody()
 	}
+	method, ok := header["method"]
+	if !ok {
+		method = "get"
+	}
 	return cr.rpc.AsyncRequest(service, method, header, form, failFast)
 }
 
 //RequestFailRetry RPC请求
-func (cr *ContextRPC) RequestFailRetry(service string, method string, header map[string]string, form map[string]interface{}, times int) (status int, r string, param map[string]string, err error) {
+func (cr *ContextRPC) RequestFailRetry(service string, header map[string]string, form map[string]interface{}, times int) (status int, r string, param map[string]string, err error) {
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.GetUUID()
 	}
 	if _, ok := header["__body"]; !ok {
 		header["__body"], _ = cr.ctx.Request.GetBody()
+	}
+	method, ok := header["method"]
+	if !ok {
+		method = "get"
 	}
 	status, r, param, err = cr.rpc.RequestFailRetry(service, method, header, form, times)
 	if err != nil || status != 200 {
@@ -76,7 +84,7 @@ func (cr *ContextRPC) RequestFailRetry(service string, method string, header map
 }
 
 //Request RPC请求
-func (cr *ContextRPC) Request(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r string, param map[string]string, err error) {
+func (cr *ContextRPC) Request(service string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r string, param map[string]string, err error) {
 	if header == nil {
 		header = map[string]string{}
 	}
@@ -89,6 +97,10 @@ func (cr *ContextRPC) Request(service string, method string, header map[string]s
 	if _, ok := header["__body"]; !ok {
 		header["__body"], _ = cr.ctx.Request.GetBody()
 	}
+	method, ok := header["method"]
+	if !ok {
+		method = "get"
+	}
 	status, r, param, err = cr.rpc.Request(service, method, header, form, failFast)
 	if err != nil || status != 200 {
 		return
@@ -97,17 +109,18 @@ func (cr *ContextRPC) Request(service string, method string, header map[string]s
 }
 
 //RequestMap RPC请求返回结果转换为map
-func (cr *ContextRPC) RequestMap(service string, method string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error) {
+func (cr *ContextRPC) RequestMap(service string, header map[string]string, form map[string]interface{}, failFast bool) (status int, r map[string]interface{}, param map[string]string, err error) {
 	if _, ok := header["__hydra_sid_"]; !ok {
 		header["__hydra_sid_"] = cr.ctx.Request.GetUUID()
 	}
 	if _, ok := header["__body"]; !ok {
 		header["__body"], _ = cr.ctx.Request.GetBody()
 	}
-	status, result, param, err := cr.Request(service, method, header, form, failFast)
+	status, result, param, err := cr.Request(service, header, form, failFast)
 	if err != nil {
 		return
 	}
+
 	r, err = jsons.Unmarshal([]byte(result))
 	if err != nil {
 		err = fmt.Errorf("rpc请求返结果不是有效的json串:%s,%v,%s,err:%v", service, form, result, err)
