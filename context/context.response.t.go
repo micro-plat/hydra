@@ -241,6 +241,9 @@ func (r *Response) GetCode(c interface{}) int {
 	case IError:
 		return v.GetCode()
 	case error:
+		if r.Status == 0 {
+			return 400
+		}
 		return r.Status
 	default:
 		if r.Status == 0 {
