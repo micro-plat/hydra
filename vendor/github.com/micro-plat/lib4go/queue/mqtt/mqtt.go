@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	xnet "net"
 	"sync"
 	"time"
 
@@ -61,7 +62,8 @@ func (c *MQTTClient) reconnect() {
 				}()
 				client, b, err := c.connect()
 				if err != nil {
-					c.Logger.Error("连接失败:", err)
+					c.connCh <- 1
+					c.Logger.Error("publisher 连接失败:", err)
 				}
 				if b {
 					c.Logger.Info("publisher成功连接到服务器")
@@ -89,20 +91,34 @@ func (c *MQTTClient) connect() (*client.Client, bool, error) {
 			}
 		},
 	})
-	if err := cc.Connect(&client.ConnectOptions{
-		Network:         "tcp",
-		Address:         c.conf.Addr,
-		UserName:        []byte(c.conf.UserName),
-		Password:        []byte(c.conf.Password),
-		ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
-		TLSConfig:       cert,
-		PINGRESPTimeout: 3,
-		KeepAlive:       10,
-	}); err != nil {
-		c.clientOnce = sync.Once{}
-		return nil, false, fmt.Errorf("连接失败:%v(%s-%s/%s)", err, c.conf.Addr, c.conf.UserName, c.conf.Password)
+	host, port, err := xnet.SplitHostPort(c.conf.Address)
+	if err != nil {
+		return nil, false, err
 	}
-	return cc, true, nil
+	addrs, err := xnet.LookupHost(host)
+	if err != nil {
+		return nil, false, err
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	for _, addr := range addrs {
+		if err := cc.Connect(&client.ConnectOptions{
+			Network:         "tcp",
+			Address:         addr + ":" + port,
+			UserName:        []byte(c.conf.UserName),
+			Password:        []byte(c.conf.Password),
+			ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
+			TLSConfig:       cert,
+			PINGRESPTimeout: 3,
+			KeepAlive:       10,
+		}); err == nil {
+			c.clientOnce = sync.Once{}
+			return cc, true, nil
+		}
+	}
+	return nil, false, fmt.Errorf("连接失败:%v[%v](%s-%s/%s)", err, c.conf.Address, addrs, c.conf.UserName, c.conf.Password)
+
 }
 func (c *MQTTClient) getCert(conf *queue.Config) (*tls.Config, error) {
 	if conf.CertPath == "" {

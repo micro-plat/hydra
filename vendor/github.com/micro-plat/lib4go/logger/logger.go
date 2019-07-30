@@ -108,6 +108,9 @@ func GetSession(name string, sessionID string, tags ...string) (logger *Logger) 
 	}
 	return logger
 }
+func (logger *Logger) SetName(name string) {
+	logger.names = name
+}
 
 //Close 关闭当前日志组件
 func (logger *Logger) Close() {
