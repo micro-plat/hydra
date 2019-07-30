@@ -62,3 +62,13 @@ func NewError(code int, err interface{}) *Error {
 	}
 	return r
 }
+
+//GetCode 获取错误码
+func GetCode(err interface{}) int {
+	switch v := err.(type) {
+	case IError:
+		return v.GetCode()
+	default:
+		return 0
+	}
+}
