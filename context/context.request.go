@@ -11,6 +11,7 @@ import (
 
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/security/md5"
+	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -102,14 +103,14 @@ func (r *Request) BindWith(obj interface{}, contentType string) error {
 func (r *Request) Check(field ...string) error {
 	data, err := r.GetBodyMap()
 	for _, fd := range field {
-		if err := r.Form.Check(fd); err == nil {
+		if err = r.Form.Check(fd); err == nil {
 			continue
 		}
-		if err := r.QueryString.Check(fd); err == nil {
+		if err = r.QueryString.Check(fd); err == nil {
 			continue
 		}
 		if v, ok := data[fd]; !ok && fmt.Sprint(v) != "" {
-			return fmt.Errorf("输入参数:%s值不能为空 %v", fd, err)
+			return fmt.Errorf("输入参数:%s值不能为空 %v", fd, types.GetString(err))
 		}
 	}
 	return nil
@@ -125,9 +126,6 @@ func (r *Request) Body2Input(encoding ...string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	//for k, v := range qString {
-	//w.Form.data.Set(k, v)
-	//}
 	return qString, nil
 }
 
