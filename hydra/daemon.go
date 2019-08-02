@@ -6,7 +6,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/creator"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
 )
 
@@ -30,7 +29,6 @@ func (m *MicroApp) stopAction(c *cli.Context) (err error) {
 }
 
 func (m *MicroApp) registryAction(c *cli.Context) (err error) {
-	defer logger.Close()
 	if err = m.checkInput(c); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
@@ -58,8 +56,6 @@ func (m *MicroApp) serviceAction(c *cli.Context) (err error) {
 	return nil
 }
 func (m *MicroApp) installAction(c *cli.Context) (err error) {
-	defer logger.Close()
-	m.logger.Info("开始安排程序")
 	if err = m.checkInput(c); err != nil {
 		cli.ErrWriter.Write([]byte("  " + err.Error() + "\n\n"))
 		cli.ShowCommandHelp(c, c.Command.Name)
