@@ -196,7 +196,9 @@ func (r *ServiceEngine) Close() error {
 		}
 	}
 	r.StandardComponent.Close()
-	r.Invoker.Close()
+	if r.Invoker != nil {
+		r.Invoker.Close()
+	}
 	r.IComponentGlobalVarObject.Close()
 	r.IComponentCache.Close()
 	r.IComponentInfluxDB.Close()
