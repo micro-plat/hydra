@@ -17,8 +17,12 @@ func NewMysqlConf(uName string, pwd string, serverIP string, dbName string) *DBC
 }
 
 //NewMysqlConfForProd 创建prod mysql数据库#connectStr
-func NewMysqlConfForProd() *DBConf {
-	return NewDBConf("mysql", "#connectStr", 20, 10, 600)
+func NewMysqlConfForProd(name ...string) *DBConf {
+	kn := "#connectStr"
+	if len(name) > 0 {
+		kn = name[0]
+	}
+	return NewDBConf("mysql", kn, 20, 10, 600)
 }
 
 //NewOracleConf 创建oracle数据库
@@ -27,8 +31,12 @@ func NewOracleConf(uName string, pwd string, tnsName string) *DBConf {
 }
 
 //NewOracleConfForProd 创建prod oracle数据库#connectStr
-func NewOracleConfForProd() *DBConf {
-	return NewDBConf("ora", "#connectStr", 200, 100, 600)
+func NewOracleConfForProd(name ...string) *DBConf {
+	kn := "#connectStr"
+	if len(name) > 0 {
+		kn = name[0]
+	}
+	return NewDBConf("ora", kn, 200, 100, 600)
 }
 
 //WithConnect 设置连接数与超时时间
