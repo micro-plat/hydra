@@ -48,15 +48,15 @@ type IBinder interface {
 	Print()
 }
 type Binder struct {
-	API     *MainBinder
-	RPC     *MainBinder
-	WS      *MainBinder
-	WEB     *MainBinder
-	MQC     *MainBinder
-	CRON    *MainBinder
+	API     IApiBinder
+	RPC     IRPCBinder
+	WS      IWSBinder
+	WEB     IWebBinder
+	MQC     IMQCBinder
+	CRON    ICronBinder
 	Plat    IPlatBinder
 	Log     logger.ILogging
-	binders map[string]*MainBinder
+	binders map[string]imainBinder
 	params  map[string]string
 	input   map[string]*Input
 	show    bool
@@ -65,14 +65,14 @@ type Binder struct {
 
 func NewBinder(log logger.ILogging) *Binder {
 	s := &Binder{params: make(map[string]string), input: make(map[string]*Input), Log: log}
-	s.API = NewMainBinder(s.params, s.input)
-	s.RPC = NewMainBinder(s.params, s.input)
-	s.WS = NewMainBinder(s.params, s.input)
-	s.WEB = NewMainBinder(s.params, s.input)
-	s.MQC = NewMainBinder(s.params, s.input)
-	s.CRON = NewMainBinder(s.params, s.input)
+	s.API = NewApiBinder(s.params, s.input)
+	s.RPC = NewRpcBinder(s.params, s.input)
+	s.WS = NewWSBinder(s.params, s.input)
+	s.WEB = NewWebBinder(s.params, s.input)
+	s.MQC = NewMQCBinder(s.params, s.input)
+	s.CRON = newCronBinder(s.params, s.input)
 	s.Plat = NewPlatBinder(s.params, s.input)
-	s.binders = map[string]*MainBinder{
+	s.binders = map[string]imainBinder{
 		"api":  s.API,
 		"rpc":  s.RPC,
 		"web":  s.WEB,

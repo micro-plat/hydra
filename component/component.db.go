@@ -72,7 +72,7 @@ func (s *StandardDB) GetDBBy(tpName string, name string) (c db.IDB, err error) {
 			dbConf.ConnString,
 			dbConf.MaxOpen,
 			dbConf.MaxIdle,
-			dbConf.LefeTime)
+			dbConf.LifeTime)
 	})
 	return c, err
 }

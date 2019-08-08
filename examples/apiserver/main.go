@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 
 	"github.com/micro-plat/hydra/examples/apiserver/services/order"
@@ -14,6 +15,9 @@ func main() {
 		hydra.WithSystemName("apiserver"),
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
+
+	app.Conf.API.SetMain(conf.NewAPIServerConf(":8098"))
+	app.Conf.API.SetHeaders(conf.NewHeader().WithCrossDomain())
 
 	app.Micro("/order/query", order.NewQueryHandler)
 	app.Micro("/hello/get", helloWorld)

@@ -68,7 +68,7 @@ func (s *StandardQueue) GetQueueBy(tpName string, name string) (c queue.IQueue, 
 		if b, err := govalidator.ValidateStruct(&qConf); !b {
 			return nil, err
 		}
-		return queue.NewQueue(qConf.Proto, string(jConf.GetRaw()))
+		return queue.NewQueue(qConf.GetProto(), string(jConf.GetRaw()))
 	})
 	return c, err
 }

@@ -4,18 +4,18 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
-var _ IPlatBinder = &PlatBinder{}
+// var _ IplatBinder = &platBinder{}
 
-type IPlatBinder interface {
-	SetVarConf(t string, s string, v string)
+type iplatBinder interface {
+	SetVarConf(t string, s string, v interface{})
 	scan(platName string, nodeName string) error
 	getVarNames() []string
 	needScanCount(nodeName string) int
 	getNodeConf(nodeName string) string
 }
 
-//PlatBinder 平台配置绑定
-type PlatBinder struct {
+//platBinder 平台配置绑定
+type platBinder struct {
 	varConf           map[string]string   //var环境参数配置
 	varParamsForInput map[string][]string //环境参数，用于用户输入
 	inputs            map[string]*Input
@@ -23,9 +23,9 @@ type PlatBinder struct {
 	rvarConf          map[string]string //翻译后的环境参数配置
 }
 
-//NewPlatBinder 平台绑定
-func NewPlatBinder(params map[string]string, inputs map[string]*Input) *PlatBinder {
-	return &PlatBinder{
+//newPlatBinder 平台绑定
+func newPlatBinder(params map[string]string, inputs map[string]*Input) *platBinder {
+	return &platBinder{
 		varConf:           make(map[string]string),
 		varParamsForInput: make(map[string][]string),
 		inputs:            inputs,
@@ -35,14 +35,18 @@ func NewPlatBinder(params map[string]string, inputs map[string]*Input) *PlatBind
 }
 
 //SetVarConf 设置var配置内容
-func (c *PlatBinder) SetVarConf(t string, s string, v string) {
+func (c *platBinder) SetVarConf(t string, s string, input interface{}) {
+	v, err := getConfig(input)
+	if err != nil {
+		panic(err)
+	}
 	c.varConf[registry.Join(t, s)] = v
 	params := getParams(v)
 	if len(params) > 0 {
 		c.varParamsForInput[registry.Join(t, s)] = params
 	}
 }
-func (c *PlatBinder) getVarNames() []string {
+func (c *platBinder) getVarNames() []string {
 	v := make([]string, 0, len(c.varConf))
 	for k := range c.varConf {
 		v = append(v, k)
@@ -51,7 +55,7 @@ func (c *PlatBinder) getVarNames() []string {
 }
 
 //NeedScanCount 待输入个数
-func (c *PlatBinder) needScanCount(nodeName string) int {
+func (c *platBinder) needScanCount(nodeName string) int {
 	count := 0
 	for _, p := range c.varParamsForInput[nodeName] {
 		if _, ok := c.params[p]; !ok {
@@ -62,7 +66,7 @@ func (c *PlatBinder) needScanCount(nodeName string) int {
 }
 
 //Scan 绑定参数
-func (c *PlatBinder) scan(platName string, nodeName string) error {
+func (c *platBinder) scan(platName string, nodeName string) error {
 	for _, p := range c.varParamsForInput[nodeName] {
 		if _, ok := c.params[p]; ok {
 			continue
@@ -82,6 +86,6 @@ func (c *PlatBinder) scan(platName string, nodeName string) error {
 }
 
 //GetNodeConf 获取节点配置
-func (c *PlatBinder) getNodeConf(nodeName string) string {
+func (c *platBinder) getNodeConf(nodeName string) string {
 	return c.rvarConf[nodeName]
 }
