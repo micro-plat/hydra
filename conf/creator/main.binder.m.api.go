@@ -6,6 +6,7 @@ type IApiBinder interface {
 	imicroBinder
 	SetStatic(*conf.Static)
 	SetMain(*conf.APIServerConf)
+	SetCrossDomain()
 }
 
 type ApiBinder struct {

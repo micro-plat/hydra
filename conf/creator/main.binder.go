@@ -16,6 +16,7 @@ type imainBinder interface {
 	SetMainConf(input interface{})
 	SetSubConf(n string, input interface{})
 	SetMetric(m *conf.Metric)
+	SetApp(interface{})
 	getSubConfNames() []string
 	scan(mainConf string, nodeName string) error
 	needScanCount(nodeName string) int
@@ -82,6 +83,11 @@ func (c *mainBinder) SetSubConf(n string, input interface{}) {
 //SetMetric 设置服务器监控配置项
 func (c *mainBinder) SetMetric(m *conf.Metric) {
 	c.SetSubConf("metric", m)
+}
+
+//SetMetric 设置服务器监控配置项
+func (c *mainBinder) SetApp(m interface{}) {
+	c.SetSubConf("app", m)
 }
 
 //GetSubConfNames 获取子系统名称

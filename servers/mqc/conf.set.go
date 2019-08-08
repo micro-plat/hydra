@@ -49,7 +49,7 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 	if err != nil {
 		return false, err
 	}
-	var server conf.Server
+	var server conf.QueueConf
 	if err = serverConf.Unmarshal(&server); err != nil {
 		return false, err
 	}
@@ -89,7 +89,7 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 		queue.Handler = middleware.ContextHandler(engine, queue.Name, queue.Engine, queue.Service, queue.Setting, ext)
 		nqueues = append(nqueues, queue)
 	}
-	if err = set.SetQueues(server.Proto, string(serverConf.GetRaw()), nqueues); err != nil {
+	if err = set.SetQueues(server.GetProto(), string(serverConf.GetRaw()), nqueues); err != nil {
 		return false, err
 	}
 	return true, nil
