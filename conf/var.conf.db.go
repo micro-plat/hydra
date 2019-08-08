@@ -16,9 +16,19 @@ func NewMysqlConf(uName string, pwd string, serverIP string, dbName string) *DBC
 	return NewDBConf("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", uName, pwd, serverIP, dbName), 20, 10, 600)
 }
 
+//NewMysqlConfForProd 创建prod mysql数据库#connectStr
+func NewMysqlConfForProd() *DBConf {
+	return NewDBConf("mysql", "#connectStr", 20, 10, 600)
+}
+
 //NewOracleConf 创建oracle数据库
 func NewOracleConf(uName string, pwd string, tnsName string) *DBConf {
-	return NewDBConf("ora", fmt.Sprintf("%s/%s@%s", uName, pwd, tnsName), 20, 10, 600)
+	return NewDBConf("ora", fmt.Sprintf("%s/%s@%s", uName, pwd, tnsName), 200, 100, 600)
+}
+
+//NewOracleConfForProd 创建prod oracle数据库#connectStr
+func NewOracleConfForProd() *DBConf {
+	return NewDBConf("ora", "#connectStr", 200, 100, 600)
 }
 
 //WithConnect 设置连接数与超时时间
