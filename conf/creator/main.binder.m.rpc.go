@@ -3,6 +3,7 @@ package creator
 import "github.com/micro-plat/hydra/conf"
 
 type IRPCBinder interface {
+	SetMain(c *conf.RPCServerConf)
 	imicroBinder
 }
 
