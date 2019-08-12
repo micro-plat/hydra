@@ -116,7 +116,7 @@ func (r *ServiceEngine) UpdateVarConf(conf conf.IServerConf) {
 }
 
 //GetServices 获取组件提供的所有服务
-func (r *ServiceEngine) GetServices() []string {
+func (r *ServiceEngine) GetServices() map[string][]string {
 	return r.GetRegistryNames(component.GetGroupName(r.GetServerType())...)
 
 }

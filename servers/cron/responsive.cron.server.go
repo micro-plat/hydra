@@ -137,7 +137,7 @@ func (w *CronResponsiveServer) GetStatus() string {
 }
 
 //GetServices 获取服务列表
-func (w *CronResponsiveServer) GetServices() []string {
+func (w *CronResponsiveServer) GetServices() map[string][]string {
 	return w.engine.GetServices()
 }
 

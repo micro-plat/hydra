@@ -137,7 +137,7 @@ func (w *MqcResponsiveServer) GetStatus() string {
 }
 
 //GetServices 获取服务列表
-func (w *MqcResponsiveServer) GetServices() []string {
+func (w *MqcResponsiveServer) GetServices() map[string][]string {
 	return w.engine.GetServices()
 }
 

@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/cache"
@@ -65,9 +64,9 @@ func (s *StandardCache) GetCacheBy(tpName string, name string) (c cache.ICache, 
 		if err = chConf.Unmarshal(&chObjConf); err != nil {
 			return nil, err
 		}
-		if b, err := govalidator.ValidateStruct(&chObjConf); !b {
-			return nil, err
-		}
+		// if b, err := govalidator.ValidateStruct(&chObjConf); !b {
+		// 	return nil, err
+		// }
 		return cache.NewCache(chObjConf.GetProto(), string(chConf.GetRaw()))
 	})
 	return c, err

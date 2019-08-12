@@ -6,6 +6,8 @@ type IPlatBinder interface {
 	iplatBinder
 	SetDB(*conf.DBConf)
 	SetDBByName(name string, d *conf.DBConf)
+	SetQueue(d *conf.QueueConf)
+	SetQueueByName(name string, d *conf.QueueConf)
 }
 
 type PlatBinder struct {

@@ -151,7 +151,7 @@ func (w *ApiResponsiveServer) GetStatus() string {
 }
 
 //GetServices 获取服务列表
-func (w *ApiResponsiveServer) GetServices() []string {
+func (w *ApiResponsiveServer) GetServices() map[string][]string {
 	return w.engine.GetServices()
 }
 

@@ -129,12 +129,12 @@ func (w *RpcResponsiveServer) GetStatus() string {
 }
 
 //GetServices 获取服务列表
-func (w *RpcResponsiveServer) GetServices() []string {
+func (w *RpcResponsiveServer) GetServices() map[string][]string {
 	svs := w.engine.GetServices()
-	nsevice := make([]string, 0, len(svs))
-	for _, sv := range svs {
+	nsevice := make(map[string][]string, len(svs))
+	for sv, m := range svs {
 		if w.server.Find(sv) {
-			nsevice = append(nsevice, sv)
+			nsevice[sv] = m
 		}
 	}
 	//servers.Trace(w.Infof, w.currentConf.GetServerName(), "发布服务：", nsevice)

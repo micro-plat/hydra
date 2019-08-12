@@ -49,7 +49,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	switch handler := h.(type) {
 	case GetHandler:
 		var f ServiceFunc = handler.GetHandle
-		r.registerAddService(registry.Join(name, ":get"), group, f)
+		r.registerAddService(registry.Join(name, "$get"), group, f)
 		if !hasHandle {
 			r.registerAddService(name, group, f)
 		}
@@ -58,19 +58,19 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	switch handler := h.(type) {
 	case PostHandler:
 		var f ServiceFunc = handler.PostHandle
-		r.registerAddService(registry.Join(name, ":post"), group, f)
+		r.registerAddService(registry.Join(name, "$post"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case PutHandler:
 		var f ServiceFunc = handler.PutHandle
-		r.registerAddService(registry.Join(name, ":put"), group, f)
+		r.registerAddService(registry.Join(name, "$put"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case DeleteHandler:
 		var f ServiceFunc = handler.DeleteHandle
-		r.registerAddService(registry.Join(name, ":delete"), group, f)
+		r.registerAddService(registry.Join(name, "$delete"), group, f)
 		found = true
 	}
 
@@ -91,7 +91,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 				var f ServiceFunc = nf
 				endName := strings.ToLower(mName[0 : len(mName)-6])
 				if endName == "get" || endName == "post" || endName == "put" || endName == "delete" {
-					endName = ":" + endName
+					endName = "$" + endName
 				}
 				r.registerAddService(registry.Join(name, endName), group, f)
 				found = true
@@ -122,7 +122,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//get降级服务
 	switch handler := h.(type) {
 	case GetFallbackHandler:
-		name := registry.Join(name, ":get")
+		name := registry.Join(name, "$get")
 		var f FallbackServiceFunc = handler.GetFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -132,7 +132,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//post降级服务
 	switch handler := h.(type) {
 	case PostFallbackHandler:
-		name := registry.Join(name, ":post")
+		name := registry.Join(name, "$post")
 		var f FallbackServiceFunc = handler.PostFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -142,7 +142,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//put降级服务
 	switch handler := h.(type) {
 	case PutFallbackHandler:
-		name := registry.Join(name, ":put")
+		name := registry.Join(name, "$put")
 		var f FallbackServiceFunc = handler.PutFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f
@@ -152,7 +152,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	//delete降级服务
 	switch handler := h.(type) {
 	case DeleteFallbackHandler:
-		name := registry.Join(name, ":delete")
+		name := registry.Join(name, "$delete")
 		var f FallbackServiceFunc = handler.DeleteFallback
 		if _, ok := r.FallbackHandlers[name]; !ok {
 			r.FallbackHandlers[name] = f

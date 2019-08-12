@@ -70,7 +70,7 @@ type ISetRouterHandler interface {
 	SetRouters([]*conf.Router) error
 }
 
-func getRouters(services []string) conf.Routers {
+func getRouters(services map[string][]string) conf.Routers {
 	routers := conf.Routers{}
 
 	if len(services) == 0 {
@@ -79,14 +79,14 @@ func getRouters(services []string) conf.Routers {
 		return routers
 	}
 	routers.Routers = make([]*conf.Router, 0, len(services))
-	for _, srvs := range services {
-		routers.Routers = append(routers.Routers,
-			&conf.Router{
-				Action:  []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
-				Name:    srvs,
-				Service: srvs,
-				Engine:  "*",
-			})
+	for name, actions := range services {
+		router := &conf.Router{
+			Action:  actions, //[]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
+			Name:    name,
+			Service: name,
+			Engine:  "*",
+		}
+		routers.Routers = append(routers.Routers, router)
 	}
 	return routers
 }

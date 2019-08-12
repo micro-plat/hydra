@@ -56,7 +56,7 @@ func (w *RpcResponsiveServer) pubServiceNode() error {
 
 	srvs := w.GetServices()
 	for _, host := range names {
-		for _, srv := range srvs {
+		for srv, _ := range srvs {
 			servicePath := path.Join(w.currentConf.GetServicePubRootPath(registry.Join(host, srv)), ipPort+"_")
 			rpath, err := w.engine.GetRegistry().CreateSeqNode(servicePath, nodeData)
 			if err != nil {

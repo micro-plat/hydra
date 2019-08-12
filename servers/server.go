@@ -27,7 +27,7 @@ type IRegistryServer interface {
 	Notify(conf.IServerConf) error
 	Start() error
 	GetAddress() string
-	GetServices() []string
+	GetServices() map[string][]string
 	Restarted() bool
 	GetStatus() string
 	Shutdown()
@@ -50,7 +50,7 @@ type IRegistryEngine interface {
 	GetComponent() component.IComponent
 	SetHandler(h component.IComponentHandler) error
 	UpdateVarConf(conf conf.IServerConf)
-	GetServices() []string
+	GetServices() map[string][]string
 	Fallback(c *context.Context) (rs interface{})
 }
 

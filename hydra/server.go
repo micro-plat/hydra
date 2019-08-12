@@ -68,7 +68,7 @@ func (h *server) GetAddress() string {
 }
 
 //GetServices 获取服务列表
-func (h *server) GetServices() []string {
+func (h *server) GetServices() map[string][]string {
 	return h.server.GetServices()
 }
 

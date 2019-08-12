@@ -149,7 +149,7 @@ func (w *WSServerResponsiveServer) GetStatus() string {
 }
 
 //GetServices 获取服务列表
-func (w *WSServerResponsiveServer) GetServices() []string {
+func (w *WSServerResponsiveServer) GetServices() map[string][]string {
 	return w.engine.GetServices()
 }
 

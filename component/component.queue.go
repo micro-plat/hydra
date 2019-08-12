@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -65,9 +64,9 @@ func (s *StandardQueue) GetQueueBy(tpName string, name string) (c queue.IQueue, 
 		if err = jConf.Unmarshal(&qConf); err != nil {
 			return nil, err
 		}
-		if b, err := govalidator.ValidateStruct(&qConf); !b {
-			return nil, err
-		}
+		// if b, err := govalidator.ValidateStruct(&qConf); !b {
+		// 	return nil, err
+		// }
 		return queue.NewQueue(qConf.GetProto(), string(jConf.GetRaw()))
 	})
 	return c, err
