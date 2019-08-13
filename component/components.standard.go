@@ -180,7 +180,7 @@ func (r *StandardComponent) GetHandler(engine string, service string, method str
 		r, ok := r.Handlers["__rpc_"]
 		return r, ok
 	default:
-		if r, ok := r.Handlers[registry.Join(service, "$", method)]; ok {
+		if r, ok := r.Handlers[registry.Join(service, "$"+method)]; ok {
 			return r, ok
 		}
 		r, ok := r.Handlers[service]

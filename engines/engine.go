@@ -100,6 +100,7 @@ func (r *ServiceEngine) SetHandler(h component.IComponentHandler) error {
 
 	//初始化服务注册
 	svs := h.GetServices()
+
 	for group, handlers := range svs {
 		for name, handler := range handlers {
 			r.StandardComponent.AddCustomerService(name, handler, group, h.GetTags(name)...)

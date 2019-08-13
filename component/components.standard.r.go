@@ -50,6 +50,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	case GetHandler:
 		var f ServiceFunc = handler.GetHandle
 		r.registerAddService(registry.Join(name, "$get"), group, f)
+		r.registerAddService(registry.Join(name, "get", "$get"), group, f)
 		if !hasHandle {
 			r.registerAddService(name, group, f)
 		}
@@ -246,10 +247,11 @@ func (r *StandardComponent) callFuncType(name string, h interface{}) (i interfac
 func (r *StandardComponent) LoadServices() error {
 	for group, v := range r.funcs {
 		for name, sv := range v {
-			if h, ok := r.Handlers[name]; ok {
-				r.register(group, name, h)
-				continue
-			}
+			// if h, ok := r.Handlers[name]; ok {
+			// 	r.register(group, name, h)
+
+			// 	continue
+			// }
 			rt, err := r.callFuncType(name, sv)
 			if err != nil {
 				return err
