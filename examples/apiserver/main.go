@@ -20,7 +20,7 @@ func main() {
 	app.Conf.API.SetHeaders(conf.NewHeader().WithCrossDomain())
 
 	app.Micro("/order/query", order.NewQueryHandler)
-	// app.Micro("/hello/get", helloWorld)
+	app.Micro("/hello/get", helloWorld)
 
 	app.Start()
 }

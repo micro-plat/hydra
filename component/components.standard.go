@@ -251,17 +251,16 @@ func (r *StandardComponent) Close() error {
 
 func (r *StandardComponent) GetRegistryNames(groups ...string) map[string][]string {
 	srvs := r.GetGroupServices(groups...)
-	svsMap := make(map[string][]string, 0)
+	svsMap := make(map[string][]string, len(srvs)/2)
 	for _, srv := range srvs {
 		name, methods := getMethod(srv)
+		if _, ok := svsMap[name]; !ok {
+			svsMap[name] = []string{}
+		}
 		if len(methods) > 0 {
 			for _, method := range methods {
 				if !requestMethods.Contains(method) {
 					panic(fmt.Sprintf("不支持的请求方式:%s(%s)", srv, method))
-				}
-				if _, ok := svsMap[name]; !ok {
-					svsMap[name] = []string{method}
-					continue
 				}
 				if !xContains(svsMap[name], method) {
 					svsMap[name] = append(svsMap[name], method)
@@ -269,11 +268,11 @@ func (r *StandardComponent) GetRegistryNames(groups ...string) map[string][]stri
 			}
 
 		} else { //默认只支持GET,POST
-			if !xContains(svsMap[srv], "get") {
-				svsMap[srv] = append(svsMap[srv], "get")
+			if !xContains(svsMap[name], "get") {
+				svsMap[name] = append(svsMap[name], "get")
 			}
-			if !xContains(svsMap[srv], "post") {
-				svsMap[srv] = append(svsMap[srv], "post")
+			if !xContains(svsMap[name], "post") {
+				svsMap[name] = append(svsMap[name], "post")
 			}
 		}
 
