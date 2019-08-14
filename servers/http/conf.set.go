@@ -86,7 +86,7 @@ func getRouters(services map[string][]string) conf.Routers {
 			Service: name,
 			Engine:  "*",
 		}
-		router.Action = append(router.Action, "HEAD", "OPTIONS")
+		router.Action = append(router.Action, "OPTIONS")
 		routers.Routers = append(routers.Routers, router)
 	}
 	return routers

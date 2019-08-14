@@ -57,6 +57,12 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 		found = true
 	}
 	switch handler := h.(type) {
+	case HeadHandler:
+		var f ServiceFunc = handler.HeadHandle
+		r.registerAddService(registry.Join(name, "$head"), group, f)
+		found = true
+	}
+	switch handler := h.(type) {
 	case PostHandler:
 		var f ServiceFunc = handler.PostHandle
 		r.registerAddService(registry.Join(name, "$post"), group, f)

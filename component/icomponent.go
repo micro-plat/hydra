@@ -39,6 +39,9 @@ type Handler interface {
 type GetHandler interface {
 	GetHandle(c *context.Context) interface{}
 }
+type HeadHandler interface {
+	HeadHandle(c *context.Context) interface{}
+}
 type PostHandler interface {
 	PostHandle(c *context.Context) interface{}
 }

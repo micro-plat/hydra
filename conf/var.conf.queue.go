@@ -34,7 +34,7 @@ func (m MQTTConf) WithCert(cert string) MQTTConf {
 func NewRedisQueueConf(address []string, dbIndex int) RedisQueueConf {
 	conf := make(map[string]interface{})
 	conf["proto"] = "redis"
-	conf["address"] = address
+	conf["addrs"] = address
 	conf["db"] = dbIndex
 	return conf
 }

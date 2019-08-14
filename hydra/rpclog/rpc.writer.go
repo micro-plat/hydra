@@ -49,7 +49,6 @@ func (r *rpcWriter) Write(p []byte) (n int, err error) {
 		"system":       r.systemName,
 		"cluster":      r.clusterName,
 		"server-types": r.serverTypes,
-		//	"__body_": buff.String(),
 	}, true)
 	if err != nil {
 		return 0, err
