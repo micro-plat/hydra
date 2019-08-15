@@ -174,3 +174,16 @@ func (w *extParams) GetJWTConfig() (*conf.Auth, error) {
 	}
 	return jwt, nil
 }
+func (w *extParams) SkipJWTExclude() (bool, error) {
+	jwt, err := w.GetJWTConfig()
+	if err != nil {
+		return false, err
+	}
+
+	for _, u := range jwt.Exclude {
+		if u == w.ctx.Service {
+			return true, nil
+		}
+	}
+	return false, nil
+}
