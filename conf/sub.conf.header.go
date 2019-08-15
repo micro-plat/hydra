@@ -26,6 +26,7 @@ func (imp Headers) WithCrossDomain(host ...string) CrossDomainHeader {
 	}
 	imp["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
 	imp["Access-Control-Allow-Credentials"] = "true"
+	imp["Access-Control-Allow-Headers"] = "X-Requested-With,Content-Type,__jwt__"
 	return imp
 }
 

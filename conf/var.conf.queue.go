@@ -39,6 +39,15 @@ func NewRedisQueueConf(address []string, dbIndex int) RedisQueueConf {
 	return conf
 }
 
+//NewRedisQueueConfForProd 创建prod redis配置
+func NewRedisQueueConfForProd(dbIndex int, name ...string) RedisQueueConf {
+	kn := "#redisCache"
+	if len(name) > 0 {
+		kn = name[0]
+	}
+	return NewRedisQueueConf([]string{kn}, dbIndex)
+}
+
 //WithTimeout 设置超时时长
 func (m RedisQueueConf) WithTimeout(dialTimeout int, readTimeout int, writeTimeout int, poolSize int) RedisQueueConf {
 	m["dial_timeout"] = dialTimeout
