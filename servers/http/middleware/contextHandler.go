@@ -148,20 +148,20 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 	}
 }
 
-func makeFormData(ctx *gin.Context) InputData {
+func makeFormData(ctx *gin.Context) IInputData {
 	if ctx.ContentType() == binding.MIMEPOSTForm ||
 		ctx.ContentType() == binding.MIMEMultipartPOSTForm {
 		ctx.Request.ParseForm()
 		ctx.Request.ParseMultipartForm(32 << 20)
 	}
 
-	return ctx.GetPostForm
+	return newInputData(ctx.Request.PostForm, ctx.GetPostForm)
 }
-func makeQueyStringData(ctx *gin.Context) InputData {
-	return ctx.GetQuery
+func makeQueyStringData(ctx *gin.Context) IInputData {
+	return newInputData(ctx.Request.URL.Query(), ctx.GetQuery)
 }
-func makeParamsData(ctx *gin.Context) InputData {
-	return ctx.Params.Get
+func makeParamsData(ctx *gin.Context) IInputData {
+	return newInputData(ctx.Params, ctx.Params.Get)
 }
 
 func makeMapData(m map[string]interface{}) MapData {
@@ -173,7 +173,7 @@ func makeSettingData(ctx *gin.Context, m map[string]string) ParamData {
 }
 
 func makeExtData(c *gin.Context) map[string]interface{} {
-	
+
 	input := make(map[string]interface{})
 	input["__hydra_sid_"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.Method)
@@ -182,7 +182,7 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 	input["__jwt_"] = func() interface{} {
 		return getJWTRaw(c)
 	}
-	
+
 	input["__func_http_request_"] = c.Request
 	input["__func_http_response_"] = c.Writer
 	input["__binding_"] = c.ShouldBind
@@ -236,13 +236,54 @@ func (i MapData) Get(key string) (interface{}, bool) {
 	return r, ok
 }
 
+//Keys 获取指定键对应的数据
+func (i MapData) Keys() []string {
+	keys := make([]string, 0, len(i))
+	for k := range i {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 //InputData 输入参数
-type InputData func(key string) (string, bool)
+type IInputData interface {
+	Get(key string) (interface{}, bool)
+	Keys() []string
+}
+type InputData struct {
+	keys []string
+	get  func(string) (string, bool)
+}
+
+//NewInputData 创建input data
+func newInputData(v interface{}, get func(string) (string, bool)) *InputData {
+	input := &InputData{
+		get: get,
+	}
+	switch tp := v.(type) {
+	case map[string][]string:
+		input.keys = make([]string, 0, len(tp))
+		for k := range tp {
+			input.keys = append(input.keys, k)
+		}
+	case []gin.Param:
+		input.keys = make([]string, 0, len(tp))
+		for _, k := range tp {
+			input.keys = append(input.keys, k.Key)
+		}
+	}
+
+	return input
+}
 
 //Get 获取指定键对应的数据
 func (i InputData) Get(key string) (interface{}, bool) {
-	r, ok := i(key)
-	return r, ok
+	return i.get(key)
+}
+
+//Keys 获取所有KEY
+func (i InputData) Keys() []string {
+	return i.keys
 }
 
 //ParamData map参数数据
@@ -252,4 +293,13 @@ type ParamData map[string]string
 func (i ParamData) Get(key string) (interface{}, bool) {
 	r, ok := i[key]
 	return r, ok
+}
+
+//Keys 获取指定键对应的数据
+func (i ParamData) Keys() []string {
+	keys := make([]string, 0, len(i))
+	for k := range i {
+		keys = append(keys, k)
+	}
+	return keys
 }

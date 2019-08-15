@@ -118,7 +118,7 @@ func (s *MqcServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Queue) 
 				if _, ok := s.handles[r.Name]; !ok {
 					handler := middleware.ContextHandler(engine, r.Name, r.Engine, r.Service, r.Setting, nil)
 					s.handles[r.Name] = handler
-					s.Dispatcher.Handle(strings.ToUpper("GET"), fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
+					s.Dispatcher.Handle("GET", fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
 				}
 				s.Logger.Debugf("[订阅(%s)消息]", r.Queue)
 				if err := s.Consume(r); err != nil {

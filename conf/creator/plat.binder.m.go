@@ -8,6 +8,8 @@ type IPlatBinder interface {
 	SetDBByName(name string, d *conf.DBConf)
 	SetQueue(d *conf.QueueConf)
 	SetQueueByName(name string, d *conf.QueueConf)
+	SetCache(*conf.CacheConf)
+	SetCacheByName(name string, d *conf.CacheConf)
 }
 
 type PlatBinder struct {
@@ -32,4 +34,10 @@ func (b *PlatBinder) SetQueue(d *conf.QueueConf) {
 }
 func (b *PlatBinder) SetQueueByName(name string, d *conf.QueueConf) {
 	b.platBinder.SetVarConf("queue", name, d)
+}
+func (b *PlatBinder) SetCache(d *conf.CacheConf) {
+	b.platBinder.SetVarConf("cache", "cache", d)
+}
+func (b *PlatBinder) SetCacheByName(name string, d *conf.CacheConf) {
+	b.platBinder.SetVarConf("cache", name, d)
 }

@@ -9,13 +9,12 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
-	"github.com/micro-plat/lib4go/net"
-	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/utility"
 )
 
 type IData interface {
 	Get(string) (interface{}, bool)
+	Keys() []string
 }
 
 //Request 输入参数
@@ -126,6 +125,19 @@ func (r *Request) Body2Input(encoding ...string) (map[string]string, error) {
 		return nil, err
 	}
 	return qString, nil
+}
+func (r *Request) GetKeys() []string {
+	keys := make([]string, 0, 4)
+	keys = append(keys, r.Form.Keys()...)
+	keys = append(keys, r.QueryString.Keys()...)
+	m, err := r.GetBodyMap()
+	if err != nil {
+		return keys
+	}
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 //Get 获取请求数据值
@@ -280,43 +292,4 @@ func (r *Request) GetDataTimeByFormat(name string, format string, p ...time.Time
 		return p[0], nil
 	}
 	return v, err
-}
-
-//GetSignRaw 检查签名原串
-func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string, string) {
-	input := make(map[string]interface{})
-	if len(f) == 0 {
-		input, _ = r.GetBodyMap()
-	} else {
-		for _, k := range f {
-			input[k] = r.GetString(k)
-		}
-	}
-	values := net.NewValues()
-	values.SetMap(input)
-
-	sign := values.Get("sign")
-	if sign == "" {
-		sign = values.Get("signature")
-	}
-	values.Remove("sign")
-	values.Remove("signature")
-	values.Sort()
-	if all {
-		return sign, values.JoinAll(a, b)
-	}
-	return sign, values.Join(a, b)
-
-}
-
-//CheckSign 检查签名是否正确(只值为空不参与签名，键值及每个串之前使用空进行连接)
-func (r *Request) CheckSign(key string, f ...string) bool {
-	sign, raw := r.GetSignRaw(false, "", "", f...)
-	return strings.EqualFold(md5.Encrypt(raw+key), sign)
-}
-
-//CheckSignAll 检查签名是否正确
-func (r *Request) CheckSignAll(key string, all bool, a string, b string, f ...string) bool {
-	sign, raw := r.GetSignRaw(all, a, b, f...)
-	return strings.EqualFold(md5.Encrypt(raw+key), sign)
 }

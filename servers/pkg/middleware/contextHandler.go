@@ -118,14 +118,14 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 	}
 }
 
-func makeFormData(ctx *dispatcher.Context) InputData {
-	return ctx.GetPostForm
+func makeFormData(ctx *dispatcher.Context) IInputData {
+	return newInputData(ctx.Request.GetForm, ctx.PostForm)
 }
-func makeQueyStringData(ctx *dispatcher.Context) InputData {
+func makeQueyStringData(ctx *dispatcher.Context) IInputData {
 	return nil
 }
-func makeParamsData(ctx *dispatcher.Context) HeaderData {
-	return ctx.Params.Get
+func makeParamsData(ctx *dispatcher.Context) IHeaderData {
+	return newHeaderData(ctx.Params, ctx.Params.Get)
 }
 func makeSettingData(ctx *dispatcher.Context, m map[string]string) ParamData {
 	return m
@@ -185,29 +185,76 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 }
 
 //InputData 输入参数
-type InputData func(key string) (interface{}, bool)
+type IInputData interface {
+	Get(key string) (interface{}, bool)
+	Keys() []string
+}
+type InputData struct {
+	keys []string
+	get  func(string) interface{}
+}
+
+//NewInputData 创建input data
+func newInputData(v interface{}, get func(string) interface{}) *InputData {
+	input := &InputData{
+		get: get,
+	}
+	switch tp := v.(type) {
+	case map[string][]string:
+		input.keys = make([]string, 0, len(tp))
+		for k := range tp {
+			input.keys = append(input.keys, k)
+		}
+	case []dispatcher.Param:
+		input.keys = make([]string, 0, len(tp))
+		for _, k := range tp {
+			input.keys = append(input.keys, k.Key)
+		}
+	}
+
+	return input
+}
 
 //Get 获取指定键对应的数据
 func (i InputData) Get(key string) (interface{}, bool) {
-	if i != nil {
-		r, ok := i(key)
-		return r, ok
-	}
-
-	return "", false
+	return i.get(key), true
 }
 
-//HeaderData 输入参数
-type HeaderData func(key string) (string, bool)
+//Keys 获取所有KEY
+func (i InputData) Keys() []string {
+	return i.keys
+}
+
+//InputData 输入参数
+type IHeaderData interface {
+	Get(key string) (interface{}, bool)
+	Keys() []string
+}
+type HeaderData struct {
+	keys []string
+	get  func(string) (string, bool)
+}
+
+//NewInputData 创建input data
+func newHeaderData(tp []dispatcher.Param, get func(string) (string, bool)) *HeaderData {
+	input := &HeaderData{
+		get: get,
+	}
+	input.keys = make([]string, 0, len(tp))
+	for _, k := range tp {
+		input.keys = append(input.keys, k.Key)
+	}
+	return input
+}
 
 //Get 获取指定键对应的数据
 func (i HeaderData) Get(key string) (interface{}, bool) {
-	if i != nil {
-		r, ok := i(key)
-		return r, ok
-	}
+	return i.get(key)
+}
 
-	return "", false
+//Keys 获取所有KEY
+func (i HeaderData) Keys() []string {
+	return i.keys
 }
 
 //ParamData map参数数据
@@ -217,4 +264,13 @@ type ParamData map[string]string
 func (i ParamData) Get(key string) (interface{}, bool) {
 	r, ok := i[key]
 	return r, ok
+}
+
+//Keys 获取指定键对应的数据
+func (i ParamData) Keys() []string {
+	keys := make([]string, 0, len(i))
+	for k := range i {
+		keys = append(keys, k)
+	}
+	return keys
 }

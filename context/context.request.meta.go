@@ -4,6 +4,14 @@ type meta struct {
 	d map[string]interface{}
 }
 
+func (m *meta) Keys() []string {
+	keys := make([]string, 0, len(m.d))
+	for k := range m.d {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 func (m *meta) Get(name string) (interface{}, bool) {
 	v, ok := m.d[name]
 	return v, ok

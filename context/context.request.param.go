@@ -20,6 +20,9 @@ func (i *inputParams) Check(names ...string) error {
 	}
 	return nil
 }
+func (i *inputParams) Keys() []string {
+	return i.data.Keys()
+}
 
 func (i *inputParams) Get(name string) (string, bool) {
 	if c, ok := i.data.Get(name); ok {
