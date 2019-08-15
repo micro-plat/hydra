@@ -155,13 +155,13 @@ func makeFormData(ctx *gin.Context) IInputData {
 		ctx.Request.ParseMultipartForm(32 << 20)
 	}
 
-	return newInputData(ctx.Request.PostForm, ctx.GetPostForm)
+	return newInputDataByPostForm(ctx)
 }
 func makeQueyStringData(ctx *gin.Context) IInputData {
-	return newInputData(ctx.Request.URL.Query(), ctx.GetQuery)
+	return newInputDataByURlQuery(ctx)
 }
 func makeParamsData(ctx *gin.Context) IInputData {
-	return newInputData(ctx.Params, ctx.Params.Get)
+	return newInputDataByParam(ctx)
 }
 
 func makeMapData(m map[string]interface{}) MapData {
@@ -251,28 +251,53 @@ type IInputData interface {
 	Keys() []string
 }
 type InputData struct {
-	keys []string
+	keys func() []string
 	get  func(string) (string, bool)
 }
 
 //NewInputData 创建input data
-func newInputData(v interface{}, get func(string) (string, bool)) *InputData {
+func newInputDataByPostForm(c *gin.Context) *InputData {
 	input := &InputData{
-		get: get,
+		get: c.GetPostForm,
 	}
-	switch tp := v.(type) {
-	case map[string][]string:
-		input.keys = make([]string, 0, len(tp))
-		for k := range tp {
-			input.keys = append(input.keys, k)
+	input.keys = func() []string {
+		keys := make([]string, 0, len(c.Request.PostForm))
+		for k := range c.Request.PostForm {
+			keys = append(keys, k)
 		}
-	case []gin.Param:
-		input.keys = make([]string, 0, len(tp))
-		for _, k := range tp {
-			input.keys = append(input.keys, k.Key)
-		}
+		return keys
 	}
+	return input
+}
 
+//NewInputData 创建input data
+func newInputDataByURlQuery(c *gin.Context) *InputData {
+	input := &InputData{
+		get: c.GetQuery,
+	}
+	input.keys = func() []string {
+		var kvs map[string][]string = c.Request.URL.Query()
+		keys := make([]string, 0, len(kvs))
+		for k := range kvs {
+			keys = append(keys, k)
+		}
+		return keys
+	}
+	return input
+}
+
+//NewInputData 创建input data
+func newInputDataByParam(c *gin.Context) *InputData {
+	input := &InputData{
+		get: c.Params.Get,
+	}
+	input.keys = func() []string {
+		keys := make([]string, 0, len(c.Params))
+		for _, k := range c.Params {
+			keys = append(keys, k.Key)
+		}
+		return keys
+	}
 	return input
 }
 
@@ -283,7 +308,7 @@ func (i InputData) Get(key string) (interface{}, bool) {
 
 //Keys 获取所有KEY
 func (i InputData) Keys() []string {
-	return i.keys
+	return i.keys()
 }
 
 //ParamData map参数数据

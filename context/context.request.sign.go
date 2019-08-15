@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/micro-plat/lib4go/net"
@@ -29,12 +30,16 @@ func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string,
 }
 
 //CheckSign 检查签名是否正确(只值为空不参与签名，键值及每个串之前使用空进行连接)
-func (r *Request) CheckSign(key string, f ...string) (bool, string) {
-	return r.CheckSignAll(key, false, "", "", f...)
+func (r *Request) CheckSign(secret string, f ...string) (bool, error) {
+	return r.CheckSignAll(secret, false, "", "", f...)
 }
 
 //CheckSignAll 检查签名是否正确
-func (r *Request) CheckSignAll(key string, all bool, a string, b string, f ...string) (bool, string) {
+func (r *Request) CheckSignAll(secret string, all bool, a string, b string, f ...string) (bool, error) {
 	sign, raw := r.GetSignRaw(all, a, b, f...)
-	return strings.EqualFold(md5.Encrypt(raw+key), sign), raw
+	expect := md5.Encrypt(raw + secret)
+	if strings.EqualFold(expect, sign) {
+		return true, nil
+	}
+	return false, fmt.Errorf("raw:%s,expect:%s,actual:%s", raw, expect, sign)
 }
