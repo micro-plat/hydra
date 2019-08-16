@@ -72,7 +72,7 @@ func renderHTML(ctx *gin.Context, response context.IResponse, cnf *conf.Metadata
 		return false
 	}
 	root := cnf.GetMetadata("view").(*conf.View).Path
-	viewPath := filepath.Join(root, fmt.Sprintf("%s.html", getServiceName(ctx)))
+	viewPath := filepath.Join(root, fmt.Sprintf("%s.html", getViewName(ctx, response)))
 	for _, f := range files {
 		if f == viewPath {
 			ctx.HTML(response.GetStatus(), filepath.Base(viewPath), response.GetContent())
@@ -80,4 +80,11 @@ func renderHTML(ctx *gin.Context, response context.IResponse, cnf *conf.Metadata
 		}
 	}
 	return false
+}
+func getViewName(ctx *gin.Context, response context.IResponse) string {
+	view := response.GetView()
+	if view != "" {
+		return view
+	}
+	return getServiceName(ctx)
 }

@@ -69,8 +69,12 @@ func (s *WebServer) StopMetric() error {
 }
 
 //SetView 设置view参数
-func (s *WebServer) SetView(view *conf.View) error {
+func (s *WebServer) SetView(view *conf.View) (err error) {
 	s.conf.SetMetadata("view", view)
+	if s.views, err = s.loadHTMLGlob(); err != nil {
+		s.Logger.Debugf("%s未找到模板:%v", s.conf.Name, err)
+		return err
+	}
 	return nil
 }
 

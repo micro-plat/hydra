@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+//GetView 获取view
+func (r *Response) GetView() string {
+	view := r.Params["__view"].(string)
+	if view != "NONE" {
+		return view
+	}
+	return ""
+}
+
 //SetView 设置view
 func (r *Response) SetView(name string) {
 	r.Params["__view"] = name

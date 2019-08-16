@@ -12,6 +12,7 @@ type IResponse interface {
 	GetCode(interface{}) int
 	GetStatus() int
 	SetStatus(int)
+	GetView() string
 	GetParams() map[string]interface{}
 	SetParams(v map[string]interface{})
 	SetParam(key string, v interface{})
