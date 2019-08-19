@@ -53,10 +53,10 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 	if err = serverConf.Unmarshal(&server); err != nil {
 		return false, err
 	}
-	if b, err := govalidator.ValidateStruct(&server); !b {
-		err = fmt.Errorf("server配置有误:%v", err)
-		return false, err
-	}
+	// if b, err := govalidator.ValidateStruct(&server); !b {
+	// 	err = fmt.Errorf("server配置有误:%v", err)
+	// 	return false, err
+	// }
 	var queues conf.Queues
 
 	if _, err = cnf.GetSubObject("queue", &queues); err != nil && err != conf.ErrNoSetting {
