@@ -57,8 +57,9 @@ func NewLockByRegistry(name string, r registry.IRegistry) (lk *DLock) {
 func (d *DLock) TryLock() (err error) {
 	d.done = false
 	d.master = false
-	if d.path==""{
-		d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), 
+	var path = d.path
+	if path==""{
+		path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), 
 			fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 		if err != nil {
 			return err
@@ -68,11 +69,11 @@ func (d *DLock) TryLock() (err error) {
 	if err != nil {
 		return err
 	}
-	if isMaster(d.path, cldrs) {
+	if isMaster(path, cldrs) {
+		d.path=path
 		return nil
 	}
-	d.registry.Delete(d.path)
-	d.path=""
+	d.registry.Delete(path)
 	return fmt.Errorf("未获取到分布式锁")
 }
 
