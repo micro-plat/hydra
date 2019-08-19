@@ -21,7 +21,7 @@ require (
 	github.com/json-iterator/go v1.1.6
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/micro-plat/lib4go v0.1.4
+	github.com/micro-plat/lib4go v0.1.5
 	github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b
 	github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
