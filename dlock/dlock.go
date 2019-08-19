@@ -70,7 +70,7 @@ func (d *DLock) TryLock() (err error) {
 	if err != nil {
 		return err
 	}
-	if isMaster(path, cldrs) {
+	if isMaster(path, d.name, cldrs) {
 		d.path = path
 		return nil
 	}
@@ -92,7 +92,7 @@ func (d *DLock) Lock() (err error) {
 	if err != nil {
 		return err
 	}
-	if isMaster(d.path, cldrs) {
+	if isMaster(d.path, d.name, cldrs) {
 		return nil
 	}
 	//监控子节点变化
@@ -107,7 +107,7 @@ func (d *DLock) Lock() (err error) {
 		case cldWatcher := <-ch:
 			if cldWatcher.GetError() == nil {
 				cldrs, _, _ := d.registry.GetChildren(d.name)
-				d.master = isMaster(d.path, cldrs)
+				d.master = isMaster(d.path, d.name, cldrs)
 				if d.master {
 					return nil
 				}
@@ -133,14 +133,14 @@ func (d *DLock) Unlock() {
 	d.registry.Delete(d.path)
 }
 
-func isMaster(path string, cldrs []string) bool {
+func isMaster(path string, root string, cldrs []string) bool {
 	if len(cldrs) == 0 {
 		return false
 	}
 	ncldrs := make([]string, 0, len(cldrs))
 	for _, v := range cldrs {
-		args := strings.SplitN(v, "_", 2)
-		ncldrs = append(ncldrs, args[len(args)-1])
+		name := strings.Replace(v, root, "", -1)
+		ncldrs = append(ncldrs, name)
 	}
 	sort.Strings(ncldrs)
 	return strings.HasSuffix(path, ncldrs[0])
