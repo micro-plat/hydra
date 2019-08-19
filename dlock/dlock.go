@@ -50,7 +50,7 @@ func NewLockByRegistry(name string, r registry.IRegistry) (lk *DLock) {
 	}
 	lk = &DLock{name: name, registry: r, closeChan: make(chan struct{})}
 	locks[name] = lk
-	return lk,
+	return lk
 }
 
 //TryLock 偿试获取分布式锁
@@ -58,19 +58,19 @@ func (d *DLock) TryLock() (err error) {
 	d.done = false
 	d.master = false
 	var path = d.path
-	if path==""{
-		path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), 
+	if path == "" {
+		path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"),
 			fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 		if err != nil {
 			return err
 		}
-	}	
+	}
 	cldrs, _, err := d.registry.GetChildren(d.name)
 	if err != nil {
 		return err
 	}
 	if isMaster(path, cldrs) {
-		d.path=path
+		d.path = path
 		return nil
 	}
 	d.registry.Delete(path)
@@ -81,12 +81,12 @@ func (d *DLock) TryLock() (err error) {
 func (d *DLock) Lock() (err error) {
 	d.done = false
 	d.master = false
-	if d.path==""{
+	if d.path == "" {
 		d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 		if err != nil {
 			return err
 		}
-	}	
+	}
 	cldrs, _, err := d.registry.GetChildren(d.name)
 	if err != nil {
 		return err
@@ -104,13 +104,12 @@ func (d *DLock) Lock() (err error) {
 		case <-d.closeChan:
 			return fmt.Errorf("未获取到分布式锁")
 		case cldWatcher := <-ch:
-			if cldWatcher.GetError() != nil {
-				break
-			}
-			cldrs, _, _ := d.registry.GetChildren(d.name)
-			d.master = isMaster(d.path, cldrs)
-			if d.master {
-				return nil
+			if cldWatcher.GetError() == nil {
+				cldrs, _, _ := d.registry.GetChildren(d.name)
+				d.master = isMaster(d.path, cldrs)
+				if d.master {
+					return nil
+				}
 			}
 		LOOP:
 			ch, err = d.registry.WatchChildren(d.name)
@@ -122,14 +121,14 @@ func (d *DLock) Lock() (err error) {
 				goto LOOP
 			}
 		}
-	}	
+	}
 }
 
 //Unlock 释放分布式锁
 func (d *DLock) Unlock() {
 	d.closeChan <- struct{}{}
 	d.done = true
-	d.path=""
+	d.path = ""
 	d.registry.Delete(d.path)
 }
 
