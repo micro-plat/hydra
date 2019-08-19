@@ -12,10 +12,11 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 )
 
+//locks 本地lock缓存
 var locks map[string]*DLock = make(map[string]*DLock)
 var currentLock sync.Mutex
 
-//DLock 分布式锁
+//DLock 分布式锁，基于注册中心实现的分布式锁
 type DLock struct {
 	name      string
 	registry  registry.IRegistry
