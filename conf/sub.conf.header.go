@@ -27,6 +27,7 @@ func (imp Headers) WithCrossDomain(host ...string) CrossDomainHeader {
 	imp["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
 	imp["Access-Control-Allow-Credentials"] = "true"
 	imp["Access-Control-Allow-Headers"] = "X-Requested-With,Content-Type,__jwt__"
+	imp["Access-Control-Expose-Headers"] = "__jwt__"
 	return imp
 }
 
@@ -37,5 +38,6 @@ func (c CrossDomainHeader) WithAllowHeaders(header ...string) CrossDomainHeader 
 		return c
 	}
 	c["Access-Control-Allow-Headers"] = strings.Join(header, ",")
+	c["Access-Control-Expose-Headers"] = strings.Join(header, ",")
 	return c
 }

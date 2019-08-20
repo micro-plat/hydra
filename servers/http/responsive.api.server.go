@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -137,6 +138,9 @@ func (w *ApiResponsiveServer) Shutdown() {
 	w.server.Shutdown(10 * time.Second)
 	if w.engine != nil {
 		w.engine.Close()
+	}
+	for _, path := range waitRemoveDir {
+		os.RemoveAll(path)
 	}
 }
 

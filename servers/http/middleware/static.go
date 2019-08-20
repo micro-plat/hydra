@@ -113,6 +113,5 @@ func Static(cnf *conf.MetadataConf) gin.HandlerFunc {
 		}
 		ctx.Next()
 		return
-
 	}
 }

@@ -15,7 +15,7 @@ func (q CacheConf) GetProto() string {
 func NewRedisCacheConf(dbIndex int, address ...string) RedisCacheConf {
 	conf := make(map[string]interface{})
 	conf["proto"] = "redis"
-	conf["address"] = address
+	conf["addrs"] = address
 	conf["db"] = dbIndex
 	conf["dial_timeout"] = 10
 	conf["read_timeout"] = 10

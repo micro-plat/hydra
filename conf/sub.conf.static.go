@@ -3,6 +3,7 @@ package conf
 //Static 设置静态文件配置
 type Static struct {
 	Dir       string   `json:"dir,omitempty" valid:"ascii"`
+	Archive   string   `json:"archive,omitempty" valid:"ascii"`
 	Prefix    string   `json:"prefix,omitempty" valid:"ascii"`
 	Exts      []string `json:"exts,omitempty" valid:"ascii"`
 	Exclude   []string `json:"exclude,omitempty" valid:"ascii"`
@@ -44,6 +45,12 @@ func (s *Static) WithFirstPage(firstPage string) *Static {
 //WithExts 设置静态文件跟目录
 func (s *Static) WithExts(exts ...string) *Static {
 	s.Exts = exts
+	return s
+}
+
+//WithArchive 设置静态文件跟目录
+func (s *Static) WithArchive(archive string) *Static {
+	s.Archive = archive
 	return s
 }
 
