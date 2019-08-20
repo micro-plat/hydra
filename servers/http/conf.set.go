@@ -304,6 +304,6 @@ func unarchive(dir string, path string) (string, error) {
 		return "", fmt.Errorf("读取归档文件失败:%v", err)
 	}
 	ndir := filepath.Join(tmpDir, dir)
-	waitRemoveDir = append(waitRemoveDir, path)
+	waitRemoveDir = append(waitRemoveDir, tmpDir)
 	return ndir, nil
 }
