@@ -18,20 +18,20 @@ func (a *MQCServerConf) WithTrace() *MQCServerConf {
 	return a
 }
 
-//WitchMasterSlave 设置为主备模式
-func (a *MQCServerConf) WitchMasterSlave() *MQCServerConf {
+//WithMasterSlave 设置为主备模式
+func (a *MQCServerConf) WithMasterSlave() *MQCServerConf {
 	a.Sharding = 1
 	return a
 }
 
-//WitchSharding 设置为分片模式
-func (a *MQCServerConf) WitchSharding(i int) *MQCServerConf {
+//WithSharding 设置为分片模式
+func (a *MQCServerConf) WithSharding(i int) *MQCServerConf {
 	a.Sharding = i
 	return a
 }
 
-//WitchP2P 设置为对等模式
-func (a *MQCServerConf) WitchP2P() *MQCServerConf {
+//WithP2P 设置为对等模式
+func (a *MQCServerConf) WithP2P() *MQCServerConf {
 	a.Sharding = 0
 	return a
 }

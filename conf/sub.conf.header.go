@@ -35,6 +35,7 @@ func (imp Headers) WithCrossDomain(host ...string) CrossDomainHeader {
 func (c CrossDomainHeader) WithAllowHeaders(header ...string) CrossDomainHeader {
 	if len(header) == 0 {
 		c["Access-Control-Allow-Headers"] = "X-Requested-With,Content-Type,__jwt__"
+		c["Access-Control-Expose-Headers"] = "__jwt__"
 		return c
 	}
 	c["Access-Control-Allow-Headers"] = strings.Join(header, ",")
