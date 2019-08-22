@@ -23,7 +23,7 @@ type Watcher struct {
 	timeSpan   time.Duration
 	changed    int32
 	notifyChan chan *ContentChangeArgs
-	logger     *logger.Logger
+	logger     logger.ILogger
 	registry   registry.IRegistry
 	mu         sync.Mutex
 	done       bool
@@ -31,7 +31,7 @@ type Watcher struct {
 }
 
 //NewWatcher 初始化监控
-func NewWatcher(path string, timeSpan time.Duration, registry registry.IRegistry, logger *logger.Logger) *Watcher {
+func NewWatcher(path string, timeSpan time.Duration, registry registry.IRegistry, logger logger.ILogger) *Watcher {
 	return &Watcher{
 		path:       path,
 		timeSpan:   timeSpan,
