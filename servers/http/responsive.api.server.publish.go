@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"net"
 	"path"
 	"strings"
 	"time"
@@ -16,6 +17,9 @@ func (w *ApiResponsiveServer) publish() (err error) {
 		return err
 	}
 	if err = w.pubServiceNode(); err != nil {
+		return
+	}
+	if err = w.pubDNSNode(); err != nil {
 		return
 	}
 	go w.publishCheck()
@@ -55,6 +59,30 @@ func (w *ApiResponsiveServer) pubServiceNode() error {
 	}
 	for _, host := range names {
 		servicePath := path.Join(w.currentConf.GetServicePubRootPath(host), ipPort+"_")
+		rservicePath, err := w.engine.GetRegistry().CreateSeqNode(servicePath, nodeData)
+		if err != nil {
+			err = fmt.Errorf("服务发布失败:(%s)[%v]", servicePath, err)
+			return err
+		}
+		w.pubs[rservicePath] = nodeData
+	}
+	return nil
+}
+func (w *ApiResponsiveServer) pubDNSNode() error {
+	names := w.currentConf.GetStrings("host")
+	if len(names) == 0 {
+		return nil
+	}
+	addr := w.server.GetAddress(w.currentConf.GetString("dn"))
+	ipPort := strings.Split(addr, "://")[1]
+	ip, _, _ := net.SplitHostPort(ipPort)
+	data := map[string]string{
+		"service": addr,
+	}
+	jsonData, _ := jsons.Marshal(data)
+	nodeData := string(jsonData)
+	for _, host := range names {
+		servicePath := path.Join(w.currentConf.GetDNSPubRootPath(host), ip+"_")
 		rservicePath, err := w.engine.GetRegistry().CreateSeqNode(servicePath, nodeData)
 		if err != nil {
 			err = fmt.Errorf("服务发布失败:(%s)[%v]", servicePath, err)

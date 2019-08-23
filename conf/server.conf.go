@@ -28,6 +28,7 @@ type IMainConf interface {
 	GetMainConfPath() string
 	GetServicePubRootPath(name string) string
 	GetServerPubRootPath() string
+	GetDNSPubRootPath(svName string) string
 	IsStop() bool
 	ForceRestart() bool
 	GetSubObject(name string, v interface{}) (int32, error)
@@ -208,6 +209,11 @@ func (c *ServerConf) GetSystemRootfPath() string {
 //GetServicePubRootPath 获取服务发布跟路径
 func (c *ServerConf) GetServicePubRootPath(svName string) string {
 	return registry.Join("/", c.platName, "services", c.serverType, svName, "providers")
+}
+
+//GetDNSPubRootPath 获取DNS服务路径
+func (c *ServerConf) GetDNSPubRootPath(svName string) string {
+	return registry.Join("/dns", svName)
 }
 
 //GetServerPubRootPath 获取服务器发布的跟路径

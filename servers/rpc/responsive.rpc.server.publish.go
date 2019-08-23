@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"fmt"
+	"net"
 	"path"
 	"strings"
 	"time"
@@ -16,6 +17,9 @@ func (w *RpcResponsiveServer) publish() (err error) {
 		return err
 	}
 	if err = w.pubServiceNode(); err != nil {
+		return
+	}
+	if err = w.pubDNSNode(); err != nil {
 		return
 	}
 	go w.publishCheck()
@@ -53,7 +57,6 @@ func (w *RpcResponsiveServer) pubServiceNode() error {
 	if len(names) == 0 {
 		names = append(names, w.currentConf.GetSysName())
 	}
-
 	srvs := w.GetServices()
 	for _, host := range names {
 		for srv, _ := range srvs {
@@ -65,6 +68,34 @@ func (w *RpcResponsiveServer) pubServiceNode() error {
 			}
 			w.pubs[rpath] = nodeData
 		}
+	}
+
+	return nil
+}
+
+func (w *RpcResponsiveServer) pubDNSNode() error {
+	names := w.currentConf.GetStrings("host")
+	if len(names) == 0 {
+		return nil
+	}
+	addr := w.server.GetAddress(w.currentConf.GetString("dn"))
+	ipPort := strings.Split(addr, "://")[1]
+	ip, _, _ := net.SplitHostPort(ipPort)
+	data := map[string]string{
+		"service": addr,
+	}
+	jsonData, _ := jsons.Marshal(data)
+	nodeData := string(jsonData)
+
+	for _, host := range names {
+		servicePath := path.Join(w.currentConf.GetDNSPubRootPath(host), ip+"_")
+		rpath, err := w.engine.GetRegistry().CreateSeqNode(servicePath, nodeData)
+		if err != nil {
+			err = fmt.Errorf("服务发布失败:(%s)[%v]", servicePath, err)
+			return err
+		}
+		w.pubs[rpath] = nodeData
+
 	}
 
 	return nil

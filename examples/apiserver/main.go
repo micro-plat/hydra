@@ -16,7 +16,7 @@ func main() {
 		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 
-	app.Conf.API.SetMain(conf.NewAPIServerConf(":8098"))
+	app.Conf.API.SetMain(conf.NewAPIServerConf(":8098").WithDNS("api.hydra.com"))
 	app.Conf.API.SetHeaders(conf.NewHeader().WithCrossDomain())
 
 	app.Micro("/order/query", order.NewQueryHandler)

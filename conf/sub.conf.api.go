@@ -11,7 +11,8 @@ type APIServerConf struct {
 	RTimeout  int    `json:"readTimeout,omitempty"`
 	WTimeout  int    `json:"writeTimeout,omitempty"`
 	RHTimeout int    `json:"readHeaderTimeout,omitempty"`
-	Hosts     string `json:"host,omitempty"`
+	Host      string `json:"host,omitempty"`
+	Domain    string `json:"dn,omitempty"`
 	Trace     bool   `json:"trace,omitempty"`
 }
 
@@ -43,7 +44,7 @@ func (a *APIServerConf) WithHeaderReadTimeout(htimeout int) *APIServerConf {
 
 //WithHost 设置host
 func (a *APIServerConf) WithHost(host ...string) *APIServerConf {
-	a.Hosts = strings.Join(host, ";")
+	a.Host = strings.Join(host, ";")
 	return a
 }
 
@@ -56,5 +57,14 @@ func (a *APIServerConf) WithDisable() *APIServerConf {
 //WithEnable 启用任务
 func (a *APIServerConf) WithEnable() *APIServerConf {
 	a.Status = "start"
+	return a
+}
+
+//WithDNS 设置请求域名
+func (a *APIServerConf) WithDNS(host string, ip ...string) *APIServerConf {
+	a.Host = host
+	if len(ip) > 0 {
+		a.Domain = ip[0]
+	}
 	return a
 }
