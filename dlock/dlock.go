@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/micro-plat/hydra/registry"
@@ -13,8 +12,8 @@ import (
 )
 
 //locks 本地lock缓存
-var locks map[string]*DLock = make(map[string]*DLock)
-var currentLock sync.Mutex
+// var locks map[string]*DLock = make(map[string]*DLock)
+// var currentLock sync.Mutex
 
 //DLock 分布式锁，基于注册中心实现的分布式锁
 type DLock struct {
@@ -28,66 +27,33 @@ type DLock struct {
 
 //NewLock 构建分布式锁
 func NewLock(name string, addr string, l logger.ILogging) (lk *DLock, err error) {
-	currentLock.Lock()
-	defer currentLock.Unlock()
-	if lk, ok := locks[name]; ok {
-		return lk, nil
-	}
-	lk = &DLock{name: name, closeChan: make(chan struct{})}
+	lk = &DLock{name: name, closeChan: make(chan struct{}, 1)}
 	lk.registry, err = registry.NewRegistryWithAddress(addr, l)
 	if err != nil {
 		return nil, err
 	}
-	locks[name] = lk
 	return lk, nil
 }
 
 //NewLockByRegistry 根据当前注册中心创建分布式锁
 func NewLockByRegistry(name string, r registry.IRegistry) (lk *DLock) {
-	currentLock.Lock()
-	defer currentLock.Unlock()
-	if lk, ok := locks[name]; ok {
-		return lk
-	}
 	lk = &DLock{name: name, registry: r, closeChan: make(chan struct{})}
-	locks[name] = lk
 	return lk
 }
 
 //TryLock 偿试获取分布式锁
 func (d *DLock) TryLock() (err error) {
-	d.done = false
-	d.master = false
-	var path = d.path
-	if path == "" {
-		path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"),
-			fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
+	defer func() {
 		if err != nil {
-			return err
+			d.registry.Delete(d.path)
 		}
-	}
-	cldrs, _, err := d.registry.GetChildren(d.name)
+	}()
+	d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"),
+		fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
-		return err
+		return fmt.Errorf("创建锁%s失败:%v", filepath.Join(d.name, "dlock_"), err)
 	}
-	if isMaster(path, d.name, cldrs) {
-		d.path = path
-		return nil
-	}
-	d.registry.Delete(path)
-	return fmt.Errorf("未获取到分布式锁")
-}
 
-//Lock 以独占方式获取分布式锁
-func (d *DLock) Lock() (err error) {
-	d.done = false
-	d.master = false
-	if d.path == "" {
-		d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
-		if err != nil {
-			return err
-		}
-	}
 	cldrs, _, err := d.registry.GetChildren(d.name)
 	if err != nil {
 		return err
@@ -95,13 +61,42 @@ func (d *DLock) Lock() (err error) {
 	if isMaster(d.path, d.name, cldrs) {
 		return nil
 	}
+	return fmt.Errorf("未获取到分布式锁")
+}
+
+//Lock 以独占方式获取分布式锁
+func (d *DLock) Lock(timeout ...time.Duration) (err error) {
+	defer func() {
+		if err != nil {
+			d.registry.Delete(d.path)
+		}
+	}()
+	d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
+	if err != nil {
+		return fmt.Errorf("创建锁%s失败:%v", filepath.Join(d.name, "dlock_"), err)
+	}
+
+	cldrs, _, err := d.registry.GetChildren(d.name)
+	if err != nil {
+		return err
+	}
+	if isMaster(d.path, d.name, cldrs) {
+		return nil
+	}
+
 	//监控子节点变化
 	ch, err := d.registry.WatchChildren(d.name)
 	if err != nil {
 		return err
 	}
+	deadline := time.Minute
+	if len(timeout) > 0 {
+		deadline = timeout[0]
+	}
 	for {
 		select {
+		case <-time.After(deadline):
+			return fmt.Errorf("超时未获取到分布式锁")
 		case <-d.closeChan:
 			return fmt.Errorf("未获取到分布式锁")
 		case cldWatcher := <-ch:
@@ -127,9 +122,8 @@ func (d *DLock) Lock() (err error) {
 
 //Unlock 释放分布式锁
 func (d *DLock) Unlock() {
-	d.closeChan <- struct{}{}
 	d.done = true
-	d.path = ""
+	close(d.closeChan)
 	d.registry.Delete(d.path)
 }
 
