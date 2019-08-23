@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,10 +14,25 @@ import (
 //ChildrenChangeArgs 值变化通知事件
 type ChildrenChangeArgs struct {
 	Deep     int
+	Name     string
 	Parent   string
 	Children []string
 	Version  int32
 	OP       int
+}
+
+func NewCArgsByDelete(deep int, parent string) *ChildrenChangeArgs {
+	return NewCArgsByChange(DEL, deep, parent, nil, 0)
+}
+func NewCArgsByChange(op int, deep int, parent string, chilren []string, v int32) *ChildrenChangeArgs {
+	names := strings.Split(strings.Trim(parent, "/"), "/")
+	return &ChildrenChangeArgs{OP: op,
+		Parent:   parent,
+		Version:  v,
+		Children: chilren,
+		Deep:     deep,
+		Name:     names[len(names)-1],
+	}
 }
 
 //ChildrenWatcher 监控器
@@ -84,7 +100,6 @@ LOOP:
 			}
 		}
 	}
-
 	//获取节点值
 	data, version, err := w.registry.GetChildren(path)
 	if err != nil {
@@ -109,6 +124,12 @@ LOOP:
 			if err = content.GetError(); err != nil {
 				goto LOOP
 			}
+
+			if b, _ := w.registry.Exists(path); !b {
+				w.Deleted()
+				goto LOOP
+			}
+
 			data, version := content.GetValue()
 			w.Changed(data, version)
 			//继续监控值变化
@@ -134,7 +155,7 @@ func (w *ChildrenWatcher) Deleted() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if v := atomic.LoadInt32(&w.changed); v > 0 && atomic.CompareAndSwapInt32(&w.changed, v, 0) {
-		updater := &ChildrenChangeArgs{OP: DEL, Parent: w.path, Deep: w.deep}
+		updater := NewCArgsByDelete(w.deep, w.path)
 		w.notify(updater)
 	}
 }
@@ -148,12 +169,12 @@ func (w *ChildrenWatcher) Changed(children []string, version int32) {
 		op = CHANGE
 	}
 	atomic.AddInt32(&w.changed, 1)
-	updater := &ChildrenChangeArgs{OP: op, Parent: w.path, Version: version, Children: children, Deep: w.deep}
+	updater := NewCArgsByChange(op, w.deep, w.path, children, version)
 	w.notify(updater)
 	return
 }
 func (w *ChildrenWatcher) notify(a *ChildrenChangeArgs) {
-	if a.Deep == 1 {
+	if a.Deep == 1 && a.OP != DEL {
 		w.notifyChan <- a
 		return
 	}
@@ -162,6 +183,7 @@ func (w *ChildrenWatcher) notify(a *ChildrenChangeArgs) {
 		case ADD, CHANGE:
 			w.changeChilrenWatcher(path)
 		case DEL:
+			w.notifyChan <- a
 			w.delChilrenWatcher(path)
 		}
 	}
