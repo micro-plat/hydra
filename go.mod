@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
-	github.com/aws/aws-sdk-go v1.22.3
+	github.com/aws/aws-sdk-go v1.22.3 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -22,7 +22,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/lib4go v0.1.5
-	github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b
 	github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.2.4+incompatible // indirect

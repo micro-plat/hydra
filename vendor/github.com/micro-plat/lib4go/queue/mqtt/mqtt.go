@@ -103,7 +103,7 @@ func (c *MQTTClient) connect() (*client.Client, bool, error) {
 		return nil, false, err
 	}
 	for _, addr := range addrs {
-		if err := cc.Connect(&client.ConnectOptions{
+		if err = cc.Connect(&client.ConnectOptions{
 			Network:         "tcp",
 			Address:         addr + ":" + port,
 			UserName:        []byte(c.conf.UserName),

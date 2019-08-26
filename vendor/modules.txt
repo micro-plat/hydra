@@ -33,8 +33,6 @@ github.com/go-redis/redis/internal/hashtag
 github.com/go-redis/redis/internal/pool
 github.com/go-redis/redis/internal/proto
 github.com/go-redis/redis/internal/util
-# github.com/go-sql-driver/mysql v1.4.1
-github.com/go-sql-driver/mysql
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -51,7 +49,7 @@ github.com/json-iterator/go
 github.com/mattn/go-isatty
 # github.com/mholt/archiver v3.1.1+incompatible
 github.com/mholt/archiver
-# github.com/micro-plat/lib4go v0.1.4
+# github.com/micro-plat/lib4go v0.1.5
 github.com/micro-plat/lib4go/net/http
 github.com/micro-plat/lib4go/cache
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -87,6 +85,7 @@ github.com/micro-plat/lib4go/registry
 github.com/micro-plat/lib4go/zk
 github.com/micro-plat/lib4go/metrics
 github.com/micro-plat/lib4go/redis
+github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/encoding
 github.com/micro-plat/lib4go/sysinfo/pipes
 github.com/micro-plat/lib4go/xsync
@@ -97,11 +96,6 @@ github.com/micro-plat/lib4go/influxdb/models
 github.com/micro-plat/lib4go/transform
 github.com/micro-plat/lib4go/ut
 github.com/micro-plat/lib4go/influxdb/escape
-# github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b
-github.com/micro-plat/qtask
-github.com/micro-plat/qtask/qtask/db
-# github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771
-github.com/micro-plat/zkcli/rgsts
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
@@ -174,8 +168,6 @@ golang.org/x/text/encoding/internal/identifier
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/appengine v1.1.0
-google.golang.org/appengine/cloudsql
 # google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.22.0
