@@ -1,7 +1,6 @@
 package watcher
 
 import (
-	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -202,7 +201,7 @@ func (w *ChildrenWatcher) changeChilrenWatcher(path string) {
 	if _, ok := w.watchers[path]; ok {
 		return
 	}
-	watcher := NewChildrenWatcher(filepath.Join(w.path, path), w.deep-1, w.timeSpan, w.registry, w.logger)
+	watcher := NewChildrenWatcher(registry.Join(w.path, path), w.deep-1, w.timeSpan, w.registry, w.logger)
 	ch, err := watcher.Start()
 	if err != nil {
 		w.logger.Error(err)
