@@ -6,7 +6,7 @@ type IMQCBinder interface {
 	SetMain(*conf.MQCServerConf)
 	SetServer(*conf.QueueConf)
 	SetQueues(*conf.Queues)
-	imainBinder
+	IExtBinder
 }
 
 type MQCBinder struct {

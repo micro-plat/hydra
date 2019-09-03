@@ -7,7 +7,7 @@ type imicroBinder interface {
 	SetRouters(*conf.Routers)
 	SetCircuitBreaker(*conf.CircuitBreaker)
 	SetHeaders(conf.Headers)
-	imainBinder
+	IExtBinder
 }
 
 type microBinder struct {

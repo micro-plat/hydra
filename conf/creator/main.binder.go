@@ -12,7 +12,7 @@ import (
 
 // var _ ImainBinder = &mainBinder{}
 
-type imainBinder interface {
+type IExtBinder interface {
 	SetMainConf(input interface{})
 	SetSubConf(n string, input interface{})
 	SetMetric(m *conf.Metric)

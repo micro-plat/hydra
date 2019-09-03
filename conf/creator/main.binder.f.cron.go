@@ -5,7 +5,7 @@ import "github.com/micro-plat/hydra/conf"
 type ICronBinder interface {
 	SetMain(*conf.CronServerConf)
 	SetTasks(*conf.Tasks)
-	imainBinder
+	IExtBinder
 }
 
 type CronBinder struct {
