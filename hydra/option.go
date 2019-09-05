@@ -132,15 +132,15 @@ func getServerTypes(serverTypes string) ([]string, error) {
 	sts := strings.Split(serverTypes, "-")
 	removeRepMap := make(map[string]byte)
 	for _, v := range sts {
-		var ctn bool
-		for _, k := range supportServerType {
-			if ctn = k == v; ctn {
-				break
-			}
-		}
-		if !ctn {
-			return nil, fmt.Errorf("不支持的服务器类型:%v", v)
-		}
+		// var ctn bool
+		// for _, k := range supportServerType {
+		// 	if ctn = k == v; ctn {
+		// 		break
+		// 	}
+		// }
+		// if !ctn {
+		// 	return nil, fmt.Errorf("不支持的服务器类型:%v", v)
+		// }
 		switch v {
 		case "*":
 			for _, value := range microServerType {

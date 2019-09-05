@@ -6,8 +6,6 @@ github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUW
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4B6AGu/h5Sxe66HYVdqdGu2l9Iebqhi/AEoA=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
-github.com/aws/aws-sdk-go v1.22.3 h1:6hh+6uqguPNPLtnb6rYLJnonwixttKMbvZYWVUdms98=
-github.com/aws/aws-sdk-go v1.22.3/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668 h1:U/lr3Dgy4WK+hNk4tyD+nuGjpVLPEHuJSFXMw11/HPA=
 github.com/bradfitz/gomemcache v0.0.0-20190329173943-551aad21a668/go.mod h1:H0wQNHz2YrLsuXOZozoeDmnHXkNCRmMW0gwFWDfEZDA=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
@@ -53,8 +51,6 @@ github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH
 github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
-github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/json-iterator/go v1.1.6 h1:MrUvLMLTMxbqFJ9kzlvat/rYZqZnW3u4wkLzWTaFwKs=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
@@ -75,13 +71,8 @@ github.com/micro-plat/hydra v0.9.3/go.mod h1:F+HcsLzvozkAaOYQBRMf26Nqjdseird+Bpt
 github.com/micro-plat/lib4go v0.0.0-20190705091641-a9c3303797f1/go.mod h1:zrC6IThH4iNBu3XkjduKLC+TulO/h3XZ6sWEsFx+YQY=
 github.com/micro-plat/lib4go v0.1.1 h1:S5p5NkBuBSNFU7j37JIWdXizBeRsJDnSnSlNCL1wUnI=
 github.com/micro-plat/lib4go v0.1.1/go.mod h1:QWcBeMuPBuQSm8sr0wq2DwfL864Nj6gyvDGt1bKDZTw=
-github.com/micro-plat/lib4go v0.1.3 h1:AV+vt3+PpMaUyXnAEn9Wtszd9lflf1qDf2rNFazgSlk=
-github.com/micro-plat/lib4go v0.1.3/go.mod h1:KKq2JoXLIS0cKbVphZUeGPFKr+lGSf1Wu1T5Xco+F1E=
-github.com/micro-plat/lib4go v0.1.4 h1:ezZyniqru792ba0P8oZDYxaDc/kY5b5cxZe8elXIv5g=
-github.com/micro-plat/lib4go v0.1.4/go.mod h1:KKq2JoXLIS0cKbVphZUeGPFKr+lGSf1Wu1T5Xco+F1E=
 github.com/micro-plat/lib4go v0.1.5 h1:OVk8kpTqlt3LZzSZkG2nzBQpYBb91jX89DscaG8Luv4=
 github.com/micro-plat/lib4go v0.1.5/go.mod h1:YTx5gseBZRf3ZcjCQf6DRl1wSWWpRMOUZIhIoVJQJKI=
-github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b h1:R47methejg9MW+LLbHUm3QpX4z9miyYfdJioj/Y9k2s=
 github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b/go.mod h1:uA1h0N/jWhAWpcA61dagfjBQrHy1Ph4Vg4D0kdwi3lc=
 github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771 h1:zu6GxRZrzru4tkGF08V4EXKdXxOQGDp65LvFqZEFFR0=
 github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771/go.mod h1:sblZVHRKhCL/6io6jGCh3apprwBIPBcThqAvPGvbA28=

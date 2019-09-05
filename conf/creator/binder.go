@@ -56,7 +56,8 @@ type Binder struct {
 	CRON    ICronBinder
 	Plat    IPlatBinder
 	Log     logger.ILogging
-	binders map[string]imainBinder
+	def     IExtBinder
+	binders map[string]IExtBinder
 	params  map[string]string
 	input   map[string]*Input
 	show    bool
@@ -65,6 +66,7 @@ type Binder struct {
 
 func NewBinder(log logger.ILogging) *Binder {
 	s := &Binder{params: make(map[string]string), input: make(map[string]*Input), Log: log}
+	s.def = NewExtBinder(s.params, s.input)
 	s.API = NewApiBinder(s.params, s.input)
 	s.RPC = NewRpcBinder(s.params, s.input)
 	s.WS = NewWSBinder(s.params, s.input)
@@ -72,7 +74,7 @@ func NewBinder(log logger.ILogging) *Binder {
 	s.MQC = NewMQCBinder(s.params, s.input)
 	s.CRON = newCronBinder(s.params, s.input)
 	s.Plat = NewPlatBinder(s.params, s.input)
-	s.binders = map[string]imainBinder{
+	s.binders = map[string]IExtBinder{
 		"api":  s.API,
 		"rpc":  s.RPC,
 		"web":  s.WEB,
@@ -82,6 +84,13 @@ func NewBinder(log logger.ILogging) *Binder {
 	}
 	return s
 }
+func (s *Binder) GetOrSet(tp string) IExtBinder {
+	if _, ok := s.binders[tp]; !ok {
+		s.binders[tp] = NewExtBinder(s.params, s.input)
+	}
+	return s.binders[tp]
+}
+
 func (s *Binder) SetParam(k, v string) {
 	s.params[k] = v
 }
@@ -101,7 +110,11 @@ func (s *Binder) SetInput(fieldName, showName, desc string, filters ...func(v st
 }
 
 func (s *Binder) GetInstallers(serverType string) []func(c component.IContainer) error {
-	return s.binders[serverType].getInstallers()
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
+	return binder.getInstallers()
 }
 
 //GetMainConfNames 获取已配置的主配置名称
@@ -113,7 +126,10 @@ func (s *Binder) GetMainConfNames(platName string, systemName string, tp string,
 
 //GetSubConfNames 获取已配置的主配置名称
 func (s *Binder) GetSubConfNames(serverType string) []string {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.getSubConfNames()
 }
 
@@ -124,13 +140,19 @@ func (s *Binder) GetVarConfNames() []string {
 
 //GetMainConfScanNum 获取主配置待扫描参数个数
 func (s *Binder) GetMainConfScanNum(serverType string) int {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.needScanCount("")
 }
 
 //GetSubConfScanNum 获取子配置待扫描参数个数
 func (s *Binder) GetSubConfScanNum(serverType string, subName string) int {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.needScanCount(subName)
 }
 
@@ -141,13 +163,19 @@ func (s *Binder) GetVarConfScanNum(nodeName string) int {
 
 //ScanMainConf 扫描主配置
 func (s *Binder) ScanMainConf(mainPath string, serverType string) error {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.scan(mainPath, "")
 }
 
 //ScanSubConf 扫描子配置
 func (s *Binder) ScanSubConf(mainPath string, serverType string, subName string) error {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.scan(mainPath, subName)
 }
 
@@ -158,13 +186,19 @@ func (s *Binder) ScanVarConf(platName string, nodeName string) error {
 
 //GetMainConf 获取主配置信息
 func (s *Binder) GetMainConf(serverType string) string {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.getNodeConf("")
 }
 
 //GetSubConf 获取子配置信息
 func (s *Binder) GetSubConf(serverType string, subName string) string {
-	binder := s.binders[serverType]
+	binder, ok := s.binders[serverType]
+	if !ok {
+		binder = s.def
+	}
 	return binder.getNodeConf(subName)
 }
 

@@ -1,18 +1,24 @@
 package main
 
 import (
-	"github.com/micro-plat/hydra/examples/rpcserver/services/order"
+	"github.com/micro-plat/hydra/context"
+
 	"github.com/micro-plat/hydra/hydra"
 )
 
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("hydra-20-test"),
-		hydra.WithSystemName("collector"),
-		hydra.WithServerTypes("rpc-api"),
+		hydra.WithPlatName("qxgrs"),
+		hydra.WithSystemName("test"),
+		hydra.WithServerTypes("api"),
 		hydra.WithDebug())
 
-	app.API("/order/query", order.NewQueryHandler)
-	app.RPC("/order/bind", order.NewBindHandler)
+	app.API("/test", handle)
 	app.Start()
+}
+func handle(ctx *context.Context) (r interface{}) {
+	service := "upchannel/notify/crawl@micro-services.qxgrs"
+	ctx.Log.Info("请求服务:", service)
+	ctx.Log.Info(ctx.RPC.Request(service, nil, nil, true))
+	return "OK"
 }
