@@ -2,11 +2,11 @@ package conf
 
 //View web服务器view解析配置
 type View struct {
-	Path    string `json:"path" valid:"ascii,required"`
-	Left    string `json:"left,omitempty" valid:"ascii"`
-	Right   string `json:"right,omitempty" valid:"ascii"`
-	Files   []string
-	Disable bool `json:"disable,omitempty"`
+	Path    string   `json:"path" valid:"ascii,required"`
+	Left    string   `json:"left,omitempty" valid:"ascii"`
+	Right   string   `json:"right,omitempty" valid:"ascii"`
+	Files   []string `json:"-"`
+	Disable bool     `json:"disable,omitempty"`
 }
 
 //NewView 构建web服务view配置

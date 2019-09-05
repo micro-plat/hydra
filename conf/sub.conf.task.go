@@ -7,13 +7,13 @@ type Tasks struct {
 type Task struct {
 	Name    string                 `json:"name,omitempty" valid:"ascii"`
 	Cron    string                 `json:"cron" valid:"ascii,required"`
-	Input   map[string]interface{} `json:"input,omitempty"`
+	Input   map[string]interface{} `json:"-"`
 	Engine  string                 `json:"engine,omitempty"  valid:"ascii,uppercase,in(*|RPC)"`
 	Service string                 `json:"service"  valid:"ascii,required"`
 	Setting map[string]string      `json:"args,omitempty"`
-	Next    string                 `json:"next,omitempty"`
-	Last    string                 `json:"last,omitempty"`
-	Handler interface{}            `json:"handler,omitempty"`
+	Next    string                 `json:"-"`
+	Last    string                 `json:"-"`
+	Handler interface{}            `json:"-"`
 	Disable bool                   `json:"disable,omitempty"`
 }
 

@@ -12,8 +12,8 @@ type Queue struct {
 	Service     string            `json:"service" valid:"ascii,required"`
 	Setting     map[string]string `json:"args,omitempty"`
 	Concurrency int               `json:"concurrency,omitempty"`
-	Disable     bool              `json:"disabl,omitemptye"`
-	Handler     interface{}
+	Disable     bool              `json:"disable,omitemptye"`
+	Handler     interface{}       `json:"-"`
 }
 
 //NewQueues 构建Queue注册列表
