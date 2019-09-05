@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/lib4go/jsons"
@@ -61,7 +62,7 @@ func (cr *ContextRPC) AsyncRequest(service string, header map[string]string, for
 	if !ok {
 		method = "get"
 	}
-	return cr.rpc.AsyncRequest(service, method, header, form, failFast)
+	return cr.rpc.AsyncRequest(service, strings.ToUpper(method), header, form, failFast)
 }
 
 //RequestFailRetry RPC请求
@@ -76,7 +77,7 @@ func (cr *ContextRPC) RequestFailRetry(service string, header map[string]string,
 	if !ok {
 		method = "get"
 	}
-	status, r, param, err = cr.rpc.RequestFailRetry(service, method, header, form, times)
+	status, r, param, err = cr.rpc.RequestFailRetry(service, strings.ToUpper(method), header, form, times)
 	if err != nil || status != 200 {
 		return
 	}
@@ -101,7 +102,7 @@ func (cr *ContextRPC) Request(service string, header map[string]string, form map
 	if !ok {
 		method = "get"
 	}
-	status, r, param, err = cr.rpc.Request(service, method, header, form, failFast)
+	status, r, param, err = cr.rpc.Request(service, strings.ToUpper(method), header, form, failFast)
 	if err != nil || status != 200 {
 		return
 	}
