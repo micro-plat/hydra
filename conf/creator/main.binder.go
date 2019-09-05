@@ -234,7 +234,7 @@ func getConfig(i interface{}) (string, error) {
 	case string:
 		return v, nil
 	default:
-		buff, err := json.Marshal(i)
+		buff, err := json.MarshalIndent(i, "", "  ")
 		if err != nil {
 			return "", err
 		}
