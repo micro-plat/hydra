@@ -3,7 +3,11 @@ package conf
 import "strings"
 
 //Authes 安全认证组
-type Authes map[string]interface{}
+type Authes struct {
+	JWT        *JWTAuth         `json:"jwt,omitempty"`
+	FixedScret *FixedSecretAuth `json:"fixed-secret,omitempty"`
+	RemoteAuth *RemoteAuth      `json:"remote,omitempty"`
+}
 
 //JWTAuth jwt安全认证
 type JWTAuth struct {
@@ -20,13 +24,13 @@ type JWTAuth struct {
 }
 
 //NewAuthes  构建安全认证
-func NewAuthes() Authes {
-	return map[string]interface{}{}
+func NewAuthes() *Authes {
+	return &Authes{}
 }
 
 //WithJWT 添加jwt验证
-func (a Authes) WithJWT(jwt *JWTAuth) Authes {
-	a["jwt"] = jwt
+func (a *Authes) WithJWT(jwt *JWTAuth) *Authes {
+	a.JWT = jwt
 	return a
 }
 

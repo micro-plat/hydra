@@ -13,8 +13,8 @@ type FixedSecretAuth struct {
 }
 
 //WithFixedSecretSign 添加固定签名认证
-func (a Authes) WithFixedSecretSign(auth *FixedSecretAuth) Authes {
-	a["fixed-secret"] = auth
+func (a *Authes) WithFixedSecretSign(auth *FixedSecretAuth) *Authes {
+	a.FixedScret = auth
 	return a
 }
 

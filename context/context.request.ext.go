@@ -166,11 +166,10 @@ func (w *extParams) GetRemoteAuthConfig() (*conf.RemoteAuth, error) {
 	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
 		return nil, err
 	}
-	confs, enable := auths["remote"]
-	if !enable {
+	if auths.RemoteAuth == nil {
 		return nil, conf.ErrNoSetting
 	}
-	return confs.(*conf.RemoteAuth), nil
+	return auths.RemoteAuth, nil
 }
 
 //GetFixedSecretConfig 获取jwt配置信息
@@ -179,11 +178,10 @@ func (w *extParams) GetFixedSecretConfig() (*conf.FixedSecretAuth, error) {
 	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
 		return nil, err
 	}
-	confs, enable := auths["fixed-secret"]
-	if !enable {
+	if auths.FixedScret == nil {
 		return nil, conf.ErrNoSetting
 	}
-	return confs.(*conf.FixedSecretAuth), nil
+	return auths.FixedScret, nil
 }
 
 //GetJWTConfig 获取jwt配置信息
@@ -192,11 +190,10 @@ func (w *extParams) GetJWTConfig() (*conf.JWTAuth, error) {
 	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
 		return nil, err
 	}
-	jwt, enable := auths["jwt"]
-	if !enable {
+	if auths.JWT == nil {
 		return nil, conf.ErrNoSetting
 	}
-	return jwt.(*conf.JWTAuth), nil
+	return auths.JWT, nil
 }
 func (w *extParams) SkipJWTExclude() (bool, error) {
 	jwt, err := w.GetJWTConfig()

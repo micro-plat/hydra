@@ -6,8 +6,8 @@ type RemoteAuth struct {
 }
 
 //WithRemoteAuth 添加固定签名认证
-func (a Authes) WithRemoteAuth(auth *RemoteAuth) Authes {
-	a["remote"] = auth
+func (a *Authes) WithRemoteAuth(auth *RemoteAuth) *Authes {
+	a.RemoteAuth = auth
 	return a
 }
 
