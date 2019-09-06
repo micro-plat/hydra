@@ -3,7 +3,7 @@ package creator
 import "github.com/micro-plat/hydra/conf"
 
 type imicroBinder interface {
-	SetAuthes(conf.Authes)
+	SetAuthes(*conf.Authes)
 	SetRouters(*conf.Routers)
 	SetCircuitBreaker(*conf.CircuitBreaker)
 	SetHeaders(conf.Headers)
@@ -20,7 +20,7 @@ func newMicroBinder(params map[string]string, inputs map[string]*Input) *microBi
 	}
 }
 
-func (b *microBinder) SetAuthes(a conf.Authes) {
+func (b *microBinder) SetAuthes(a *conf.Authes) {
 	b.mainBinder.SetSubConf("auth", a)
 }
 func (b *microBinder) SetRouters(r *conf.Routers) {
