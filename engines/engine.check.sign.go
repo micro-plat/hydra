@@ -17,7 +17,7 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 	if err := ctx.Request.Check("sign", "timestamp"); err != nil {
 		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
 	}
-	_, err = ctx.Request.CheckSign(fsConf.Secret)
+	_, err = ctx.Request.CheckSign(fsConf.Secret, fsConf.Mode)
 	if err == nil {
 		return nil
 	}
