@@ -34,6 +34,18 @@ func NewMeta() *Meta {
 	}
 }
 
+//Sets 设置map参数
+func (m *Meta) Sets(i map[string]interface{}) {
+	m.m.d = i
+}
+
+//SetStrings 设置map参数
+func (m *Meta) SetStrings(input map[string]string) {
+	for i, v := range input {
+		m.m.d[i] = v
+	}
+}
+
 //Set 设置元数据
 func (m *Meta) Set(key string, value interface{}) {
 	m.m.d[key] = value

@@ -40,13 +40,14 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	input := ctx.Request.GetRequestMap()
 	timeout := ctx.Request.Setting.GetInt("timeout", 3)
 	response := ctx.RPC.AsyncRequest(fsConf.RPCServiceName, header, input, true)
-	status, result, _, err := response.Wait(time.Second * time.Duration(timeout))
+	status, result, params, err := response.Wait(time.Second * time.Duration(timeout))
 	if err != nil {
 		return context.NewErrorf(403, "调用远程认证服务失败 %v(%d)", err, status)
 	}
 	if status == 200 {
 		return nil
 	}
+	ctx.Request.Metadata.SetStrings(params)
 	return context.NewErrorf(status, "远程认证失败(%d)%s", status, result)
 
 }

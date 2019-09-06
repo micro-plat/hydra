@@ -23,6 +23,7 @@ type Request struct {
 	QueryString    *inputParams
 	Param          *inputParams
 	Setting        *inputParams
+	Metadata       *Meta
 	CircuitBreaker *circuitBreakerParam //熔断处理
 	Http           *httpRequest
 	*extParams
@@ -47,6 +48,7 @@ func newRequest() *Request {
 		Setting:        &inputParams{},
 		CircuitBreaker: &circuitBreakerParam{inputParams: &inputParams{}},
 		Http:           &httpRequest{},
+		Metadata:       NewMeta(),
 		extParams:      &extParams{},
 	}
 }

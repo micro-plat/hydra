@@ -6,7 +6,7 @@ import "strings"
 type Authes struct {
 	JWT        *JWTAuth         `json:"jwt,omitempty"`
 	FixedScret *FixedSecretAuth `json:"fixed-secret,omitempty"`
-	RemoteAuth *RemoteAuth      `json:"remote,omitempty"`
+	RemoteAuth *RemoteAuth      `json:"remote-auth,omitempty"`
 }
 
 //JWTAuth jwt安全认证
