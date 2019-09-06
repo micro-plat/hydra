@@ -185,5 +185,5 @@ func SetJWT(set ISetJwtAuth, cnf conf.IServerConf) (enable bool, err error) {
 		err = set.SetJWT(auths.JWT)
 		return err == nil && !auths.JWT.Disable, err
 	}
-	return false, conf.ErrNoSetting
+	return false, nil
 }

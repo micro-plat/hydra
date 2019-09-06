@@ -278,7 +278,7 @@ func SetJWT(set ISetJwtAuth, cnf conf.IServerConf) (enable bool, err error) {
 		err = set.SetJWT(auths.JWT)
 		return err == nil && !auths.JWT.Disable, err
 	}
-	return false, conf.ErrNoSetting
+	return false, nil
 }
 
 func unarchive(dir string, path string) (string, error) {
@@ -326,7 +326,7 @@ func CheckFixedSecret(cnf conf.IServerConf) (enable bool, err error) {
 		}
 		return !auths.FixedScret.Disable, nil
 	}
-	return false, conf.ErrNoSetting
+	return false, nil
 }
 
 //---------------------------------------------------------------------------
@@ -348,5 +348,5 @@ func CheckRemoteAuth(cnf conf.IServerConf) (enable bool, err error) {
 		}
 		return !auths.RemoteAuth.Disable, nil
 	}
-	return false, conf.ErrNoSetting
+	return false, nil
 }
