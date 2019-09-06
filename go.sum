@@ -73,6 +73,8 @@ github.com/micro-plat/lib4go v0.1.1 h1:S5p5NkBuBSNFU7j37JIWdXizBeRsJDnSnSlNCL1wU
 github.com/micro-plat/lib4go v0.1.1/go.mod h1:QWcBeMuPBuQSm8sr0wq2DwfL864Nj6gyvDGt1bKDZTw=
 github.com/micro-plat/lib4go v0.1.5 h1:OVk8kpTqlt3LZzSZkG2nzBQpYBb91jX89DscaG8Luv4=
 github.com/micro-plat/lib4go v0.1.5/go.mod h1:YTx5gseBZRf3ZcjCQf6DRl1wSWWpRMOUZIhIoVJQJKI=
+github.com/micro-plat/lib4go v0.1.8 h1:y27Ckou2tUz6BgCCi+O8OvaWqJ2ydY3DfMjLuO+CBG4=
+github.com/micro-plat/lib4go v0.1.8/go.mod h1:JAgT8ciW1oK4y8q9EPnX4J6UvVxx9Gn5na9AyuS2xHU=
 github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b/go.mod h1:uA1h0N/jWhAWpcA61dagfjBQrHy1Ph4Vg4D0kdwi3lc=
 github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771 h1:zu6GxRZrzru4tkGF08V4EXKdXxOQGDp65LvFqZEFFR0=
 github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771/go.mod h1:sblZVHRKhCL/6io6jGCh3apprwBIPBcThqAvPGvbA28=

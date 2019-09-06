@@ -259,29 +259,31 @@ func SetHosts(set ISetHosts, cnf conf.IServerConf) (enable bool, err error) {
 
 //ISetJwtAuth 设置jwt
 type ISetJwtAuth interface {
-	SetJWT(*conf.Auth) error
+	SetJWT(*conf.JWTAuth) error
 }
 
 //SetJWT 设置jwt
 func SetJWT(set ISetJwtAuth, cnf conf.IServerConf) (enable bool, err error) {
 	//设置jwt安全认证参数
 	var auths conf.Authes
-	var jwt *conf.Auth
+	var ojwt interface{}
 	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("jwt配置有误:%v", err)
 		return false, err
 	}
-	if jwt, enable = auths["jwt"]; !enable {
-		jwt = &conf.Auth{Disable: true}
+	if ojwt, enable = auths["jwt"]; !enable {
+		ojwt = &conf.JWTAuth{Disable: true}
 	} else {
-		if b, err := govalidator.ValidateStruct(jwt); !b {
+		if b, err := govalidator.ValidateStruct(ojwt.(*conf.JWTAuth)); !b {
 			err = fmt.Errorf("jwt配置有误:%v", err)
 			return false, err
 		}
 	}
+	jwt := ojwt.(*conf.JWTAuth)
 	err = set.SetJWT(jwt)
 	return err == nil && !jwt.Disable, err
 }
+
 func unarchive(dir string, path string) (string, error) {
 	if path == "" {
 		return dir, nil
@@ -306,4 +308,54 @@ func unarchive(dir string, path string) (string, error) {
 	ndir := filepath.Join(tmpDir, dir)
 	waitRemoveDir = append(waitRemoveDir, tmpDir)
 	return ndir, nil
+}
+
+//---------------------------------------------------------------------------
+//-------------------------------fixed-secret---------------------------------------
+//---------------------------------------------------------------------------
+
+//CheckFixedSecret 设置FixedSecret
+func CheckFixedSecret(cnf conf.IServerConf) (enable bool, err error) {
+	//设置fixedSecret安全认证参数
+	var auths conf.Authes
+	var oFixedSecret interface{}
+	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+		err = fmt.Errorf("fixed-secret配置有误:%v", err)
+		return false, err
+	}
+	if oFixedSecret, enable = auths["fixed-secret"]; !enable {
+		oFixedSecret = &conf.FixedSecretAuth{Disable: true}
+	} else {
+		if b, err := govalidator.ValidateStruct(oFixedSecret.(*conf.FixedSecretAuth)); !b {
+			err = fmt.Errorf("fixed-secret配置有误:%v", err)
+			return false, err
+		}
+	}
+	fixedSecret := oFixedSecret.(*conf.FixedSecretAuth)
+	return err == nil && !fixedSecret.Disable, err
+}
+
+//---------------------------------------------------------------------------
+//-------------------------------remote-auth---------------------------------------
+//---------------------------------------------------------------------------
+
+//CheckRemoteAuth 检查是否设置remote-auth
+func CheckRemoteAuth(cnf conf.IServerConf) (enable bool, err error) {
+	//设置Remote安全认证参数
+	var auths conf.Authes
+	var oRemote interface{}
+	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+		err = fmt.Errorf("remote-auth配置有误:%v", err)
+		return false, err
+	}
+	if oRemote, enable = auths["remote"]; !enable {
+		oRemote = &conf.RemoteAuth{Disable: true}
+	} else {
+		if b, err := govalidator.ValidateStruct(oRemote.(*conf.RemoteAuth)); !b {
+			err = fmt.Errorf("remote-auth配置有误:%v", err)
+			return false, err
+		}
+	}
+	remote := oRemote.(*conf.RemoteAuth)
+	return err == nil && !remote.Disable, err
 }

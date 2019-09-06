@@ -14,7 +14,7 @@ import (
 //JwtAuth jwt
 func wsCheckJwt(ctx *gin.Context, curl string, token string) bool {
 	cnf := getMetadataConf(ctx)
-	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 	if !ok || jwtAuth == nil || jwtAuth.Disable {
 		return true
 	}
@@ -42,7 +42,7 @@ func makeJwtToken(ctx *gin.Context, data interface{}) (string, bool) {
 		return "", false
 	}
 	cnf := getMetadataConf(ctx)
-	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 	if !ok || jwtAuth.Disable {
 		return "", false
 	}
@@ -55,7 +55,7 @@ func makeJwtToken(ctx *gin.Context, data interface{}) (string, bool) {
 }
 
 // CheckJWT 检查jwk参数是否合法
-func checkWSJWT(ctx *gin.Context, auth *conf.Auth, token string) (data interface{}, err context.IError) {
+func checkWSJWT(ctx *gin.Context, auth *conf.JWTAuth, token string) (data interface{}, err context.IError) {
 	if token == "" {
 		return nil, context.NewError(types.GetInt(auth.FailedCode, 403), fmt.Errorf("获取%s失败或未传入该参数", auth.Name))
 	}
@@ -69,7 +69,7 @@ func checkWSJWT(ctx *gin.Context, auth *conf.Auth, token string) (data interface
 	return data, nil
 }
 func getJWTToken(ctx *gin.Context) string {
-	jwtAuth, ok := getMetadataConf(ctx).GetMetadata("jwt").(*conf.Auth)
+	jwtAuth, ok := getMetadataConf(ctx).GetMetadata("jwt").(*conf.JWTAuth)
 	if !ok || jwtAuth == nil || jwtAuth.Disable {
 		return ""
 	}

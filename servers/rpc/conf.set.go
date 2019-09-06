@@ -166,26 +166,27 @@ func SetHosts(set ISetHosts, cnf conf.IServerConf) (enable bool, err error) {
 
 //ISetJwtAuth 设置jwt
 type ISetJwtAuth interface {
-	SetJWT(*conf.Auth) error
+	SetJWT(*conf.JWTAuth) error
 }
 
 //SetJWT 设置jwt
 func SetJWT(set ISetJwtAuth, cnf conf.IServerConf) (enable bool, err error) {
 	//设置jwt安全认证参数
 	var auths conf.Authes
-	var jwt *conf.Auth
+	var ojwt interface{}
 	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("jwt配置有误:%v", err)
 		return false, err
 	}
-	if jwt, enable = auths["jwt"]; !enable {
-		jwt = &conf.Auth{Disable: true}
+	if ojwt, enable = auths["jwt"]; !enable {
+		ojwt = &conf.JWTAuth{Disable: true}
 	} else {
-		if b, err := govalidator.ValidateStruct(jwt); !b {
+		if b, err := govalidator.ValidateStruct(ojwt.(*conf.JWTAuth)); !b {
 			err = fmt.Errorf("jwt配置有误:%v", err)
 			return false, err
 		}
 	}
+	jwt := ojwt.(*conf.JWTAuth)
 	err = set.SetJWT(jwt)
 	return err == nil && !jwt.Disable, err
 }

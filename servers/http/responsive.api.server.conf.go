@@ -97,6 +97,18 @@ func (w *ApiResponsiveServer) SetConf(restart bool, cnf conf.IServerConf) (err e
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "jwt设置")
 
+	//检查固定密钥认证
+	if ok, err = CheckFixedSecret(cnf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "固定密钥认证")
+
+	//检查远程服务认证
+	if ok, err = CheckRemoteAuth(cnf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "远程服务认证")
+
 	//设置ajax请求
 	if ok, err = SetAjaxRequest(w.server, cnf); err != nil {
 		return err

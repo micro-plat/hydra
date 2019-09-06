@@ -160,19 +160,43 @@ func (w *extParams) GetUUID() string {
 	return fmt.Sprint(w.ext["__hydra_sid_"])
 }
 
-//GetJWTConfig 获取jwt配置信息
-func (w *extParams) GetJWTConfig() (*conf.Auth, error) {
+//GetRemoteAuthConfig 获取远程服务认证
+func (w *extParams) GetRemoteAuthConfig() (*conf.RemoteAuth, error) {
 	var auths conf.Authes
-	var jwt *conf.Auth
-	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
-		err = fmt.Errorf("jwt配置有误:%v", err)
+	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
+		return nil, err
+	}
+	confs, enable := auths["remote"]
+	if !enable {
+		return nil, conf.ErrNoSetting
+	}
+	return confs.(*conf.RemoteAuth), nil
+}
+
+//GetFixedSecretConfig 获取jwt配置信息
+func (w *extParams) GetFixedSecretConfig() (*conf.FixedSecretAuth, error) {
+	var auths conf.Authes
+	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
+		return nil, err
+	}
+	confs, enable := auths["fixed-secret"]
+	if !enable {
+		return nil, conf.ErrNoSetting
+	}
+	return confs.(*conf.FixedSecretAuth), nil
+}
+
+//GetJWTConfig 获取jwt配置信息
+func (w *extParams) GetJWTConfig() (*conf.JWTAuth, error) {
+	var auths conf.Authes
+	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
 		return nil, err
 	}
 	jwt, enable := auths["jwt"]
 	if !enable {
-		return nil, fmt.Errorf("jwt:%v", conf.ErrNoSetting)
+		return nil, conf.ErrNoSetting
 	}
-	return jwt, nil
+	return jwt.(*conf.JWTAuth), nil
 }
 func (w *extParams) SkipJWTExclude() (bool, error) {
 	jwt, err := w.GetJWTConfig()

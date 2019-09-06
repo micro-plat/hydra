@@ -14,7 +14,7 @@ import (
 //JwtAuth jwt
 func JwtAuth(cnf *conf.MetadataConf) dispatcher.HandlerFunc {
 	return func(ctx *dispatcher.Context) {
-		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 		if !ok || jwtAuth == nil || jwtAuth.Disable {
 			ctx.Next()
 			return
@@ -50,7 +50,7 @@ func setJwtResponse(ctx *dispatcher.Context, cnf *conf.MetadataConf, data interf
 	if data == nil {
 		return
 	}
-	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 	if !ok || jwtAuth.Disable {
 		return
 	}

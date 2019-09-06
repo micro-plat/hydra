@@ -3,13 +3,10 @@ package conf
 import "strings"
 
 //Authes 安全认证组
-type Authes map[string]*Auth
-type JWTAuth struct {
-	*Auth
-}
+type Authes map[string]interface{}
 
-//Auth 安全认证
-type Auth struct {
+//JWTAuth jwt安全认证
+type JWTAuth struct {
 	Name       string   `json:"name" valid:"ascii,required"`
 	ExpireAt   int64    `json:"expireAt" valid:"required"`
 	Mode       string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required"`
@@ -24,25 +21,23 @@ type Auth struct {
 
 //NewAuthes  构建安全认证
 func NewAuthes() Authes {
-	return map[string]*Auth{}
+	return map[string]interface{}{}
 }
 
 //WithJWT 添加jwt验证
 func (a Authes) WithJWT(jwt *JWTAuth) Authes {
-	a["jwt"] = jwt.Auth
+	a["jwt"] = jwt
 	return a
 }
 
 //NewJWT 构建JWT安全认证
 func NewJWT(name string, mode string, secret string, expireAt int64, exclude ...string) *JWTAuth {
 	return &JWTAuth{
-		Auth: &Auth{
-			Name:     name,
-			Mode:     mode,
-			Secret:   secret,
-			ExpireAt: expireAt,
-			Exclude:  exclude,
-		},
+		Name:     name,
+		Mode:     mode,
+		Secret:   secret,
+		ExpireAt: expireAt,
+		Exclude:  exclude,
 	}
 }
 
@@ -73,10 +68,22 @@ func (a *JWTAuth) WithRedirect(url string) *JWTAuth {
 	return a
 }
 
+//WithDisable 禁用配置
+func (a *JWTAuth) WithDisable() *JWTAuth {
+	a.Disable = true
+	return a
+}
+
+//WithEnable 启用配置
+func (a *JWTAuth) WithEnable() *JWTAuth {
+	a.Disable = false
+	return a
+}
+
 var cacheExcludeSvcs = map[string]bool{}
 
 //IsExcluded 是否是排除验证的服务
-func (a *Auth) IsExcluded(service string) bool {
+func (a *JWTAuth) IsExcluded(service string) bool {
 
 	service = strings.ToLower(service)
 	if v, e := cacheExcludeSvcs[service]; e && v {

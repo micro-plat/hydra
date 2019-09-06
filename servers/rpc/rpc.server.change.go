@@ -15,7 +15,7 @@ func (s *RpcServer) SetRouters(routers []*conf.Router) (err error) {
 }
 
 //SetJWT Server
-func (s *RpcServer) SetJWT(auth *conf.Auth) error {
+func (s *RpcServer) SetJWT(auth *conf.JWTAuth) error {
 	s.conf.SetMetadata("jwt", auth)
 	return nil
 }

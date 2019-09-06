@@ -15,7 +15,7 @@ func (s *WSServer) SetRouters(routers []*conf.Router) (err error) {
 }
 
 //SetJWT Server
-func (s *WSServer) SetJWT(auth *conf.Auth) error {
+func (s *WSServer) SetJWT(auth *conf.JWTAuth) error {
 	s.conf.SetMetadata("jwt", auth)
 	return nil
 }

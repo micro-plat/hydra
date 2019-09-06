@@ -176,9 +176,13 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 }
 
 //Handling 每次handle执行前执行
-func (r *ServiceEngine) Handling(c *context.Context) (rs interface{}) {
-	c.SetRPC(r.Invoker)
-	return nil
+func (r *ServiceEngine) Handling(ctx *context.Context) (rs interface{}) {
+	ctx.SetRPC(r.Invoker)
+	err := checkSignByFixedSecret(ctx)
+	if err != nil {
+		return err
+	}
+	return checkSignByRemoteSecret(ctx)
 }
 
 //GetRegistry 获取注册中心

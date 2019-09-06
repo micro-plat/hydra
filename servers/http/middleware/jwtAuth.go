@@ -21,7 +21,7 @@ func JwtAuth(cnf *conf.MetadataConf) gin.HandlerFunc {
 			return
 		}
 
-		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 		if !ok || jwtAuth == nil || jwtAuth.Disable {
 			ctx.Next()
 			return
@@ -78,7 +78,7 @@ func setJwtResponse(ctx *gin.Context, cnf *conf.MetadataConf, data interface{}) 
 	if data == nil {
 		return
 	}
-	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.Auth)
+	jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
 	if !ok || jwtAuth.Disable {
 		return
 	}
@@ -92,7 +92,7 @@ func setJwtResponse(ctx *gin.Context, cnf *conf.MetadataConf, data interface{}) 
 }
 
 // CheckJWT 检查jwk参数是否合法
-func checkJWT(ctx *gin.Context, auth *conf.Auth) (data interface{}, err context.IError) {
+func checkJWT(ctx *gin.Context, auth *conf.JWTAuth) (data interface{}, err context.IError) {
 	token := getToken(ctx, auth)
 	if token == "" {
 		return nil, context.NewError(types.GetInt(auth.FailedCode, 403), fmt.Errorf("获取%s失败或未传入该参数", auth.Name))
@@ -106,7 +106,7 @@ func checkJWT(ctx *gin.Context, auth *conf.Auth) (data interface{}, err context.
 	}
 	return data, nil
 }
-func getToken(ctx *gin.Context, jwt *conf.Auth) string {
+func getToken(ctx *gin.Context, jwt *conf.JWTAuth) string {
 	switch strings.ToUpper(jwt.Source) {
 	case "HEADER", "H":
 		return ctx.GetHeader(jwt.Name)
@@ -116,7 +116,7 @@ func getToken(ctx *gin.Context, jwt *conf.Auth) string {
 	}
 }
 
-func setToken(ctx *gin.Context, jwt *conf.Auth, token string) {
+func setToken(ctx *gin.Context, jwt *conf.JWTAuth, token string) {
 	switch strings.ToUpper(jwt.Source) {
 	case "HEADER", "H":
 		ctx.Header(jwt.Name, token)

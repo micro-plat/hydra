@@ -19,7 +19,7 @@ require (
 	github.com/json-iterator/go v1.1.6
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/micro-plat/lib4go v0.1.5
+	github.com/micro-plat/lib4go v0.1.8
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.2.4+incompatible // indirect
 	github.com/pkg/profile v1.3.0
@@ -38,3 +38,5 @@ require (
 	google.golang.org/grpc v1.22.0
 	gopkg.in/yaml.v2 v2.2.2
 )
+
+//replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

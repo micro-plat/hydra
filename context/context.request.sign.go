@@ -9,7 +9,7 @@ import (
 )
 
 //GetSignRaw 检查签名原串
-func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string, string) {
+func (r *Request) GetSignRaw(all bool, a string, b string) (string, string) {
 	keys := r.GetKeys()
 	values := net.NewValues()
 	var sign string
@@ -30,13 +30,13 @@ func (r *Request) GetSignRaw(all bool, a string, b string, f ...string) (string,
 }
 
 //CheckSign 检查签名是否正确(只值为空不参与签名，键值及每个串之前使用空进行连接)
-func (r *Request) CheckSign(secret string, f ...string) (bool, error) {
-	return r.CheckSignAll(secret, false, "", "", f...)
+func (r *Request) CheckSign(secret string) (bool, error) {
+	return r.CheckSignAll(secret, false, "", "")
 }
 
 //CheckSignAll 检查签名是否正确
-func (r *Request) CheckSignAll(secret string, all bool, a string, b string, f ...string) (bool, error) {
-	sign, raw := r.GetSignRaw(all, a, b, f...)
+func (r *Request) CheckSignAll(secret string, all bool, a string, b string) (bool, error) {
+	sign, raw := r.GetSignRaw(all, a, b)
 	expect := md5.Encrypt(raw + secret)
 	if strings.EqualFold(expect, sign) {
 		return true, nil
