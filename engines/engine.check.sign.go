@@ -21,7 +21,7 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 	if err == nil {
 		return nil
 	}
-	return context.NewErrorf(403, "签名认证失败%v", err)
+	return context.NewErrorf(401, "签名认证失败%v", err)
 }
 
 //checkSignByRemoteSecret 根据固定secret检查签名
@@ -42,12 +42,12 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	response := ctx.RPC.AsyncRequest(fsConf.RPCServiceName, header, input, true)
 	status, result, params, err := response.Wait(time.Second * time.Duration(timeout))
 	if err != nil {
-		return context.NewErrorf(403, "调用远程认证服务失败 %v(%d)", err, status)
+		return context.NewErrorf(401, "调用远程认证服务失败 %v(%d)", err, status)
 	}
 	if status == 200 {
+		ctx.Request.Metadata.SetStrings(params)
 		return nil
 	}
-	ctx.Request.Metadata.SetStrings(params)
 	return context.NewErrorf(status, "远程认证失败(%d)%s", status, result)
 
 }
