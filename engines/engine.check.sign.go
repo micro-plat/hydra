@@ -2,7 +2,6 @@ package engines
 
 import (
 	"strings"
-	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -38,9 +37,7 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	}
 	header["method"] = strings.ToUpper(ctx.Request.GetMethod())
 	input := ctx.Request.GetRequestMap()
-	timeout := ctx.Request.Setting.GetInt("timeout", 3)
-	response := ctx.RPC.AsyncRequest(fsConf.RPCServiceName, header, input, true)
-	status, result, params, err := response.Wait(time.Second * time.Duration(timeout))
+	status, result, params, err := ctx.RPC.Request(fsConf.RPCServiceName, header, input, true)
 	if err != nil {
 		return context.NewErrorf(401, "调用远程认证服务失败 %v(%d)", err, status)
 	}
