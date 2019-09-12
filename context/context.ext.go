@@ -4,7 +4,7 @@ import "strings"
 
 //IsMicroServer 是否是远程服务api,web,rpc
 func (c *Context) IsMicroServer() bool {
-	return c.IsAPIServer() || c.IsWebServer() || c.IsRPCServer()
+	return c.IsAPIServer() || c.IsWebServer() || c.IsRPCServer() || c.IsWSServer()
 }
 
 //IsFlowServer 是否是流程服务mqc,cron
@@ -15,6 +15,11 @@ func (c *Context) IsFlowServer() bool {
 //IsAPIServer 是否是http api服务
 func (c *Context) IsAPIServer() bool {
 	return strings.ToLower(c.GetContainer().GetServerType()) == "api"
+}
+
+//IsWSServer 是否是web socket服务
+func (c *Context) IsWSServer() bool {
+	return strings.ToLower(c.GetContainer().GetServerType()) == "ws"
 }
 
 //IsWebServer 是否是web服务
