@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type ISetMetric interface {
@@ -92,7 +93,7 @@ func SetRouters(engine servers.IRegistryEngine, cnf conf.IServerConf, set ISetRo
 				router.Setting[k] = v
 			}
 		}
-		router.Handler = middleware.ContextHandler(engine, router.Name, router.Engine, router.Service, router.Setting, ext)
+		router.Handler = middleware.ContextHandler(engine, router.Name, router.Engine, router.Service, router.Setting, types.Copy(ext, "path", router.Service))
 	}
 	err = set.SetRouters(routers.Routers)
 	return len(routers.Routers) > 0 && err == nil, err
@@ -184,6 +185,50 @@ func SetJWT(set ISetJwtAuth, cnf conf.IServerConf) (enable bool, err error) {
 		}
 		err = set.SetJWT(auths.JWT)
 		return err == nil && !auths.JWT.Disable, err
+	}
+	return false, nil
+}
+
+//---------------------------------------------------------------------------
+//-------------------------------fixed-secret---------------------------------------
+//---------------------------------------------------------------------------
+
+//CheckFixedSecret 设置FixedSecret
+func CheckFixedSecret(cnf conf.IServerConf) (enable bool, err error) {
+	//设置fixedSecret安全认证参数
+	var auths conf.Authes
+	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+		err = fmt.Errorf("fixed-secret配置有误:%v", err)
+		return false, err
+	}
+	if auths.FixedScret != nil {
+		if b, err := govalidator.ValidateStruct(auths.FixedScret); !b {
+			err = fmt.Errorf("fixed-secret配置有误:%v", err)
+			return false, err
+		}
+		return !auths.FixedScret.Disable, nil
+	}
+	return false, nil
+}
+
+//---------------------------------------------------------------------------
+//-------------------------------remote-auth---------------------------------------
+//---------------------------------------------------------------------------
+
+//CheckRemoteAuth 检查是否设置remote-auth
+func CheckRemoteAuth(cnf conf.IServerConf) (enable bool, err error) {
+	//设置Remote安全认证参数
+	var auths conf.Authes
+	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+		err = fmt.Errorf("remote-auth配置有误:%v", err)
+		return false, err
+	}
+	if auths.RemoteAuth != nil {
+		if b, err := govalidator.ValidateStruct(auths.RemoteAuth); !b {
+			err = fmt.Errorf("remote-auth配置有误:%v", err)
+			return false, err
+		}
+		return !auths.RemoteAuth.Disable, nil
 	}
 	return false, nil
 }

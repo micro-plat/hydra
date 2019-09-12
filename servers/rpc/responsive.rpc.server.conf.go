@@ -80,6 +80,18 @@ func (w *RpcResponsiveServer) SetConf(restart bool, conf conf.IServerConf) (err 
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "jwt设置")
 
+	//检查固定密钥认证
+	if ok, err = CheckFixedSecret(conf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "固定密钥认证")
+
+	//检查远程服务认证
+	if ok, err = CheckRemoteAuth(conf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "远程服务认证")
+
 	//设置请求头
 	if ok, err = SetHeaders(w.server, conf); err != nil {
 		return err

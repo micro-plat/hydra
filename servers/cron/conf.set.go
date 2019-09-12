@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type ISetMetric interface {
@@ -73,7 +74,7 @@ func SetTasks(engine servers.IRegistryEngine, set ITasks, cnf conf.IServerConf, 
 				task.Setting[k] = v
 			}
 		}
-		task.Handler = middleware.ContextHandler(engine, task.Name, task.Engine, task.Service, task.Setting, ext)
+		task.Handler = middleware.ContextHandler(engine, task.Name, task.Engine, task.Service, task.Setting, types.Copy(ext, "path", task.Cron))
 		ntasks = append(ntasks, task)
 	}
 	var raw string

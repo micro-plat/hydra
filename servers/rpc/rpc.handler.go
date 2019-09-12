@@ -58,6 +58,6 @@ func (r *Routers) Route(method string, name string, f servers.IRegistryEngine) {
 			Action:  strings.Split(method, ","),
 			Engine:  "*",
 			Service: name,
-			Handler: middleware.ContextHandler(f, name, "*", name, nil, nil),
+			Handler: middleware.ContextHandler(f, name, "*", name, nil, map[string]interface{}{"path": name}),
 		})
 }

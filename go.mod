@@ -39,4 +39,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-//replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

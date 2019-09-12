@@ -116,7 +116,9 @@ func (s *MqcServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Queue) 
 
 				//注册服务
 				if _, ok := s.handles[r.Name]; !ok {
-					handler := middleware.ContextHandler(engine, r.Name, r.Engine, r.Service, r.Setting, nil)
+					handler := middleware.ContextHandler(engine, r.Name, r.Engine, r.Service, r.Setting, map[string]interface{}{
+						"path": r.Queue,
+					})
 					s.handles[r.Name] = handler
 					s.Dispatcher.Handle("GET", fmt.Sprintf("/%s", strings.TrimPrefix(r.Name, "/")), handler)
 				}

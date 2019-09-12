@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type ISetMetric interface {
@@ -86,7 +87,7 @@ func SetQueues(engine servers.IRegistryEngine, set IQueues, cnf conf.IServerConf
 				queue.Setting[k] = v
 			}
 		}
-		queue.Handler = middleware.ContextHandler(engine, queue.Name, queue.Engine, queue.Service, queue.Setting, ext)
+		queue.Handler = middleware.ContextHandler(engine, queue.Name, queue.Engine, queue.Service, queue.Setting, types.Copy(ext, "path", queue.Queue))
 		nqueues = append(nqueues, queue)
 	}
 	if err = set.SetQueues(server.GetProto(), string(serverConf.GetRaw()), nqueues); err != nil {

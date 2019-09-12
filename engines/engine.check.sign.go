@@ -10,9 +10,13 @@ import (
 //checkSignByFixedSecret 根据固定secret检查签名
 func checkSignByFixedSecret(ctx *context.Context) error {
 	fsConf, err := ctx.Request.GetFixedSecretConfig()
-	if err == conf.ErrNoSetting {
+	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
 		return nil
 	}
+	if !fsConf.Contains(ctx.Request.GetPath()) {
+		return nil
+	}
+
 	if err := ctx.Request.Check("sign", "timestamp"); err != nil {
 		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
 	}
@@ -26,10 +30,12 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 //checkSignByRemoteSecret 根据固定secret检查签名
 func checkSignByRemoteSecret(ctx *context.Context) error {
 	fsConf, err := ctx.Request.GetRemoteAuthConfig()
-	if err == conf.ErrNoSetting {
+	if err == conf.ErrNoSetting || !ctx.Request.Http.IsHTTPRequest() {
 		return nil
 	}
-
+	if !fsConf.Contains(ctx.Request.GetPath()) {
+		return nil
+	}
 	header, _ := ctx.Request.Http.GetHeader()
 	cookie, _ := ctx.Request.Http.GetCookies()
 	for k, v := range cookie {
