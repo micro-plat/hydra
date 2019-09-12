@@ -30,7 +30,7 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 //checkSignByRemoteSecret 根据固定secret检查签名
 func checkSignByRemoteSecret(ctx *context.Context) error {
 	fsConf, err := ctx.Request.GetRemoteAuthConfig()
-	if err == conf.ErrNoSetting || !ctx.Request.Http.IsHTTPRequest() {
+	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
 		return nil
 	}
 	if !fsConf.Contains(ctx.Request.GetPath()) {

@@ -13,10 +13,14 @@ func (a *Authes) WithRemoteAuth(auth *RemoteAuth) *Authes {
 }
 
 //NewRemoteAuth 创建固定Secret签名认证
-func NewRemoteAuth(rpcService string) *RemoteAuth {
+func NewRemoteAuth(rpcService string, path ...string) *RemoteAuth {
+	ninclude := []string{"*"}
+	if len(path) > 0 {
+		ninclude = path
+	}
 	return &RemoteAuth{
 		RPCServiceName: rpcService,
-		Include:        []string{"*"},
+		Include:        ninclude,
 	}
 }
 

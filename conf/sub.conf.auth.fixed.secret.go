@@ -28,6 +28,15 @@ func NewFixedSecretAuth(secret string, mode ...string) *FixedSecretAuth {
 	}
 }
 
+//WithInclude 设置include的请求服务路径
+func (a *FixedSecretAuth) WithInclude(path ...string) *FixedSecretAuth {
+	if len(path) > 0 {
+		a.Include = path
+	}
+	return a
+
+}
+
 //Contains 检查指定的路径是否允许签名
 func (a *FixedSecretAuth) Contains(p string) bool {
 	if len(a.Include) == 0 {
