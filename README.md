@@ -35,9 +35,8 @@ func main() {
 		hydra.WithSystemName("demo"), //系统名称
 		hydra.WithClusterName("test"), //集群名称
 		hydra.WithServerTypes("api"), //服务器类型为http api
-		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
-		hydra.WithDebug())
-
+		hydra.WithRegistry("fs://../")) //使用本地文件系统作为注册中心
+		
 	app.API("/hello",hello)
 	app.Start()
 }
