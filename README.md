@@ -91,6 +91,9 @@ curl http://localhost:8090/hello
 
 [构建 websocket 服务(WS)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_ws_01.md)
 
+[安全认证(jwt,数字摘要，远程服务)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_sec_01.md)
+
+
 [性能指标收集(metric)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_metric_01.md)
 
 [日志配置与管理](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_log_01.md)
