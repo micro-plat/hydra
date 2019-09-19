@@ -37,6 +37,13 @@ func (a *RemoteAuth) Contains(p string) bool {
 	return false
 }
 
+//WithInclude 设置include的请求服务路径
+func (a *RemoteAuth) WithInclude(path ...string) *RemoteAuth {
+	if len(path) > 0 {
+		a.Include = path
+	}
+	return a
+
 //WithDisable 禁用配置
 func (a *RemoteAuth) WithDisable() *RemoteAuth {
 	a.Disable = true
