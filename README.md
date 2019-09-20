@@ -35,8 +35,7 @@ func main() {
 		hydra.WithSystemName("demo"), //系统名称
 		hydra.WithClusterName("test"), //集群名称
 		hydra.WithServerTypes("api"), //服务器类型为http api
-		hydra.WithRegistry("fs://../"), //使用本地文件系统作为注册中心
-		hydra.WithDebug())
+		hydra.WithRegistry("fs://../")) //使用本地文件系统作为注册中心
 
 	app.API("/hello",hello)
 	app.Start()
@@ -91,6 +90,8 @@ curl http://localhost:8090/hello
 [构建静态文件服务](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_static_01.md)
 
 [构建 websocket 服务(WS)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_ws_01.md)
+
+[安全认证(jwt,数字摘要，远程认证)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_sec_01.md)
 
 [性能指标收集(metric)](https://github.com/micro-plat/hydra/tree/master/docs/getting-started_metric_01.md)
 

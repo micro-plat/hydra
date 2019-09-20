@@ -122,6 +122,11 @@ func (r *ServiceEngine) GetServices() map[string][]string {
 
 }
 
+//GetTags 添加获和取tag接口
+func(r *ServiceEngine)GetTags(name string)[]string{
+	return r.StandardComponent.GetTags(name)
+}
+
 //Execute 执行外部请求
 func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	id := fmt.Sprint(goid())

@@ -24,6 +24,8 @@ type IContainer interface {
 	conf.IMainConf
 	GetRegistry() registry.IRegistry
 
+	GetTags(name string)[]string
+
 	GetRegularCache(names ...string) (c cache.ICache)
 	GetCache(names ...string) (c cache.ICache, err error)
 	GetCacheBy(tpName string, name string) (c cache.ICache, err error)

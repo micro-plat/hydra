@@ -42,6 +42,12 @@ func (w *extParams) GetMethod() string {
 	}
 	return ""
 }
+func (w *extParams) GetPath() string {
+	if m, ok := w.ext["__path_"].(string); ok {
+		return m
+	}
+	return ""
+}
 func (w *extParams) GetHeader() map[string]string {
 	if h, ok := w.ext["__header_"].(map[string]string); ok {
 		return h

@@ -134,7 +134,12 @@ func makeSettingData(ctx *dispatcher.Context, m map[string]string) ParamData {
 func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]interface{} {
 	input := make(map[string]interface{})
 	for k, v := range ext {
-		input[k] = v
+		if strings.HasPrefix(k, "__") {
+			input[k] = v
+			continue
+		}
+		input[fmt.Sprintf("__%s_", k)] = v
+
 	}
 	input["__hydra_sid_"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.GetMethod())

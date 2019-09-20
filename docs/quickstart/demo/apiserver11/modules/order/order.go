@@ -4,7 +4,7 @@ import (
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/quickstart/demo/apiserver11/modules/const/keys"
 	"github.com/micro-plat/lib4go/db"
-	"github.com/micro-plat/qtask"
+	// "github.com/micro-plat/qtask"
 )
 
 type IOrder interface {
@@ -28,6 +28,6 @@ func (d *Order) Create(merchantID string, orderNO string, account string, face i
 	if err != nil {
 		return nil, err
 	}
-	qtask.Create(d.c, "订单支付", order, 60, keys.ORDER_PAY)
+	// qtask.Create(d.c, "订单支付", order, 60, keys.ORDER_PAY)
 	return order, err
 }

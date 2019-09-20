@@ -43,7 +43,6 @@ func NewApp(opts ...Option) (m *MicroApp) {
 	for _, opt := range opts {
 		opt(m.option)
 	}
-
 	m.logger = logger.GetSession("hydra", logger.CreateSession())
 	return m
 }

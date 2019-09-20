@@ -17,6 +17,22 @@ type httpRequest struct {
 func (c *httpRequest) Clear() {
 	c.ext = nil
 }
+
+//GetPath 获取请求路径
+func (c *httpRequest) GetPath() string {
+	request, err := c.Get()
+	if err != nil {
+		return ""
+	}
+	return request.URL.Path
+}
+
+//IsHTTPRequest 检查是否是http请求
+func (c *httpRequest) IsHTTPRequest() bool {
+	_, err := c.Get()
+	return err == nil
+}
+
 func (c *httpRequest) GetHeader() (map[string]string, error) {
 	header := make(map[string]string)
 	request, err := c.Get()

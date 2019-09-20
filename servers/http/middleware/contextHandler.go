@@ -178,6 +178,7 @@ func makeExtData(c *gin.Context) map[string]interface{} {
 	input["__hydra_sid_"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.Method)
 	input["__header_"] = c.Request.Header
+	input["__path_"] = c.Request.URL.Path
 	input["__is_circuit_breaker_"] = getIsCircuitBreaker(c)
 	input["__jwt_"] = func() interface{} {
 		return getJWTRaw(c)

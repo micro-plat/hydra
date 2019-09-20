@@ -123,7 +123,10 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 			if task.Setting == nil {
 				task.Setting = make(map[string]string)
 			}
-			task.Handler = middleware.ContextHandler(engine, task.Name, task.Engine, task.Service, task.Setting, map[string]interface{}{})
+			task.Handler = middleware.ContextHandler(engine, task.Name, task.Engine, task.Service, task.Setting,
+				map[string]interface{}{
+					"path": task.Cron,
+				})
 			ct, err := newCronTask(task)
 			if err != nil {
 				s.Logger.Error("构建cron.task失败:", err)
