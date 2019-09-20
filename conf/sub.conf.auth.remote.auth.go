@@ -43,6 +43,7 @@ func (a *RemoteAuth) WithInclude(path ...string) *RemoteAuth {
 		a.Include = path
 	}
 	return a
+}
 
 //WithDisable 禁用配置
 func (a *RemoteAuth) WithDisable() *RemoteAuth {
