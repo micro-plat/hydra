@@ -42,42 +42,42 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	hasHandle := false
 	switch h.(type) {
 	case Handler:
-		r.registerAddService(name, group, h)
+		r.registerAddService(name,name, group, h)
 		found = true
 		hasHandle = true
 	}
 	switch handler := h.(type) {
 	case GetHandler:
 		var f ServiceFunc = handler.GetHandle
-		r.registerAddService(registry.Join(name, "$get"), group, f)
-		r.registerAddService(registry.Join(name, "get", "$get"), group, f)
+		r.registerAddService(name,registry.Join(name, "$get"), group, f)
+		r.registerAddService(name,registry.Join(name, "get", "$get"), group, f)
 		if !hasHandle {
-			r.registerAddService(name, group, f)
+			r.registerAddService(name,name, group, f)
 		}
 		found = true
 	}
 	switch handler := h.(type) {
 	case HeadHandler:
 		var f ServiceFunc = handler.HeadHandle
-		r.registerAddService(registry.Join(name, "$head"), group, f)
+		r.registerAddService(name,registry.Join(name, "$head"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case PostHandler:
 		var f ServiceFunc = handler.PostHandle
-		r.registerAddService(registry.Join(name, "$post"), group, f)
+		r.registerAddService(name,registry.Join(name, "$post"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case PutHandler:
 		var f ServiceFunc = handler.PutHandle
-		r.registerAddService(registry.Join(name, "$put"), group, f)
+		r.registerAddService(name,registry.Join(name, "$put"), group, f)
 		found = true
 	}
 	switch handler := h.(type) {
 	case DeleteHandler:
 		var f ServiceFunc = handler.DeleteHandle
-		r.registerAddService(registry.Join(name, "$delete"), group, f)
+		r.registerAddService(name,registry.Join(name, "$delete"), group, f)
 		found = true
 	}
 
@@ -100,7 +100,7 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 				if endName == "get" || endName == "post" || endName == "put" || endName == "delete" {
 					endName = "$" + endName
 				}
-				r.registerAddService(registry.Join(name, endName), group, f)
+				r.registerAddService(name,registry.Join(name, endName), group, f)
 				found = true
 			}
 		}
@@ -175,11 +175,15 @@ func (r *StandardComponent) register(group string, name string, h interface{}) {
 	}
 }
 
-func (r *StandardComponent) registerAddService(name string, group string, handler interface{}) {
+func (r *StandardComponent) registerAddService(rname string,name string, group string, handler interface{}) {
+	
+	if _,ok:=r.ServiceTags[name];!ok&&rname!=name{
+		r.ServiceTags[name]=r.ServiceTags[rname]
+	}
+	
 	_, hok := r.Handlers[name]
 	if !hok {
 		r.Handlers[name] = handler
-
 	}
 	if strings.HasPrefix(name, "__") {
 		return

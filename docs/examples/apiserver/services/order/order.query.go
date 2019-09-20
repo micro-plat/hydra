@@ -21,8 +21,9 @@ func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 // func (u *QueryHandler) PutHandle(ctx *context.Context) (r interface{}) {
 // 	return "success.handle"
 // }
-func (u *QueryHandler) PostHandle(ctx *context.Context) (r interface{}) {
-	return "success.post"
+func (u *QueryHandler) QueryHandle(ctx *context.Context) (r interface{}) {
+	ctx.Log.Info(ctx.GetContainer().GetTags(ctx.Service))
+	return "success.query"
 }
 
 // func (u *QueryHandler) QueryHandle(ctx *context.Context) (r interface{}) {
