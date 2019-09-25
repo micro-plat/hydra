@@ -20,6 +20,8 @@ type IContainer interface {
 	GetRegistry() registry.IRegistry
 	GetLogger() logger.ILogging
 
+	GetTags(name string) []string
+
 	GetRegularCache(names ...string) (c cache.ICache)
 	GetCache(names ...string) (c cache.ICache, err error)
 	GetCacheBy(tpName string, name string) (c cache.ICache, err error)
