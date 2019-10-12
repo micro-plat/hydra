@@ -18,9 +18,8 @@ func main() {
 
 	// app.Conf.API.SetMain(conf.NewAPIServerConf(":8098").WithDNS("api.hydra.com"))
 	app.Conf.API.SetHeaders(conf.NewHeader().WithCrossDomain())
-	app.Micro("/order", order.NewQueryHandler,"/order/tags")
-	app.Micro("/hello/get", helloWorld,"/a/bc")
-	
+	app.Micro("/order", order.NewQueryHandler, "/order/tags")
+	app.Micro("/hello/Get.do", helloWorld, "/a/bc")
 
 	app.Start()
 }
