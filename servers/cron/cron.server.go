@@ -114,7 +114,7 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 				continue
 			}
 
-			if b, err := govalidator.ValidateStruct(task); !b {
+			if b, err := govalidator.ValidateStruct(task); !b && err != nil {
 				err = fmt.Errorf("task配置有误:%v", err)
 				s.Logger.Error(err)
 				continue

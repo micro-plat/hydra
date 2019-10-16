@@ -13,7 +13,7 @@ type Task struct {
 	Setting map[string]string      `json:"args,omitempty"`
 	Next    string                 `json:"-"`
 	Last    string                 `json:"-"`
-	Handler interface{}            `json:"-"`
+	Handler interface{}            `json:"-" valid:"-"`
 	Disable bool                   `json:"disable,omitempty"`
 }
 
@@ -28,6 +28,7 @@ func NewTasks() *Tasks {
 func (h *Tasks) Append(cron string, service string) *Tasks {
 	h.Tasks = append(h.Tasks, &Task{
 		Cron:    cron,
+		Engine:  "*",
 		Service: service,
 	})
 	return h
@@ -37,6 +38,7 @@ func (h *Tasks) Append(cron string, service string) *Tasks {
 func NewTask(cron string, service string) *Task {
 	return &Task{
 		Cron:    cron,
+		Engine:  "*",
 		Service: service,
 	}
 }

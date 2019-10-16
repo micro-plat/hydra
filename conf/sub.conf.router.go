@@ -11,7 +11,7 @@ type Router struct {
 	Service string            `json:"service" valid:"ascii,required"`
 	Setting map[string]string `json:"args,omitempty"`
 	Disable bool              `json:"disable,omitempty"`
-	Handler interface{}       `json:"-"`
+	Handler interface{}       `json:"-" valid:"-"`
 }
 
 //NewRouters 构建路由
