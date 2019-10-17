@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/micro-plat/hydra/servers/rpc/standard/pb"
+	"github.com/micro-plat/hydra/servers/rpc/pb"
 	"github.com/micro-plat/lib4go/ut"
 )
 

@@ -167,15 +167,15 @@ func (w *extParams) GetUUID() string {
 }
 
 //GetRemoteAuthConfig 获取远程服务认证
-func (w *extParams) GetRemoteAuthConfig() (*conf.RemoteAuth, error) {
+func (w *extParams) GetRemoteAuthConfig() (conf.ServiceAuths, error) {
 	var auths conf.Authes
 	if _, err := w.ctx.GetContainer().GetSubObject("auth", &auths); err != nil {
 		return nil, err
 	}
-	if auths.RemoteAuth == nil {
+	if auths.RemotingServiceAuths == nil {
 		return nil, conf.ErrNoSetting
 	}
-	return auths.RemoteAuth, nil
+	return auths.RemotingServiceAuths, nil
 }
 
 //GetFixedSecretConfig 获取jwt配置信息

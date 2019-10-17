@@ -1,6 +1,7 @@
 package engines
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -33,7 +34,8 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
 		return nil
 	}
-	if !fsConf.Contains(ctx.Request.GetPath()) {
+	b, auth := fsConf.Contains(ctx.Request.GetPath())
+	if !b {
 		return nil
 	}
 	header, _ := ctx.Request.Http.GetHeader()
@@ -43,7 +45,11 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	}
 	header["method"] = strings.ToUpper(ctx.Request.GetMethod())
 	input := ctx.Request.GetRequestMap()
-	status, result, params, err := ctx.RPC.Request(fsConf.RPCServiceName, header, input, true)
+	input["__auth_"], err = auth.AuthString()
+	if err != nil {
+		return fmt.Errorf("将service.auth转换为__auth_失败:%v", err)
+	}
+	status, result, params, err := ctx.RPC.Request(auth.Service, header, input, true)
 	if err != nil {
 		return context.NewErrorf(401, "调用远程认证服务失败 %v(%d)", err, status)
 	}

@@ -1,58 +1,134 @@
 package conf
 
-type RemoteAuth struct {
-	RPCServiceName string   `json:"rpc-service" valid:"required"`
-	Include        []string `json:"include" valid:"required"`
-	Disable        bool     `json:"disable,omitempty"`
+import (
+	"encoding/json"
+
+	"github.com/micro-plat/lib4go/types"
+)
+
+//ServiceAuth 服务认证配置
+type ServiceAuth struct {
+	Service        string            `json:"service,omitempty" valid:"required"`
+	Requests       []string          `json:"requests,omitempty" valid:"required"`
+	Required       []string          `json:"required,omitempty"`
+	Alias          map[string]string `json:"alias,omitempty"`
+	Decrypt        []string          `json:"decrypt,omitempty"`
+	CheckTimestamp bool              `json:"check-timestamp,omitempty"`
+	Disable        bool              `json:"disable,omitempty"`
 }
 
-//WithRemoteAuth 添加固定签名认证
-func (a *Authes) WithRemoteAuth(auth *RemoteAuth) *Authes {
-	a.RemoteAuth = auth
+//WithServiceAuth 添加远程服务验证
+func (a *Authes) WithServiceAuth(auth *ServiceAuth) *Authes {
+	a.RemotingServiceAuths = append(a.RemotingServiceAuths, auth)
 	return a
 }
 
-//NewRemoteAuth 创建固定Secret签名认证
-func NewRemoteAuth(rpcService string, path ...string) *RemoteAuth {
-	ninclude := []string{"*"}
-	if len(path) > 0 {
-		ninclude = path
+//NewServiceAuth 创建远程服务验证参数
+func NewServiceAuth(service string, path ...string) *ServiceAuth {
+	ninclude := path
+	if len(path) == 0 {
+		ninclude = []string{"*"}
 	}
-	return &RemoteAuth{
-		RPCServiceName: rpcService,
-		Include:        ninclude,
+	return &ServiceAuth{
+		Service:  service,
+		Requests: ninclude,
+		Required: make([]string, 0, 1),
+		Alias:    make(map[string]string),
+		Decrypt:  make([]string, 0, 1),
 	}
 }
 
-//Contains 检查指定的路径是否允许签名
-func (a *RemoteAuth) Contains(p string) bool {
-	if len(a.Include) == 0 {
-		return true
+//String 获取签名串
+func (a *ServiceAuth) String() (string, error) {
+	buff, err := json.Marshal(a)
+	if err != nil {
+		return "", err
 	}
-	for _, i := range a.Include {
-		if i == "*" || i == p {
-			return true
-		}
-	}
-	return false
+	return string(buff), nil
 }
 
-//WithInclude 设置include的请求服务路径
-func (a *RemoteAuth) WithInclude(path ...string) *RemoteAuth {
+//AuthString 获取签名串
+func (a *ServiceAuth) AuthString() (string, error) {
+	b := *a
+	b.Service = ""
+	b.Requests = nil
+	c := &b
+	return c.String()
+}
+
+//WithRequest 设置requests的请求服务路径
+func (a *ServiceAuth) WithRequest(path ...string) *ServiceAuth {
 	if len(path) > 0 {
-		a.Include = path
+		a.Requests = append(a.Requests, path...)
 	}
+	return a
+}
+
+//WithRequired 设置必须字段
+func (a *ServiceAuth) WithRequired(fieldName ...string) *ServiceAuth {
+	if len(fieldName) > 0 {
+		a.Required = append(a.Required, fieldName...)
+	}
+	return a
+}
+
+//WithUIDAlias 设置用户id的字段名
+func (a *ServiceAuth) WithUIDAlias(name string) *ServiceAuth {
+	a.Alias["uid"] = name
+	return a
+}
+
+//WithTimestampAlias 设置timestamp的字段名
+func (a *ServiceAuth) WithTimestampAlias(name string) *ServiceAuth {
+	a.Alias["timestamp"] = name
+	return a
+}
+
+//WithSignAlias 设置sign的字段名
+func (a *ServiceAuth) WithSignAlias(name string) *ServiceAuth {
+	a.Alias["sign"] = name
+	return a
+}
+
+//WithDecryptName 设置需要解密的字段名
+func (a *ServiceAuth) WithDecryptName(name ...string) *ServiceAuth {
+	a.Decrypt = append(a.Decrypt, name...)
+	return a
+}
+
+//WithCheckTimestamp 设置需要检查时间戳
+func (a *ServiceAuth) WithCheckTimestamp(e ...bool) *ServiceAuth {
+	a.CheckTimestamp = types.GetBoolByIndex(e, 0, true)
 	return a
 }
 
 //WithDisable 禁用配置
-func (a *RemoteAuth) WithDisable() *RemoteAuth {
+func (a *ServiceAuth) WithDisable() *ServiceAuth {
 	a.Disable = true
 	return a
 }
 
 //WithEnable 启用配置
-func (a *RemoteAuth) WithEnable() *RemoteAuth {
+func (a *ServiceAuth) WithEnable() *ServiceAuth {
 	a.Disable = false
 	return a
+}
+
+//ServiceAuths 远程服务验证组
+type ServiceAuths []*ServiceAuth
+
+//Contains 检查指定的路径是否允许签名
+func (a ServiceAuths) Contains(p string) (bool, *ServiceAuth) {
+	var last *ServiceAuth
+	for _, auth := range a {
+		for _, req := range auth.Requests {
+			if req == p {
+				return true, auth
+			}
+			if req == "*" {
+				last = auth
+			}
+		}
+	}
+	return last != nil, last
 }

@@ -4,9 +4,9 @@ import "strings"
 
 //Authes 安全认证组
 type Authes struct {
-	JWT        *JWTAuth         `json:"jwt,omitempty"`
-	FixedScret *FixedSecretAuth `json:"fixed-secret,omitempty"`
-	RemoteAuth *RemoteAuth      `json:"remote-auth,omitempty"`
+	JWT                  *JWTAuth         `json:"jwt,omitempty"`
+	FixedScret           *FixedSecretAuth `json:"fixed-secret,omitempty"`
+	RemotingServiceAuths ServiceAuths     `json:"remotings,omitempty"`
 }
 
 //JWTAuth jwt安全认证
@@ -25,7 +25,9 @@ type JWTAuth struct {
 
 //NewAuthes  构建安全认证
 func NewAuthes() *Authes {
-	return &Authes{}
+	return &Authes{
+		RemotingServiceAuths: make([]*ServiceAuth, 0, 2),
+	}
 }
 
 //WithJWT 添加jwt验证

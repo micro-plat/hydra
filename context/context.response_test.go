@@ -2,8 +2,6 @@ package context
 
 import (
 	"testing"
-
-	"github.com/micro-plat/lib4go/ut"
 )
 
 type input struct {
@@ -33,10 +31,4 @@ func TestJSONResponse(t *testing.T) {
 			},
 		}, r.ect, r.evalue)
 	}
-}
-func checkJSON(t *testing.T, res *Response, ect int, evalue interface{}) {
-	c, v, err := res.GetRenderContent(CT_JSON)
-	ut.Expect(t, err, nil)
-	ut.Expect(t, c, ect)
-	ut.Expect(t, v, evalue)
 }

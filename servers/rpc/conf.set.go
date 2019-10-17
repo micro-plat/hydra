@@ -223,12 +223,15 @@ func CheckRemoteAuth(cnf conf.IServerConf) (enable bool, err error) {
 		err = fmt.Errorf("remote-auth配置有误:%v", err)
 		return false, err
 	}
-	if auths.RemoteAuth != nil {
-		if b, err := govalidator.ValidateStruct(auths.RemoteAuth); !b {
+	count := 0
+	for _, auth := range auths.RemotingServiceAuths {
+		if b, err := govalidator.ValidateStruct(auth); !b {
 			err = fmt.Errorf("remote-auth配置有误:%v", err)
 			return false, err
 		}
-		return !auths.RemoteAuth.Disable, nil
+		if !auth.Disable {
+			count++
+		}
 	}
-	return false, nil
+	return count > 0, nil
 }
