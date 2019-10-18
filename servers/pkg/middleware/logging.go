@@ -25,9 +25,9 @@ func Logging(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 		v, _ := getResponseRaw(ctx)
 		statusCode := ctx.Writer.Status()
 		if statusCode >= 200 && statusCode < 400 {
-			log.Info(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start), v)
+			log.Info(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, getExt(ctx), time.Since(start), v)
 		} else {
-			log.Error(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, time.Since(start), v)
+			log.Error(conf.Type+".response:", conf.Name, ctx.Request.GetMethod(), p, statusCode, getExt(ctx), time.Since(start), v)
 		}
 	}
 }

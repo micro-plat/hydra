@@ -50,8 +50,8 @@ func wLogTail(ctx *gin.Context, p string, start time.Time) {
 	conf := getMetadataConf(ctx)
 	statusCode := getCTX(ctx).Response.GetStatus()
 	if statusCode >= 200 && statusCode < 400 {
-		getLogger(ctx).Info(conf.Type+".response", ctx.Request.Method, p, statusCode, time.Since(start))
+		getLogger(ctx).Info(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start))
 	} else {
-		getLogger(ctx).Error(conf.Type+".response", ctx.Request.Method, p, statusCode, time.Since(start))
+		getLogger(ctx).Error(conf.Type+".response", ctx.Request.Method, p, statusCode, getExt(ctx), time.Since(start))
 	}
 }

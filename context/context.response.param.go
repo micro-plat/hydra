@@ -21,8 +21,10 @@ func (r *Response) SetHeaders(h map[string]string) {
 func (r *Response) GetParams() map[string]interface{} {
 	return r.Params
 }
-func (r *Response) SetParams(v map[string]interface{}) {
-	r.Params = v
+func (r *Response) SetParams(p map[string]interface{}) {
+	for k, v := range p {
+		r.Params[k] = v
+	}
 }
 func (r *Response) SetParam(key string, v interface{}) {
 	r.Params[key] = v

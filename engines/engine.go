@@ -123,7 +123,7 @@ func (r *ServiceEngine) GetServices() map[string][]string {
 }
 
 //GetTags 添加获和取tag接口
-func(r *ServiceEngine)GetTags(name string)[]string{
+func (r *ServiceEngine) GetTags(name string) []string {
 	return r.StandardComponent.GetTags(name)
 }
 

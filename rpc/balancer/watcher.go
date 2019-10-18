@@ -20,6 +20,9 @@ type Watcher struct {
 	client        registry.IRegistry
 	isInitialized bool
 	caches        map[string]bool
+	plat          string
+	server        string
+	path          string
 	service       string
 	sortPrefix    string
 	closeCh       chan struct{}
@@ -36,20 +39,26 @@ func (w *Watcher) Close() {
 
 // Next 监控服务器地址变化,监控发生异常时移除所有服务,否则等待服务器地址变化
 func (w *Watcher) Next() ([]*naming.Update, error) {
+start:
 	w.lastErr = nil
 	if !w.isInitialized {
-		resp, _, err := w.client.GetChildren(w.service)
-		w.isInitialized = true
+		path, err := w.initialize()
+		if err != nil {
+			return nil, err
+		}
+		w.path = path
+		resp, _, err := w.client.GetChildren(w.path)
 		if err == nil {
+			w.isInitialized = true
 			addrs := w.extractAddrs(resp)
 			return w.getUpdates(addrs), nil
 		}
 	}
 
 	// generate etcd/zk Watcher
-	watcherCh, err := w.client.WatchChildren(w.service)
+	watcherCh, err := w.client.WatchChildren(w.path)
 	if err != nil {
-		return nil, fmt.Errorf("rpc.client.未找到服务:%s(err:%v)", w.service, err)
+		return nil, fmt.Errorf("rpc.client.未找到服务:%s(err:%v)", w.path, err)
 	}
 	var watcher r.ChildrenWatcher
 	select {
@@ -61,6 +70,10 @@ func (w *Watcher) Next() ([]*naming.Update, error) {
 		return nil, err
 	}
 	chilren, _ := watcher.GetValue()
+	if len(chilren) == 0 {
+		w.isInitialized = false
+		goto start
+	}
 	addrs := w.extractAddrs(chilren)
 	return w.getUpdates(addrs), nil
 }
@@ -93,5 +106,63 @@ func (w *Watcher) extractAddrs(resp []string) []string {
 			return strings.HasPrefix(addrs[i], w.sortPrefix)
 		})
 	}
+	fmt.Println("rpc.servers:", w.path, addrs)
 	return addrs
+}
+
+func (w *Watcher) initialize() (string, error) {
+	rpath := fmt.Sprintf("/%s/services/rpc/%s%s/providers", w.plat, w.server, w.service)
+	b, err := w.client.Exists(rpath)
+	if err != nil {
+		return "", err
+	}
+	if b {
+		clds, _, err := w.client.GetChildren(rpath)
+		if err != nil {
+			return "", err
+		}
+		if len(clds) > 0 {
+			return rpath, nil
+		}
+	}
+	root := fmt.Sprintf("/%s/services/rpc/%s", w.plat, w.server)
+	items := strings.Split(strings.Trim(w.service, "/"), "/")
+	list, err := w.findRealPath([]string{root}, items...)
+	if err != nil {
+		return "", err
+	}
+	for _, li := range list {
+		path := registry.Join(li, "providers")
+		clds, _, err := w.client.GetChildren(path)
+		if err != nil {
+			return "", err
+		}
+		if len(clds) > 0 {
+			return path, nil
+		}
+	}
+	return "", fmt.Errorf("未找到服务提供程序:%s", rpath)
+
+}
+
+func (w *Watcher) findRealPath(roots []string, items ...string) ([]string, error) {
+	if len(items) == 0 {
+		return roots, nil
+	}
+	rmatch := make([]string, 0, 1)
+	for _, root := range roots {
+		paths, _, err := w.client.GetChildren(root)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range paths {
+			if p == items[0] || strings.HasPrefix(p, ":") {
+				rmatch = append(rmatch, registry.Join(root, p))
+			}
+		}
+	}
+	if len(rmatch) == 0 {
+		return nil, fmt.Errorf("未找到匹配的路径：%v %s", roots, items[0])
+	}
+	return w.findRealPath(rmatch, items[1:]...)
 }

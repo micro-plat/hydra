@@ -6,6 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //checkSignByFixedSecret 根据固定secret检查签名
@@ -17,7 +18,7 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 	if !fsConf.Contains(ctx.Request.GetPath()) {
 		return nil
 	}
-
+	ctx.Response.SetHeader("__auth_tag_", "FAUTH")
 	if err := ctx.Request.Check("sign", "timestamp"); err != nil {
 		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
 	}
@@ -49,14 +50,12 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	if err != nil {
 		return fmt.Errorf("将service.auth转换为__auth_失败:%v", err)
 	}
+	ctx.Response.SetHeader("__auth_tag_", "RAUTH")
 	status, result, params, err := ctx.RPC.Request(auth.Service, header, input, true)
-	if err != nil {
-		return context.NewErrorf(401, "调用远程认证服务失败 %v(%d)", err, status)
+	if err != nil || status != 200 {
+		return context.NewErrorf(types.GetMax(status, 403), "远程认证失败:%s,err:%v(%d)", err, result, status)
 	}
-	if status == 200 {
-		ctx.Request.Metadata.SetStrings(params)
-		return nil
-	}
-	return context.NewErrorf(status, "远程认证失败(%d)%s", status, result)
+	ctx.Request.Metadata.SetStrings(params)
+	return nil
 
 }

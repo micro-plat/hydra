@@ -63,13 +63,36 @@ type ISetRouterHandler interface {
 	SetRouters([]*conf.Router) error
 }
 
+func getRouters(services map[string][]string) conf.Routers {
+	routers := conf.Routers{}
+
+	if len(services) == 0 {
+		routers.Routers = make([]*conf.Router, 0, 1)
+		routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}, Name: "/*name", Service: "/@name", Engine: "*"})
+		return routers
+	}
+	routers.Routers = make([]*conf.Router, 0, len(services))
+	for name, actions := range services {
+		router := &conf.Router{
+			Action:  actions, //[]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
+			Name:    name,
+			Service: name,
+			Engine:  "*",
+		}
+		router.Action = append(router.Action, "OPTIONS")
+		routers.Routers = append(routers.Routers, router)
+	}
+	return routers
+}
 func SetRouters(engine servers.IRegistryEngine, cnf conf.IServerConf, set ISetRouterHandler, ext map[string]interface{}) (enable bool, err error) {
 	var routers conf.Routers
 	if _, err = cnf.GetSubObject("router", &routers); err == conf.ErrNoSetting || len(routers.Routers) == 0 {
-		routers = conf.Routers{}
-		routers.Routers = make([]*conf.Router, 0, 1)
-		routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD"}, Name: "/*name", Service: "/@name", Engine: "*"})
+		// routers = conf.Routers{}
+		// routers.Routers = make([]*conf.Router, 0, 1)
+		// routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD"}, Name: "/*name", Service: "/@name", Engine: "*"})
+		routers = getRouters(engine.GetServices())
 	}
+
 	if err != conf.ErrNoSetting && err != nil {
 		err = fmt.Errorf("路由:%v", err)
 		return false, err

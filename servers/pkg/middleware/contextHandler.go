@@ -71,6 +71,16 @@ func getCTX(c *dispatcher.Context) *context.Context {
 	}
 	return result.(*context.Context)
 }
+func getExt(c *dispatcher.Context) string {
+	ext := make([]string, 0, 1)
+	if f, ok := c.Get("__ext_param_name_"); ok {
+		ext = append(ext, f.(string))
+	}
+	if v, ok := c.Get("__auth_tag_"); ok {
+		ext = append(ext, v.(string))
+	}
+	return strings.Join(ext, " ")
+}
 func setResponseRaw(c *dispatcher.Context, raw string) {
 	c.Set("__response_raw_", raw)
 }
@@ -79,6 +89,12 @@ func getResponseRaw(c *dispatcher.Context) (string, bool) {
 		return v.(string), true
 	}
 	return "", false
+}
+func setAuthTag(c *dispatcher.Context, ctx *context.Context) {
+	if tag, ok := ctx.Response.GetParams()["__auth_tag_"]; ok {
+		c.Set("__auth_tag_", tag)
+	}
+
 }
 
 //ContextHandler api请求处理程序

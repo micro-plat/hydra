@@ -149,7 +149,7 @@ func (r *Invoker) Request(service string, method string, header map[string]strin
 	if err != nil {
 		return
 	}
-	rservice, _, _, _ := ResolvePath(service, r.domain, r.server)
+	rservice, _, _, _ := ResolvePath(service, r.server, r.domain)
 	status, result, params, err = client.Request(rservice, method, header, form, failFast)
 	if status != 200 || err != nil {
 		if err != nil {
@@ -172,28 +172,32 @@ func (r *Invoker) getBalancer(domain string) (int, string) {
 
 //GetClient 获取RPC客户端
 //addr 支持格式:
-//order.request#merchant.hydra
+//order.request@merchant.hydra
 //order.request,order.request@api.hydra
 //order.request@api
 func (r *Invoker) GetClient(addr string) (c *Client, err error) {
-	service, domain, server, err := ResolvePath(addr, r.domain, r.server)
+	rservice, domain, server, err := ResolvePath(addr, r.server, r.domain)
 	if err != nil {
 		return
 	}
-	fullService := fmt.Sprintf(serviceRoot, strings.TrimPrefix(domain, "/"), server, service)
-	_, client, err := r.cache.SetIfAbsentCb(fullService, func(i ...interface{}) (interface{}, error) {
-		rsrvs := i[0].(string)
+	//
+	serviceKey := fmt.Sprintf("%s@%s.%s", rservice, server, domain)
+	_, client, err := r.cache.SetIfAbsentCb(serviceKey, func(i ...interface{}) (interface{}, error) {
+		plat := i[0].(string)
+		server := i[1].(string)
+		service := i[2].(string)
+
 		opts := make([]ClientOption, 0, 0)
 		opts = append(opts, WithLogger(r.logger))
 		mode, p := r.getBalancer(domain)
-		rs := balancer.NewResolver(rsrvs, time.Second, p)
-
+		rs := balancer.NewResolver(plat, server, service, time.Second, p)
+		servicePath := fmt.Sprintf(serviceRoot, strings.TrimPrefix(domain, "/"), server, service)
 		//设置负载均衡算法
 		switch mode {
 		case RoundRobin:
-			opts = append(opts, WithRoundRobinBalancer(rs, rsrvs, time.Second, map[string]int{}))
+			opts = append(opts, WithRoundRobinBalancer(rs, servicePath, time.Second, map[string]int{}))
 		case LocalFirst:
-			opts = append(opts, WithLocalFirstBalancer(rs, rsrvs, p, map[string]int{}))
+			opts = append(opts, WithLocalFirstBalancer(rs, servicePath, p, map[string]int{}))
 		default:
 		}
 
@@ -203,7 +207,7 @@ func (r *Invoker) GetClient(addr string) (c *Client, err error) {
 			opts = append(opts, WithTLS(r.tls[domain]))
 		}
 		return NewClient(r.address, opts...)
-	}, fullService)
+	}, domain, server, rservice)
 	if err != nil {
 		return
 	}
@@ -229,50 +233,4 @@ func (r *Invoker) Close() {
 		client.Close()
 		return true
 	})
-}
-
-//ResolvePath   解析注册中心地址
-//domain:hydra,server:merchant_cron
-//order.request#merchant_api.hydra 解析为:service: /order/request,server:merchant_api,domain:hydra
-//order.request 解析为 service: /order/request,server:merchant_cron,domain:hydra
-//order.request#merchant_rpc 解析为 service: /order/request,server:merchant_rpc,domain:hydra
-func ResolvePath(address string, d string, s string) (service string, domain string, server string, err error) {
-	raddress := strings.TrimRight(address, "@")
-	addrs := strings.SplitN(raddress, "@", 2)
-	if len(addrs) == 1 {
-		if addrs[0] == "" {
-			return "", "", "", fmt.Errorf("服务地址%s不能为空", address)
-		}
-		service = "/" + strings.Trim(strings.Replace(raddress, ".", "/", -1), "/")
-		domain = d
-		server = s
-		return
-	}
-	if addrs[0] == "" {
-		return "", "", "", fmt.Errorf("%s错误，服务名不能为空", address)
-	}
-	if addrs[1] == "" {
-		return "", "", "", fmt.Errorf("%s错误，服务名，域不能为空", address)
-	}
-	service = "/" + strings.Trim(strings.Replace(addrs[0], ".", "/", -1), "/")
-	raddr := strings.Split(strings.TrimRight(addrs[1], "."), ".")
-	if len(raddr) >= 2 && raddr[0] != "" && raddr[1] != "" {
-		domain = raddr[len(raddr)-1]
-		server = strings.Join(raddr[0:len(raddr)-1], ".")
-		return
-	}
-	if len(raddr) == 1 {
-		if raddr[0] == "" {
-			return "", "", "", fmt.Errorf("%s错误，服务器名称不能为空", address)
-		}
-		domain = d
-		server = raddr[0]
-		return
-	}
-	if raddr[0] == "" && raddr[1] == "" {
-		return "", "", "", fmt.Errorf(`%s错误,未指定服务器名称和域名称`, addrs[1])
-	}
-	domain = raddr[1]
-	server = s
-	return
 }

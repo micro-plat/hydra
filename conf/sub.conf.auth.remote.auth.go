@@ -18,20 +18,20 @@ type ServiceAuth struct {
 }
 
 //WithServiceAuth 添加远程服务验证
-func (a *Authes) WithServiceAuth(auth *ServiceAuth) *Authes {
-	a.RemotingServiceAuths = append(a.RemotingServiceAuths, auth)
+func (a *Authes) WithServiceAuth(auth ...*ServiceAuth) *Authes {
+	a.RemotingServiceAuths = append(a.RemotingServiceAuths, auth...)
 	return a
 }
 
 //NewServiceAuth 创建远程服务验证参数
-func NewServiceAuth(service string, path ...string) *ServiceAuth {
-	ninclude := path
-	if len(path) == 0 {
-		ninclude = []string{"*"}
+func NewServiceAuth(service string, request ...string) *ServiceAuth {
+	requests := request
+	if len(requests) == 0 {
+		requests = []string{"*"}
 	}
 	return &ServiceAuth{
 		Service:  service,
-		Requests: ninclude,
+		Requests: requests,
 		Required: make([]string, 0, 1),
 		Alias:    make(map[string]string),
 		Decrypt:  make([]string, 0, 1),
@@ -74,7 +74,7 @@ func (a *ServiceAuth) WithRequired(fieldName ...string) *ServiceAuth {
 
 //WithUIDAlias 设置用户id的字段名
 func (a *ServiceAuth) WithUIDAlias(name string) *ServiceAuth {
-	a.Alias["uid"] = name
+	a.Alias["euid"] = name
 	return a
 }
 

@@ -37,10 +37,14 @@ func setExt(c *gin.Context, name string) {
 	c.Set("__ext_param_name_", name)
 }
 func getExt(c *gin.Context) string {
+	ext := make([]string, 0, 1)
 	if f, ok := c.Get("__ext_param_name_"); ok {
-		return f.(string)
+		ext = append(ext, f.(string))
 	}
-	return ""
+	if v, ok := c.Get("__auth_tag_"); ok {
+		ext = append(ext, v.(string))
+	}
+	return strings.Join(ext, " ")
 }
 
 func setLogger(c *gin.Context, l *logger.Logger) {
@@ -115,6 +119,12 @@ func getMetadataConf(c *gin.Context) *conf.MetadataConf {
 	}
 	return v.(*conf.MetadataConf)
 }
+func setAuthTag(c *gin.Context, ctx *context.Context) {
+	if tag, ok := ctx.Response.GetParams()["__auth_tag_"]; ok {
+		c.Set("__auth_tag_", tag)
+	}
+
+}
 
 //ContextHandler api请求处理程序
 func ContextHandler(exhandler interface{}, name string, engine string, service string, mSetting map[string]string) gin.HandlerFunc {
@@ -136,7 +146,9 @@ func ContextHandler(exhandler interface{}, name string, engine string, service s
 		if result != nil {
 			ctx.Response.ShouldContent(result)
 		}
+
 		//处理错误err,5xx
+		setAuthTag(c, ctx)
 		if err := ctx.Response.GetError(); err != nil {
 			err = fmt.Errorf("error:%v", err)
 			getLogger(c).Error(err)
