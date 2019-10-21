@@ -2,6 +2,7 @@ package balancer
 
 import (
 	"strings"
+	"time"
 
 	"github.com/micro-plat/hydra/registry"
 	r "github.com/micro-plat/lib4go/registry"
@@ -44,7 +45,8 @@ start:
 	if !w.isInitialized {
 		path, err := w.initialize()
 		if err != nil {
-			return nil, err
+			time.Sleep(time.Second)
+			return w.getUpdates([]string{}), nil
 		}
 		w.path = path
 		resp, _, err := w.client.GetChildren(w.path)
@@ -106,7 +108,6 @@ func (w *Watcher) extractAddrs(resp []string) []string {
 			return strings.HasPrefix(addrs[i], w.sortPrefix)
 		})
 	}
-	fmt.Println("rpc.servers:", w.path, addrs)
 	return addrs
 }
 
