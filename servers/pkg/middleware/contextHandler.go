@@ -138,8 +138,8 @@ func makeFormData(ctx *dispatcher.Context) IInputData {
 	return newInputData(ctx.Request.GetForm, ctx.PostForm)
 }
 func makeQueyStringData(ctx *dispatcher.Context) IInputData {
-	// var p ParamData = make(map[string]string)
-	return (ParamData)make(map[string]string)
+	var p ParamData = make(map[string]string)
+	return p
 }
 func makeParamsData(ctx *dispatcher.Context) IHeaderData {
 	return newHeaderData(ctx.Params, ctx.Params.Get)
