@@ -74,6 +74,12 @@ func (s *ApiServer) StopMetric() error {
 	return nil
 }
 
+//SetResponse 设置response配置
+func (s *ApiServer) SetResponse(r *conf.Response) error {
+	s.conf.SetMetadata("__response_conf_", r)
+	return nil
+}
+
 //CloseCircuitBreaker 关闭熔断配置
 func (s *ApiServer) CloseCircuitBreaker() error {
 	if c, ok := s.conf.GetMetadata("__circuit-breaker_").(*circuit.NamedCircuitBreakers); ok {

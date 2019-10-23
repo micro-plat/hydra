@@ -9,10 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //APIResponse 处理api返回值
-func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
+func APIResponse(xconf *conf.MetadataConf) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
 		nctx := getCTX(ctx)
@@ -26,39 +27,81 @@ func APIResponse(conf *conf.MetadataConf) gin.HandlerFunc {
 		if ctx.Writer.Written() {
 			return
 		}
-
 		tp, content, err := nctx.Response.GetJSONRenderContent()
-		writeTrace(getTrace(conf), tp, ctx, content)
+		writeTrace(getTrace(xconf), tp, ctx, content)
 		if err != nil && err.Error() != "" {
 			getLogger(ctx).Error(err)
-			ctx.JSON(nctx.Response.GetStatus(), map[string]interface{}{"err": err})
+			tp = context.CT_JSON
+			content = err.Error()
+			nctx.Response.ShouldContent(err)
+		}
+
+		//检查是否配置输出模板
+		resTemplate, ok := xconf.GetMetadata("__response_conf_").(*conf.Response)
+		if !ok {
+			write2Response(ctx, tp, nctx.Response.GetStatus(), content)
 			return
 		}
-		tpName := context.ContentTypes[tp]
-		switch tp {
-		case context.CT_XML:
-			if v, ok := content.([]byte); ok {
-				ctx.Data(nctx.Response.GetStatus(), tpName, v)
-				return
-			}
-			ctx.XML(nctx.Response.GetStatus(), content)
-		case context.CT_YMAL:
-			if v, ok := content.([]byte); ok {
-				ctx.Data(nctx.Response.GetStatus(), tpName, v)
-				return
-			}
-			ctx.YAML(nctx.Response.GetStatus(), content)
-		case context.CT_PLAIN, context.CT_HTML, context.CT_OTHER:
-			if v, ok := content.([]byte); ok {
-				ctx.Data(nctx.Response.GetStatus(), tpName, v)
-				return
-			}
-			ctx.Data(nctx.Response.GetStatus(), tpName, ([]byte)(content.(string)))
-		default:
-			ctx.JSON(nctx.Response.GetStatus(), content)
+		ok, template := resTemplate.GetTemplate(nctx.Service)
+		if !ok {
+			write2Response(ctx, tp, nctx.Response.GetStatus(), content)
+			return
 		}
+
+		//翻译模板进行输出
+		status, content, err := getResponseContent(template, nctx, tp, content)
+		if err != nil && err.Error() != "" {
+			getLogger(ctx).Error(err)
+			content = map[string]interface{}{"err": err}
+		}
+		write2Response(ctx, tp, status, content)
+
 	}
 }
+
+func getResponseContent(c *conf.Template, ctx *context.Context, t int, sc interface{}) (int, interface{}, error) {
+	status := ctx.Response.GetStatus()
+	input := types.NewXMap()
+	input.MergeMap(c.Params)
+	input.MergeMap(ctx.Response.GetParams())
+	input.SetValue("status", ctx.Response.GetStatus())
+	if err := ctx.Response.GetError(); err != nil {
+		input.SetValue("err", err.Error())
+	} else {
+		input.SetValue("data", ctx.Response.GetContent())
+	}
+	if !input.Has("sdata") {
+		input.SetValue("sdata", sc)
+	}
+	result, err := c.Translate(ctx.Service, input.ToMap())
+	if err != nil {
+		return status, nil, err
+	}
+	return 200, result, nil
+}
+
+//将指定的状态码，内容输出到响应流
+func write2Response(ctx *gin.Context, tp int, status int, content interface{}) {
+	tpName := context.ContentTypes[tp]
+	switch v := content.(type) {
+	case []byte:
+		ctx.Data(status, tpName, v)
+		return
+	case string:
+		ctx.Data(status, tpName, []byte(v))
+		return
+	}
+	switch tp {
+	case context.CT_XML:
+		ctx.XML(status, content)
+	case context.CT_YMAL:
+		ctx.YAML(status, content)
+	default:
+		ctx.JSON(status, content)
+	}
+
+}
+
 func writeTrace(b bool, tp int, ctx *gin.Context, c interface{}) {
 	if !b {
 		return

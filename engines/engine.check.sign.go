@@ -15,7 +15,7 @@ func checkSignByFixedSecret(ctx *context.Context) error {
 	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
 		return nil
 	}
-	if !fsConf.Contains(ctx.Request.GetPath()) {
+	if !fsConf.Contains(ctx.Service) {
 		return nil
 	}
 	ctx.Response.SetHeader("__auth_tag_", "FAUTH")
@@ -35,7 +35,7 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
 		return nil
 	}
-	b, auth := fsConf.Contains(ctx.Request.GetPath())
+	b, auth := fsConf.Contains(ctx.Service)
 	if !b {
 		return nil
 	}

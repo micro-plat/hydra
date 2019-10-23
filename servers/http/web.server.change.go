@@ -19,6 +19,12 @@ func (s *WebServer) SetJWT(auth *conf.JWTAuth) error {
 	return nil
 }
 
+//SetResponse 设置response配置
+func (s *WebServer) SetResponse(r *conf.Response) error {
+	s.conf.SetMetadata("__response_conf_", r)
+	return nil
+}
+
 //SetAjaxRequest 只允许ajax请求
 func (s *WebServer) SetAjaxRequest(allow bool) error {
 	s.conf.SetMetadata("ajax-request", allow)

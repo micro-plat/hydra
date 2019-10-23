@@ -254,6 +254,29 @@ func SetHosts(set ISetHosts, cnf conf.IServerConf) (enable bool, err error) {
 }
 
 //---------------------------------------------------------------------------
+//-------------------------------response---------------------------------------
+//---------------------------------------------------------------------------
+
+//ISetResponse 设置response配置串
+type ISetResponse interface {
+	SetResponse(*conf.Response) error
+}
+
+//SetResponse 设置response配置串
+func SetResponse(set ISetResponse, cnf conf.IServerConf) (enable bool, err error) {
+	var response conf.Response
+	_, err = cnf.GetSubObject("response", &response)
+	if err != nil && err != conf.ErrNoSetting {
+		return false, err
+	}
+	if err == conf.ErrNoSetting {
+		return false, nil
+	}
+	err = set.SetResponse(&response)
+	return err == nil, err
+}
+
+//---------------------------------------------------------------------------
 //-------------------------------jwt---------------------------------------
 //---------------------------------------------------------------------------
 

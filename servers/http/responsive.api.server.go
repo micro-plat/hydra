@@ -22,6 +22,7 @@ type IServer interface {
 	CloseCircuitBreaker() error
 	SetCircuitBreaker(*conf.CircuitBreaker) error
 
+	SetResponse(*conf.Response) error
 	SetRouters(routers []*conf.Router) (err error)
 	SetJWT(auth *conf.JWTAuth) error
 	SetAjaxRequest(allow bool) error

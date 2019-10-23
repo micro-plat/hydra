@@ -85,6 +85,12 @@ func (w *ApiResponsiveServer) SetConf(restart bool, cnf conf.IServerConf) (err e
 	}
 	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "header设置")
 
+	//设置请求头
+	if ok, err = SetResponse(w.server, cnf); err != nil {
+		return err
+	}
+	servers.TraceIf(ok, w.Infof, w.Debugf, getEnableName(ok), "响应格式设置")
+
 	//设置熔断配置
 	if ok, err = SetCircuitBreaker(w.server, cnf); err != nil {
 		return err
