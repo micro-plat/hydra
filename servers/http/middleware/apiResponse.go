@@ -65,6 +65,9 @@ func getResponseContent(c *conf.Template, ctx *context.Context, t int, sc interf
 	input.MergeMap(c.Params)
 	input.MergeMap(ctx.Response.GetParams())
 	input.SetValue("status", ctx.Response.GetStatus())
+	input.SetValue("param", ctx.Request.Param.GetMaps())
+	input.SetValue("querystring", ctx.Request.QueryString.GetMaps())
+	input.SetValue("form", ctx.Request.Form.GetMaps())
 	if err := ctx.Response.GetError(); err != nil {
 		input.SetValue("err", err.Error())
 	} else {

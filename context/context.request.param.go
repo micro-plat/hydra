@@ -24,6 +24,15 @@ func (i *inputParams) Keys() []string {
 	return i.data.Keys()
 }
 
+//GetMaps()  获取所有参数列表
+func (i *inputParams) GetMaps() map[string]string {
+	keys := i.Keys()
+	m := make(map[string]string, len(keys))
+	for _, k := range keys {
+		m[k] = i.GetString(k)
+	}
+	return m
+}
 func (i *inputParams) Get(name string) (string, bool) {
 	if c, ok := i.data.Get(name); ok {
 		return fmt.Sprint(c), ok

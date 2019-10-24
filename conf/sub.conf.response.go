@@ -42,7 +42,7 @@ func (r *Response) Append(t string, service ...string) *Response {
 }
 
 //SetParam 追加模板配置
-func (r *Response) SetParam(k, v string) *Response {
+func (r *Response) SetParam(k string, v interface{}) *Response {
 	r.Params[k] = v
 	return r
 }
