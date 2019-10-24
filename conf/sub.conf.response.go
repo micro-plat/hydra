@@ -64,7 +64,6 @@ func (r *Template) Translate(service string, input interface{}) (string, error) 
 //GetTemplate 获取指定请求对应的模板
 func (r *Response) GetTemplate(s string) (bool, *Template) {
 	var last *Template
-
 	for _, t := range r.Templates {
 		for _, service := range t.Services {
 			if service == s {
