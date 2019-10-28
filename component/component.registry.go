@@ -147,8 +147,8 @@ func NewServiceRegistry() *ServiceRegistry {
 		exts:              make(map[string]interface{}),
 		tags:              make(map[string][]string),
 		rpcBalancers:      make(map[string]*rpc.BalancerMode),
-		dynamicQueues:     make(chan *conf.Queue, 10),
-		dynamicCrons:      make(chan *conf.Task, 10),
+		dynamicQueues:     make(chan *conf.Queue, 100),
+		dynamicCrons:      make(chan *conf.Task, 100),
 	}
 }
 
