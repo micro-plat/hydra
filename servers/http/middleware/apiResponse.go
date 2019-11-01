@@ -76,11 +76,26 @@ func getResponseContent(c *conf.Template, ctx *context.Context, t int, sc interf
 	if !input.Has("sdata") {
 		input.SetValue("sdata", sc)
 	}
-	result, err := c.Translate(ctx.Service, input.ToMap())
+
+	//翻译状态码
+	code, err := c.Translate(c.Status, input.ToMap())
 	if err != nil {
 		return status, nil, err
 	}
-	return 200, result, nil
+
+	//翻译模块
+	result, err := c.Translate(c.Content, input.ToMap())
+	if err != nil {
+		return status, nil, err
+	}
+	if v := types.GetInt(code, 0); v != 0 {
+		status = v
+	}
+	if result != "" {
+		sc = result
+	}
+	return status, sc, nil
+
 }
 
 //将指定的状态码，内容输出到响应流
