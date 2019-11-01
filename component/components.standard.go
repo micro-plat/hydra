@@ -40,8 +40,8 @@ const (
 
 var _ IComponent = &StandardComponent{}
 
-//ErrNotFoundService 未找到服务
-var ErrNotFoundService = errors.New("未找到服务")
+//ErrNotFoundFallbackService 未找到服务
+var ErrNotFoundFallbackService = errors.New("未实现降级服务")
 
 //StandardComponent 标准组件
 type StandardComponent struct {
@@ -220,16 +220,17 @@ func (r *StandardComponent) GetFallbackHandler(engine string, service string, me
 
 //Fallback 降级处理
 func (r *StandardComponent) Fallback(c *context.Context) (rs interface{}) {
-	c.Response.SetStatus(404)
 	h, ok := r.GetFallbackHandler(c.Engine, c.Service, c.Request.GetMethod())
 	if !ok {
-		return ErrNotFoundService
+		c.Response.SetStatus(404)
+		return ErrNotFoundFallbackService
 	}
 	switch handler := h.(type) {
 	case FallbackHandler:
 		rs = handler.Fallback(c)
 	default:
-		rs = fmt.Errorf("未找到服务:%s", c.Service)
+		c.Response.SetStatus(404)
+		rs = fmt.Errorf("%v:%s", ErrNotFoundFallbackService, c.Service)
 	}
 	return
 }

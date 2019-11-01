@@ -134,8 +134,9 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	defer r.loggers.Remove(id)
 	if ctx.Request.CircuitBreaker.IsOpen() { //熔断开关打开，则自动降级
 		rf := r.StandardComponent.Fallback(ctx)
-		if r, ok := rf.(error); ok && r == component.ErrNotFoundService {
-			ctx.Response.MustContent(ctx.Request.CircuitBreaker.GetDefStatus(), ctx.Request.CircuitBreaker.GetDefContent())
+		if r, ok := rf.(error); ok && r == component.ErrNotFoundFallbackService {
+			ctx.Response.MustContent(ctx.Request.CircuitBreaker.GetDefStatus(),
+				ctx.Request.CircuitBreaker.GetDefContent())
 		}
 		return rf
 	}

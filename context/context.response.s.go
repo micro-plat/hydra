@@ -25,7 +25,8 @@ func getJSONContent(t int, data interface{}) (int, interface{}, error) {
 	case reflect.String:
 		value := []byte(data.(string))
 		switch {
-		case (t == CT_JSON || t == CT_DEF) && json.Valid(value):
+		case (t == CT_JSON || t == CT_DEF) && json.Valid(value) && (bytes.HasPrefix(value, []byte("{")) ||
+			bytes.HasPrefix(value, []byte("["))):
 			return CT_JSON, data, nil
 		case (t == CT_XML || t == CT_DEF) && bytes.HasPrefix(value, []byte("<?xml")):
 			return CT_XML, data, nil
