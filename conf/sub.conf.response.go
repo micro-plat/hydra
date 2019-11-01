@@ -64,8 +64,18 @@ func (r *Response) SetParam(k string, v interface{}) *Response {
 	return r
 }
 
+//GetStatus 获取翻译后的状态码
+func (r *Template) GetStatus(input interface{}) (c string, err error) {
+	return r.translate(r.Status, input)
+}
+
+//GetContent 获取翻译后的返回内容
+func (r *Template) GetContent(input interface{}) (c string, err error) {
+	return r.translate(r.Content, input)
+}
+
 //Translate 翻译模板
-func (r *Template) Translate(s string, input interface{}) (c string, err error) {
+func (r *Template) translate(s string, input interface{}) (c string, err error) {
 	if s == "" {
 		return "", nil
 	}

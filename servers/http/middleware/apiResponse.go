@@ -78,13 +78,13 @@ func getResponseContent(c *conf.Template, ctx *context.Context, t int, sc interf
 	}
 
 	//翻译状态码
-	code, err := c.Translate(c.Status, input.ToMap())
+	code, err := c.GetStatus(input.ToMap())
 	if err != nil {
 		return status, nil, err
 	}
 
 	//翻译模块
-	result, err := c.Translate(c.Content, input.ToMap())
+	result, err := c.GetContent(input.ToMap())
 	if err != nil {
 		return status, nil, err
 	}
