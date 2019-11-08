@@ -8,13 +8,14 @@ import (
 
 //ServiceAuth 服务认证配置
 type ServiceAuth struct {
-	Service        string            `json:"service,omitempty" valid:"required"`
-	Requests       []string          `json:"requests,omitempty" valid:"required"`
-	Required       []string          `json:"required,omitempty"`
-	Alias          map[string]string `json:"alias,omitempty"`
-	Decrypt        []string          `json:"decrypt,omitempty"`
-	CheckTimestamp bool              `json:"check-timestamp,omitempty"`
-	Disable        bool              `json:"disable,omitempty"`
+	Service        string                 `json:"service,omitempty" valid:"required"`
+	Requests       []string               `json:"requests,omitempty" valid:"required"`
+	Required       []string               `json:"required,omitempty"`
+	Alias          map[string]string      `json:"alias,omitempty"`
+	Params         map[string]interface{} `json:"params,omitempty"`
+	Decrypt        []string               `json:"decrypt,omitempty"`
+	CheckTimestamp bool                   `json:"check-timestamp,omitempty"`
+	Disable        bool                   `json:"disable,omitempty"`
 }
 
 //WithServiceAuth 添加远程服务验证

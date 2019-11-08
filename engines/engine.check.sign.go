@@ -45,16 +45,19 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 		header[k] = v
 	}
 	header["method"] = strings.ToUpper(ctx.Request.GetMethod())
-	input := ctx.Request.GetRequestMap()
+	input := types.NewXMapByMap(ctx.Request.GetRequestMap())
+	iparam := types.XMap(auth.Params)
+	input.Merge(iparam)
 	input["__auth_"], err = auth.AuthString()
 	if err != nil {
 		return fmt.Errorf("将service.auth转换为__auth_失败:%v", err)
 	}
 	ctx.Response.SetHeader("__auth_tag_", "RAUTH")
-	status, result, params, err := ctx.RPC.Request(auth.Service, header, input, true)
+	status, result, params, err := ctx.RPC.Request(auth.Service, header, input.ToMap(), true)
 	if err != nil || status != 200 {
 		return context.NewErrorf(types.GetMax(status, 403), "远程认证失败:%s,err:%v(%d)", err, result, status)
 	}
+	ctx.Request.Metadata.SetStrings(iparam.ToSMap())
 	ctx.Request.Metadata.SetStrings(params)
 	return nil
 
