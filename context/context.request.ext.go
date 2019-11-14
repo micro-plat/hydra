@@ -163,7 +163,7 @@ func (w *extParams) GetJWT(out interface{}) error {
 
 //GetUUID
 func (w *extParams) GetUUID() string {
-	return fmt.Sprint(w.ext["__hydra_sid_"])
+	return fmt.Sprint(w.ext["X-Request-Id"])
 }
 
 //GetRemoteAuthConfig 获取远程服务认证

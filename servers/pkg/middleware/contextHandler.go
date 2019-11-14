@@ -18,14 +18,14 @@ import (
 )
 
 func getUUID(c *dispatcher.Context) string {
-	sid, ok := c.Request.GetHeader()["__hydra_sid_"]
+	sid, ok := c.Request.GetHeader()["X-Request-Id"]
 	if !ok || sid == "" {
 		return logger.CreateSession()
 	}
 	return sid
 }
 func setUUID(c *dispatcher.Context, id string) {
-	c.Request.GetHeader()["__hydra_sid_"] = id
+	c.Request.GetHeader()["X-Request-Id"] = id
 }
 
 func setStartTime(c *dispatcher.Context) {
@@ -158,7 +158,7 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 		input[fmt.Sprintf("__%s_", k)] = v
 
 	}
-	input["__hydra_sid_"] = getUUID(c)
+	input["X-Request-Id"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.GetMethod())
 	input["__header_"] = c.Request.GetHeader()
 	input["__jwt_"] = getJWTRaw(c)

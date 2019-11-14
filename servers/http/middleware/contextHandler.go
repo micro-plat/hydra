@@ -17,7 +17,7 @@ import (
 )
 
 func getUUID(c *gin.Context) string {
-	if v, ok := c.Get("__hydra_sid_"); ok {
+	if v, ok := c.Get("X-Request-Id"); ok {
 		return v.(string)
 	}
 	ck, err := c.Request.Cookie("hydra_sid")
@@ -27,7 +27,7 @@ func getUUID(c *gin.Context) string {
 	return ck.Value
 }
 func setUUID(c *gin.Context, id string) {
-	c.Set("__hydra_sid_", id)
+	c.Set("X-Request-Id", id)
 }
 func setStartTime(c *gin.Context) {
 	c.Set("__start_time_", time.Now())
@@ -187,7 +187,7 @@ func makeSettingData(ctx *gin.Context, m map[string]string) ParamData {
 func makeExtData(c *gin.Context) map[string]interface{} {
 
 	input := make(map[string]interface{})
-	input["__hydra_sid_"] = getUUID(c)
+	input["X-Request-Id"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.Method)
 	input["__header_"] = c.Request.Header
 	input["__path_"] = c.Request.URL.Path
