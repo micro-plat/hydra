@@ -17,6 +17,7 @@ func (s *RpcServer) getProcessor(routers []*conf.Router) (*Processor, error) {
 	engine.Use(s.option.metric.Handle())   //生成metric报表
 	engine.Use(middleware.Host(s.conf))    // 检查主机头是否合法
 	engine.Use(middleware.JwtAuth(s.conf)) //jwt安全认证
+	engine.Use(middleware.Delay())         //请求延时配置
 	engine.Use(middleware.Body())          //处理请求form
 	engine.Use(middleware.Response(s.conf))
 	engine.Use(middleware.Header(s.conf))    //设置请求头

@@ -25,6 +25,7 @@ func (s *ApiServer) getHandler(routers []*conf.Router) (x.Handler, error) {
 	engine.Use(middleware.AjaxRequest(s.conf))  //过滤非ajax请求
 	engine.Use(middleware.JwtAuth(s.conf))      //jwt安全认证
 	engine.Use(middleware.CircuitBreak(s.conf)) //服务熔断配置
+	engine.Use(middleware.Delay())
 	//engine.Use(middleware.Body())               //处理请求form
 	engine.Use(middleware.APIResponse(s.conf)) //处理返回值
 	engine.Use(middleware.Header(s.conf))      //设置请求头

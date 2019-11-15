@@ -26,7 +26,7 @@ func (imp Headers) WithCrossDomain(host ...string) CrossDomainHeader {
 	}
 	imp["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
 	imp["Access-Control-Allow-Credentials"] = "true"
-	imp["Access-Control-Allow-Headers"] = "X-Requested-With,Content-Type,__jwt__"
+	imp["Access-Control-Allow-Headers"] = "X-Request-Id,X-Requested-With,Content-Type,__jwt__"
 	imp["Access-Control-Expose-Headers"] = "__jwt__"
 	return imp
 }
@@ -34,7 +34,7 @@ func (imp Headers) WithCrossDomain(host ...string) CrossDomainHeader {
 //WithAllowHeaders 设置允许的头信息
 func (c CrossDomainHeader) WithAllowHeaders(header ...string) CrossDomainHeader {
 	if len(header) == 0 {
-		c["Access-Control-Allow-Headers"] = "X-Requested-With,Content-Type,__jwt__"
+		c["Access-Control-Allow-Headers"] = "X-Request-Id,X-Requested-With,Content-Type,__jwt__"
 		c["Access-Control-Expose-Headers"] = "__jwt__"
 		return c
 	}
