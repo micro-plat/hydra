@@ -4,7 +4,7 @@ package conf
 type CircuitBreaker struct {
 	ForceBreak      bool       `json:"force-break,omitempty"`
 	Disable         bool       `json:"disable,omitempty"`
-	SwitchWindow    int        `json:"swith-window,omitempty"`
+	SwitchWindow    int        `json:"switch-window,omitempty"`
 	CircuitBreakers []*Breaker `json:"circuit-breakers,omitempty"`
 }
 
