@@ -16,7 +16,7 @@ type IConf interface {
 	GetInt(key string, def ...int) int
 	GetArray(key string, def ...interface{}) (r []interface{})
 	GetBool(key string, def ...bool) (r bool)
-	GeJSON(section string) (r []byte, version int32, err error)
+	GetJSON(section string) (r []byte, version int32, err error)
 	GetSection(section string) (c *JSONConf, err error)
 	HasSection(section string) bool
 	GetRaw() []byte
@@ -149,8 +149,8 @@ func (j *JSONConf) GetBool(key string, def ...bool) (r bool) {
 	return false
 }
 
-//GeJSON 获取section原始JSON串
-func (j *JSONConf) GeJSON(section string) (r []byte, version int32, err error) {
+//GetJSON 获取section原始JSON串
+func (j *JSONConf) GetJSON(section string) (r []byte, version int32, err error) {
 	if v, ok := j.data[section]; !ok || v == nil {
 		err = fmt.Errorf("节点:%s不存在或值为空", section)
 		return
