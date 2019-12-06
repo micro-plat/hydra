@@ -16,12 +16,17 @@ func NewRPCSerivce(rpcServiceName string, rpcInput ...map[string]string) Service
 			header[k] = v
 		}
 		header["method"] = strings.ToUpper(ctx.Request.GetMethod())
+		nheader := types.NewXMapBySMap(header)
 		input := types.NewXMapByMap(ctx.Request.GetRequestMap())
-		if len(rpcInput) > 0 {
+		switch {
+		case len(rpcInput) == 1:
 			input.MergeSMap(rpcInput[0])
+		case len(rpcInput) >= 2:
+			nheader.MergeSMap(rpcInput[0])
+			input.MergeSMap(rpcInput[1])
 		}
 
-		status, result, params, err := ctx.RPC.Request(rpcServiceName, header, input.ToMap(), true)
+		status, result, params, err := ctx.RPC.Request(rpcServiceName, nheader.ToSMap(), input.ToMap(), true)
 		if err != nil {
 			return err
 		}
