@@ -149,13 +149,13 @@ func (r *Invoker) Request(service string, method string, header map[string]strin
 	if err != nil {
 		return
 	}
-	rservice, _, _, _ := ResolvePath(service, r.server, r.domain)
+	rservice, d, s, _ := ResolvePath(service, r.server, r.domain)
 	status, result, params, err = client.Request(rservice, method, header, form, failFast)
 	if status != 200 || err != nil {
 		if err != nil {
-			err = fmt.Errorf("%s请求失败:%v(%d)", service, err, status)
+			err = fmt.Errorf("%s@%s.%s请求失败:%v(%d)", rservice, d, s, err, status)
 		} else {
-			err = fmt.Errorf("%s请求失败:%d)", service, status)
+			err = fmt.Errorf("%s@%s.%s请求失败:%d)", rservice, d, s, status)
 		}
 	}
 	return

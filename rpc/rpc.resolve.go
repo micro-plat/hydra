@@ -7,9 +7,9 @@ import (
 
 //ResolvePath   解析注册中心地址
 //domain:hydra,server:merchant_cron
-//order.request#merchant_api.hydra 解析为:service: /order/request,server:merchant_api,domain:hydra
+//order.request@merchant_api.hydra 解析为:service: /order/request,server:merchant_api,domain:hydra
 //order.request 解析为 service: /order/request,server:merchant_cron,domain:hydra
-//order.request#merchant_rpc 解析为 service: /order/request,server:merchant_rpc,domain:hydra
+//order.request@merchant_rpc 解析为 service: /order/request,server:merchant_rpc,domain:hydra
 func ResolvePath(address string, d string, s string) (service string, domain string, server string, err error) {
 	raddress := strings.TrimRight(address, "@")
 	addrs := strings.SplitN(raddress, "@", 2)

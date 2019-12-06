@@ -17,21 +17,21 @@ type Processor struct {
 	lock          sync.Mutex
 	once          sync.Once
 	done          bool
-	addrss        string
+	address       string
 	raw           string
 	hasAddRouters bool
 }
 
 //NewProcessor 创建processor
-func NewProcessor(addrss, raw string, queues []*conf.Queue) (p *Processor, err error) {
+func NewProcessor(address, raw string, queues []*conf.Queue) (p *Processor, err error) {
 	p = &Processor{
 		Dispatcher: dispatcher.New(),
 		handles:    make(map[string]dispatcher.HandlerFunc),
-		addrss:     addrss,
+		address:    address,
 		raw:        raw,
 		queues:     queues,
 	}
-	if p.MQConsumer, err = mq.NewMQConsumer(addrss, mq.WithRaw(raw)); err != nil {
+	if p.MQConsumer, err = mq.NewMQConsumer(address, mq.WithRaw(raw)); err != nil {
 		return
 	}
 	return p, nil
@@ -58,7 +58,7 @@ func (s *Processor) Consumes() (err error) {
 	}
 	if s.MQConsumer == nil {
 		s.once = sync.Once{}
-		s.MQConsumer, err = mq.NewMQConsumer(s.addrss, mq.WithRaw(s.raw), mq.WithQueueCount(len(s.queues)))
+		s.MQConsumer, err = mq.NewMQConsumer(s.address, mq.WithRaw(s.raw), mq.WithQueueCount(len(s.queues)))
 		if err != nil {
 			return err
 		}
