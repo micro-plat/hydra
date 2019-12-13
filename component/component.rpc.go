@@ -1,6 +1,7 @@
 package component
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/micro-plat/hydra/context"
@@ -34,7 +35,7 @@ func NewRPCSerivce(rpcServiceName string, rpcInput ...map[string]string) Service
 		if status != 200 {
 			return context.NewError(status, result)
 		}
-		ctx.Response.MustContent(status, result)
+		ctx.Response.MustContent(status, json.RawMessage(result))
 		return
 	}
 
