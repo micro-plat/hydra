@@ -8,14 +8,15 @@ import (
 
 //ServiceAuth 服务认证配置
 type ServiceAuth struct {
-	Service        string                 `json:"service,omitempty" valid:"required"`
-	Requests       []string               `json:"requests,omitempty" valid:"required"`
-	Required       []string               `json:"required,omitempty"`
-	Alias          map[string]string      `json:"alias,omitempty"`
-	Params         map[string]interface{} `json:"params,omitempty"`
-	Decrypt        []string               `json:"decrypt,omitempty"`
-	CheckTimestamp bool                   `json:"check-timestamp,omitempty"`
-	Disable        bool                   `json:"disable,omitempty"`
+	Service  string                 `json:"service,omitempty" valid:"required"`
+	Requests []string               `json:"requests,omitempty" valid:"required"`
+	Required []string               `json:"required,omitempty"`
+	conn     *Connect               `json:"connect,omitempty"`
+	Alias    map[string]string      `json:"alias,omitempty"`
+	Params   map[string]interface{} `json:"params,omitempty"`
+	Decrypt  []string               `json:"decrypt,omitempty"`
+	CheckTS  bool                   `json:"check-timestamp,omitempty"`
+	Disable  bool                   `json:"disable,omitempty"`
 }
 
 //WithServiceAuth 添加远程服务验证
@@ -33,6 +34,7 @@ func NewServiceAuth(service string, request ...string) *ServiceAuth {
 	return &ServiceAuth{
 		Service:  service,
 		Requests: requests,
+		conn:     &Connect{},
 		Required: make([]string, 0, 1),
 		Alias:    make(map[string]string),
 		Decrypt:  make([]string, 0, 1),
@@ -99,8 +101,14 @@ func (a *ServiceAuth) WithDecryptName(name ...string) *ServiceAuth {
 
 //WithCheckTimestamp 设置需要检查时间戳
 func (a *ServiceAuth) WithCheckTimestamp(e ...bool) *ServiceAuth {
-	a.CheckTimestamp = types.GetBoolByIndex(e, 0, true)
+	a.CheckTS = types.GetBoolByIndex(e, 0, true)
 	return a
+}
+
+// WithConnect 设置签名链接方式
+func (a *ServiceAuth) WithConnect() *Connect {
+	a.conn = &Connect{auth: a}
+	return a.conn
 }
 
 //WithDisable 禁用配置
