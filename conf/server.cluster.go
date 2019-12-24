@@ -1,10 +1,10 @@
 package conf
 
-import "strings"
+import (
+	"strings"
 
-import "github.com/micro-plat/hydra/registry"
-
-import "fmt"
+	"github.com/micro-plat/hydra/registry"
+)
 
 //CNodes 所有集群节点
 type CNodes []*CNode
@@ -16,7 +16,7 @@ func (c CNodes) GetCurrent() *CNode {
 			return v
 		}
 	}
-	panic(fmt.Errorf("从集群中获取本机节点失败"))
+	return nil
 }
 
 //CNode 集群节点
