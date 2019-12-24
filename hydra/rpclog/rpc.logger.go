@@ -140,7 +140,7 @@ func (r *RPCLogger) changed(c *conf.JSONConf) error {
 	defer r.lock.Unlock()
 
 	if r.service != setting.Service {
-		_, domain, server, err := rpc.ResolvePath(setting.Service, "", "")
+		_, _, domain, server, err := rpc.ResolvePath(setting.Service, "", "")
 		if err != nil || domain == "" || server == "" {
 			return fmt.Errorf("%s不合法 %v", setting.Service, err)
 		}

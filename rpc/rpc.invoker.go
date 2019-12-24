@@ -54,7 +54,6 @@ func WithInvokerLogger(log *logger.Logger) InvokerOption {
 }
 
 func WithBalancerMode(platName string, mode int, p string) InvokerOption {
-
 	switch mode {
 	case RoundRobin:
 		return WithRoundRobin(platName)
@@ -115,7 +114,6 @@ func NewInvoker(domain string, server string, address string, opts ...InvokerOpt
 		address: address,
 		cache:   cmap.New(8),
 		invokerOption: &invokerOption{
-			// balancerType: RoundRobin,
 			balancers: map[string]BalancerMode{
 				"*": BalancerMode{Mode: RoundRobin},
 			},
@@ -149,13 +147,13 @@ func (r *Invoker) Request(service string, method string, header map[string]strin
 	if err != nil {
 		return
 	}
-	rservice, d, s, _ := ResolvePath(service, r.server, r.domain)
+	_, rservice, d, s, _ := ResolvePath(service, r.server, r.domain)
 	status, result, params, err = client.Request(rservice, method, header, form, failFast)
 	if status != 200 || err != nil {
 		if err != nil {
-			err = fmt.Errorf("%s@%s.%s请求失败:%v(%d)", rservice, d, s, err, status)
+			err = fmt.Errorf("%s[@%s.%s]请求失败:%v(%d)", rservice, d, s, err, status)
 		} else {
-			err = fmt.Errorf("%s@%s.%s请求失败:%d)", rservice, d, s, status)
+			err = fmt.Errorf("%s[@%s.%s]请求失败:%d)", rservice, d, s, status)
 		}
 	}
 	return
@@ -176,7 +174,7 @@ func (r *Invoker) getBalancer(domain string) (int, string) {
 //order.request,order.request@api.hydra
 //order.request@api
 func (r *Invoker) GetClient(addr string) (c *Client, err error) {
-	rservice, domain, server, err := ResolvePath(addr, r.server, r.domain)
+	isIP, rservice, domain, server, err := ResolvePath(addr, r.server, r.domain)
 	if err != nil {
 		return
 	}
@@ -186,9 +184,22 @@ func (r *Invoker) GetClient(addr string) (c *Client, err error) {
 		plat := i[0].(string)
 		server := i[1].(string)
 		service := i[2].(string)
+		isip := i[3].(bool)
 
 		opts := make([]ClientOption, 0, 0)
 		opts = append(opts, WithLogger(r.logger))
+
+		//IP直接调用
+		if isip {
+			//设置安全证书
+			switch len(r.tls[domain]) {
+			case 2:
+				opts = append(opts, WithTLS(r.tls[domain]))
+			}
+			return NewClient(server, opts...)
+		}
+
+		//非IP调用
 		mode, p := r.getBalancer(domain)
 		rs := balancer.NewResolver(plat, server, service, time.Second, p)
 		servicePath := fmt.Sprintf(serviceRoot, strings.TrimPrefix(domain, "/"), server, service)
@@ -207,7 +218,7 @@ func (r *Invoker) GetClient(addr string) (c *Client, err error) {
 			opts = append(opts, WithTLS(r.tls[domain]))
 		}
 		return NewClient(r.address, opts...)
-	}, domain, server, rservice)
+	}, domain, server, rservice, isIP)
 	if err != nil {
 		return
 	}

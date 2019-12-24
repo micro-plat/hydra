@@ -21,12 +21,10 @@ type MicroApp struct {
 	app     *cli.App
 	logger  *logger.Logger
 	xlogger logger.ILogging
-	//Conf 绑定安装程序
-	Conf  *creator.Binder
-	hydra *Hydra
+	Conf    *creator.Binder
+	hydra   *Hydra
 	*option
 	remoteQueryService *rqs.RemoteQueryService
-	//	registry           registry.IRegistry
 	component.IComponentRegistry
 	service daemon.Daemon
 	Cli     ICli
@@ -109,10 +107,6 @@ func (m *MicroApp) action(c *cli.Context) (err error) {
 		m.RegistryAddr, m.IsDebug, m.RemoteLogger, m.logger, m.IComponentRegistry)
 
 	m.run()
-	// if _, err := m.hydra.Start(); err != nil {
-	// 	m.logger.Error(err)
-	// 	return err
-	// }
 	return nil
 }
 func (m *MicroApp) run() {
