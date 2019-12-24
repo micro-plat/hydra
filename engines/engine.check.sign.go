@@ -1,6 +1,7 @@
 package engines
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -57,8 +58,16 @@ func checkSignByRemoteSecret(ctx *context.Context) error {
 	if err != nil || status != 200 {
 		return context.NewErrorf(types.GetMax(status, 403), "远程认证失败:%s,err:%v(%d)", err, result, status)
 	}
-	ctx.Request.Metadata.SetStrings(iparam.ToSMap())
-	ctx.Request.Metadata.SetStrings(params)
+
+	ctx.Log.Info("checkSignByRemoteSecret", result, params)
+
+	tmp := types.XMap{}
+	if err := json.Unmarshal([]byte(result), &tmp); err != nil {
+		return err
+	}
+	ctx.Request.Metadata.SetStrings(tmp.ToSMap())
+	// ctx.Request.Metadata.SetStrings(iparam.ToSMap())
+	// ctx.Request.Metadata.SetStrings(params)
 	return nil
 
 }

@@ -11,7 +11,7 @@ type ServiceAuth struct {
 	Service  string                 `json:"service,omitempty" valid:"required"`
 	Requests []string               `json:"requests,omitempty" valid:"required"`
 	Required []string               `json:"required,omitempty"`
-	conn     *Connect               `json:"connect,omitempty"`
+	Connect  *Connect               `json:"connect,omitempty"`
 	Alias    map[string]string      `json:"alias,omitempty"`
 	Params   map[string]interface{} `json:"params,omitempty"`
 	Decrypt  []string               `json:"decrypt,omitempty"`
@@ -34,7 +34,7 @@ func NewServiceAuth(service string, request ...string) *ServiceAuth {
 	return &ServiceAuth{
 		Service:  service,
 		Requests: requests,
-		conn:     &Connect{},
+		Connect:  &Connect{},
 		Required: make([]string, 0, 1),
 		Alias:    make(map[string]string),
 		Decrypt:  make([]string, 0, 1),
@@ -107,8 +107,8 @@ func (a *ServiceAuth) WithCheckTimestamp(e ...bool) *ServiceAuth {
 
 // WithConnect 设置签名链接方式
 func (a *ServiceAuth) WithConnect() *Connect {
-	a.conn = &Connect{auth: a}
-	return a.conn
+	a.Connect = &Connect{auth: a}
+	return a.Connect
 }
 
 //WithDisable 禁用配置
