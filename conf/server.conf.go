@@ -31,7 +31,7 @@ type IMainConf interface {
 	GetServicePubRootPath(name string) string
 	GetServerPubRootPath(serverType ...string) string
 	GetDNSPubRootPath(svName string) string
-	GetClusterNodes(serverType ...string) ([]*CNode, error)
+	GetClusterNodes(serverType ...string) CNodes
 	IsStop() bool
 	ForceRestart() bool
 	GetSubObject(name string, v interface{}) (int32, error)
@@ -229,17 +229,18 @@ func (c *ServerConf) GetDNSPubRootPath(svName string) string {
 }
 
 //GetClusterNodes 获取集群其它服务器节点
-func (c *ServerConf) GetClusterNodes(serverType ...string) ([]*CNode, error) {
+func (c *ServerConf) GetClusterNodes(serverType ...string) CNodes {
+	cnodes := make([]*CNode, 0, 2)
 	path := c.GetServerPubRootPath(serverType...)
 	children, _, err := c.registry.GetChildren(path)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	cnodes := make([]*CNode, 0, len(children))
+
 	for _, node := range children {
 		cnodes = append(cnodes, NewCNode(path, node, c.clusterID))
 	}
-	return cnodes, nil
+	return cnodes
 }
 
 //GetServerPubRootPath 获取服务器发布的跟路径

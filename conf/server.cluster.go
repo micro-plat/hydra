@@ -4,6 +4,21 @@ import "strings"
 
 import "github.com/micro-plat/hydra/registry"
 
+import "fmt"
+
+//CNodes 所有集群节点
+type CNodes []*CNode
+
+//GetCurrent 获取当前节点
+func (c CNodes) GetCurrent() *CNode {
+	for _, v := range c {
+		if v.IsCurrent() {
+			return v
+		}
+	}
+	panic(fmt.Errorf("从集群中获取本机节点失败"))
+}
+
 //CNode 集群节点
 type CNode struct {
 	name    string
