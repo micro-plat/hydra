@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/http/middleware"
 	"github.com/micro-plat/lib4go/archiver"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //waitRemoveDir 等待移除的静态文件
@@ -107,12 +108,7 @@ func getRouters(services map[string][]string) conf.Routers {
 func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf conf.IServerConf) (enable bool, err error) {
 	var routers conf.Routers
 	if _, err = cnf.GetSubObject("router", &routers); err == conf.ErrNoSetting || len(routers.Routers) == 0 {
-		// routers = conf.Routers{}
-		// routers.Routers = make([]*conf.Router, 0, 1)
-		// routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}, Name: "/*name", Service: "/@name", Engine: "*"})
-
 		routers = getRouters(engine.GetServices())
-		// fmt.Println("routers:", engine.GetServices())
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("路由:%v", err)
@@ -122,13 +118,26 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		err = fmt.Errorf("router配置有误:%v", err)
 		return false, err
 	}
+
+	//处理路由默认值
+	nRouters := make([]*conf.Router, 0, len(routers.Proxy)+len(routers.Routers))
+	for _, proxy := range routers.Proxy {
+		if len(proxy.Action) == 0 {
+			proxy.Action = []string{"GET", "POST"}
+		}
+		proxy.Engine = "rpc"
+		nRouters = append(nRouters, proxy)
+
+	}
+
 	for _, router := range routers.Routers {
 		if len(router.Action) == 0 {
 			router.Action = []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}
 		}
-		if router.Engine == "" {
-			router.Engine = "*"
-		}
+		router.Engine = types.GetString(router.Engine, "*")
+		nRouters = append(nRouters, router)
+	}
+	for _, router := range nRouters {
 		if router.Setting == nil {
 			router.Setting = make(map[string]string)
 		}
@@ -138,9 +147,14 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 			}
 		}
 		router.Handler = middleware.ContextHandler(engine, router.Name, router.Engine, router.Service, router.Setting)
+
 	}
-	err = set.SetRouters(routers.Routers)
-	return len(routers.Routers) > 0 && err == nil, err
+
+	err = set.SetRouters(nRouters)
+	if err != nil {
+		return false, err
+	}
+	return len(nRouters) > 0 && err == nil, err
 }
 
 //---------------------------------------------------------------------------

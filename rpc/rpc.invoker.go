@@ -147,7 +147,7 @@ func (r *Invoker) Request(service string, method string, header map[string]strin
 	if err != nil {
 		return
 	}
-	_, rservice, d, s, _ := ResolvePath(service, r.server, r.domain)
+	_, rservice, d, s, _ := ResolvePath(service, r.domain, r.server)
 	status, result, params, err = client.Request(rservice, method, header, form, failFast)
 	if status != 200 || err != nil {
 		if err != nil {
@@ -174,7 +174,7 @@ func (r *Invoker) getBalancer(domain string) (int, string) {
 //order.request,order.request@api.hydra
 //order.request@api
 func (r *Invoker) GetClient(addr string) (c *Client, err error) {
-	isIP, rservice, domain, server, err := ResolvePath(addr, r.server, r.domain)
+	isIP, rservice, domain, server, err := ResolvePath(addr, r.domain, r.server)
 	if err != nil {
 		return
 	}
