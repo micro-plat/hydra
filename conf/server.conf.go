@@ -242,12 +242,6 @@ func (c *ServerConf) GetClusterNodes(serverType ...string) ([]*CNode, error) {
 	return cnodes, nil
 }
 
-//GetClusterPeerHost 获取集群服务节点
-func (c *ServerConf) GetClusterPeerHost(s string) string {
-	items := strings.Split(s, "_")
-	return items[0]
-}
-
 //GetServerPubRootPath 获取服务器发布的跟路径
 func (c *ServerConf) GetServerPubRootPath(serverType ...string) string {
 	return registry.Join("/", c.GetSystemRootfPath(serverType...), "servers")

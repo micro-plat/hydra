@@ -11,16 +11,16 @@ type CNode struct {
 	path    string
 	host    string
 	clustID string
-	cid     string
+	mid     string
 }
 
 //NewCNode 构建集群节点信息
-func NewCNode(root string, name string, cid string) *CNode {
+func NewCNode(root string, name string, mid string) *CNode {
 	items := strings.Split(name, "_")
 	return &CNode{
 		name:    name,
 		root:    root,
-		cid:     cid,
+		mid:     mid,
 		path:    registry.Join(root, name),
 		host:    items[0],
 		clustID: items[1],
@@ -49,5 +49,5 @@ func (c *CNode) GetName() string {
 
 //IsCurrent 是否是当前服务
 func (c *CNode) IsCurrent() bool {
-	return c.clustID == c.cid
+	return c.clustID == c.mid
 }
