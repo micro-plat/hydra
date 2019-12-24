@@ -29,6 +29,7 @@ type IMainConf interface {
 	GetServicePubRootPath(name string) string
 	GetServerPubRootPath() string
 	GetDNSPubRootPath(svName string) string
+	GetClusterNodes() ([]string, error)
 	IsStop() bool
 	ForceRestart() bool
 	GetSubObject(name string, v interface{}) (int32, error)
@@ -214,6 +215,21 @@ func (c *ServerConf) GetServicePubRootPath(svName string) string {
 //GetDNSPubRootPath 获取DNS服务路径
 func (c *ServerConf) GetDNSPubRootPath(svName string) string {
 	return registry.Join("/dns", svName)
+}
+
+//GetClusterNodes 获取集群其它服务器节点
+func (c *ServerConf) GetClusterNodes() ([]string, error) {
+	path := c.GetServerPubRootPath()
+	children, _, err := c.registry.GetChildren(path)
+	if err != nil {
+		return nil, err
+	}
+	npath := make([]string, 0, len(children))
+	for _, p := range children {
+		items := strings.Split(p, "-")
+		npath = append(npath, items[0])
+	}
+	return npath, nil
 }
 
 //GetServerPubRootPath 获取服务器发布的跟路径

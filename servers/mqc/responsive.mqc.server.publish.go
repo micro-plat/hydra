@@ -13,7 +13,7 @@ import (
 func (w *MqcResponsiveServer) publish() (err error) {
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
-	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort)
+	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort+"_")
 	data := map[string]string{
 		"service": addr,
 	}
