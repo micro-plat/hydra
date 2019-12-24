@@ -7,6 +7,8 @@ import (
 	"sync"
 
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/types"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 //ErrNoSetting 未配置
@@ -24,12 +26,12 @@ type ISystemConf interface {
 }
 type IMainConf interface {
 	IConf
-	GetSystemRootfPath() string
+	GetSystemRootfPath(server ...string) string
 	GetMainConfPath() string
 	GetServicePubRootPath(name string) string
-	GetServerPubRootPath() string
+	GetServerPubRootPath(serverType ...string) string
 	GetDNSPubRootPath(svName string) string
-	GetClusterNodes() ([]string, error)
+	GetClusterNodes(serverType ...string) ([]*CNode, error)
 	IsStop() bool
 	ForceRestart() bool
 	GetSubObject(name string, v interface{}) (int32, error)
@@ -38,6 +40,7 @@ type IMainConf interface {
 	GetSubConfClone() map[string]JSONConf
 	SetSubConf(data map[string]JSONConf)
 	IterSubConf(f func(k string, conf *JSONConf) bool)
+	GetClusterID() string
 }
 type IVarConf interface {
 	GetVarVersion() int32
@@ -63,6 +66,7 @@ type ServerConf struct {
 	sysName      string
 	serverType   string
 	clusterName  string
+	clusterID    string
 	mainConfpath string
 	varConfPath  string
 	*metadata
@@ -89,6 +93,7 @@ func NewServerConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int3
 		sysName:      sections[1],
 		serverType:   sections[2],
 		clusterName:  sections[3],
+		clusterID:    utility.GetGUID()[0:8],
 		varConfPath:  registry.Join("/", sections[0], "var"),
 		registry:     rgst,
 		subNodeConfs: make(map[string]JSONConf),
@@ -192,6 +197,11 @@ func (c *ServerConf) IsStop() bool {
 	return c.GetString("status", "start") != "start" && c.GetString("status", "start") != "restart"
 }
 
+//GetClusterID 获取当前服务的集群编号
+func (c *ServerConf) GetClusterID() string {
+	return c.clusterID
+}
+
 //ForceRestart 强制重启
 func (c *ServerConf) ForceRestart() bool {
 	return c.GetString("status", "start") == "restart"
@@ -203,8 +213,9 @@ func (c *ServerConf) GetMainConfPath() string {
 }
 
 //GetSystemRootfPath 获取系统根路径
-func (c *ServerConf) GetSystemRootfPath() string {
-	return registry.Join("/", c.platName, c.sysName, c.serverType, c.clusterName)
+func (c *ServerConf) GetSystemRootfPath(tp ...string) string {
+	return registry.Join("/", c.platName, c.sysName,
+		types.GetStringByIndex(tp, 0, c.serverType), c.clusterName)
 }
 
 //GetServicePubRootPath 获取服务发布跟路径
@@ -218,23 +229,28 @@ func (c *ServerConf) GetDNSPubRootPath(svName string) string {
 }
 
 //GetClusterNodes 获取集群其它服务器节点
-func (c *ServerConf) GetClusterNodes() ([]string, error) {
-	path := c.GetServerPubRootPath()
+func (c *ServerConf) GetClusterNodes(serverType ...string) ([]*CNode, error) {
+	path := c.GetServerPubRootPath(serverType...)
 	children, _, err := c.registry.GetChildren(path)
 	if err != nil {
 		return nil, err
 	}
-	npath := make([]string, 0, len(children))
-	for _, p := range children {
-		items := strings.Split(p, "-")
-		npath = append(npath, items[0])
+	cnodes := make([]*CNode, 0, len(children))
+	for _, node := range children {
+		cnodes = append(cnodes, NewCNode(path, node, c.clusterID))
 	}
-	return npath, nil
+	return cnodes, nil
+}
+
+//GetClusterPeerHost 获取集群服务节点
+func (c *ServerConf) GetClusterPeerHost(s string) string {
+	items := strings.Split(s, "_")
+	return items[0]
 }
 
 //GetServerPubRootPath 获取服务器发布的跟路径
-func (c *ServerConf) GetServerPubRootPath() string {
-	return registry.Join("/", c.GetSystemRootfPath(), "servers")
+func (c *ServerConf) GetServerPubRootPath(serverType ...string) string {
+	return registry.Join("/", c.GetSystemRootfPath(serverType...), "servers")
 }
 
 //GetAppConf 获取系统配置

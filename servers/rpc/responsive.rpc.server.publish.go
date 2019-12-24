@@ -28,9 +28,11 @@ func (w *RpcResponsiveServer) publish() (err error) {
 func (w *RpcResponsiveServer) pubServerNode() error {
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
-	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort)
+	rname := fmt.Sprintf("%s_%s", ipPort, w.currentConf.GetClusterID())
+	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), rname)
 	data := map[string]string{
-		"service": addr,
+		"service":    addr,
+		"cluster_id": w.currentConf.GetClusterID(),
 	}
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)
@@ -49,7 +51,8 @@ func (w *RpcResponsiveServer) pubServiceNode() error {
 	addr := w.server.GetAddress(w.currentConf.GetString("dn"))
 	ipPort := strings.Split(addr, "://")[1]
 	data := map[string]string{
-		"service": addr,
+		"service":    addr,
+		"cluster_id": w.currentConf.GetClusterID(),
 	}
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)
@@ -82,7 +85,8 @@ func (w *RpcResponsiveServer) pubDNSNode() error {
 	ipPort := strings.Split(addr, "://")[1]
 	ip, _, _ := net.SplitHostPort(ipPort)
 	data := map[string]string{
-		"service": addr,
+		"service":    addr,
+		"cluster_id": w.currentConf.GetClusterID(),
 	}
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)

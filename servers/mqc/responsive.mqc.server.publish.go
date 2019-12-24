@@ -13,9 +13,11 @@ import (
 func (w *MqcResponsiveServer) publish() (err error) {
 	addr := w.server.GetAddress()
 	ipPort := strings.Split(addr, "://")[1]
-	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), ipPort+"_")
+	rname := fmt.Sprintf("%s_%s_", ipPort, w.currentConf.GetClusterID())
+	pubPath := registry.Join(w.currentConf.GetServerPubRootPath(), rname)
 	data := map[string]string{
-		"service": addr,
+		"service":    addr,
+		"cluster_id": w.currentConf.GetClusterID(),
 	}
 	jsonData, _ := jsons.Marshal(data)
 	nodeData := string(jsonData)
