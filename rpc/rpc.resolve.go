@@ -36,7 +36,7 @@ func ResolvePath(address string, d string, s string) (isip bool, service string,
 		return true, addrs[0], d, addrs[1], nil
 	}
 
-	service = "/" + strings.Trim(strings.Replace(addrs[0], ".", "/", -1), "/")
+	service = "/" + strings.Trim(strings.Replace(addrs[0], ".", "/", -1), "/") //处理服务名中的特殊字符
 	raddr := strings.Split(strings.TrimRight(addrs[1], "."), ".")
 	if len(raddr) >= 2 && raddr[0] != "" && raddr[1] != "" {
 		domain = raddr[len(raddr)-1]

@@ -1,7 +1,9 @@
 package rpc
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/rpc/balancer"
@@ -197,6 +199,11 @@ func (c *Client) Request(service string, method string, header map[string]string
 
 	status = int(response.Status)
 	result = response.GetResult()
+	var r string
+	dec := json.NewDecoder(strings.NewReader(result))
+	if err := dec.Decode(&r); err == nil {
+		result = r
+	}
 	return
 }
 

@@ -27,7 +27,7 @@ func TestFactoryResolvePath(t *testing.T) {
 	_, svs, domain, server, err = ResolvePath("@", def_domain, def_server)
 	ut.Refute(t, err, nil)
 
-	svs, domain, server, err = ResolvePath("@merchant_cron", def_domain, def_server)
+	_, svs, domain, server, err = ResolvePath("@merchant_cron", def_domain, def_server)
 	ut.Refute(t, err, nil)
 
 	_, svs, domain, server, err = ResolvePath("/order/request@merchant", def_domain, def_server)
