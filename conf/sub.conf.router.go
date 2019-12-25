@@ -2,7 +2,7 @@ package conf
 
 type Routers struct {
 	Routers []*Router         `json:"routers,omitempty"`
-	Proxy   []*Router         `json:"proxy,omitempty"`
+	RPCS    []*Router         `json:"rpcs,omitempty"`
 	Setting map[string]string `json:"args,omitempty"`
 }
 
@@ -20,7 +20,7 @@ type Router struct {
 func NewRouters() *Routers {
 	return &Routers{
 		Routers: make([]*Router, 0),
-		Proxy:   make([]*Router, 0),
+		RPCS:    make([]*Router, 0),
 	}
 }
 
@@ -35,7 +35,7 @@ func (h *Routers) Append(name string, service string) *Routers {
 
 //AppendProxy 添加proxy信息
 func (h *Routers) AppendProxy(name string, service string) *Routers {
-	h.Proxy = append(h.Proxy, &Router{
+	h.RPCS = append(h.RPCS, &Router{
 		Name:    name,
 		Service: service,
 	})

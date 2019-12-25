@@ -120,8 +120,8 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 	}
 
 	//处理路由默认值
-	nRouters := make([]*conf.Router, 0, len(routers.Proxy)+len(routers.Routers))
-	for _, proxy := range routers.Proxy {
+	nRouters := make([]*conf.Router, 0, len(routers.RPCS)+len(routers.Routers))
+	for _, proxy := range routers.RPCS {
 		if len(proxy.Action) == 0 {
 			proxy.Action = []string{"GET", "POST"}
 		}
