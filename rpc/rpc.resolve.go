@@ -14,9 +14,6 @@ import (
 //order.request 解析为 service: /order/request,server:merchant_cron,domain:hydra
 //order.request@merchant_rpc 解析为 service: /order/request,server:merchant_rpc,domain:hydra
 func ResolvePath(address string, d string, s string) (isip bool, service string, domain string, server string, err error) {
-	defer func() {
-		fmt.Println("len.3:", service, domain, server)
-	}()
 	raddress := strings.TrimRight(address, "@")
 	addrs := strings.SplitN(raddress, "@", 2)
 	if len(addrs) == 1 {

@@ -263,11 +263,11 @@ func (c *ServerConf) GetSubObject(name string, v interface{}) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	if err := conf.Unmarshal(&v); err != nil {
 		err = fmt.Errorf("获取%s配置失败:%v", name, err)
 		return 0, err
 	}
-
 	return conf.version, nil
 }
 

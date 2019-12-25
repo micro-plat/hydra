@@ -1,9 +1,9 @@
 package conf
 
 type Routers struct {
-	Setting map[string]string `json:"args,omitempty"`
 	Routers []*Router         `json:"routers,omitempty"`
 	Proxy   []*Router         `json:"proxy,omitempty"`
+	Setting map[string]string `json:"args,omitempty"`
 }
 
 type Router struct {

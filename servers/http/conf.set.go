@@ -82,13 +82,13 @@ type ISetRouterHandler interface {
 	SetRouters([]*conf.Router) error
 }
 
-func getRouters(services map[string][]string) conf.Routers {
+func getRouters(services map[string][]string) []*conf.Router {
 	routers := conf.Routers{}
 
 	if len(services) == 0 {
 		routers.Routers = make([]*conf.Router, 0, 1)
 		routers.Routers = append(routers.Routers, &conf.Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}, Name: "/*name", Service: "/@name", Engine: "*"})
-		return routers
+		return routers.Routers
 	}
 	routers.Routers = make([]*conf.Router, 0, len(services))
 	for name, actions := range services {
@@ -101,14 +101,14 @@ func getRouters(services map[string][]string) conf.Routers {
 		router.Action = append(router.Action, "OPTIONS")
 		routers.Routers = append(routers.Routers, router)
 	}
-	return routers
+	return routers.Routers
 }
 
 //SetHttpRouters 设置路由
 func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf conf.IServerConf) (enable bool, err error) {
 	var routers conf.Routers
 	if _, err = cnf.GetSubObject("router", &routers); err == conf.ErrNoSetting || len(routers.Routers) == 0 {
-		routers = getRouters(engine.GetServices())
+		routers.Routers = getRouters(engine.GetServices())
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("路由:%v", err)
@@ -127,7 +127,6 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		}
 		proxy.Engine = "rpc"
 		nRouters = append(nRouters, proxy)
-
 	}
 
 	for _, router := range routers.Routers {
@@ -137,6 +136,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		router.Engine = types.GetString(router.Engine, "*")
 		nRouters = append(nRouters, router)
 	}
+
 	for _, router := range nRouters {
 		if router.Setting == nil {
 			router.Setting = make(map[string]string)
