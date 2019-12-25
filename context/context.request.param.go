@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"github.com/micro-plat/lib4go/jsons"
 	"regexp"
 	"strconv"
 	"time"
@@ -33,6 +34,15 @@ func (i *inputParams) GetMaps() map[string]string {
 	}
 	return m
 }
+func (i *inputParams) GetJSON() string {
+	m := i.GetMaps()
+	if len(m) == 0 {
+		return "{}"
+	}
+	buff, _ := jsons.Marshal(m)
+	return string(buff)
+}
+
 func (i *inputParams) Get(name string) (string, bool) {
 	if c, ok := i.data.Get(name); ok {
 		return fmt.Sprint(c), ok

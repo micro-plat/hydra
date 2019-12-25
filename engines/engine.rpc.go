@@ -20,7 +20,7 @@ func (r *ServiceEngine) RPCProxy() component.ServiceFunc {
 		}
 		header["method"] = strings.ToUpper(ctx.Request.GetMethod())
 		input := ctx.Request.GetRequestMap()
-		input["__params_"] = ctx.Request.Setting.GetMaps()
+		input["__body_"] = ctx.Request.Setting.GetJSON()
 		timeout := ctx.Request.Setting.GetInt("timeout", 3)
 		response := ctx.RPC.AsyncRequest(ctx.Service, header, input, true)
 		status, result, params, err := response.Wait(time.Second * time.Duration(timeout))

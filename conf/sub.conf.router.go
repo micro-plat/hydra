@@ -34,11 +34,12 @@ func (h *Routers) Append(name string, service string) *Routers {
 }
 
 //AppendProxy 添加proxy信息
-func (h *Routers) AppendProxy(name string, service string) *Routers {
-	h.RPCS = append(h.RPCS, &Router{
-		Name:    name,
-		Service: service,
-	})
+func (h *Routers) AppendProxy(name string, service string, settings ...map[string]string) *Routers {
+	router := &Router{Name: name, Service: service}
+	if len(settings) > 0 {
+		router.Setting = settings[0]
+	}
+	h.RPCS = append(h.RPCS, router)
 	return h
 }
 

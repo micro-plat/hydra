@@ -156,7 +156,6 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 			continue
 		}
 		input[fmt.Sprintf("__%s_", k)] = v
-
 	}
 	input["X-Request-Id"] = getUUID(c)
 	input["__method_"] = strings.ToLower(c.Request.GetMethod())
@@ -165,22 +164,24 @@ func makeExtData(c *dispatcher.Context, ext map[string]interface{}) map[string]i
 	input["__func_http_request_"] = c.Request
 	input["__func_http_response_"] = c.Writer
 	input["__binding_"] = func(obj interface{}) error {
-		buffer, err := json.Marshal(c.Request.GetForm())
-		if err != nil {
-			return err
+		form := c.Request.GetForm()
+		var buffer []byte
+		var err error
+		if body, ok := form["__body_"].(string); ok && len(form) == 1 {
+			buffer = []byte(body)
+		} else {
+			buffer, err = json.Marshal(form)
+			if err != nil {
+				return err
+			}
 		}
+
 		d := json.NewDecoder(bytes.NewBuffer(buffer))
 		d.UseNumber()
 		return d.Decode(obj)
 	}
 	input["__binding_with_"] = func(v interface{}, ct string) error {
-		buffer, err := json.Marshal(c.Request.GetForm())
-		if err != nil {
-			return err
-		}
-		d := json.NewDecoder(bytes.NewBuffer(buffer))
-		d.UseNumber()
-		return d.Decode(v)
+		return input["__binding_"].(func(obj interface{}) error)(v)
 	}
 	input["__func_body_get_"] = func(ch string) (string, error) {
 		if s, ok := c.Request.GetForm()["__body_"]; ok {
@@ -233,7 +234,6 @@ func newInputData(v interface{}, get func(string) interface{}) *InputData {
 			input.keys = append(input.keys, k.Key)
 		}
 	}
-
 	return input
 }
 
