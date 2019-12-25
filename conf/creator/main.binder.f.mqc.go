@@ -4,7 +4,7 @@ import "github.com/micro-plat/hydra/conf"
 
 type IMQCBinder interface {
 	SetMain(*conf.MQCServerConf)
-	SetServer(*conf.QueueConf)
+	SetServer(conf.QueueConf)
 	SetQueues(*conf.Queues)
 	IExtBinder
 }
@@ -22,7 +22,7 @@ func NewMQCBinder(params map[string]string, inputs map[string]*Input) *MQCBinder
 func (b *MQCBinder) SetMain(c *conf.MQCServerConf) {
 	b.mainBinder.SetMainConf(c)
 }
-func (b *MQCBinder) SetServer(c *conf.QueueConf) {
+func (b *MQCBinder) SetServer(c conf.QueueConf) {
 	b.mainBinder.SetSubConf("server", c)
 }
 

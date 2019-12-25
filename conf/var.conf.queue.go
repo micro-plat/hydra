@@ -3,15 +3,25 @@ package conf
 //QueueConf 消息队列配置
 type QueueConf map[string]interface{}
 
+//LMQConf 本地消息队列
+type LMQConf = QueueConf
+
 //MQTTConf MQTT配置
-type MQTTConf QueueConf
+type MQTTConf = QueueConf
 
 //RedisQueueConf redis消息队列
-type RedisQueueConf QueueConf
+type RedisQueueConf = QueueConf
 
 //GetProto 获取协议
 func (q QueueConf) GetProto() string {
 	return q["proto"].(string)
+}
+
+//NewLMQConf 本地消息队列
+func NewLMQConf() LMQConf {
+	conf := make(map[string]interface{})
+	conf["proto"] = "lmq"
+	return conf
 }
 
 //NewMQTTConf 构建MQTT消息队列配置
