@@ -33,8 +33,8 @@ func (h *Routers) Append(name string, service string) *Routers {
 	return h
 }
 
-//AppendProxy 添加proxy信息
-func (h *Routers) AppendProxy(name string, service string, settings ...map[string]string) *Routers {
+//AppendRPCProxy 添加proxy信息
+func (h *Routers) AppendRPCProxy(name string, service string, settings ...map[string]string) *Routers {
 	router := &Router{Name: name, Service: service}
 	if len(settings) > 0 {
 		router.Setting = settings[0]
