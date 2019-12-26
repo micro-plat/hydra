@@ -35,6 +35,7 @@ func NewServiceAuth(service string, request ...string) *ServiceAuth {
 		Service:  service,
 		Requests: requests,
 		Connect:  &Connect{},
+		Params:   make(map[string]interface{}),
 		Required: make([]string, 0, 1),
 		Alias:    make(map[string]string),
 		Decrypt:  make([]string, 0, 1),
@@ -102,6 +103,12 @@ func (a *ServiceAuth) WithDecryptName(name ...string) *ServiceAuth {
 //WithCheckTimestamp 设置需要检查时间戳
 func (a *ServiceAuth) WithCheckTimestamp(e ...bool) *ServiceAuth {
 	a.CheckTS = types.GetBoolByIndex(e, 0, true)
+	return a
+}
+
+//WithParam 设置扩展参数
+func (a *ServiceAuth) WithParam(key string, value interface{}) *ServiceAuth {
+	a.Params[key] = value
 	return a
 }
 

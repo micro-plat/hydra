@@ -20,7 +20,10 @@ func (r *ServiceEngine) RPCProxy() component.ServiceFunc {
 		}
 		header["method"] = strings.ToUpper(ctx.Request.GetMethod())
 		input := ctx.Request.GetRequestMap()
-		input["__body_"] = ctx.Request.Setting.GetJSON()
+		args := ctx.Request.Setting.GetMaps() //获取配置参数，使用配置覆盖远程传入参数
+		for k, v := range args {
+			input[k] = v
+		}
 		timeout := ctx.Request.Setting.GetInt("timeout", 3)
 		response := ctx.RPC.AsyncRequest(ctx.Service, header, input, true)
 		status, result, params, err := response.Wait(time.Second * time.Duration(timeout))

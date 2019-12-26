@@ -82,7 +82,7 @@ type ISetRouterHandler interface {
 	SetRouters([]*conf.Router) error
 }
 
-func getRouters(services map[string][]string) []*conf.Router {
+func getDefaultRouters(services map[string][]string) []*conf.Router {
 	routers := conf.Routers{}
 
 	if len(services) == 0 {
@@ -106,9 +106,10 @@ func getRouters(services map[string][]string) []*conf.Router {
 
 //SetHttpRouters 设置路由
 func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf conf.IServerConf) (enable bool, err error) {
+
 	var routers conf.Routers
 	if _, err = cnf.GetSubObject("router", &routers); err == conf.ErrNoSetting || len(routers.Routers) == 0 {
-		routers.Routers = getRouters(engine.GetServices())
+		routers.Routers = getDefaultRouters(engine.GetServices()) //添加默认路由
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		err = fmt.Errorf("路由:%v", err)
@@ -119,7 +120,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		return false, err
 	}
 
-	//处理路由默认值
+	//处理RPC代理服务
 	nRouters := make([]*conf.Router, 0, len(routers.RPCS)+len(routers.Routers))
 	for _, proxy := range routers.RPCS {
 		if len(proxy.Action) == 0 {
@@ -129,6 +130,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		nRouters = append(nRouters, proxy)
 	}
 
+	//处理路由
 	for _, router := range routers.Routers {
 		if len(router.Action) == 0 {
 			router.Action = []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}
@@ -137,6 +139,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		nRouters = append(nRouters, router)
 	}
 
+	//构建路由处理函数
 	for _, router := range nRouters {
 		if router.Setting == nil {
 			router.Setting = make(map[string]string)
@@ -149,11 +152,7 @@ func SetHttpRouters(engine servers.IRegistryEngine, set ISetRouterHandler, cnf c
 		router.Handler = middleware.ContextHandler(engine, router.Name, router.Engine, router.Service, router.Setting)
 
 	}
-
 	err = set.SetRouters(nRouters)
-	if err != nil {
-		return false, err
-	}
 	return len(nRouters) > 0 && err == nil, err
 }
 

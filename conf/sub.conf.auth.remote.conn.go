@@ -1,10 +1,13 @@
 package conf
 
+import "strings"
+
 //Connect 签名拼接串
 type Connect struct {
 	KeyValue string         `json:"kv,omitempty" valid:"ascii"`
 	Chain    string         `json:"chain,omitempty" valid:"ascii"`
 	Sort     string         `json:"sort,omitempty" valid:"in(all|data|static)"`
+	Fields   string         `json:"fields,omitempty" valid:"ascii"`
 	Secret   *SecretConnect `json:"secret,omitempty"`
 	auth     *ServiceAuth   `json:"-" valid:"-"`
 }
@@ -37,9 +40,10 @@ func (c *Connect) SortAll() *Connect {
 	return c
 }
 
-//SortStatic 不排序
-func (c *Connect) SortStatic() *Connect {
+//SortStatic 使用指定的字段进行排序
+func (c *Connect) SortStatic(fields ...string) *Connect {
 	c.Sort = "static"
+	c.Fields = strings.Join(fields, "|")
 	return c
 }
 
