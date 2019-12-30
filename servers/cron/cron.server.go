@@ -137,6 +137,5 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 			}
 			s.Debugf("[注册定时任务(%s)(%s)]", task.Cron, task.Name)
 		}
-
 	}
 }

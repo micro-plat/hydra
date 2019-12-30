@@ -35,7 +35,9 @@ type CloseHandler interface {
 type Handler interface {
 	Handle(c *context.Context) interface{}
 }
-
+type IHandler interface {
+	Handle(c *context.Context) interface{}
+}
 type GetHandler interface {
 	GetHandle(c *context.Context) interface{}
 }
