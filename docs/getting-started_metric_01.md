@@ -10,13 +10,13 @@ hydra 提供 QPS、正在处理数、响应时间、响应状态码的统计数�
 
 `metric`配置实际是`influxdb`服务器连接配置:
 
-|  参数名  | 必须 | 说明                       |
-| :------: | :--: | -------------------------- |
-|   host   |  是  | influxdb 服务器地址        |
-| dataBase |  是  | 数据库名称                 |
-|   cron   |  是  | 保存到 influxdb 的间隔时长 |
-| userName |  否  | 用户名                     |
-| password |  否  | 密码                       |
+|  参数名  | 必须  | 说明                       |
+| :------: | :---: | -------------------------- |
+|   host   |  是   | influxdb 服务器地址        |
+| dataBase |  是   | 数据库名称                 |
+|   cron   |  是   | 保存到 influxdb 的间隔时长 |
+| userName |  否   | 用户名                     |
+| password |  否   | 密码                       |
 
 ```go
 
@@ -55,7 +55,7 @@ func main() {
 
 }
 
-func hello(ctx *context.Context) (r interface{}) {
+func hello(ctx *hydra.Context) (r interface{}) {
 	return "hello world"
 }
 

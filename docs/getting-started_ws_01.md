@@ -107,7 +107,7 @@ func NewLoginHandler(container component.IContainer) (u *LoginHandler) {
 	}
 }
 //Handle api接口发送消息，将消息存入消息队列
-func (u *LoginHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *LoginHandler) Handle(ctx *hydra.Context) (r interface{}) {
     userName:=ctx.Request.String("uname")
     pwd:=ctx.Request.String("pwd")
     uuid:=ctx.Request.GetUUID()
@@ -139,7 +139,7 @@ func NewSendHandler(container component.IContainer) (u *SendHandler) {
 	}
 }
 //Handle api接口发送消息，将消息存入消息队列
-func (u *SendHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *SendHandler) Handle(ctx *hydra.Context) (r interface{}) {
     //从缓存或数据库中拉取用户信息，根据保存的uuid发送消息
     queue:=ctx.GetContain().GetRegularQueue()
     if err:=queue.Push("mall:wsserver:msg",`{"uuid":"890997777","msg":"充值成功"}`);err!=nil{
@@ -172,7 +172,7 @@ func NewPushHandler(container component.IContainer) (u *PushHandler) {
 	}
 }
 //Handle api接口发送消息，将消息存入消息队列
-func (u *PushHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *PushHandler) Handle(ctx *hydra.Context) (r interface{}) {
     uuid:=ctx.Request.String("uuid")
     content:=ctx.Request.String("msg")
     if err := context.WSExchange.Notify(uuid,content); err != nil {

@@ -70,7 +70,7 @@ import (
 //handling 处理jwt排除页面，保存登录对象，验证用户权限
 func (api *apiserver) handling() {
 	//每个请求执行前执行
-	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+	api.MicroApp.Handling(func(ctx *hydra.Context) (rt interface{}) {
 
 		//获取jwt
 		jwt, err := ctx.Request.GetJWTConfig() //获取jwt配置
@@ -139,7 +139,7 @@ func NewLoginHandler(container component.IContainer) (u *LoginHandler) {
 
 
 //Handle 用户登录
-func (u *LoginHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *LoginHandler) Handle(ctx *hydra.Context) (r interface{}) {
 	ctx.Log.Info("-------用户登录---------")
 	ctx.Log.Info("1. 检查输入参数")
 	if err := ctx.Request.Check("username", "password"); err != nil {
@@ -179,20 +179,20 @@ func NewOrderHandler(container component.IContainer) (u *OrderHandler) {
 }
 
 //GetHandle 查询
-func (u *OrderHandler) GetHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) GetHandle(ctx *hydra.Context) (r interface{}) {
  }
 
  //PostHandle 新增
-func (u *OrderHandler) PostHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) PostHandle(ctx *hydra.Context) (r interface{}) {
  	 member:=mem.Get(ctx)
  }
 
 //PutHandle 修改
- func (u *OrderHandler) PutHandle(ctx *context.Context) (r interface{}) {
+ func (u *OrderHandler) PutHandle(ctx *hydra.Context) (r interface{}) {
  }
 
 //DeleteHandle 删除
- func (u *OrderHandler) DeleteHandle(ctx *context.Context) (r interface{}) {
+ func (u *OrderHandler) DeleteHandle(ctx *hydra.Context) (r interface{}) {
  }
 ```
 
@@ -241,7 +241,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 )
 //Save 保存member信息
-func Save(ctx *context.Context, m *LoginState) error {
+func Save(ctx *hydra.Context, m *LoginState) error {
 	//不允许同一个账户多终端登录
 	//检查用户是否已锁定、禁用
 	ctx.Meta.Set("__member_info__", m)
@@ -249,7 +249,7 @@ func Save(ctx *context.Context, m *LoginState) error {
 }
 
 //Get 获取member信息
-func Get(ctx *context.Context) *LoginState {
+func Get(ctx *hydra.Context) *LoginState {
 	v, _ := ctx.Meta.Get("__member_info__")
 	if v == nil {
 		return nil

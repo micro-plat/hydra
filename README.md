@@ -24,7 +24,6 @@ hydra['haɪdrə]致力于提供统一的，丰富功能的后端开发框架，�
 package main
 
 import (
-	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/hydra"
 )
@@ -41,7 +40,7 @@ func main() {
 	app.Start()
 }
 
-func hello(ctx *context.Context) (r interface{}) {
+func hello(ctx *hydra.Context) (r interface{}) {
 	return "hello world"
 }
 ```

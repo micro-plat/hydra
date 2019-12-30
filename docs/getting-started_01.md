@@ -174,7 +174,7 @@ import (
 )
 
 func (api *apiserver) handling() {
-	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+	api.MicroApp.Handling(func(ctx *hydra.Context) (rt interface{}) {
 		//检验登录状态或权限
 		return nil
 	})
@@ -200,7 +200,7 @@ func NewRequestHandler(container component.IContainer) (u *RequestHandler, err e
 }
 
 //Handle .
-func (u *RequestHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *RequestHandler) Handle(ctx *hydra.Context) (r interface{}) {
 	return "success"
 }
 

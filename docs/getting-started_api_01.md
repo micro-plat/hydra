@@ -161,7 +161,7 @@ import (
 )
 
 func (api *apiserver) handling() {
-	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+	api.MicroApp.Handling(func(ctx *hydra.Context) (rt interface{}) {
 		if err := ctx.Request.Check("merchant_id"); err != nil {
 			return err
 		}
@@ -203,7 +203,7 @@ func NewOrderHandler(container component.IContainer) (u *OrderHandler) {
 }
 
 //RequestHandle 会员充值订单请求
-func (u *OrderHandler) RequestHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) RequestHandle(ctx *hydra.Context) (r interface{}) {
 	ctx.Log.Info("--------------会员充值订单请求---------------")
 	ctx.Log.Info("1.检查请求参数")
 	if err := ctx.Request.Check("merchant_id","order_no", "account", "face", "num"); err != nil {
@@ -224,7 +224,7 @@ func (u *OrderHandler) RequestHandle(ctx *context.Context) (r interface{}) {
 }
 
 //QueryHandle 充值结果查询
-func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) QueryHandle(ctx *hydra.Context) (r interface{}) {
 	ctx.Log.Info("--------------充值结果查询---------------")
 	ctx.Log.Info("1.检查请求参数")
 	if err := ctx.Request.Check("merchant_id","order_no"); err != nil {

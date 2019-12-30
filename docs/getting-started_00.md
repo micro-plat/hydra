@@ -242,7 +242,7 @@ func main() {
 	app.Start()
 }
 
-func hello(ctx *context.Context) (r interface{}) {
+func hello(ctx *hydra.Context) (r interface{}) {
 	return "hello world"
 }
 ```
@@ -309,7 +309,7 @@ func main() {
 	app.Start()
 }
 
-func hello(ctx *context.Context) (r interface{}) {
+func hello(ctx *hydra.Context) (r interface{}) {
 	return "hello world"
 }
 ```

@@ -71,7 +71,7 @@ func NewLoginHandler(container component.IContainer) (u *LoginHandler) {
 
 
 //Handle 用户登录
-func (u *LoginHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *LoginHandler) Handle(ctx *hydra.Context) (r interface{}) {
 	ctx.Log.Info("-------用户登录---------")
 	ctx.Log.Info("1. 检查输入参数")
 	if err := ctx.Request.Check("username", "password"); err != nil {
@@ -108,7 +108,7 @@ import (
 //handling 处理jwt排除页面，保存登录对象
 func (api *apiserver) handling() {
 	//每个请求执行前执行
-	api.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+	api.MicroApp.Handling(func(ctx *hydra.Context) (rt interface{}) {
 
 		if b, err := ctx.Request.SkipJWTExclude(); b || err != nil {
 		    return err

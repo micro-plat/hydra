@@ -163,11 +163,11 @@ func NewTaskHandler(container component.IContainer) (u *TaskHandler， err error
 }
 
 //Handle 生成对账文件
-func (u *TaskHandler) BillHandle(ctx *context.Context) (r interface{}) {
+func (u *TaskHandler) BillHandle(ctx *hydra.Context) (r interface{}) {
     //业务逻辑
 	return "success"
 }
-func (u *TaskHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *TaskHandler) Handle(ctx *hydra.Context) (r interface{}) {
 	current, totoal := ctx.Request.GetSharding()
 	return nil
 }

@@ -179,11 +179,11 @@ func NewOrderHandler(container component.IContainer) (u *OrderHandler， err err
 }
 
 //Handle 处理订单支付
-func (u *OrderHandler) PayHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) PayHandle(ctx *hydra.Context) (r interface{}) {
     //业务逻辑
 	return "success"
 }
-func (u *OrderHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) Handle(ctx *hydra.Context) (r interface{}) {
 	current, totoal := ctx.Request.GetSharding()
 	return nil
 }

@@ -100,7 +100,7 @@ import (
 )
 
 func (rpc *rpcserver) handling() {
-	rpc.MicroApp.Handling(func(ctx *context.Context) (rt interface{}) {
+	rpc.MicroApp.Handling(func(ctx *hydra.Context) (rt interface{}) {
 		if err := ctx.Request.Check("merchant_id"); err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func NewOrderHandler(container component.IContainer) (u *OrderHandler) {
 	}
 }
 //QueryHandle 充值结果查询
-func (u *OrderHandler) QueryHandle(ctx *context.Context) (r interface{}) {
+func (u *OrderHandler) QueryHandle(ctx *hydra.Context) (r interface{}) {
 	ctx.Log.Info("--------------充值结果查询---------------")	
 	return "SUCCESS"
 }
@@ -223,7 +223,7 @@ type QueryHandler struct {
 func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
 	return &QueryHandler{container: container}
 }
-func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *QueryHandler) Handle(ctx *hydra.Context) (r interface{}) {
     //构建输入参数
     header:=map[string]string{}
     input:=map[string]interface{}{
