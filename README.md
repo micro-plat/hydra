@@ -66,7 +66,7 @@ func main() {
 		hydra.WithServerTypes("api"), //服务器类型为http api
 		hydra.WithRegistry("fs://../")) //使用本地文件系统作为注册中心
 
-	app.API("/api",hello) //注册服务
+	app.API("/api",api) //注册服务
 
 	app.Start()
 }
@@ -125,7 +125,7 @@ func main() {
 		hydra.WithServerTypes("rpc"), //修改为RPC服务器类型
 		hydra.WithRegistry("fs://../")) //使用本地文件系统作为注册中心
 
-	app.RPC("/rpc",hello) //注册为rpc服务
+	app.RPC("/rpc",rpc) //注册为rpc服务
 	app.Start()
 }
 
