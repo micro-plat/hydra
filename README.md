@@ -209,7 +209,7 @@ func api(ctx *hydra.Context) (r interface{}) {
 [2020/01/06 16:52:18.287947][i][979a5d210]api.request GET /api from 192.168.4.121
 [2020/01/06 16:52:19.290044][i][979a5d210]rpc.request: myplat.demo.test GET /rpc from 
 [2020/01/06 16:52:19.290626][i][979a5d210]rpc.response: myplat.demo.test GET /rpc 200  644.078µs 
-[2020/01/06 16:52:19.291206][i][979a5d210]api.response GET /api 200  1.003274125s 
+[2020/01/06 16:52:19.291206][i][979a5d210]api.response GET /api 200  700.644µs 
 
 ```
 
