@@ -57,11 +57,13 @@ func main() {
 		hydra.WithServerTypes("api"), //服务器类型为http api
 		hydra.WithRegistry("fs://../")) //使用本地文件系统作为注册中心
 
-	app.API("/api",hello)
+	app.API("/api",hello) //注册服务
+
 	app.Start()
 }
 
-func api(ctx *hydra.Context) (r interface{}) {
+
+func api(ctx *hydra.Context) (r interface{}) { //服务实现
 	return "hello world "
 }
 ```
