@@ -1,5 +1,6 @@
 package conf
 
+//MQCServerConf mqc服务配置
 type MQCServerConf struct {
 	Status   string `json:"status,omitempty" valid:"in(start|stop)"`
 	Sharding int    `json:"sharding,omitempty"`
@@ -9,7 +10,7 @@ type MQCServerConf struct {
 
 //NewMQCServerConf 构建mqc server配置，默认为对等模式
 func NewMQCServerConf() *MQCServerConf {
-	return &MQCServerConf{}
+	return &MQCServerConf{Sharding: 1}
 }
 
 //WithTrace 构建api server配置信息
