@@ -27,12 +27,17 @@ type MicroApp struct {
 	remoteQueryService *rqs.RemoteQueryService
 	component.IComponentRegistry
 	service daemon.Daemon
+	funs    *funs
 	Cli     ICli
 }
 
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
-	m = &MicroApp{option: &option{}, IComponentRegistry: component.NewServiceRegistry()}
+	m = &MicroApp{
+		option:             &option{},
+		funs:               newFuns(),
+		IComponentRegistry: component.NewServiceRegistry(),
+	}
 	logging := log.New(os.Stdout, "", log.Llongcolor)
 	logging.SetOutputLevel(log.Ldebug)
 	m.xlogger = logging
@@ -49,9 +54,6 @@ func NewApp(opts ...Option) (m *MicroApp) {
 func (m *MicroApp) Start() {
 	var err error
 	defer logger.Close()
-	if m.IsDebug {
-		m.PlatName += "_debug"
-	}
 	m.app = m.getCliApp()
 	m.service, err = daemon.New(m.app.Name, m.app.Name)
 	if err != nil {
@@ -121,6 +123,9 @@ func (m *MicroApp) checkInput(c *cli.Context) (err error) {
 	if m.PlatName == "" && m.Name != "" {
 		WithName(m.Name)(m.option)
 	}
+	if m.IsDebug {
+		m.PlatName += "_debug"
+	}
 	if b, err := govalidator.ValidateStruct(m.option); !b {
 		err = fmt.Errorf("服务器运行缺少参数，请查看以下帮助信息")
 		return err
@@ -133,8 +138,12 @@ func (m *MicroApp) checkInput(c *cli.Context) (err error) {
 			return err
 		}
 	}
-	return
+	return m.funs.Call()
 }
+
+//Shutdown 关闭服务
 func (m *MicroApp) Shutdown() {
-	m.hydra.Shutdown()
+	if m.hydra != nil {
+		m.hydra.Shutdown()
+	}
 }

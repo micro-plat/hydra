@@ -40,6 +40,7 @@ type Hydra struct {
 	cHandler       component.IComponentHandler
 	rspServer      *rspServer
 	trace          string
+	shutdown       sync.Once
 	done           bool
 	remoteLogger   bool
 }
@@ -179,9 +180,11 @@ LOOP:
 	}
 }
 
+//Shutdown 关闭服务器
 func (h *Hydra) Shutdown() {
-	h.done = true
-	close(h.closeChan)
-	h.interrupt <- syscall.SIGTERM
-
+	h.shutdown.Do(func() {
+		h.done = true
+		close(h.closeChan)
+		h.interrupt <- syscall.SIGTERM
+	})
 }

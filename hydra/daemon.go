@@ -61,7 +61,6 @@ func (m *MicroApp) installAction(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
-
 	if err = m.install(); err != nil {
 		m.xlogger.Error(err)
 		return err
