@@ -1,13 +1,8 @@
 package main
 
-import(
-// _ "github.com/mholt/archiver"
-_ "github.com/micro-plat/hydra/hydra"
-// _ "github.com/micro-plat/hydra/hydra/impt"
-// _ "github.com/micro-plat/lib4go/net/http"
-
+import (
+	_ "github.com/micro-plat/hydra/hydra"
 )
-
 
 func main() {
 

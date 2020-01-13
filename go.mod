@@ -18,6 +18,7 @@ require (
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pkg/profile v1.3.0
+	github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
 	github.com/stretchr/testify v1.4.0
 	github.com/ugorji/go/codec v1.1.7
 	github.com/urfave/cli v1.22.1
