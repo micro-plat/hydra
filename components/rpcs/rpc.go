@@ -31,7 +31,7 @@ type StandardRPC struct {
 
 //NewStandardRPC 创建RPC服务代理
 func NewStandardRPC(c components.IComponents, platName string, systemName string, registryAddr string) *StandardQueue {
-	return &StandardQueue{
+	return &StandardRPC{
 		c:       c,
 		invoker: rpc.NewInvoker(platName, systemName, registryAddr),
 	}
@@ -46,7 +46,7 @@ func (s *StandardRPC) Request(service string, input map[string]interface{}, opts
 	}
 
 	//发送远程请求
-	status, r, param, err = s.invoker.Request(service, o.method, o.Params, input, o.failFast)
+	status, r, param, err := s.invoker.Request(service, o.method, o.Params, input, o.failFast)
 	if err != nil {
 		return nil, err
 	}
@@ -58,19 +58,19 @@ func (s *StandardRPC) Request(service string, input map[string]interface{}, opts
 //RPCResponse 请求结果
 type RPCResponse struct {
 	Status int
-	Params map[string]interface{}
+	Params map[string]string
 	Result string
 }
 
 //Success 请求是否成功
 func (r *RPCResponse) Success() bool {
-	return status == 200
+	return r.Status == 200
 }
 
 //GetResult 获取请求结果
 func (r *RPCResponse) GetResult() (map[string]interface{}, error) {
 	out := make(map[string]interface{})
-	err := json.Marshal([]byte(r.Result), &out)
+	err := json.Unmarshal([]byte(r.Result), &out)
 	return out, err
 }
 
@@ -81,14 +81,14 @@ func (r *RPCResponse) GetParam(key string) interface{} {
 
 //-----------------RPC可选参数---------------------------------
 type option struct {
-	params   map[string]interface{}
+	params   map[string]string
 	failFast bool
 	method   string
 }
 
 func newOption() *option {
-	return &Option{
-		params:   map[string]string{"X-Request-Id": s.c.GetRequestID()},
+	return &option{
+		params:   map[string]string{},
 		failFast: true,
 		method:   "GET",
 	}
@@ -98,7 +98,7 @@ func newOption() *option {
 type Option func(*option)
 
 //WithRPCParams RPC请求参数
-func WithRPCParams(p map[string]interface{}) Option {
+func WithRPCParams(p map[string]string) Option {
 	return func(o *option) {
 		o.params = p
 	}
