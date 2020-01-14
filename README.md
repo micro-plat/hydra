@@ -52,7 +52,6 @@
 package main
 
 import (
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/hydra/hydra"
 )
 
