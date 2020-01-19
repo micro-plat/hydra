@@ -16,15 +16,6 @@ const (
 	dbNameNode = "db"
 )
 
-//IDB 数据库接口
-type IDB = db.IDB
-
-//IComponentDB Component DB
-type IComponentDB interface {
-	GetRegularDB(names ...string) (d IDB)
-	GetDB(names ...string) (d IDB, err error)
-}
-
 //StandardDB db
 type StandardDB struct {
 	c components.IComponents
@@ -47,7 +38,7 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(c conf.IConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreateByConf(dbTypeNode, name, func(c conf.IConf) (interface{}, error) {
 		var dbConf conf.DBConf
 		if err = c.Unmarshal(&dbConf); err != nil {
 			return nil, err

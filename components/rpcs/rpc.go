@@ -1,119 +1,48 @@
 package rpcs
 
 import (
-	"encoding/json"
-	"strings"
-	"time"
-
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/rpc"
+	"github.com/micro-plat/hydra/components/rpcs/rpc"
+	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/lib4go/types"
 )
 
-//IRPCInvoker RPC调用程序
-type IRPCInvoker interface {
-	PreInit(services ...string) (err error)
-	RequestFailRetry(service string, method string, header map[string]string, input map[string]interface{}, times int) (status int, result string, params map[string]string, err error)
-	Request(service string, method string, header map[string]string, input map[string]interface{}, failFast bool) (status int, result string, param map[string]string, err error)
-	AsyncRequest(service string, method string, header map[string]string, input map[string]interface{}, failFast bool) rpc.IRPCResponse
-	WaitWithFailFast(callback func(string, int, string, error), timeout time.Duration, rs ...rpc.IRPCResponse) error
-}
+//rpcTypeNode rpc在var配置中的类型名称
+const rpcTypeNode = "rpc"
 
-//IComponentRPC Component rpc
-type IComponentRPC interface {
-	Request(service string, input map[string]interface{}, failFast ...bool) (status int, r string, param map[string]string, err error)
-}
+//rpcNameNode rpc名称在var配置中的末节点名称
+const rpcNameNode = "rpc"
 
 //StandardRPC rpc服务
 type StandardRPC struct {
-	c       components.IComponents
-	invoker IRPCInvoker
+	c      components.IComponents
+	client *rpc.Client
 }
 
 //NewStandardRPC 创建RPC服务代理
-func NewStandardRPC(c components.IComponents, platName string, systemName string, registryAddr string) *StandardQueue {
+func NewStandardRPC(c components.IComponents, platName string, systemName string, registryAddr string) *StandardRPC {
 	return &StandardRPC{
-		c:       c,
-		invoker: rpc.NewInvoker(platName, systemName, registryAddr),
+		c: c,
 	}
 }
 
-//Request RPC请求
-func (s *StandardRPC) Request(service string, input map[string]interface{}, opts ...Option) (res *RPCResponse, err error) {
-	//处理可选参数
-	o := newOption()
-	for _, opt := range opts {
-		opt(o)
+//GetRegularRPC 获取正式的没有异常缓存实例
+func (s *StandardRPC) GetRegularRPC(names ...string) (c IRequest) {
+	c, err := s.GetRPC(names...)
+	if err != nil {
+		panic(err)
 	}
+	return c
+}
 
-	//发送远程请求
-	status, r, param, err := s.invoker.Request(service, o.method, o.Params, input, o.failFast)
+//GetRPC 获取缓存操作对象
+func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
+	name := types.GetStringByIndex(names, 0, rpcNameNode)
+	obj, err := s.c.GetOrCreateByConf(rpcTypeNode, name, func(c conf.IConf) (interface{}, error) {
+		return &Request{}, nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	return &RPCResponse{Status: status, Result: r, Params: param}, nil
-}
-
-//------------------------RPC响应---------------------------------------
-
-//RPCResponse 请求结果
-type RPCResponse struct {
-	Status int
-	Params map[string]string
-	Result string
-}
-
-//Success 请求是否成功
-func (r *RPCResponse) Success() bool {
-	return r.Status == 200
-}
-
-//GetResult 获取请求结果
-func (r *RPCResponse) GetResult() (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	err := json.Unmarshal([]byte(r.Result), &out)
-	return out, err
-}
-
-//GetParam 根据KEY获取参数
-func (r *RPCResponse) GetParam(key string) interface{} {
-	return r.Params[key]
-}
-
-//-----------------RPC可选参数---------------------------------
-type option struct {
-	params   map[string]string
-	failFast bool
-	method   string
-}
-
-func newOption() *option {
-	return &option{
-		params:   map[string]string{},
-		failFast: true,
-		method:   "GET",
-	}
-}
-
-//Option 配置选项
-type Option func(*option)
-
-//WithRPCParams RPC请求参数
-func WithRPCParams(p map[string]string) Option {
-	return func(o *option) {
-		o.params = p
-	}
-}
-
-//WithRPCFailFast 快速失败
-func WithRPCFailFast(b bool) Option {
-	return func(o *option) {
-		o.failFast = b
-	}
-}
-
-//WithMethod 设置请求方法
-func WithMethod(m string) Option {
-	return func(o *option) {
-		o.method = strings.ToUpper(m)
-	}
+	return obj.(IRequest), nil
 }

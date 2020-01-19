@@ -15,15 +15,6 @@ const (
 	cacheNameNode = "cache"
 )
 
-//ICache 缓存接口
-type ICache = cache.ICache
-
-//IComponentCache Component Cache
-type IComponentCache interface {
-	GetRegularCache(names ...string) (c ICache)
-	GetCache(names ...string) (c ICache, err error)
-}
-
 //StandardCache cache
 type StandardCache struct {
 	c components.IComponents
@@ -46,7 +37,7 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(c conf.IConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreateByConf(cacheTypeNode, name, func(c conf.IConf) (interface{}, error) {
 		return cache.NewCache(c.GetString("proto"), string(c.GetRaw()))
 	})
 	if err != nil {
