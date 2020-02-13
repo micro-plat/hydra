@@ -237,8 +237,8 @@ func (c *ServerConf) GetClusterNodes(serverType ...string) CNodes {
 		return nil
 	}
 
-	for _, node := range children {
-		cnodes = append(cnodes, NewCNode(path, node, c.clusterID))
+	for i, node := range children {
+		cnodes = append(cnodes, NewCNode(path, node, c.clusterID, i))
 	}
 	return cnodes
 }
