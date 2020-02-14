@@ -33,6 +33,5 @@ func NewUUID(container interface{}) IUUID {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("len:", globals.Count())
 	return sf.(*Snowflake)
 }
