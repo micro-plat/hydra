@@ -1,1 +1,0 @@
-[{"type":"file","level":"All","path":"/home/yanglei/work/src/github.com/micro-plat/hydra/logs/%date.log","layout":"[%datetime.%ms][%l][%session] %content%n"},{"type":"stdout","level":"All","layout":"[%datetime.%ms][%l][%session]%content"}]
