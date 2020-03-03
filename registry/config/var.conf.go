@@ -1,5 +1,13 @@
 package config
 
+import (
+	"fmt"
+	"strings"
+	"sync"
+
+	"github.com/micro-plat/hydra/registry"
+)
+
 //VarConf 变量信息
 type VarConf struct {
 	*JSONConf

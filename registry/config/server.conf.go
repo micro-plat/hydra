@@ -2,13 +2,8 @@ package config
 
 import (
 	"errors"
-	"fmt"
-	"strings"
-	"sync"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/types"
-	"github.com/micro-plat/lib4go/utility"
 )
 
 //ErrNoSetting 未配置

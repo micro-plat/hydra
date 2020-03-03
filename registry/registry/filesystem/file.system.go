@@ -1,4 +1,4 @@
-package fileSystem
+package filesystem
 
 import (
 	"errors"
@@ -85,7 +85,7 @@ func (l *fileSystem) formatPath(path string) string {
 	}
 	return path
 }
-func (l *fileSystem) Exist(path string) (bool, error) {
+func (l *fileSystem) Exists(path string) (bool, error) {
 	_, err := os.Stat(l.formatPath(path))
 	return err == nil || os.IsExist(err), nil
 }
@@ -171,7 +171,6 @@ func (l *fileSystem) WatchChildren(path string) (data chan registry.ChildrenWatc
 	return nil, nil
 }
 func (l *fileSystem) Delete(path string) error {
-
 	if b, _ := l.Exists(path); !b {
 		return nil
 	}
