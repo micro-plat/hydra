@@ -49,5 +49,5 @@ func (f *valueFactory) Create(rgst registry.IRegistry, path []string, logger log
 }
 
 func init() {
-	registry.RegisterValueWatcher(registry.WatchValue, &valueFactory{})
+	registry.RegisterWatcher(&valueFactory{})
 }

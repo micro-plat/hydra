@@ -49,5 +49,5 @@ func (f *childFactory) Create(rgst registry.IRegistry, path []string, logger log
 }
 
 func init() {
-	registry.RegisterChildWatcher(registry.WatchChild, &childFactory{})
+	registry.RegisterWatcher(&childFactory{})
 }
