@@ -7,7 +7,7 @@ import (
 
 //MultiValueWatcher 配置监控服务
 type MultiValueWatcher struct {
-	watchers   []*SingleWatcher
+	watchers   []*SingleValueWatcher
 	notifyChan chan *registry.ValueChangeArgs
 }
 
@@ -16,9 +16,9 @@ func NewMultiValueWatcher(rgst registry.IRegistry, path []string, logger logger.
 	w = &MultiValueWatcher{
 		notifyChan: make(chan *registry.ValueChangeArgs, 10),
 	}
-	w.watchers = make([]*SingleWatcher, 0, len(path))
+	w.watchers = make([]*SingleValueWatcher, 0, len(path))
 	for _, path := range path {
-		watcher := NewSingleWatcher(rgst, path, logger)
+		watcher := NewSingleValueWatcher(rgst, path, logger)
 		w.watchers = append(w.watchers, watcher)
 	}
 	return
@@ -42,12 +42,12 @@ func (c *MultiValueWatcher) Close() {
 	}
 }
 
-type factory struct{}
+type valueFactory struct{}
 
-func (f *factory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IWatcher, error) {
+func (f *valueFactory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IWatcher, error) {
 	return NewMultiValueWatcher(rgst, path, logger)
 }
 
 func init() {
-	registry.RegisterWatcher(registry.WatchValue, &factory{})
+	registry.RegisterValueWatcher(registry.WatchValue, &valueFactory{})
 }

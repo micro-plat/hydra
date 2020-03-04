@@ -15,7 +15,7 @@ type ChildWatcher struct {
 	timeSpan   time.Duration
 	deep       int
 	changedCnt int32
-	notifyChan chan *registry.ChildrenChangeArgs
+	notifyChan chan *registry.ChildChangeArgs
 	logger     logger.ILogger
 	registry   IRegistry
 	watchers   map[string]*ChildWatcher
@@ -25,7 +25,7 @@ type ChildWatcher struct {
 }
 
 //NewChildWatcher 初始化子节点监控
-func NewChildWatcher(path string, registry IRegistry, logger logger.ILogger) *ChildWatcher {
+func NewChildWatcher(registry IRegistry, path string, logger logger.ILogger) *ChildWatcher {
 	return NewChildWatcherByDeep(path, 2, registry, logger)
 }
 
@@ -38,13 +38,13 @@ func NewChildWatcherByDeep(path string, deep int, registry IRegistry, logger log
 		registry:   registry,
 		logger:     logger,
 		watchers:   make(map[string]*ChildWatcher),
-		notifyChan: make(chan *registry.ChildrenChangeArgs, 1),
+		notifyChan: make(chan *registry.ChildChangeArgs, 1),
 		closeChan:  make(chan struct{}),
 	}
 }
 
 //Start 监控配置项变化，当发生错误时持续监控节点变化，只有明确节点不存在时才会通知关闭
-func (w *ChildWatcher) Start() (c chan *registry.ChildrenChangeArgs, err error) {
+func (w *ChildWatcher) Start() (c chan *registry.ChildChangeArgs, err error) {
 	errChan := make(chan error, 1)
 	go func() {
 		err := w.watch(w.path)
@@ -143,11 +143,11 @@ func (w *ChildWatcher) changed(children []string, version int32) {
 		op = CHANGE
 	}
 	atomic.AddInt32(&w.changedCnt, 1)
-	updater := NewCArgsByChange(op, w.deep, w.path, children, version)
+	updater := NewCArgsByChange(op, w.deep, w.path, children, version, w.registry)
 	w.notify(updater)
 	return
 }
-func (w *ChildWatcher) notify(a *registry.ChildrenChangeArgs) {
+func (w *ChildWatcher) notify(a *registry.ChildChangeArgs) {
 	if a.Deep == 1 && a.OP != DEL {
 		w.notifyChan <- a
 		return
