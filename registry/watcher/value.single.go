@@ -14,7 +14,7 @@ type SingleValueWatcher struct {
 	path       string
 	timeSpan   time.Duration
 	changed    int32
-	notifyChan chan *registry.NodeChangeArgs
+	notifyChan chan *registry.ValueChangeArgs
 	logger     logger.ILogging
 	registry   registry.IRegistry
 	mu         sync.Mutex
@@ -29,13 +29,13 @@ func NewSingleValueWatcher(r registry.IRegistry, path string, logger logger.ILog
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		notifyChan: make(chan *registry.NodeChangeArgs, 1),
+		notifyChan: make(chan *registry.ValueChangeArgs, 1),
 		closeChan:  make(chan struct{}),
 	}
 }
 
 //Start 监控配置项变化，当发生错误时持续监控节点变化，只有明确节点不存在时才会通知关闭
-func (w *SingleValueWatcher) Start() (c chan *registry.NodeChangeArgs, err error) {
+func (w *SingleValueWatcher) Start() (c chan *registry.ValueChangeArgs, err error) {
 	errChan := make(chan error, 1)
 	go func() {
 		err := w.watch()
@@ -110,7 +110,7 @@ func (w *SingleValueWatcher) notifyDeleted() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if v := atomic.LoadInt32(&w.changed); v > 0 && atomic.CompareAndSwapInt32(&w.changed, v, 0) {
-		updater := &registry.NodeChangeArgs{OP: registry.DEL, Path: w.path, Registry: w.registry}
+		updater := &registry.ValueChangeArgs{OP: registry.DEL, Path: w.path, Registry: w.registry}
 		w.notifyChan <- updater
 
 	}
@@ -123,7 +123,7 @@ func (w *SingleValueWatcher) notifyChanged(content []byte, version int32) {
 		op = registry.CHANGE
 	}
 	atomic.AddInt32(&w.changed, 1)
-	updater := &registry.NodeChangeArgs{OP: op, Path: w.path, Version: version, Content: content, Registry: w.registry}
+	updater := &registry.ValueChangeArgs{OP: op, Path: w.path, Version: version, Content: content, Registry: w.registry}
 	w.notifyChan <- updater
 	return
 }

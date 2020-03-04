@@ -44,7 +44,7 @@ func (c *MultiChildWatcher) Close() {
 
 type childFactory struct{}
 
-func (f *childFactory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IWatcher, error) {
+func (f *childFactory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IChildWatcher, error) {
 	return NewMultiChildWatcher(rgst, path, logger)
 }
 

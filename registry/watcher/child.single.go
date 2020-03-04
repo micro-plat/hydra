@@ -16,8 +16,8 @@ type ChildWatcher struct {
 	deep       int
 	changedCnt int32
 	notifyChan chan *registry.ChildChangeArgs
-	logger     logger.ILogger
-	registry   IRegistry
+	logger     logger.ILogging
+	registry   registry.IRegistry
 	watchers   map[string]*ChildWatcher
 	mu         sync.Mutex
 	done       bool
@@ -25,17 +25,17 @@ type ChildWatcher struct {
 }
 
 //NewChildWatcher 初始化子节点监控
-func NewChildWatcher(registry IRegistry, path string, logger logger.ILogger) *ChildWatcher {
+func NewChildWatcher(registry registry.IRegistry, path string, logger logger.ILogging) *ChildWatcher {
 	return NewChildWatcherByDeep(path, 2, registry, logger)
 }
 
 //NewChildWatcherByDeep 初始化监控
-func NewChildWatcherByDeep(path string, deep int, registry IRegistry, logger logger.ILogger) *ChildWatcher {
+func NewChildWatcherByDeep(path string, deep int, r registry.IRegistry, logger logger.ILogging) *ChildWatcher {
 	return &ChildWatcher{
 		path:       path,
 		deep:       deep,
 		timeSpan:   time.Second,
-		registry:   registry,
+		registry:   r,
 		logger:     logger,
 		watchers:   make(map[string]*ChildWatcher),
 		notifyChan: make(chan *registry.ChildChangeArgs, 1),
@@ -61,28 +61,28 @@ func (w *ChildWatcher) Start() (c chan *registry.ChildChangeArgs, err error) {
 }
 func (w *ChildWatcher) watch(path string) (err error) {
 LOOP:
-	exists, _ := w.Exists(path)
+	exists, _ := w.registry.Exists(path)
 	for !exists {
 		select {
 		case <-time.After(w.timeSpan):
 			if w.done {
 				return nil
 			}
-			exists, err = w.Exists(path)
+			exists, err = w.registry.Exists(path)
 			if !exists && err == nil {
 				w.deleted()
 			}
 		}
 	}
 	//获取节点值
-	data, version, err := w.GetChildren(path)
+	data, version, err := w.registry.GetChildren(path)
 	if err != nil {
 		w.logger.Debugf("获取节点值失败：%s(err:%v)", path, err)
 		time.Sleep(time.Second)
 		goto LOOP
 	}
 	w.changed(data, version)
-	dataChan, err := w.WatchChildren(path)
+	dataChan, err := w.registry.WatchChildren(path)
 	if err != nil {
 		goto LOOP
 	}
@@ -99,15 +99,15 @@ LOOP:
 				goto LOOP
 			}
 
-			if b, _ := w.Exists(path); !b {
+			if b, _ := w.registry.Exists(path); !b {
 				w.deleted()
 				goto LOOP
 			}
 
 			data, version := content.GetValue()
-			w.Changed(data, version)
+			w.changed(data, version)
 			//继续监控值变化
-			dataChan, err = w.WatchChildren(path)
+			dataChan, err = w.registry.WatchChildren(path)
 			if err != nil {
 				goto LOOP
 			}
@@ -129,7 +129,7 @@ func (w *ChildWatcher) deleted() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if v := atomic.LoadInt32(&w.changedCnt); v > 0 && atomic.CompareAndSwapInt32(&w.changedCnt, v, 0) {
-		updater := NewCArgsByDelete(w.deep, w.path)
+		updater := registry.NewCArgsByChange(registry.DEL, w.deep, w.path, nil, 0, w.registry)
 		w.notify(updater)
 	}
 }
@@ -138,25 +138,25 @@ func (w *ChildWatcher) deleted() {
 func (w *ChildWatcher) changed(children []string, version int32) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	op := ADD
+	op := registry.ADD
 	if atomic.LoadInt32(&w.changedCnt) > 0 {
-		op = CHANGE
+		op = registry.CHANGE
 	}
 	atomic.AddInt32(&w.changedCnt, 1)
-	updater := NewCArgsByChange(op, w.deep, w.path, children, version, w.registry)
+	updater := registry.NewCArgsByChange(op, w.deep, w.path, children, version, w.registry)
 	w.notify(updater)
 	return
 }
 func (w *ChildWatcher) notify(a *registry.ChildChangeArgs) {
-	if a.Deep == 1 && a.OP != DEL {
+	if a.Deep == 1 && a.OP != registry.DEL {
 		w.notifyChan <- a
 		return
 	}
 	for _, path := range a.Children {
 		switch a.OP {
-		case ADD, CHANGE:
+		case registry.ADD, registry.CHANGE:
 			w.changeChilrenWatcher(path)
-		case DEL:
+		case registry.DEL:
 			w.notifyChan <- a
 			w.delChilrenWatcher(path)
 		}
@@ -176,7 +176,7 @@ func (w *ChildWatcher) changeChilrenWatcher(path string) {
 	if _, ok := w.watchers[path]; ok {
 		return
 	}
-	watcher := NewChildWatcher(Join(w.path, path), w.deep-1, w.registry, w.logger)
+	watcher := NewChildWatcherByDeep(registry.Join(w.path, path), w.deep-1, w.registry, w.logger)
 	ch, err := watcher.Start()
 	if err != nil {
 		w.logger.Error(err)

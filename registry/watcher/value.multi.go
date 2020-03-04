@@ -44,7 +44,7 @@ func (c *MultiValueWatcher) Close() {
 
 type valueFactory struct{}
 
-func (f *valueFactory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IWatcher, error) {
+func (f *valueFactory) Create(rgst registry.IRegistry, path []string, logger logger.ILogging) (registry.IValueWatcher, error) {
 	return NewMultiValueWatcher(rgst, path, logger)
 }
 
