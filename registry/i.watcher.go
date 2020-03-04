@@ -91,6 +91,5 @@ func NewValueWatcherByServers(registry IRegistry, platName string, systemName st
 	for _, s := range serverTypes {
 		path = append(path, Join(platName, systemName, s, clusterName, "conf"))
 	}
-	path = append(path, Join(platName, "var"))
 	return NewValueWatcherByRegistry(registry, path, l)
 }

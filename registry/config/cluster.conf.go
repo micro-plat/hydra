@@ -20,15 +20,13 @@ type ClusterConf struct {
 	clusterID    string
 	mainConfpath string
 	*metadata
-	varVersion   int32
 	subNodeConfs map[string]JSONConf
 	registry     registry.IRegistry
 	subLock      sync.RWMutex
 }
 
-//NewClusterConf 构建服务器配置缓存
-func NewClusterConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int32, rgst registry.IRegistry) (s *ClusterConf, err error) {
-
+//NewClusterConf 指定集群节点的配置路径，注册中心对象构建集群配置缓存
+func NewClusterConf(mainConfpath string, rgst registry.IRegistry) (s *ClusterConf, err error) {
 	sections := strings.Split(strings.Trim(mainConfpath, rgst.GetSeparator()), rgst.GetSeparator())
 	if len(sections) != 5 {
 		err = fmt.Errorf("conf配置文件格式错误，格式:/platName/sysName/serverType/clusterName/conf 当前值：%s", mainConfpath)
@@ -44,6 +42,10 @@ func NewClusterConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int
 		clusterID:    utility.GetGUID()[0:8],
 		registry:     rgst,
 		subNodeConfs: make(map[string]JSONConf),
+	}
+	mainConfRaw, mainConfVersion, err := rgst.GetValue(mainConfpath)
+	if err != nil {
+		return nil, err
 	}
 	rdata, err := decrypt(mainConfRaw)
 	if err != nil {

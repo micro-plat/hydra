@@ -61,9 +61,9 @@ type ServerConf struct {
 }
 
 //NewServerConf 构建服务器配置缓存
-func NewServerConf(mainConfpath string, mainConfRaw []byte, mainConfVersion int32, rgst registry.IRegistry) (s *ServerConf, err error) {
+func NewServerConf(mainConfpath string, rgst registry.IRegistry) (s *ServerConf, err error) {
 	s = &ServerConf{}
-	s.ClusterConf, err = NewClusterConf(mainConfpath, mainConfRaw, mainConfVersion, rgst)
+	s.ClusterConf, err = NewClusterConf(mainConfpath, rgst)
 	if err != nil {
 		return nil, err
 	}
