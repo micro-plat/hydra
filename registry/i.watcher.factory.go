@@ -15,14 +15,14 @@ type IValueWatcherFactory interface {
 var childWatcherFactory IChildWatcherFactory
 var valueWatchFactory IValueWatcherFactory
 
-//RegisterValueWatcher 注册配置文件适配器
+//RegisterWatcher 注册配置文件适配器
 func RegisterWatcher(f interface{}) {
-	switch (v:=f.(type)){
+	switch v := f.(type) {
 	case IValueWatcherFactory:
-		valueWatchFactory=v
+		valueWatchFactory = v
 	case IChildWatcherFactory:
-		childWatcherFactory=v
+		childWatcherFactory = v
 	default:
 		panic("注册的watcher类型不支持")
-}
+	}
 }
