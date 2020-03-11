@@ -13,7 +13,6 @@ import (
 
 //IRegistry 注册中心接口
 type IRegistry interface {
-	CanWirteDataInDir() bool
 	GetSeparator() string
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)
 	WatchValue(path string) (data chan registry.ValueWatcher, err error)
