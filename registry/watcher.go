@@ -38,7 +38,7 @@ type ChildChangeArgs struct {
 
 //NewCArgsByChange 构建子节点变化参数
 func NewCArgsByChange(op int, deep int, parent string, chilren []string, v int32, r IRegistry) *ChildChangeArgs {
-	names := strings.Split(strings.Trim(parent, r.GetSeparator()), r.GetSeparator())
+	names := strings.Split(strings.Trim(parent, "/"), "/")
 	return &ChildChangeArgs{OP: op,
 		Registry: r,
 		Parent:   parent,
@@ -60,12 +60,12 @@ type ValueChangeArgs struct {
 
 //IsConf 是否是conf根节点或conf的子节点
 func (n *ValueChangeArgs) IsConf() bool {
-	return strings.HasSuffix(n.Path, Join(n.Registry.GetSeparator(), "conf")) ||
-		strings.Contains(n.Path, Join(n.Registry.GetSeparator(), "conf", n.Registry.GetSeparator()))
+	return strings.HasSuffix(n.Path, Join("/", "conf")) ||
+		strings.Contains(n.Path, Join("/", "conf", "/"))
 }
 
 //IsVarRoot 是否是var跟节点或var的子节点
 func (n *ValueChangeArgs) IsVarRoot() bool {
-	return strings.HasSuffix(n.Path, Join(n.Registry.GetSeparator(), "var")) ||
-		strings.Contains(n.Path, Join(n.Registry.GetSeparator(), "var", n.Registry.GetSeparator()))
+	return strings.HasSuffix(n.Path, Join("/", "var")) ||
+		strings.Contains(n.Path, Join("/", "var", "/"))
 }

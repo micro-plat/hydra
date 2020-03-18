@@ -33,10 +33,10 @@ type fileSystem struct {
 	tempNodeLock sync.Mutex
 	seqNode      int32
 	closeCh      chan struct{}
-	prefix       string
+	path         string
 }
 
-func newFileSystem(prefix string) (*fileSystem, error) {
+func newFileSystem(path string) (*fileSystem, error) {
 	if err := checkPrivileges(); err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func newFileSystem(prefix string) (*fileSystem, error) {
 		return nil, err
 	}
 	return &fileSystem{
-		prefix:      strings.TrimRight(prefix, "/"),
+		path:        path,
 		watcher:     w,
 		watcherMaps: make(map[string]*eventWatcher),
 		tempNode:    make([]string, 0, 2),
@@ -80,33 +80,48 @@ func (l *fileSystem) Start() {
 	}()
 }
 func (l *fileSystem) formatPath(path string) string {
-	if !strings.HasPrefix(path, l.prefix) {
-		return l.prefix + r.Join("/", path)
+	npath := strings.Replace(path, "/", string(os.PathSeparator), -1)
+	if !strings.HasPrefix(path, l.path) {
+		return filepath.Join(l.path, npath)
 	}
-	return path
+	return npath
+}
+func (l *fileSystem) getStaticPath(path string) string {
+	p := l.formatPath(path)
+	if !strings.HasSuffix(path, ".init") {
+		return filepath.Join(p, ".init")
+	}
+	return p
+}
+func (l *fileSystem) getSeqPath(path string) string {
+	p := l.formatPath(path)
+	if strings.HasSuffix(path, ".init") {
+		return p
+	}
+	nid := atomic.AddInt32(&l.seqNode, 1)
+	return l.getStaticPath(fmt.Sprintf("%s-%d", path, nid))
 }
 func (l *fileSystem) Exists(path string) (bool, error) {
-	_, err := os.Stat(l.formatPath(path))
+	_, err := os.Stat(l.getStaticPath(path))
 	return err == nil || os.IsExist(err), nil
 }
 func (l *fileSystem) GetValue(path string) (data []byte, version int32, err error) {
-	rpath := l.formatPath(path)
+	rpath := l.getStaticPath(path)
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
-		return nil, 0, errors.New(rpath + "不存在")
+		return nil, 0, nil
 	}
-	if !fs.IsDir() {
-		data, err = ioutil.ReadFile(rpath)
-		version = int32(fs.ModTime().Unix())
-		return
-	}
-	return l.GetValue(r.Join(path, ".init"))
+	data, err = ioutil.ReadFile(rpath)
+	version = int32(fs.ModTime().Unix())
+	return
+
 }
 func (l *fileSystem) Update(path string, data string, version int32) (err error) {
-	if b, _ := l.Exists(path); !b {
-		return errors.New(path + "不存在")
+	rpath := l.getStaticPath(path)
+	if b, _ := l.Exists(rpath); !b {
+		return errors.New(rpath + "不存在")
 	}
-	return ioutil.WriteFile(l.formatPath(path), []byte(data), 0666)
+	return ioutil.WriteFile(rpath, []byte(data), 0666)
 
 }
 func (l *fileSystem) GetChildren(path string) (paths []string, version int32, err error) {
@@ -131,19 +146,14 @@ func (l *fileSystem) GetChildren(path string) (paths []string, version int32, er
 }
 
 func (l *fileSystem) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	rpath := l.formatPath(path)
-	absPath := rpath
-	fs, _ := os.Stat(rpath)
-	if fs != nil && fs.IsDir() {
-		absPath = r.Join(rpath, ".init")
-	}
+	rpath := l.getStaticPath(path)
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
-	v, ok := l.watcherMaps[absPath]
+	v, ok := l.watcherMaps[rpath]
 	if ok {
 		return v.watcher, nil
 	}
-	l.watcherMaps[absPath] = &eventWatcher{
+	l.watcherMaps[rpath] = &eventWatcher{
 		event:   make(chan fsnotify.Event),
 		watcher: make(chan registry.ValueWatcher),
 	}
@@ -164,21 +174,30 @@ func (l *fileSystem) WatchValue(path string) (data chan registry.ValueWatcher, e
 				v.watcher <- &valueEntity{path: rpath, Err: fmt.Errorf("文件发生变化:%v", event.Op)}
 			}
 		}
-	}(rpath, l.watcherMaps[absPath])
-	return l.watcherMaps[absPath].watcher, nil
+	}(rpath, l.watcherMaps[rpath])
+	return l.watcherMaps[rpath].watcher, nil
 }
 func (l *fileSystem) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
+	// rpath := l.formatPath(path)
+	// fs, err := os.Stat(rpath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// time := fs.ModTime()
+
 	return nil, nil
 }
 func (l *fileSystem) Delete(path string) error {
-	if b, _ := l.Exists(path); !b {
+	rpath := l.formatPath(path)
+	if b, _ := l.Exists(rpath); !b {
 		return nil
 	}
-	return os.Remove(l.formatPath(path))
+	return os.Remove(rpath)
 }
 
 func (l *fileSystem) CreatePersistentNode(path string, data string) (err error) {
-	rpath := l.formatPath(path)
+	rpath := l.getStaticPath(path)
 	_, err = os.Stat(rpath)
 	if err == nil || os.IsExist(err) {
 		os.Remove(rpath)
@@ -201,26 +220,20 @@ func (l *fileSystem) CreatePersistentNode(path string, data string) (err error) 
 	return nil
 }
 func (l *fileSystem) CreateTempNode(path string, data string) (err error) {
+	rpath := l.getStaticPath(path)
 	if err = l.CreatePersistentNode(path, data); err != nil {
 		return err
 	}
 	l.tempNodeLock.Lock()
 	defer l.tempNodeLock.Unlock()
-	l.tempNode = append(l.tempNode, l.formatPath(path))
+	l.tempNode = append(l.tempNode, rpath)
 	return nil
 }
 func (l *fileSystem) CreateSeqNode(path string, data string) (rpath string, err error) {
-	nid := atomic.AddInt32(&l.seqNode, 1)
-	rpath = fmt.Sprintf("%s_%d", l.formatPath(path), nid)
+	rpath = l.getSeqPath(path)
 	return rpath, l.CreateTempNode(rpath, data)
 }
-func (l *fileSystem) GetSeparator() string {
-	return string(filepath.Separator)
-}
 
-func (l *fileSystem) CanWirteDataInDir() bool {
-	return false
-}
 func (l *fileSystem) Close() error {
 	l.tempNodeLock.Lock()
 	defer l.tempNodeLock.Unlock()
