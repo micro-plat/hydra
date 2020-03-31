@@ -54,6 +54,7 @@ func (c *VarConf) load() (err error) {
 	}
 
 	for _, p := range varfirstNodes {
+		
 		//获取第二级目录
 		firstNodePath := registry.Join(c.varConfPath, p)
 		varSecondChildren, _, err := c.registry.GetChildren(firstNodePath)

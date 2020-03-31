@@ -13,6 +13,7 @@ type IMainConf interface {
 	GetClusterNodes() CNodes
 	GetMainConf() *JSONConf
 	GetSubConf(name string) (*JSONConf, error)
+	GetVersion()int32
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
 }
@@ -83,6 +84,11 @@ func (c *MainConf) load() (err error) {
 //IsStarted 当前服务是否已启动
 func (c *MainConf) IsStarted() bool {
 	return c.mainConf.GetString("status", "start") == "start"
+}
+
+//GetVersion 获取版本号
+func (c *MainConf) GetVersion()int32{
+	return c.version
 }
 
 //GetClusterNodes 获取集群中的所有节点
