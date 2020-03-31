@@ -2,11 +2,7 @@ package apic
 
 import "strings"
 
-type Hosts []string
-
-//APIServerConf api server配置信息
-type APIServer struct {
-	Address   string `json:"address,omitempty" valid:"dialstring"`
+type option struct {
 	Status    string `json:"status,omitempty" valid:"in(start|stop)"`
 	RTimeout  int    `json:"readTimeout,omitempty"`
 	WTimeout  int    `json:"writeTimeout,omitempty"`
@@ -16,55 +12,76 @@ type APIServer struct {
 	Trace     bool   `json:"trace,omitempty"`
 }
 
-//NewAPIServer 构建api server配置信息
-func NewAPIServer(address string) *APIServerConf {
-	return &APIServerConf{
-		Address: address,
+//Option 配置选项
+type Option func(*option)
+
+//WithTrace 构建api server配置信息
+func WithTrace() Option {
+	return func(a *option) {
+		a.Trace = true
 	}
 }
 
-//WithTrace 构建api server配置信息
-func (a *APIServerConf) WithTrace() *APIServerConf {
-	a.Trace = true
-	return a
-}
-
 //WithTimeout 构建api server配置信息
-func (a *APIServerConf) WithTimeout(rtimeout int, wtimout int) *APIServerConf {
-	a.RTimeout = rtimeout
-	a.WTimeout = wtimout
-	return a
+func WithTimeout(rtimeout int, wtimout int) Option {
+	return func(a *option) {
+		a.RTimeout = rtimeout
+		a.WTimeout = wtimout
+	}
 }
 
 //WithHeaderReadTimeout 构建api server配置信息
-func (a *APIServerConf) WithHeaderReadTimeout(htimeout int) *APIServerConf {
-	a.RHTimeout = htimeout
-	return a
+func WithHeaderReadTimeout(htimeout int) Option {
+	return func(a *option) {
+		a.RHTimeout = htimeout
+	}
 }
 
 //WithHost 设置host
-func (a *APIServerConf) WithHost(host ...string) *APIServerConf {
-	a.Host = strings.Join(host, ";")
-	return a
+func WithHost(host ...string) Option {
+	return func(a *option) {
+		a.Host = strings.Join(host, ";")
+	}
 }
 
 //WithDisable 禁用任务
-func (a *APIServerConf) WithDisable() *APIServerConf {
-	a.Status = "stop"
-	return a
+func WithDisable() Option {
+	return func(a *option) {
+		a.Status = "stop"
+	}
 }
 
 //WithEnable 启用任务
-func (a *APIServerConf) WithEnable() *APIServerConf {
-	a.Status = "start"
-	return a
+func WithEnable() Option {
+	return func(a *option) {
+		a.Status = "start"
+	}
 }
 
 //WithDNS 设置请求域名
-func (a *APIServerConf) WithDNS(host string, ip ...string) *APIServerConf {
-	a.Host = host
-	if len(ip) > 0 {
-		a.Domain = ip[0]
+func WithDNS(host string, ip ...string) Option {
+	return func(a *option) {
+		a.Host = host
+		if len(ip) > 0 {
+			a.Domain = ip[0]
+		}
+	}
+}
+
+//APIServer api server配置信息
+type APIServer struct {
+	Address string `json:"address,omitempty" valid:"dialstring"`
+	*option
+}
+
+//NewAPIServer 构建api server配置信息
+func NewAPIServer(address string, opts ...Option) *APIServer {
+	a := &APIServer{
+		Address: address,
+		option:  &option{},
+	}
+	for _, opt := range opts {
+		opt(a.option)
 	}
 	return a
 }
