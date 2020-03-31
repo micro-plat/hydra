@@ -1,9 +1,8 @@
 package config
 
 import (
-	"fmt"
-
 	"encoding/hex"
+	"fmt"
 
 	"github.com/micro-plat/lib4go/security/des"
 )
