@@ -2,8 +2,6 @@ package config
 
 import (
 	"strings"
-
-	"github.com/micro-plat/hydra/registry"
 )
 
 //CNodes 所有集群节点
@@ -31,22 +29,15 @@ type CNode struct {
 }
 
 //NewCNode 构建集群节点信息
-func NewCNode(root string, name string, mid string, index int) *CNode {
+func NewCNode(name string, mid string, index int) *CNode {
 	items := strings.Split(name, "_")
 	return &CNode{
 		name:    name,
-		root:    root,
 		mid:     mid,
 		index:   index,
-		path:    registry.Join(root, name),
 		host:    items[0],
 		clustID: items[1],
 	}
-}
-
-//GetFullPath 获取完整路径信息
-func (c *CNode) GetFullPath() string {
-	return c.path
 }
 
 //GetHost 获取服务器信息

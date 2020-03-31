@@ -2,19 +2,27 @@ package config
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/micro-plat/hydra/registry"
 )
 
+//IVarConf 变量配置
+type IVarConf interface {
+	GetVersion() int32
+	GetConf(tp string, name string) (*JSONConf, error)
+	GetClone() IVarConf
+	Has(tp string, name string) bool
+	Iter(f func(k string, conf *JSONConf) bool)
+}
+
+var _ IVarConf = &VarConf{}
+
 //VarConf 变量信息
 type VarConf struct {
-	*JSONConf
 	varConfPath  string
 	varVersion   int32
 	varNodeConfs map[string]JSONConf
 	registry     registry.IRegistry
-	varLock      sync.RWMutex
 }
 
 //NewVarConf 构建服务器配置缓存
@@ -24,14 +32,14 @@ func NewVarConf(varConfPath string, rgst registry.IRegistry) (s *VarConf, err er
 		registry:     rgst,
 		varNodeConfs: make(map[string]JSONConf),
 	}
-	if err = s.loadVarNodeConf(); err != nil {
+	if err = s.load(); err != nil {
 		return
 	}
 	return s, nil
 }
 
-//初始化子节点配置
-func (c *VarConf) loadVarNodeConf() (err error) {
+//load 加载所有配置项
+func (c *VarConf) load() (err error) {
 
 	//检查跟路径是否存在
 	if b, err := c.registry.Exists(c.varConfPath); err == nil && !b {
@@ -75,50 +83,43 @@ func (c *VarConf) loadVarNodeConf() (err error) {
 	return nil
 }
 
-//GetVarVersion 获取var路径版本号
-func (c *VarConf) GetVarVersion() int32 {
+//GetVersion 获取数据版本号
+func (c *VarConf) GetVersion() int32 {
 	return c.varVersion
 }
 
-//IterVarConf 迭代所有子配置
-func (c *VarConf) IterVarConf(f func(k string, conf *JSONConf) bool) {
-	for k, v := range c.varNodeConfs {
-		if !f(k, &v) {
-			break
-		}
-	}
-}
-
-//GetVarConf 指定配置文件名称，获取var配置信息
-func (c *VarConf) GetVarConf(tp string, name string) (*JSONConf, error) {
-	c.varLock.RLock()
-	defer c.varLock.RUnlock()
+//GetConf 指定配置文件名称，获取var配置信息
+func (c *VarConf) GetConf(tp string, name string) (*JSONConf, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
 	return nil, ErrNoSetting
 }
 
-//GetVarConfClone 获取var配置拷贝
-func (c *VarConf) GetVarConfClone() map[string]JSONConf {
-	c.varLock.RLock()
-	defer c.varLock.RUnlock()
-	data := make(map[string]JSONConf)
-	for k, v := range c.varNodeConfs {
-		data[k] = v
+//GetClone 获取配置拷贝
+func (c *VarConf) GetClone() IVarConf {
+	s := &VarConf{
+		varConfPath:  c.varConfPath,
+		registry:     c.registry,
+		varNodeConfs: make(map[string]JSONConf),
 	}
-	return data
+	for k, v := range c.varNodeConfs {
+		s.varNodeConfs[k] = v
+	}
+	return s
 }
 
-//SetVarConf 获取var配置参数
-func (c *VarConf) SetVarConf(data map[string]JSONConf) {
-	c.varLock.Lock()
-	defer c.varLock.Unlock()
-	c.varNodeConfs = data
-}
-
-//HasVarConf 是否存在子级配置
-func (c *VarConf) HasVarConf(tp string, name string) bool {
+//Has 是否存在配置项
+func (c *VarConf) Has(tp string, name string) bool {
 	_, ok := c.varNodeConfs[registry.Join(tp, name)]
 	return ok
+}
+
+//Iter 迭代所有子配置
+func (c *VarConf) Iter(f func(path string, conf *JSONConf) bool) {
+	for path, v := range c.varNodeConfs {
+		if !f(path, &v) {
+			break
+		}
+	}
 }
