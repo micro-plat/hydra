@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/registry"
@@ -11,9 +10,7 @@ import (
 //VarConf 变量信息
 type VarConf struct {
 	*JSONConf
-	mainConfpath string
 	varConfPath  string
-	*metadata
 	varVersion   int32
 	varNodeConfs map[string]JSONConf
 	registry     registry.IRegistry
@@ -21,17 +18,9 @@ type VarConf struct {
 }
 
 //NewVarConf 构建服务器配置缓存
-func NewVarConf(mainConfpath string, rgst registry.IRegistry) (s *VarConf, err error) {
-
-	sections := strings.Split(strings.Trim(mainConfpath, rgst.GetSeparator()), rgst.GetSeparator())
-	if len(sections) != 5 {
-		err = fmt.Errorf("conf配置文件格式错误，格式:/platName/sysName/serverType/clusterName/conf 当前值：%s", mainConfpath)
-		return
-	}
+func NewVarConf(varConfPath string, rgst registry.IRegistry) (s *VarConf, err error) {
 	s = &VarConf{
-		metadata:     &metadata{},
-		mainConfpath: mainConfpath,
-		varConfPath:  registry.Join("/", sections[0], "var"),
+		varConfPath:  varConfPath,
 		registry:     rgst,
 		varNodeConfs: make(map[string]JSONConf),
 	}
@@ -126,19 +115,6 @@ func (c *VarConf) SetVarConf(data map[string]JSONConf) {
 	c.varLock.Lock()
 	defer c.varLock.Unlock()
 	c.varNodeConfs = data
-}
-
-//GetVarObject 指定配置文件名称，获取var配置信息
-func (c *VarConf) GetVarObject(tp string, name string, v interface{}) (int32, error) {
-	conf, err := c.GetVarConf(tp, name)
-	if err != nil {
-		return 0, err
-	}
-	if err := conf.Unmarshal(&v); err != nil {
-		err = fmt.Errorf("获取/%s/%s配置失败:%v", tp, name, err)
-		return 0, err
-	}
-	return conf.version, nil
 }
 
 //HasVarConf 是否存在子级配置

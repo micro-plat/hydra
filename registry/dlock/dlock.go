@@ -62,7 +62,7 @@ func (d *DLock) TryLock() (err error) {
 //Lock 以独占方式获取分布式锁
 func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 	defer func() {
-		if err != nil {
+		if err != nil && d.path != "" {
 			d.registry.Delete(d.path)
 		}
 	}()
@@ -94,7 +94,7 @@ func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 		case <-time.After(deadline):
 			return fmt.Errorf("超时未获取到分布式锁")
 		case <-d.closeChan:
-			return fmt.Errorf("未获取到分布式锁")
+			return fmt.Errorf("服务关闭，未获取到分布式锁")
 		case cldWatcher := <-ch:
 			if cldWatcher.GetError() == nil {
 				cldrs, _, _ := d.registry.GetChildren(d.name)
@@ -107,7 +107,7 @@ func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 			ch, err = d.registry.WatchChildren(d.name)
 			if err != nil {
 				if d.done {
-					return fmt.Errorf("未获取到分布式锁")
+					return fmt.Errorf("服务关闭，未获取到分布式锁")
 				}
 				time.Sleep(time.Second)
 				goto LOOP
@@ -132,6 +132,7 @@ func isMaster(path string, root string, cldrs []string) bool {
 		name := strings.Replace(v, root, "", -1)
 		ncldrs = append(ncldrs, name)
 	}
+
 	sort.Strings(ncldrs)
 	return strings.HasSuffix(path, ncldrs[0])
 }
