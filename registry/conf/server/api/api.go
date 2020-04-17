@@ -1,5 +1,7 @@
 package api
 
+import "github.com/micro-plat/hydra/conf"
+
 //Server api server配置信息
 type Server struct {
 	Address string `json:"address,omitempty" valid:"dialstring"`
@@ -16,4 +18,10 @@ func New(address string, opts ...Option) *Server {
 		opt(a.option)
 	}
 	return a
+}
+
+//GetHosts 获取hosts
+func GetHosts(set ISetHosts, cnf conf.IMainConf) (hosts []string, err error) {
+	hosts = cnf.GetStrings("host")
+	return hosts, nil
 }

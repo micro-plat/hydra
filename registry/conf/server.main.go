@@ -1,4 +1,4 @@
-package config
+package conf
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type IMainConf interface {
 	GetClusterNodes() CNodes
 	GetMainConf() *JSONConf
 	GetSubConf(name string) (*JSONConf, error)
-	GetVersion()int32
+	GetVersion() int32
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
 }
@@ -87,7 +87,7 @@ func (c *MainConf) IsStarted() bool {
 }
 
 //GetVersion 获取版本号
-func (c *MainConf) GetVersion()int32{
+func (c *MainConf) GetVersion() int32 {
 	return c.version
 }
 

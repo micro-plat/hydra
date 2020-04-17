@@ -1,8 +1,11 @@
 package jwt
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -89,4 +92,17 @@ func (a *JWTAuth) IsExcluded(service string) bool {
 
 	}
 	return false
+}
+
+//GetJWT 获取jwt
+func GetJWT(cnf conf.IServerConf) (jwt *JWTAuth, err error) {
+	if _, err := cnf.GetSubObject("auth/jwt", &jwt); err != nil && err != conf.ErrNoSetting {
+		return nil, fmt.Errorf("jwt配置有误:%v", err)
+	}
+	if jwt != nil {
+		if b, err := govalidator.ValidateStruct(jwt); !b {
+			return nil, fmt.Errorf("jwt配置有误:%v", err)
+		}
+	}
+	return jwt, nil
 }
