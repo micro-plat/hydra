@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 //RspTmplItem 服务响应模板项
@@ -79,11 +79,10 @@ LOOP:
 	return true, last
 }
 
-//GetRspTmpl 设置GetRspTmpl配置
-func GetRspTmpl(cnf conf.IServerConf) (response *conf.Response, err error) {
-	_, err = cnf.GetSubObject("rsptmpl", &response)
-	if err != nil && err != conf.ErrNoSetting {
+//GetConf 设置GetRspTmpl配置
+func GetConf(cnf conf.IMainConf) (rsp *RspTmpl, err error) {
+	if _, err = cnf.GetSubObject("tmpl", &rsp); err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}
-	return response, nil
+	return rsp, nil
 }

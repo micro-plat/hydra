@@ -3,7 +3,7 @@ package header
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 //Headers http头信息
@@ -18,8 +18,8 @@ func NewHeader(opts ...Option) Headers {
 	return h
 }
 
-//GetHeaders 设置header
-func GetHeaders(cnf conf.IServerConf) (header *conf.Headers, err error) {
+//GetConf 设置header
+func GetConf(cnf conf.IMainConf) (header *Headers, err error) {
 	_, err = cnf.GetSubObject("header", &header)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("header配置有误:%v", err)

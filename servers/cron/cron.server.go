@@ -4,31 +4,29 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/registry/conf/server/task"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/net"
-	"github.com/micro-plat/lib4go/types"
 )
 
 //CronServer cron服务器
 type CronServer struct {
 	*option
-	conf *conf.MetadataConf
+	conf   *conf.Metadata
+	engine servers.IRegistryEngine
 	*Processor
 	running string
 	addr    string
 }
 
 //NewCronServer 创建mqc服务器
-func NewCronServer(name string, tasks []*conf.Task, opts ...Option) (t *CronServer, err error) {
+func NewCronServer(name string, engine servers.IRegistryEngine, tasks []*task.Task, opts ...Option) (t *CronServer, err error) {
 	t = &CronServer{
-		conf: &conf.MetadataConf{
-			Name: name,
-			Type: "cron",
-		},
+		engine: engine,
+		conf:   conf.NewMetadata(name, "cron"),
 	}
 	t.option = &option{
 		metric: middleware.NewMetric(t.conf),
@@ -39,7 +37,7 @@ func NewCronServer(name string, tasks []*conf.Task, opts ...Option) (t *CronServ
 	}
 
 	if err = t.SetTasks(tasks); err != nil {
-		return err
+		return nil, err
 	}
 
 	t.ShowTrace(t.showTrace)
@@ -104,7 +102,7 @@ func (s *CronServer) GetStatus() string {
 }
 
 //Dynamic 动态注册或撤销cron任务
-func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) {
+func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *task.Task) {
 	for {
 		select {
 		case <-time.After(time.Millisecond * 100):
@@ -112,35 +110,19 @@ func (s *CronServer) Dynamic(engine servers.IRegistryEngine, c chan *conf.Task) 
 				return
 			}
 		case task := <-c:
-			task.Name = types.DecodeString(task.Name, "", task.Service, task.Name)
 			if task.Disable {
-				s.Debugf("[取消定时任务(%s)]", task.Name)
-				s.Processor.Remove(task.Name)
+				s.Debugf("[取消定时任务(%s)]", task.GetUNQ())
+				s.Processor.Remove(task.GetUNQ())
 				continue
 			}
-
-			if b, err := govalidator.ValidateStruct(task); !b && err != nil {
-				err = fmt.Errorf("task配置有误:%v", err)
+			if err := task.Validate(); err != nil {
 				s.Logger.Error(err)
 				continue
 			}
-
-			if task.Setting == nil {
-				task.Setting = make(map[string]string)
-			}
-			task.Handler = middleware.ContextHandler(engine, task.Name, task.Engine, task.Service, task.Setting,
-				map[string]interface{}{
-					"path": task.Cron,
-				})
-			ct, err := newCronTask(task)
-			if err != nil {
-				s.Logger.Error("构建cron.task失败:", err)
-				continue
-			}
-			if _, _, err = s.Processor.Add(ct, true); err != nil {
+			if err := s.Processor.Add(task); err != nil {
 				s.Logger.Error("添加cron到任务列表失败:", err)
 			}
-			s.Debugf("[注册定时任务(%s)(%s)]", task.Cron, task.Name)
+			s.Debugf("[注册定时任务(%s)(%s)]", task.Cron, task.Service)
 		}
 	}
 }

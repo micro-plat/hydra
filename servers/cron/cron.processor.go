@@ -2,9 +2,12 @@ package cron
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/registry/conf/server/task"
+	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/utility"
@@ -17,6 +20,7 @@ type Processor struct {
 	once      sync.Once
 	done      bool
 	closeChan chan struct{}
+	engine    servers.IRegistryEngine
 	length    int
 	index     int
 	span      time.Duration
@@ -26,8 +30,9 @@ type Processor struct {
 }
 
 //NewProcessor 创建processor
-func NewProcessor() (p *Processor, err error) {
+func NewProcessor(engine servers.IRegistryEngine) (p *Processor, err error) {
 	p = &Processor{
+		engine:     engine,
 		Dispatcher: dispatcher.New(),
 		closeChan:  make(chan struct{}),
 		span:       time.Second,
@@ -56,7 +61,23 @@ START:
 }
 
 //Add 添加任务
-func (s *Processor) Add(task iCronTask) (offset int, round int, err error) {
+func (s *Processor) Add(ts ...*task.Task) (err error) {
+	for _, t := range ts {
+		task, err := newCronTask(t, s.engine)
+		if err != nil {
+			return fmt.Errorf("构建cron.task失败:%v", err)
+		}
+		if !s.Dispatcher.Find(task.GetService()) {
+			s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
+		}
+		if _, _, err := s.add(task); err != nil {
+			return err
+		}
+	}
+	return
+
+}
+func (s *Processor) add(task iCronTask) (offset int, round int, err error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.done {
@@ -73,12 +94,6 @@ func (s *Processor) Add(task iCronTask) (offset int, round int, err error) {
 	}
 	task.SetRound(round)
 	s.slots[offset].Set(utility.GetGUID(), task)
-	if r {
-		if !s.Dispatcher.Find(task.GetService()) {
-			s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
-		}
-
-	}
 	return
 }
 
@@ -158,10 +173,8 @@ func (s *Processor) handle(task iCronTask) error {
 			task.Errorf("%s执行出错:%v", task.GetName(), err)
 		}
 		task.SetResult(rw.Status(), rw.Data())
-		s.saveHistory(task)
-
 	}
-	_, _, err := s.Add(task, false)
+	_, _, err := s.add(task)
 	if err != nil {
 		return err
 	}

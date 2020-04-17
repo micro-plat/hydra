@@ -20,17 +20,16 @@ func newOption() *option {
 	a := &option{}
 	a.Dir = "./static"
 	a.FirstPage = "index.html"
-	a.Rewriters = []string{"/", "index.htm", "default.html")}
-	a.Exclude=[]stgring{"/views/", ".exe", ".so"}
+	a.Rewriters = []string{"/", "index.htm", "default.html"}
+	a.Exclude = []string{"/views/", ".exe", ".so"}
 	a.Exts = []string{".txt", ".html", ".htm", ".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".woff2", ".jpg", ".jpeg", ".png", ".gif", ".ico", ".tif", ".pcx", ".tga", ".exif", ".fpx", ".svg", ".psd", ".cdr", ".pcd", ".dxf", ".ufo", ".eps", ".ai", ".raw", ".WMF", ".webp"}
 	return a
-
 }
 
 //WithImages 图片服务配置
 func WithImages() Option {
 	return func(s *option) {
-		a.Dir = "./static"
+		s.Dir = "./static"
 		s.Exts = []string{".jpg", ".jpeg", ".png", ".gif", ".ico", ".tif", ".pcx", ".tga", ".exif", ".fpx", ".svg", ".psd", ".cdr", ".pcd", ".dxf", ".ufo", ".eps", ".ai", ".raw", ".WMF", ".webp"}
 	}
 }

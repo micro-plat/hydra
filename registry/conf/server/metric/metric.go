@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 type Metric struct {
@@ -31,8 +31,8 @@ func NewMetric(host string, db string, cron string, opts ...Option) *Metric {
 	return m
 }
 
-//GetMetric 设置metric
-func GetMetric(cnf conf.IMainConf) (metric *Metric, err error) {
+//GetConf 设置metric
+func GetConf(cnf conf.IMainConf) (metric *Metric, err error) {
 	_, err = cnf.GetSubObject("metric", &metric)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, err

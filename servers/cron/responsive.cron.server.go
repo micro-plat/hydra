@@ -21,7 +21,7 @@ type CronResponsiveServer struct {
 	shardingIndex int
 	shardingCount int
 	master        bool
-	currentConf   conf.IServerConf
+	currentConf   conf.IMainConf
 	closeChan     chan struct{}
 	once          sync.Once
 	done          bool
@@ -32,7 +32,7 @@ type CronResponsiveServer struct {
 }
 
 //NewCronResponsiveServer 创建rpc服务器
-func NewCronResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *logger.Logger) (h *CronResponsiveServer, err error) {
+func NewCronResponsiveServer(registryAddr string, cnf conf.IMainConf, logger *logger.Logger) (h *CronResponsiveServer, err error) {
 	h = &CronResponsiveServer{
 		closeChan:    make(chan struct{}),
 		currentConf:  cnf,
@@ -50,9 +50,9 @@ func NewCronResponsiveServer(registryAddr string, cnf conf.IServerConf, logger *
 		return nil, err
 	}
 	h.server, err = NewCronServer(h.currentConf.GetServerName(),
-		"",
+		h.engine,
 		nil,
-		WithShowTrace(cnf.GetBool("trace", false)),
+		WithTrace(cnf.GetBool("trace", false)),
 		WithLogger(logger))
 	if err != nil {
 		return
@@ -83,9 +83,9 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 		return err
 	}
 	w.server, err = NewCronServer(w.currentConf.GetServerName(),
-		"",
+		w.engine,
 		nil,
-		WithShowTrace(cnf.GetBool("trace", false)),
+		WithTrace(cnf.GetBool("trace", false)),
 		WithLogger(w.Logger))
 	if err != nil {
 		return
@@ -106,7 +106,7 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 
 //Start 启用服务
 func (w *CronResponsiveServer) Start() (err error) {
-	err = w.server.Run()
+	err = w.server.Start()
 	if err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func (w *CronResponsiveServer) Shutdown() {
 	w.unpublish()
 	w.server.Shutdown(time.Second)
 	if w.engine != nil {
-		w.engine.Close()
+		// w.engine.Close()
 	}
 }
 

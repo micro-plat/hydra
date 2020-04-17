@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/cron"
@@ -30,24 +30,27 @@ type iCronTask interface {
 	logger.ILogger
 }
 type cronTask struct {
-	*conf.Task
+	*task.Task
 	schedule cron.Schedule
 	Executed int `json:"executed"`
 	round    int
 	method   string
 	form     map[string]interface{}
 	header   map[string]string
+	handler dispatcher.HandlerFunc 
 	logger.ILogger
 	status int
 	result []byte
 }
 
-func newCronTask(t *conf.Task) (r *cronTask, err error) {
+func newCronTask(t *task.Task, engine servers.IRegistryEngine) (r *cronTask, err error) {
 	r = &cronTask{
 		Task:    t,
 		method:  "GET",
 		header:  make(map[string]string),
 		ILogger: logger.GetSession(t.Name, logger.CreateSession()),
+		handler: middleware.ContextHandler(engine, t.Name, "*", t.Service,nil,nil)
+		
 	}
 	r.schedule, err = cron.ParseStandard(t.Cron)
 	if err != nil {

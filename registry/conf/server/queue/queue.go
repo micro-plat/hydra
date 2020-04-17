@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 //Queues queue任务
@@ -31,8 +31,8 @@ func NewQueues(v Option, opts ...Option) *Queues {
 	return q
 }
 
-//GetQueues 设置queue
-func GetQueues(cnf conf.IServerConf) (queues *conf.Queues, err error) {
+//GetConf 设置queue
+func GetConf(cnf conf.IMainConf) (queues *Queues, err error) {
 	if _, err = cnf.GetSubObject("queue", &queues); err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("queue:%v", err)
 	}

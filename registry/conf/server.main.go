@@ -12,7 +12,9 @@ type IMainConf interface {
 	IsStarted() bool
 	GetClusterNodes() CNodes
 	GetMainConf() *JSONConf
+	GetMainObject(v interface{}) (int32, error)
 	GetSubConf(name string) (*JSONConf, error)
+	GetSubObject(name string, v interface{}) (int32, error)
 	GetVersion() int32
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
@@ -111,12 +113,37 @@ func (c *MainConf) GetMainConf() *JSONConf {
 	return c.mainConf
 }
 
+//GetMainObject 获取主配置信息
+func (c *MainConf) GetMainObject(v interface{}) (int32, error) {
+	conf := c.GetMainConf()
+	if err := conf.Unmarshal(&v); err != nil {
+		err = fmt.Errorf("获取主配置失败:%v", err)
+		return 0, err
+	}
+
+	return conf.version, nil
+}
+
 //GetSubConf 指定子配置
 func (c *MainConf) GetSubConf(name string) (*JSONConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
 	return nil, ErrNoSetting
+}
+
+//GetSubObject 获取子配置信息
+func (c *MainConf) GetSubObject(name string, v interface{}) (int32, error) {
+	conf, err := c.GetSubConf(name)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := conf.Unmarshal(&v); err != nil {
+		err = fmt.Errorf("获取%s配置失败:%v", name, err)
+		return 0, err
+	}
+	return conf.version, nil
 }
 
 //Has 是否存在子配置

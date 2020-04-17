@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 //FixedSecretAuth 创建固定密钥验证服务
@@ -38,15 +38,15 @@ func (a *FixedSecretAuth) Contains(p string) bool {
 	return false
 }
 
-//GetFixedSecret 获取FixedSecret
-func GetFixedSecret(cnf conf.IMainConf) (auths *conf.Authes, err error) {
-	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
+//GetConf 获取FixedSecret
+func GetConf(cnf conf.IMainConf) (fsa *FixedSecretAuth, err error) {
+	if _, err := cnf.GetSubObject("fixed-secret", &fsa); err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("fixed-secret配置有误:%v", err)
 	}
-	if auths.FixedScret != nil {
-		if b, err := govalidator.ValidateStruct(auths.FixedScret); !b {
+	if fsa != nil {
+		if b, err := govalidator.ValidateStruct(&fsa); !b {
 			return nil, fmt.Errorf("fixed-secret配置有误:%v", err)
 		}
 	}
-	return auths, nil
+	return fsa, nil
 }

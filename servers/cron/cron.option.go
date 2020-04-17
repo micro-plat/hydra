@@ -25,7 +25,7 @@ func WithLogger(logger *logger.Logger) Option {
 //WithTrace 显示跟踪信息
 func WithTrace(show bool) Option {
 	return func(o *option) {
-		o.showTrace = b
+		o.showTrace = show
 	}
 }
 

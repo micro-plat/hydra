@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/golang/snappy"
-	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/lib4go/encoding/base64"
@@ -61,7 +61,7 @@ func setServiceName(c *dispatcher.Context, v string) {
 func setCTX(c *dispatcher.Context, r *context.Context) {
 	c.Set("__context_", r)
 }
-func getTrace(cnf *conf.MetadataConf) bool {
+func getTrace(cnf *conf.Metadata) bool {
 	return cnf.GetMetadata("show-trace").(bool)
 }
 func getCTX(c *dispatcher.Context) *context.Context {

@@ -3,11 +3,12 @@ package cron
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf/server/metric"
+	"github.com/micro-plat/hydra/registry/conf/server/task"
 )
 
 //SetMetric 重置metric
-func (s *CronServer) SetMetric(metric *conf.Metric) error {
+func (s *CronServer) SetMetric(metric *metric.Metric) error {
 	s.metric.Stop()
 	if metric.Disable {
 		return nil
@@ -20,13 +21,16 @@ func (s *CronServer) SetMetric(metric *conf.Metric) error {
 }
 
 //SetTasks 设置定时任务
-func (s *CronServer) SetTasks(tasks []*conf.Task) (err error) {
-	s.Processor, err = s.getProcessor(tasks)
-	return err
+func (s *CronServer) SetTasks(tasks []*task.Task) (err error) {
+	s.Processor, err = s.getProcessor()
+	if err != nil {
+		return err
+	}
+	return s.Processor.Add(tasks...)
 }
 
 //ShowTrace 显示跟踪信息
 func (s *CronServer) ShowTrace(b bool) {
-	s.conf.SetMetadata("show-trace", b)
+	s.conf.Set("show-trace", b)
 	return
 }

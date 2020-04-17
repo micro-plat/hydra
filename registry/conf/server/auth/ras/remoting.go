@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 )
 
 //RASAuth 远程认证服务
@@ -71,14 +71,14 @@ func (a RASAuths) Contains(p string) (bool, *RASAuth) {
 	return last != nil, last
 }
 
-//GetRASAuth 检查是否设置remote-auth
-func GetRASAuth(cnf conf.IMainConf) (auths *conf.Authes, err error) {
+//GetConf 获取配置信息
+func GetConf(cnf conf.IMainConf) (auths RASAuths, err error) {
 	//设置Remote安全认证参数
-	if _, err := cnf.GetSubObject("auth", &auths); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("remote-auth配置有误:%v", err)
+	if _, err := cnf.GetSubObject("ras", &auths); err != nil && err != conf.ErrNoSetting {
+		return nil, fmt.Errorf("remote-auth-service配置有误:%v", err)
 	}
-	for _, auth := range auths.RemotingServiceAuths {
-		if b, err := govalidator.ValidateStruct(auth); !b {
+	for _, auth := range auths {
+		if b, err := govalidator.ValidateStruct(&auth); !b {
 			return nil, fmt.Errorf("remote-auth配置有误:%v", err)
 		}
 	}

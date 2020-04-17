@@ -1,6 +1,8 @@
 package api
 
-import "github.com/micro-plat/hydra/conf"
+import (
+	"github.com/micro-plat/hydra/registry/conf"
+)
 
 //Server api server配置信息
 type Server struct {
@@ -20,8 +22,10 @@ func New(address string, opts ...Option) *Server {
 	return a
 }
 
-//GetHosts 获取hosts
-func GetHosts(set ISetHosts, cnf conf.IMainConf) (hosts []string, err error) {
-	hosts = cnf.GetStrings("host")
-	return hosts, nil
+//GetConf 获取主配置信息
+func GetConf(cnf conf.IMainConf) (s *Server, err error) {
+	if _, err := cnf.GetMainObject(&s); err != nil && err != conf.ErrNoSetting {
+		return nil, err
+	}
+	return s, nil
 }

@@ -7,11 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/lib4go/security/md5"
-	"github.com/micro-plat/lib4go/types"
 )
-
-//Metadata 元数据
-type Metadata = types.XMap
 
 //IConf 配置管理
 type IConf interface {
