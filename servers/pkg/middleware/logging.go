@@ -4,13 +4,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/lib4go/logger"
 )
 
 //Logging 记录日志
-func Logging(conf *conf.MetadataConf) dispatcher.HandlerFunc {
+func Logging(conf *conf.Metadata) dispatcher.HandlerFunc {
 	return func(ctx *dispatcher.Context) {
 		start := time.Now()
 		setStartTime(ctx)

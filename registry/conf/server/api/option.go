@@ -4,9 +4,9 @@ import "strings"
 
 type option struct {
 	Status    string `json:"status,omitempty" valid:"in(start|stop)"`
-	RTimeout  int    `json:"readTimeout,omitempty"`
-	WTimeout  int    `json:"writeTimeout,omitempty"`
-	RHTimeout int    `json:"readHeaderTimeout,omitempty"`
+	RTimeout  int    `json:"rTimeout,omitempty"`
+	WTimeout  int    `json:"wTimeout,omitempty"`
+	RHTimeout int    `json:"rhTimeout,omitempty"`
 	Host      string `json:"host,omitempty"`
 	Domain    string `json:"dn,omitempty"`
 	Trace     bool   `json:"trace,omitempty"`

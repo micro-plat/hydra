@@ -2,6 +2,13 @@ package cron
 
 import "github.com/micro-plat/hydra/registry/conf"
 
+//MainConfName 主配置中的关键配置名
+var MainConfName = []string{"status", "sharding"}
+
+//SubConfName 子配置中的关键配置名
+var SubConfName = []string{"task"}
+
+//Server 服务嚣配置信息
 type Server struct {
 	*option
 }

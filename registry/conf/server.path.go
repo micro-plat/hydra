@@ -13,7 +13,8 @@ var _ IPub = &Pub{}
 //IPub 发布路径服务
 type IPub interface {
 	GetMainPath() string
-	GetServicePubPath(svName string) string
+	GetServicePubPathByService(svName string) string
+	GetServicePubPath() string
 	GetDNSPubPath(svName string) string
 	GetServerPubPath() string
 	GetClusterID() string
@@ -61,9 +62,14 @@ func (c *Pub) GetVarPath() string {
 	return registry.Join(c.platName, "var")
 }
 
+//GetServicePubPathByService 获取服务发布跟路径
+func (c *Pub) GetServicePubPathByService(svName string) string {
+	return registry.Join("/", c.platName, "services", c.serverType, c.sysName, svName, "providers")
+}
+
 //GetServicePubPath 获取服务发布跟路径
-func (c *Pub) GetServicePubPath(svName string) string {
-	return registry.Join("/", c.platName, "services", c.serverType, svName, "providers")
+func (c *Pub) GetServicePubPath() string {
+	return registry.Join("/", c.platName, "services", c.serverType, c.sysName, "providers")
 }
 
 //GetDNSPubPath 获取DNS服务路径
@@ -73,7 +79,7 @@ func (c *Pub) GetDNSPubPath(svName string) string {
 
 //GetServerPubPath 获取服务器发布的跟路径
 func (c *Pub) GetServerPubPath() string {
-	return registry.Join("/", c.GetMainPath(), "servers")
+	return registry.Join("/", c.platName, c.sysName, c.serverType, c.clusterName, "servers")
 }
 
 //GetClusterID 获取当前服务的集群编号

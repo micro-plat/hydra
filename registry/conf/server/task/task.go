@@ -20,7 +20,7 @@ type Task struct {
 
 //GetUNQ 获取任务的唯一标识
 func (t *Task) GetUNQ() string {
-	return md5.Encrypt(fmt.Sprintf("%s-%s", t.Cron, t.Service))
+	return md5.Encrypt(fmt.Sprintf("%s(%s)", t.Service, t.Cron))
 }
 
 //Validate 验证任务参数

@@ -4,6 +4,12 @@ import (
 	"github.com/micro-plat/hydra/registry/conf"
 )
 
+//MainConfName 主配置中的关键配置名
+var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "host", "dn"}
+
+//SubConfName 子配置中的关键配置名
+var SubConfName = []string{"router"}
+
 //Server api server配置信息
 type Server struct {
 	Address string `json:"address,omitempty" valid:"dialstring"`

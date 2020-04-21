@@ -15,6 +15,7 @@ type IMainConf interface {
 	GetMainObject(v interface{}) (int32, error)
 	GetSubConf(name string) (*JSONConf, error)
 	GetSubObject(name string, v interface{}) (int32, error)
+	GetRegistry() registry.IRegistry
 	GetVersion() int32
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
@@ -81,6 +82,11 @@ func (c *MainConf) load() (err error) {
 		c.subConfs[p] = *childConf
 	}
 	return nil
+}
+
+//GetRegistry 获取注册中心
+func (c *MainConf) GetRegistry() registry.IRegistry {
+	return c.registry
 }
 
 //IsStarted 当前服务是否已启动

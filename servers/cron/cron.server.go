@@ -7,7 +7,6 @@ import (
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server/task"
 	"github.com/micro-plat/hydra/servers"
-	"github.com/micro-plat/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/net"
 )
@@ -15,8 +14,9 @@ import (
 //CronServer cron服务器
 type CronServer struct {
 	*option
-	conf   *conf.Metadata
-	engine servers.IRegistryEngine
+	conf    *conf.Metadata
+	engine  servers.IRegistryEngine
+	compare conf.IComparer
 	*Processor
 	running string
 	addr    string
@@ -29,7 +29,7 @@ func NewCronServer(name string, engine servers.IRegistryEngine, tasks []*task.Ta
 		conf:   conf.NewMetadata(name, "cron"),
 	}
 	t.option = &option{
-		metric: middleware.NewMetric(t.conf),
+		// metric: middleware.NewMetric(t.conf),
 		Logger: logger.GetSession(name, logger.CreateSession()),
 	}
 	for _, opt := range opts {

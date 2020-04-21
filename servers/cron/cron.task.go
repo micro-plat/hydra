@@ -1,132 +1,124 @@
 package cron
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/hydra/registry/conf/server/task"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/cron"
 )
 
-type iCronTask interface {
+var _ ICronTask = &CronTask{}
+
+type ICronTask interface {
 	GetName() string
 	ReduceRound(int)
 	GetRound() int
-	SetRound(int)
+	UpdateRound(int)
 	GetExecuted() int
-	AddExecuted()
+	IncreaseExecuted()
 	NextTime(time.Time) time.Time
-	GetHandler() interface{}
-	Enable() bool
+	IsEnable() bool
 	SetDisable()
-	GetTaskExecutionRecord() (string, error)
-	SetResult(status int, result []byte)
 	dispatcher.IRequest
-	logger.ILogger
 }
-type cronTask struct {
+
+//CronTask 定时任务
+type CronTask struct {
 	*task.Task
 	schedule cron.Schedule
-	Executed int `json:"executed"`
+	Executed int
 	round    int
 	method   string
 	form     map[string]interface{}
 	header   map[string]string
-	handler dispatcher.HandlerFunc 
-	logger.ILogger
-	status int
-	result []byte
+	status   int
+	result   []byte
 }
 
-func newCronTask(t *task.Task, engine servers.IRegistryEngine) (r *cronTask, err error) {
-	r = &cronTask{
-		Task:    t,
-		method:  "GET",
-		header:  make(map[string]string),
-		ILogger: logger.GetSession(t.Name, logger.CreateSession()),
-		handler: middleware.ContextHandler(engine, t.Name, "*", t.Service,nil,nil)
-		
+//NewCronTask 构建定时任务
+func NewCronTask(t *task.Task) (r *CronTask, err error) {
+	r = &CronTask{
+		Task:   t,
+		method: "GET",
+		form:   make(map[string]interface{}),
+		header: make(map[string]string),
 	}
 	r.schedule, err = cron.ParseStandard(t.Cron)
 	if err != nil {
-		return nil, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Name, t.Cron)
-	}
-	r.form = t.Input
-	if r.form == nil {
-		r.form = make(map[string]interface{})
+		return nil, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Service, t.Cron)
 	}
 	return
 }
-func (m *cronTask) GetName() string {
-	return m.Task.Name
+
+//GetName 获取任务名称
+func (m *CronTask) GetName() string {
+	return m.Task.GetUNQ()
 }
-func (m *cronTask) ReduceRound(v int) {
+
+//ReduceRound 减少任务执行轮数
+func (m *CronTask) ReduceRound(v int) {
 	m.round -= v
 }
 
-func (m *cronTask) GetRound() int {
+//GetRound 获取任务执行轮数
+func (m *CronTask) GetRound() int {
 	return m.round
 }
-func (m *cronTask) SetRound(v int) {
+
+//UpdateRound 获取任务的轮数
+func (m *CronTask) UpdateRound(v int) {
 	m.round = v
 }
-func (m *cronTask) GetExecuted() int {
+
+//GetExecuted 获取执行次数
+func (m *CronTask) GetExecuted() int {
 	return m.Executed
 }
-func (m *cronTask) AddExecuted() {
+
+//IncreaseExecuted 累加执行次数
+func (m *CronTask) IncreaseExecuted() {
 	if m.Executed >= math.MaxInt32 {
 		m.Executed = 1
 	} else {
 		m.Executed++
 	}
 }
-func (m *cronTask) GetHandler() interface{} {
-	return m.Handler
-}
-func (m *cronTask) NextTime(t time.Time) time.Time {
+
+//NextTime 下次执行时间
+func (m *CronTask) NextTime(t time.Time) time.Time {
 	return m.schedule.Next(t)
 }
-func (m *cronTask) GetService() string {
-	return fmt.Sprintf("/%s", strings.TrimPrefix(m.Name, "/"))
+
+//GetService 服务名
+func (m *CronTask) GetService() string {
+	return fmt.Sprintf("/%s", strings.TrimPrefix(m.GetUNQ(), "/"))
 }
-func (m *cronTask) GetMethod() string {
+
+//GetMethod 方法名
+func (m *CronTask) GetMethod() string {
 	return m.method
 }
-func (m *cronTask) GetForm() map[string]interface{} {
+
+//GetForm 输入参数
+func (m *CronTask) GetForm() map[string]interface{} {
 	return m.form
 }
-func (m *cronTask) GetHeader() map[string]string {
+
+//GetHeader 头信息
+func (m *CronTask) GetHeader() map[string]string {
 	return m.header
 }
-func (m *cronTask) SetResult(status int, result []byte) {
-	m.status = status
-	m.result = result
-}
-func (m *cronTask) Enable() bool {
+
+//IsEnable 是否启动
+func (m *CronTask) IsEnable() bool {
 	return !m.Disable
 }
-func (m *cronTask) SetDisable() {
+
+//SetDisable 禁用
+func (m *CronTask) SetDisable() {
 	m.Disable = true
-}
-func (m *cronTask) GetTaskExecutionRecord() (string, error) {
-	data := map[string]interface{}{
-		"name":     m.Name,
-		"cron":     m.Cron,
-		"service":  m.Service,
-		"engine":   m.Engine,
-		"executed": m.Executed,
-		"result":   fmt.Sprintf("%d,%s", m.status, json.RawMessage(m.result)),
-		"next":     m.NextTime(time.Now()).Format("20060102150405"),
-		"last":     time.Now().Format("20060102150405"),
-	}
-	buff, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), nil
 }

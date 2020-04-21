@@ -1,72 +1,71 @@
 package cron
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/engines"
+	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/registry/pub"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/lib4go/logger"
 )
 
 //CronResponsiveServer rpc 响应式服务器
 type CronResponsiveServer struct {
-	server        *CronServer
-	engine        servers.IRegistryEngine
-	registryAddr  string
-	pubs          []string
-	shardingIndex int
-	shardingCount int
-	master        bool
-	currentConf   conf.IMainConf
-	closeChan     chan struct{}
-	once          sync.Once
-	done          bool
-	pubLock       sync.Mutex
-	restarted     bool
+	server      *CronServer
+	engine      servers.IRegistryEngine
+	comparer    conf.IComparer
+	pub         pub.IPublisher
+	currentConf conf.IMainConf
+	closeChan   chan struct{}
+	once        sync.Once
+	done        bool
+	restarted   bool
 	*logger.Logger
 	mu sync.Mutex
 }
 
 //NewCronResponsiveServer 创建rpc服务器
-func NewCronResponsiveServer(registryAddr string, cnf conf.IMainConf, logger *logger.Logger) (h *CronResponsiveServer, err error) {
+func NewCronResponsiveServer(cnf conf.IMainConf, logger *logger.Logger) (h *CronResponsiveServer, err error) {
 	h = &CronResponsiveServer{
-		closeChan:    make(chan struct{}),
-		currentConf:  cnf,
-		Logger:       logger,
-		pubs:         make([]string, 0, 2),
-		registryAddr: registryAddr,
+		closeChan:   make(chan struct{}),
+		currentConf: cnf,
+		Logger:      logger,
+		pub:         pub.New(h.currentConf),
 	}
-	// 启动执行引擎
-	h.engine, err = engines.NewServiceEngine(cnf, registryAddr, h.Logger)
-	if err != nil {
-		return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
-	}
-	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
-	if err = h.engine.SetHandler(chandler); err != nil {
+
+	if err := h.pub.WatchClusterChange(h.notify); err != nil {
 		return nil, err
 	}
+
+	// 启动执行引擎
+	// h.engine, err = engines.NewServiceEngine(cnf, registryAddr, h.Logger)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
+	// }
+	// chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	// if err = h.engine.SetHandler(chandler); err != nil {
+	// 	return nil, err
+	// }
+
 	h.server, err = NewCronServer(h.currentConf.GetServerName(),
 		h.engine,
 		nil,
-		WithTrace(cnf.GetBool("trace", false)),
+		WithTrace(cnf.GetMainConf().GetBool("trace", false)),
 		WithLogger(logger))
 	if err != nil {
 		return
 	}
-	err = h.SetConf(true, h.currentConf)
-	if err != nil {
-		return
-	}
-	go h.server.Dynamic(h.engine, chandler.GetDynamicCron())
+	// err = h.SetConf(true, h.currentConf)
+	// if err != nil {
+	// 	return
+	// }
+	// go h.server.Dynamic(h.engine, chandler.GetDynamicCron())
 	return
 }
 
 //Restart 重启服务器
-func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
+func (w *CronResponsiveServer) Restart(cnf conf.IMainConf) (err error) {
 	w.Shutdown()
 	time.Sleep(time.Second)
 	w.closeChan = make(chan struct{})
@@ -74,27 +73,27 @@ func (w *CronResponsiveServer) Restart(cnf conf.IServerConf) (err error) {
 	w.currentConf = cnf
 	w.once = sync.Once{}
 	// 启动执行引擎
-	w.engine, err = engines.NewServiceEngine(cnf, w.registryAddr, w.Logger)
-	if err != nil {
-		return fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
-	}
-	chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
-	if err = w.engine.SetHandler(chandler); err != nil {
-		return err
-	}
+	// w.engine, err = engines.NewServiceEngine(cnf, w.registryAddr, w.Logger)
+	// if err != nil {
+	// 	return fmt.Errorf("%s:engine启动失败%v", cnf.GetServerName(), err)
+	// }
+	// chandler := cnf.Get("__component_handler_").(component.IComponentHandler)
+	// if err = w.engine.SetHandler(chandler); err != nil {
+	// 	return err
+	// }
 	w.server, err = NewCronServer(w.currentConf.GetServerName(),
 		w.engine,
 		nil,
-		WithTrace(cnf.GetBool("trace", false)),
+		WithTrace(cnf.GetMainConf().GetBool("trace", false)),
 		WithLogger(w.Logger))
 	if err != nil {
 		return
 	}
-	if err = w.SetConf(true, cnf); err != nil {
-		return
-	}
+	// if err = w.SetConf(true, cnf); err != nil {
+	// 	return
+	// }
 
-	go w.server.Dynamic(w.engine, chandler.GetDynamicCron())
+	// go w.server.Dynamic(w.engine, chandler.GetDynamicCron())
 
 	if err = w.Start(); err == nil {
 		w.currentConf = cnf

@@ -63,12 +63,12 @@ START:
 //Add 添加任务
 func (s *Processor) Add(ts ...*task.Task) (err error) {
 	for _, t := range ts {
-		task, err := newCronTask(t, s.engine)
+		task, err := NewCronTask(t)
 		if err != nil {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
 		if !s.Dispatcher.Find(task.GetService()) {
-			s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
+			// s.Dispatcher.Handle(task.GetMethod(), task.GetService(), task.GetHandler().(dispatcher.HandlerFunc))
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err
@@ -77,7 +77,7 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 	return
 
 }
-func (s *Processor) add(task iCronTask) (offset int, round int, err error) {
+func (s *Processor) add(task ICronTask) (offset int, round int, err error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.done {
@@ -92,21 +92,18 @@ func (s *Processor) add(task iCronTask) (offset int, round int, err error) {
 	if offset < 0 || round < 0 {
 		return -1, -1, errors.New("next time less than now.2")
 	}
-	task.SetRound(round)
+	task.UpdateRound(round)
 	s.slots[offset].Set(utility.GetGUID(), task)
 	return
 }
 
 //Remove 移除服务
 func (s *Processor) Remove(name string) {
-	if name == "" {
-		return
-	}
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	for _, slot := range s.slots {
 		slot.RemoveIterCb(func(k string, value interface{}) bool {
-			task := value.(iCronTask)
+			task := value.(ICronTask)
 			task.SetDisable()
 			return task.GetName() == name
 		})
@@ -153,7 +150,7 @@ func (s *Processor) execute() {
 	s.index = (s.index + 1) % s.length
 	current := s.slots[s.index]
 	current.RemoveIterCb(func(k string, value interface{}) bool {
-		task := value.(iCronTask)
+		task := value.(ICronTask)
 		task.ReduceRound(1)
 		if task.GetRound() <= 0 {
 			go s.handle(task)
@@ -162,17 +159,16 @@ func (s *Processor) execute() {
 		return false
 	})
 }
-func (s *Processor) handle(task iCronTask) error {
-	if s.done || !task.Enable() {
+func (s *Processor) handle(task ICronTask) error {
+	if s.done || !task.IsEnable() {
 		return nil
 	}
 	if !s.isPause {
-		task.AddExecuted()
-		rw, err := s.Dispatcher.HandleRequest(task)
+		task.IncreaseExecuted()
+		_, err := s.Dispatcher.HandleRequest(task)
 		if err != nil {
-			task.Errorf("%s执行出错:%v", task.GetName(), err)
+			// task.Errorf("%s执行出错:%v", task.GetName(), err)
 		}
-		task.SetResult(rw.Status(), rw.Data())
 	}
 	_, _, err := s.add(task)
 	if err != nil {
