@@ -39,33 +39,6 @@ func Response(conf *conf.MetadataConf) dispatcher.HandlerFunc {
 			return
 		}
 		ctx.JSON(nctx.Response.GetStatus(), content)
-		// tpName := context.ContentTypes[tp]
-		// switch tp {
-		// case context.CT_XML:
-		// 	if v, ok := content.([]byte); ok {
-		// 		ctx.Data(nctx.Response.GetStatus(), tpName, v)
-		// 		return
-		// 	}
-		// 	ctx.XML(nctx.Response.GetStatus(), content)
-		// case context.CT_YMAL:
-		// 	if v, ok := content.([]byte); ok {
-		// 		ctx.Data(nctx.Response.GetStatus(), tpName, v)
-		// 		return
-		// 	}
-		// 	ctx.YAML(nctx.Response.GetStatus(), content)
-		// case context.CT_PLAIN, context.CT_HTML:
-		// 	if v, ok := content.([]byte); ok {
-		// 		ctx.Data(nctx.Response.GetStatus(), tpName, v)
-		// 		return
-		// 	}
-		// 	ctx.Data(nctx.Response.GetStatus(), tpName, ([]byte)(content.(string)))
-		// default:
-		// 	if v, ok := content.([]byte); ok {
-		// 		ctx.Data(nctx.Response.GetStatus(), tpName, v)
-		// 		return
-		// 	}
-		// 	ctx.JSON(nctx.Response.GetStatus(), content)
-		// }
 	}
 }
 func writeTrace(b bool, tp int, ctx *dispatcher.Context, c interface{}) {

@@ -9,12 +9,12 @@ type metadata struct {
 	lock sync.RWMutex
 }
 
-func (m *metadata) Get(key string) interface{} {
+func (m *metadata) Get(key string) (interface{}, bool) {
 	m.lock.RLocker().Lock()
 	defer m.lock.RLocker().Unlock()
 
-	data := m.data[key]
-	return data
+	data, ok := m.data[key]
+	return data, ok
 }
 func (m *metadata) Set(key string, value interface{}) {
 	m.lock.Lock()
@@ -28,6 +28,11 @@ func (m *metadata) CSet(key string, value interface{}) {
 		m.data = make(map[string]interface{})
 	}
 	m.data[key] = value
+}
+
+type IMetadata interface {
+	Get(key string) (interface{}, bool)
+	Set(key string, v interface{})
 }
 
 type Metadata struct {
@@ -46,7 +51,7 @@ func NewMetadata(name, tp string) *Metadata {
 	}
 }
 
-func (s *Metadata) Get(key string) interface{} {
+func (s *Metadata) Get(key string) (interface{}, bool) {
 	return s.data.Get(key)
 }
 func (s *Metadata) Set(key string, v interface{}) {

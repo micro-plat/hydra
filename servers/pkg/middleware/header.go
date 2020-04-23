@@ -1,29 +1,32 @@
 package middleware
 
 import (
-	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
+	"strings"
+
+	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/registry/conf/server/header"
 )
 
 //Header 头设置
-func Header(cnf *conf.MetadataConf) dispatcher.HandlerFunc {
-	return func(ctx *dispatcher.Context) {
-		ctx.Next()
-		headers, ok := cnf.GetMetadata("headers").(conf.Headers)
+func Header(cnf conf.IMetadata) Handler {
+	return func(r IRequest) {
+		r.Next()
+		h, ok := cnf.Get("headers")
 		if !ok {
 			return
 		}
-		for k, v := range headers {
-			ctx.Header(k, v)
+		headers, ok := h.(header.Headers)
+		if ok {
+			origin := r.GetHeader("Origin")
+			for k, v := range headers {
+				if k != "Access-Control-Allow-Origin" { //非跨域设置
+					r.Header(k, v)
+					continue
+				}
+				if origin != "" && (v == "*" || strings.Contains(v, origin)) {
+					r.Header(k, origin)
+				}
+			}
 		}
-		context := getCTX(ctx)
-		if context == nil {
-			return
-		}
-		header := context.Response.GetHeaders()
-		for k, v := range header {
-			ctx.Header(k, v)
-		}
-
 	}
 }

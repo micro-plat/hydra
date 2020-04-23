@@ -5,7 +5,7 @@ import "strings"
 var allow = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "hsid"}
 var expose = []string{"hsid"}
 
-type option map[string]string
+type option = map[string]string
 
 //Option 配置选项
 type Option func(option)
