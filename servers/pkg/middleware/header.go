@@ -5,11 +5,12 @@ import (
 
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server/header"
+	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 //Header 头设置
-func Header(cnf conf.IMetadata) Handler {
-	return func(r IRequest) {
+func Header(cnf conf.IMetadata) swap.Handler {
+	return func(r swap.IRequest) {
 		r.Next()
 		h, ok := cnf.Get("headers")
 		if !ok {
