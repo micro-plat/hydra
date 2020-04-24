@@ -56,3 +56,18 @@ func (c *GinCtx) GetLogger(name ...string) logger.ILogger {
 	return l
 
 }
+
+//GetClientIP 获取客户端IP地址
+func (c *GinCtx) GetClientIP() string {
+	return c.Context.ClientIP()
+}
+
+//GetStatusCode 获取response状态码
+func (c *GinCtx) GetStatusCode() int {
+	return c.Context.Writer.Status()
+}
+
+//GetExt 获取ext扩展信息
+func (c *GinCtx) GetExt() string {
+	return c.Context.GetString("__ext__")
+}

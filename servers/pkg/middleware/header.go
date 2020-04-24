@@ -3,20 +3,20 @@ package middleware
 import (
 	"strings"
 
-	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server/header"
 	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 //Header 头设置
-func Header(cnf conf.IMetadata) swap.Handler {
+func Header(h header.IHeader) swap.Handler {
 	return func(r swap.IRequest) {
+
 		r.Next()
-		h, ok := cnf.Get("headers")
+
+		headers, ok := h.GetConf()
 		if !ok {
 			return
 		}
-		headers, ok := h.(header.Headers)
 		if ok {
 			origin := r.GetHeader("Origin")
 			for k, v := range headers {

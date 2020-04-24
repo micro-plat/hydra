@@ -378,7 +378,7 @@ func (c *Context) Redirect(code int, location string) {
 }
 
 //ClientIP 获取客户端IP
-func (c *Context) ClientIP() string {
+func (c *Context) GetClientIP() string {
 	clientIP := c.requestHeader("X-Forwarded-For")
 	if index := strings.IndexByte(clientIP, ','); index >= 0 {
 		clientIP = clientIP[0:index]

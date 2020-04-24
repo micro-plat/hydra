@@ -6,6 +6,11 @@ import (
 	"github.com/micro-plat/hydra/registry/conf"
 )
 
+//IHeader 获取header
+type IHeader interface {
+	GetConf() (Headers, bool)
+}
+
 //Headers http头信息
 type Headers = option
 

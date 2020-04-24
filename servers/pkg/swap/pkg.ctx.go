@@ -46,3 +46,13 @@ func (c *PkgCtx) GetLogger(name ...string) logger.ILogger {
 	return l
 
 }
+
+//GetStatusCode 获取response状态码
+func (c *PkgCtx) GetStatusCode() int {
+	return c.Context.Writer.Status()
+}
+
+//GetExt 获取ext扩展信息
+func (c *PkgCtx) GetExt() string {
+	return c.Context.GetString("__ext__")
+}

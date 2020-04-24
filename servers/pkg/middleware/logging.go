@@ -3,25 +3,24 @@ package middleware
 import (
 	"time"
 
-	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 //Logging 记录日志
-func Logging(conf *conf.Metadata) swap.Handler {
+func Logging(name string, serverType string) swap.Handler {
 	return func(r swap.IRequest) {
 
 		start := time.Now()
 		srvs := r.GetService()
-		log := r.GetLogger(conf.Name, srvs)
-		log.Info(conf.Type+".request:", conf.Name, r.GetMethod(), srvs, "from", r.GetClientIP())
+		log := r.GetLogger(name, srvs)
+		log.Info(serverType+".request:", name, r.GetMethod(), srvs, "from", r.GetClientIP())
 
 		r.Next()
 
 		if r.GetStatusCode() >= 200 && r.GetStatusCode() < 400 {
-			log.Info(conf.Type+".response:", conf.Name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start), v)
+			log.Info(serverType+".response:", name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start))
 		} else {
-			log.Error(conf.Type+".response:", conf.Name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start), v)
+			log.Error(serverType+".response:", name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start))
 		}
 	}
 }
