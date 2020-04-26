@@ -2,6 +2,7 @@ package header
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/micro-plat/hydra/registry/conf"
 )
@@ -21,6 +22,16 @@ func NewHeader(opts ...Option) Headers {
 		opt(h)
 	}
 	return h
+}
+
+//IsAccessControlAllowOrigin 是否允许跨域访问
+func (h *Headers) IsAccessControlAllowOrigin(h string) bool {
+	return h == "Access-Control-Allow-Origin"
+}
+
+//AllowOrigin 是否允许跨域访问
+func (h *Headers) AllowOrigin(h string, v string, origin string) bool {
+	return h == "Access-Control-Allow-Origin" && origin != "" && (v == "*" || strings.Contains(v, origin))
 }
 
 //GetConf 设置header

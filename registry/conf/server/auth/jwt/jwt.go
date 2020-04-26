@@ -9,6 +9,11 @@ import (
 	"github.com/micro-plat/lib4go/utility"
 )
 
+//IJWTAuth 获取jwt配置
+type IJWTAuth interface {
+	GetConf() (JWTAuth, bool)
+}
+
 //JWTAuth jwt配置信息
 type JWTAuth struct {
 	*jwtOption

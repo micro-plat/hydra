@@ -34,7 +34,7 @@ type IRoutes interface {
 type RouterGroup struct {
 	Handlers HandlersChain
 	basePath string
-	engine   *Dispatcher
+	engine   *Engine
 	root     bool
 }
 

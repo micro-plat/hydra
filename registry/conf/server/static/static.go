@@ -8,7 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/registry/conf"
-	"github.com/qxnw/lib4go/archiver"
+	"github.com/micro-plat/lib4go/archiver"
 )
 
 //Static 设置静态文件配置

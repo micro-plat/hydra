@@ -1,6 +1,6 @@
 package caches
 
-import "github.com/qxnw/lib4go/cache"
+import "github.com/micro-plat/lib4go/cache"
 
 //ICache 缓存接口
 type ICache = cache.ICache

@@ -8,15 +8,16 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
+	"github.com/micro-plat/hydra/servers/pkg/swap"
 	"github.com/micro-plat/lib4go/security/jwt"
 )
 
 //JwtAuth jwt
-func JwtAuth(cnf *conf.MetadataConf) dispatcher.HandlerFunc {
-	return func(ctx *dispatcher.Context) {
-		jwtAuth, ok := cnf.GetMetadata("jwt").(*conf.JWTAuth)
+func JwtAuth(f jwt.IJWTAuth) dispatcher.HandlerFunc {
+	return func(r swap.IRequest) {
+		jwtAuth, ok := f.GetConf()
 		if !ok || jwtAuth == nil || jwtAuth.Disable {
-			ctx.Next()
+			r.Next()
 			return
 		}
 
@@ -24,7 +25,7 @@ func JwtAuth(cnf *conf.MetadataConf) dispatcher.HandlerFunc {
 		data, err := checkJWT(ctx, jwtAuth.Name, jwtAuth.Secret)
 		if err == nil {
 			setJWTRaw(ctx, data)
-			ctx.Next()
+			r.Next()
 			return
 		}
 
@@ -32,13 +33,14 @@ func JwtAuth(cnf *conf.MetadataConf) dispatcher.HandlerFunc {
 		url := ctx.Request.GetService()
 		for _, u := range jwtAuth.Exclude {
 			if u == url {
-				ctx.Next()
+				r.Next()
 				return
 			}
 		}
+
 		//jwt.token错误，返回错误码
-		getLogger(ctx).Error(err.GetError())
-		ctx.AbortWithStatus(err.GetCode())
+		r.GetLogger().Error(err.GetError())
+		r.Abort(err.GetCode())
 		return
 
 	}

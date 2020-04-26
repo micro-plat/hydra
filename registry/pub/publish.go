@@ -9,8 +9,8 @@ import (
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/watcher"
+	"github.com/micro-plat/lib4go/jsons"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/qxnw/lib4go/jsons"
 )
 
 //IPublisher 服务发布程序

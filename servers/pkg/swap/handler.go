@@ -21,6 +21,8 @@ type IRequest interface {
 	GetLogger(name ...string) logger.ILogger
 	conf.IMetadata
 	Next()
+	Abort(int)
+	Close()
 }
 
 //Handler 通用的中间件处理服务

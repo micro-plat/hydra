@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"runtime"
 
-	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
+	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 var (
@@ -16,14 +16,9 @@ var (
 	slash     = []byte("/")
 )
 
-// Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.
-func Recovery() dispatcher.HandlerFunc {
-	return RecoveryWithWriter()
-}
-
 // RecoveryWithWriter returns a middleware for a given writer that recovers from any panics and writes a 500 if there was one.
-func RecoveryWithWriter() dispatcher.HandlerFunc {
-	return func(c *dispatcher.Context) {
+func Recovery() swap.Handler {
+	return func(r swap.IRequest) {
 		defer func() {
 			logger := getLogger(c)
 			if err := recover(); err != nil {
@@ -31,10 +26,10 @@ func RecoveryWithWriter() dispatcher.HandlerFunc {
 					stack := stack(3)
 					logger.Printf("[Recovery] panic recovered:\n%s\n%s", err, stack)
 				}
-				c.AbortWithStatus(500)
+				r.Abort(500)
 			}
 		}()
-		c.Next()
+		r.Next()
 	}
 }
 

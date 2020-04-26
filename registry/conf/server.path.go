@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/qxnw/lib4go/utility"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 var _ IPub = &Pub{}

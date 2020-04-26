@@ -18,7 +18,7 @@ type IRequest interface {
 }
 
 type Context struct {
-	engine    *Dispatcher
+	engine    *Engine
 	writermem responseWriter
 	Writer    ResponseWriter
 	Request   IRequest

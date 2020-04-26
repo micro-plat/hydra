@@ -1,6 +1,6 @@
 package queues
 
-import "github.com/qxnw/lib4go/queue"
+import "github.com/micro-plat/lib4go/queue"
 
 //IQueue 消息队列
 type IQueue = queue.IQueue
