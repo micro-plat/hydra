@@ -43,6 +43,7 @@ func NewRPCCtxSerivce(rpcServiceName string, rpcInput ...func(ctx *context.Conte
 		if status != 200 {
 			return context.NewError(status, result)
 		}
+		ctx.Response.SetJSON()
 		ctx.Response.MustContent(status, result)
 		return
 	}
@@ -76,6 +77,7 @@ func NewRPCSerivce(rpcServiceName string, rpcInput ...map[string]string) Service
 		if status != 200 {
 			return context.NewError(status, result)
 		}
+		ctx.Response.SetJSON()
 		ctx.Response.MustContent(status, result)
 		return
 	}
