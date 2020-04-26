@@ -1,11 +1,12 @@
 package context
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/micro-plat/hydra/registry"
 )
 
 // 因为snowFlake目的是解决分布式下生成唯一id 所以ID中是包含集群和节点编号在内的
@@ -25,36 +26,51 @@ const (
 	epoch int64 = 1577808000000 //2020-01-01 0:0:0
 )
 
-//Worker 定义一个woker工作节点所需要的基本参数
-type Worker struct {
+//Snowflake 定义一个woker工作节点所需要的基本参数
+type Snowflake struct {
+	name      string
+	root      string
+	registry  registry.IRegistry
 	mu        sync.Mutex // 添加互斥锁 确保并发安全
 	timestamp int64      // 记录时间戳
 	workerID  int64      // 该节点的ID
 	number    int64      // 当前毫秒已经生成的id序列号(从0开始累加) 1毫秒内最多生成4096个ID
+	closeChan chan struct{}
+	done      bool
 }
 
-//NewWorker  实例化一个工作节点
-func NewWorker(workerID int64) (*Worker, error) {
-	// 要先检测workerID是否在上面定义的范围内
-	if workerID < 0 || workerID > workerMax {
-		return nil, errors.New("Worker ID excess of quantity")
-	}
+//NewSnowflake  实例化一个工作节点
+func NewSnowflake(root string, name string, r registry.IRegistry) (*Snowflake, error) {
+
 	// 生成一个新节点
-	return &Worker{
+	w := &Snowflake{
+		root:      root,
+		name:      name,
+		registry:  r,
 		timestamp: 0,
-		workerID:  workerID,
 		number:    0,
-	}, nil
+		closeChan: make(chan struct{}),
+	}
+	if err := w.watch(); err != nil {
+		return nil, err
+	}
+	if w.workerID < 0 {
+		w.workerID = w.workerID * -1
+	}
+	if w.workerID > workerMax {
+		w.workerID = w.workerID % workerMax
+	}
+	return w, nil
 }
 
-//GetStringID 获取字符串编号
-func (w *Worker) GetStringID(pre ...string) string {
-	return fmt.Sprintf("%s%d", strings.Join(pre, ""), w.GetID())
+//GetString 获取字符串编号
+func (w *Snowflake) GetString(pre ...string) string {
+	return fmt.Sprintf("%s%d", strings.Join(pre, ""), w.Get())
 }
 
-//GetID 接下来我们开始生成id
+//Get 接下来我们开始生成id
 // 生成方法一定要挂载在某个woker下，这样逻辑会比较清晰 指定某个节点生成id
-func (w *Worker) GetID() int64 {
+func (w *Snowflake) Get() int64 {
 	// 获取id最关键的一点 加锁 加锁 加锁
 	w.mu.Lock()
 	defer w.mu.Unlock() // 生成完成后记得 解锁 解锁 解锁
@@ -81,4 +97,51 @@ func (w *Worker) GetID() int64 {
 	// 如果在程序跑了一段时间修改了epoch这个值 可能会导致生成相同的ID
 	ID := int64((now-epoch)<<timeShift | (w.workerID << workerShift) | (w.number))
 	return ID
+}
+
+//watch 监测集群变化
+func (w *Snowflake) watch() (err error) {
+	cldrs, _, err := w.registry.GetChildren(w.root)
+	if err != nil {
+		return err
+	}
+	w.workerID = getIndex(cldrs, w.name)
+
+	//监控子节点变化
+	ch, err := w.registry.WatchChildren(w.root)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case <-w.closeChan:
+				return
+			case cldWatcher := <-ch:
+				if cldWatcher.GetError() == nil {
+					cldrs, _, _ := w.registry.GetChildren(w.root)
+					w.workerID = getIndex(cldrs, w.name)
+				}
+			LOOP:
+				ch, err = w.registry.WatchChildren(w.root)
+				if err != nil {
+					if w.done {
+						return
+					}
+					time.Sleep(time.Second)
+					goto LOOP
+				}
+			}
+		}
+	}()
+	return nil
+}
+func getIndex(children []string, name string) int64 {
+	for i, v := range children {
+		if strings.Contains(v, name) {
+			return int64(i)
+		}
+	}
+	return 0
 }
