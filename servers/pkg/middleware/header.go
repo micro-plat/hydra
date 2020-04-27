@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"strings"
-
 	"github.com/micro-plat/hydra/registry/conf/server/header"
 	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
@@ -13,25 +11,26 @@ var originName = "Origin"
 func Header(h header.IHeader) swap.Handler {
 	return func(r swap.IRequest) {
 
-		if strings.ToUpper(r.GetMethod()) != "OPTIONS" {
-			r.Next()
-		}
+		//1. 业务处理
+		r.Next()
 
+		//2. 获取header配置
 		headers, ok := h.GetConf()
 		if !ok {
 			return
 		}
-		if ok {
-			origin := r.GetHeader(originName)
-			for k, v := range headers {
-				if !headers.IsAccessControlAllowOrigin(k) { //非跨域设置
-					r.Header(k, v)
-					continue
-				}
-				if headers.AllowOrigin(k, v, origin) {
-					r.Header(k, origin)
-				}
+
+		//3. 处理响应header参数
+		origin := r.GetHeader(originName)
+		for k, v := range headers {
+			if !headers.IsAccessControlAllowOrigin(k) { //非跨域设置
+				r.Header(k, v)
+				continue
+			}
+			if headers.AllowOrigin(k, v, origin) {
+				r.Header(k, origin)
 			}
 		}
+
 	}
 }

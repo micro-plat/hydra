@@ -104,3 +104,18 @@ func (c *GinCtx) GetCookie(name string) (string, bool) {
 	}
 	return "", false
 }
+
+//File 输入文件
+func (c *GinCtx) File(f string) {
+	c.Context.File(f)
+}
+
+//GetRequestPath 获取请求路径
+func (c *GinCtx) GetRequestPath() string {
+	return c.Context.Request.URL.Path
+}
+
+//GetResponseParam 获取响应参数
+func (c *GinCtx) GetResponseParam() map[string]interface{} {
+	return nil
+}

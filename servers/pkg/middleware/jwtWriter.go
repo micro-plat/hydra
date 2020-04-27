@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/context"
 	xjwt "github.com/micro-plat/hydra/registry/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/servers/pkg/swap"
 	"github.com/qxnw/lib4go/security/jwt"
@@ -19,7 +18,7 @@ func JwtWriter(f xjwt.IJWTAuth) swap.Handler {
 		if !ok || conf.Disable {
 			return
 		}
-		setJwtResponse(r, conf, context.Response.GetParams()["__jwt_"])
+		setJwtResponse(r, conf, r.GetResponseParam()["__jwt_"])
 	}
 }
 

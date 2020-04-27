@@ -7,6 +7,10 @@ import (
 	"github.com/micro-plat/hydra/registry/conf"
 )
 
+type IMetric interface {
+	GetConf() (*Metric, bool)
+}
+
 type Metric struct {
 	Host     string `json:"host" valid:"requrl,required"`
 	DataBase string `json:"dataBase" valid:"ascii,required"`

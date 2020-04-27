@@ -10,21 +10,23 @@ import (
 func Logging(name string, serverType string) swap.Handler {
 	return func(r swap.IRequest) {
 
-		//整个服务的开始
+		//1. 整个服务的开始,记录请求时间与日志
 		start := time.Now()
 		srvs := r.GetService()
 		log := r.GetLogger(name, srvs)
 		log.Info(serverType+".request:", name, r.GetMethod(), srvs, "from", r.GetClientIP())
 
+		//2. 处理业务
 		r.Next()
 
+		//3. 处理响应
 		if r.GetStatusCode() >= 200 && r.GetStatusCode() < 400 {
 			log.Info(serverType+".response:", name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start))
 		} else {
 			log.Error(serverType+".response:", name, r.GetMethod(), srvs, r.GetStatusCode(), r.GetExt(), time.Since(start))
 		}
 
-		//处理整个请求的关闭
+		//4.释放资源
 		r.Close()
 	}
 }

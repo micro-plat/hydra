@@ -11,6 +11,11 @@ import (
 	"github.com/micro-plat/lib4go/archiver"
 )
 
+//IStatic 静态文件接口
+type IStatic interface {
+	GetConf() (*Static, bool)
+}
+
 //Static 设置静态文件配置
 type Static struct {
 	*option
@@ -23,6 +28,11 @@ func New(opts ...Option) *Static {
 		opt(s.option)
 	}
 	return s
+}
+
+//AllowRequest 是否是合适的请求
+func (s *Static) AllowRequest(m string) bool {
+	return m == "GET" || m == "HEAD"
 }
 
 //GetConf 设置static

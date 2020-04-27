@@ -86,3 +86,18 @@ func (c *PkgCtx) Close() {
 func (c *PkgCtx) GetCookie(name string) (string, bool) {
 	return "", false
 }
+
+//File 输入文件
+func (c *PkgCtx) File(f string) {
+
+}
+
+//GetRequestPath 获取请求路径
+func (c *PkgCtx) GetRequestPath() string {
+	return c.Request.GetService()
+}
+
+//GetResponseParam 获取响应参数
+func (c *PkgCtx) GetResponseParam() map[string]interface{} {
+	return nil
+}

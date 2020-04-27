@@ -9,7 +9,6 @@ func NoResponse() swap.Handler {
 	return func(r swap.IRequest) {
 		r.Next()
 
-		defer r.Close()
 		// if ctx.Writer.Written() {
 		// 	return
 		// }
