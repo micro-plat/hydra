@@ -11,7 +11,7 @@ import (
 
 //IJWTAuth 获取jwt配置
 type IJWTAuth interface {
-	GetConf() (JWTAuth, bool)
+	GetConf() (*JWTAuth, bool)
 }
 
 //JWTAuth jwt配置信息

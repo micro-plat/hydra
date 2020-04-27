@@ -1,4 +1,4 @@
-package Engine
+package dispatcher
 
 import (
 	"sync"

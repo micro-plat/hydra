@@ -6,9 +6,8 @@ package render
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
-
-	"github.com/micro-plat/hydra/servers/pkg/json"
 )
 
 type JSON struct {

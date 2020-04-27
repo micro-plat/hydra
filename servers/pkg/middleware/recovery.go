@@ -16,11 +16,11 @@ var (
 	slash     = []byte("/")
 )
 
-// RecoveryWithWriter returns a middleware for a given writer that recovers from any panics and writes a 500 if there was one.
+//Recovery 用于处理请求过程中出现的非预见的错误
 func Recovery() swap.Handler {
 	return func(r swap.IRequest) {
 		defer func() {
-			logger := getLogger(c)
+			logger := r.GetLogger()
 			if err := recover(); err != nil {
 				if logger != nil {
 					stack := stack(3)

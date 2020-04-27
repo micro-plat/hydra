@@ -13,6 +13,16 @@ type PkgCtx struct {
 	*dispatcher.Context
 }
 
+//GetMethod 获取服务请求方式
+func (c *PkgCtx) GetMethod() string {
+	return c.Request.GetMethod()
+}
+
+//GetService 获取处理服务
+func (c *PkgCtx) GetService() string {
+	return c.Request.GetService()
+}
+
 //GetBody 获取body
 func (c *PkgCtx) GetBody() (string, bool) {
 	if body, ok := c.Request.GetForm()["__body_"]; ok {
@@ -55,4 +65,24 @@ func (c *PkgCtx) GetStatusCode() int {
 //GetExt 获取ext扩展信息
 func (c *PkgCtx) GetExt() string {
 	return c.Context.GetString("__ext__")
+}
+
+//Abort 根据错误码终止应用
+func (c *PkgCtx) Abort(s int) {
+	c.Context.AbortWithStatus(s)
+}
+
+//AbortWithError 根据错误码与错误消息终止应用
+func (c *PkgCtx) AbortWithError(s int, err error) {
+	c.Context.AbortWithError(s, err)
+}
+
+//Close 关闭并释放所有资源
+func (c *PkgCtx) Close() {
+
+}
+
+//GetCookie 获取cookie信息
+func (c *PkgCtx) GetCookie(name string) (string, bool) {
+	return "", false
 }

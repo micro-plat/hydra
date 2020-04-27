@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"strings"
+
 	"github.com/micro-plat/hydra/registry/conf/server/header"
 	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
@@ -11,7 +13,9 @@ var originName = "Origin"
 func Header(h header.IHeader) swap.Handler {
 	return func(r swap.IRequest) {
 
-		r.Next()
+		if strings.ToUpper(r.GetMethod()) != "OPTIONS" {
+			r.Next()
+		}
 
 		headers, ok := h.GetConf()
 		if !ok {

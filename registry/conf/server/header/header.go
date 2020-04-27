@@ -13,7 +13,7 @@ type IHeader interface {
 }
 
 //Headers http头信息
-type Headers = option
+type Headers option
 
 //NewHeader 构建请求的头配置
 func NewHeader(opts ...Option) Headers {
@@ -25,13 +25,13 @@ func NewHeader(opts ...Option) Headers {
 }
 
 //IsAccessControlAllowOrigin 是否允许跨域访问
-func (h *Headers) IsAccessControlAllowOrigin(h string) bool {
-	return h == "Access-Control-Allow-Origin"
+func (h Headers) IsAccessControlAllowOrigin(k string) bool {
+	return k == "Access-Control-Allow-Origin"
 }
 
 //AllowOrigin 是否允许跨域访问
-func (h *Headers) AllowOrigin(h string, v string, origin string) bool {
-	return h == "Access-Control-Allow-Origin" && origin != "" && (v == "*" || strings.Contains(v, origin))
+func (h Headers) AllowOrigin(k string, v string, origin string) bool {
+	return h.IsAccessControlAllowOrigin(k) && origin != "" && (v == "*" || strings.Contains(v, origin))
 }
 
 //GetConf 设置header

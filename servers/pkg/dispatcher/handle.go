@@ -2,7 +2,7 @@ package dispatcher
 
 type HandlerFunc func(*Context)
 
-func (h HandlerFunc) Handle(ctx *dispatcher.Context) {
+func (h HandlerFunc) Handle(ctx *Context) {
 	h(ctx)
 }
 

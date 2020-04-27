@@ -14,6 +14,16 @@ type GinCtx struct {
 	*gin.Context
 }
 
+//GetMethod 获取服务请求方式
+func (c *GinCtx) GetMethod() string {
+	return c.Request.Method
+}
+
+//GetService 获取处理服务
+func (c *GinCtx) GetService() string {
+	return ""
+}
+
 //GetBody 获取body
 func (c *GinCtx) GetBody() (string, bool) {
 	if body, err := ioutil.ReadAll(c.Request.Body); err == nil {
@@ -70,4 +80,27 @@ func (c *GinCtx) GetStatusCode() int {
 //GetExt 获取ext扩展信息
 func (c *GinCtx) GetExt() string {
 	return c.Context.GetString("__ext__")
+}
+
+//Abort 根据错误码终止应用
+func (c *GinCtx) Abort(s int) {
+	c.Context.AbortWithStatus(s)
+}
+
+//AbortWithError 根据错误码与错误消息终止应用
+func (c *GinCtx) AbortWithError(s int, err error) {
+	c.Context.AbortWithError(s, err)
+}
+
+//Close 关闭并释放所有资源
+func (c *GinCtx) Close() {
+
+}
+
+//GetCookie 获取cookie信息
+func (c *GinCtx) GetCookie(name string) (string, bool) {
+	if cookie, err := c.Context.Request.Cookie(name); err == nil {
+		return cookie.Value, true
+	}
+	return "", false
 }
