@@ -12,41 +12,41 @@ import (
 
 //JwtAuth jwt
 func JwtAuth(f xjwt.IJWTAuth) swap.Handler {
-	return func(r swap.IRequest) {
+	return func(ctx swap.IContext) {
 
 		//1. 获取jwt配置
 		jwtAuth, ok := f.GetConf()
 		if !ok || jwtAuth == nil || jwtAuth.Disable {
-			r.Next()
+			ctx.Next()
 			return
 		}
 
 		//2.检查jwt是否有效
 		_, err := checkJWT(r, jwtAuth)
 		if err == nil {
-			r.Next()
+			ctx.Next()
 			return
 		}
 
 		//3.检查是否需要跳过请求
 		if jwtAuth.IsExcluded(r.GetService()) {
-			r.Next()
+			ctx.Next()
 			return
 		}
 
 		//4.jwt验证失败后返回错误
-		r.GetLogger().Error(err)
-		r.Abort(errs.GetCode(err, 401))
+		ctx.Error(err)
+		ctx.Response().Abort(errs.GetCode(err, 401))
 		return
 
 	}
 }
 
 // CheckJWT 检查jwk参数是否合法
-func checkJWT(r swap.IRequest, j *xjwt.JWTAuth) (data interface{}, err error) {
+func checkJWT(ctx swap.IContext, j *xjwt.JWTAuth) (data interface{}, err error) {
 
 	//1. 从请求中获取jwt信息
-	token := getToken(r, j)
+	token := getToken(ctx, j)
 	if token == "" {
 		return nil, errs.NewError(403, fmt.Errorf("%s未传入jwt.token", j.Name))
 	}
@@ -61,17 +61,17 @@ func checkJWT(r swap.IRequest, j *xjwt.JWTAuth) (data interface{}, err error) {
 	}
 
 	//保存到请求头中
-	r.Set("__jwt_", data)
+	ctx.Set("__jwt_", data)
 	return data, nil
 }
 
 //getToken 从请求头或cookie中获取cookie
-func getToken(r swap.IRequest, jwt *xjwt.JWTAuth) string {
+func getToken(r swap.IContext, jwt *xjwt.JWTAuth) string {
 	switch strings.ToUpper(jwt.Source) {
 	case "HEADER", "H":
-		return r.GetHeader(jwt.Name)
+		return ctx.Request().GetHeader(jwt.Name)
 	default:
-		cookie, _ := r.GetCookie(jwt.Name)
+		cookie, _ := ctx.Request().GetCookie(jwt.Name)
 		return cookie
 	}
 }

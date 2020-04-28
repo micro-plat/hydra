@@ -57,10 +57,10 @@ func NewMetric(name string, serverType string, f metric.IMetric) (*Metric, error
 
 //Handle 处理请求
 func (m *Metric) Handle() swap.Handler {
-	return func(r swap.IRequest) {
+	return func(r swap.IContext) {
 
 		//1. 初始化三类统计器---请求的QPS/正在处理的计数器/时间统计器
-		url := r.GetService()
+		url := ctx.Request().GetService()
 		conterName := metrics.MakeName(m.serverType+".server.request", metrics.WORKING, "server", m.name, "host", m.ip, "url", url) //堵塞计数
 		timerName := metrics.MakeName(m.serverType+".server.request", metrics.TIMER, "server", m.name, "host", m.ip, "url", url)    //堵塞计数
 		requestName := metrics.MakeName(m.serverType+".server.request", metrics.QPS, "server", m.name, "host", m.ip, "url", url)    //请求数
@@ -74,14 +74,14 @@ func (m *Metric) Handle() swap.Handler {
 
 		//4. 对服务处理时长进行统计
 		metrics.GetOrRegisterTimer(timerName, m.currentRegistry).Time(func() {
-			r.Next()
+			ctx.Next()
 		})
 
 		//5. 服务处理完成后进行减数
 		counter.Dec(1)
 
 		//6. 初始化第四类统计器----状态码上报
-		statusCode := r.GetStatusCode()
+		statusCode := ctx.GetStatusCode()
 		responseName := metrics.MakeName(m.serverType+".server.response", metrics.METER, "server", m.name, "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
 

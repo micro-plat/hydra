@@ -6,7 +6,7 @@ import (
 
 //NoResponse 处理无响应的返回结果
 func NoResponse() swap.Handler {
-	return func(r swap.IRequest) {
+	return func(r swap.IContext) {
 		r.Next()
 
 		// if ctx.Writer.Written() {

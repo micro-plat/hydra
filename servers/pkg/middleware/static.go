@@ -12,7 +12,7 @@ import (
 
 //Static 静态文件处理插件
 func Static(f static.IStatic) swap.Handler {
-	return func(r swap.IRequest) {
+	return func(r swap.IContext) {
 		opt, ok := f.GetConf()
 		if !ok || opt.Disable || opt.AllowRequest(r.GetMethod()) {
 			r.Next()

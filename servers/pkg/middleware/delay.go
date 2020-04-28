@@ -12,8 +12,8 @@ const xAddDelay = "X-Add-Delay"
 
 //Delay 处理请求的延时时长
 func Delay() swap.Handler {
-	return func(r swap.IRequest) {
-		if delay := types.GetInt64(r.GetHeader(xAddDelay), 0); delay > 0 {
+	return func(ctx swap.IContext) {
+		if delay := types.GetInt64(ctx.Request().GetHeader(xAddDelay), 0); delay > 0 {
 			time.Sleep(time.Duration(delay) * time.Microsecond)
 		}
 		r.Next()

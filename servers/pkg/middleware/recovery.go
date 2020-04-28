@@ -18,7 +18,7 @@ var (
 
 //Recovery 用于处理请求过程中出现的非预见的错误
 func Recovery() swap.Handler {
-	return func(r swap.IRequest) {
+	return func(r swap.IContext) {
 		defer func() {
 			logger := r.GetLogger()
 			if err := recover(); err != nil {

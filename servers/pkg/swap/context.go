@@ -2,36 +2,11 @@ package swap
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/servers/pkg/dispatcher"
-	"github.com/micro-plat/lib4go/logger"
 )
 
-//IRequest 用于中间件处理的上下文管理
-type IRequest interface {
-	GetMethod() string
-	GetService() string
-	GetBody() (string, bool)
-	GetRequestPath() string
-
-	GetResponseParam() map[string]interface{}
-	GetClientIP() string
-	GetStatusCode() int
-	GetExt() string
-	GetHeader(string) string
-	Header(string, string)
-	GetCookie(string) (string, bool)
-	GetLogger(name ...string) logger.ILogger
-	conf.IMetadata
-	Next()
-	Abort(int)
-	AbortWithError(int, error)
-	Close()
-	File(string)
-}
-
 //Handler 通用的中间件处理服务
-type Handler func(IRequest)
+type Handler func(IContext)
 
 //PkgFunc 返回当前包对应的处理函数
 func (h Handler) PkgFunc() dispatcher.HandlerFunc {

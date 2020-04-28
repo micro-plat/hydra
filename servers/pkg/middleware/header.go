@@ -9,7 +9,7 @@ var originName = "Origin"
 
 //Header 头设置
 func Header(h header.IHeader) swap.Handler {
-	return func(r swap.IRequest) {
+	return func(ctx swap.IContext) {
 
 		//1. 业务处理
 		r.Next()
@@ -21,14 +21,14 @@ func Header(h header.IHeader) swap.Handler {
 		}
 
 		//3. 处理响应header参数
-		origin := r.GetHeader(originName)
+		origin := ctx.Request().GetHeader(originName)
 		for k, v := range headers {
 			if !headers.IsAccessControlAllowOrigin(k) { //非跨域设置
-				r.Header(k, v)
+				ctx.Response().Header(k, v)
 				continue
 			}
 			if headers.AllowOrigin(k, v, origin) {
-				r.Header(k, origin)
+				ctx.Response().Header(k, origin)
 			}
 		}
 
