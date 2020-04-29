@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/engines/context"
-	xgin "github.com/micro-plat/hydra/engines/context/gin"
+	"github.com/micro-plat/hydra/context"
+	xgin "github.com/micro-plat/hydra/context/gin"
 )
 
 type iNext interface {

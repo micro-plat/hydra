@@ -7,7 +7,7 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
-		h := ctx.Server().GetHandler(service)
+		h := ctx.Application().GetHandler(ctx.Server().GetMainConf().GetServerType(), service)
 		result := h.Handle(ctx)
 		if ctx.Response().Written() {
 			return

@@ -49,15 +49,16 @@ func (h *Routers) Append(path string, service string, action ...string) *Routers
 }
 
 //GetConf 设置路由
-func GetConf(cnf conf.IMainConf) (router *Routers, err error) {
-	if _, err = cnf.GetSubObject("router", &router); err == conf.ErrNoSetting || len(router.Routers) == 0 {
+func GetConf(cnf conf.IMainConf) (router *Routers) {
+	_, err := cnf.GetSubObject("router", &router)
+	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		router = NewRouters()
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("路由:%v", err)
+		panic(fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err))
 	}
 	if b, err := govalidator.ValidateStruct(&router); !b {
-		return nil, fmt.Errorf("router配置有误:%v", err)
+		panic(fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err))
 	}
-	return router, nil
+	return router
 }

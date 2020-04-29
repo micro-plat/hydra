@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/micro-plat/hydra/engines/context"
+	"github.com/micro-plat/hydra/context"
 	xjwt "github.com/micro-plat/hydra/registry/conf/server/auth/jwt"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/security/jwt"

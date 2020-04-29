@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/engines/context"
+	"github.com/micro-plat/hydra/context"
 	xjwt "github.com/micro-plat/hydra/registry/conf/server/auth/jwt"
 	"github.com/qxnw/lib4go/security/jwt"
 )

@@ -5,7 +5,7 @@ import (
 )
 
 //MainConfName 主配置中的关键配置名
-var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "host", "dn"}
+var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "dn"}
 
 //SubConfName 子配置中的关键配置名
 var SubConfName = []string{"router"}
