@@ -2,9 +2,8 @@ package middleware
 
 import (
 	"fmt"
+	"sync"
 
-	"github.com/micro-plat/hydra/registry/conf/server/metric"
-	"github.com/micro-plat/hydra/servers/pkg/swap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/metrics"
 	"github.com/micro-plat/lib4go/net"
@@ -15,55 +14,60 @@ type Metric struct {
 	reporter        metrics.IReporter
 	logger          *logger.Logger
 	currentRegistry metrics.Registry
-	name            string
-	serverType      string
+	needCollect     bool
+	once            sync.Once
 	ip              string
 }
 
 //NewMetric new metric
-func NewMetric(name string, serverType string, f metric.IMetric) (*Metric, error) {
+func NewMetric() *Metric {
+	return &Metric{}
 
-	//1. 检查metric配置
-	metric, ok := f.GetConf()
-	if !ok || metric.Disable {
-		return &Metric{}, nil
-	}
+}
+func (m *Metric) onceDo(ctx IMiddleContext) {
+	m.once.Do(func() {
+		metric := ctx.Server().GetMetricConf()
+		if metric.Disable {
+			return
+		}
 
-	//2.创建配置信息
-	m := &Metric{
-		name:            name,
-		serverType:      serverType,
-		currentRegistry: metrics.NewRegistry(),
-		ip:              net.GetLocalIPAddress(),
-		logger:          logger.New("metric"),
-	}
+		m.currentRegistry = metrics.NewRegistry()
+		m.ip = net.GetLocalIPAddress()
+		m.logger = logger.New("metric")
 
-	//3. 创建上报服务
-	var err error
-	m.reporter, err = metrics.InfluxDB(m.currentRegistry,
-		metric.Cron,
-		metric.Host, metric.DataBase,
-		metric.UserName,
-		metric.Password, m.logger)
-	if err != nil {
-		return nil, err
-	}
+		//2. 创建上报服务
+		var err error
+		m.reporter, err = metrics.InfluxDB(m.currentRegistry,
+			metric.Cron,
+			metric.Host, metric.DataBase,
+			metric.UserName,
+			metric.Password, m.logger)
+		if err != nil {
+			panic(fmt.Errorf("初始化metric失败:%w", err))
+		}
+		m.needCollect = true
+		//定时上报
+		go m.reporter.Run()
 
-	//定时上报
-	go m.reporter.Run()
-
-	return m, nil
+	})
 }
 
 //Handle 处理请求
-func (m *Metric) Handle() swap.Handler {
-	return func(r swap.IContext) {
+func (m *Metric) Handle() Handler {
+	return func(ctx IMiddleContext) {
+
+		//执行首次初始化
+		m.onceDo(ctx)
+		if !m.needCollect {
+			ctx.Next()
+			return
+		}
 
 		//1. 初始化三类统计器---请求的QPS/正在处理的计数器/时间统计器
-		url := ctx.Request().GetService()
-		conterName := metrics.MakeName(m.serverType+".server.request", metrics.WORKING, "server", m.name, "host", m.ip, "url", url) //堵塞计数
-		timerName := metrics.MakeName(m.serverType+".server.request", metrics.TIMER, "server", m.name, "host", m.ip, "url", url)    //堵塞计数
-		requestName := metrics.MakeName(m.serverType+".server.request", metrics.QPS, "server", m.name, "host", m.ip, "url", url)    //请求数
+		url := ctx.Request().Path().GetService()
+		conterName := metrics.MakeName(ctx.Server().GetServerType()+".server.request", metrics.WORKING, "server", ctx.Server().GetServerName(), "host", m.ip, "url", url) //堵塞计数
+		timerName := metrics.MakeName(ctx.Server().GetServerType()+".server.request", metrics.TIMER, "server", ctx.Server().GetServerName(), "host", m.ip, "url", url)    //堵塞计数
+		requestName := metrics.MakeName(ctx.Server().GetServerType()+".server.request", metrics.QPS, "server", ctx.Server().GetServerName(), "host", m.ip, "url", url)    //请求数
 
 		//2. 对QPS进行计数
 		metrics.GetOrRegisterQPS(requestName, m.currentRegistry).Mark(1)
@@ -81,8 +85,8 @@ func (m *Metric) Handle() swap.Handler {
 		counter.Dec(1)
 
 		//6. 初始化第四类统计器----状态码上报
-		statusCode := ctx.GetStatusCode()
-		responseName := metrics.MakeName(m.serverType+".server.response", metrics.METER, "server", m.name, "host", m.ip,
+		statusCode := ctx.Response().GetStatusCode()
+		responseName := metrics.MakeName(ctx.Server().GetServerType()+".server.response", metrics.METER, "server", ctx.Server().GetServerName(), "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
 
 		//7. 对服务处理结果的状态码进行上报

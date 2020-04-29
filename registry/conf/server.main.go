@@ -10,6 +10,7 @@ import (
 type IMainConf interface {
 	IPub
 	IsStarted() bool
+	IsTrace() bool
 	GetClusterNodes() CNodes
 	GetMainConf() *JSONConf
 	GetMainObject(v interface{}) (int32, error)
@@ -82,6 +83,11 @@ func (c *MainConf) load() (err error) {
 		c.subConfs[p] = *childConf
 	}
 	return nil
+}
+
+//IsTrace 是否跟踪请求或响应
+func (c *MainConf) IsTrace() bool {
+	return c.mainConf.GetString("trace", "true") == "true"
 }
 
 //GetRegistry 获取注册中心

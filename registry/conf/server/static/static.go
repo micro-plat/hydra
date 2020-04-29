@@ -36,17 +36,18 @@ func (s *Static) AllowRequest(m string) bool {
 }
 
 //GetConf 设置static
-func GetConf(cnf conf.IMainConf) (static *Static, err error) {
+func GetConf(cnf conf.IMainConf) (static *Static) {
 	//设置静态文件路由
-	_, err = cnf.GetSubObject("static", &static)
+	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
-		return nil, err
+		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	if err == conf.ErrNoSetting {
-		static = New()
+		static = New(WithDisable())
+		return
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
-		return nil, fmt.Errorf("static配置有误:%v", err)
+		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
 	return

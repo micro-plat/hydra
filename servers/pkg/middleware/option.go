@@ -2,19 +2,16 @@ package middleware
 
 import (
 	"strings"
-
-	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 //Options 请求处理
-func Options() swap.Handler {
-	return func(r swap.IContext) {
-
+func Options() Handler {
+	return func(ctx IMiddleContext) {
 		//options请求则自动不再进行后续处理
-		if strings.ToUpper(r.GetMethod()) == "OPTIONS" {
+		if strings.ToUpper(ctx.Request().Path().GetMethod()) == "OPTIONS" {
 			return
 		}
-		r.Next()
+		ctx.Next()
 
 	}
 }

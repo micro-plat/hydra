@@ -7,45 +7,44 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/registry/conf/server/static"
-	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 //Static 静态文件处理插件
-func Static(f static.IStatic) swap.Handler {
-	return func(r swap.IContext) {
-		opt, ok := f.GetConf()
-		if !ok || opt.Disable || opt.AllowRequest(r.GetMethod()) {
-			r.Next()
+func Static() Handler {
+	return func(ctx IMiddleContext) {
+		opt := ctx.Server().GetStaticConf()
+		if opt.Disable || opt.AllowRequest(ctx.Request().Path().GetMethod()) {
+			ctx.Next()
 			return
 		}
 
-		var rPath = r.GetRequestPath()
+		var rPath = ctx.Request().Path().GetPath()
 		s, xname := MustStatic(opt, getDefPath(opt, rPath))
 		if !s {
-			r.Next()
+			ctx.Next()
 			return
 		}
 
-		r.Set("__ext__", "static")
+		ctx.Response().AddSpecial("static")
 		fPath := filepath.Join(opt.Dir, xname)
 		finfo, err := os.Stat(fPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				r.GetLogger().Error(fmt.Errorf("找不到文件:%s", fPath))
-				r.Abort(404)
+				ctx.Log().Error(fmt.Errorf("找不到文件:%s", fPath))
+				ctx.Response().Abort(404)
 				return
 			}
-			r.GetLogger().Error(fmt.Errorf("%s,err:%v", fPath, err))
-			r.Abort(500)
+			ctx.Log().Error(fmt.Errorf("%s,err:%v", fPath, err))
+			ctx.Response().Abort(500)
 			return
 		}
 		if finfo.IsDir() {
-			r.GetLogger().Error(fmt.Errorf("找不到文件:%s", fPath))
-			r.Abort(404)
+			ctx.Log().Error(fmt.Errorf("找不到文件:%s", fPath))
+			ctx.Response().Abort(404)
 			return
 		}
 		//文件已存在，则返回文件
-		r.File(fPath)
+		ctx.Response().File(fPath)
 		return
 	}
 }

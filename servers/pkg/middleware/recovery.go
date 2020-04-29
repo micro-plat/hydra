@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"runtime"
-
-	"github.com/micro-plat/hydra/servers/pkg/swap"
 )
 
 var (
@@ -17,19 +15,16 @@ var (
 )
 
 //Recovery 用于处理请求过程中出现的非预见的错误
-func Recovery() swap.Handler {
-	return func(r swap.IContext) {
+func Recovery() Handler {
+	return func(ctx IMiddleContext) {
 		defer func() {
-			logger := r.GetLogger()
 			if err := recover(); err != nil {
-				if logger != nil {
-					stack := stack(3)
-					logger.Printf("[Recovery] panic recovered:\n%s\n%s", err, stack)
-				}
-				r.Abort(500)
+				stack := stack(3)
+				ctx.Log().Errorf("[Recovery] panic recovered:\n%s\n%s", err, stack)
+				ctx.Response().Abort(500)
 			}
 		}()
-		r.Next()
+		ctx.Next()
 	}
 }
 

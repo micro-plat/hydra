@@ -36,18 +36,17 @@ func NewMetric(host string, db string, cron string, opts ...Option) *Metric {
 }
 
 //GetConf 设置metric
-func GetConf(cnf conf.IMainConf) (metric *Metric, err error) {
-	_, err = cnf.GetSubObject("metric", &metric)
+func GetConf(cnf conf.IMainConf) (metric *Metric) {
+	_, err := cnf.GetSubObject("metric", &metric)
 	if err != nil && err != conf.ErrNoSetting {
-		return nil, err
+		panic(err)
 	}
 	if err == conf.ErrNoSetting {
 		metric.Disable = true
-	} else {
-		if b, err := govalidator.ValidateStruct(&metric); !b {
-			err = fmt.Errorf("metric配置有误:%v", err)
-			return nil, err
-		}
+		return
+	}
+	if b, err := govalidator.ValidateStruct(&metric); !b {
+		panic(fmt.Errorf("metric配置有误:%v", err))
 	}
 	return
 }

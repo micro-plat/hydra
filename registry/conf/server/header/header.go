@@ -35,10 +35,13 @@ func (h Headers) AllowOrigin(k string, v string, origin string) bool {
 }
 
 //GetConf 设置header
-func GetConf(cnf conf.IMainConf) (header *Headers, err error) {
-	_, err = cnf.GetSubObject("header", &header)
+func GetConf(cnf conf.IMainConf) (header Headers) {
+	_, err := cnf.GetSubObject("header", &header)
 	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("header配置有误:%v", err)
+		panic(fmt.Errorf("header配置有误:%v", err))
+	}
+	if err == conf.ErrNoSetting {
+		return nil
 	}
 	return
 }

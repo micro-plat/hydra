@@ -9,11 +9,6 @@ import (
 	"github.com/micro-plat/lib4go/utility"
 )
 
-//IJWTAuth 获取jwt配置
-type IJWTAuth interface {
-	GetConf() (*JWTAuth, bool)
-}
-
 //JWTAuth jwt配置信息
 type JWTAuth struct {
 	*jwtOption
@@ -100,14 +95,18 @@ func (a *JWTAuth) IsExcluded(service string) bool {
 }
 
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) (jwt *JWTAuth, err error) {
-	if _, err := cnf.GetSubObject("jwt", &jwt); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("jwt配置有误:%v", err)
+func GetConf(cnf conf.IMainConf) (jwt *JWTAuth) {
+	_, err := cnf.GetSubObject("jwt", &jwt)
+	if err == conf.ErrNoSetting {
+		return &JWTAuth{jwtOption: &jwtOption{Disable: true}}
+	}
+	if err != nil && err != conf.ErrNoSetting {
+		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
 	if jwt != nil {
 		if b, err := govalidator.ValidateStruct(&jwt); !b {
-			return nil, fmt.Errorf("jwt配置有误:%v", err)
+			panic(fmt.Errorf("jwt配置有误:%v", err))
 		}
 	}
-	return jwt, nil
+	return jwt
 }
