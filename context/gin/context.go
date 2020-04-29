@@ -11,13 +11,12 @@ var _ context.IContext = &GinCtx{}
 
 //GinCtx gin.context
 type GinCtx struct {
-	context     *gin.Context
-	log         logger.ILogger
-	request     *request
-	response    *response
-	user        *user
-	server      server.IServerConf
-	application context.IApplication
+	context  *gin.Context
+	log      logger.ILogger
+	request  *request
+	response *response
+	user     *user
+	server   server.IServerConf
 }
 
 //NewGinCtx 构建基于gin.Context的上下文
@@ -55,11 +54,6 @@ func (c *GinCtx) Log() logger.ILogger {
 //Server 获取服务器配置
 func (c *GinCtx) Server() server.IServerConf {
 	return c.server
-}
-
-//Application 获取应用配置
-func (c *GinCtx) Application() context.IApplication {
-	return c.application
 }
 
 //Close 关闭并释放所有资源

@@ -1,13 +1,14 @@
 package middleware
 
 import (
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/lib4go/errs"
 )
 
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
-		h := ctx.Application().GetHandler(ctx.Server().GetMainConf().GetServerType(), service)
+		h := application.Current().GetHandler(ctx.Server().GetMainConf().GetServerType(), service)
 		result := h.Handle(ctx)
 		if ctx.Response().Written() {
 			return

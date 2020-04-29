@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/pub"
+	"github.com/micro-plat/hydra/servers"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -106,3 +107,17 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 			cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 10)))
 
 }
+
+func init() {
+	fn := func(c server.IServerConf) (servers.IResponsiveServer, error) {
+		return NewResponsive(c)
+	}
+	servers.Register(API, fn)
+	servers.Register(Web, fn)
+}
+
+//API api服务器
+const API = "api"
+
+//Web web服务器
+const Web = "web"

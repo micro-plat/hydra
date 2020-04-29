@@ -74,17 +74,12 @@ type IUser interface {
 }
 
 //IApplication 应用信息
-type IApplication interface {
-	GetCMD() string
-	GetHandler(tp string, service string) IHandler
-}
 
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
 	Request() IRequest
 	Response() IResponse
 	Server() server.IServerConf
-	Application() IApplication
 	User() IUser
 	Log() logger.ILogger
 	Close()

@@ -22,13 +22,13 @@ type IServerCreator interface {
 type IResponsiveServer interface {
 	Start() error
 	Notify(server.IServerConf) error
-	Shutdown() error
+	Shutdown()
 }
 
 var creators = make(map[string]IServerCreator)
 
 //Register 注册服务器生成器
-func Register(tp string, creator IServerCreator) {
+func Register(tp string, creator IServerCreatorHandler) {
 	if _, ok := creators[tp]; ok {
 		panic(fmt.Sprintf("服务器[%s]不能多次注册", tp))
 	}
