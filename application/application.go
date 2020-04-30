@@ -25,7 +25,10 @@ var PlatName string = ""
 var SysName string = ""
 
 //ServerTypes 服务器类型
-var ServerTypes cli.StringSlice
+var ServerTypes []string
+
+//ServerTypeNames 服务类型名称
+var ServerTypeNames string
 
 //ClusterName 集群名称
 var ClusterName string = ""

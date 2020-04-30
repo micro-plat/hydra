@@ -19,6 +19,7 @@ type IServerConf interface {
 	GetMetricConf() *metric.Metric
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
+	GetFSAConf() *fsa.FixedSecretAuth
 }
 
 //ServerConf 服务器配置信息
@@ -82,4 +83,8 @@ func (s *ServerConf) GetStaticConf() *static.Static {
 //GetRouterConf 获取路由信息
 func (s *ServerConf) GetRouterConf() *router.Routers {
 	return router.GetConf(s.mainConf)
+}
+//GetRouterConf 获取路由信息
+func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
+	return fsa.GetConf(s.mainConf)
 }
