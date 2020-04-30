@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+//getFlags 获取运行时的参数
 func getFlags() []cli.Flag {
 	flags := make([]cli.Flag, 0, 4)
 	if application.RegistryAddr == "" {
@@ -36,7 +37,7 @@ func getFlags() []cli.Flag {
 			flags = append(flags, cli.StringFlag{
 				Name:        "plat,p",
 				Destination: &application.PlatName,
-				EnvVar:      "hydra_plat",
+				EnvVar:      "platName",
 				Usage:       "\033[;31m*\033[0m平台名称",
 			})
 		}
@@ -44,23 +45,23 @@ func getFlags() []cli.Flag {
 			flags = append(flags, cli.StringFlag{
 				Name:        "system,s",
 				Destination: &application.SysName,
-				EnvVar:      "hydra_system",
+				EnvVar:      "sysName",
 				Usage:       "\033[;31m*\033[0m系统名称",
 			})
 		}
 		if len(application.ServerTypes) == 0 {
-			flags = append(flags, cli.StringFlag{
+			flags = append(flags, cli.StringSliceFlag{
 				Name:        "server-types,S",
 				Destination: &application.ServerTypes,
-				EnvVar:      "hydra_server_types",
-				Usage:       fmt.Sprintf("\033[;31m*\033[0m服务类型，目前支持的服务器类型有%v", supportServerType),
+				EnvVar:      "serverType",
+				Usage:       fmt.Sprintf("\033[;31m*\033[0m服务类型，目前支持的服务器类型有api,web,rpc,mqc,cron,ws"),
 			})
 		}
 		if application.ClusterName == "" {
 			flags = append(flags, cli.StringFlag{
 				Name:        "cluster,c",
 				Destination: &application.ClusterName,
-				EnvVar:      "hydra_cluster",
+				EnvVar:      "clusterName",
 				Usage:       "\033[;31m*\033集群名称",
 			})
 		}
@@ -69,7 +70,7 @@ func getFlags() []cli.Flag {
 	flags = append(flags, cli.StringFlag{
 		Name:        "trace,t",
 		Destination: &application.Trace,
-		EnvVar:      "hydra_trace",
+		EnvVar:      "trace",
 		Usage: `-性能跟踪，可选项。用于生成golang的pprof的性能分析数据,支持的模式有:cpu,mem,block,mutex,web。其中web是以http
 	 服务的方式提供pprof数据。该参数可从环境变量中获取，环境变量名为:`,
 	})

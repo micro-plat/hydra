@@ -13,6 +13,7 @@ require (
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a
 	google.golang.org/grpc v1.27.1
 	gopkg.in/yaml.v2 v2.2.8
+	github.com/urfave/cli v2.2.0
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

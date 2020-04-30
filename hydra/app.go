@@ -8,8 +8,7 @@ import (
 
 //MicroApp  微服务应用
 type MicroApp struct {
-	app    *cli.App
-	option *option
+	app *cli.App
 }
 
 //NewApp 创建微服务应用

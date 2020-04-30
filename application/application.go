@@ -1,12 +1,16 @@
 package application
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/urfave/cli"
 )
 
 //AppName 当前应用程序的名称
-var AppName string = ""
+var AppName string = filepath.Base(os.Args[0])
 
 //Version 版本号
 var Version string = "1.0.0"
@@ -21,7 +25,7 @@ var PlatName string = ""
 var SysName string = ""
 
 //ServerTypes 服务器类型
-var ServerTypes []string = []string{}
+var ServerTypes cli.StringSlice
 
 //ClusterName 集群名称
 var ClusterName string = ""
@@ -30,7 +34,7 @@ var ClusterName string = ""
 var Name string = ""
 
 //Trace 显示请求与响应信息
-var Trace bool = false
+var Trace string
 
 //Bind 绑定输入参数
 func Bind() error {
