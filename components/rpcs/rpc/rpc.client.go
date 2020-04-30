@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/components/rpcs/balancer"
-	"github.com/micro-plat/hydra/servers/rpc/pb"
+	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/lib4go/logger"
 
 	"errors"

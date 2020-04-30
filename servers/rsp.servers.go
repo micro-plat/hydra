@@ -14,6 +14,7 @@ import (
 //RspServers 响应式服务管理器,监控配置变更自动创建、停止服务器
 type RspServers struct {
 	registryAddr string
+	registry     registry.IRegistry
 	path         []string
 	notify       chan *watcher.ValueChangeArgs
 	done         bool
@@ -42,7 +43,7 @@ func NewRspServers(registryAddr string, platName, sysName string, serverTypes []
 func (r *RspServers) Start() (err error) {
 
 	//初始化注册中心
-	r, err := registry.NewRegistryWithAddress(r.registryAddr, log)
+	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
 	if err != nil {
 		err = fmt.Errorf("注册中心初始化失败:%s(%v)", r.registryAddr, err)
 		return

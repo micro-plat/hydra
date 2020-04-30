@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/logger"
 	"google.golang.org/grpc/naming"
 )
 
@@ -30,7 +31,7 @@ func NewResolver(plat string, server string, service string, sortPrefix string) 
 // Resolve to resolve the service from zookeeper, target is the dial address of zookeeper
 // target example: "zk://192.168.0.159:2181,192.168.0.154:2181"
 func (v *Resolver) Resolve(target string) (naming.Watcher, error) {
-	r, err := registry.NewRegistryWithAddress(target, nil)
+	r, err := registry.NewRegistry(target, logger.New("rpc.resolve"))
 	if err != nil {
 		return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 	}

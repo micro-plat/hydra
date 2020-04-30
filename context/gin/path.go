@@ -32,6 +32,21 @@ func (c *rpath) GetHeader(key string) string {
 	return c.Context.GetHeader(key)
 }
 
+//GetHeaders 获取请求的header
+func (c *rpath) GetHeaders() map[string][]string {
+	return c.Context.Request.Header
+}
+
+//GetHeaders 获取请求的header
+func (c *rpath) GetCookies() map[string]string {
+	out := make(map[string]string)
+	cookies := c.Context.Request.Cookies()
+	for _, cookie := range cookies {
+		out[cookie.Name] = cookie.Value
+	}
+	return out
+}
+
 //GetCookie 获取cookie信息
 func (c *rpath) GetCookie(name string) (string, bool) {
 	if cookie, err := c.Context.Request.Cookie(name); err == nil {

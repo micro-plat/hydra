@@ -67,7 +67,7 @@ func getFlags() []cli.Flag {
 		}
 	}
 
-	flags = append(flags, cli.BoolFlag{
+	flags = append(flags, cli.StringFlag{
 		Name:        "trace,t",
 		Destination: &application.Trace,
 		EnvVar:      "trace",

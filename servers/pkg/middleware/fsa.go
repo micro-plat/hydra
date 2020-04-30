@@ -1,28 +1,78 @@
 package middleware
 
+import (
+	"fmt"
+	"strings"
 
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/lib4go/net"
+	"github.com/qxnw/lib4go/security/md5"
+	"github.com/qxnw/lib4go/security/sha1"
+	"github.com/qxnw/lib4go/security/sha256"
+)
 
 //FixedSecretAuth 静态密钥验证
 func FixedSecretAuth() Handler {
 	return func(ctx IMiddleContext) {
 
+		//获取FSA配置
+		auth := ctx.Server().GetFSAConf()
+		if !auth.Contains(ctx.Request().Path().GetService()) {
+			ctx.Next()
+			return
+		}
 
-		fsConf, err := ctx.Request.GetFixedSecretConfig()
-	if err == conf.ErrNoSetting || !ctx.IsMicroServer() {
-		return nil
+		//检查必须参数
+		ctx.Response().AddSpecial("fsa")
+		if err := ctx.Request().Check("sign", "timestamp"); err != nil {
+			ctx.Response().AbortWithError(402, err)
+			return
+		}
+
+		//验证签名
+		_, err := checkSign(ctx.Request(), auth.Secret, auth.Mode)
+		if err == nil {
+			ctx.Next()
+			return
+		}
+		ctx.Response().AbortWithError(401, err)
 	}
-	if !fsConf.Contains(ctx.Service) {
-		return nil
+}
+
+//checkSign 检查签名是否正确
+func checkSign(r context.IRequest, secret string, tp string) (bool, error) {
+	sign, raw := getSignRaw(r, "", "")
+	var expect string
+	switch strings.ToUpper(tp) {
+	case "MD5":
+		expect = md5.Encrypt(raw + secret)
+	case "SHA1":
+		expect = sha1.Encrypt(raw + secret)
+	case "SHA256":
+		expect = sha256.Encrypt(raw + secret)
+	default:
+		return false, fmt.Errorf("不支持的签名验证方式:%v", tp)
 	}
-	ctx.Response.SetHeader("__auth_tag_", "FAUTH")
-	if err := ctx.Request.Check("sign", "timestamp"); err != nil {
-		return context.NewError(context.ERR_NOT_ACCEPTABLE, err)
+	if strings.EqualFold(expect, sign) {
+		return true, nil
 	}
-	_, err = ctx.Request.CheckSign(fsConf.Secret, fsConf.Mode)
-	if err == nil {
-		return nil
+	return false, fmt.Errorf("raw:%s,expect:%s,actual:%s", raw, expect, sign)
+}
+
+//getSignRaw 检查签名原串
+func getSignRaw(r context.IRequest, a string, b string) (string, string) {
+	keys := r.GetKeys()
+	values := net.NewValues()
+	var sign string
+	for _, key := range keys {
+		switch key {
+		case "sign":
+			sign = r.GetString(key)
+		default:
+			values.Set(key, r.GetString(key))
+		}
 	}
-	return context.NewErrorf(401, "签名认证失败%v", err)
-		ctx.Next()
-	}
+	values.Sort()
+	return sign, values.Join(a, b)
+
 }

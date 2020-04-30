@@ -3,6 +3,7 @@ package gin
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -85,6 +86,24 @@ func (r *request) GetKeys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+//GetData 获取请求的参数信息
+func (r *request) GetData() (map[string]interface{}, error) {
+	body, err := r.body.GetBodyMap()
+	if err != nil {
+		return nil, err
+	}
+	query := r.Context.Request.URL.Query()
+	for k, v := range query {
+		body[k] = strings.Join(v, ",")
+	}
+	forms := r.Context.Request.PostForm
+	for k, v := range forms {
+		body[k] = strings.Join(v, ",")
+	}
+	return body, nil
+
 }
 
 //Get 获取字段的值

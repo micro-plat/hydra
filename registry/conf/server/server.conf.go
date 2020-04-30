@@ -3,7 +3,9 @@ package server
 import (
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/registry/conf/server/auth/fsa"
 	"github.com/micro-plat/hydra/registry/conf/server/auth/jwt"
+	"github.com/micro-plat/hydra/registry/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/registry/conf/server/header"
 	"github.com/micro-plat/hydra/registry/conf/server/metric"
 	"github.com/micro-plat/hydra/registry/conf/server/router"
@@ -20,6 +22,7 @@ type IServerConf interface {
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
 	GetFSAConf() *fsa.FixedSecretAuth
+	GetRASConf() ras.RASAuths
 }
 
 //ServerConf 服务器配置信息
@@ -84,7 +87,13 @@ func (s *ServerConf) GetStaticConf() *static.Static {
 func (s *ServerConf) GetRouterConf() *router.Routers {
 	return router.GetConf(s.mainConf)
 }
+
 //GetRouterConf 获取路由信息
 func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
 	return fsa.GetConf(s.mainConf)
+}
+
+//GetRASConf 获取路由信息
+func (s *ServerConf) GetRASConf() ras.RASAuths {
+	return ras.GetConf(s.mainConf)
 }

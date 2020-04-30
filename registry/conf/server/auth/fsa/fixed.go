@@ -38,20 +38,6 @@ func (a *FixedSecretAuth) Contains(p string) bool {
 	return false
 }
 
-//GetConf 获取FixedSecret
-func GetConf(cnf conf.IMainConf) (fsa *FixedSecretAuth, err error) {
-	if _, err := cnf.GetSubObject("fixed-secret", &fsa); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("fixed-secret配置有误:%v", err)
-	}
-	if fsa != nil {
-		if b, err := govalidator.ValidateStruct(&fsa); !b {
-			return nil, fmt.Errorf("fixed-secret配置有误:%v", err)
-		}
-	}
-	return fsa, nil
-}
-
-
 //GetConf 获取FixedSecretAuth
 func GetConf(cnf conf.IMainConf) (fsa *FixedSecretAuth) {
 	_, err := cnf.GetSubObject("fixed-secret", &fsa)
@@ -61,10 +47,10 @@ func GetConf(cnf conf.IMainConf) (fsa *FixedSecretAuth) {
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("fixed-secret配置有误:%v", err))
 	}
-	if jwt != nil {
-		if b, err := govalidator.ValidateStruct(&jwt); !b {
+	if fsa != nil {
+		if b, err := govalidator.ValidateStruct(&fsa); !b {
 			panic(fmt.Errorf("fixed-secret配置有误:%v", err))
 		}
 	}
-	return jwt
+	return fsa
 }

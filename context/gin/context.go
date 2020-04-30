@@ -2,6 +2,7 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/logger"
@@ -11,12 +12,13 @@ var _ context.IContext = &GinCtx{}
 
 //GinCtx gin.context
 type GinCtx struct {
-	context  *gin.Context
-	log      logger.ILogger
-	request  *request
-	response *response
-	user     *user
-	server   server.IServerConf
+	context   *gin.Context
+	log       logger.ILogger
+	request   *request
+	response  *response
+	user      *user
+	server    server.IServerConf
+	component components.IComponent
 }
 
 //NewGinCtx 构建基于gin.Context的上下文
@@ -26,6 +28,7 @@ func NewGinCtx(c *gin.Context) *GinCtx {
 		user:     &user{Context: c},
 		response: &response{Context: c},
 	}
+	ctx.component = components.NewComponent(ctx.server)
 	ctx.request = newRequest(c)
 	ctx.log = logger.GetSession(ctx.server.GetMainConf().GetServerName(), ctx.User().GetRequestID())
 	return ctx
@@ -54,6 +57,11 @@ func (c *GinCtx) Log() logger.ILogger {
 //Server 获取服务器配置
 func (c *GinCtx) Server() server.IServerConf {
 	return c.server
+}
+
+//Component 获取组件
+func (c *GinCtx) Component() components.IComponent {
+	return c.component
 }
 
 //Close 关闭并释放所有资源

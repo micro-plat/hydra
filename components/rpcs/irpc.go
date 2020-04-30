@@ -3,10 +3,17 @@ package rpcs
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/components"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/lib4go/types"
 )
+
+//rpcTypeNode rpc在var配置中的类型名称
+const rpcTypeNode = "rpc"
+
+//rpcNameNode rpc名称在var配置中的末节点名称
+const rpcNameNode = "rpc"
 
 //IRequest Component rpc
 type IRequest = rpc.IRequest
@@ -19,11 +26,20 @@ type IComponentRPC interface {
 
 //Request RPC Request
 type Request struct {
-	plat     string
-	server   string
-	registry string
-	conf     conf.IConf
-	c        components.IComponentContainer
+	plat      string
+	server    string
+	node      string
+	container container.IContainer
+}
+
+//NewRequest 构建请求
+func NewRequest(plat string, server string, nameNode string, container container.IContainer) *Request {
+	return &Request{
+		plat:      plat,
+		server:    server,
+		node:      types.GetString(nameNode, rpcNameNode),
+		container: container,
+	}
 }
 
 //Request RPC请求
@@ -32,14 +48,17 @@ func (r *Request) Request(service string, form map[string]interface{}, opts ...r
 	if err != nil {
 		return
 	}
-	c, err := r.c.GetOrCreate(fmt.Sprintf("%s@%s.%s", rservice, server, domain), func(i ...interface{}) (interface{}, error) {
+	c, err := r.container.GetOrCreate(fmt.Sprintf("__rpc_service_%s@%s.%s", rservice, server, domain), func(i ...interface{}) (interface{}, error) {
 		if isip {
-			tls := r.conf.GetStrings("tls")
-			if len(tls) == 2 {
-				return rpc.NewClient(service, rpc.WithTLS(tls))
+			tls, err := r.container.Conf().GetConf(rpcTypeNode, r.node)
+			if err != conf.ErrNoSetting {
+				return nil, err
 			}
-			return rpc.NewClient(service)
+			if len(tls.GetStrings("tls")) == 2 {
+				return rpc.NewClient(service, rpc.WithTLS(tls.GetStrings("tls")))
+			}
 		}
+		return rpc.NewClient(service)
 	})
 	if err != nil {
 		return nil, err

@@ -72,15 +72,20 @@ func (a RASAuths) Contains(p string) (bool, *RASAuth) {
 }
 
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (auths RASAuths, err error) {
+func GetConf(cnf conf.IMainConf) (auths RASAuths) {
 	//设置Remote安全认证参数
-	if _, err := cnf.GetSubObject("ras", &auths); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("remote-auth-service配置有误:%v", err)
+	_, err := cnf.GetSubObject("ras", &auths)
+	if err != nil && err != conf.ErrNoSetting {
+		panic(fmt.Errorf("remote-auth-service配置有误:%v", err))
 	}
+	if err == conf.ErrNoSetting {
+		return []*RASAuth{}
+	}
+
 	for _, auth := range auths {
 		if b, err := govalidator.ValidateStruct(&auth); !b {
-			return nil, fmt.Errorf("remote-auth配置有误:%v", err)
+			panic(fmt.Errorf("remote-auth配置有误:%v", err))
 		}
 	}
-	return auths, nil
+	return auths
 }

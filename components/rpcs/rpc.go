@@ -1,28 +1,23 @@
 package rpcs
 
 import (
-	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//rpcTypeNode rpc在var配置中的类型名称
-const rpcTypeNode = "rpc"
-
-//rpcNameNode rpc名称在var配置中的末节点名称
-const rpcNameNode = "rpc"
-
 //StandardRPC rpc服务
 type StandardRPC struct {
-	c      components.IComponentContainer
-	client *rpc.Client
+	c          container.IContainer
+	platName   string
+	systemName string
 }
 
 //NewStandardRPC 创建RPC服务代理
-func NewStandardRPC(c components.IComponentContainer, platName string, systemName string, registryAddr string) *StandardRPC {
+func NewStandardRPC(c container.IContainer, platName string, systemName string) *StandardRPC {
 	return &StandardRPC{
-		c: c,
+		c:          c,
+		platName:   platName,
+		systemName: systemName,
 	}
 }
 
@@ -38,11 +33,11 @@ func (s *StandardRPC) GetRegularRPC(names ...string) (c IRequest) {
 //GetRPC 获取缓存操作对象
 func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
 	name := types.GetStringByIndex(names, 0, rpcNameNode)
-	obj, err := s.c.GetOrCreateByConf(rpcTypeNode, name, func(c conf.IConf) (interface{}, error) {
-		return &Request{}, nil
+	v, err := s.c.GetOrCreate("__rpc_container_"+name, func(i ...interface{}) (interface{}, error) {
+		return NewRequest(s.platName, s.systemName, name, s.c), nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return obj.(IRequest), nil
+	return v.(IRequest), nil
 }

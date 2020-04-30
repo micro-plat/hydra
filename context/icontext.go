@@ -3,6 +3,7 @@ package context
 import (
 	"time"
 
+	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -30,6 +31,8 @@ type IPath interface {
 	GetPath() string
 	GetCookie(string) (string, bool)
 	GetHeader(string) string
+	GetHeaders() map[string][]string
+	GetCookies() map[string]string
 }
 
 //IVariable 参与变量
@@ -42,6 +45,7 @@ type IRequest interface {
 	Path() IPath
 	Bind(obj interface{}) error
 	Check(field ...string) error
+	GetData() (map[string]interface{}, error)
 	GetBody(encoding ...string) (string, error)
 	GetBodyMap(encoding ...string) (map[string]interface{}, error)
 	GetTrace() string
@@ -80,6 +84,7 @@ type IContext interface {
 	Request() IRequest
 	Response() IResponse
 	Server() server.IServerConf
+	Component() components.IComponent
 	User() IUser
 	Log() logger.ILogger
 	Close()
