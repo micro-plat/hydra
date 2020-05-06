@@ -89,6 +89,28 @@ func (c *VarConf) GetConf(tp string, name string) (*conf.JSONConf, error) {
 	return nil, conf.ErrNoSetting
 }
 
+//GetConfVersion 获取配置的版本号
+func (c *VarConf) GetConfVersion(tp string, name string) (int32, error) {
+	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
+		return v.GetVersion(), nil
+	}
+	return 0, conf.ErrNoSetting
+}
+
+//GetObject 获取子配置信息
+func (c *VarConf) GetObject(tp string, name string, v interface{}) (int32, error) {
+	conf, err := c.GetConf(tp, name)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := conf.Unmarshal(&v); err != nil {
+		err = fmt.Errorf("获取%s/%s配置失败:%v", tp, name, err)
+		return 0, err
+	}
+	return conf.GetVersion(), nil
+}
+
 //GetClone 获取配置拷贝
 func (c *VarConf) GetClone() conf.IVarConf {
 	s := &VarConf{

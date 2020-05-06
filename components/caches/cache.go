@@ -1,8 +1,7 @@
 package caches
 
 import (
-	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/lib4go/cache"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -17,11 +16,11 @@ const (
 
 //StandardCache cache
 type StandardCache struct {
-	c components.IComponentContainer
+	c container.IContainer
 }
 
 //NewStandardCache 创建cache
-func NewStandardCache(c components.IComponentContainer) *StandardCache {
+func NewStandardCache(c container.IContainer) *StandardCache {
 	return &StandardCache{c: c}
 }
 
@@ -37,8 +36,12 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreateByConf(cacheTypeNode, name, func(c conf.IConf) (interface{}, error) {
-		return cache.NewCache(c.GetString("proto"), string(c.GetRaw()))
+	obj, err := s.c.GetOrCreate("__cache_container_"+name, func(...interface{}) (interface{}, error) {
+		js, err := s.c.Conf().GetConf(cacheTypeNode, name)
+		if err != nil {
+			return nil, err
+		}
+		return cache.NewCache(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

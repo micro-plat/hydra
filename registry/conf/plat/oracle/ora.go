@@ -1,46 +1,25 @@
 package oracle
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/registry/conf/plat/db"
+)
 
 //Oracle oracle数据库连接信息
 type Oracle struct {
-	Provider   string `json:"provider" valid:"required"`
-	ConnString string `json:"connString" valid:"required"`
-	*option
+	*db.DB
 }
 
 //New 构建oracle连接信息
-func New(connString string, opts ...Option) *Oracle {
-	ora := &Oracle{
-		Provider:   "oracle",
-		ConnString: connString,
-		option: &option{
-			MaxOpen:  10,
-			MaxIdle:  3,
-			LifeTime: 600,
-		},
+func New(connString string, opts ...db.Option) *Oracle {
+	return &Oracle{
+		DB: db.New("oracle", connString, opts...),
 	}
-	for _, opt := range opts {
-		opt(ora.option)
-	}
-	return ora
 
 }
 
 //NewBy 构建oracle连接信息
-func NewBy(uName string, pwd string, tnsName string, opts ...Option) *Oracle {
-	ora := &Oracle{
-		Provider:   "oracle",
-		ConnString: fmt.Sprintf("%s/%s@%s", uName, pwd, tnsName),
-		option: &option{
-			MaxOpen:  10,
-			MaxIdle:  3,
-			LifeTime: 600,
-		},
-	}
-	for _, opt := range opts {
-		opt(ora.option)
-	}
-	return ora
-
+func NewBy(uName string, pwd string, tnsName string, opts ...db.Option) *Oracle {
+	return New(fmt.Sprintf("%s/%s@%s", uName, pwd, tnsName), opts...)
 }

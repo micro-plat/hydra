@@ -12,7 +12,7 @@ func (s *Server) addRouters(routers ...*router.Router) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	s.engine = gin.New()
-	s.engine.Use(middleware.Recovery().GinFunc())
+	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
 	s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
 	s.engine.Use(middleware.Options().GinFunc())   //处理option响应

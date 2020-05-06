@@ -31,11 +31,11 @@ func newMiddleContext(c context.IContext, n iNext) IMiddleContext {
 type Handler func(IMiddleContext)
 
 //GinFunc 返回GIN对应的处理函数
-func (h Handler) GinFunc() gin.HandlerFunc {
+func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, ok := c.Get("__gin_middle_context__")
 		if !ok {
-			v = newMiddleContext(xgin.NewGinCtx(c), c)
+			v = newMiddleContext(xgin.NewGinCtx(c, tps[0]), c)
 			c.Set("__gin_middle_context__", v)
 		}
 		h(v.(IMiddleContext))

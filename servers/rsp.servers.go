@@ -60,6 +60,7 @@ func (r *RspServers) Start() (err error) {
 	if err != nil {
 		return err
 	}
+	//处理配置更变通知消息
 	go r.loopRecvNotify()
 	return nil
 }
@@ -69,7 +70,7 @@ func (r *RspServers) loopRecvNotify() {
 	notify := make(chan struct{}, 1)
 	go func() {
 		select {
-		case <-time.After(time.Second * 10):
+		case <-time.After(time.Second * 15):
 			r.log.Warnf("%s 未配置", r.path[0])
 		case <-notify:
 			break
@@ -102,7 +103,7 @@ func (r *RspServers) Shutdown() {
 	defer r.lock.Unlock()
 	cl := make(chan struct{})
 
-	//多个协程去关闭服务器
+	//新协程去关闭服务器
 	go func() {
 		for _, server := range r.servers {
 			server.Shutdown()
@@ -128,26 +129,33 @@ func (r *RspServers) checkServer(path string) error {
 		r.log.Error("加载[%s]配置发生错误:%w", path, err)
 	}
 
-	//拿到权限再去检查服务器配置
+	//同一时间只允许一个流程处理配置变更
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	if r.done {
 		return nil
 	}
 
-	//通知已创建的服务器
-	if server, ok := r.servers[conf.GetMainConf().GetServerType()]; ok {
-		return server.Notify(conf)
-	}
-
-	//创建新服务器
-	if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
-		server, err := creator.Create(conf)
-		if err != nil {
+	//检查服务器是否已创建
+	srvr, ok := r.servers[conf.GetMainConf().GetServerType()]
+	if ok {
+		//通知已创建的服务器
+		if err := srvr.Notify(conf); err != nil {
 			return err
 		}
-		r.servers[conf.GetMainConf().GetServerType()] = server
+	} else {
+		//创建新服务器
+		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
+			srvr, err := creator.Create(conf)
+			if err != nil {
+				return err
+			}
+			r.servers[conf.GetMainConf().GetServerType()] = srvr
+		}
 	}
+
+	//缓存服务器配置
+	server.Cache(conf)
 	return nil
 
 }

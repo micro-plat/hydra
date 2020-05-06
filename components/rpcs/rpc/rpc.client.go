@@ -92,6 +92,20 @@ func WithHeaders(p map[string]string) RequestOption {
 	}
 }
 
+//WithXRequestID 设置请求编号
+func WithXRequestID(s string) RequestOption {
+	return func(o *requestOption) {
+		o.headers["X-Request-Id"] = s
+	}
+}
+
+//WithDelay 设置请求延迟时长
+func WithDelay(s time.Duration) RequestOption {
+	return func(o *requestOption) {
+		o.headers["X-Add-Delay"] = fmt.Sprint(s)
+	}
+}
+
 //WithFailFast 快速失败
 func WithFailFast(b bool) RequestOption {
 	return func(o *requestOption) {

@@ -1,11 +1,11 @@
 package dbs
 
 import (
-	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
+
+	xdb "github.com/micro-plat/hydra/registry/conf/plat/db"
 )
 
 const (
@@ -18,11 +18,11 @@ const (
 
 //StandardDB db
 type StandardDB struct {
-	c components.IComponentContainer
+	c container.IContainer
 }
 
 //NewStandardDB 创建DB
-func NewStandardDB(c components.IComponentContainer) *StandardDB {
+func NewStandardDB(c container.IContainer) *StandardDB {
 	return &StandardDB{c: c}
 }
 
@@ -38,12 +38,9 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreateByConf(dbTypeNode, name, func(c conf.IConf) (interface{}, error) {
-		var dbConf conf.DBConf
-		if err = c.Unmarshal(&dbConf); err != nil {
-			return nil, err
-		}
-		if b, err := govalidator.ValidateStruct(&dbConf); !b {
+	obj, err := s.c.GetOrCreate("__db_container_"+name, func(...interface{}) (interface{}, error) {
+		dbConf, err := xdb.GetConf(s.c.Conf(), dbTypeNode, name)
+		if err != nil {
 			return nil, err
 		}
 		return db.NewDB(dbConf.Provider,

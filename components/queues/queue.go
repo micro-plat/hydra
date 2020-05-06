@@ -1,8 +1,7 @@
 package queues
 
 import (
-	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/lib4go/queue"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -15,11 +14,11 @@ const queueNameNode = "queue"
 
 //StandardQueue queue
 type StandardQueue struct {
-	c components.IComponentContainer
+	c container.IContainer
 }
 
 //NewStandardQueue 创建queue
-func NewStandardQueue(c components.IComponentContainer) *StandardQueue {
+func NewStandardQueue(c container.IContainer) *StandardQueue {
 	return &StandardQueue{c: c}
 }
 
@@ -35,8 +34,12 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 //GetQueue GetQueue
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
-	obj, err := s.c.GetOrCreateByConf(queueTypeNode, name, func(c conf.IConf) (interface{}, error) {
-		return queue.NewQueue(c.GetString("proto"), string(c.GetRaw()))
+	obj, err := s.c.GetOrCreate("__queue_container_"+name, func(i ...interface{}) (interface{}, error) {
+		js, err := s.c.Conf().GetConf(queueTypeNode, name)
+		if err != nil {
+			return nil, err
+		}
+		return queue.NewQueue(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

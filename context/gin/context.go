@@ -1,7 +1,10 @@
 package gin
 
 import (
+	"sync"
+
 	"github.com/gin-gonic/gin"
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry/conf/server"
@@ -9,6 +12,15 @@ import (
 )
 
 var _ context.IContext = &GinCtx{}
+var contextPool *sync.Pool
+
+func init() {
+	contextPool = &sync.Pool{
+		New: func() interface{} {
+			return &GinCtx{}
+		},
+	}
+}
 
 //GinCtx gin.context
 type GinCtx struct {
@@ -19,18 +31,20 @@ type GinCtx struct {
 	user      *user
 	server    server.IServerConf
 	component components.IComponent
+	tid       uint64
 }
 
 //NewGinCtx 构建基于gin.Context的上下文
-func NewGinCtx(c *gin.Context) *GinCtx {
-	ctx := &GinCtx{
-		context:  c,
-		user:     &user{Context: c},
-		response: &response{Context: c},
-	}
+func NewGinCtx(c *gin.Context, tp string) *GinCtx {
+	ctx := contextPool.Get().(*GinCtx)
+	ctx.context = c
+	ctx.server = application.Current().Server(tp)
+	ctx.user = &user{Context: c}
+	ctx.response = &response{Context: c}
 	ctx.component = components.NewComponent(ctx.server)
 	ctx.request = newRequest(c)
 	ctx.log = logger.GetSession(ctx.server.GetMainConf().GetServerName(), ctx.User().GetRequestID())
+	ctx.tid = context.Cache(ctx) //保存到缓存中
 	return ctx
 }
 
@@ -66,10 +80,6 @@ func (c *GinCtx) Component() components.IComponent {
 
 //Close 关闭并释放所有资源
 func (c *GinCtx) Close() {
-
-}
-
-//Next 执行下一个中间件(中间件调用)
-func (c *GinCtx) Next() {
-	c.context.Next()
+	context.Del(c.tid) //从当前请求上下文中删除
+	contextPool.Put(c)
 }
