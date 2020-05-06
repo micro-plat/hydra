@@ -1,10 +1,13 @@
 package dbs
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
 
+	"github.com/micro-plat/hydra/registry/conf"
 	xdb "github.com/micro-plat/hydra/registry/conf/plat/db"
 )
 
@@ -38,10 +41,11 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate("__db_container_"+name, func(...interface{}) (interface{}, error) {
-		dbConf, err := xdb.GetConf(s.c.Conf(), dbTypeNode, name)
+	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
+		var dbConf xdb.DB
+		err := js.Unmarshal(&dbConf)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
 		return db.NewDB(dbConf.Provider,
 			dbConf.ConnString,

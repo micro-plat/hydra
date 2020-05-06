@@ -1,6 +1,8 @@
 package container
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/qxnw/lib4go/concurrent/cmap"
 )
@@ -13,7 +15,7 @@ type ICloser interface {
 //IContainer 组件容器
 type IContainer interface {
 	Conf() conf.IVarConf
-	GetOrCreate(name string, creator func(i ...interface{}) (interface{}, error)) (interface{}, error)
+	GetOrCreate(typ string, name string, creator func(conf *conf.JSONConf) (interface{}, error)) (interface{}, error)
 	ICloser
 }
 
@@ -38,8 +40,15 @@ func (c *Container) Conf() conf.IVarConf {
 }
 
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
-func (c *Container) GetOrCreate(name string, creator func(i ...interface{}) (interface{}, error)) (interface{}, error) {
-	_, obj, err := c.cache.SetIfAbsentCb(name, creator)
+func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.JSONConf) (interface{}, error)) (interface{}, error) {
+	js, err := c.conf.GetConf(typ, name)
+	if err != nil {
+		return nil, err
+	}
+	key := fmt.Sprintf("%s_%s_%d", typ, name, js.GetVersion())
+	_, obj, err := c.cache.SetIfAbsentCb(key, func(i ...interface{}) (interface{}, error) {
+		return creator(js)
+	})
 	return obj, err
 
 }

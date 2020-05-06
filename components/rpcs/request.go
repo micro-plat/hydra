@@ -3,10 +3,9 @@ package rpcs
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/registry/conf"
-	"github.com/micro-plat/lib4go/types"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 //rpcTypeNode rpc在var配置中的类型名称
@@ -15,30 +14,23 @@ const rpcTypeNode = "rpc"
 //rpcNameNode rpc名称在var配置中的末节点名称
 const rpcNameNode = "rpc"
 
-//IRequest Component rpc
-type IRequest = rpc.IRequest
-
-//IComponentRPC Component Cache
-type IComponentRPC interface {
-	GetRegularRPC(names ...string) (c IRequest)
-	GetRPC(names ...string) (c IRequest, err error)
-}
+var requests = cmap.New(4)
 
 //Request RPC Request
 type Request struct {
-	plat      string
-	server    string
-	node      string
-	container container.IContainer
+	plat   string
+	server string
+	node   string
+	j      *conf.JSONConf
 }
 
 //NewRequest 构建请求
-func NewRequest(plat string, server string, nameNode string, container container.IContainer) *Request {
+func NewRequest(plat string, server string, nameNode string, j *conf.JSONConf) *Request {
 	return &Request{
-		plat:      plat,
-		server:    server,
-		node:      types.GetString(nameNode, rpcNameNode),
-		container: container,
+		plat:   plat,
+		server: server,
+		node:   nameNode,
+		j:      j,
 	}
 }
 
@@ -48,21 +40,10 @@ func (r *Request) Request(service string, form map[string]interface{}, opts ...r
 	if err != nil {
 		return
 	}
-
-	//获取配置版本号
-	version, err := r.container.Conf().GetConfVersion(rpcTypeNode, r.node)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := r.container.GetOrCreate(fmt.Sprintf("__rpc_service_%d_%s@%s.%s", version, rservice, server, domain), func(i ...interface{}) (interface{}, error) {
+	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%s", rservice, server, domain), func(i ...interface{}) (interface{}, error) {
 		if isip {
-			tls, err := r.container.Conf().GetConf(rpcTypeNode, r.node)
-			if err != conf.ErrNoSetting {
-				return nil, err
-			}
-			if len(tls.GetStrings("tls")) == 2 {
-				return rpc.NewClient(service, rpc.WithTLS(tls.GetStrings("tls")))
+			if len(r.j.GetStrings("tls")) == 2 {
+				return rpc.NewClient(service, rpc.WithTLS(r.j.GetStrings("tls")))
 			}
 		}
 		return rpc.NewClient(service)
@@ -72,4 +53,14 @@ func (r *Request) Request(service string, form map[string]interface{}, opts ...r
 	}
 	client := c.(*rpc.Client)
 	return client.Request(service, form, opts...)
+}
+
+//Close 关闭RPC连接
+func (r *Request) Close() error {
+	requests.RemoveIterCb(func(key string, v interface{}) bool {
+		client := v.(*rpc.Client)
+		client.Close()
+		return true
+	})
+	return nil
 }

@@ -2,6 +2,7 @@ package queues
 
 import (
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/lib4go/queue"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -34,11 +35,7 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 //GetQueue GetQueue
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
-	obj, err := s.c.GetOrCreate("__queue_container_"+name, func(i ...interface{}) (interface{}, error) {
-		js, err := s.c.Conf().GetConf(queueTypeNode, name)
-		if err != nil {
-			return nil, err
-		}
+	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
 		return queue.NewQueue(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {

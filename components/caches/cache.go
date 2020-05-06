@@ -2,6 +2,7 @@ package caches
 
 import (
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/lib4go/cache"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -36,11 +37,7 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreate("__cache_container_"+name, func(...interface{}) (interface{}, error) {
-		js, err := s.c.Conf().GetConf(cacheTypeNode, name)
-		if err != nil {
-			return nil, err
-		}
+	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
 		return cache.NewCache(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
