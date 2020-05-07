@@ -10,7 +10,7 @@ func Header() Handler {
 		ctx.Next()
 
 		//2. 获取header配置
-		headers := ctx.Server().GetHeaderConf()
+		headers := ctx.ServerConf().GetHeaderConf()
 
 		//3. 处理响应header参数
 		origin := ctx.Request().Path().GetHeader(originName)

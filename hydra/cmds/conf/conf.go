@@ -11,8 +11,8 @@ import (
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
-	"github.com/qxnw/lib4go/logger"
 	"github.com/urfave/cli"
 )
 

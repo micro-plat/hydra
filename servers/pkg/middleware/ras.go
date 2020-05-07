@@ -5,7 +5,7 @@ func RASAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
-		auth := ctx.Server().GetRASConf()
+		auth := ctx.ServerConf().GetRASConf()
 		if len(auth) == 0 {
 			ctx.Next()
 			return

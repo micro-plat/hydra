@@ -12,7 +12,7 @@ import (
 //Static 静态文件处理插件
 func Static() Handler {
 	return func(ctx IMiddleContext) {
-		opt := ctx.Server().GetStaticConf()
+		opt := ctx.ServerConf().GetStaticConf()
 		if opt.Disable || opt.AllowRequest(ctx.Request().Path().GetMethod()) {
 			ctx.Next()
 			return

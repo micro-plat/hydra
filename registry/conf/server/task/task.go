@@ -15,7 +15,17 @@ type Tasks struct {
 
 //Task cron任务的task明细
 type Task struct {
-	*option
+	Cron    string `json:"cron" valid:"ascii,required"`
+	Service string `json:"service" valid:"ascii,required"`
+	Disable bool   `json:"disable,omitemptye"`
+}
+
+//NewTask 创建任务信息
+func NewTask(cron string, service string) *Task {
+	return &Task{
+		Cron:    cron,
+		Service: service,
+	}
 }
 
 //GetUNQ 获取任务的唯一标识
@@ -31,18 +41,23 @@ func (t *Task) Validate() error {
 	return nil
 }
 
-//NewTasks 构建任务列表
-func NewTasks(first Option, tasks ...Option) *Tasks {
-	t := &Tasks{
+//NewEmptyTasks 构建空的tasks
+func NewEmptyTasks() *Tasks {
+	return &Tasks{
 		Tasks: make([]*Task, 0),
 	}
-	ft := &Task{option: &option{}}
-	first(ft.option)
-	t.Tasks = append(t.Tasks, ft)
-	for _, opt := range tasks {
-		nopt := &Task{option: &option{}}
-		opt(nopt.option)
-		t.Tasks = append(t.Tasks, nopt)
+}
+
+//NewTasks 构建任务列表
+func NewTasks(tasks ...*Task) *Tasks {
+	t := NewEmptyTasks()
+	return t.Append(tasks...)
+}
+
+//Append 增加任务列表
+func (t *Tasks) Append(tasks ...*Task) *Tasks {
+	for _, task := range tasks {
+		t.Tasks = append(t.Tasks, task)
 	}
 	return t
 }

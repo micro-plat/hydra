@@ -26,7 +26,7 @@ func NewMetric() *Metric {
 }
 func (m *Metric) onceDo(ctx IMiddleContext) {
 	m.once.Do(func() {
-		metric := ctx.Server().GetMetricConf()
+		metric := ctx.ServerConf().GetMetricConf()
 		if metric.Disable {
 			return
 		}
@@ -65,9 +65,9 @@ func (m *Metric) Handle() Handler {
 
 		//1. 初始化三类统计器---请求的QPS/正在处理的计数器/时间统计器
 		url := ctx.Request().Path().GetService()
-		conterName := metrics.MakeName(ctx.Server().GetMainConf().GetServerType()+".server.request", metrics.WORKING, "server", ctx.Server().GetMainConf().GetServerName(), "host", m.ip, "url", url) //堵塞计数
-		timerName := metrics.MakeName(ctx.Server().GetMainConf().GetServerType()+".server.request", metrics.TIMER, "server", ctx.Server().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //堵塞计数
-		requestName := metrics.MakeName(ctx.Server().GetMainConf().GetServerType()+".server.request", metrics.QPS, "server", ctx.Server().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //请求数
+		conterName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.WORKING, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url) //堵塞计数
+		timerName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.TIMER, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //堵塞计数
+		requestName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.QPS, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //请求数
 
 		//2. 对QPS进行计数
 		metrics.GetOrRegisterQPS(requestName, m.currentRegistry).Mark(1)
@@ -86,7 +86,7 @@ func (m *Metric) Handle() Handler {
 
 		//6. 初始化第四类统计器----状态码上报
 		statusCode := ctx.Response().GetStatusCode()
-		responseName := metrics.MakeName(ctx.Server().GetMainConf().GetServerType()+".server.response", metrics.METER, "server", ctx.Server().GetMainConf().GetServerName(), "host", m.ip,
+		responseName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.response", metrics.METER, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
 
 		//7. 对服务处理结果的状态码进行上报

@@ -7,14 +7,14 @@ import (
 
 	"github.com/micro-plat/hydra/context"
 	xjwt "github.com/micro-plat/hydra/registry/conf/server/auth/jwt"
-	"github.com/qxnw/lib4go/security/jwt"
+	"github.com/micro-plat/lib4go/security/jwt"
 )
 
 //JwtWriter 将jwt信息写入到请求中
 func JwtWriter() Handler {
 	return func(ctx IMiddleContext) {
 		ctx.Next()
-		conf := ctx.Server().GetJWTConf()
+		conf := ctx.ServerConf().GetJWTConf()
 
 		if conf.Disable {
 			return

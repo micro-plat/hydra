@@ -3,7 +3,6 @@ package context
 import (
 	"time"
 
-	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -83,8 +82,7 @@ type IUser interface {
 type IContext interface {
 	Request() IRequest
 	Response() IResponse
-	Server() server.IServerConf
-	Component() components.IComponent
+	ServerConf() server.IServerConf
 	User() IUser
 	Log() logger.ILogger
 	Close()

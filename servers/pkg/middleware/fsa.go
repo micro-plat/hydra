@@ -6,9 +6,9 @@ import (
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/net"
-	"github.com/qxnw/lib4go/security/md5"
-	"github.com/qxnw/lib4go/security/sha1"
-	"github.com/qxnw/lib4go/security/sha256"
+	"github.com/micro-plat/lib4go/security/md5"
+	"github.com/micro-plat/lib4go/security/sha1"
+	"github.com/micro-plat/lib4go/security/sha256"
 )
 
 //FixedSecretAuth 静态密钥验证
@@ -16,7 +16,7 @@ func FixedSecretAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
-		auth := ctx.Server().GetFSAConf()
+		auth := ctx.ServerConf().GetFSAConf()
 		if !auth.Contains(ctx.Request().Path().GetService()) {
 			ctx.Next()
 			return
