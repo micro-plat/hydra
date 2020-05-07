@@ -24,14 +24,13 @@ func init() {
 
 //GinCtx gin.context
 type GinCtx struct {
-	context   *gin.Context
-	log       logger.ILogger
-	request   *request
-	response  *response
-	user      *user
-	server    server.IServerConf
-	component components.IComponent
-	tid       uint64
+	context  *gin.Context
+	log      logger.ILogger
+	request  *request
+	response *response
+	user     *user
+	server   server.IServerConf
+	tid      uint64
 }
 
 //NewGinCtx 构建基于gin.Context的上下文
@@ -41,7 +40,6 @@ func NewGinCtx(c *gin.Context, tp string) *GinCtx {
 	ctx.server = application.Current().Server(tp)
 	ctx.user = &user{Context: c}
 	ctx.response = &response{Context: c}
-	ctx.component = components.NewComponent(ctx.server)
 	ctx.request = newRequest(c)
 	ctx.log = logger.GetSession(ctx.server.GetMainConf().GetServerName(), ctx.User().GetRequestID())
 	ctx.tid = context.Cache(ctx) //保存到缓存中
@@ -75,7 +73,7 @@ func (c *GinCtx) Server() server.IServerConf {
 
 //Component 获取组件
 func (c *GinCtx) Component() components.IComponent {
-	return c.component
+	return components.Def
 }
 
 //Close 关闭并释放所有资源

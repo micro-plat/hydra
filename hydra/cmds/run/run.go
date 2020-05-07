@@ -28,17 +28,19 @@ func init() {
 func doRun(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	if err := application.Bind(); err != nil {
+	if err := application.DefApp.Bind(); err != nil {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
 	//2.创建trace性能跟踪
-	if err = startTrace(application.Trace); err != nil {
+	if err = startTrace(application.Current().GetTrace()); err != nil {
 		return
 	}
 
 	//3. 创建服务器
-	server := servers.NewRspServers(application.RegistryAddr, application.PlatName, application.SysName, application.ServerTypes, application.ClusterName)
+	server := servers.NewRspServers(application.Current().GetRegistryAddr(),
+		application.Current().GetPlatName(), application.Current().GetSysName(),
+		application.Current().GetServerTypes(), application.Current().GetClusterName())
 	if err := server.Start(); err != nil {
 		return err
 	}

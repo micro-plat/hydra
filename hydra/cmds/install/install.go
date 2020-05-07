@@ -23,12 +23,12 @@ func init() {
 func doInstall(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	if err := application.Bind(); err != nil {
+	if err := application.DefApp.Bind(); err != nil {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
 
-	service, err := daemon.New(application.Name, application.Name)
+	service, err := daemon.New(application.AppName, application.AppName)
 	if err != nil {
 		return err
 	}

@@ -155,7 +155,7 @@ func (r *RspServers) checkServer(path string) error {
 	}
 
 	//缓存服务器配置
-	server.Cache(conf)
+	server.Cache.Save(conf)
 	return nil
 
 }

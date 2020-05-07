@@ -29,7 +29,7 @@ func init() {
 func doConf(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	if err := application.Bind(); err != nil {
+	if err := application.DefApp.Bind(); err != nil {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
@@ -39,14 +39,14 @@ func doConf(c *cli.Context) (err error) {
 	print := log.Info
 
 	//3. 创建注册中心
-	rgst, err := registry.NewRegistry(application.RegistryAddr, log)
+	rgst, err := registry.NewRegistry(application.Current().GetRegistryAddr(), log)
 	if err != nil {
 		return err
 	}
 	queryIndex := 0
 	queryList := make(map[int][]byte)
-	for i, tp := range application.ServerTypes {
-		sc, err := server.NewServerConfBy(application.PlatName, application.SysName, tp, application.ClusterName, rgst)
+	for i, tp := range application.Current().GetServerTypes() {
+		sc, err := server.NewServerConfBy(application.Current().GetPlatName(), application.Current().GetSysName(), tp, application.Current().GetClusterName(), rgst)
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func doConf(c *cli.Context) (err error) {
 			queryList[queryIndex] = cn.GetRaw()
 			return true
 		})
-		if i == len(application.ServerTypes)-1 {
+		if i == len(application.Current().GetServerTypes())-1 {
 			index := -1
 			sc.GetVarConf().Iter(func(k string, cn *conf.JSONConf) bool {
 				queryIndex++

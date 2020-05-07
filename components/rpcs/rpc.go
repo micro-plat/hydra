@@ -18,17 +18,13 @@ type IComponentRPC interface {
 
 //StandardRPC rpc服务
 type StandardRPC struct {
-	c          container.IContainer
-	platName   string
-	systemName string
+	c container.IContainer
 }
 
 //NewStandardRPC 创建RPC服务代理
-func NewStandardRPC(c container.IContainer, platName string, systemName string) *StandardRPC {
+func NewStandardRPC(c container.IContainer) *StandardRPC {
 	return &StandardRPC{
-		c:          c,
-		platName:   platName,
-		systemName: systemName,
+		c: c,
 	}
 }
 
@@ -43,10 +39,10 @@ func (s *StandardRPC) GetRegularRPC(names ...string) (c IRequest) {
 
 //GetRPC 获取缓存操作对象
 func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
-	name := types.GetStringByIndex(names, 0, rpcNameNode)
 
+	name := types.GetStringByIndex(names, 0, rpcNameNode)
 	v, err := s.c.GetOrCreate(rpcTypeNode, name, func(i *conf.JSONConf) (interface{}, error) {
-		return NewRequest(s.platName, s.systemName, name, i), nil
+		return NewRequest(i), nil
 	})
 	if err != nil {
 		return nil, err

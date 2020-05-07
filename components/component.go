@@ -5,7 +5,6 @@ import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
-	"github.com/micro-plat/hydra/registry/conf/server"
 )
 
 //IComponent 组件
@@ -15,6 +14,9 @@ type IComponent interface {
 	Cache() caches.IComponentCache
 }
 
+//Def 默认组件
+var Def IComponent = NewComponent()
+
 //Component 组件
 type Component struct {
 	c     container.IContainer
@@ -23,12 +25,12 @@ type Component struct {
 	cache caches.IComponentCache
 }
 
-//NewComponent 创建组件
-func NewComponent(conf server.IServerConf) *Component {
+//NewComponent 创建组件e
+func NewComponent() *Component {
 	c := &Component{
-		c: container.NewContainer(conf.GetVarConf()),
+		c: container.NewContainer(),
 	}
-	c.rpc = rpcs.NewStandardRPC(c.c, conf.GetMainConf().GetPlatName(), conf.GetMainConf().GetSysName())
+	c.rpc = rpcs.NewStandardRPC(c.c)
 	c.queue = queues.NewStandardQueue(c.c)
 	c.cache = caches.NewStandardCache(c.c)
 	return c

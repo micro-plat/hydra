@@ -3,6 +3,7 @@ package rpcs
 import (
 	"fmt"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -18,29 +19,23 @@ var requests = cmap.New(4)
 
 //Request RPC Request
 type Request struct {
-	plat   string
-	server string
-	node   string
-	j      *conf.JSONConf
+	j *conf.JSONConf
 }
 
 //NewRequest 构建请求
-func NewRequest(plat string, server string, nameNode string, j *conf.JSONConf) *Request {
+func NewRequest(j *conf.JSONConf) *Request {
 	return &Request{
-		plat:   plat,
-		server: server,
-		node:   nameNode,
-		j:      j,
+		j: j,
 	}
 }
 
 //Request RPC请求
 func (r *Request) Request(service string, form map[string]interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
-	isip, rservice, domain, server, err := rpc.ResolvePath(service, r.plat, r.server)
+	isip, rservice, domain, server, err := rpc.ResolvePath(service, application.Current().GetPlatName(), application.Current().GetSysName())
 	if err != nil {
 		return
 	}
-	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%s", rservice, server, domain), func(i ...interface{}) (interface{}, error) {
+	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%s_%d", rservice, server, domain, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
 		if isip {
 			if len(r.j.GetStrings("tls")) == 2 {
 				return rpc.NewClient(service, rpc.WithTLS(r.j.GetStrings("tls")))
@@ -52,7 +47,9 @@ func (r *Request) Request(service string, form map[string]interface{}, opts ...r
 		return nil, err
 	}
 	client := c.(*rpc.Client)
-	return client.Request(service, form, opts...)
+	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
+	nopts = append(nopts, rpc.WithXRequestID(application.Current().CurrentContext().User().GetRequestID()))
+	return client.Request(service, form, nopts...)
 }
 
 //Close 关闭RPC连接
