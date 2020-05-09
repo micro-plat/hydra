@@ -13,8 +13,8 @@ func (s *Server) addRouters(routers ...*router.Router) {
 	}
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
-	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
-	s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
+	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
+	// s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
 	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
 	s.engine.Use(middleware.Static().GinFunc())    //处理静态文件
 	s.engine.Use(middleware.JwtAuth().GinFunc())   //jwt安全认证
@@ -22,6 +22,7 @@ func (s *Server) addRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头
 	s.engine.Use(middleware.JwtWriter().GinFunc()) //设置jwt回写
 	s.addRouter(routers...)
+	s.server.Handler = s.engine
 	return
 }
 func (s *Server) addRouter(routers ...*router.Router) {

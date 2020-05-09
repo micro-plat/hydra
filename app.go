@@ -6,6 +6,9 @@ import (
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 
+	_ "github.com/micro-plat/hydra/registry/watcher/wchild"
+	_ "github.com/micro-plat/hydra/registry/watcher/wvalue"
+
 	_ "github.com/micro-plat/hydra/hydra/cmds/conf"
 	_ "github.com/micro-plat/hydra/hydra/cmds/install"
 	_ "github.com/micro-plat/hydra/hydra/cmds/remove"

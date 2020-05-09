@@ -23,7 +23,7 @@ func init() {
 		cli.Command{
 			Name:   "conf",
 			Usage:  "查看配置信息",
-			Flags:  getFlags(),
+			Flags:  GetBaseFlags(),
 			Action: doConf,
 		})
 }
@@ -39,8 +39,7 @@ func doConf(c *cli.Context) (err error) {
 	}
 
 	//2. 处理日志
-	log := log.New(os.Stdout, "", log.Llongcolor)
-	print := log.Info
+	print := log.New(os.Stdout, "", log.Llongcolor).Info
 
 	//3. 创建注册中心
 	rgst, err := registry.NewRegistry(application.Current().GetRegistryAddr(), application.Current().Log())

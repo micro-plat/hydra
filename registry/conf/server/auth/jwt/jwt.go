@@ -11,13 +11,13 @@ import (
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
-	*jwtOption
+	jwtOption
 }
 
 //NewJWT 构建JWT配置参数发
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
-		jwtOption: &jwtOption{
+		jwtOption: jwtOption{
 			Name:     "hsid",
 			Mode:     "HS512",
 			Secret:   utility.GetGUID(),
@@ -26,7 +26,7 @@ func NewJWT(opts ...Option) *JWTAuth {
 		},
 	}
 	for _, opt := range opts {
-		opt(jwt.jwtOption)
+		opt(&jwt.jwtOption)
 	}
 	return jwt
 }
@@ -95,18 +95,18 @@ func (a *JWTAuth) IsExcluded(service string) bool {
 }
 
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) (jwt *JWTAuth) {
+func GetConf(cnf conf.IMainConf) *JWTAuth {
+	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject("jwt", &jwt)
 	if err == conf.ErrNoSetting {
-		return &JWTAuth{jwtOption: &jwtOption{Disable: true}}
+		return &JWTAuth{jwtOption: jwtOption{Disable: true}}
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
-	if jwt != nil {
-		if b, err := govalidator.ValidateStruct(&jwt); !b {
-			panic(fmt.Errorf("jwt配置有误:%v", err))
-		}
+	if b, err := govalidator.ValidateStruct(&jwt); !b {
+		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
-	return jwt
+
+	return &jwt
 }

@@ -46,7 +46,7 @@ func (w *Responsive) Start() (err error) {
 		w.Shutdown()
 		return err
 	}
-	w.log.Infof("服务启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
+	w.log.Infof("服务启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetRouterConf().Routers))
 	return nil
 }
 

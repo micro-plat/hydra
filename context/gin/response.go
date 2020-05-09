@@ -2,6 +2,7 @@ package gin
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -54,18 +55,56 @@ func (c *response) File(path string) {
 }
 
 //WriteAny 将结果写入响应流，自动检查内容处理状态码
-func (c *response) WriteAny(v interface{}) error {
-	return nil
+func (c *response) WriteAny(content interface{}) error {
+	status := 200
+	content := ""
+	switch v := content.(type) {
+	case IResult:
+		status = v.GetCode()
+		content = v.GetResult()
+		return
+	case IError:
+		content = v.GetError()
+		status = v.GetCode()
+	case error:
+		status = 400
+		content = content.(error)
+	default:
+		tp := reflect.TypeOf(content).Kind()
+		value := reflect.ValueOf(content)
+		if tp == reflect.Ptr {
+			value = value.Elem()
+		}
+		switch tp {
+		case reflect.Chan, reflect.Map, reflect.Slice:
+			if value.Len() == 0 {
+
+			}
+		}
+	}
+	c.Write(status, content)
+	return
+}
+func (c *response) swap(content interface{}) interface{} {
+
 }
 
 //Write 将状态码、内容写入到响应流中
 func (c *response) Write(s int, v string) error {
+	if c.Request.Response.Header.Get("Content-Type") == "" {
+		c.Request.Response.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	}
 	if c.Context.Writer.Written() {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", s, v))
 	}
 	c.Context.Writer.WriteHeader(s)
 	_, err := c.Context.Writer.WriteString(v)
 	return err
+}
+
+//Redirect 转跳g刚才gc
+func (c *response) Redirect(code int, url string) {
+	c.Context.Redirect(code, url)
 }
 
 //AddSpecial 添加响应的特殊字符

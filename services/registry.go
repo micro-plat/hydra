@@ -147,7 +147,16 @@ func (s *service) GetFallback(serverType string, service string, method string) 
 }
 
 func reflectHandler(name string, h interface{}) (handlers map[string]context.IHandler, fallbacks map[string]context.IHandler) {
+	handlers = make(map[string]context.IHandler)
+	fallbacks = make(map[string]context.IHandler)
+
+	if vv, ok := h.(func(context.IContext) interface{}); ok {
+		handlers[name] = context.Handler(vv)
+		return
+	}
+
 	switch tp := h.(type) {
+	case context.Handler:
 	case context.IHandler:
 		handlers[name] = tp
 		return

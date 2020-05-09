@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 )
+
+var traces = []string{"cpu", "mem", "block", "mutex", "web"}
 
 //DefApp 默认app
 var DefApp = &application{
-	log: logger.New("hydra"),
+	log:   logger.New("hydra"),
+	close: make(chan struct{}),
 }
 
 type application struct {
@@ -52,36 +55,20 @@ type application struct {
 }
 
 func (m *application) Bind() (err error) {
-	if m.ServerTypeNames != "" {
-		m.ServerTypes = strings.Split(m.ServerTypeNames, "-")
-	}
-	if m.Name != "" {
-		m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
-		if err != nil {
-			return err
-		}
-	}
-	_, err = govalidator.ValidateStruct(m)
-	if err != nil {
+	//处理参数
+	if err := m.check(); err != nil {
 		return err
 	}
+
+	//增加调试参数
 	if IsDebug {
 		m.PlatName += "_debug"
 	}
 	return nil
 }
 
-func (a *application) GetCMD() string {
-	return ""
-}
-
-//GetHandler 获取服务对应的处理函数
-func (a *application) GetHandler(tp string, service string) context.IHandler {
-	return nil
-}
-
 //Server 获取服务器配置信息
-func (a *application) Server(tp string) server.IServerConf {
+func (m *application) Server(tp string) server.IServerConf {
 	s, err := server.Cache.GetServerConf(tp)
 	if err == nil {
 		return s
@@ -90,54 +77,54 @@ func (a *application) Server(tp string) server.IServerConf {
 }
 
 //CurrentContext 获取当前请求上下文
-func (a *application) CurrentContext() context.IContext {
+func (m *application) CurrentContext() context.IContext {
 	return nil
 }
 
 //GetRegistryAddr 注册中心
-func (a *application) GetRegistryAddr() string {
-	return a.RegistryAddr
+func (m *application) GetRegistryAddr() string {
+	return m.RegistryAddr
 }
 
 //GetPlatName 平台名称
-func (a *application) GetPlatName() string {
-	return a.PlatName
+func (m *application) GetPlatName() string {
+	return m.PlatName
 }
 
 //GetSysName 系统名称
-func (a *application) GetSysName() string {
-	return a.SysName
+func (m *application) GetSysName() string {
+	return m.SysName
 }
 
 //GetServerTypes 服务器类型
-func (a *application) GetServerTypes() []string {
-	return a.ServerTypes
+func (m *application) GetServerTypes() []string {
+	return m.ServerTypes
 }
 
 //GetClusterName 集群名称
-func (a *application) GetClusterName() string {
-	return a.ClusterName
+func (m *application) GetClusterName() string {
+	return m.ClusterName
 }
 
 //GetTrace 显示请求与响应信息
-func (a *application) GetTrace() string {
-	return a.Trace
+func (m *application) GetTrace() string {
+	return m.Trace
 }
 
 //ClosingNotify 获取系统关闭通知
-func (a *application) ClosingNotify() chan struct{} {
-	return a.close
+func (m *application) ClosingNotify() chan struct{} {
+	return m.close
 }
 
 //Log 获取日志组件
-func (a *application) Log() logger.ILogger {
-	return a.log
+func (m *application) Log() logger.ILogger {
+	return m.log
 }
 
 //Close 显示请求与响应信息
-func (a *application) Close() {
-	a.isClose = true
-	close(a.close)
+func (m *application) Close() {
+	m.isClose = true
+	close(m.close)
 }
 func parsePath(p string) (platName string, systemName string, serverTypes []string, clusterName string, err error) {
 	fs := strings.Split(strings.Trim(p, "/"), "/")
@@ -150,4 +137,37 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 	systemName = fs[1]
 	clusterName = fs[3]
 	return
+}
+func (m *application) check() (err error) {
+
+	if m.ServerTypeNames != "" {
+		m.ServerTypes = strings.Split(m.ServerTypeNames, "-")
+	}
+	if m.Name != "" {
+		m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
+		if err != nil {
+			return err
+		}
+	}
+
+	if m.RegistryAddr == "" {
+		return fmt.Errorf("注册中心地址不能为空")
+	}
+	if m.PlatName == "" {
+		return fmt.Errorf("平台名称不能为空")
+	}
+	if m.SysName == "" {
+		return fmt.Errorf("系统名称不能为空")
+	}
+	if len(m.ServerTypes) == 0 {
+		return fmt.Errorf("服务器类型不能为空")
+	}
+	if m.ClusterName == "" {
+		return fmt.Errorf("集群名称不能为空")
+	}
+	if m.Trace != "" && !types.StringContains(traces, m.Trace) {
+		return fmt.Errorf("trace名称只能是%v", traces)
+	}
+
+	return nil
 }

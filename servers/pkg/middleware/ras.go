@@ -1,6 +1,6 @@
 package middleware
 
-//RASAuth 远程服务验证
+//RASAuth RAS远程认证
 func RASAuth() Handler {
 	return func(ctx IMiddleContext) {
 

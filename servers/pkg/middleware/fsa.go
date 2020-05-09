@@ -13,10 +13,15 @@ import (
 
 //FixedSecretAuth 静态密钥验证
 func FixedSecretAuth() Handler {
+
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
 		auth := ctx.ServerConf().GetFSAConf()
+		if auth.Disable {
+			ctx.Next()
+			return
+		}
 		if !auth.Contains(ctx.Request().Path().GetService()) {
 			ctx.Next()
 			return

@@ -12,16 +12,18 @@ import (
 
 //JwtAuth jwt
 func JwtAuth() Handler {
+
 	return func(ctx IMiddleContext) {
 
 		//1. 获取jwt配置
 		jwtAuth := ctx.ServerConf().GetJWTConf()
-		if jwtAuth == nil || jwtAuth.Disable {
+		if jwtAuth.Disable {
 			ctx.Next()
 			return
 		}
 
 		//2.检查jwt是否有效
+		ctx.Response().AddSpecial("jwt")
 		_, err := checkJWT(ctx, jwtAuth)
 		if err == nil {
 			ctx.Next()
@@ -48,9 +50,8 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 	//1. 从请求中获取jwt信息
 	token := getToken(ctx, j)
 	if token == "" {
-		return nil, errs.NewError(403, fmt.Errorf("%s未传入jwt.token", j.Name))
+		return nil, errs.NewError(403, fmt.Errorf("未传入jwt.token(%s.%s值为空)", j.Source, j.Name))
 	}
-
 	//2. 解密jwt判断是否有效，是否过期
 	data, er := jwt.Decrypt(token, j.Secret)
 	if er != nil {

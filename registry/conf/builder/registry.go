@@ -32,6 +32,7 @@ func publish(r registry.IRegistry, path string, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
 	}
+	r.Delete(path)
 	if err := r.CreatePersistentNode(path, value); err != nil {
 		return fmt.Errorf("创建配置节点%s %s出错:%w", path, value, err)
 	}

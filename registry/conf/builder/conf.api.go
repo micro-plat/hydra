@@ -8,7 +8,9 @@ import (
 	"github.com/micro-plat/hydra/registry/conf/server/header"
 	"github.com/micro-plat/hydra/registry/conf/server/metric"
 	"github.com/micro-plat/hydra/registry/conf/server/render"
+	"github.com/micro-plat/hydra/registry/conf/server/router"
 	"github.com/micro-plat/hydra/registry/conf/server/static"
+	"github.com/micro-plat/hydra/services"
 )
 
 type apiBuilder map[string]interface{}
@@ -17,6 +19,12 @@ type apiBuilder map[string]interface{}
 func NewAPI(address string, opts ...api.Option) apiBuilder {
 	b := make(map[string]interface{})
 	b["main"] = api.New(address, opts...)
+	routers := router.NewRouters()
+	services := services.Registry.GetServices("api")
+	for _, s := range services {
+		routers.Append(s, s, "GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+	}
+	b["router"] = routers
 	return b
 }
 

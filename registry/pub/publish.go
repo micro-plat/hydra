@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/watcher"
@@ -107,7 +108,7 @@ func (p *Publisher) Publish(serverName string, input map[string]interface{}, ser
 
 //pubRPCServiceNode 发布RPC服务节点
 func (p *Publisher) pubRPCServiceNode(serverName string, service string, data string) error {
-	path := fmt.Sprintf("%s/%s_", p.c.GetServicePubPathByService(service), serverName)
+	path := registry.Join(p.c.GetServicePubPathByService(service), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
 		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
@@ -118,7 +119,7 @@ func (p *Publisher) pubRPCServiceNode(serverName string, service string, data st
 
 //pubAPIServiceNode 发布API服务节点
 func (p *Publisher) pubAPIServiceNode(serverName string, data string) error {
-	path := fmt.Sprintf("%s/%s_", p.c.GetServicePubPath(), serverName)
+	path := registry.Join(p.c.GetServicePubPath(), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
 		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
@@ -143,7 +144,7 @@ func (p *Publisher) pubDNSNode(serverName string) error {
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("/%s/%s", p.c.GetDNSPubPath(server.Domain), ip)
+	path := registry.Join(p.c.GetDNSPubPath(server.Domain), ip)
 	err = p.c.GetRegistry().CreateTempNode(path, "")
 	if err != nil {
 		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
@@ -155,7 +156,7 @@ func (p *Publisher) pubDNSNode(serverName string) error {
 
 //pubServerNode 发布集群节点，用于服务监控
 func (p *Publisher) pubServerNode(serverName string, data string) error {
-	path := fmt.Sprintf("/%s/%s_%s_", p.c.GetServerPubPath(), p.c.GetClusterID(), serverName)
+	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", p.c.GetClusterID(), serverName))
 
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {

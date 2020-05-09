@@ -17,7 +17,6 @@ func Static() Handler {
 			ctx.Next()
 			return
 		}
-
 		var rPath = ctx.Request().Path().GetPath()
 		s, xname := MustStatic(opt, getDefPath(opt, rPath))
 		if !s {

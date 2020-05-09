@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/hydra/registry/watcher"
@@ -45,7 +46,7 @@ func (r *RspServers) Start() (err error) {
 	//初始化注册中心
 	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
 	if err != nil {
-		err = fmt.Errorf("注册中心初始化失败:%s(%v)", r.registryAddr, err)
+		err = fmt.Errorf("注册中心初始化失败 %s %w", r.registryAddr, err)
 		return
 	}
 
@@ -55,23 +56,28 @@ func (r *RspServers) Start() (err error) {
 		return fmt.Errorf("服务器watcher初始化失败 %s,%w", r.path, err)
 	}
 
-	//启动配置监听
+	//处理配置更变通知消息
+
 	r.notify, err = watcher.Start()
 	if err != nil {
 		return err
 	}
-	//处理配置更变通知消息
 	go r.loopRecvNotify()
 	return nil
 }
 
 //loopRecvNotify 接收注册中心配置变更消息
 func (r *RspServers) loopRecvNotify() {
+
+	//启动配置监听
+	r.log.Infof("开始监听:%v", r.path)
+
 	notify := make(chan struct{}, 1)
 	go func() {
+		f := time.After(time.Second * 10)
 		select {
-		case <-time.After(time.Second * 15):
-			r.log.Warnf("%s 未配置", r.path[0])
+		case <-f:
+			r.log.Warnf("%v 未配置", r.path)
 		case <-notify:
 			break
 		}
@@ -94,6 +100,7 @@ LOOP:
 			}
 		}
 	}
+	r.log.Error("exit")
 }
 
 //Shutdown 关闭所有服务器
@@ -122,7 +129,11 @@ func (r *RspServers) Shutdown() {
 
 //checkServer 通知server配置变更或创建新server
 func (r *RspServers) checkServer(path string) error {
-
+	defer func() {
+		if err := recover(); err != nil {
+			r.log.Errorf("[Recovery] panic recovered:\n%s\n%s", err, application.GetStack())
+		}
+	}()
 	//拉取配置信息
 	conf, err := server.NewServerConf(path, r.registry)
 	if err != nil {
@@ -148,9 +159,15 @@ func (r *RspServers) checkServer(path string) error {
 		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
 			srvr, err := creator.Create(conf)
 			if err != nil {
-				return err
+				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
 			}
 			r.servers[conf.GetMainConf().GetServerType()] = srvr
+			if err := srvr.Start(); err != nil {
+				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
+			}
+		} else {
+			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
+			return nil
 		}
 	}
 

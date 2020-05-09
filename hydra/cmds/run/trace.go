@@ -3,6 +3,7 @@ package run
 import (
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime/trace"
 
@@ -44,6 +45,6 @@ func startTraceServer() error {
 	}
 	defer trace.Stop()
 	addr := "0.0.0.0:19999"
-	logger.New("trace").Info("启动成功:pprof.web(addr:http://0.0.0.0:9999/debug/pprof/)")
+	logger.New("trace").Info("启动成功:pprof.web(addr:http://0.0.0.0:19999/debug/pprof/)")
 	return http.ListenAndServe(addr, nil)
 }

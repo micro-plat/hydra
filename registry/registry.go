@@ -52,7 +52,7 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	}
 	resolver, ok := registries[proto]
 	if !ok {
-		return nil, fmt.Errorf("registry: unknown adapter name %q (forgotten import?)", proto)
+		return nil, fmt.Errorf("不支持的协议类型[%s]", proto)
 	}
 	key := fmt.Sprintf("%s_%s", proto, strings.Join(addrs, "_"))
 	_, value, err := registryMap.SetIfAbsentCb(key, func(input ...interface{}) (interface{}, error) {

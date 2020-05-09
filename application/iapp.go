@@ -24,8 +24,6 @@ var Usage string = " A new hydra application"
 
 //IApplication 应用程序信息
 type IApplication interface {
-	GetCMD() string
-	GetHandler(tp string, service string) context.IHandler
 	Server(tp string) server.IServerConf
 	CurrentContext() context.IContext
 

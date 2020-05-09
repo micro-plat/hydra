@@ -2,8 +2,9 @@ package middleware
 
 var originName = "Origin"
 
-//Header 头设置
+//Header 响应头设置
 func Header() Handler {
+
 	return func(ctx IMiddleContext) {
 
 		//1. 业务处理

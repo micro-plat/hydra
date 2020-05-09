@@ -23,11 +23,11 @@ type Router struct {
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
-		Routers: make([]*Router, 0),
-		RPCS:    make([]*Router, 0),
+		Routers: make([]*Router, 0, 1),
+		RPCS:    make([]*Router, 0, 1),
 	}
-	r.Routers = append(r.Routers, &Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
-		Path: "/*name", Service: "/@name"})
+	// r.Routers = append(r.Routers, &Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
+	// 	Path: "/*name", Service: "/@name"})
 	return r
 }
 
@@ -50,6 +50,7 @@ func (h *Routers) Append(path string, service string, action ...string) *Routers
 
 //GetConf 设置路由
 func GetConf(cnf conf.IMainConf) (router *Routers) {
+	router = new(Routers)
 	_, err := cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		router = NewRouters()
@@ -57,7 +58,7 @@ func GetConf(cnf conf.IMainConf) (router *Routers) {
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err))
 	}
-	if b, err := govalidator.ValidateStruct(&router); !b {
+	if b, err := govalidator.ValidateStruct(router); !b {
 		panic(fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err))
 	}
 	return router
