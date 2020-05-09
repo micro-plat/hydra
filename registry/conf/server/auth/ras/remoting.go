@@ -11,12 +11,12 @@ import (
 //RASAuth 远程认证服务
 type RASAuth struct {
 	//远程验证服务名
-	Service string `json:"service,omitempty" valid:"required"`
+	Service string `json:"service,omitempty" valid:"required" toml:"service,omitempty"`
 	*remotingOption
 }
 
-//NewRASAuth 创建远程服务验证参数
-func NewRASAuth(service string, opts ...RemotingOption) *RASAuth {
+//New 创建远程服务验证参数
+func New(service string, opts ...RemotingOption) *RASAuth {
 	r := &RASAuth{
 		Service: service,
 		remotingOption: &remotingOption{

@@ -12,17 +12,17 @@ type IMetric interface {
 }
 
 type Metric struct {
-	Host     string `json:"host" valid:"requrl,required"`
-	DataBase string `json:"dataBase" valid:"ascii,required"`
-	Cron     string `json:"cron" valid:"ascii,required"`
-	UserName string `json:"userName,omitempty" valid:"ascii"`
-	Password string `json:"password,omitempty" valid:"ascii"`
-	Disable  bool   `json:"disable,omitempty"`
+	Host     string `json:"host" valid:"requrl,required" toml:"host,omitempty"`
+	DataBase string `json:"dataBase" valid:"ascii,required" toml:"dataBase,omitempty"`
+	Cron     string `json:"cron" valid:"ascii,required" toml:"cron,omitempty"`
+	UserName string `json:"userName,omitempty" valid:"ascii" toml:"userName,omitempty"`
+	Password string `json:"password,omitempty" valid:"ascii" toml:"password,omitempty"`
+	Disable  bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	*option
 }
 
-//NewMetric 构建api server配置信息
-func NewMetric(host string, db string, cron string, opts ...Option) *Metric {
+//New 构建api server配置信息
+func New(host string, db string, cron string, opts ...Option) *Metric {
 	m := &Metric{
 		Host:     host,
 		DataBase: db,

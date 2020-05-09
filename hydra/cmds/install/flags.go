@@ -7,6 +7,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+var onlyInstallLocalService = false
+
 //getFlags 获取运行时的参数
 func getFlags() []cli.Flag {
 	flags := make([]cli.Flag, 0, 4)
@@ -66,7 +68,11 @@ func getFlags() []cli.Flag {
 			})
 		}
 	}
-
+	flags = append(flags, cli.BoolFlag{
+		Name:        "local,l",
+		Destination: &onlyInstallLocalService,
+		Usage:       `只安装本地服务`,
+	})
 	flags = append(flags, cli.StringFlag{
 		Name:        "trace,t",
 		Destination: &application.DefApp.Trace,

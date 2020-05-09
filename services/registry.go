@@ -77,6 +77,12 @@ func (s *service) CRON(name string, h interface{}) {
 	s.register("cron", name, h)
 }
 
+//CRONBy 根据cron表达式，服务名称，服务处理函数注册cron服务
+func (s *service) CRONBy(cron string, name string, h interface{}) {
+	CRON.Add(cron, name)
+	s.register("cron", name, h)
+}
+
 //register 注册服务
 func (s *service) register(tp string, name string, h interface{}) {
 	s.check(tp)

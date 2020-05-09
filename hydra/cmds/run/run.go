@@ -8,17 +8,17 @@ import (
 	"time"
 
 	"github.com/micro-plat/cli/cmds"
+	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/urfave/cli"
-	"github.com/zkfy/log"
 )
 
 func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "run",
-			Usage:  "运行服务。前台运行，日志直接输出到客户端，输入ctl+c命令时退出服务",
+			Usage:  "运行服务",
 			Flags:  getFlags(),
 			Action: doRun,
 		})
@@ -29,9 +29,12 @@ func doRun(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
 	if err := application.DefApp.Bind(); err != nil {
+		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return err
+		return nil
+		return nil
 	}
+
 	//2.创建trace性能跟踪
 	if err = startTrace(application.Current().GetTrace()); err != nil {
 		return
@@ -59,9 +62,10 @@ LOOP:
 	}
 
 	//5. 关闭服务器释放所有资源
-	log.Info(application.AppName, "正在退出...")
+	application.DefApp.Log().Info(application.AppName, "正在退出...")
 	server.Shutdown()
-	log.Info(application.AppName, "已安全退出")
+	application.Current().Close()
+	application.DefApp.Log().Info(application.AppName, "已安全退出")
 	return nil
 
 }

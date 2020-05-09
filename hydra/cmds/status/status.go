@@ -18,6 +18,9 @@ func init() {
 }
 
 func doStatus(c *cli.Context) (err error) {
+
+	//关闭日志显示
+	application.Current().Log().Pause()
 	service, err := daemon.New(application.AppName, application.AppName)
 	if err != nil {
 		return err

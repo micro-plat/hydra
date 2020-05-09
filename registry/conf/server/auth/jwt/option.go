@@ -2,16 +2,16 @@ package jwt
 
 //jwtOption jwt配置参数
 type jwtOption struct {
-	Name       string   `json:"name" valid:"ascii,required"`
-	ExpireAt   int64    `json:"expireAt" valid:"required"`
-	Mode       string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required"`
-	Secret     string   `json:"secret" valid:"ascii,required"`
-	Source     string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)"`
-	Exclude    []string `json:"exclude,omitempty"`
-	FailedCode string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)"`
-	Redirect   string   `json:"redirect,omitempty" valid:"ascii"`
-	Domain     string   `json:"domain,omitempty" valid:"ascii"`
-	Disable    bool     `json:"disable,omitempty"`
+	Name       string   `json:"name" valid:"ascii,required" toml:"name,omitempty"`
+	ExpireAt   int64    `json:"expireAt" valid:"required" toml:"expireAt,omitzero"`
+	Mode       string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
+	Secret     string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
+	Source     string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
+	Exclude    []string `json:"exclude,omitempty" toml:"exclude,omitempty"`
+	FailedCode string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)" toml:"failed-code,omitempty"`
+	Redirect   string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
+	Domain     string   `json:"domain,omitempty" valid:"ascii" toml:"domain,omitempty"`
+	Disable    bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //Option jwt配置选项

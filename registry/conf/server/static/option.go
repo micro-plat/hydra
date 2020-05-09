@@ -2,14 +2,14 @@ package static
 
 //option 配置参数
 type option struct {
-	Dir       string   `json:"dir,omitempty" valid:"ascii"`
-	Archive   string   `json:"archive,omitempty" valid:"ascii"`
-	Prefix    string   `json:"prefix,omitempty" valid:"ascii"`
-	Exts      []string `json:"exts,omitempty" valid:"ascii"`
-	Exclude   []string `json:"exclude,omitempty" valid:"ascii"`
-	FirstPage string   `json:"first-page,omitempty" valid:"ascii"`
-	Rewriters []string `json:"rewriters,omitempty" valid:"ascii"`
-	Disable   bool     `json:"disable,omitempty"`
+	Dir       string   `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
+	Archive   string   `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
+	Prefix    string   `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
+	Exts      []string `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
+	Exclude   []string `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
+	FirstPage string   `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
+	Rewriters []string `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
+	Disable   bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //Option jwt配置选项

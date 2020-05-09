@@ -37,6 +37,7 @@ type ICNode interface {
 //IPub 发布路径服务
 type IPub interface {
 	GetMainPath() string
+	GetSubConfPath(name string) string
 	GetServicePubPathByService(svName string) string
 	GetServicePubPath() string
 	GetDNSPubPath(svName string) string

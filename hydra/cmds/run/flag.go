@@ -14,7 +14,7 @@ func getFlags() []cli.Flag {
 		flags = append(flags, cli.StringFlag{
 			Name:        "registry,r",
 			Destination: &application.DefApp.RegistryAddr,
-			EnvVar:      "hydra_registry",
+			EnvVar:      "registry",
 			Usage: "\033[;31m*\033[0m" + `注册中心地址,必须项。目前支持zookeeper(zk)和本地文件系统(fs)。注册中心用于保存服务启动和运行参数，
 	 服务注册与发现等数据，格式:proto://host。proto的取值有zk,fs; host的取值根据不同的注册中心各不同,
 	 如zookeeper则为ip地址(加端口号),多个ip用逗号分隔,如:zk://192.168.0.2,192.168.0.107:12181。本地文
@@ -25,7 +25,7 @@ func getFlags() []cli.Flag {
 	if application.DefApp.PlatName == "" && application.DefApp.SysName == "" && len(application.DefApp.ServerTypes) == 0 && application.DefApp.ClusterName == "" {
 		flags = append(flags, cli.StringFlag{
 			Name:        "name,n",
-			EnvVar:      "hydra_name",
+			EnvVar:      "name",
 			Destination: &application.DefApp.Name,
 			Usage: "\033[;31m*\033[0m" + `服务全名，指服务在注册中心的完整名称，该名称是以/分隔的多级目录结构，完整的表示该服务所在平台，系统，服务
 	 类型，集群名称，格式：/平台名称/系统名称/服务器类型/集群名称; 平台名称，系统名称，集群名称可以是任意字母

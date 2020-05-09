@@ -2,16 +2,14 @@ package http
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	x "net/http"
-	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server/router"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/net"
@@ -158,24 +156,10 @@ func (s *Server) getAddress(addr string) (string, error) {
 		return "", fmt.Errorf("%s端口不合法", addr)
 	}
 	if port == "80" {
-		if err := checkPrivileges(); err != nil {
+		if err := application.CheckPrivileges(); err != nil {
 			return "", err
 		}
 	}
 	s.port = port
 	return fmt.Sprintf("%s:%s", host, s.port), nil
 }
-func checkPrivileges() error {
-	if output, err := exec.Command("id", "-g").Output(); err == nil {
-		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {
-			if gid == 0 {
-				return nil
-			}
-			return errRootPrivileges
-		}
-	}
-	return errUnsupportedSystem
-}
-
-var errUnsupportedSystem = errors.New("Unsupported system")
-var errRootPrivileges = errors.New("You must have root user privileges. Possibly using 'sudo' command should help")

@@ -12,8 +12,8 @@ type FixedSecretAuth struct {
 	*fixedOption
 }
 
-//NewFixedSecret 创建固定密钥验证服务
-func NewFixedSecret(secret string, opts ...FixedOption) *FixedSecretAuth {
+//New 创建固定密钥验证服务
+func New(secret string, opts ...FixedOption) *FixedSecretAuth {
 	f := &FixedSecretAuth{fixedOption: &fixedOption{
 		Secret:  secret,
 		Include: []string{"*"},

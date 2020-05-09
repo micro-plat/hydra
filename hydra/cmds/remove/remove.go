@@ -12,11 +12,14 @@ func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "remove",
-			Usage:  "删除服务。应用启动参数发生变化后，需调用remove删除本地服务后再重新安装",
+			Usage:  "删除服务",
 			Action: doRemove,
 		})
 }
 func doRemove(c *cli.Context) (err error) {
+
+	//关闭日志显示
+	application.Current().Log().Pause()
 	service, err := daemon.New(application.AppName, application.AppName)
 	if err != nil {
 		return err

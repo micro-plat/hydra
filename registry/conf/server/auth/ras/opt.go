@@ -5,19 +5,19 @@ import "strings"
 type connectOption struct {
 
 	//键值连接符
-	KeyValue string `json:"kv,omitempty" valid:"ascii"`
+	KeyValue string `json:"kv,omitempty" valid:"ascii" toml:"kv,omitempty"`
 
 	//每组键值连接符
-	Chain string `json:"chain,omitempty" valid:"ascii"`
+	Chain string `json:"chain,omitempty" valid:"ascii" toml:"chain,omitempty"`
 
 	//排序方式
-	Sort string `json:"sort,omitempty" valid:"in(all|data|static)"`
+	Sort string `json:"sort,omitempty" valid:"in(all|data|static)" toml:"sort,omitempty"`
 
 	//参与签名验证的字段
-	Fields string `json:"fields,omitempty" valid:"ascii"`
+	Fields string `json:"fields,omitempty" valid:"ascii" toml:"fields,omitempty"`
 
 	//密钥连接方式
-	Secret *SecretConnect `json:"secret,omitempty"`
+	Secret *SecretConnect `json:"secret,omitempty" toml:"secret,omitempty"`
 }
 
 //ConnectOption 配置选项

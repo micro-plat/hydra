@@ -12,12 +12,15 @@ func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "stop",
-			Usage:  "停止服务。通过start启动的服务，使用此命令可停止服务",
+			Usage:  "停止服务",
 			Action: doStop,
 		})
 }
 
 func doStop(c *cli.Context) (err error) {
+
+	//关闭日志显示
+	application.Current().Log().Pause()
 	service, err := daemon.New(application.AppName, application.AppName)
 	if err != nil {
 		return err

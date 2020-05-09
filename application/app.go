@@ -2,42 +2,72 @@ package application
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //DefApp 默认app
-var DefApp = &application{}
+var DefApp = &application{
+	log: logger.New("hydra"),
+}
 
 type application struct {
 
 	//registryAddr 集群地址
-	RegistryAddr string
+	RegistryAddr string `json:"registryAddr" valid:"ascii,required"`
 
 	//PlatName 平台名称
-	PlatName string
+	PlatName string `json:"platName" valid:"ascii,required"`
 
 	//SysName 系统名称
-	SysName string
+	SysName string `json:"sysName" valid:"ascii,required"`
 
 	//ServerTypes 服务器类型
-	ServerTypes []string
+	ServerTypes []string `json:"serverTypes" valid:"in(api|web|rpc|ws|mqc|cron),required"`
 
 	//ServerTypeNames 服务类型名称
 	ServerTypeNames string
 
 	//ClusterName 集群名称
-	ClusterName string
+	ClusterName string `json:"clusterName" valid:"ascii,required"`
 
 	//Name 服务器请求名称
 	Name string
 
 	//Trace 显示请求与响应信息
-	Trace string
+	Trace string `valid:"in(cpu|mem|block|mutex|web)"`
+
+	//isClose 是否关闭当前应用程序
+	isClose bool
+
+	//log 日志管理
+	log logger.ILogger
+
+	//close 关闭通道
+	close chan struct{}
 }
 
-func (a *application) Bind() error {
+func (m *application) Bind() (err error) {
+	if m.ServerTypeNames != "" {
+		m.ServerTypes = strings.Split(m.ServerTypeNames, "-")
+	}
+	if m.Name != "" {
+		m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = govalidator.ValidateStruct(m)
+	if err != nil {
+		return err
+	}
+	if IsDebug {
+		m.PlatName += "_debug"
+	}
 	return nil
 }
 
@@ -92,4 +122,32 @@ func (a *application) GetClusterName() string {
 //GetTrace 显示请求与响应信息
 func (a *application) GetTrace() string {
 	return a.Trace
+}
+
+//ClosingNotify 获取系统关闭通知
+func (a *application) ClosingNotify() chan struct{} {
+	return a.close
+}
+
+//Log 获取日志组件
+func (a *application) Log() logger.ILogger {
+	return a.log
+}
+
+//Close 显示请求与响应信息
+func (a *application) Close() {
+	a.isClose = true
+	close(a.close)
+}
+func parsePath(p string) (platName string, systemName string, serverTypes []string, clusterName string, err error) {
+	fs := strings.Split(strings.Trim(p, "/"), "/")
+	if len(fs) != 4 {
+		err := fmt.Errorf("系统名称错误，格式:/[platName]/[sysName]/[typeName]/[clusterName]")
+		return "", "", nil, "", err
+	}
+	serverTypes = strings.Split(fs[2], "-")
+	platName = fs[0]
+	systemName = fs[1]
+	clusterName = fs[3]
+	return
 }

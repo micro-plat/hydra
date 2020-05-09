@@ -4,23 +4,25 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/micro-plat/cli/cmds"
+	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
+	"github.com/zkfy/log"
 )
 
 func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "conf",
-			Usage:  "查看配置信息。查看当前服务在配置中心的配置信息",
+			Usage:  "查看配置信息",
 			Flags:  getFlags(),
 			Action: doConf,
 		})
@@ -29,17 +31,19 @@ func init() {
 func doConf(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
+	application.Current().Log().Pause()
 	if err := application.DefApp.Bind(); err != nil {
+		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return err
+		return nil
 	}
 
 	//2. 处理日志
-	log := logger.New(application.AppName)
+	log := log.New(os.Stdout, "", log.Llongcolor)
 	print := log.Info
 
 	//3. 创建注册中心
-	rgst, err := registry.NewRegistry(application.Current().GetRegistryAddr(), log)
+	rgst, err := registry.NewRegistry(application.Current().GetRegistryAddr(), application.Current().Log())
 	if err != nil {
 		return err
 	}

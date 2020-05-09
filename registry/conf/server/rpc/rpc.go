@@ -4,7 +4,7 @@ import "github.com/micro-plat/hydra/registry/conf"
 
 //Server rpc server配置信息
 type Server struct {
-	Address string `json:"address,omitempty" valid:"dialstring"`
+	Address string `json:"addr,omitempty" valid:"dialstring" toml:"addr,omitempty"`
 	*option
 }
 

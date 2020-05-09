@@ -12,7 +12,7 @@ var SubConfName = []string{"router"}
 
 //Server api server配置信息
 type Server struct {
-	Address string `json:"address,omitempty" valid:"dialstring"`
+	Address string `json:"address,omitempty" valid:"dialstring" toml:"addr,omitempty"`
 	*option
 }
 

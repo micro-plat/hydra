@@ -2,10 +2,10 @@ package cron
 
 //option 配置参数
 type option struct {
-	Status   string `json:"status,omitempty" valid:"in(start|stop)"`
-	Sharding int    `json:"sharding,omitempty"`
-	Trace    bool   `json:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitempty"`
+	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
+	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	Timeout  int    `json:"timeout,omitempty" toml:"timeout,omitzero"`
 }
 
 //Option 配置选项

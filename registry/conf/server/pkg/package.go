@@ -7,9 +7,9 @@ import (
 )
 
 type Package struct {
-	URL     string `json:"url" valid:"requrl,required"`
-	Version string `json:"version" valid:"ascii,required"`
-	CRC32   uint32 `json:"crc32" valid:"required"`
+	URL     string `json:"url" valid:"requrl,required" toml:"url,omitempty"`
+	Version string `json:"version" valid:"ascii,required" toml:"version,omitempty"`
+	CRC32   uint32 `json:"crc32" valid:"required" toml:"crc32,omitempty"`
 }
 
 //NewPackage 构建CRON任务

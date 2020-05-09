@@ -2,9 +2,9 @@ package metric
 
 //option 配置参数
 type option struct {
-	UserName string `json:"userName,omitempty" valid:"ascii"`
-	Password string `json:"password,omitempty" valid:"ascii"`
-	Disable  bool   `json:"disable,omitempty"`
+	UserName string `json:"userName,omitempty" valid:"ascii" toml:"userName,omitempty"`
+	Password string `json:"password,omitempty" valid:"ascii" toml:"password,omitempty"`
+	Disable  bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //Option 配置选项

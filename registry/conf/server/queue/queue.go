@@ -1,45 +1,26 @@
 package queue
 
-import (
-	"fmt"
-
-	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/registry/conf"
-)
-
-//Queues queue任务
-type Queues struct {
-	Queues []*Queue `json:"queues"`
-}
-
-//Queue 任务项
+//Queue 配置参数
 type Queue struct {
-	*option
+	Queue       string `json:"queue" valid:"ascii,required" toml:"queue,omitempty"`
+	Service     string `json:"service" valid:"ascii,required" toml:"service,omitempty"`
+	Concurrency int    `json:"concurrency,omitempty" toml:"concurrency,omitempty"`
+	Disable     bool   `json:"disable,omitemptye" toml:"disable,omitempty"`
 }
 
-//NewQueues 构建Queues
-func NewQueues(v Option, opts ...Option) *Queues {
-	q := &Queues{Queues: make([]*Queue, 0, 1)}
-	fq := &Queue{option: &option{}}
-	v(fq.option)
-	q.Queues = append(q.Queues, fq)
-	for _, opt := range opts {
-		oq := &Queue{option: &option{}}
-		opt(oq.option)
-		q.Queues = append(q.Queues, oq)
+//NewQueue 构建queue任务信息
+func NewQueue(queue string, service string) *Queue {
+	return &Queue{
+		Queue:   queue,
+		Service: service,
 	}
-	return q
 }
 
-//GetConf 设置queue
-func GetConf(cnf conf.IMainConf) (queues *Queues, err error) {
-	if _, err = cnf.GetSubObject("queue", &queues); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("queue:%v", err)
+//NewQueueByConcurrency 构建queue任务信息
+func NewQueueByConcurrency(queue string, service string, concurrency int) *Queue {
+	return &Queue{
+		Queue:       queue,
+		Service:     service,
+		Concurrency: concurrency,
 	}
-	if len(queues.Queues) > 0 {
-		if b, err := govalidator.ValidateStruct(&queues); !b {
-			return nil, fmt.Errorf("queue配置有误:%v", err)
-		}
-	}
-	return queues, nil
 }

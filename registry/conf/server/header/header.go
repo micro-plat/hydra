@@ -15,8 +15,8 @@ type IHeader interface {
 //Headers http头信息
 type Headers option
 
-//NewHeader 构建请求的头配置
-func NewHeader(opts ...Option) Headers {
+//New 构建请求的头配置
+func New(opts ...Option) Headers {
 	h := newOption()
 	for _, opt := range opts {
 		opt(h)

@@ -1,10 +1,10 @@
 package fsa
 
 type fixedOption struct {
-	Secret  string   `json:"secret" valid:"ascii,required"`
-	Mode    string   `json:"mode" valid:"in(MD5|SHA1|SHA256),required"`
-	Include []string `json:"include" valid:"required"`
-	Disable bool     `json:"disable,omitempty"`
+	Secret  string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
+	Mode    string   `json:"mode" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
+	Include []string `json:"include" valid:"required" toml:"include,omitempty"`
+	Disable bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //FixedOption 配置选项

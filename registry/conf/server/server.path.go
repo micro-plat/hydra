@@ -42,6 +42,11 @@ func (c *Pub) GetMainPath() string {
 	return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "conf")
 }
 
+//GetSubConfPath 获取子配置路径
+func (c *Pub) GetSubConfPath(name string) string {
+	return registry.Join(c.GetMainPath(), name)
+}
+
 //GetVarPath 获取var配置路径
 func (c *Pub) GetVarPath() string {
 	return registry.Join(c.platName, "var")
@@ -49,12 +54,12 @@ func (c *Pub) GetVarPath() string {
 
 //GetServicePubPathByService 获取服务发布跟路径
 func (c *Pub) GetServicePubPathByService(svName string) string {
-	return registry.Join("/", c.platName, "services", c.serverType, c.sysName, svName, "providers")
+	return registry.Join(c.platName, "services", c.serverType, c.sysName, svName, "providers")
 }
 
 //GetServicePubPath 获取服务发布跟路径
 func (c *Pub) GetServicePubPath() string {
-	return registry.Join("/", c.platName, "services", c.serverType, c.sysName, "providers")
+	return registry.Join(c.platName, "services", c.serverType, c.sysName, "providers")
 }
 
 //GetDNSPubPath 获取DNS服务路径
@@ -64,7 +69,7 @@ func (c *Pub) GetDNSPubPath(svName string) string {
 
 //GetServerPubPath 获取服务器发布的跟路径
 func (c *Pub) GetServerPubPath() string {
-	return registry.Join("/", c.platName, c.sysName, c.serverType, c.clusterName, "servers")
+	return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "servers")
 }
 
 //GetClusterID 获取当前服务的集群编号

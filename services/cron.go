@@ -3,6 +3,7 @@ package services
 import (
 	"sync"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server/task"
 )
 
@@ -31,8 +32,8 @@ func newCron() *cron {
 	return c
 }
 
-//AddTask 添加任务
-func (c *cron) AddTask(cron string, service string) {
+//Add 添加任务
+func (c *cron) Add(cron string, service string) *cron {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
@@ -41,6 +42,21 @@ func (c *cron) AddTask(cron string, service string) {
 		s.msg <- task
 	}
 	c.n <- struct{}{}
+	return c
+}
+
+//Remove 移除任务
+func (c *cron) Remove(cron string, service string) *cron {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	task := task.NewTask(cron, service)
+	task.Disable = true
+	c.tasks.Append(task)
+	for _, s := range c.events {
+		s.msg <- task
+	}
+	c.n <- struct{}{}
+	return c
 }
 
 //Subscribe 订阅任务
@@ -60,8 +76,11 @@ func (c *cron) Subscribe(f func(t *task.Task)) {
 
 //notify 通知任务
 func (c *cron) notify() {
+BREAK:
 	for {
 		select {
+		case <-application.Current().ClosingNotify():
+			break BREAK
 		case <-c.n:
 			c.lock.Lock()
 			for _, e := range c.events {

@@ -5,28 +5,28 @@ import "github.com/micro-plat/lib4go/types"
 type remotingOption struct {
 
 	//指定需要远程验证的请求列表
-	Requests []string `json:"requests,omitempty" valid:"required"`
+	Requests []string `json:"requests,omitempty" valid:"required" toml:"requests,omitempty"`
 
 	//必须传入的字段列表
-	Required []string `json:"required,omitempty"`
+	Required []string `json:"required,omitempty" toml:"required,omitempty"`
 
 	//远程验证的字段连接方式
-	Connect *Connect `json:"connect,omitempty"`
+	Connect *Connect `json:"connect,omitempty" toml:"connect,omitempty"`
 
 	//字段别名表
-	Alias map[string]string `json:"alias,omitempty"`
+	Alias map[string]string `json:"alias,omitempty" toml:"alias,omitempty"`
 
 	//扩展参数表
-	Params map[string]interface{} `json:"params,omitempty"`
+	Params map[string]interface{} `json:"params,omitempty" toml:"params,omitempty"`
 
 	//需要解密的字段
-	Decrypt []string `json:"decrypt,omitempty"`
+	Decrypt []string `json:"decrypt,omitempty" toml:"decrypt,omitempty"`
 
 	//是否需要检查时间戳
-	CheckTS bool `json:"check-timestamp,omitempty"`
+	CheckTS bool `json:"check-timestamp,omitempty" toml:"check-timestamp,omitempty"`
 
 	//配置是否禁用
-	Disable bool `json:"disable,omitempty"`
+	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //RemotingOption 配置选项

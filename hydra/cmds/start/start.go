@@ -12,12 +12,15 @@ func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "start",
-			Usage:  "启动服务。后台运行服务，日志存入本地文件或日志中心。异常退出或服务器重启会自动启动",
+			Usage:  "启动服务",
 			Action: doStart,
 		})
 }
 
 func doStart(c *cli.Context) (err error) {
+
+	//关闭日志显示
+	application.Current().Log().Pause()
 	service, err := daemon.New(application.AppName, application.AppName)
 	if err != nil {
 		return err

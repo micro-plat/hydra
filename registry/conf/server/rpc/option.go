@@ -3,13 +3,13 @@ package rpc
 import "strings"
 
 type option struct {
-	Status    string `json:"status,omitempty" valid:"in(start|stop)"`
-	RTimeout  int    `json:"readTimeout,omitempty"`
-	WTimeout  int    `json:"writeTimeout,omitempty"`
-	RHTimeout int    `json:"readHeaderTimeout,omitempty"`
-	Host      string `json:"host,omitempty"`
-	Domain    string `json:"dn,omitempty"`
-	Trace     bool   `json:"trace,omitempty"`
+	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
+	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
+	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
+	Host      string `json:"host,omitempty" toml:"host,omitempty"`
+	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
+	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
 //Option 配置选项

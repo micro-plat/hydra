@@ -2,7 +2,6 @@ package registry
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"strings"
 
@@ -92,8 +91,16 @@ func Parse(address string) (proto string, raddr []string, u string, p string, er
 
 //Join 地址连接
 func Join(elem ...string) string {
-	path := filepath.Join(elem...)
-	return strings.Replace(path, "\\", "/", -1)
+	var builder strings.Builder
+	builder.WriteString("/")
+	for _, v := range elem {
+		if v == "/" || v == "\\" {
+			continue
+		}
+		builder.WriteString(strings.Trim(v, "/"))
+		builder.WriteString("/")
+	}
+	return strings.TrimSuffix(builder.String(), "/")
 }
 func getAddrByUserPass(addr string) (u string, p string, address string, err error) {
 	if !strings.Contains(addr, "@") {
