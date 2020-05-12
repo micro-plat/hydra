@@ -7,8 +7,7 @@ import (
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/hydra/cmds/daemon"
-	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/registry/conf/builder"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
@@ -30,26 +29,17 @@ func doInstall(c *cli.Context) (err error) {
 	if err = application.CheckPrivileges(); err != nil {
 		return err
 	}
+
 	//2. 绑定应用程序参数
 	if err := application.DefApp.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
+
 	//3.检查是否只安装本地服务
 	if !onlyInstallLocalService {
-
-		//1. 加载配置信息
-		if err := builder.Conf.Load(); err != nil {
-			return err
-		}
-
-		//2. 发布到配置中心
-		r, err := registry.NewRegistry(application.Current().GetRegistryAddr(), application.Current().Log())
-		if err != nil {
-			return err
-		}
-		if err := builder.Conf.Pub(application.Current().GetPlatName(), application.Current().GetSysName(), application.Current().GetClusterName(), r); err != nil {
+		if err := pkgs.Pub2Registry(); err != nil {
 			return err
 		}
 	}

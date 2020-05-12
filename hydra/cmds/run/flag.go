@@ -2,13 +2,13 @@ package run
 
 import (
 	"github.com/micro-plat/hydra/application"
-	"github.com/micro-plat/hydra/hydra/cmds/conf"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
 
 //getFlags 获取运行时的参数
 func getFlags() []cli.Flag {
-	flags := conf.GetBaseFlags()
+	flags := pkgs.GetBaseFlags()
 	flags = append(flags, cli.StringFlag{
 		Name:        "trace,t",
 		Destination: &application.DefApp.Trace,

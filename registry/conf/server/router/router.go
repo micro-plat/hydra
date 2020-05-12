@@ -8,8 +8,7 @@ import (
 )
 
 type Routers struct {
-	Routers []*Router `json:"srvs,omitempty"`
-	RPCS    []*Router `json:"gwts,omitempty"`
+	Routers []*Router `json:"routers,omitempty"`
 }
 
 //Router 路由信息
@@ -24,18 +23,8 @@ type Router struct {
 func NewRouters() *Routers {
 	r := &Routers{
 		Routers: make([]*Router, 0, 1),
-		RPCS:    make([]*Router, 0, 1),
 	}
-	// r.Routers = append(r.Routers, &Router{Action: []string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"},
-	// 	Path: "/*name", Service: "/@name"})
 	return r
-}
-
-//AppendRPCProxy 添加proxy信息
-func (h *Routers) AppendRPCProxy(path string, service string) *Routers {
-	router := &Router{Path: path, Service: service}
-	h.RPCS = append(h.RPCS, router)
-	return h
 }
 
 //Append 添加路由信息

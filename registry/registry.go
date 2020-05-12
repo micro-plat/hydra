@@ -10,6 +10,10 @@ import (
 	"github.com/micro-plat/lib4go/registry"
 )
 
+const LocalMemory = "lm"
+const Zookeeper = "zk"
+const FileSystem = "fs"
+
 //IRegistry 注册中心接口
 type IRegistry interface {
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)
@@ -68,18 +72,24 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	return
 }
 
+//GetProto 获取协议名称
+func GetProto(addr string) string {
+	p, _, _, _, _ := Parse(addr)
+	return p
+}
+
 //Parse 解析地址
 //如:zk://192.168.0.155:2181 或 fs://../
 func Parse(address string) (proto string, raddr []string, u string, p string, err error) {
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
-		return "", nil, "", "", fmt.Errorf("%s错误，必须包含://", address)
+		return "", nil, "", "", fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)
 	}
 	if len(addr[0]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s错误，协议名不能为空", address)
+		return "", nil, "", "", fmt.Errorf("%s，协议名不能为空。格式:[proto]://[address]", address)
 	}
 	if len(addr[1]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s错误，地址不能为空", address)
+		return "", nil, "", "", fmt.Errorf("%s，地址不能为空。格式:[proto]://[address]", address)
 	}
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")

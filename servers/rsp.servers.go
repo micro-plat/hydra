@@ -46,7 +46,7 @@ func (r *RspServers) Start() (err error) {
 	//初始化注册中心
 	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
 	if err != nil {
-		err = fmt.Errorf("注册中心初始化失败 %s %w", r.registryAddr, err)
+		err = fmt.Errorf("注册中心初始化失败 %w", err)
 		return
 	}
 
@@ -70,14 +70,15 @@ func (r *RspServers) Start() (err error) {
 func (r *RspServers) loopRecvNotify() {
 
 	//启动配置监听
-	r.log.Infof("开始监听:%v", r.path)
 
 	notify := make(chan struct{}, 1)
 	go func() {
 		f := time.After(time.Second * 10)
 		select {
 		case <-f:
-			r.log.Warnf("%v 未配置", r.path)
+			for _, p := range r.path {
+				r.log.Infof("开始监听:%v", p)
+			}
 		case <-notify:
 			break
 		}
@@ -137,7 +138,7 @@ func (r *RspServers) checkServer(path string) error {
 	//拉取配置信息
 	conf, err := server.NewServerConf(path, r.registry)
 	if err != nil {
-		r.log.Error("加载[%s]配置发生错误:%w", path, err)
+		r.log.Errorf("加载[%s]配置发生错误:%v", path, err)
 	}
 
 	//同一时间只允许一个流程处理配置变更

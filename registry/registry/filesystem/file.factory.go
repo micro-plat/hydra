@@ -23,5 +23,5 @@ func (z *fileFactory) Create(addrs []string, u string, p string, log logger.ILog
 }
 
 func init() {
-	registry.Register("fs", &fileFactory{})
+	registry.Register(registry.FileSystem, &fileFactory{})
 }

@@ -48,6 +48,9 @@ type IApplication interface {
 	//Log 获取日志组件
 	Log() logger.ILogger
 
+	//HasServerType 是否包含指定的服务器类型
+	HasServerType(tp string) bool
+
 	//ClosingNotify 获取系统关闭通知
 	ClosingNotify() chan struct{}
 

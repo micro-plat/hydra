@@ -88,7 +88,7 @@ func (s *ServerConf) GetRouterConf() *router.Routers {
 	return router.GetConf(s.mainConf)
 }
 
-//GetRouterConf 获取路由信息
+//GetFSAConf 获取路由信息
 func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
 	return fsa.GetConf(s.mainConf)
 }

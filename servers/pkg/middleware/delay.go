@@ -13,6 +13,7 @@ const xAddDelay = "X-Add-Delay"
 func Delay() Handler {
 	return func(ctx IMiddleContext) {
 		if delay := types.GetInt64(ctx.Request().Path().GetHeader(xAddDelay), 0); delay > 0 {
+			ctx.Response().AddSpecial("delay")
 			time.Sleep(time.Duration(delay) * time.Microsecond)
 		}
 		ctx.Next()

@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/BurntSushi/toml"
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/conf/server/cron"
 )
@@ -42,6 +43,10 @@ func (c *conf) Load() error {
 			return err
 		}
 	}
+	if _, ok := c.data["api"]; !ok && application.Current().HasServerType("api") {
+		c.API(":8080")
+	}
+	//添加其它服务器
 	return nil
 }
 

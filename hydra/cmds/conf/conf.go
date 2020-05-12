@@ -10,6 +10,7 @@ import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server"
@@ -23,7 +24,7 @@ func init() {
 		cli.Command{
 			Name:   "conf",
 			Usage:  "查看配置信息",
-			Flags:  GetBaseFlags(),
+			Flags:  pkgs.GetBaseFlags(),
 			Action: doConf,
 		})
 }
@@ -46,6 +47,14 @@ func doConf(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+
+	//4. 处理本地内存作为注册中心的服务发布问题
+	if registry.GetProto(application.Current().GetRegistryAddr()) == registry.LocalMemory {
+		if err := pkgs.Pub2Registry(); err != nil {
+			return err
+		}
+	}
+
 	queryIndex := 0
 	queryList := make(map[int][]byte)
 	for i, tp := range application.Current().GetServerTypes() {

@@ -83,43 +83,6 @@ func (s *service) CRONBy(cron string, name string, h interface{}) {
 	s.register("cron", name, h)
 }
 
-//register 注册服务
-func (s *service) register(tp string, name string, h interface{}) {
-	s.check(tp)
-	handlers, fallbacks := reflectHandler(name, h)
-	for k, v := range handlers {
-		if _, ok := s.handlers[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.handlers[tp][k] = v
-	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	for k, v := range fallbacks {
-		if _, ok := s.fallbacks[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.fallbacks[tp][k] = v
-	}
-}
-func (s *service) check(tp string) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if _, ok := s.handlers[tp]; !ok {
-		s.handlers[tp] = make(map[string]context.IHandler)
-	}
-	if _, ok := s.fallbacks[tp]; !ok {
-		s.fallbacks[tp] = make(map[string]context.IHandler)
-	}
-}
-func (s *service) GetServices(serverType string) []string {
-	list := make([]string, 0, len(s.handlers[serverType]))
-	for k := range s.handlers[serverType] {
-		list = append(list, k)
-	}
-	return list
-}
-
 //GetHandler 获取服务对应的处理函数
 func (s *service) GetHandler(serverType string, service string, method string) (context.IHandler, bool) {
 	s.lock.RLock()
@@ -210,4 +173,41 @@ func reflectHandler(name string, h interface{}) (handlers map[string]context.IHa
 
 	}
 	return
+}
+
+//register 注册服务
+func (s *service) register(tp string, name string, h interface{}) {
+	s.check(tp)
+	handlers, fallbacks := reflectHandler(name, h)
+	for k, v := range handlers {
+		if _, ok := s.handlers[tp][k]; ok {
+			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
+		}
+		s.handlers[tp][k] = v
+	}
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	for k, v := range fallbacks {
+		if _, ok := s.fallbacks[tp][k]; ok {
+			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
+		}
+		s.fallbacks[tp][k] = v
+	}
+}
+func (s *service) check(tp string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	if _, ok := s.handlers[tp]; !ok {
+		s.handlers[tp] = make(map[string]context.IHandler)
+	}
+	if _, ok := s.fallbacks[tp]; !ok {
+		s.fallbacks[tp] = make(map[string]context.IHandler)
+	}
+}
+func (s *service) GetServices(serverType string) []string {
+	list := make([]string, 0, len(s.handlers[serverType]))
+	for k := range s.handlers[serverType] {
+		list = append(list, k)
+	}
+	return list
 }

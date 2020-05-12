@@ -42,6 +42,7 @@ type IVariable interface {
 //IRequest 请求信息
 type IRequest interface {
 	Path() IPath
+	Param(string) string
 	Bind(obj interface{}) error
 	Check(field ...string) error
 	GetData() (map[string]interface{}, error)
@@ -58,13 +59,13 @@ type IResponse interface {
 	SetHeader(string, string)
 	GetStatusCode() int
 	SetStatusCode(int)
-	Write(s int, v string) error
+	Write(s int, v interface{}) error
 	WriteAny(v interface{}) error
 	Written() bool
 	File(path string)
 	Abort(int)
 	AbortWithError(int, error)
-	GetTrace() string
+	GetResponse() string
 }
 
 //IUser 用户相关信息

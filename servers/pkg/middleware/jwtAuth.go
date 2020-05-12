@@ -22,21 +22,24 @@ func JwtAuth() Handler {
 			return
 		}
 
-		//2.检查jwt是否有效
+		//2.检查是否需要跳过请求
+		if jwtAuth.IsExcluded(ctx.Request().Path().GetPath()) ||
+			jwtAuth.IsExcluded(ctx.Request().Path().GetService()) {
+			ctx.Next()
+			return
+		}
+
+		//3.检查jwt是否有效
 		ctx.Response().AddSpecial("jwt")
+
+		//4. 验证jwt
 		_, err := checkJWT(ctx, jwtAuth)
 		if err == nil {
 			ctx.Next()
 			return
 		}
 
-		//3.检查是否需要跳过请求
-		if jwtAuth.IsExcluded(ctx.Request().Path().GetService()) {
-			ctx.Next()
-			return
-		}
-
-		//4.jwt验证失败后返回错误
+		//5.jwt验证失败后返回错误
 		ctx.Log().Error(err)
 		ctx.Response().Abort(errs.GetCode(err, 401))
 		return

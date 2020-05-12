@@ -10,6 +10,8 @@ import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/servers"
 	"github.com/urfave/cli"
 )
@@ -32,7 +34,6 @@ func doRun(c *cli.Context) (err error) {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
-		return nil
 	}
 
 	//2.创建trace性能跟踪
@@ -40,7 +41,14 @@ func doRun(c *cli.Context) (err error) {
 		return
 	}
 
-	//3. 创建服务器
+	//3. 处理本地内存作为注册中心的服务发布问题
+	if registry.GetProto(application.Current().GetRegistryAddr()) == registry.LocalMemory {
+		if err := pkgs.Pub2Registry(); err != nil {
+			return err
+		}
+	}
+
+	//4. 创建服务器
 	server := servers.NewRspServers(application.Current().GetRegistryAddr(),
 		application.Current().GetPlatName(), application.Current().GetSysName(),
 		application.Current().GetServerTypes(), application.Current().GetClusterName())
@@ -48,7 +56,7 @@ func doRun(c *cli.Context) (err error) {
 		return err
 	}
 
-	//4. 堵塞当前进程，直到用户退出
+	//5. 堵塞当前进程，直到用户退出
 	interrupt := make(chan os.Signal, 4)
 	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
 LOOP:
@@ -61,7 +69,7 @@ LOOP:
 		}
 	}
 
-	//5. 关闭服务器释放所有资源
+	//6. 关闭服务器释放所有资源
 	application.DefApp.Log().Info(application.AppName, "正在退出...")
 	server.Shutdown()
 	application.Current().Close()

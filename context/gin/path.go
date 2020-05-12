@@ -24,7 +24,7 @@ func (c *rpath) GetService() string {
 
 //GetPath 获取请求路径
 func (c *rpath) GetPath() string {
-	return c.Context.Request.URL.Path
+	return c.Request.URL.Path
 }
 
 //GetHeader 获取请求头信息
@@ -34,13 +34,13 @@ func (c *rpath) GetHeader(key string) string {
 
 //GetHeaders 获取请求的header
 func (c *rpath) GetHeaders() map[string][]string {
-	return c.Context.Request.Header
+	return c.Request.Header
 }
 
 //GetHeaders 获取请求的header
 func (c *rpath) GetCookies() map[string]string {
 	out := make(map[string]string)
-	cookies := c.Context.Request.Cookies()
+	cookies := c.Request.Cookies()
 	for _, cookie := range cookies {
 		out[cookie.Name] = cookie.Value
 	}
@@ -49,7 +49,7 @@ func (c *rpath) GetCookies() map[string]string {
 
 //GetCookie 获取cookie信息
 func (c *rpath) GetCookie(name string) (string, bool) {
-	if cookie, err := c.Context.Request.Cookie(name); err == nil {
+	if cookie, err := c.Request.Cookie(name); err == nil {
 		return cookie.Value, true
 	}
 	return "", false

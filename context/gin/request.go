@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -39,6 +40,11 @@ func (r *request) Path() context.IPath {
 	return r.path
 }
 
+//Path 获取请求路径信息
+func (r *request) Param(key string) string {
+	return r.Context.Param(key)
+}
+
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
 	if err := r.Context.ShouldBind(&obj); err != nil {
@@ -62,10 +68,10 @@ func (r *request) Bind(obj interface{}) error {
 func (r *request) Check(field ...string) error {
 	data, _ := r.body.GetBodyMap()
 	for _, key := range field {
-		if _, ok := r.Context.GetPostForm(key); !ok {
+		if _, ok := r.Context.GetPostForm(key); ok {
 			continue
 		}
-		if _, ok := r.Context.GetQuery(key); !ok {
+		if _, ok := r.Context.GetQuery(key); ok {
 			continue
 		}
 		if v, ok := data[key]; !ok || fmt.Sprint(v) == "" {
@@ -83,6 +89,10 @@ func (r *request) GetKeys() []string {
 		keys = append(keys, k)
 	}
 	for k := range r.Context.Request.PostForm {
+		keys = append(keys, k)
+	}
+	data, _ := r.body.GetBodyMap()
+	for k := range data {
 		keys = append(keys, k)
 	}
 	return keys
@@ -111,7 +121,7 @@ func (r *request) Get(name string) (result string, ok bool) {
 	if result, ok = r.Context.GetPostForm(name); ok {
 		return
 	}
-	if result, ok = r.Context.GetQuery(name); !ok {
+	if result, ok = r.Context.GetQuery(name); ok {
 		return
 	}
 	m, err := r.body.GetBodyMap()
@@ -128,7 +138,6 @@ func (r *request) GetString(name string, def ...string) string {
 		return v
 	}
 	return types.GetStringByIndex(def, 0, "")
-
 }
 
 func (r *request) GetInt(name string, def ...int) int {
@@ -172,5 +181,13 @@ func (r *request) IsEmpty(name string) bool {
 
 //GetTrace 获取trace信息
 func (r *request) GetTrace() string {
+	data, err := r.GetData()
+	if err != nil {
+		return err.Error()
+	}
+	if buff, err := json.Marshal(data); err == nil {
+		return string(buff)
+	}
 	return ""
+
 }

@@ -13,7 +13,7 @@ import (
 //body 用于处理http请求的body读取
 type body struct {
 	*gin.Context
-	body        string
+	body        []byte
 	bodyReadErr error
 	hasReadBody bool
 }
@@ -34,18 +34,24 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 }
 
 //GetBody 读取body返回body原字符串
-func (w *body) GetBody(e ...string) (string, error) {
+func (w *body) GetBody(e ...string) (s string, err error) {
 	encode := types.GetStringByIndex(e, 0, "utf-8")
 	if w.hasReadBody {
-		return w.body, w.bodyReadErr
+		if w.bodyReadErr != nil {
+			return "", w.bodyReadErr
+		}
+		buff, err := encoding.DecodeBytes(w.body, encode)
+		return string(buff), err
 	}
-	buff, err := ioutil.ReadAll(w.Context.Request.Body)
-	if err != nil {
-		return "", fmt.Errorf("获取body发生错误:%w", err)
+	w.hasReadBody = true
+	w.body, w.bodyReadErr = ioutil.ReadAll(w.Context.Request.Body)
+	if w.bodyReadErr != nil {
+		return "", fmt.Errorf("获取body发生错误:%w", w.bodyReadErr)
 	}
-	nbuff, err := encoding.DecodeBytes(buff, encode)
-	if err != nil {
-		return "", fmt.Errorf("获取body发生错误:%w", err)
+	var buff []byte
+	buff, w.bodyReadErr = encoding.DecodeBytes(w.body, encode)
+	if w.bodyReadErr != nil {
+		return "", fmt.Errorf("获取body发生错误:%w", w.bodyReadErr)
 	}
-	return string(nbuff), nil
+	return string(buff), nil
 }

@@ -32,11 +32,29 @@ func publish(r registry.IRegistry, path string, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
 	}
-	r.Delete(path)
+	if err := deleteAll(r, path); err != nil {
+		return err
+	}
 	if err := r.CreatePersistentNode(path, value); err != nil {
 		return fmt.Errorf("创建配置节点%s %s出错:%w", path, value, err)
 	}
 	return nil
+}
+func deleteAll(r registry.IRegistry, path string) error {
+	if b, err := r.Exists(path); err != nil || !b {
+		return err
+	}
+	child, _, err := r.GetChildren(path)
+	if err != nil {
+		return err
+	}
+	for _, c := range child {
+		npath := registry.Join(path, c)
+		if err := r.Delete(npath); err != nil {
+			return err
+		}
+	}
+	return r.Delete(path)
 }
 
 //getJSON 将对象序列化为json字符串

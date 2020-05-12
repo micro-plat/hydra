@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/micro-plat/hydra/application"
 	r "github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/registry"
 )
@@ -37,7 +35,7 @@ type fileSystem struct {
 }
 
 func newFileSystem(path string) (*fileSystem, error) {
-	if err := checkPrivileges(); err != nil {
+	if err := application.CheckPrivileges(); err != nil {
 		return nil, err
 	}
 	w, err := fsnotify.NewWatcher()
@@ -276,21 +274,3 @@ func (v *valuesEntity) GetError() error {
 func (v *valuesEntity) GetPath() string {
 	return v.path
 }
-
-func checkPrivileges() error {
-	if output, err := exec.Command("id", "-g").Output(); err == nil {
-		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {
-			if gid == 0 {
-				return nil
-			}
-			return errRootPrivileges
-		}
-	}
-	if runtime.GOOS == "windows" {
-		return nil
-	}
-	return fmt.Errorf("%v %s", errUnsupportedSystem, runtime.GOOS)
-}
-
-var errUnsupportedSystem = errors.New("Unsupported system")
-var errRootPrivileges = errors.New("You must have root user privileges. Possibly using 'sudo' command should help")

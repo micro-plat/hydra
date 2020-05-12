@@ -27,5 +27,5 @@ func (z *zookeeperFactory) Create(addrs []string, u string, p string, log logger
 }
 
 func init() {
-	registry.Register("zk", &zookeeperFactory{})
+	registry.Register(registry.Zookeeper, &zookeeperFactory{})
 }

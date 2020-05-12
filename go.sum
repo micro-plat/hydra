@@ -66,8 +66,6 @@ github.com/mattn/go-isatty v0.0.12 h1:wuysRhFDzyxgEmMf5xjvJ2M9dZoWAXNNr5LSBS7uHX
 github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
 github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A/Q=
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
-github.com/micro-plat/cli v1.0.0 h1:l0fZ6A4Qjr1rwnLwpbwUNmyYxaEhlxoJzzrOIkSFmkI=
-github.com/micro-plat/cli v1.0.0/go.mod h1:rjUkvJ83qjYmnk+VT4TQAFiYkoPGR5yN7XaMoqBeN0Y=
 github.com/micro-plat/cli v1.0.1 h1:Yo2jXptuQaCKwzC7SDJ43YXvC+/NogmicU2Ir/V8snk=
 github.com/micro-plat/cli v1.0.1/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
 github.com/micro-plat/gmq v1.0.1/go.mod h1:93NeUjbgul5ywP+cm4eXERv6Zk0J8zZyrzYrY3q8GVQ=
@@ -103,7 +101,6 @@ github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
-github.com/urfave/cli v1.22.3/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.4 h1:u7tSpNPPswAFymm8IehJhy4uJMlUuU/GmqSkvJ1InXA=
 github.com/urfave/cli v1.22.4/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/yosssi/gmq v0.0.1/go.mod h1:mReykazh0U1JabvuWh1PEbzzJftqOQWsjr0Lwg5jL1Y=

@@ -16,12 +16,8 @@ func ExecuteHandler(service string) Handler {
 			return
 		}
 		result := h.Handle(ctx)
-		if ctx.Response().Written() {
-			return
-		}
 		if err := errs.GetError(result); err != nil {
-			ctx.Response().Write(err.GetCode(), err.GetError().Error())
-			return
+			ctx.Log().Error("err:", err)
 		}
 		ctx.Response().WriteAny(result)
 	}

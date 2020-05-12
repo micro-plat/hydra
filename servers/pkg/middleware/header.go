@@ -12,6 +12,9 @@ func Header() Handler {
 
 		//2. 获取header配置
 		headers := ctx.ServerConf().GetHeaderConf()
+		if len(headers) > 0 {
+			ctx.Response().AddSpecial("header")
+		}
 
 		//3. 处理响应header参数
 		origin := ctx.Request().Path().GetHeader(originName)
