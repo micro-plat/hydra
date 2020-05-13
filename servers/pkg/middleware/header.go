@@ -7,10 +7,7 @@ func Header() Handler {
 
 	return func(ctx IMiddleContext) {
 
-		//1. 业务处理
-		ctx.Next()
-
-		//2. 获取header配置
+		//1. 获取header配置
 		headers := ctx.ServerConf().GetHeaderConf()
 		if len(headers) > 0 {
 			ctx.Response().AddSpecial("header")
@@ -27,6 +24,9 @@ func Header() Handler {
 				ctx.Response().SetHeader(k, origin)
 			}
 		}
+
+		//2. 业务处理
+		ctx.Next()
 
 	}
 }

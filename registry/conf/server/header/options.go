@@ -11,24 +11,26 @@ type option = map[string]string
 type Option func(option)
 
 func newOption() option {
-	return map[string]string{
-		"Access-Control-Allow-Credentials": "true",
-		"Access-Control-Allow-Origin":      "*",
-		"Access-Control-Allow-Methods":     "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-		"Access-Control-Allow-Headers":     strings.Join(allow, ","),
-		"Access-Control-Expose-Headers":    strings.Join(expose, ","),
-	}
+	return map[string]string{}
 }
 
-//WithHosts 设置允许的主机名
-func WithHosts(host ...string) Option {
+//WithCrossDomain 添加跨域配置
+func WithCrossDomain(host ...string) Option {
 	return func(a option) {
-		a["Access-Control-Allow-Origin"] = strings.Join(host, ",")
+		origin := "*"
+		if len(host) > 0 {
+			origin = strings.Join(host, ",")
+		}
+		a["Access-Control-Allow-Credentials"] = "true"
+		a["Access-Control-Allow-Origin"] = origin
+		a["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+		a["Access-Control-Allow-Headers"] = strings.Join(allow, ",")
+		a["Access-Control-Expose-Headers"] = strings.Join(expose, ",")
 	}
 }
 
-//WithMethods 设置允许的请求类型
-func WithMethods(method ...string) Option {
+//WithAllowMethods 设置允许的请求类型
+func WithAllowMethods(method ...string) Option {
 	return func(a option) {
 		a["Access-Control-Allow-Methods"] = strings.ToUpper(strings.Join(method, ","))
 	}

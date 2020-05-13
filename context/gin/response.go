@@ -23,7 +23,8 @@ type response struct {
 
 //Header 设置头信息到response里
 func (c *response) SetHeader(k string, v string) {
-	c.Context.Writer.Header().Set(k, v)
+	fmt.Println("header：", k, v)
+	c.Header(k, v)
 }
 
 //Abort 根据错误码终止应用
