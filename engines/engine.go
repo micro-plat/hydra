@@ -159,24 +159,13 @@ func (r *ServiceEngine) Execute(ctx *context.Context) (rs interface{}) {
 	}
 	if !ctx.Response.SkipHandle {
 		//当前服务处理
-		if rs = r.Handle(ctx); ctx.Response.HasError(rs) {
-			return rs
-		}
+		rs = r.Handle(ctx)
 	}
 
 	//当前服务器后处理
-	if r.cHandler != nil && r.cHandler.GetHandleds() != nil {
+	if r.cHandler != nil && len(r.cHandler.GetHandleds()) > 0 {
 		hdd := r.cHandler.GetHandleds()
-		for _, h := range hdd {
-			if rh := h(ctx); ctx.Response.HasError(rh) {
-				return rh
-			}
-		}
-	}
-
-	//当前引擎后处理
-	if rd := r.Handled(ctx); ctx.Response.HasError(rd) {
-		return rd
+		return hdd[0](ctx)
 	}
 	return rs
 }
