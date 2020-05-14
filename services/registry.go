@@ -44,7 +44,7 @@ type service struct {
 }
 
 //APIHandling 处理handling业务
-func (s *service) Handling(typ string, h context.IHandler) {
+func (s *service) Handling(h context.IHandler, tps ...string) {
 	s.check(typ)
 	if _, ok := s.handlings[typ]["*"]; ok {
 		panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
