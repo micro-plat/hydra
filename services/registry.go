@@ -28,15 +28,37 @@ type IServiceRegistry interface {
 
 //Registry 服务注册管理
 var Registry = &service{
+	handlings: make(map[string]map[string]context.IHandler),
 	handlers:  make(map[string]map[string]context.IHandler),
 	fallbacks: make(map[string]map[string]context.IHandler),
+	handleds:  make(map[string]map[string]context.IHandler),
 }
 
 //service  本地服务
 type service struct {
+	handlings map[string]map[string]context.IHandler
 	handlers  map[string]map[string]context.IHandler
 	fallbacks map[string]map[string]context.IHandler
+	handleds  map[string]map[string]context.IHandler
 	lock      sync.RWMutex
+}
+
+//APIHandling 处理handling业务
+func (s *service) Handling(typ string, h context.IHandler) {
+	s.check(typ)
+	if _, ok := s.handlings[typ]["*"]; ok {
+		panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+	}
+	s.handlings[typ]["*"] = h
+}
+
+//Handled 处理Handled业务
+func (s *service) Handled(typ string, h context.IHandler) {
+	s.check(typ)
+	if _, ok := s.handleds[typ]["*"]; ok {
+		panic(fmt.Sprintf("[%s]服务的Handled函数不能重复注册", typ))
+	}
+	s.handleds[typ]["*"] = h
 }
 
 //Micro 注册为微服务包括api,web,rpc
@@ -94,6 +116,36 @@ func (s *service) GetHandler(serverType string, service string, method string) (
 		}
 	}
 	return nil, false
+}
+
+//GetHandling 获取预处理函数
+func (s *service) GetHandlings(serverType string, service string, method string) []context.IHandler {
+	handlings := make([]context.IHandler, 0, 1)
+	if c, ok := s.handlings[serverType]["*"]; ok {
+		handlings = append(handlings, c)
+	}
+	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
+	for _, srvs := range list {
+		if h, ok := s.handlings[serverType][srvs]; ok {
+			handlings = append(handlings, h)
+		}
+	}
+	return handlings
+}
+
+//GetHandling 获取后处理函数
+func (s *service) GetHandleds(serverType string, service string, method string) []context.IHandler {
+	handleds := make([]context.IHandler, 0, 1)
+	if c, ok := s.handleds[serverType]["*"]; ok {
+		handleds = append(handleds, c)
+	}
+	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
+	for _, srvs := range list {
+		if h, ok := s.handleds[serverType][srvs]; ok {
+			handleds = append(handleds, h)
+		}
+	}
+	return handleds
 }
 
 //GetFallback 获取服务对应的降级函数
@@ -197,8 +249,14 @@ func (s *service) register(tp string, name string, h interface{}) {
 func (s *service) check(tp string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	if _, ok := s.handlings[tp]; !ok {
+		s.handlings[tp] = make(map[string]context.IHandler)
+	}
 	if _, ok := s.handlers[tp]; !ok {
 		s.handlers[tp] = make(map[string]context.IHandler)
+	}
+	if _, ok := s.handleds[tp]; !ok {
+		s.handleds[tp] = make(map[string]context.IHandler)
 	}
 	if _, ok := s.fallbacks[tp]; !ok {
 		s.fallbacks[tp] = make(map[string]context.IHandler)

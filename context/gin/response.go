@@ -67,6 +67,9 @@ func (c *response) WriteAny(v interface{}) error {
 
 //Write 将结果写入响应流，自动检查内容处理状态码
 func (c *response) Write(status int, content interface{}) error {
+	if c.Context.Writer.Written() {
+		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
+	}
 	switch v := content.(type) {
 	case errs.IError:
 		status = v.GetCode()
@@ -132,9 +135,6 @@ func (c *response) swap(content interface{}) interface{} {
 func (c *response) writeNow(status int, content interface{}) error {
 	if c.Context.Writer.Header().Get("Content-Type") == "" {
 		c.Header("Content-Type", "application/json; charset=UTF-8")
-	}
-	if c.Context.Writer.Written() {
-		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
 	c.content = content
 	tpName := c.Context.Writer.Header().Get("Content-Type")
