@@ -116,11 +116,15 @@ func (c *response) swap(content interface{}) interface{} {
 			case strings.Contains(ctp, "yaml"):
 				return content
 			default:
-				return map[string]interface{}{
-					"data": content,
-				}
+				c.Header("Content-Type", "text/plain; charset=UTF-8")
+				return content
 			}
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
+			if ctp == "" {
+				c.Header("Content-Type", "text/plain; charset=UTF-8")
+				return content
+			}
+
 			return map[string]interface{}{
 				"data": content,
 			}
