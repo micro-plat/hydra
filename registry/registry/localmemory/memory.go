@@ -9,7 +9,6 @@ import (
 	r "github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
-	"gopkg.in/fsnotify.v1"
 )
 
 //Local 本地内存作为注册中心
@@ -71,7 +70,6 @@ func (l *localMemory) GetChildren(path string) (paths []string, version int32, e
 
 func (l *localMemory) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
 	v := &eventWatcher{
-		event:   make(chan fsnotify.Event),
 		watcher: make(chan registry.ValueWatcher),
 	}
 
@@ -148,7 +146,6 @@ func (v *valuesEntity) GetPath() string {
 
 type eventWatcher struct {
 	watcher chan registry.ValueWatcher
-	event   chan fsnotify.Event
 }
 
 //zkRegistry 基于zookeeper的注册中心

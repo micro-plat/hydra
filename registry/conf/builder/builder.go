@@ -37,7 +37,6 @@ func (c *conf) Ready(fs ...interface{}) {
 
 //Load 加载所有配置
 func (c *conf) Load() error {
-	c.Decode("./conf.toml")
 	for _, f := range c.funcs {
 		if err := f(); err != nil {
 			return err

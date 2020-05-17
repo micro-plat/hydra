@@ -17,6 +17,7 @@ require (
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 	golang.org/x/sys v0.0.0-20200508214444-3aab700007d7
 	google.golang.org/grpc v1.27.1
+	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v2 v2.2.8
 )
 

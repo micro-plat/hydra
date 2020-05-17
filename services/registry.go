@@ -43,27 +43,32 @@ type service struct {
 	lock      sync.RWMutex
 }
 
-//APIHandling 处理handling业务
-func (s *service) Handling(h context.IHandler, tps ...string) {
-
+//OnHandleExecuting 处理handling业务
+func (s *service) OnHandleExecuting(h context.IHandler, tps ...string) {
 	if len(tps) == 0 {
-		tps = []string{"api", "rpc", "web", "mqc", ""}
+		tps = []string{"api", "web", "ws", "rpc", "mqc", "cron"}
 	}
-
-	s.check(typ)
-	if _, ok := s.handlings[typ]["*"]; ok {
-		panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+	for _, typ := range tps {
+		s.check(typ)
+		if _, ok := s.handlings[typ]["*"]; ok {
+			panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+		}
+		s.handlings[typ]["*"] = h
 	}
-	s.handlings[typ]["*"] = h
 }
 
 //Handled 处理Handled业务
-func (s *service) Handled(typ string, h context.IHandler) {
-	s.check(typ)
-	if _, ok := s.handleds[typ]["*"]; ok {
-		panic(fmt.Sprintf("[%s]服务的Handled函数不能重复注册", typ))
+func (s *service) OnHandleExecuted(h context.IHandler, tps ...string) {
+	if len(tps) == 0 {
+		tps = []string{"api", "web", "ws", "rpc", "mqc", "cron"}
 	}
-	s.handleds[typ]["*"] = h
+	for _, typ := range tps {
+		s.check(typ)
+		if _, ok := s.handleds[typ]["*"]; ok {
+			panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+		}
+		s.handleds[typ]["*"] = h
+	}
 }
 
 //Micro 注册为微服务包括api,web,rpc

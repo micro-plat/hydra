@@ -1,244 +1,141 @@
-package filesystem
+package fileSystem
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/fsnotify/fsnotify"
+	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/hydra/application"
 	r "github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
 )
 
+//Local 本地内存作为注册中心
 var _ r.IRegistry = &fileSystem{}
 
-type eventWatcher struct {
-	watcher chan registry.ValueWatcher
-	event   chan fsnotify.Event
-}
-
 type fileSystem struct {
-	watcher      *fsnotify.Watcher
-	watcherMaps  map[string]*eventWatcher
-	watchLock    sync.Mutex
-	tempNode     []string
-	tempNodeLock sync.Mutex
-	seqNode      int32
-	closeCh      chan struct{}
-	path         string
+	closeCh  chan struct{}
+	nodes    map[string]string
+	seqValue int32
+	path     string
+	lock     sync.RWMutex
 }
 
-func newFileSystem(path string) (*fileSystem, error) {
-	if err := application.CheckPrivileges(); err != nil {
+func newfileSystem(platName string, systemName string, clusterName string, path string) (*fileSystem, error) {
+	f := &fileSystem{
+		closeCh: make(chan struct{}),
+		nodes:   make(map[string]string),
+	}
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, fmt.Errorf("配置未安装(配置文件不存在:%s):%w", path, err)
+	}
+	vnodes := make(map[string]map[string]interface{})
+	if _, err := toml.DecodeFile(path, &vnodes); err != nil {
 		return nil, err
 	}
-	w, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-	return &fileSystem{
-		path:        path,
-		watcher:     w,
-		watcherMaps: make(map[string]*eventWatcher),
-		tempNode:    make([]string, 0, 2),
-		seqNode:     10000,
-		closeCh:     make(chan struct{}),
-	}, nil
-}
-
-//Start 启动文件监控
-func (l *fileSystem) Start() {
-	go func() {
-	LOOP:
-		for {
-			select {
-			case <-l.closeCh:
-				break LOOP
-			case event := <-l.watcher.Events:
-				func(event fsnotify.Event) {
-					l.watchLock.Lock()
-					watcher, ok := l.watcherMaps[event.Name]
-					l.watchLock.Unlock()
-					if !ok {
-						return
-					}
-					watcher.event <- event
-					delete(l.watcherMaps, event.Name)
-				}(event)
-
+	for k, sub := range vnodes {
+		for name, value := range sub {
+			var path = r.Join(platName, systemName, k, clusterName, "conf", name)
+			if name == "main" {
+				path = r.Join(platName, systemName, k, clusterName, "conf")
 			}
+			buff, err := json.Marshal(&value)
+			if err == nil {
+				f.nodes[path] = string(buff)
+			}
+			return nil, fmt.Errorf("转换配置信息为json串失败:%s", path)
 		}
-		l.watcher.Close()
-	}()
-}
-func (l *fileSystem) formatPath(path string) string {
-	npath := strings.Replace(path, "/", string(os.PathSeparator), -1)
-	if !strings.HasPrefix(path, l.path) {
-		return filepath.Join(l.path, npath)
 	}
-	return npath
+	return f, nil
+
 }
-func (l *fileSystem) getStaticPath(path string) string {
-	p := l.formatPath(path)
-	if !strings.HasSuffix(path, ".init") {
-		return filepath.Join(p, ".init")
-	}
-	return p
-}
-func (l *fileSystem) getSeqPath(path string) string {
-	p := l.formatPath(path)
-	if strings.HasSuffix(path, ".init") {
-		return p
-	}
-	nid := atomic.AddInt32(&l.seqNode, 1)
-	return l.getStaticPath(fmt.Sprintf("%s-%d", path, nid))
-}
+
 func (l *fileSystem) Exists(path string) (bool, error) {
-	_, err := os.Stat(l.getStaticPath(path))
-	return err == nil || os.IsExist(err), nil
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	if _, ok := l.nodes[r.Join(path)]; ok {
+		return true, nil
+	}
+	return false, nil
 }
 func (l *fileSystem) GetValue(path string) (data []byte, version int32, err error) {
-	rpath := l.getStaticPath(path)
-	fs, err := os.Stat(rpath)
-	if os.IsNotExist(err) {
-		return nil, 0, nil
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	if v, ok := l.nodes[r.Join(path)]; ok {
+		return []byte(v), 0, nil
 	}
-	data, err = ioutil.ReadFile(rpath)
-	version = int32(fs.ModTime().Unix())
-	return
+	return nil, 0, fmt.Errorf("节点[%s]不存在", path)
 
 }
 func (l *fileSystem) Update(path string, data string, version int32) (err error) {
-	rpath := l.getStaticPath(path)
-	if b, _ := l.Exists(rpath); !b {
-		return errors.New(rpath + "不存在")
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	if _, ok := l.nodes[r.Join(path)]; ok {
+		l.nodes[r.Join(path)] = data
+		return nil
 	}
-	return ioutil.WriteFile(rpath, []byte(data), 0666)
-
+	return fmt.Errorf("节点[%s]不存在", path)
 }
 func (l *fileSystem) GetChildren(path string) (paths []string, version int32, err error) {
-	rpath := l.formatPath(path)
-	fs, err := os.Stat(rpath)
-	if os.IsNotExist(err) {
-		return nil, 0, errors.New(path + "不存在")
-	}
-	version = int32(fs.ModTime().Unix())
-	rf, err := ioutil.ReadDir(rpath)
-	if err != nil {
-		return nil, 0, err
-	}
-	paths = make([]string, 0, len(rf))
-	for _, f := range rf {
-		if strings.HasSuffix(f.Name(), ".swp") || strings.HasPrefix(f.Name(), "~") {
-			continue
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	paths = make([]string, 0, 1)
+	npath := r.Join(path)
+	for k := range l.nodes {
+		lk := strings.TrimPrefix(k, npath)
+		if len(lk) > 2 {
+			paths = append(paths, strings.Trim(lk, "/"))
 		}
-		paths = append(paths, f.Name())
 	}
-	return paths, version, nil
+	return paths, 0, nil
 }
 
 func (l *fileSystem) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	rpath := l.getStaticPath(path)
-	l.watchLock.Lock()
-	defer l.watchLock.Unlock()
-	v, ok := l.watcherMaps[rpath]
-	if ok {
-		return v.watcher, nil
-	}
-	l.watcherMaps[rpath] = &eventWatcher{
-		event:   make(chan fsnotify.Event),
+	v := &eventWatcher{
 		watcher: make(chan registry.ValueWatcher),
 	}
 
-	go func(rpath string, v *eventWatcher) {
-		if err := l.watcher.Add(rpath); err != nil {
-			v.watcher <- &valueEntity{path: rpath, Err: err}
-		}
-		select {
-		case <-l.closeCh:
-			return
-		case event := <-v.event:
-			switch event.Op {
-			case fsnotify.Write, fsnotify.Create:
-				buff, version, err := l.GetValue(rpath)
-				v.watcher <- &valueEntity{Value: buff, version: version, path: rpath, Err: err}
-			default:
-				v.watcher <- &valueEntity{path: rpath, Err: fmt.Errorf("文件发生变化:%v", event.Op)}
-			}
-		}
-	}(rpath, l.watcherMaps[rpath])
-	return l.watcherMaps[rpath].watcher, nil
+	return v.watcher, nil
+
 }
 func (l *fileSystem) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-	// rpath := l.formatPath(path)
-	// fs, err := os.Stat(rpath)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// time := fs.ModTime()
-
 	return nil, nil
 }
 func (l *fileSystem) Delete(path string) error {
-	rpath := l.formatPath(path)
-	if b, _ := l.Exists(rpath); !b {
-		return nil
-	}
-	return os.Remove(rpath)
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	delete(l.nodes, r.Join(path))
+	return nil
 }
 
 func (l *fileSystem) CreatePersistentNode(path string, data string) (err error) {
-	rpath := l.getStaticPath(path)
-	_, err = os.Stat(rpath)
-	if err == nil || os.IsExist(err) {
-		os.Remove(rpath)
-	}
-	if err = os.MkdirAll(filepath.Dir(rpath), 0777); err != nil {
-		return err
-	}
-	f, err := os.Create(rpath) //创建文件
-	if err != nil {
-		return err
-	}
-	err = os.Chmod(rpath, 0777)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if _, err = f.WriteString(data); err != nil {
-		return err
-	}
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	l.nodes[r.Join(path)] = data
 	return nil
 }
 func (l *fileSystem) CreateTempNode(path string, data string) (err error) {
-	rpath := l.getStaticPath(path)
-	if err = l.CreatePersistentNode(path, data); err != nil {
-		return err
-	}
-	l.tempNodeLock.Lock()
-	defer l.tempNodeLock.Unlock()
-	l.tempNode = append(l.tempNode, rpath)
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.nodes[r.Join(path)] = data
 	return nil
 }
 func (l *fileSystem) CreateSeqNode(path string, data string) (rpath string, err error) {
-	rpath = l.getSeqPath(path)
-	return rpath, l.CreateTempNode(rpath, data)
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	nid := atomic.AddInt32(&l.seqValue, 1)
+	rpath = fmt.Sprintf("%s%d", path, nid)
+	l.nodes[rpath] = data
+	return rpath, nil
 }
 
 func (l *fileSystem) Close() error {
-	l.tempNodeLock.Lock()
-	defer l.tempNodeLock.Unlock()
-	close(l.closeCh)
-	for _, p := range l.tempNode {
-		os.Remove(p)
-	}
 	return nil
 }
 
@@ -273,4 +170,21 @@ func (v *valuesEntity) GetError() error {
 }
 func (v *valuesEntity) GetPath() string {
 	return v.path
+}
+
+type eventWatcher struct {
+	watcher chan registry.ValueWatcher
+}
+
+//fsFactory 基于本地文件系统
+type fsFactory struct{}
+
+//Build 根据配置生成文件系统注册中心
+func (z *fsFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
+	return newfileSystem(application.DefApp.PlatName, application.DefApp.SysName, application.DefApp.ClusterName, filepath.Join(addrs[0], application.DefApp.LocalConfName))
+	
+}
+
+func init() {
+	r.Register(r.FileSystem, &fsFactory{})
 }

@@ -14,8 +14,9 @@ var traces = []string{"cpu", "mem", "block", "mutex", "web"}
 
 //DefApp 默认appliction
 var DefApp = &application{
-	log:   logger.New("hydra"),
-	close: make(chan struct{}),
+	log:           logger.New("hydra"),
+	LocalConfName: "./conf.toml",
+	close:         make(chan struct{}),
 }
 
 //application 应用全局管理器
@@ -50,6 +51,9 @@ type application struct {
 
 	//log 日志管理
 	log logger.ILogger
+
+	//LocalConfName 本地配置文件名称
+	LocalConfName string
 
 	//close 关闭通道
 	close chan struct{}
