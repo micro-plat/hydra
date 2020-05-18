@@ -4,30 +4,46 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/application"
-	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf/builder"
 	"github.com/urfave/cli"
 )
 
 //Pub2Registry 发布到注册中心
-func Pub2Registry() error {
+func Pub2Registry(cover bool) error {
 
 	//1. 加载配置信息
 	if err := builder.Conf.Load(); err != nil {
 		return err
 	}
 
-	//2. 创建配置中心
-	r, err := registry.NewRegistry(application.Current().GetRegistryAddr(), application.Current().Log())
-	if err != nil {
-		return err
-	}
-
-	//3.发布到配置中心
-	if err := builder.Conf.Pub(application.Current().GetPlatName(), application.Current().GetSysName(), application.Current().GetClusterName(), r); err != nil {
+	//2.发布到配置中心
+	if err := builder.Conf.Pub(application.Current().GetPlatName(),
+		application.Current().GetSysName(),
+		application.Current().GetClusterName(),
+		application.DefApp.RegistryAddr, cover); err != nil {
 		return err
 	}
 	return nil
+}
+
+//GetAppNameFlags 获取服务名称flags
+func GetAppNameFlags(vname *string) []cli.Flag {
+	flags := make([]cli.Flag, 0, 1)
+	flags = append(flags, cli.StringFlag{
+		Name:        "name,n",
+		Destination: vname,
+		Usage:       `-指定服务名称`,
+	})
+	return flags
+
+}
+
+//GetAppNameDesc 获取应用程序名称
+func GetAppNameDesc(vname string) (string, string) {
+	if vname != "" {
+		return application.DefApp.GetLongAppName(vname), application.DefApp.GetLongAppName(vname)
+	}
+	return application.DefApp.GetLongAppName(), application.Usage
 }
 
 //GetBaseFlags 获取运行时的参数

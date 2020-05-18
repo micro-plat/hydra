@@ -31,9 +31,10 @@ func newfileSystem(platName string, systemName string, clusterName string, path 
 	f := &fileSystem{
 		closeCh: make(chan struct{}),
 		nodes:   make(map[string]string),
+		path:    path,
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("配置未安装(配置文件不存在:%s):%w", path, err)
+		return nil, fmt.Errorf("配置文件不存在:%s %v", path, err)
 	}
 	vnodes := make(map[string]map[string]interface{})
 	if _, err := toml.DecodeFile(path, &vnodes); err != nil {
@@ -46,10 +47,10 @@ func newfileSystem(platName string, systemName string, clusterName string, path 
 				path = r.Join(platName, systemName, k, clusterName, "conf")
 			}
 			buff, err := json.Marshal(&value)
-			if err == nil {
-				f.nodes[path] = string(buff)
+			if err != nil {
+				return nil, fmt.Errorf("转换配置信息为json串失败:%s %w", path, err)
 			}
-			return nil, fmt.Errorf("转换配置信息为json串失败:%s", path)
+			f.nodes[path] = string(buff)
 		}
 	}
 	return f, nil
@@ -182,7 +183,7 @@ type fsFactory struct{}
 //Build 根据配置生成文件系统注册中心
 func (z *fsFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
 	return newfileSystem(application.DefApp.PlatName, application.DefApp.SysName, application.DefApp.ClusterName, filepath.Join(addrs[0], application.DefApp.LocalConfName))
-	
+
 }
 
 func init() {

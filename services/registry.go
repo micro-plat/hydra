@@ -8,9 +8,12 @@ import (
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/hydra/servers"
 )
 
+const defHandling = "Handling"
 const defHandler = "Handle"
+const defHandled = "Handled"
 const defFallback = "Fallback"
 
 var defRequestMethod = []string{"get", "post", "put", "delete"}
@@ -46,7 +49,7 @@ type service struct {
 //OnHandleExecuting 处理handling业务
 func (s *service) OnHandleExecuting(h context.IHandler, tps ...string) {
 	if len(tps) == 0 {
-		tps = []string{"api", "web", "ws", "rpc", "mqc", "cron"}
+		tps = servers.GetServerTypes()
 	}
 	for _, typ := range tps {
 		s.check(typ)
@@ -60,7 +63,7 @@ func (s *service) OnHandleExecuting(h context.IHandler, tps ...string) {
 //Handled 处理Handled业务
 func (s *service) OnHandleExecuted(h context.IHandler, tps ...string) {
 	if len(tps) == 0 {
-		tps = []string{"api", "web", "ws", "rpc", "mqc", "cron"}
+		tps = servers.GetServerTypes()
 	}
 	for _, typ := range tps {
 		s.check(typ)
@@ -171,8 +174,10 @@ func (s *service) GetFallback(serverType string, service string, method string) 
 	return nil, false
 }
 
-func reflectHandler(name string, h interface{}) (handlers map[string]context.IHandler, fallbacks map[string]context.IHandler) {
+func reflectHandler(name string, h interface{}) (handlings map[string]context.IHandler, handlers map[string]context.IHandler, handleds map[string]context.IHandler, fallbacks map[string]context.IHandler) {
+	handlings = make(map[string]context.IHandler)
 	handlers = make(map[string]context.IHandler)
+	handleds = make(map[string]context.IHandler)
 	fallbacks = make(map[string]context.IHandler)
 
 	if vv, ok := h.(func(context.IContext) interface{}); ok {
@@ -203,10 +208,15 @@ func reflectHandler(name string, h interface{}) (handlers map[string]context.IHa
 					if strings.HasSuffix(mName, defHandler) {
 						handleType = defHandler
 						endName = strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-					}
-					if strings.HasSuffix(mName, defFallback) {
+					} else if strings.HasSuffix(mName, defFallback) {
 						handleType = defFallback
 						endName = strings.ToLower(mName[0 : len(mName)-len(defFallback)])
+					} else if strings.HasSuffix(mName, defHandling) {
+						handleType = defHandling
+						endName = strings.ToLower(mName[0 : len(mName)-len(defHandling)])
+					} else if strings.HasSuffix(mName, defHandled) {
+						handleType = defHandled
+						endName = strings.ToLower(mName[0 : len(mName)-len(defHandled)])
 					}
 					for _, m := range defRequestMethod {
 						if m == endName {
@@ -223,16 +233,21 @@ func reflectHandler(name string, h interface{}) (handlers map[string]context.IHa
 					}
 
 					//保存到缓存列表
-					if handleType == defHandler {
+					switch handleType {
+					case defHandling:
+						handlings[registry.Join(name, endName)] = nf
+					case defHandler:
 						handlers[registry.Join(name, endName)] = nf
-						continue
+					case defHandled:
+						handleds[registry.Join(name, endName)] = nf
+					case defFallback:
+						fallbacks[registry.Join(name, endName)] = nf
 					}
-					fallbacks[registry.Join(name, endName)] = nf
+
 				}
 			}
 			break
 		}
-
 	}
 	return
 }
@@ -240,15 +255,28 @@ func reflectHandler(name string, h interface{}) (handlers map[string]context.IHa
 //register 注册服务
 func (s *service) register(tp string, name string, h interface{}) {
 	s.check(tp)
-	handlers, fallbacks := reflectHandler(name, h)
+	handlings, handlers, handleds, fallbacks := reflectHandler(name, h)
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	for k, v := range handlings {
+		if _, ok := s.handlings[tp][k]; ok {
+			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
+		}
+		s.handlings[tp][k] = v
+	}
 	for k, v := range handlers {
 		if _, ok := s.handlers[tp][k]; ok {
 			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
 		}
 		s.handlers[tp][k] = v
 	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	for k, v := range handleds {
+		if _, ok := s.handleds[tp][k]; ok {
+			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
+		}
+		s.handleds[tp][k] = v
+	}
+
 	for k, v := range fallbacks {
 		if _, ok := s.fallbacks[tp][k]; ok {
 			panic(fmt.Sprintf("服务[%s]不能重复注册", k))

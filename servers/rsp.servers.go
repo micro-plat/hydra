@@ -57,7 +57,6 @@ func (r *RspServers) Start() (err error) {
 	}
 
 	//处理配置更变通知消息
-
 	r.notify, err = watcher.Start()
 	if err != nil {
 		return err

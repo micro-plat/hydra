@@ -3,23 +3,37 @@ package builder
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf/server"
 )
 
-//Pub 将本地配置发布到配置中心
-func (c *conf) Pub(platName string, systemName string, clusterName string, r registry.IRegistry) error {
+//Pub 将配置发布到配置中心
+func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+
+	//本地文件系统则直接使用toml序列化方式进行发布
+	proto := registry.GetProto(registryAddr)
+	if proto == registry.FileSystem {
+		return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], application.DefApp.LocalConfName), cover)
+	}
+
+	//创建注册中心，根据注册中心提供的接口进行配置发布
+	r, err := registry.NewRegistry(registryAddr, application.DefApp.Log())
+	if err != nil {
+		return err
+	}
 	for tp, subs := range c.data {
 		pub := server.NewPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetMainPath(), subs["main"]); err != nil {
+		if err := publish(r, pub.GetMainPath(), subs["main"], cover); err != nil {
 			return err
 		}
 		for name, value := range subs {
 			if name == "main" {
 				continue
 			}
-			if err := publish(r, pub.GetSubConfPath(name), value); err != nil {
+			if err := publish(r, pub.GetSubConfPath(name), value, cover); err != nil {
 				return err
 			}
 		}
@@ -27,10 +41,15 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, r reg
 	return nil
 }
 
-func publish(r registry.IRegistry, path string, v interface{}) error {
+func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
 	value, err := getJSON(&v)
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
+	}
+	if !cover {
+		if b, _ := r.Exists(path); b {
+			return nil
+		}
 	}
 	if err := deleteAll(r, path); err != nil {
 		return err

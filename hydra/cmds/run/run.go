@@ -43,7 +43,7 @@ func doRun(c *cli.Context) (err error) {
 
 	//3. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(application.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(); err != nil {
+		if err := pkgs.Pub2Registry(true); err != nil {
 			return err
 		}
 	}

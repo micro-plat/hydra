@@ -2,6 +2,8 @@ package builder
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/hydra/application"
@@ -69,6 +71,28 @@ func (c *conf) Encode() (string, error) {
 	encoder := toml.NewEncoder(&buffer)
 	err := encoder.Encode(&c.data)
 	return buffer.String(), err
+}
+
+//Encode2File 将当前配置内容保存到文件中
+func (c *conf) Encode2File(path string, cover bool) error {
+	if !cover {
+		if _, err := os.Stat(path); err == nil || os.IsExist(err) {
+			return fmt.Errorf("配置文件已存在 %s", path)
+		}
+	}
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return fmt.Errorf("无法打开文件:%s %w", path, err)
+	}
+	encoder := toml.NewEncoder(f)
+	err = encoder.Encode(&c.data)
+	if err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 //Decode 从配置文件中读取配置信息

@@ -2,6 +2,8 @@ package application
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/micro-plat/hydra/context"
@@ -15,7 +17,7 @@ var traces = []string{"cpu", "mem", "block", "mutex", "web"}
 //DefApp 默认appliction
 var DefApp = &application{
 	log:           logger.New("hydra"),
-	LocalConfName: "./conf.toml",
+	LocalConfName: "./" + filepath.Base(os.Args[0]) + ".conf.toml",
 	close:         make(chan struct{}),
 }
 
@@ -71,6 +73,17 @@ func (m *application) Bind() (err error) {
 		m.PlatName += "_debug"
 	}
 	return nil
+}
+
+//GetLongAppName 获取包含有部分路径的app name
+func (m *application) GetLongAppName(n ...string) string {
+	name := types.GetStringByIndex(n, 0, AppName)
+	path, _ := filepath.Abs(name)
+	rname := strings.Trim(strings.Replace(path, string(filepath.Separator), "_", -1), "_")
+	if len(rname) < 32 {
+		return rname
+	}
+	return rname[len(rname)-32:]
 }
 
 //HasServerType 是否包含指定的服务类型
@@ -161,7 +174,7 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 func (m *application) check() (err error) {
 
 	if m.ServerTypeNames != "" {
-		m.ServerTypes = strings.Split(m.ServerTypeNames, "-")
+		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
 	if m.Name != "" {
 		m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)

@@ -23,7 +23,6 @@ type response struct {
 
 //Header 设置头信息到response里
 func (c *response) SetHeader(k string, v string) {
-	fmt.Println("header：", k, v)
 	c.Header(k, v)
 }
 

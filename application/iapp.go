@@ -20,11 +20,15 @@ var AppName string = filepath.Base(os.Args[0])
 var Version string = "1.0.0"
 
 //Usage 用途
-var Usage string = " A new hydra application"
+var Usage string = filepath.Base(os.Args[0]) + "(A new hydra application)"
 
 //IApplication 应用程序信息
 type IApplication interface {
+
+	//Server 服务器配置
 	Server(tp string) server.IServerConf
+
+	//CurrentContext 当前context
 	CurrentContext() context.IContext
 
 	//GetRegistryAddr 注册中心

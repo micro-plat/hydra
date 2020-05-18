@@ -4,15 +4,19 @@ import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/hydra/cmds/daemon"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
+
+var vname string
 
 func init() {
 	cmds.Register(
 		cli.Command{
 			Name:   "status",
 			Usage:  "查询服务状态",
+			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doStatus,
 		})
 }
@@ -21,7 +25,7 @@ func doStatus(c *cli.Context) (err error) {
 
 	//关闭日志显示
 	application.Current().Log().Pause()
-	service, err := daemon.New(application.AppName, application.AppName)
+	service, err := daemon.New(pkgs.GetAppNameDesc(vname))
 	if err != nil {
 		return err
 	}

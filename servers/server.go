@@ -6,6 +6,7 @@ import (
 	"github.com/micro-plat/hydra/registry/conf/server"
 )
 
+//IServerCreatorHandler 服务器创建器
 type IServerCreatorHandler func(server.IServerConf) (IResponsiveServer, error)
 
 //Create 创建服务
@@ -33,4 +34,13 @@ func Register(tp string, creator IServerCreatorHandler) {
 		panic(fmt.Sprintf("服务器[%s]不能多次注册", tp))
 	}
 	creators[tp] = creator
+}
+
+//GetServerTypes 获取支付的服务器类型
+func GetServerTypes() []string {
+	tps := make([]string, 0, len(creators))
+	for k := range creators {
+		tps = append(tps, k)
+	}
+	return tps
 }

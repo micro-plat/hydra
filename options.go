@@ -1,6 +1,10 @@
 package hydra
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/micro-plat/hydra/application"
 )
 
@@ -66,6 +70,6 @@ func WithVersion(v string) Option {
 //WithUsage 设置使用说明
 func WithUsage(usage string) Option {
 	return func() {
-		application.Usage = usage
+		application.Usage = fmt.Sprintf("%s(%s)", filepath.Base(os.Args[0]), usage)
 	}
 }

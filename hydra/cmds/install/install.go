@@ -37,18 +37,22 @@ func doInstall(c *cli.Context) (err error) {
 		return nil
 	}
 
-	//3.检查是否只安装本地服务
-	if !onlyInstallLocalService {
-		if err := pkgs.Pub2Registry(); err != nil {
+	//3.检查是否安装注册中心配置
+	if installRegistry {
+		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
 			return err
 		}
 	}
 
 	//4.创建本地服务
-	service, err := daemon.New(application.AppName, application.AppName)
+	service, err := daemon.New(application.DefApp.GetLongAppName(), application.Usage)
 	if err != nil {
 		return err
 	}
+	if coverIfExists {
+		service.Remove()
+	}
+
 	msg, err := service.Install(os.Args[2:]...)
 	if err != nil {
 		return err

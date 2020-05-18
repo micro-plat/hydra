@@ -10,8 +10,13 @@ import (
 	"github.com/micro-plat/lib4go/registry"
 )
 
+//LocalMemory 本地内存模式
 const LocalMemory = "lm"
+
+//Zookeeper zk
 const Zookeeper = "zk"
+
+//FileSystem 本地文件系统
 const FileSystem = "fs"
 
 //IRegistry 注册中心接口
@@ -76,6 +81,12 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 func GetProto(addr string) string {
 	p, _, _, _, _ := Parse(addr)
 	return p
+}
+
+//GetAddrs 获取地址信息
+func GetAddrs(addr string) []string {
+	_, addrs, _, _, _ := Parse(addr)
+	return addrs
 }
 
 //Parse 解析地址
