@@ -1,6 +1,7 @@
 package context
 
 import (
+	"context"
 	"time"
 
 	"github.com/micro-plat/hydra/registry/conf/server"
@@ -59,6 +60,7 @@ type IResponse interface {
 	SetHeader(string, string)
 	GetStatusCode() int
 	SetStatusCode(int)
+	ContentType(v string)
 	Write(s int, v interface{}) error
 	WriteAny(v interface{}) error
 	Written() bool
@@ -83,6 +85,7 @@ type IUser interface {
 type IContext interface {
 	Request() IRequest
 	Response() IResponse
+	Context() context.Context
 	ServerConf() server.IServerConf
 	User() IUser
 	Log() logger.ILogger

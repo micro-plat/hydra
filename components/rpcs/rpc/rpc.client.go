@@ -19,7 +19,7 @@ import (
 
 //IRequest RPC请求
 type IRequest interface {
-	Request(service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error)
+	Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error)
 }
 
 //Client rpc client, 用于构建基础的RPC调用,并提供基于服务器的限流工具，轮询、本地优先等多种负载算法
@@ -225,7 +225,7 @@ func (c *Client) connect() (err error) {
 }
 
 //Request 发送Request请求
-func (c *Client) Request(service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error) {
+func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error) {
 
 	//处理可选参数
 	o := newOption()
@@ -242,7 +242,7 @@ func (c *Client) Request(service string, form map[string]interface{}, opts ...Re
 		return nil, err
 	}
 
-	response, err := c.client.Request(context.Background(),
+	response, err := c.client.Request(ctx,
 		&pb.RequestContext{
 			Method:  o.method,
 			Service: service,

@@ -8,6 +8,12 @@ import (
 	"github.com/urfave/cli"
 )
 
+//Success 成功消息
+const Success = "\t\t\t\t\t[  \033[32mOK\033[0m  ]" // Show colored "OK"
+
+//Failed 失败消息
+const Failed = "\t\t\t\t\t[\033[31mFAILED\033[0m]" // Show colored "FAILED"
+
 //Pub2Registry 发布到注册中心
 func Pub2Registry(cover bool) error {
 

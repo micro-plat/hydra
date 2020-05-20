@@ -16,7 +16,6 @@ type Router struct {
 	Path    string   `json:"path,omitempty" valid:"ascii,required"`
 	Action  []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
 	Service string   `json:"service" valid:"ascii,required"`
-	Disable bool     `json:"disable,omitempty"`
 }
 
 //NewRouters 构建路由

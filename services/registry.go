@@ -16,8 +16,6 @@ const defHandler = "Handle"
 const defHandled = "Handled"
 const defFallback = "Fallback"
 
-var defRequestMethod = []string{"get", "post", "put", "delete"}
-
 //IServiceRegistry 服务注册接口
 type IServiceRegistry interface {
 	Micro(name string, h interface{})
@@ -187,67 +185,64 @@ func reflectHandler(name string, h interface{}) (handlings map[string]context.IH
 
 	switch tp := h.(type) {
 	case context.Handler:
-	case context.IHandler:
 		handlers[name] = tp
 		return
 	default:
 		obj := reflect.ValueOf(h)
 		typ := reflect.TypeOf(h)
-		for {
-			if typ.Kind() == reflect.Ptr {
-				for i := 0; i < typ.NumMethod(); i++ {
 
-					//检查函数名称是否是以Handle,Fallback结尾
-					mName := typ.Method(i).Name
-					if !strings.HasSuffix(mName, defHandler) && !strings.HasSuffix(mName, defFallback) {
-						continue
-					}
+		if typ.Kind() == reflect.Ptr || typ.Kind() == reflect.Struct {
+			for i := 0; i < typ.NumMethod(); i++ {
 
-					//处理函数名称
-					var endName, handleType string
-					if strings.HasSuffix(mName, defHandler) {
-						handleType = defHandler
-						endName = strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-					} else if strings.HasSuffix(mName, defFallback) {
-						handleType = defFallback
-						endName = strings.ToLower(mName[0 : len(mName)-len(defFallback)])
-					} else if strings.HasSuffix(mName, defHandling) {
-						handleType = defHandling
-						endName = strings.ToLower(mName[0 : len(mName)-len(defHandling)])
-					} else if strings.HasSuffix(mName, defHandled) {
-						handleType = defHandled
-						endName = strings.ToLower(mName[0 : len(mName)-len(defHandled)])
-					}
-					for _, m := range defRequestMethod {
-						if m == endName {
-							endName = "$" + endName
-							break
-						}
-					}
+				//检查函数名称是否是以Handle,Fallback结尾
+				mName := typ.Method(i).Name
+				if !strings.HasSuffix(mName, defHandling) &&
+					!strings.HasSuffix(mName, defHandler) &&
+					!strings.HasSuffix(mName, defHandled) &&
+					!strings.HasSuffix(mName, defFallback) {
+					continue
+				}
 
-					//检查函数是否符合指定的签名格式context.IHandler
-					method := obj.MethodByName(mName)
-					nf, ok := method.Interface().(context.Handler)
-					if !ok {
-						panic("不是有效的服务类型")
-					}
+				//处理函数名称
+				var endName, handleType string
+				if strings.HasSuffix(mName, defHandler) {
+					handleType = defHandler
+					endName = strings.ToLower(mName[0 : len(mName)-len(defHandler)])
+				} else if strings.HasSuffix(mName, defFallback) {
+					handleType = defFallback
+					endName = strings.ToLower(mName[0 : len(mName)-len(defFallback)])
+				} else if strings.HasSuffix(mName, defHandling) {
+					handleType = defHandling
+					endName = strings.ToLower(mName[0 : len(mName)-len(defHandling)])
+				} else if strings.HasSuffix(mName, defHandled) {
+					handleType = defHandled
+					endName = strings.ToLower(mName[0 : len(mName)-len(defHandled)])
+				}
 
-					//保存到缓存列表
-					switch handleType {
-					case defHandling:
-						handlings[registry.Join(name, endName)] = nf
-					case defHandler:
-						handlers[registry.Join(name, endName)] = nf
-					case defHandled:
-						handleds[registry.Join(name, endName)] = nf
-					case defFallback:
-						fallbacks[registry.Join(name, endName)] = nf
-					}
+				//检查函数是否符合指定的签名格式context.IHandler
+				method := obj.MethodByName(mName)
+				nfx, ok := method.Interface().(func(context.IContext) interface{})
+				if !ok {
+					panic(fmt.Sprintf("%s不是有效的服务类型", mName))
+				}
+				// fmt.Println("ok")
 
+				var nf context.Handler = nfx
+				//保存到缓存列表
+				switch handleType {
+				case defHandling:
+					handlings[registry.Join(name, endName)] = nf
+				case defHandler:
+					handlers[registry.Join(name, endName)] = nf
+				case defHandled:
+					handleds[registry.Join(name, endName)] = nf
+				case defFallback:
+					fallbacks[registry.Join(name, endName)] = nf
 				}
 			}
-			break
+
 		}
+
 	}
 	return
 }

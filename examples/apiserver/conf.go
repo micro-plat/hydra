@@ -8,6 +8,8 @@ import (
 
 func init() {
 	hydra.Conf.Ready(func() {
-		hydra.Conf.API(":8080").Jwt(jwt.WithExclude("/order/request/2")).Header(header.WithCrossDomain(), header.WithHeader("k", "v"))
+		hydra.Conf.API(":8080").
+			Jwt(jwt.WithExclude("/order/**")).
+			Header(header.WithCrossDomain())
 	})
 }

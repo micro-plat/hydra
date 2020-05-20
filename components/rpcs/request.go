@@ -1,6 +1,7 @@
 package rpcs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/micro-plat/hydra/application"
@@ -30,7 +31,7 @@ func NewRequest(j *conf.JSONConf) *Request {
 }
 
 //Request RPC请求
-func (r *Request) Request(service string, form map[string]interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
+func (r *Request) Request(ctx context.Context, service string, form map[string]interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
 	isip, rservice, domain, server, err := rpc.ResolvePath(service, application.Current().GetPlatName(), application.Current().GetSysName())
 	if err != nil {
 		return
@@ -48,8 +49,8 @@ func (r *Request) Request(service string, form map[string]interface{}, opts ...r
 	}
 	client := c.(*rpc.Client)
 	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
-	nopts = append(nopts, rpc.WithXRequestID(application.Current().CurrentContext().User().GetRequestID()))
-	return client.Request(service, form, nopts...)
+	nopts = append(nopts, rpc.WithXRequestID(ctx.Value("X-Request-Id").(string)))
+	return client.Request(ctx, service, form, nopts...)
 }
 
 //Close 关闭RPC连接

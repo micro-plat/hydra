@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/errs"
 )
 
@@ -17,6 +18,7 @@ var _ context.IResponse = &response{}
 
 type response struct {
 	*gin.Context
+	conf     server.IServerConf
 	content  interface{}
 	specials []string
 }
@@ -24,6 +26,11 @@ type response struct {
 //Header 设置头信息到response里
 func (c *response) SetHeader(k string, v string) {
 	c.Header(k, v)
+}
+
+//ContentType 设置contentType
+func (c *response) ContentType(v string) {
+	c.Header("Content-Type", v)
 }
 
 //Abort 根据错误码终止应用
@@ -88,9 +95,10 @@ func (c *response) Write(status int, content interface{}) error {
 	return c.writeNow(status, c.swap(content))
 }
 func (c *response) swap(content interface{}) interface{} {
-	ctp := c.Context.Writer.Header().Get("Content-Type")
+	ctp := c.getContentType()
 	switch {
 	case strings.Contains(ctp, "plain"):
+		c.ContentType(ctp)
 		return fmt.Sprint(content)
 	default:
 		tp := reflect.TypeOf(content).Kind()
@@ -104,40 +112,58 @@ func (c *response) swap(content interface{}) interface{} {
 			switch {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
-				c.Header("Content-Type", "application/json; charset=UTF-8")
+				c.ContentType("application/json; charset=UTF-8")
 				return content
 			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				c.Header("Content-Type", "application/xml; charset=UTF-8")
+				c.ContentType("application/xml; charset=UTF-8")
 				return content
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
-				c.Header("Content-Type", "text/html; charset=UTF-8")
+				c.ContentType("text/html; charset=UTF-8")
 				return content
 			case strings.Contains(ctp, "yaml"):
+				c.ContentType(ctp)
+				return content
+			case ctp == "" || strings.Contains(ctp, "plain"):
+				c.ContentType("text/plain; charset=UTF-8")
 				return content
 			default:
-				c.Header("Content-Type", "text/plain; charset=UTF-8")
-				return content
+				c.ContentType(ctp)
+				return map[string]interface{}{
+					"data": content,
+				}
 			}
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 			if ctp == "" {
-				c.Header("Content-Type", "text/plain; charset=UTF-8")
+				c.ContentType("text/plain; charset=UTF-8")
 				return content
 			}
-
 			return map[string]interface{}{
 				"data": content,
 			}
 		default:
+			if ctp == "" {
+				c.ContentType("application/json; charset=UTF-8")
+				return content
+			}
 			return content
 		}
 
 	}
 }
+func (c *response) getContentType() string {
+	if ctp := c.Context.Writer.Header().Get("Content-Type"); ctp != "" {
+		return ctp
+	}
+	if ct, ok := c.conf.GetHeaderConf()["Content-Type"]; ok && ct != "" {
+		return ct
+	}
+	return ""
+}
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, content interface{}) error {
 	if c.Context.Writer.Header().Get("Content-Type") == "" {
-		c.Header("Content-Type", "application/json; charset=UTF-8")
+		c.ContentType("application/json; charset=UTF-8")
 	}
 	c.content = content
 	tpName := c.Context.Writer.Header().Get("Content-Type")

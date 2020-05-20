@@ -17,6 +17,7 @@ func main() {
 	)
 
 	app.API("/order/request/:tp", request)
+	app.API("/order/query", &OrderService{})
 	app.Start()
 }
 

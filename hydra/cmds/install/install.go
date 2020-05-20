@@ -7,7 +7,6 @@ import (
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/hydra/cmds/daemon"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
@@ -37,14 +36,7 @@ func doInstall(c *cli.Context) (err error) {
 		return nil
 	}
 
-	//3.检查是否安装注册中心配置
-	if installRegistry {
-		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			return err
-		}
-	}
-
-	//4.创建本地服务
+	//3.创建本地服务
 	service, err := daemon.New(application.DefApp.GetLongAppName(), application.Usage)
 	if err != nil {
 		return err
