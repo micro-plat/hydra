@@ -1,16 +1,17 @@
 package http
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server/router"
 	"github.com/micro-plat/hydra/servers/pkg/middleware"
 )
 
 func (s *Server) addRouters(routers ...*router.Router) {
-	if !application.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	// if !application.IsDebug {
+	gin.SetMode(gin.ReleaseMode)
+	// }
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
@@ -29,7 +30,7 @@ func (s *Server) addRouters(routers ...*router.Router) {
 func (s *Server) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
 		for _, method := range router.Action {
-			s.engine.Handle(method, router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
+			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
 }

@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
-	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.3.3
 	github.com/micro-plat/cli v1.0.1
@@ -17,7 +16,7 @@ require (
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 	golang.org/x/sys v0.0.0-20200508214444-3aab700007d7
 	google.golang.org/grpc v1.27.1
-	gopkg.in/fsnotify.v1 v1.4.7
+	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 )
 

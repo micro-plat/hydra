@@ -18,6 +18,15 @@ type Router struct {
 	Service string   `json:"service" valid:"ascii,required"`
 }
 
+//NewRouter 构建路径配置
+func NewRouter(path string, service string, action ...string) *Router {
+	return &Router{
+		Path:    path,
+		Action:  action,
+		Service: service,
+	}
+}
+
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
@@ -28,11 +37,7 @@ func NewRouters() *Routers {
 
 //Append 添加路由信息
 func (h *Routers) Append(path string, service string, action ...string) *Routers {
-	h.Routers = append(h.Routers, &Router{
-		Path:    path,
-		Service: service,
-		Action:  action,
-	})
+	h.Routers = append(h.Routers, NewRouter(path, service, action...))
 	return h
 }
 

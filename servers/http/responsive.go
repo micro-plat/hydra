@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/pub"
 	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -36,6 +37,9 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 //Start 启用服务
 func (w *Responsive) Start() (err error) {
 	w.log.Infof("开始启动[%s]服务...", w.conf.GetMainConf().GetServerType())
+	if err := services.Registry.DoStart(w.conf); err != nil {
+		return err
+	}
 	if err = w.Server.Start(); err != nil {
 		err = fmt.Errorf("启动失败 %w", err)
 		w.log.Error(err)
@@ -78,6 +82,11 @@ func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
 	w.Server.Shutdown()
 	w.pub.Clear()
+	if err := services.Registry.DoClose(w.conf); err != nil {
+		w.log.Infof("关闭[%s]服务,出现错误", err)
+		return
+	}
+	return
 }
 
 //publish 将当前服务器的节点信息发布到注册中心

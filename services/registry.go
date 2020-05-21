@@ -1,20 +1,23 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 	"sync"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/hydra/registry/conf/server/router"
 )
 
 const defHandling = "Handling"
 const defHandler = "Handle"
 const defHandled = "Handled"
 const defFallback = "Fallback"
+const defClose = "Close"
 
 //IServiceRegistry 服务注册接口
 type IServiceRegistry interface {
@@ -25,280 +28,248 @@ type IServiceRegistry interface {
 	WS(name string, h interface{})
 	MQC(name string, h interface{})
 	CRON(name string, h interface{})
+	OnServerStarting(h func(server.IServerConf) error, tps ...string)
+	OnServerClosing(h func(server.IServerConf) error, tps ...string)
+	OnHandleExecuting(h context.Handler, tps ...string)
+	OnHandleExecuted(h context.Handler, tps ...string)
 }
 
 //Registry 服务注册管理
-var Registry = &service{
-	handlings: make(map[string]map[string]context.IHandler),
-	handlers:  make(map[string]map[string]context.IHandler),
-	fallbacks: make(map[string]map[string]context.IHandler),
-	handleds:  make(map[string]map[string]context.IHandler),
+var Registry = &regist{
+	registRouters: make(map[string]*services),
 }
 
-//service  本地服务
-type service struct {
-	handlings map[string]map[string]context.IHandler
-	handlers  map[string]map[string]context.IHandler
-	fallbacks map[string]map[string]context.IHandler
-	handleds  map[string]map[string]context.IHandler
-	lock      sync.RWMutex
+//regist  本地服务
+type regist struct {
+	registRouters map[string]*services
+	lock          sync.RWMutex
+}
+
+//OnServerStarting 处理服务器启动
+func (s *regist) OnServerStarting(h func(server.IServerConf) error, tps ...string) {
+	if len(tps) == 0 {
+		tps = application.DefApp.ServerTypes
+	}
+	for _, typ := range tps {
+		if err := s.get(typ).Starting(h); err != nil {
+			panic(fmt.Errorf("%s OnServerStarting %v", typ, err))
+		}
+	}
+}
+
+//OnServerClosing 处理服务器关闭
+func (s *regist) OnServerClosing(h func(server.IServerConf) error, tps ...string) {
+	if len(tps) == 0 {
+		tps = application.DefApp.ServerTypes
+	}
+	for _, typ := range tps {
+		if err := s.get(typ).Closing(h); err != nil {
+			panic(fmt.Errorf("%s OnServerClosing %v", typ, err))
+		}
+	}
 }
 
 //OnHandleExecuting 处理handling业务
-func (s *service) OnHandleExecuting(h context.IHandler, tps ...string) {
+func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
-		tps = servers.GetServerTypes()
+		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		s.check(typ)
-		if _, ok := s.handlings[typ]["*"]; ok {
-			panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+		if err := s.get(typ).GlobalHandling(h); err != nil {
+			panic(fmt.Errorf("%s OnHandleExecuting %v", typ, err))
 		}
-		s.handlings[typ]["*"] = h
 	}
 }
 
 //Handled 处理Handled业务
-func (s *service) OnHandleExecuted(h context.IHandler, tps ...string) {
+func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
-		tps = servers.GetServerTypes()
+		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		s.check(typ)
-		if _, ok := s.handleds[typ]["*"]; ok {
-			panic(fmt.Sprintf("[%s]服务的Handling函数不能重复注册", typ))
+		if err := s.get(typ).GlobalHandled(h); err != nil {
+			panic(fmt.Errorf("%s OnHandleExecuted %v", typ, err))
 		}
-		s.handleds[typ]["*"] = h
 	}
 }
 
 //Micro 注册为微服务包括api,web,rpc
-func (s *service) Micro(name string, h interface{}) {
+func (s *regist) Micro(name string, h interface{}) {
 	s.register("api", name, h)
 	s.register("web", name, h)
 	s.register("rpc", name, h)
 }
 
 //Flow 注册为流程服务，包括mqc,cron
-func (s *service) Flow(name string, h interface{}) {
+func (s *regist) Flow(name string, h interface{}) {
 	s.register("mqc", name, h)
 	s.register("cron", name, h)
 }
 
 //API 注册为API服务
-func (s *service) API(name string, h interface{}) {
+func (s *regist) API(name string, h interface{}) {
 	s.register("api", name, h)
 }
 
 //Web 注册为web服务
-func (s *service) Web(name string, h interface{}) {
+func (s *regist) Web(name string, h interface{}) {
 	s.register("web", name, h)
 }
 
 //WS 注册为websocket服务
-func (s *service) WS(name string, h interface{}) {
+func (s *regist) WS(name string, h interface{}) {
 	s.register("ws", name, h)
 }
 
 //MQC 注册为消息队列服务
-func (s *service) MQC(name string, h interface{}) {
+func (s *regist) MQC(name string, h interface{}) {
 	s.register("mqc", name, h)
 }
 
 //CRON 注册为定时任务服务
-func (s *service) CRON(name string, h interface{}) {
+func (s *regist) CRON(name string, h interface{}) {
 	s.register("cron", name, h)
 }
 
 //CRONBy 根据cron表达式，服务名称，服务处理函数注册cron服务
-func (s *service) CRONBy(cron string, name string, h interface{}) {
+func (s *regist) CRONBy(cron string, name string, h interface{}) {
 	CRON.Add(cron, name)
 	s.register("cron", name, h)
 }
 
 //GetHandler 获取服务对应的处理函数
-func (s *service) GetHandler(serverType string, service string, method string) (context.IHandler, bool) {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
-	for _, srvs := range list {
-		if h, ok := s.handlers[serverType][srvs]; ok {
-			return h, true
-		}
-	}
-	return nil, false
+func (s *regist) GetHandler(serverType string, service string) (context.IHandler, bool) {
+	return s.get(serverType).GetHandlers(service)
 }
 
 //GetHandling 获取预处理函数
-func (s *service) GetHandlings(serverType string, service string, method string) []context.IHandler {
-	handlings := make([]context.IHandler, 0, 1)
-	if c, ok := s.handlings[serverType]["*"]; ok {
-		handlings = append(handlings, c)
-	}
-	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
-	for _, srvs := range list {
-		if h, ok := s.handlings[serverType][srvs]; ok {
-			handlings = append(handlings, h)
-		}
-	}
-	return handlings
+func (s *regist) GetHandlings(serverType string, service string) []context.IHandler {
+	return s.get(serverType).GetHandlings(service)
 }
 
 //GetHandling 获取后处理函数
-func (s *service) GetHandleds(serverType string, service string, method string) []context.IHandler {
-	handleds := make([]context.IHandler, 0, 1)
-	if c, ok := s.handleds[serverType]["*"]; ok {
-		handleds = append(handleds, c)
-	}
-	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
-	for _, srvs := range list {
-		if h, ok := s.handleds[serverType][srvs]; ok {
-			handleds = append(handleds, h)
-		}
-	}
-	return handleds
+func (s *regist) GetHandleds(serverType string, service string) []context.IHandler {
+	return s.get(serverType).GetHandleds(service)
 }
 
 //GetFallback 获取服务对应的降级函数
-func (s *service) GetFallback(serverType string, service string, method string) (context.IHandler, bool) {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	list := []string{service, fmt.Sprintf("%s@%s", service, method)}
-	for _, srvs := range list {
-		if h, ok := s.fallbacks[serverType][srvs]; ok {
-			return h, true
-		}
-	}
-	return nil, false
+func (s *regist) GetFallback(serverType string, service string) (context.IHandler, bool) {
+	return s.get(serverType).GetFallback(service)
 }
 
-func reflectHandler(name string, h interface{}) (handlings map[string]context.IHandler, handlers map[string]context.IHandler, handleds map[string]context.IHandler, fallbacks map[string]context.IHandler) {
-	handlings = make(map[string]context.IHandler)
-	handlers = make(map[string]context.IHandler)
-	handleds = make(map[string]context.IHandler)
-	fallbacks = make(map[string]context.IHandler)
-
+func (s *regist) register(tp string, name string, h interface{}) (err error) {
+	//检查参数
+	if tp == "" || h == nil {
+		return fmt.Errorf("注册对象不能为空")
+	}
+	//输入参数为函数
+	current := s.get(tp)
 	if vv, ok := h.(func(context.IContext) interface{}); ok {
-		handlers[name] = context.Handler(vv)
-		return
+		if err := current.AddHanler(name, "", context.Handler(vv)); err != nil {
+			return err
+		}
 	}
 
-	switch tp := h.(type) {
-	case context.Handler:
-		handlers[name] = tp
-		return
-	default:
-		obj := reflect.ValueOf(h)
-		typ := reflect.TypeOf(h)
+	//检查输入的注册服务必须为struct
+	typ := reflect.TypeOf(h)
+	val := reflect.ValueOf(h)
+	if val.Kind() != reflect.Ptr {
+		return fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
+	}
 
-		if typ.Kind() == reflect.Ptr || typ.Kind() == reflect.Struct {
-			for i := 0; i < typ.NumMethod(); i++ {
+	//reflect所有函数，检查函数签名
+	for i := 0; i < typ.NumMethod(); i++ {
 
-				//检查函数名称是否是以Handle,Fallback结尾
-				mName := typ.Method(i).Name
-				if !strings.HasSuffix(mName, defHandling) &&
-					!strings.HasSuffix(mName, defHandler) &&
-					!strings.HasSuffix(mName, defHandled) &&
-					!strings.HasSuffix(mName, defFallback) {
-					continue
-				}
+		//检查函数参数是否符合接口要求
+		mName := typ.Method(i).Name
+		method := val.MethodByName(mName)
 
-				//处理函数名称
-				var endName, handleType string
-				if strings.HasSuffix(mName, defHandler) {
-					handleType = defHandler
-					endName = strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-				} else if strings.HasSuffix(mName, defFallback) {
-					handleType = defFallback
-					endName = strings.ToLower(mName[0 : len(mName)-len(defFallback)])
-				} else if strings.HasSuffix(mName, defHandling) {
-					handleType = defHandling
-					endName = strings.ToLower(mName[0 : len(mName)-len(defHandling)])
-				} else if strings.HasSuffix(mName, defHandled) {
-					handleType = defHandled
-					endName = strings.ToLower(mName[0 : len(mName)-len(defHandled)])
-				}
+		//处理服务关闭函数
+		if mName == defClose {
+			err = current.AddCloser(name, method.Interface())
+		}
+		if err != nil {
+			panic(err)
+		}
 
-				//检查函数是否符合指定的签名格式context.IHandler
-				method := obj.MethodByName(mName)
-				nfx, ok := method.Interface().(func(context.IContext) interface{})
-				if !ok {
-					panic(fmt.Sprintf("%s不是有效的服务类型", mName))
-				}
-				// fmt.Println("ok")
+		//处理handling,handle,handled,fallback
+		nfx, ok := method.Interface().(func(context.IContext) interface{})
+		if !ok {
+			continue
+		}
 
-				var nf context.Handler = nfx
-				//保存到缓存列表
-				switch handleType {
-				case defHandling:
-					handlings[registry.Join(name, endName)] = nf
-				case defHandler:
-					handlers[registry.Join(name, endName)] = nf
-				case defHandled:
-					handleds[registry.Join(name, endName)] = nf
-				case defFallback:
-					fallbacks[registry.Join(name, endName)] = nf
-				}
+		//检查函数名是否符合特定要求
+		var nf context.Handler = nfx
+		switch {
+		case strings.HasSuffix(mName, defHandling):
+			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
+			err = current.AddHandling(name, endName, nf)
+		case strings.HasSuffix(mName, defHandler):
+			endName := strings.ToLower(mName[0 : len(mName)-len(defHandler)])
+			err = current.AddHanler(name, endName, nf)
+		case strings.HasSuffix(mName, defHandled):
+			endName := strings.ToLower(mName[0 : len(mName)-len(defHandled)])
+			err = current.AddHandled(name, endName, nf)
+		case strings.HasSuffix(mName, defFallback):
+			endName := strings.ToLower(mName[0 : len(mName)-len(defFallback)])
+			err = current.AddFallback(name, endName, nf)
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return nil
+
+}
+
+func (s *regist) get(tp string) *services {
+	if _, ok := s.registRouters[tp]; !ok {
+		s.registRouters[tp] = newServices()
+	}
+	return s.registRouters[tp]
+}
+
+//GetServices 获取指定服务器已注册的服务
+func (s *regist) GetRouters(serverType string) (*router.Routers, error) {
+	return s.get(serverType).GetRouters()
+}
+
+//DoStart 执行服务启动函数
+func (s *regist) DoStart(c server.IServerConf) error {
+	handlers := s.get(c.GetMainConf().GetServerType()).GetStartingHandles()
+	for _, h := range handlers {
+		if err := h(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+//DoClose 执行服务关闭函数
+func (s *regist) DoClose(c server.IServerConf) error {
+	handlers := s.get(c.GetMainConf().GetServerType()).GetClosingHandles()
+	for _, h := range handlers {
+		if err := h(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+//GetClosers 获取资源释放函数
+func (s *regist) Close() error {
+	var sb strings.Builder
+	for _, r := range s.registRouters {
+		for _, cs := range r.GetClosers() {
+			if err := cs(); err != nil {
+				sb.WriteString(err.Error())
+				sb.WriteString("\n")
 			}
-
 		}
-
 	}
-	return
-}
-
-//register 注册服务
-func (s *service) register(tp string, name string, h interface{}) {
-	s.check(tp)
-	handlings, handlers, handleds, fallbacks := reflectHandler(name, h)
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	for k, v := range handlings {
-		if _, ok := s.handlings[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.handlings[tp][k] = v
+	if sb.Len() == 0 {
+		return nil
 	}
-	for k, v := range handlers {
-		if _, ok := s.handlers[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.handlers[tp][k] = v
-	}
-	for k, v := range handleds {
-		if _, ok := s.handleds[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.handleds[tp][k] = v
-	}
-
-	for k, v := range fallbacks {
-		if _, ok := s.fallbacks[tp][k]; ok {
-			panic(fmt.Sprintf("服务[%s]不能重复注册", k))
-		}
-		s.fallbacks[tp][k] = v
-	}
-}
-func (s *service) check(tp string) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if _, ok := s.handlings[tp]; !ok {
-		s.handlings[tp] = make(map[string]context.IHandler)
-	}
-	if _, ok := s.handlers[tp]; !ok {
-		s.handlers[tp] = make(map[string]context.IHandler)
-	}
-	if _, ok := s.handleds[tp]; !ok {
-		s.handleds[tp] = make(map[string]context.IHandler)
-	}
-	if _, ok := s.fallbacks[tp]; !ok {
-		s.fallbacks[tp] = make(map[string]context.IHandler)
-	}
-}
-func (s *service) GetServices(serverType string) []string {
-	list := make([]string, 0, len(s.handlers[serverType]))
-	for k := range s.handlers[serverType] {
-		list = append(list, k)
-	}
-	return list
+	return errors.New(strings.Trim(sb.String(), "\n"))
 }

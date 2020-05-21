@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/servers"
+	"github.com/micro-plat/hydra/services"
 	"github.com/urfave/cli"
 )
 
@@ -71,8 +72,18 @@ LOOP:
 
 	//6. 关闭服务器释放所有资源
 	application.DefApp.Log().Info(application.AppName, "正在退出...")
+
+	//关闭服务器
 	server.Shutdown()
+
+	//关闭各服务
+	if err := services.Registry.Close(); err != nil {
+		application.DefApp.Log().Error("err:", err)
+	}
+
+	//通知关闭各组件
 	application.Current().Close()
+
 	application.DefApp.Log().Info(application.AppName, "已安全退出")
 	return nil
 
