@@ -36,12 +36,12 @@ type IServiceRegistry interface {
 
 //Registry 服务注册管理
 var Registry = &regist{
-	registRouters: make(map[string]*services),
+	registRouters: make(map[string]*httpServices),
 }
 
 //regist  本地服务
 type regist struct {
-	registRouters map[string]*services
+	registRouters map[string]*httpServices
 	lock          sync.RWMutex
 }
 
@@ -223,7 +223,7 @@ func (s *regist) register(tp string, name string, h interface{}) (err error) {
 
 }
 
-func (s *regist) get(tp string) *services {
+func (s *regist) get(tp string) *httpServices {
 	if _, ok := s.registRouters[tp]; !ok {
 		s.registRouters[tp] = newServices()
 	}
