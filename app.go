@@ -49,9 +49,7 @@ func NewCliApp(opts ...Option) (m *MicroApp) {
 		WithSystemName("apiserver"),
 		WithServerTypes(http.API),
 		WithClusterName("t"))
-	if len(opts) > 0 {
-		nopts = append(nopts, opts...)
-	}
+	nopts = append(nopts, opts...)
 	return NewApp(nopts...)
 }
 
