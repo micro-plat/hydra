@@ -2,6 +2,7 @@ package servers
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/hydra/registry/watcher"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -17,6 +19,7 @@ type RspServers struct {
 	registryAddr string
 	registry     registry.IRegistry
 	path         []string
+	mpath        string
 	notify       chan *watcher.ValueChangeArgs
 	done         bool
 	closeChan    chan struct{}
@@ -27,21 +30,27 @@ type RspServers struct {
 
 //NewRspServers 构建响应式服务器
 func NewRspServers(registryAddr string, platName, sysName string, serverTypes []string, clusterName string) *RspServers {
-
 	server := &RspServers{
 		registryAddr: registryAddr,
 		closeChan:    make(chan struct{}),
 		servers:      make(map[string]IResponsiveServer),
 		log:          logger.New("hydra"),
+		mpath:        registry.Join(platName, sysName, strings.Join(serverTypes, "-"), clusterName, "conf"),
 	}
 	for _, t := range serverTypes {
 		server.path = append(server.path, registry.Join(platName, sysName, t, clusterName, "conf"))
 	}
+
 	return server
 }
 
 //Start 启动服务器
 func (r *RspServers) Start() (err error) {
+
+	r.log.Info("初始化:", r.mpath)
+
+	//加载已注册服务
+	services.Registry.Load()
 
 	//初始化注册中心
 	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
@@ -100,7 +109,6 @@ LOOP:
 			}
 		}
 	}
-	r.log.Error("exit")
 }
 
 //Shutdown 关闭所有服务器
@@ -148,10 +156,12 @@ func (r *RspServers) checkServer(path string) error {
 	}
 
 	//检查服务器是否已创建
+	var change bool
 	srvr, ok := r.servers[conf.GetMainConf().GetServerType()]
 	if ok {
 		//通知已创建的服务器
-		if err := srvr.Notify(conf); err != nil {
+		r.log.Debugf("%s配置发生变化", conf.GetMainConf().GetMainPath())
+		if change, err = srvr.Notify(conf); err != nil {
 			return err
 		}
 	} else {
@@ -169,10 +179,14 @@ func (r *RspServers) checkServer(path string) error {
 			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
 			return nil
 		}
+		change = true
 	}
 
 	//缓存服务器配置
-	server.Cache.Save(conf)
+	if change {
+		server.Cache.Save(conf)
+	}
+
 	return nil
 
 }

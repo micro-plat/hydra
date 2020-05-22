@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/registry/conf"
@@ -11,19 +12,29 @@ type Routers struct {
 	Routers []*Router `json:"routers,omitempty"`
 }
 
+func (p *Routers) String() string {
+	var sb strings.Builder
+	for _, v := range p.Routers {
+		sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v\n", v.Path, v.Service, strings.Join(v.Action, " "), v.Pages))
+	}
+	return sb.String()
+}
+
 //Router 路由信息
 type Router struct {
 	Path    string   `json:"path,omitempty" valid:"ascii,required"`
 	Action  []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
 	Service string   `json:"service" valid:"ascii,required"`
+	Pages   []string `json:"pages,omitempty"`
 }
 
 //NewRouter 构建路径配置
-func NewRouter(path string, service string, action ...string) *Router {
+func NewRouter(path string, service string, action []string, pages ...string) *Router {
 	return &Router{
 		Path:    path,
 		Action:  action,
 		Service: service,
+		Pages:   pages,
 	}
 }
 
@@ -36,8 +47,8 @@ func NewRouters() *Routers {
 }
 
 //Append 添加路由信息
-func (h *Routers) Append(path string, service string, action ...string) *Routers {
-	h.Routers = append(h.Routers, NewRouter(path, service, action...))
+func (h *Routers) Append(path string, service string, action []string, pages ...string) *Routers {
+	h.Routers = append(h.Routers, NewRouter(path, service, action, pages...))
 	return h
 }
 

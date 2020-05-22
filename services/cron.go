@@ -71,7 +71,6 @@ func (c *cron) Subscribe(f func(t *task.Task)) {
 		subscriber.msg <- t
 	}
 	c.events = append(c.events, subscriber)
-
 }
 
 //notify 通知任务

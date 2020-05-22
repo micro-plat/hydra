@@ -14,19 +14,19 @@ func (o *OrderService) GetHandle(ctx hydra.IContext) interface{} {
 }
 
 func (o *OrderService) Handling(ctx hydra.IContext) interface{} {
-	ctx.Log().Info("order.all.handling:", ctx.Request().GetString("order_no"))
+	ctx.Log().Info("order.Handling", ctx.Request().GetString("order_no"))
 	return "order.all.handling"
 }
 func (o *OrderService) GetHandling(ctx hydra.IContext) interface{} {
-	ctx.Log().Info("order.get.handling:", ctx.Request().GetString("order_no"))
+	ctx.Log().Info("order.GetHandling", ctx.Request().GetString("order_no"))
 	return "order.get.handling"
 }
 func (o *OrderService) GetHandled(ctx hydra.IContext) interface{} {
-	ctx.Log().Info("order.get.handled:", ctx.Request().GetString("order_no"))
+	ctx.Log().Info("order.GetHandled", ctx.Request().GetString("order_no"))
 	return "order.all.handling"
 }
 func (o *OrderService) Handled(ctx hydra.IContext) interface{} {
-	hydra.Application.CurrentContext().Log().Info("order.all.handled:", ctx.Request().GetString("order_no"))
+	ctx.Log().Info("order.Handled", ctx.Request().GetString("order_no"))
 	return "order.all.handling"
 }
 func (o *OrderService) PostHandle(ctx hydra.IContext) interface{} {
@@ -42,6 +42,6 @@ func (o *OrderService) QueryHandle(ctx context.IContext) interface{} {
 	return "order.query.handle"
 }
 func (o *OrderService) Close() error {
-	hydra.Application.Log().Info("order.close")
+	hydra.Application.Log().Info("order.Close")
 	return nil
 }

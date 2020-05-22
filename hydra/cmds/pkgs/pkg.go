@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/builder"
+	"github.com/micro-plat/hydra/services"
 	"github.com/urfave/cli"
 )
 
@@ -18,6 +19,8 @@ const Failed = "\t\t\t\t\t[\033[31mFAILED\033[0m]" // Show colored "FAILED"
 func Pub2Registry(cover bool) error {
 
 	//1. 加载配置信息
+	services.Registry.Load()
+
 	if err := builder.Conf.Load(); err != nil {
 		return err
 	}

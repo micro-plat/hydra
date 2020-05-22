@@ -18,12 +18,16 @@ type apiBuilder map[string]interface{}
 func NewAPI(address string, opts ...api.Option) apiBuilder {
 	b := make(map[string]interface{})
 	b["main"] = api.New(address, opts...)
-	routers, err := services.Registry.GetRouters("api")
+	return b
+}
+
+//load 加载路由
+func (b apiBuilder) loadRouters() {
+	routers, err := services.API.GetRouters()
 	if err != nil {
 		panic(err)
 	}
 	b["router"] = routers
-	return b
 }
 
 //Jwt jwt配置

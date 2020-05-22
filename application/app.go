@@ -182,6 +182,11 @@ func (m *application) check() (err error) {
 			return err
 		}
 	}
+	for _, s := range m.ServerTypes {
+		if !types.StringContains(ServerTypes, s) {
+			return fmt.Errorf("%s不支持，只能是%v", s, ServerTypes)
+		}
+	}
 
 	if m.RegistryAddr == "" {
 		return fmt.Errorf("注册中心地址不能为空")

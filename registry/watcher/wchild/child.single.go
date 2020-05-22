@@ -1,6 +1,7 @@
 package wchild
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -23,6 +24,7 @@ type ChildWatcher struct {
 	mu         sync.Mutex
 	done       bool
 	closeChan  chan struct{}
+	once       sync.Once
 }
 
 //NewChildWatcher 初始化子节点监控
@@ -118,11 +120,18 @@ LOOP:
 
 //Close 关闭监控
 func (w *ChildWatcher) Close() {
-	for _, watcher := range w.watchers {
-		watcher.Close()
-	}
-	w.done = true
-	close(w.closeChan)
+	w.once.Do(func() {
+		for _, watcher := range w.watchers {
+			watcher.Close()
+		}
+		if !w.done {
+			fmt.Println("child.watcher.close.", w.path)
+			w.done = true
+			close(w.closeChan)
+		}
+
+	})
+
 }
 
 //deleted 节点删除

@@ -39,7 +39,7 @@ type Publisher struct {
 func New(c conf.IMainConf) *Publisher {
 	p := &Publisher{
 		c:         c,
-		watchChan: make(chan struct{}, 1),
+		watchChan: make(chan struct{}),
 		closeChan: make(chan struct{}),
 		pubs:      make(map[string]string),
 		log:       logger.New("publisher"),
@@ -156,7 +156,7 @@ func (p *Publisher) pubDNSNode(serverName string) error {
 
 //pubServerNode 发布集群节点，用于服务监控
 func (p *Publisher) pubServerNode(serverName string, data string) error {
-	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", p.c.GetClusterID(), serverName))
+	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", serverName, p.c.GetClusterID()))
 
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
@@ -215,15 +215,17 @@ func (p *Publisher) Close() {
 	p.done = true
 	close(p.closeChan)
 	p.Clear()
+
 }
 
 //Clear 清除所有发布节点
 func (p *Publisher) Clear() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
-	p.watchChan <- struct{}{}
+	close(p.watchChan)
 	for path := range p.pubs {
 		p.c.GetRegistry().Delete(path)
 	}
 	p.pubs = make(map[string]string)
+	p.watchChan = make(chan struct{})
 }

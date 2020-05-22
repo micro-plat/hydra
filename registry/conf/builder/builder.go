@@ -44,8 +44,13 @@ func (c *conf) Load() error {
 			return err
 		}
 	}
-	if _, ok := c.data["api"]; !ok && application.Current().HasServerType("api") {
-		c.API(":8080")
+	api, ok := c.data[application.API]
+	if ok {
+		apiBuilder(api).loadRouters()
+		return nil
+	}
+	if application.Current().HasServerType(application.API) {
+		c.API(":8080").loadRouters()
 	}
 	//添加其它服务器
 	return nil
@@ -54,14 +59,14 @@ func (c *conf) Load() error {
 //API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) apiBuilder {
 	api := NewAPI(address, opts...)
-	c.data["api"] = api
+	c.data[application.API] = api
 	return api
 }
 
 //CRON cron服务器配置
 func (c *conf) CRON(opts ...cron.Option) cronBuilder {
 	cron := newCron(opts...)
-	c.data["cron"] = cron
+	c.data[application.CRON] = cron
 	return cron
 }
 

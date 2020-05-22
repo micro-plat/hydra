@@ -31,9 +31,8 @@ func NewComparer(oconf IMainConf, valueNames []string, subNames ...string) *Comp
 
 //Update 更新配置
 func (s *Comparer) Update(n IMainConf) {
-	if n == nil {
-		s.nconf = nil
-		return
+	if s.nconf != nil {
+		s.oconf = s.nconf
 	}
 	s.nconf = n
 }

@@ -3,14 +3,12 @@ package services
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry/conf/server"
-	"github.com/micro-plat/hydra/registry/conf/server/router"
 )
 
 const defHandling = "Handling"
@@ -21,13 +19,14 @@ const defClose = "Close"
 
 //IServiceRegistry 服务注册接口
 type IServiceRegistry interface {
-	Micro(name string, h interface{})
+	Micro(name string, h interface{}, pages ...string)
 	Flow(name string, h interface{})
-	API(name string, h interface{})
-	Web(name string, h interface{})
-	WS(name string, h interface{})
-	MQC(name string, h interface{})
-	CRON(name string, h interface{})
+	API(name string, h interface{}, pages ...string)
+	Web(name string, h interface{}, pages ...string)
+	RPC(name string, h interface{}, pages ...string)
+	WS(name string, h interface{}, pages ...string)
+	MQC(name string, h interface{}, queues ...string)
+	CRON(name string, h interface{}, crons ...string)
 	OnServerStarting(h func(server.IServerConf) error, tps ...string)
 	OnServerClosing(h func(server.IServerConf) error, tps ...string)
 	OnHandleExecuting(h context.Handler, tps ...string)
@@ -36,13 +35,59 @@ type IServiceRegistry interface {
 
 //Registry 服务注册管理
 var Registry = &regist{
-	registRouters: make(map[string]*httpServices),
+	servers: make(map[string]*serverServices),
+	caches:  make(map[string]map[string]interface{}),
 }
 
 //regist  本地服务
 type regist struct {
-	registRouters map[string]*httpServices
-	lock          sync.RWMutex
+	servers map[string]*serverServices
+	caches  map[string]map[string]interface{}
+	lock    sync.RWMutex
+	once    sync.Once
+}
+
+//Micro 注册为微服务包括api,web,rpc
+func (s *regist) Micro(name string, h interface{}, pages ...string) {
+	s.get(application.API).Cache(name, h, pages...)
+	s.get(application.Web).Cache(name, h, pages...)
+	s.get(application.WS).Cache(name, h, pages...)
+}
+
+//Flow 注册为流程服务，包括mqc,cron
+func (s *regist) Flow(name string, h interface{}) {
+	s.get(application.MQC).Cache(name, h)
+	s.get(application.CRON).Cache(name, h)
+}
+
+//API 注册为API服务
+func (s *regist) API(name string, h interface{}, pages ...string) {
+	s.get(application.API).Cache(name, h, pages...)
+}
+
+//Web 注册为web服务
+func (s *regist) Web(name string, h interface{}, pages ...string) {
+	s.get(application.Web).Cache(name, h, pages...)
+}
+
+//RPC 注册为rpc服务
+func (s *regist) RPC(name string, h interface{}, pages ...string) {
+	s.get(application.WS).Cache(name, h, pages...)
+}
+
+//WS 注册为websocket服务
+func (s *regist) WS(name string, h interface{}, pages ...string) {
+	s.get(application.WS).Cache(name, h, pages...)
+}
+
+//MQC 注册为消息队列服务
+func (s *regist) MQC(name string, h interface{}, queues ...string) {
+	s.get(application.MQC).Cache(name, h, queues...)
+}
+
+//CRON 注册为定时任务服务
+func (s *regist) CRON(name string, h interface{}, crons ...string) {
+	s.get(application.CRON).Cache(name, h, crons...)
 }
 
 //OnServerStarting 处理服务器启动
@@ -51,7 +96,7 @@ func (s *regist) OnServerStarting(h func(server.IServerConf) error, tps ...strin
 		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		if err := s.get(typ).Starting(h); err != nil {
+		if err := s.get(typ).AddStarting(h); err != nil {
 			panic(fmt.Errorf("%s OnServerStarting %v", typ, err))
 		}
 	}
@@ -63,7 +108,7 @@ func (s *regist) OnServerClosing(h func(server.IServerConf) error, tps ...string
 		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		if err := s.get(typ).Closing(h); err != nil {
+		if err := s.get(typ).AddClosing(h); err != nil {
 			panic(fmt.Errorf("%s OnServerClosing %v", typ, err))
 		}
 	}
@@ -75,7 +120,7 @@ func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		if err := s.get(typ).GlobalHandling(h); err != nil {
+		if err := s.get(typ).AddHandleExecuting(h); err != nil {
 			panic(fmt.Errorf("%s OnHandleExecuting %v", typ, err))
 		}
 	}
@@ -87,54 +132,20 @@ func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 		tps = application.DefApp.ServerTypes
 	}
 	for _, typ := range tps {
-		if err := s.get(typ).GlobalHandled(h); err != nil {
+		if err := s.get(typ).AddHandleExecuted(h); err != nil {
 			panic(fmt.Errorf("%s OnHandleExecuted %v", typ, err))
 		}
 	}
 }
 
-//Micro 注册为微服务包括api,web,rpc
-func (s *regist) Micro(name string, h interface{}) {
-	s.register("api", name, h)
-	s.register("web", name, h)
-	s.register("rpc", name, h)
+//GetHandleExecutings 获取handle预处理勾子
+func (s *regist) GetHandleExecutings(serverType string) []context.IHandler {
+	return s.get(serverType).GetHandleExecutings()
 }
 
-//Flow 注册为流程服务，包括mqc,cron
-func (s *regist) Flow(name string, h interface{}) {
-	s.register("mqc", name, h)
-	s.register("cron", name, h)
-}
-
-//API 注册为API服务
-func (s *regist) API(name string, h interface{}) {
-	s.register("api", name, h)
-}
-
-//Web 注册为web服务
-func (s *regist) Web(name string, h interface{}) {
-	s.register("web", name, h)
-}
-
-//WS 注册为websocket服务
-func (s *regist) WS(name string, h interface{}) {
-	s.register("ws", name, h)
-}
-
-//MQC 注册为消息队列服务
-func (s *regist) MQC(name string, h interface{}) {
-	s.register("mqc", name, h)
-}
-
-//CRON 注册为定时任务服务
-func (s *regist) CRON(name string, h interface{}) {
-	s.register("cron", name, h)
-}
-
-//CRONBy 根据cron表达式，服务名称，服务处理函数注册cron服务
-func (s *regist) CRONBy(cron string, name string, h interface{}) {
-	CRON.Add(cron, name)
-	s.register("cron", name, h)
+//GetHandleExecuted 获取handle后处理勾子
+func (s *regist) GetHandleExecuted(serverType string) []context.IHandler {
+	return s.get(serverType).GetHandleExecuteds()
 }
 
 //GetHandler 获取服务对应的处理函数
@@ -157,111 +168,29 @@ func (s *regist) GetFallback(serverType string, service string) (context.IHandle
 	return s.get(serverType).GetFallback(service)
 }
 
-func (s *regist) register(tp string, name string, h interface{}) (err error) {
-	//检查参数
-	if tp == "" || h == nil {
-		return fmt.Errorf("注册对象不能为空")
+func (s *regist) get(tp string) *serverServices {
+	if v, ok := s.servers[tp]; ok {
+		return v
 	}
-	//输入参数为函数
-	current := s.get(tp)
-	if vv, ok := h.(func(context.IContext) interface{}); ok {
-		if err := current.AddHanler(name, "", context.Handler(vv)); err != nil {
-			return err
-		}
-	}
+	panic(fmt.Sprintf("不支持的服务器类型:%s", tp))
+}
 
-	//检查输入的注册服务必须为struct
-	typ := reflect.TypeOf(h)
-	val := reflect.ValueOf(h)
-	if val.Kind() != reflect.Ptr {
-		return fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
-	}
-
-	//reflect所有函数，检查函数签名
-	for i := 0; i < typ.NumMethod(); i++ {
-
-		//检查函数参数是否符合接口要求
-		mName := typ.Method(i).Name
-		method := val.MethodByName(mName)
-
-		//处理服务关闭函数
-		if mName == defClose {
-			err = current.AddCloser(name, method.Interface())
-		}
-		if err != nil {
-			panic(err)
-		}
-
-		//处理handling,handle,handled,fallback
-		nfx, ok := method.Interface().(func(context.IContext) interface{})
-		if !ok {
-			continue
-		}
-
-		//检查函数名是否符合特定要求
-		var nf context.Handler = nfx
-		switch {
-		case strings.HasSuffix(mName, defHandling):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
-			err = current.AddHandling(name, endName, nf)
-		case strings.HasSuffix(mName, defHandler):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-			err = current.AddHanler(name, endName, nf)
-		case strings.HasSuffix(mName, defHandled):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandled)])
-			err = current.AddHandled(name, endName, nf)
-		case strings.HasSuffix(mName, defFallback):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defFallback)])
-			err = current.AddFallback(name, endName, nf)
-		}
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return nil
+//OnStarting 执行服务启动函数
+func (s *regist) OnStarting(c server.IServerConf) error {
+	return s.get(c.GetMainConf().GetServerType()).OnStarting(c)
 
 }
 
-func (s *regist) get(tp string) *httpServices {
-	if _, ok := s.registRouters[tp]; !ok {
-		s.registRouters[tp] = newServices()
-	}
-	return s.registRouters[tp]
-}
-
-//GetServices 获取指定服务器已注册的服务
-func (s *regist) GetRouters(serverType string) (*router.Routers, error) {
-	return s.get(serverType).GetRouters()
-}
-
-//DoStart 执行服务启动函数
-func (s *regist) DoStart(c server.IServerConf) error {
-	handlers := s.get(c.GetMainConf().GetServerType()).GetStartingHandles()
-	for _, h := range handlers {
-		if err := h(c); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-//DoClose 执行服务关闭函数
-func (s *regist) DoClose(c server.IServerConf) error {
-	handlers := s.get(c.GetMainConf().GetServerType()).GetClosingHandles()
-	for _, h := range handlers {
-		if err := h(c); err != nil {
-			return err
-		}
-	}
-	return nil
+//OnClose 执行服务关闭函数
+func (s *regist) OnClosing(c server.IServerConf) error {
+	return s.get(c.GetMainConf().GetServerType()).OnClosing(c)
 }
 
 //GetClosers 获取资源释放函数
 func (s *regist) Close() error {
 	var sb strings.Builder
-	for _, r := range s.registRouters {
-		for _, cs := range r.GetClosers() {
+	for _, r := range s.servers {
+		for _, cs := range r.GetClosingHandlers() {
 			if err := cs(); err != nil {
 				sb.WriteString(err.Error())
 				sb.WriteString("\n")
@@ -272,4 +201,44 @@ func (s *regist) Close() error {
 		return nil
 	}
 	return errors.New(strings.Trim(sb.String(), "\n"))
+}
+
+//-----------------------注册缓存-------------------------------------------
+
+//Load 加载所有服务
+func (s *regist) Load() {
+	s.once.Do(func() {
+		for _, v := range s.servers {
+			v.Load()
+		}
+	})
+}
+
+//init 处理服务初始化及特殊注册函数
+func init() {
+	Registry.servers[application.API] = newServerServices(func(g *unit, ext ...string) error {
+		return API.Add(g.path, g.service, g.actions, ext...)
+	})
+	Registry.servers[application.Web] = newServerServices(func(g *unit, ext ...string) error {
+		return WEB.Add(g.path, g.service, g.actions, ext...)
+	})
+	Registry.servers[application.RPC] = newServerServices(func(g *unit, ext ...string) error {
+		return RPC.Add(g.path, g.service, g.actions, ext...)
+	})
+
+	Registry.servers[application.WS] = newServerServices(nil)
+
+	Registry.servers[application.CRON] = newServerServices(func(g *unit, ext ...string) error {
+		for _, t := range ext {
+			CRON.Add(t, g.service)
+		}
+		return nil
+
+	})
+	Registry.servers[application.MQC] = newServerServices(func(g *unit, ext ...string) error {
+		for _, t := range ext {
+			MQC.Add(t, g.service)
+		}
+		return nil
+	})
 }

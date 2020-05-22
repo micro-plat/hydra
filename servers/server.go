@@ -22,7 +22,7 @@ type IServerCreator interface {
 //IResponsiveServer 响应式服务器
 type IResponsiveServer interface {
 	Start() error
-	Notify(server.IServerConf) error
+	Notify(server.IServerConf) (bool, error)
 	Shutdown()
 }
 

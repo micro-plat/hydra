@@ -14,25 +14,25 @@ func main() {
 		hydra.WithDebug(),
 	)
 
-	app.API("/order/request", request)
+	app.API("/order/request", request, "/order/*")
 	app.API("/order", &OrderService{})
 
 	app.OnServerStarting(func(server.IServerConf) error {
-		hydra.Application.Log().Info("on.server.starting")
+		hydra.Application.Log().Info("server.OnServerStarting")
 		return nil
 	})
 
 	app.OnServerClosing(func(server.IServerConf) error {
-		hydra.Application.Log().Info("on.server.closing")
+		hydra.Application.Log().Info("server.OnServerClosing")
 		return nil
 	})
 
 	app.OnHandleExecuting(func(ctx hydra.IContext) interface{} {
-		ctx.Log().Info("on.handle.executing")
+		ctx.Log().Info("global.OnHandleExecuting")
 		return nil
 	})
 	app.OnHandleExecuted(func(ctx hydra.IContext) interface{} {
-		ctx.Log().Info("on.handle.executed")
+		ctx.Log().Info("global.OnHandleExecuted")
 		return nil
 	})
 	app.Start()

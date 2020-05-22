@@ -22,6 +22,27 @@ var Version string = "1.0.0"
 //Usage 用途
 var Usage string = filepath.Base(os.Args[0]) + "(A new hydra application)"
 
+//API api服务器
+const API = "api"
+
+//Web web服务器
+const Web = "web"
+
+//RPC rpc服务器
+const RPC = "rpc"
+
+//WS websocket服务器
+const WS = "ws"
+
+//CRON cron服务器
+const CRON = "cron"
+
+//MQC mqc服务器
+const MQC = "mqc"
+
+//ServerTypes 支持的所有服务器类型
+var ServerTypes = []string{API, Web, RPC, WS, CRON, MQC}
+
 //IApplication 应用程序信息
 type IApplication interface {
 

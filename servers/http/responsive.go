@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
@@ -37,7 +38,7 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 //Start 启用服务
 func (w *Responsive) Start() (err error) {
 	w.log.Infof("开始启动[%s]服务...", w.conf.GetMainConf().GetServerType())
-	if err := services.Registry.DoStart(w.conf); err != nil {
+	if err := services.Registry.OnStarting(w.conf); err != nil {
 		return err
 	}
 	if err = w.Server.Start(); err != nil {
@@ -55,26 +56,30 @@ func (w *Responsive) Start() (err error) {
 }
 
 //Notify 服务器配置变更通知
-func (w *Responsive) Notify(c server.IServerConf) (err error) {
-	w.comparer.Update(c.GetMainConf())
+func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 
-	//配置未发生变化
-	if w.comparer.IsChanged() {
-		return nil
+	w.comparer.Update(c.GetMainConf())
+	if !w.comparer.IsChanged() {
+		w.log.Debug("服务配置未发生变化")
+		return false, nil
 	}
-	w.conf = c
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
 		w.Shutdown()
 
 		w.Server, err = w.getServer(c)
 		if err != nil {
-			return err
+			return false, err
 		}
-		return w.Start()
+		if err = w.Start(); err != nil {
+			return false, err
+		}
+		w.conf = c
+		return true, nil
 	}
-	w.log.Info("配置发生变化，准备更新")
-	return nil
+	w.conf = c
+	w.log.Info("关键配置未发生变化，无需更新服务器")
+	return true, nil
 }
 
 //Shutdown 关闭服务器
@@ -82,7 +87,7 @@ func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
 	w.Server.Shutdown()
 	w.pub.Clear()
-	if err := services.Registry.DoClose(w.conf); err != nil {
+	if err := services.Registry.OnClosing(w.conf); err != nil {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
@@ -126,7 +131,7 @@ func init() {
 }
 
 //API api服务器
-const API = "api"
+const API = application.API
 
 //Web web服务器
-const Web = "web"
+const Web = application.Web
