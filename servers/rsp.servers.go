@@ -40,7 +40,6 @@ func NewRspServers(registryAddr string, platName, sysName string, serverTypes []
 	for _, t := range serverTypes {
 		server.path = append(server.path, registry.Join(platName, sysName, t, clusterName, "conf"))
 	}
-
 	return server
 }
 
