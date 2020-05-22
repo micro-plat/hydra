@@ -1,14 +1,10 @@
 package services
 
-import "fmt"
-
 type serverServices struct {
 	extHandle func(u *unit, ext ...string) error
 	*services
 	*handleHook
 	*serverHook
-	caches    map[string]interface{}
-	cacheExts map[string][]string
 }
 
 func newServerServices(v func(u *unit, ext ...string) error) *serverServices {
@@ -16,43 +12,28 @@ func newServerServices(v func(u *unit, ext ...string) error) *serverServices {
 		handleHook: newHandleHook(),
 		services:   newService(),
 		serverHook: new(serverHook),
-		caches:     make(map[string]interface{}),
-		cacheExts:  make(map[string][]string),
 		extHandle:  v,
 	}
 }
 
-//Load 加载所有服务
-func (s *serverServices) Load() error {
-	for path, v := range s.caches {
-		groups, err := reflectHandle(path, v)
-		if err != nil {
-			return err
-		}
-		if err := s.Add(groups); err != nil {
-			return err
-		}
+func (s *serverServices) Add(name string, h interface{}, ext ...string) {
+	groups, err := reflectHandle(name, h)
+	if err != nil {
+		panic(err)
 	}
-	return nil
-}
-func (s *serverServices) Cache(name string, h interface{}, ext ...string) {
-	if _, ok := s.caches[name]; ok {
-		panic(fmt.Sprintf("服务%s不能重复注册", name))
-	}
-	s.caches[name] = h
-	if len(ext) > 0 {
-		s.cacheExts[name] = ext
+	if err := s.addGroup(groups, ext...); err != nil {
+		panic(err)
 	}
 }
-func (s *serverServices) handleExt(g *unit) error {
+func (s *serverServices) handleExt(g *unit, ext ...string) error {
 	if s.extHandle == nil {
 		return nil
 	}
-	return s.extHandle(g, s.cacheExts[g.path]...)
+	return s.extHandle(g, ext...)
 }
 
-//Add 添加服务注册
-func (s *serverServices) Add(g *unitGroup) error {
+//addGroup 添加服务注册
+func (s *serverServices) addGroup(g *unitGroup, ext ...string) error {
 	for _, u := range g.Services {
 
 		//添加预处理函数
@@ -61,7 +42,7 @@ func (s *serverServices) Add(g *unitGroup) error {
 		}
 
 		//执行处理扩展函数
-		if err := s.handleExt(u); err != nil {
+		if err := s.handleExt(u, ext...); err != nil {
 			return err
 		}
 

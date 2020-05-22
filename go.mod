@@ -7,7 +7,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.3.3
-	github.com/micro-plat/cli v1.0.1
+	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/lib4go v0.4.0
 	github.com/pkg/profile v1.4.0
 	github.com/ugorji/go/codec v1.1.7
@@ -21,3 +21,4 @@ require (
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+

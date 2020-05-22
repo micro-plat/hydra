@@ -68,6 +68,8 @@ github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/micro-plat/cli v1.0.1 h1:Yo2jXptuQaCKwzC7SDJ43YXvC+/NogmicU2Ir/V8snk=
 github.com/micro-plat/cli v1.0.1/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
+github.com/micro-plat/cli v1.1.0 h1:2+EQ9aqjGSIvjMV5Bua3jmarY5jiKjbqmAUo4QggMrU=
+github.com/micro-plat/cli v1.1.0/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
 github.com/micro-plat/gmq v1.0.1/go.mod h1:93NeUjbgul5ywP+cm4eXERv6Zk0J8zZyrzYrY3q8GVQ=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 h1:ZqeYNhU3OHLH3mGKHDcjJRFFRrJa6eAM5H+CtDdOsPc=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=

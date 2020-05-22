@@ -3,6 +3,7 @@ package hydra
 import (
 	"github.com/micro-plat/cli"
 	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/servers/http"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 
@@ -38,6 +39,20 @@ func NewApp(opts ...Option) (m *MicroApp) {
 		opt()
 	}
 	return m
+}
+
+//NewCliApp 创建cli app
+func NewCliApp(opts ...Option) (m *MicroApp) {
+	nopts := make([]Option, 0, len(opts)+4)
+	nopts = append(nopts, WithRegistry("lm://."),
+		WithPlatName("hydra"),
+		WithSystemName("apiserver"),
+		WithServerTypes(http.API),
+		WithClusterName("t"))
+	if len(opts) > 0 {
+		nopts = append(nopts, opts...)
+	}
+	return NewApp(nopts...)
 }
 
 //Start 启动服务器

@@ -5,7 +5,6 @@ import (
 
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/builder"
-	"github.com/micro-plat/hydra/services"
 	"github.com/urfave/cli"
 )
 
@@ -17,9 +16,6 @@ const Failed = "\t\t\t\t\t[\033[31mFAILED\033[0m]" // Show colored "FAILED"
 
 //Pub2Registry 发布到注册中心
 func Pub2Registry(cover bool) error {
-
-	//1. 加载配置信息
-	services.Registry.Load()
 
 	if err := builder.Conf.Load(); err != nil {
 		return err
@@ -70,7 +66,7 @@ func GetBaseFlags() []cli.Flag {
 	 定，也可从环境变量中获取，环境变量名为:`,
 		})
 	}
-	if application.DefApp.PlatName == "" && application.DefApp.SysName == "" && len(application.DefApp.ServerTypes) == 0 && application.DefApp.ClusterName == "" {
+	if application.DefApp.Name == "" && application.DefApp.PlatName == "" && application.DefApp.SysName == "" && len(application.DefApp.ServerTypes) == 0 && application.DefApp.ClusterName == "" {
 		flags = append(flags, cli.StringFlag{
 			Name:        "name,n",
 			EnvVar:      "name",

@@ -18,13 +18,14 @@ import (
 )
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "run",
 			Usage:  "运行服务",
 			Flags:  getFlags(),
 			Action: doRun,
-		})
+		}
+	})
 }
 
 //doRun 服务启动

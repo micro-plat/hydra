@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/context"
@@ -43,51 +42,49 @@ var Registry = &regist{
 type regist struct {
 	servers map[string]*serverServices
 	caches  map[string]map[string]interface{}
-	lock    sync.RWMutex
-	once    sync.Once
 }
 
 //Micro 注册为微服务包括api,web,rpc
 func (s *regist) Micro(name string, h interface{}, pages ...string) {
-	s.get(application.API).Cache(name, h, pages...)
-	s.get(application.Web).Cache(name, h, pages...)
-	s.get(application.WS).Cache(name, h, pages...)
+	s.get(application.API).Add(name, h, pages...)
+	s.get(application.Web).Add(name, h, pages...)
+	s.get(application.WS).Add(name, h, pages...)
 }
 
 //Flow 注册为流程服务，包括mqc,cron
 func (s *regist) Flow(name string, h interface{}) {
-	s.get(application.MQC).Cache(name, h)
-	s.get(application.CRON).Cache(name, h)
+	s.get(application.MQC).Add(name, h)
+	s.get(application.CRON).Add(name, h)
 }
 
 //API 注册为API服务
 func (s *regist) API(name string, h interface{}, pages ...string) {
-	s.get(application.API).Cache(name, h, pages...)
+	s.get(application.API).Add(name, h, pages...)
 }
 
 //Web 注册为web服务
 func (s *regist) Web(name string, h interface{}, pages ...string) {
-	s.get(application.Web).Cache(name, h, pages...)
+	s.get(application.Web).Add(name, h, pages...)
 }
 
 //RPC 注册为rpc服务
 func (s *regist) RPC(name string, h interface{}, pages ...string) {
-	s.get(application.WS).Cache(name, h, pages...)
+	s.get(application.WS).Add(name, h, pages...)
 }
 
 //WS 注册为websocket服务
 func (s *regist) WS(name string, h interface{}, pages ...string) {
-	s.get(application.WS).Cache(name, h, pages...)
+	s.get(application.WS).Add(name, h, pages...)
 }
 
 //MQC 注册为消息队列服务
 func (s *regist) MQC(name string, h interface{}, queues ...string) {
-	s.get(application.MQC).Cache(name, h, queues...)
+	s.get(application.MQC).Add(name, h, queues...)
 }
 
 //CRON 注册为定时任务服务
 func (s *regist) CRON(name string, h interface{}, crons ...string) {
-	s.get(application.CRON).Cache(name, h, crons...)
+	s.get(application.CRON).Add(name, h, crons...)
 }
 
 //OnServerStarting 处理服务器启动
@@ -204,15 +201,6 @@ func (s *regist) Close() error {
 }
 
 //-----------------------注册缓存-------------------------------------------
-
-//Load 加载所有服务
-func (s *regist) Load() {
-	s.once.Do(func() {
-		for _, v := range s.servers {
-			v.Load()
-		}
-	})
-}
 
 //init 处理服务初始化及特殊注册函数
 func init() {

@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/hydra/registry/watcher"
-	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -47,9 +46,6 @@ func NewRspServers(registryAddr string, platName, sysName string, serverTypes []
 func (r *RspServers) Start() (err error) {
 
 	r.log.Info("初始化:", r.mpath)
-
-	//加载已注册服务
-	services.Registry.Load()
 
 	//初始化注册中心
 	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
