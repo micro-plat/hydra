@@ -8,7 +8,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 )
 
-func reflectHandle(path string, h interface{}) (g *unitGroup, err error) {
+func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	//检查参数
 	if path == "" || h == nil {
 		return nil, fmt.Errorf("注册对象不能为空")

@@ -26,6 +26,8 @@ type IServiceRegistry interface {
 	WS(name string, h interface{}, pages ...string)
 	MQC(name string, h interface{}, queues ...string)
 	CRON(name string, h interface{}, crons ...string)
+	Custome(tp string, name string, h interface{}, ext ...string)
+	RegisterServer(tp string, f ...func(g *Unit, ext ...string) error)
 	OnServerStarting(h func(server.IServerConf) error, tps ...string)
 	OnServerClosing(h func(server.IServerConf) error, tps ...string)
 	OnHandleExecuting(h context.Handler, tps ...string)
@@ -46,45 +48,62 @@ type regist struct {
 
 //Micro 注册为微服务包括api,web,rpc
 func (s *regist) Micro(name string, h interface{}, pages ...string) {
-	s.get(application.API).Add(name, h, pages...)
-	s.get(application.Web).Add(name, h, pages...)
-	s.get(application.WS).Add(name, h, pages...)
+	s.Custome(application.API, name, h, pages...)
+	s.Custome(application.Web, name, h, pages...)
+	s.Custome(application.WS, name, h, pages...)
 }
 
 //Flow 注册为流程服务，包括mqc,cron
 func (s *regist) Flow(name string, h interface{}) {
-	s.get(application.MQC).Add(name, h)
-	s.get(application.CRON).Add(name, h)
+	s.Custome(application.MQC, name, h)
+	s.Custome(application.CRON, name, h)
 }
 
 //API 注册为API服务
 func (s *regist) API(name string, h interface{}, pages ...string) {
-	s.get(application.API).Add(name, h, pages...)
+	s.get(application.API).Register(name, h, pages...)
 }
 
 //Web 注册为web服务
 func (s *regist) Web(name string, h interface{}, pages ...string) {
-	s.get(application.Web).Add(name, h, pages...)
+	s.Custome(application.Web, name, h, pages...)
 }
 
 //RPC 注册为rpc服务
 func (s *regist) RPC(name string, h interface{}, pages ...string) {
-	s.get(application.WS).Add(name, h, pages...)
+	s.Custome(application.WS, name, h, pages...)
 }
 
 //WS 注册为websocket服务
 func (s *regist) WS(name string, h interface{}, pages ...string) {
-	s.get(application.WS).Add(name, h, pages...)
+	s.Custome(application.WS, name, h, pages...)
 }
 
 //MQC 注册为消息队列服务
 func (s *regist) MQC(name string, h interface{}, queues ...string) {
-	s.get(application.MQC).Add(name, h, queues...)
+	s.Custome(application.MQC, name, h, queues...)
 }
 
 //CRON 注册为定时任务服务
 func (s *regist) CRON(name string, h interface{}, crons ...string) {
-	s.get(application.CRON).Add(name, h, crons...)
+	s.Custome(application.CRON, name, h, crons...)
+}
+
+//Custome 自定义服务注册
+func (s *regist) Custome(tp string, name string, h interface{}, ext ...string) {
+	s.get(tp).Register(name, h, ext...)
+}
+
+//RegisterServer 注册服务器
+func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...string) error) {
+	if _, ok := s.servers[tp]; ok {
+		panic(fmt.Errorf("服务%s已存在，不能重复注册", tp))
+	}
+	if len(f) > 0 {
+		s.servers[tp] = newServerServices(f[0])
+		return
+	}
+	s.servers[tp] = newServerServices(nil)
 }
 
 //OnServerStarting 处理服务器启动
@@ -204,28 +223,28 @@ func (s *regist) Close() error {
 
 //init 处理服务初始化及特殊注册函数
 func init() {
-	Registry.servers[application.API] = newServerServices(func(g *unit, ext ...string) error {
-		return API.Add(g.path, g.service, g.actions, ext...)
+	Registry.servers[application.API] = newServerServices(func(g *Unit, ext ...string) error {
+		return API.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	Registry.servers[application.Web] = newServerServices(func(g *unit, ext ...string) error {
-		return WEB.Add(g.path, g.service, g.actions, ext...)
+	Registry.servers[application.Web] = newServerServices(func(g *Unit, ext ...string) error {
+		return WEB.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	Registry.servers[application.RPC] = newServerServices(func(g *unit, ext ...string) error {
-		return RPC.Add(g.path, g.service, g.actions, ext...)
+	Registry.servers[application.RPC] = newServerServices(func(g *Unit, ext ...string) error {
+		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
 	})
 
 	Registry.servers[application.WS] = newServerServices(nil)
 
-	Registry.servers[application.CRON] = newServerServices(func(g *unit, ext ...string) error {
+	Registry.servers[application.CRON] = newServerServices(func(g *Unit, ext ...string) error {
 		for _, t := range ext {
-			CRON.Add(t, g.service)
+			CRON.Add(t, g.Service)
 		}
 		return nil
 
 	})
-	Registry.servers[application.MQC] = newServerServices(func(g *unit, ext ...string) error {
+	Registry.servers[application.MQC] = newServerServices(func(g *Unit, ext ...string) error {
 		for _, t := range ext {
-			MQC.Add(t, g.service)
+			MQC.Add(t, g.Service)
 		}
 		return nil
 	})

@@ -1,13 +1,13 @@
 package services
 
 type serverServices struct {
-	extHandle func(u *unit, ext ...string) error
+	extHandle func(u *Unit, ext ...string) error
 	*services
 	*handleHook
 	*serverHook
 }
 
-func newServerServices(v func(u *unit, ext ...string) error) *serverServices {
+func newServerServices(v func(u *Unit, ext ...string) error) *serverServices {
 	return &serverServices{
 		handleHook: newHandleHook(),
 		services:   newService(),
@@ -16,7 +16,8 @@ func newServerServices(v func(u *unit, ext ...string) error) *serverServices {
 	}
 }
 
-func (s *serverServices) Add(name string, h interface{}, ext ...string) {
+//Register 注册服务
+func (s *serverServices) Register(name string, h interface{}, ext ...string) {
 	groups, err := reflectHandle(name, h)
 	if err != nil {
 		panic(err)
@@ -25,7 +26,7 @@ func (s *serverServices) Add(name string, h interface{}, ext ...string) {
 		panic(err)
 	}
 }
-func (s *serverServices) handleExt(g *unit, ext ...string) error {
+func (s *serverServices) handleExt(g *Unit, ext ...string) error {
 	if s.extHandle == nil {
 		return nil
 	}
@@ -33,11 +34,11 @@ func (s *serverServices) handleExt(g *unit, ext ...string) error {
 }
 
 //addGroup 添加服务注册
-func (s *serverServices) addGroup(g *unitGroup, ext ...string) error {
+func (s *serverServices) addGroup(g *UnitGroup, ext ...string) error {
 	for _, u := range g.Services {
 
 		//添加预处理函数
-		if err := s.handleHook.AddHandling(u.service, u.GetHandlings()...); err != nil {
+		if err := s.handleHook.AddHandling(u.Service, u.GetHandlings()...); err != nil {
 			return err
 		}
 
@@ -47,18 +48,18 @@ func (s *serverServices) addGroup(g *unitGroup, ext ...string) error {
 		}
 
 		//添加服务
-		if err := s.services.AddHanler(u.service, u.Handle); err != nil {
+		if err := s.services.AddHanler(u.Service, u.Handle); err != nil {
 			return err
 
 		}
 
 		//添加后处理函数
-		if err := s.handleHook.AddHandled(u.service, u.GetHandleds()...); err != nil {
+		if err := s.handleHook.AddHandled(u.Service, u.GetHandleds()...); err != nil {
 			return err
 		}
 
 		//添加降级函数
-		if err := s.services.AddFallback(u.service, u.Fallback); err != nil {
+		if err := s.services.AddFallback(u.Service, u.Fallback); err != nil {
 			return err
 
 		}
