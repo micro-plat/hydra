@@ -3,6 +3,7 @@ package servers
 import (
 	"fmt"
 
+	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server"
 )
 
@@ -33,6 +34,7 @@ func Register(tp string, creator IServerCreatorHandler) {
 	if _, ok := creators[tp]; ok {
 		panic(fmt.Sprintf("服务器[%s]不能多次注册", tp))
 	}
+	application.ServerTypes = append(application.ServerTypes, tp)
 	creators[tp] = creator
 }
 

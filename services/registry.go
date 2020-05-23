@@ -28,8 +28,8 @@ type IServiceRegistry interface {
 	CRON(name string, h interface{}, crons ...string)
 	Custome(tp string, name string, h interface{}, ext ...string)
 	RegisterServer(tp string, f ...func(g *Unit, ext ...string) error)
-	OnServerStarting(h func(server.IServerConf) error, tps ...string)
-	OnServerClosing(h func(server.IServerConf) error, tps ...string)
+	OnStarting(h func(server.IServerConf) error, tps ...string)
+	OnClosing(h func(server.IServerConf) error, tps ...string)
 	OnHandleExecuting(h context.Handler, tps ...string)
 	OnHandleExecuted(h context.Handler, tps ...string)
 }
@@ -106,8 +106,8 @@ func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...string) err
 	s.servers[tp] = newServerServices(nil)
 }
 
-//OnServerStarting 处理服务器启动
-func (s *regist) OnServerStarting(h func(server.IServerConf) error, tps ...string) {
+//OnStarting 处理服务器启动
+func (s *regist) OnStarting(h func(server.IServerConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = application.DefApp.ServerTypes
 	}
@@ -118,8 +118,8 @@ func (s *regist) OnServerStarting(h func(server.IServerConf) error, tps ...strin
 	}
 }
 
-//OnServerClosing 处理服务器关闭
-func (s *regist) OnServerClosing(h func(server.IServerConf) error, tps ...string) {
+//OnClosing 处理服务器关闭
+func (s *regist) OnClosing(h func(server.IServerConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = application.DefApp.ServerTypes
 	}
@@ -191,15 +191,15 @@ func (s *regist) get(tp string) *serverServices {
 	panic(fmt.Sprintf("不支持的服务器类型:%s", tp))
 }
 
-//OnStarting 执行服务启动函数
-func (s *regist) OnStarting(c server.IServerConf) error {
-	return s.get(c.GetMainConf().GetServerType()).OnStarting(c)
+//DoStarting 执行服务启动函数
+func (s *regist) DoStarting(c server.IServerConf) error {
+	return s.get(c.GetMainConf().GetServerType()).DoStarting(c)
 
 }
 
-//OnClose 执行服务关闭函数
-func (s *regist) OnClosing(c server.IServerConf) error {
-	return s.get(c.GetMainConf().GetServerType()).OnClosing(c)
+//DoClosing 执行服务关闭函数
+func (s *regist) DoClosing(c server.IServerConf) error {
+	return s.get(c.GetMainConf().GetServerType()).DoClosing(c)
 }
 
 //GetClosers 获取资源释放函数

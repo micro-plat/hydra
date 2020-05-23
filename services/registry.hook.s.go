@@ -66,16 +66,16 @@ func (s *serverHook) GetHandleExecuteds() []context.IHandler {
 	return s.handleds
 }
 
-//OnStarting 获取服务器启动预处理函数
-func (s *serverHook) OnStarting(c server.IServerConf) error {
+//DoStarting 获取服务器启动预处理函数
+func (s *serverHook) DoStarting(c server.IServerConf) error {
 	if s.starting == nil {
 		return nil
 	}
 	return s.starting(c)
 }
 
-//GetClosings 获取服务器关闭处理函数
-func (s *serverHook) OnClosing(c server.IServerConf) error {
+//DoClosing 获取服务器关闭处理函数
+func (s *serverHook) DoClosing(c server.IServerConf) error {
 	if s.closing == nil {
 		return nil
 	}

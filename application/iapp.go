@@ -41,7 +41,7 @@ const CRON = "cron"
 const MQC = "mqc"
 
 //ServerTypes 支持的所有服务器类型
-var ServerTypes = []string{API, Web, RPC, WS, CRON, MQC}
+var ServerTypes = []string{}
 
 //IApplication 应用程序信息
 type IApplication interface {

@@ -38,7 +38,7 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 //Start 启用服务
 func (w *Responsive) Start() (err error) {
 	w.log.Infof("开始启动[%s]服务...", w.conf.GetMainConf().GetServerType())
-	if err := services.Registry.OnStarting(w.conf); err != nil {
+	if err := services.Registry.DoStarting(w.conf); err != nil {
 		return err
 	}
 	if err = w.Server.Start(); err != nil {
@@ -87,7 +87,7 @@ func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
 	w.Server.Shutdown()
 	w.pub.Clear()
-	if err := services.Registry.OnClosing(w.conf); err != nil {
+	if err := services.Registry.DoClosing(w.conf); err != nil {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
