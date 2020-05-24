@@ -9,7 +9,12 @@ import (
 	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/conf/server/cron"
+	"github.com/micro-plat/hydra/servers"
 )
+
+type iload interface {
+	Load()
+}
 
 //Conf 配置服务
 var Conf = &conf{data: make(map[string]map[string]interface{})}
@@ -44,13 +49,19 @@ func (c *conf) Load() error {
 			return err
 		}
 	}
-	api, ok := c.data[application.API]
-	if ok {
-		apiBuilder(api).loadRouters()
-		return nil
-	}
-	if application.Current().HasServerType(application.API) {
-		c.API(":8080").loadRouters()
+	types := servers.GetServerTypes()
+	for _, t := range types {
+		if _, ok := c.data[t]; !ok {
+			switch t {
+			case application.API:
+				c.data[application.API] = newAPI(":8080").Load()
+			default:
+				c.data[t] = map[string]interface{}{
+					"main": map[string]interface{}{},
+				}
+			}
+
+		}
 	}
 	//添加其它服务器
 	return nil
@@ -58,7 +69,7 @@ func (c *conf) Load() error {
 
 //API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) apiBuilder {
-	api := NewAPI(address, opts...)
+	api := newAPI(address, opts...)
 	c.data[application.API] = api
 	return api
 }

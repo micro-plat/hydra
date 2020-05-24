@@ -15,19 +15,20 @@ import (
 type apiBuilder map[string]interface{}
 
 //NewAPI 构建API生成器
-func NewAPI(address string, opts ...api.Option) apiBuilder {
+func newAPI(address string, opts ...api.Option) apiBuilder {
 	b := make(map[string]interface{})
 	b["main"] = api.New(address, opts...)
 	return b
 }
 
-//load 加载路由
-func (b apiBuilder) loadRouters() {
+//Load 加载路由
+func (b apiBuilder) Load() apiBuilder {
 	routers, err := services.API.GetRouters()
 	if err != nil {
 		panic(err)
 	}
 	b["router"] = routers
+	return b
 }
 
 //Jwt jwt配置

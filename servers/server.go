@@ -42,7 +42,12 @@ func Register(tp string, creator IServerCreatorHandler) {
 func GetServerTypes() []string {
 	tps := make([]string, 0, len(creators))
 	for k := range creators {
-		tps = append(tps, k)
+		for _, s := range application.DefApp.ServerTypes {
+			if k == s {
+				tps = append(tps, k)
+			}
+		}
+
 	}
 	return tps
 }

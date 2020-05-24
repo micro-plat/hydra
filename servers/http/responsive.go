@@ -112,7 +112,7 @@ func (w *Responsive) publish() (err error) {
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	return NewServer(cnf.GetMainConf().GetServerName(),
-		cnf.GetMainConf().GetMainConf().GetString("address", ":8090"),
+		cnf.GetMainConf().GetMainConf().GetString("address", ":8080"),
 		cnf.GetRouterConf().Routers,
 		WithServerType(cnf.GetMainConf().GetServerType()),
 		WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),

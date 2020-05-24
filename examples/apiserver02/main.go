@@ -7,7 +7,7 @@ import (
 
 //服务注册与系统勾子函数
 func main() {
-	app := hydra.NewCliApp()
+	app := hydra.NewApp()
 
 	app.API("/order/request", request, "/order/*")
 	app.API("/order", &OrderService{})

@@ -18,8 +18,8 @@ func NewMultiValueWatcher(rgst registry.IRegistry, path []string, logger logger.
 		notifyChan: make(chan *watcher.ValueChangeArgs, 10),
 	}
 	w.watchers = make([]*SingleValueWatcher, 0, len(path))
-	for _, path := range path {
-		watcher := NewSingleValueWatcher(rgst, path, logger)
+	for _, p := range path {
+		watcher := NewSingleValueWatcher(rgst, p, logger)
 		w.watchers = append(w.watchers, watcher)
 	}
 	return
