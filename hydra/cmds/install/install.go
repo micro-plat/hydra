@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/daemon"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
@@ -24,20 +24,20 @@ func init() {
 func doInstall(c *cli.Context) (err error) {
 
 	//1.检查是否有管理员权限
-	application.Current().Log().Pause()
-	if err = application.CheckPrivileges(); err != nil {
+	global.Current().Log().Pause()
+	if err = global.CheckPrivileges(); err != nil {
 		return err
 	}
 
 	//2. 绑定应用程序参数
-	if err := application.DefApp.Bind(); err != nil {
+	if err := global.DefApp.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
 
 	//3.创建本地服务
-	service, err := daemon.New(application.DefApp.GetLongAppName(), application.Usage)
+	service, err := daemon.New(global.DefApp.GetLongAppName(), global.Usage)
 	if err != nil {
 		return err
 	}

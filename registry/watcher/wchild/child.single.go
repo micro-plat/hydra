@@ -1,7 +1,6 @@
 package wchild
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -125,7 +124,6 @@ func (w *ChildWatcher) Close() {
 			watcher.Close()
 		}
 		if !w.done {
-			fmt.Println("child.watcher.close.", w.path)
 			w.done = true
 			close(w.closeChan)
 		}

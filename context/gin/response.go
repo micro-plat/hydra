@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/errs"
 )
 
@@ -80,7 +80,7 @@ func (c *response) Write(status int, content interface{}) error {
 	case errs.IError:
 		status = v.GetCode()
 		content = v.GetError().Error()
-		if application.IsDebug {
+		if global.IsDebug {
 			content = "Internal Server Error"
 		}
 	case error:
@@ -88,7 +88,7 @@ func (c *response) Write(status int, content interface{}) error {
 			status = 400
 		}
 		content = v.Error()
-		if application.IsDebug {
+		if global.IsDebug {
 			content = "Internal Server Error"
 		}
 	}

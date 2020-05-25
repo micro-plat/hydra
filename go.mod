@@ -21,4 +21,3 @@ require (
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
-

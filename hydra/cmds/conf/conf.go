@@ -3,7 +3,7 @@ package conf
 import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
@@ -21,8 +21,8 @@ func init() {
 func doConf(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	application.Current().Log().Pause()
-	if err := application.DefApp.Bind(); err != nil {
+	global.Current().Log().Pause()
+	if err := global.DefApp.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil

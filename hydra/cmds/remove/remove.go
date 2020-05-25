@@ -2,7 +2,7 @@ package remove
 
 import (
 	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/daemon"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/lib4go/errs"
@@ -23,7 +23,7 @@ func init() {
 func doRemove(c *cli.Context) (err error) {
 
 	//关闭日志显示
-	application.Current().Log().Pause()
+	global.Current().Log().Pause()
 	service, err := daemon.New(pkgs.GetAppNameDesc(vname))
 	if err != nil {
 		return err

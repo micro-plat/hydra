@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/registry/conf"
-	"github.com/micro-plat/hydra/registry/conf/server"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/zkfy/log"
 )
@@ -22,13 +22,13 @@ func show() error {
 	print := log.New(os.Stdout, "", log.Llongcolor).Info
 
 	//2. 创建注册中心
-	rgst, err := registry.NewRegistry(application.Current().GetRegistryAddr(), application.Current().Log())
+	rgst, err := registry.NewRegistry(global.Current().GetRegistryAddr(), global.Current().Log())
 	if err != nil {
 		return err
 	}
 
 	//3. 处理本地内存作为注册中心的服务发布问题
-	if registry.GetProto(application.Current().GetRegistryAddr()) == registry.LocalMemory {
+	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
 		if err := pkgs.Pub2Registry(true); err != nil {
 			return err
 		}
@@ -36,8 +36,8 @@ func show() error {
 
 	queryIndex := 0
 	queryList := make(map[int][]byte)
-	for i, tp := range application.Current().GetServerTypes() {
-		sc, err := server.NewServerConfBy(application.Current().GetPlatName(), application.Current().GetSysName(), tp, application.Current().GetClusterName(), rgst)
+	for i, tp := range global.Current().GetServerTypes() {
+		sc, err := server.NewServerConfBy(global.Current().GetPlatName(), global.Current().GetSysName(), tp, global.Current().GetClusterName(), rgst)
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ func show() error {
 			queryList[queryIndex] = cn.GetRaw()
 			return true
 		})
-		if i == len(application.Current().GetServerTypes())-1 {
+		if i == len(global.Current().GetServerTypes())-1 {
 			index := -1
 			sc.GetVarConf().Iter(func(k string, cn *conf.JSONConf) bool {
 				queryIndex++

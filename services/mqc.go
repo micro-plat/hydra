@@ -3,8 +3,8 @@ package services
 import (
 	"sync"
 
-	"github.com/micro-plat/hydra/application"
-	"github.com/micro-plat/hydra/registry/conf/server/queue"
+	"github.com/micro-plat/hydra/conf/server/queue"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -80,7 +80,7 @@ func (c *mqc) notify() {
 BREAK:
 	for {
 		select {
-		case <-application.Current().ClosingNotify():
+		case <-global.Current().ClosingNotify():
 			break BREAK
 		case <-c.n:
 			c.lock.Lock()

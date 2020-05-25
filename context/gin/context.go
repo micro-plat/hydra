@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -39,7 +39,7 @@ type GinCtx struct {
 func NewGinCtx(c *gin.Context, tp string) *GinCtx {
 	ctx := contextPool.Get().(*GinCtx)
 	ctx.context = c
-	ctx.serverConf = application.Current().Server(tp)
+	ctx.serverConf = global.Current().Server(tp)
 	ctx.user = &user{Context: c}
 	ctx.response = &response{Context: c, conf: ctx.serverConf}
 	ctx.request = newRequest(c)

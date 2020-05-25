@@ -7,8 +7,8 @@ import (
 	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
 
-	"github.com/micro-plat/hydra/registry/conf"
-	xdb "github.com/micro-plat/hydra/registry/conf/plat/db"
+	"github.com/micro-plat/hydra/conf"
+	xdb "github.com/micro-plat/hydra/conf/plat/db"
 )
 
 const (

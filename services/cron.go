@@ -3,8 +3,8 @@ package services
 import (
 	"sync"
 
-	"github.com/micro-plat/hydra/application"
-	"github.com/micro-plat/hydra/registry/conf/server/task"
+	"github.com/micro-plat/hydra/conf/server/task"
+	"github.com/micro-plat/hydra/global"
 )
 
 type subscriber struct {
@@ -78,7 +78,7 @@ func (c *cron) notify() {
 BREAK:
 	for {
 		select {
-		case <-application.Current().ClosingNotify():
+		case <-global.Current().ClosingNotify():
 			break BREAK
 		case <-c.n:
 			c.lock.Lock()

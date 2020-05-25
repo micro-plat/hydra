@@ -3,7 +3,7 @@ package rpcs
 import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
 

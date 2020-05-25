@@ -3,8 +3,8 @@ package services
 import (
 	"fmt"
 
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/registry/conf/server"
 )
 
 type serverHook struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/micro-plat/hydra/registry/conf/server/router"
+	"github.com/micro-plat/hydra/conf/server/router"
 )
 
 //API  路由信息

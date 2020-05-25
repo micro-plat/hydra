@@ -60,9 +60,8 @@ func (l *localMemory) GetChildren(path string) (paths []string, version int32, e
 	paths = make([]string, 0, 1)
 	npath := r.Join(path)
 	for k := range l.nodes {
-		lk := strings.TrimPrefix(k, npath)
-		if len(lk) > 2 {
-			paths = append(paths, strings.Trim(lk, "/"))
+		if strings.HasPrefix(k, npath) {
+			paths = append(paths, strings.Trim(k[len(npath):], "/"))
 		}
 	}
 	return paths, 0, nil

@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/BurntSushi/toml"
-	"github.com/micro-plat/hydra/application"
+	"github.com/micro-plat/hydra/global"
 	r "github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
@@ -182,7 +182,7 @@ type fsFactory struct{}
 
 //Build 根据配置生成文件系统注册中心
 func (z *fsFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
-	return newfileSystem(application.DefApp.PlatName, application.DefApp.SysName, application.DefApp.ClusterName, filepath.Join(addrs[0], application.DefApp.LocalConfName))
+	return newfileSystem(global.DefApp.PlatName, global.DefApp.SysName, global.DefApp.ClusterName, filepath.Join(addrs[0], global.DefApp.LocalConfName))
 
 }
 

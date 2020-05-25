@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/registry/conf"
-	"github.com/micro-plat/hydra/registry/conf/server/api"
 	"github.com/micro-plat/hydra/registry/watcher"
 	"github.com/micro-plat/lib4go/jsons"
 	"github.com/micro-plat/lib4go/logger"

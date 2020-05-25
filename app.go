@@ -2,8 +2,7 @@ package hydra
 
 import (
 	"github.com/micro-plat/cli"
-	"github.com/micro-plat/hydra/application"
-	"github.com/micro-plat/hydra/servers/http"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 
@@ -27,13 +26,13 @@ import (
 //MicroApp  微服务应用
 type MicroApp struct {
 	app *cli.App
-	services.IServiceRegistry
+	services.IService
 }
 
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{
-		IServiceRegistry: services.Registry,
+		IService: services.DefService,
 	}
 	for _, opt := range opts {
 		opt()
@@ -47,7 +46,6 @@ func NewCliApp(opts ...Option) (m *MicroApp) {
 	nopts = append(nopts, WithRegistry("lm://."),
 		WithPlatName("hydra"),
 		WithSystemName("apiserver"),
-		WithServerTypes(http.API),
 		WithClusterName("t"))
 	nopts = append(nopts, opts...)
 	return NewApp(nopts...)
@@ -56,7 +54,7 @@ func NewCliApp(opts ...Option) (m *MicroApp) {
 //Start 启动服务器
 func (m *MicroApp) Start() {
 	defer logger.Close()
-	m.app = cli.New(cli.WithVersion(application.Version), cli.WithUsage(application.Usage))
+	m.app = cli.New(cli.WithVersion(global.Version), cli.WithUsage(global.Usage))
 	m.app.Start()
 
 }

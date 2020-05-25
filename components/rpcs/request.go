@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/micro-plat/hydra/application"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/registry/conf"
+	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -32,7 +32,7 @@ func NewRequest(j *conf.JSONConf) *Request {
 
 //Request RPC请求
 func (r *Request) Request(ctx context.Context, service string, form map[string]interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
-	isip, rservice, domain, server, err := rpc.ResolvePath(service, application.Current().GetPlatName(), application.Current().GetSysName())
+	isip, rservice, domain, server, err := rpc.ResolvePath(service, global.Current().GetPlatName(), global.Current().GetSysName())
 	if err != nil {
 		return
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/micro-plat/hydra/registry/conf/server"
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/lib4go/logger"
 )
 
