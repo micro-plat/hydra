@@ -3,8 +3,10 @@ package components
 import (
 	"github.com/micro-plat/hydra/components/caches"
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components/dlock"
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
+	"github.com/micro-plat/hydra/global"
 )
 
 //IComponent 组件
@@ -49,4 +51,9 @@ func (c *Component) Queue() queues.IComponentQueue {
 //Cache 获取Queue组件
 func (c *Component) Cache() caches.IComponentCache {
 	return c.cache
+}
+
+//GetDLock 获取分布式鍞
+func (c *Component) GetDLock(name string) (dlock.ILock, error) {
+	return dlock.NewLock(name, global.Def.RegistryAddr, global.Def.CurrentContext().Log())
 }

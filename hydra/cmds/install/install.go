@@ -30,14 +30,14 @@ func doInstall(c *cli.Context) (err error) {
 	}
 
 	//2. 绑定应用程序参数
-	if err := global.DefApp.Bind(); err != nil {
+	if err := global.Def.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
 
 	//3.创建本地服务
-	service, err := daemon.New(global.DefApp.GetLongAppName(), global.Usage)
+	service, err := daemon.New(global.Def.GetLongAppName(), global.Usage)
 	if err != nil {
 		return err
 	}

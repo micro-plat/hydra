@@ -70,16 +70,20 @@ type IResponse interface {
 	GetResponse() string
 }
 
+//IAuth 认证信息
+type IAuth interface {
+	Save(v interface{})
+	Get() interface{}
+	Cache(v interface{})
+	Bind(out interface{})
+}
+
 //IUser 用户相关信息
 type IUser interface {
 	GetClientIP() string
 	GetRequestID() string
-	SaveJwt(v interface{})
-	GetJwt() interface{}
-	BindJwt(out interface{})
+	Auth() IAuth
 }
-
-//IApplication 应用信息
 
 //IContext 用于中间件处理的上下文管理
 type IContext interface {

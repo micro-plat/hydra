@@ -14,15 +14,15 @@ import (
 
 var traces = []string{"cpu", "mem", "block", "mutex", "web"}
 
-//DefApp 默认appliction
-var DefApp = &application{
+//Def 默认appliction
+var Def = &global{
 	log:           logger.New("hydra"),
 	LocalConfName: "./" + filepath.Base(os.Args[0]) + ".conf.toml",
 	close:         make(chan struct{}),
 }
 
-//application 应用全局管理器
-type application struct {
+//global 应用全局管理器
+type global struct {
 
 	//registryAddr 集群地址
 	RegistryAddr string
@@ -62,7 +62,7 @@ type application struct {
 }
 
 //Bind 处理app命令行参数
-func (m *application) Bind() (err error) {
+func (m *global) Bind() (err error) {
 	//处理参数
 	if err := m.check(); err != nil {
 		return err
@@ -76,7 +76,7 @@ func (m *application) Bind() (err error) {
 }
 
 //GetLongAppName 获取包含有部分路径的app name
-func (m *application) GetLongAppName(n ...string) string {
+func (m *global) GetLongAppName(n ...string) string {
 	name := types.GetStringByIndex(n, 0, AppName)
 	path, _ := filepath.Abs(name)
 	rname := strings.Trim(strings.Replace(path, string(filepath.Separator), "_", -1), "_")
@@ -87,7 +87,7 @@ func (m *application) GetLongAppName(n ...string) string {
 }
 
 //HasServerType 是否包含指定的服务类型
-func (m *application) HasServerType(tp string) bool {
+func (m *global) HasServerType(tp string) bool {
 	for _, t := range m.ServerTypes {
 		if t == tp {
 			return true
@@ -97,7 +97,7 @@ func (m *application) HasServerType(tp string) bool {
 }
 
 //Server 通过服务类型从全局缓存中获取服务配置
-func (m *application) Server(tp string) server.IServerConf {
+func (m *global) Server(tp string) server.IServerConf {
 	s, err := server.Cache.GetServerConf(tp)
 	if err == nil {
 		return s
@@ -106,52 +106,52 @@ func (m *application) Server(tp string) server.IServerConf {
 }
 
 //CurrentContext 获取当前请求上下文
-func (m *application) CurrentContext() context.IContext {
+func (m *global) CurrentContext() context.IContext {
 	return context.Get()
 }
 
 //GetRegistryAddr 获取注册中心地址
-func (m *application) GetRegistryAddr() string {
+func (m *global) GetRegistryAddr() string {
 	return m.RegistryAddr
 }
 
 //GetPlatName 获取平台名称
-func (m *application) GetPlatName() string {
+func (m *global) GetPlatName() string {
 	return m.PlatName
 }
 
 //GetSysName 获取系统名称
-func (m *application) GetSysName() string {
+func (m *global) GetSysName() string {
 	return m.SysName
 }
 
 //GetServerTypes 获取服务器类型
-func (m *application) GetServerTypes() []string {
+func (m *global) GetServerTypes() []string {
 	return m.ServerTypes
 }
 
 //GetClusterName 获取集群名称
-func (m *application) GetClusterName() string {
+func (m *global) GetClusterName() string {
 	return m.ClusterName
 }
 
 //GetTrace 获取当前启动的pprof类型
-func (m *application) GetTrace() string {
+func (m *global) GetTrace() string {
 	return m.Trace
 }
 
 //ClosingNotify 获取系统关闭通知
-func (m *application) ClosingNotify() chan struct{} {
+func (m *global) ClosingNotify() chan struct{} {
 	return m.close
 }
 
 //Log 获取日志组件
-func (m *application) Log() logger.ILogger {
+func (m *global) Log() logger.ILogger {
 	return m.log
 }
 
 //Close 关闭全局应用
-func (m *application) Close() {
+func (m *global) Close() {
 	m.isClose = true
 	close(m.close)
 }
@@ -171,7 +171,7 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 }
 
 //check 检查参数
-func (m *application) check() (err error) {
+func (m *global) check() (err error) {
 
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")

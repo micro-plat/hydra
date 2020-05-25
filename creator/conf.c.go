@@ -12,8 +12,8 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers"
 )
 
-//IRegistryConf 配置注册管理
-type IRegistryConf interface {
+//IConf 配置注册管理
+type IConf interface {
 
 	//OnReady 系统准备好后触发
 	OnReady(fs ...interface{})

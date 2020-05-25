@@ -43,8 +43,8 @@ const MQC = "mqc"
 //ServerTypes 支持的所有服务器类型
 var ServerTypes = []string{}
 
-//IApplication 应用程序信息
-type IApplication interface {
+//IGlobal 应用程序信息
+type IGlobal interface {
 
 	//Server 服务器配置
 	Server(tp string) server.IServerConf
@@ -84,8 +84,8 @@ type IApplication interface {
 }
 
 //Current 当前应用程序信息
-func Current() IApplication {
-	return DefApp
+func Current() IGlobal {
+	return Def
 }
 
 //CheckPrivileges 检查是否有管理员权限

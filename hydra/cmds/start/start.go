@@ -21,7 +21,7 @@ func doStart(c *cli.Context) (err error) {
 
 	//关闭日志显示
 	global.Current().Log().Pause()
-	service, err := daemon.New(global.DefApp.GetLongAppName(), global.Usage)
+	service, err := daemon.New(global.Def.GetLongAppName(), global.Usage)
 	if err != nil {
 		return err
 	}

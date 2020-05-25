@@ -61,8 +61,8 @@ type IService interface {
 	OnHandleExecuted(h context.Handler, tps ...string)
 }
 
-//DefService 服务注册管理
-var DefService = &regist{
+//Def 服务注册管理
+var Def = &regist{
 	servers: make(map[string]*serverServices),
 	caches:  make(map[string]map[string]interface{}),
 }
@@ -136,7 +136,7 @@ func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...string) err
 //OnStarting 处理服务器启动
 func (s *regist) OnStarting(h func(server.IServerConf) error, tps ...string) {
 	if len(tps) == 0 {
-		tps = global.DefApp.ServerTypes
+		tps = global.Def.ServerTypes
 	}
 	for _, typ := range tps {
 		if err := s.get(typ).AddStarting(h); err != nil {
@@ -148,7 +148,7 @@ func (s *regist) OnStarting(h func(server.IServerConf) error, tps ...string) {
 //OnClosing 处理服务器关闭
 func (s *regist) OnClosing(h func(server.IServerConf) error, tps ...string) {
 	if len(tps) == 0 {
-		tps = global.DefApp.ServerTypes
+		tps = global.Def.ServerTypes
 	}
 	for _, typ := range tps {
 		if err := s.get(typ).AddClosing(h); err != nil {
@@ -160,7 +160,7 @@ func (s *regist) OnClosing(h func(server.IServerConf) error, tps ...string) {
 //OnHandleExecuting 处理handling业务
 func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
-		tps = global.DefApp.ServerTypes
+		tps = global.Def.ServerTypes
 	}
 	for _, typ := range tps {
 		if err := s.get(typ).AddHandleExecuting(h); err != nil {
@@ -172,7 +172,7 @@ func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 //Handled 处理Handled业务
 func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
-		tps = global.DefApp.ServerTypes
+		tps = global.Def.ServerTypes
 	}
 	for _, typ := range tps {
 		if err := s.get(typ).AddHandleExecuted(h); err != nil {
@@ -250,26 +250,26 @@ func (s *regist) Close() error {
 
 //init 处理服务初始化及特殊注册函数
 func init() {
-	DefService.servers[global.API] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.API] = newServerServices(func(g *Unit, ext ...string) error {
 		return API.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	DefService.servers[global.Web] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.Web] = newServerServices(func(g *Unit, ext ...string) error {
 		return WEB.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	DefService.servers[global.RPC] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.RPC] = newServerServices(func(g *Unit, ext ...string) error {
 		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
 	})
 
-	DefService.servers[global.WS] = newServerServices(nil)
+	Def.servers[global.WS] = newServerServices(nil)
 
-	DefService.servers[global.CRON] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...string) error {
 		for _, t := range ext {
 			CRON.Add(t, g.Service)
 		}
 		return nil
 
 	})
-	DefService.servers[global.MQC] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...string) error {
 		for _, t := range ext {
 			MQC.Add(t, g.Service)
 		}

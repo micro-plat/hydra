@@ -14,42 +14,42 @@ type Option func()
 //WithRegistry 设置注册中心地址
 func WithRegistry(addr string) Option {
 	return func() {
-		global.DefApp.RegistryAddr = addr
+		global.Def.RegistryAddr = addr
 	}
 }
 
 //WithPlatName 设置平台名称
 func WithPlatName(platName string) Option {
 	return func() {
-		global.DefApp.PlatName = platName
+		global.Def.PlatName = platName
 	}
 }
 
 //WithSystemName 设置系统名称
 func WithSystemName(sysName string) Option {
 	return func() {
-		global.DefApp.SysName = sysName
+		global.Def.SysName = sysName
 	}
 }
 
 //WithServerTypes 设置系统类型
 func WithServerTypes(serverType ...string) Option {
 	return func() {
-		global.DefApp.ServerTypes = serverType
+		global.Def.ServerTypes = serverType
 	}
 }
 
 //WithClusterName 设置集群名称
 func WithClusterName(clusterName string) Option {
 	return func() {
-		global.DefApp.ClusterName = clusterName
+		global.Def.ClusterName = clusterName
 	}
 }
 
 //WithName 设置系统全名 格式:/[platName]/[sysName]/[typeName]/[clusterName]
 func WithName(name string) Option {
 	return func() {
-		global.DefApp.Name = name
+		global.Def.Name = name
 	}
 }
 

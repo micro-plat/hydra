@@ -22,7 +22,7 @@ func doConf(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
-	if err := global.DefApp.Bind(); err != nil {
+	if err := global.Def.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil

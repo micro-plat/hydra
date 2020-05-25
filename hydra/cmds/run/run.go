@@ -32,7 +32,7 @@ func init() {
 func doRun(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	if err := global.DefApp.Bind(); err != nil {
+	if err := global.Def.Bind(); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
@@ -72,20 +72,20 @@ LOOP:
 	}
 
 	//6. 关闭服务器释放所有资源
-	global.DefApp.Log().Info(global.AppName, "正在退出...")
+	global.Def.Log().Info(global.AppName, "正在退出...")
 
 	//关闭服务器
 	server.Shutdown()
 
 	//关闭各服务
-	if err := services.DefService.Close(); err != nil {
-		global.DefApp.Log().Error("err:", err)
+	if err := services.Def.Close(); err != nil {
+		global.Def.Log().Error("err:", err)
 	}
 
 	//通知关闭各组件
 	global.Current().Close()
 
-	global.DefApp.Log().Info(global.AppName, "已安全退出")
+	global.Def.Log().Info(global.AppName, "已安全退出")
 	return nil
 
 }

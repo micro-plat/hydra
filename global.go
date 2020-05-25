@@ -9,13 +9,13 @@ import (
 )
 
 //Global 全局应用程序配置
-var Global = global.DefApp
+var Global = global.Def
 
 //Services 服务中心
-var Services services.IService = services.DefService
+var Services services.IService = services.Def
 
 //Conf 配置组件
-var Conf creator.IRegistryConf = creator.Conf
+var Conf creator.IConf = creator.Conf
 
 //IContext 请求上下文
 type IContext = context.IContext

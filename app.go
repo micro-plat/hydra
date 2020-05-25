@@ -32,7 +32,7 @@ type MicroApp struct {
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{
-		IService: services.DefService,
+		IService: services.Def,
 	}
 	for _, opt := range opts {
 		opt()

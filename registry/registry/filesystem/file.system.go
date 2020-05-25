@@ -182,7 +182,7 @@ type fsFactory struct{}
 
 //Build 根据配置生成文件系统注册中心
 func (z *fsFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
-	return newfileSystem(global.DefApp.PlatName, global.DefApp.SysName, global.DefApp.ClusterName, filepath.Join(addrs[0], global.DefApp.LocalConfName))
+	return newfileSystem(global.Def.PlatName, global.Def.SysName, global.Def.ClusterName, filepath.Join(addrs[0], global.Def.LocalConfName))
 
 }
 

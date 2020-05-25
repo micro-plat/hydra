@@ -19,7 +19,7 @@ func JwtWriter() Handler {
 		if conf.Disable {
 			return
 		}
-		setJwtResponse(ctx, conf, ctx.User().GetJwt())
+		setJwtResponse(ctx, conf, ctx.User().Auth().Get())
 	}
 }
 

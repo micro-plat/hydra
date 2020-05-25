@@ -40,7 +40,7 @@ func NewGinCtx(c *gin.Context, tp string) *GinCtx {
 	ctx := contextPool.Get().(*GinCtx)
 	ctx.context = c
 	ctx.serverConf = global.Current().Server(tp)
-	ctx.user = &user{Context: c}
+	ctx.user = &user{Context: c, auth: &auth{}}
 	ctx.response = &response{Context: c, conf: ctx.serverConf}
 	ctx.request = newRequest(c)
 	ctx.log = logger.GetSession(ctx.serverConf.GetMainConf().GetServerName(), ctx.User().GetRequestID())
