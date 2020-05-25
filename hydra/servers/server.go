@@ -1,0 +1,53 @@
+package servers
+
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/global"
+)
+
+//IServerCreatorHandler 服务器创建器
+type IServerCreatorHandler func(server.IServerConf) (IResponsiveServer, error)
+
+//Create 创建服务
+func (r IServerCreatorHandler) Create(c server.IServerConf) (IResponsiveServer, error) {
+	return r(c)
+}
+
+//IServerCreator 服务器构建嚣
+type IServerCreator interface {
+	Create(server.IServerConf) (IResponsiveServer, error)
+}
+
+//IResponsiveServer 响应式服务器
+type IResponsiveServer interface {
+	Start() error
+	Notify(server.IServerConf) (bool, error)
+	Shutdown()
+}
+
+var creators = make(map[string]IServerCreator)
+
+//Register 注册服务器生成器
+func Register(tp string, creator IServerCreatorHandler) {
+	if _, ok := creators[tp]; ok {
+		panic(fmt.Sprintf("服务器[%s]不能多次注册", tp))
+	}
+	global.ServerTypes = append(global.ServerTypes, tp)
+	creators[tp] = creator
+}
+
+//GetServerTypes 获取支付的服务器类型
+func GetServerTypes() []string {
+	tps := make([]string, 0, len(creators))
+	for k := range creators {
+		for _, s := range global.DefApp.ServerTypes {
+			if k == s {
+				tps = append(tps, k)
+			}
+		}
+
+	}
+	return tps
+}

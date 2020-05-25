@@ -1,0 +1,74 @@
+package creator
+
+import (
+	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/auth/fsa"
+	"github.com/micro-plat/hydra/conf/server/auth/jwt"
+	"github.com/micro-plat/hydra/conf/server/auth/ras"
+	"github.com/micro-plat/hydra/conf/server/header"
+	"github.com/micro-plat/hydra/conf/server/metric"
+	"github.com/micro-plat/hydra/conf/server/render"
+	"github.com/micro-plat/hydra/conf/server/static"
+	"github.com/micro-plat/hydra/services"
+)
+
+type httpBuilder customerBuilder
+
+//newHTTP 构建http生成器
+func newHTTP(address string, opts ...api.Option) httpBuilder {
+	b := make(map[string]interface{})
+	b["main"] = api.New(address, opts...)
+	return b
+}
+
+//Load 加载路由
+func (b httpBuilder) load() httpBuilder {
+	routers, err := services.API.GetRouters()
+	if err != nil {
+		panic(err)
+	}
+	b["router"] = routers
+	return b
+}
+
+//Jwt jwt配置
+func (b httpBuilder) Jwt(opts ...jwt.Option) httpBuilder {
+	b["jwt"] = jwt.NewJWT(opts...)
+	return b
+}
+
+//Fsa fsa静态密钥错误
+func (b httpBuilder) Fsa(secret string, opts ...fsa.FixedOption) httpBuilder {
+	b["fsa"] = fsa.New(secret, opts...)
+	return b
+}
+
+//Ras 远程认证服务配置
+func (b httpBuilder) Ras(service string, opts ...ras.RemotingOption) httpBuilder {
+	b["ras"] = ras.New(service, opts...)
+	return b
+}
+
+//Header 头配置
+func (b httpBuilder) Header(opts ...header.Option) httpBuilder {
+	b["header"] = header.New(opts...)
+	return b
+}
+
+//Header 头配置
+func (b httpBuilder) Metric(host string, db string, cron string, opts ...metric.Option) httpBuilder {
+	b["metric"] = metric.New(host, db, cron, opts...)
+	return b
+}
+
+//Static 静态文件配置
+func (b httpBuilder) Static(opts ...static.Option) httpBuilder {
+	b["static"] = static.New(opts...)
+	return b
+}
+
+//Render 响应渲染配置
+func (b httpBuilder) Render(opts ...render.Option) httpBuilder {
+	b["render"] = render.New(opts...)
+	return b
+}
