@@ -9,17 +9,17 @@ import (
 )
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "conf",
 			Usage:  "查看配置信息",
 			Flags:  getFlags(),
 			Action: doConf,
-		})
+		}
+	})
 }
 
 func doConf(c *cli.Context) (err error) {
-
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(); err != nil {

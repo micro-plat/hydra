@@ -12,7 +12,7 @@ import (
 	"github.com/micro-plat/hydra/services"
 )
 
-type httpBuilder customerBuilder
+type httpBuilder = customerBuilder
 
 //newHTTP 构建http生成器
 func newHTTP(address string, opts ...api.Option) httpBuilder {
@@ -22,13 +22,13 @@ func newHTTP(address string, opts ...api.Option) httpBuilder {
 }
 
 //Load 加载路由
-func (b httpBuilder) load() httpBuilder {
+func (b httpBuilder) Load() {
 	routers, err := services.API.GetRouters()
 	if err != nil {
 		panic(err)
 	}
 	b["router"] = routers
-	return b
+	return
 }
 
 //Jwt jwt配置

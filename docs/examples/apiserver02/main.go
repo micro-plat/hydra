@@ -3,11 +3,14 @@ package main
 import (
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
 //服务注册与系统勾子函数
 func main() {
-	app := hydra.NewApp()
+	app := hydra.NewApp(
+		hydra.WithServerTypes(http.API),
+	)
 
 	app.API("/order/request", request, "/order/*")
 	app.API("/order", &OrderService{})

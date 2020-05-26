@@ -30,8 +30,12 @@ func (o *OrderService) Handled(ctx hydra.IContext) interface{} {
 	return "order.all.handling"
 }
 func (o *OrderService) PostHandle(ctx hydra.IContext) interface{} {
-	ctx.Log().Info("order.post.handle.order_no:", ctx.Request().GetString("order_no"))
-	return "order.post.handle"
+	ctx.Log().Info("order_id:", ctx.Request().GetString("order_id"))
+	t, err := ctx.Request().GetBody()
+	if err != nil {
+		return err
+	}
+	return t
 }
 func (o *OrderService) Handle(ctx hydra.IContext) interface{} {
 	ctx.Log().Info("order.handle.order_no:", ctx.Request().GetString("order_no"))

@@ -23,8 +23,8 @@ func JwtAuth() Handler {
 		}
 
 		//2.检查是否需要跳过请求
-		if jwtAuth.IsExcluded(ctx.Request().Path().GetPath()) ||
-			jwtAuth.IsExcluded(ctx.Request().Path().GetService()) {
+		if jwtAuth.In(ctx.Request().Path().GetPath()) ||
+			jwtAuth.In(ctx.Request().Path().GetService()) {
 			ctx.Next()
 			return
 		}

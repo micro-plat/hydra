@@ -6,6 +6,7 @@ import (
 	"github.com/micro-plat/hydra/components/dlock"
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
+	"github.com/micro-plat/hydra/components/uuid"
 	"github.com/micro-plat/hydra/global"
 )
 
@@ -27,7 +28,7 @@ type Component struct {
 	cache caches.IComponentCache
 }
 
-//NewComponent 创建组件e
+//NewComponent 创建组件
 func NewComponent() *Component {
 	c := &Component{
 		c: container.NewContainer(),
@@ -53,7 +54,12 @@ func (c *Component) Cache() caches.IComponentCache {
 	return c.cache
 }
 
-//GetDLock 获取分布式鍞
-func (c *Component) GetDLock(name string) (dlock.ILock, error) {
-	return dlock.NewLock(name, global.Def.RegistryAddr, global.Def.CurrentContext().Log())
+//DLock 获取分布式鍞
+func (c *Component) DLock(name string) (dlock.ILock, error) {
+	return dlock.NewLock(name, global.Def.RegistryAddr, global.Def.Context().Log())
+}
+
+//UUID 获取全局用户编号
+func (c *Component) UUID() uuid.IUUID {
+	return uuid.Get()
 }

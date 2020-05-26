@@ -17,7 +17,7 @@ func getFlags() []cli.Flag {
 		Usage:       `-安装配置信息到注册中心`,
 	})
 	flags = append(flags, cli.BoolFlag{
-		Name:        "cover,c",
+		Name:        "cover,v",
 		Destination: &coverIfExists,
 		Usage:       `-覆盖配置，覆盖配置中心和本地服务`,
 	})

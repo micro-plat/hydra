@@ -10,14 +10,14 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
-		h, ok := services.Registry.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
+		h, ok := services.Def.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		if !ok {
 			panic(fmt.Errorf("未找到服务：%s", service))
 		}
 
 		//预处理,用户资源检查，发生错误后不再执行业务处理-------
 
-		globalHandlings := services.Registry.GetHandleExecutings(ctx.ServerConf().GetMainConf().GetServerType())
+		globalHandlings := services.Def.GetHandleExecutings(ctx.ServerConf().GetMainConf().GetServerType())
 		for _, h := range globalHandlings {
 			result := h.Handle(ctx)
 			if err := errs.GetError(result); err != nil {
@@ -27,7 +27,7 @@ func ExecuteHandler(service string) Handler {
 			}
 		}
 
-		handlings := services.Registry.GetHandlings(ctx.ServerConf().GetMainConf().GetServerType(), service)
+		handlings := services.Def.GetHandlings(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		for _, h := range handlings {
 			result := h.Handle(ctx)
 			if err := errs.GetError(result); err != nil {
@@ -41,7 +41,7 @@ func ExecuteHandler(service string) Handler {
 		result := h.Handle(ctx)
 
 		//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
-		handleds := services.Registry.GetHandleds(ctx.ServerConf().GetMainConf().GetServerType(), service)
+		handleds := services.Def.GetHandleds(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		for _, h := range handleds {
 			hresult := h.Handle(ctx)
 			if err := errs.GetError(hresult); err != nil {
@@ -50,7 +50,7 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
-		globalHandleds := services.Registry.GetHandleExecuted(ctx.ServerConf().GetMainConf().GetServerType())
+		globalHandleds := services.Def.GetHandleExecuted(ctx.ServerConf().GetMainConf().GetServerType())
 		for _, h := range globalHandleds {
 			hresult := h.Handle(ctx)
 			if err := errs.GetError(hresult); err != nil {

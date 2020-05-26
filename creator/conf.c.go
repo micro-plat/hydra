@@ -26,11 +26,11 @@ type IConf interface {
 }
 
 //Conf 配置服务
-var Conf = &conf{data: make(map[string]map[string]interface{})}
+var Conf = &conf{data: make(map[string]iCustomerBuilder)}
 
 type conf struct {
 	funcs []func() error
-	data  map[string]map[string]interface{}
+	data  map[string]iCustomerBuilder
 }
 
 //OnReady 注册配置准备函数
@@ -60,18 +60,21 @@ func (c *conf) Load() error {
 	}
 	types := servers.GetServerTypes()
 	for _, t := range types {
-		if _, ok := c.data[t]; !ok {
+		if p, ok := c.data[t]; !ok {
 			switch t {
 			case global.API:
-				c.data[global.API] = newHTTP(":8080").load()
+				h := newHTTP(":8080")
+				h.Load()
+				c.data[global.API] = h
 			case global.Web:
-				c.data[global.Web] = newHTTP(":8089").load()
+				h := newHTTP(":8089")
+				h.Load()
+				c.data[global.Web] = h
 			default:
-				c.data[t] = map[string]interface{}{
-					"main": map[string]interface{}{},
-				}
+				c.data[t] = newCustomerBuilder()
 			}
-
+		} else {
+			p.Load()
 		}
 	}
 	//添加其它服务器

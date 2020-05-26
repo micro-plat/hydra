@@ -105,8 +105,8 @@ func (m *global) Server(tp string) server.IServerConf {
 	panic(fmt.Errorf("[%s]服务器未启动:%w", tp, err))
 }
 
-//CurrentContext 获取当前请求上下文
-func (m *global) CurrentContext() context.IContext {
+//Context 获取当前请求上下文
+func (m *global) Context() context.IContext {
 	return context.Get()
 }
 

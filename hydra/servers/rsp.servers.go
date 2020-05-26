@@ -2,6 +2,7 @@ package servers
 
 import (
 	"fmt"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -71,20 +72,19 @@ func (r *RspServers) Start() (err error) {
 
 //loopRecvNotify 接收注册中心配置变更消息
 func (r *RspServers) loopRecvNotify() {
-
-	//启动配置监听
-
-	notify := make(chan struct{}, 1)
 	go func() {
-		f := time.After(time.Second * 10)
-		select {
-		case <-f:
-			for _, p := range r.path {
-				r.log.Infof("开始监听:%v", p)
+		tk := time.NewTicker(time.Second * 120)
+	LOOP:
+		for {
+			select {
+			case <-tk.C:
+				debug.FreeOSMemory()
+			case <-r.closeChan:
+				r.log.Debug("退出")
+				break LOOP
 			}
-		case <-notify:
-			break
 		}
+
 	}()
 LOOP:
 	for {
@@ -97,10 +97,6 @@ LOOP:
 			}
 			if err := r.checkServer(u.Path); err != nil {
 				r.log.Error(err)
-			}
-			select {
-			case notify <- struct{}{}:
-			default:
 			}
 		}
 	}

@@ -37,7 +37,7 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 
 //Start 启用服务
 func (w *Responsive) Start() (err error) {
-	if err := services.Registry.DoStarting(w.conf); err != nil {
+	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
 	if err = w.Server.Start(); err != nil {
@@ -82,7 +82,7 @@ func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
 	w.Server.Shutdown()
 	w.pub.Clear()
-	if err := services.Registry.DoClosing(w.conf); err != nil {
+	if err := services.Def.DoClosing(w.conf); err != nil {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
@@ -111,9 +111,9 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 		cnf.GetRouterConf().Routers,
 		WithServerType(cnf.GetMainConf().GetServerType()),
 		WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
-		WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 10),
-			cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 10),
-			cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 10)))
+		WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
+			cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
+			cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
 
 }
 

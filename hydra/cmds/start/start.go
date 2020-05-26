@@ -9,12 +9,13 @@ import (
 )
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "start",
 			Usage:  "启动服务",
 			Action: doStart,
-		})
+		}
+	})
 }
 
 func doStart(c *cli.Context) (err error) {

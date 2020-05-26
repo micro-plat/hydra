@@ -3,9 +3,7 @@ package run
 import (
 	"os"
 	"os/signal"
-	"runtime/debug"
 	"syscall"
-	"time"
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
@@ -64,8 +62,6 @@ func doRun(c *cli.Context) (err error) {
 LOOP:
 	for {
 		select {
-		case <-time.After(time.Second * 120):
-			debug.FreeOSMemory()
 		case <-interrupt:
 			break LOOP
 		}

@@ -26,10 +26,10 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	}
 	for tp, subs := range c.data {
 		pub := server.NewPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetMainPath(), subs["main"], cover); err != nil {
+		if err := publish(r, pub.GetMainPath(), subs.Map()["main"], cover); err != nil {
 			return err
 		}
-		for name, value := range subs {
+		for name, value := range subs.Map() {
 			if name == "main" {
 				continue
 			}

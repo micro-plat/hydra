@@ -66,8 +66,6 @@ github.com/mattn/go-isatty v0.0.12 h1:wuysRhFDzyxgEmMf5xjvJ2M9dZoWAXNNr5LSBS7uHX
 github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
 github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A/Q=
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
-github.com/micro-plat/cli v1.0.1 h1:Yo2jXptuQaCKwzC7SDJ43YXvC+/NogmicU2Ir/V8snk=
-github.com/micro-plat/cli v1.0.1/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
 github.com/micro-plat/cli v1.1.0 h1:2+EQ9aqjGSIvjMV5Bua3jmarY5jiKjbqmAUo4QggMrU=
 github.com/micro-plat/cli v1.1.0/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
 github.com/micro-plat/gmq v1.0.1/go.mod h1:93NeUjbgul5ywP+cm4eXERv6Zk0J8zZyrzYrY3q8GVQ=

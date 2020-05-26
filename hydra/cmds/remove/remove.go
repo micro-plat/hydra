@@ -12,13 +12,14 @@ import (
 var vname string
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "remove",
 			Usage:  "删除服务",
 			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doRemove,
-		})
+		}
+	})
 }
 func doRemove(c *cli.Context) (err error) {
 

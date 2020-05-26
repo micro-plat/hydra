@@ -12,13 +12,14 @@ import (
 var vname string
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "status",
 			Usage:  "查询服务状态",
 			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doStatus,
-		})
+		}
+	})
 }
 
 func doStatus(c *cli.Context) (err error) {

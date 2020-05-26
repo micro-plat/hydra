@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/security/sha1"
@@ -22,7 +23,7 @@ func FixedSecretAuth() Handler {
 			ctx.Next()
 			return
 		}
-		if !auth.Contains(ctx.Request().Path().GetService()) {
+		if !auth.In(ctx.Request().Path().GetPath()) {
 			ctx.Next()
 			return
 		}
@@ -61,7 +62,11 @@ func checkSign(r context.IRequest, secret string, tp string) (bool, error) {
 	if strings.EqualFold(expect, sign) {
 		return true, nil
 	}
-	return false, fmt.Errorf("raw:%s,expect:%s,actual:%s", raw, expect, sign)
+	if global.IsDebug {
+		return false, fmt.Errorf("签名错误:raw:%s,expect:%s,actual:%s", raw, expect, sign)
+	}
+	return false, fmt.Errorf("签名错误")
+
 }
 
 //getSignRaw 检查签名原串

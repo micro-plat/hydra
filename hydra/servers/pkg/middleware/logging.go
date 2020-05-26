@@ -10,7 +10,7 @@ func Logging() Handler {
 
 		//1. 整个服务的开始,记录请求时间与日志
 		start := time.Now()
-		path := ctx.Request().Path().GetPath()
+		path := ctx.Request().Path().GetURL()
 		ctx.Log().Info(ctx.ServerConf().GetMainConf().GetServerType()+".request:", ctx.ServerConf().GetMainConf().GetServerName(), ctx.Request().Path().GetMethod(), path, "from", ctx.User().GetClientIP())
 
 		//2. 处理业务

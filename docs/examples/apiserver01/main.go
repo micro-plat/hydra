@@ -66,7 +66,7 @@ func request(ctx hydra.IContext) (r interface{}) {
 		}
 		return ctx.Request().GetString("order_id")
 	case "13":
-		return hydra.global.PlatName
+		return hydra.Global.PlatName
 	default:
 		return fmt.Errorf("值错误，请传入1-12")
 	}

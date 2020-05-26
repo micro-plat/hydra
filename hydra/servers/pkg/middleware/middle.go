@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/context"
-	xgin "github.com/micro-plat/hydra/context/gin"
+	"github.com/micro-plat/hydra/context/ctx"
 )
 
 type iNext interface {
@@ -35,7 +35,7 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, ok := c.Get("__gin_middle_context__")
 		if !ok {
-			v = newMiddleContext(xgin.NewGinCtx(c, tps[0]), c)
+			v = newMiddleContext(ctx.NewCtx(&ginCtx{Context: c}, tps[0]), c)
 			c.Set("__gin_middle_context__", v)
 		}
 		h(v.(IMiddleContext))

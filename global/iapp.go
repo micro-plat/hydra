@@ -49,8 +49,8 @@ type IGlobal interface {
 	//Server 服务器配置
 	Server(tp string) server.IServerConf
 
-	//CurrentContext 当前context
-	CurrentContext() context.IContext
+	//Context 当前context
+	Context() context.IContext
 
 	//GetRegistryAddr 注册中心
 	GetRegistryAddr() string

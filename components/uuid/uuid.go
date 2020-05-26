@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -37,6 +38,26 @@ type UUID struct {
 	number    int64      // 当前毫秒已经生成的id序列号(从0开始累加) 1毫秒内最多生成4096个ID
 	closeChan chan struct{}
 	done      bool
+}
+
+var uuid *UUID
+var once sync.Once
+
+//Get 根据当前应用环境构建
+func Get() *UUID {
+	once.Do(func() {
+		r, err := registry.NewRegistry(global.Def.RegistryAddr, global.Def.Log())
+		if err != nil {
+			panic(err)
+		}
+		uuid, err = NewUUID(global.Def.Context().ServerConf().GetMainConf().GetServerPubPath(),
+			global.Def.Context().ServerConf().GetMainConf().GetClusterID(), r)
+		if err != nil {
+			panic(err)
+		}
+
+	})
+	return uuid
 }
 
 //NewUUID  实例化一个工作节点

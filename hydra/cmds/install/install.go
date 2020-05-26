@@ -12,13 +12,14 @@ import (
 )
 
 func init() {
-	cmds.Register(
-		cli.Command{
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
 			Name:   "install",
 			Usage:  "安装服务。将配置信息安装到注册中心，并在本地创建服务。安装完成后可通过'start'命令启动服务",
 			Flags:  getFlags(),
 			Action: doInstall,
-		})
+		}
+	})
 }
 
 func doInstall(c *cli.Context) (err error) {
