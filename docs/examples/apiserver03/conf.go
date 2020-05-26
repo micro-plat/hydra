@@ -9,8 +9,10 @@ import (
 
 func init() {
 	hydra.Conf.OnReady(func() {
-		hydra.Conf.API(":8080").Fsa(fsa.CreateSecret(), fsa.WithInclude("/order/*")).
-			Jwt(jwt.WithExclude("/member/**")).
+		hydra.Conf.API(":8080").
+			Fsa(fsa.CreateSecret(), fsa.WithInclude("/order/*")).
+			Jwt(jwt.WithExclude("/member/**"), jwt.WithHeader()).
+			Static().
 			Header(header.WithCrossDomain())
 	})
 }

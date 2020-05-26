@@ -53,7 +53,7 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 	//1. 从请求中获取jwt信息
 	token := getToken(ctx, j)
 	if token == "" {
-		return nil, errs.NewError(403, fmt.Errorf("未传入jwt.token(%s.%s值为空)", j.Source, j.Name))
+		return nil, errs.NewError(403, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
 	}
 	//2. 解密jwt判断是否有效，是否过期
 	data, er := jwt.Decrypt(token, j.Secret)
@@ -61,7 +61,7 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 		if strings.Contains(er.Error(), "Token is expired") {
 			return nil, errs.NewError(401, er)
 		}
-		return data, errs.NewError(403, er)
+		return data, errs.NewError(403, fmt.Errorf("jwt.token值(%s)有误 %w", token, er))
 	}
 
 	//保存到Context中

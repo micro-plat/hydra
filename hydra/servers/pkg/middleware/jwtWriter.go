@@ -24,7 +24,6 @@ func JwtWriter() Handler {
 }
 
 func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{}) {
-	fmt.Println("jwt.data:", data)
 	if data == nil {
 		return
 	}
@@ -40,7 +39,6 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 	switch strings.ToUpper(jwt.Source) {
 	case "HEADER", "H":
-		fmt.Println("set.header:", jwt.Name, token)
 		ctx.Response().SetHeader(jwt.Name, token)
 	default:
 		expireTime := time.Now().Add(time.Duration(time.Duration(jwt.ExpireAt)*time.Second - 8*60*60*time.Second))
@@ -50,7 +48,6 @@ func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 			ctx.Response().SetHeader("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
 			return
 		}
-		fmt.Println("set.cookie:", jwt.Name, token)
 		ctx.Response().SetHeader("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
 	}
 }

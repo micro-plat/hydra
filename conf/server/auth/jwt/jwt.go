@@ -18,7 +18,7 @@ type JWTAuth struct {
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
 		jwtOption: jwtOption{
-			Name:     "hsid",
+			Name:     "Authorization-Jwt",
 			Mode:     "HS512",
 			Secret:   utility.GetGUID(),
 			ExpireAt: 86400,

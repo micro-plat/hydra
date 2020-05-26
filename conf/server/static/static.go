@@ -18,14 +18,21 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
-	*option
+	Dir       string   `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
+	Archive   string   `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
+	Prefix    string   `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
+	Exts      []string `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
+	Exclude   []string `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
+	FirstPage string   `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
+	Rewriters []string `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
+	Disable   bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //New 构建静态文件配置信息
 func New(opts ...Option) *Static {
-	s := &Static{option: newOption()}
+	s := newStatic()
 	for _, opt := range opts {
-		opt(s.option)
+		opt(s)
 	}
 	return s
 }
@@ -36,21 +43,21 @@ func (s *Static) AllowRequest(m string) bool {
 }
 
 //GetConf 设置static
-func GetConf(cnf conf.IMainConf) (static *Static) {
+func GetConf(cnf conf.IMainConf) *Static {
 	//设置静态文件路由
+	static := Static{Disable: true}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	if err == conf.ErrNoSetting {
-		static = New(WithDisable())
-		return
+		return &static
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
 		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
-	return
+	return &static
 }
 
 var waitRemoveDir = make([]string, 0, 1)

@@ -17,11 +17,12 @@ import (
 var _ context.IResponse = &response{}
 
 type response struct {
-	ctx      context.IInnerContext
-	conf     server.IServerConf
-	content  interface{}
-	log      logger.ILogger
-	specials []string
+	ctx        context.IInnerContext
+	conf       server.IServerConf
+	content    interface{}
+	log        logger.ILogger
+	asyncWrite func() error
+	specials   []string
 }
 
 //Header 设置头信息到response里
@@ -97,7 +98,10 @@ func (c *response) Write(status int, content interface{}) error {
 			content = "Internal Server Error"
 		}
 	}
-	return c.writeNow(status, c.swap(content))
+	c.asyncWrite = func() error {
+		return c.writeNow(status, c.swap(content))
+	}
+	return nil
 }
 func (c *response) swap(content interface{}) interface{} {
 	ctp := c.getContentType()
@@ -230,5 +234,12 @@ func (c *response) GetResponse() string {
 			return string(buff)
 		}
 		return fmt.Sprint(c.content)
+	}
+}
+func (c *response) Flush() {
+	if c.asyncWrite != nil {
+		if err := c.asyncWrite(); err != nil {
+			panic(err)
+		}
 	}
 }

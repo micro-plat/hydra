@@ -17,11 +17,12 @@ func (s *Server) addRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
 	s.engine.Use(middleware.Delay().GinFunc())
+	s.engine.Use(middleware.Options().GinFunc()) //处理option响应
+	s.engine.Use(middleware.Static().GinFunc())  //处理静态文件
 	s.engine.Use(middleware.Trace().GinFunc())
 	s.engine.Use(middleware.FixedSecretAuth().GinFunc())
 	// s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
-	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
-	s.engine.Use(middleware.Static().GinFunc())    //处理静态文件
+
 	s.engine.Use(middleware.JwtAuth().GinFunc())   //jwt安全认证
 	s.engine.Use(middleware.Response().GinFunc())  //处理返回值
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头

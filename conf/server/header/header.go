@@ -13,25 +13,58 @@ type IHeader interface {
 }
 
 //Headers http头信息
-type Headers option
+type Headers map[string]string
 
 //New 构建请求的头配置
 func New(opts ...Option) Headers {
-	h := newOption()
+	h := make(map[string]string)
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-//IsAccessControlAllowOrigin 是否允许跨域访问
+//IsAccessControlAllowOrigin 是否是Access-Control-Allow-Origin
 func (h Headers) IsAccessControlAllowOrigin(k string) bool {
-	return k == "Access-Control-Allow-Origin"
+	return strings.EqualFold(k, "Access-Control-Allow-Origin")
 }
 
-//AllowOrigin 是否允许跨域访问
-func (h Headers) AllowOrigin(k string, v string, origin string) bool {
-	return h.IsAccessControlAllowOrigin(k) && origin != "" && (v == "*" || strings.Contains(v, origin))
+//GetHeaderByOrigin 根据origin选择合适的header
+func (h Headers) GetHeaderByOrigin(origin string) Headers {
+	hd := New()
+	if h.hasCross(origin) {
+		for k, v := range h {
+			hd[k] = v
+			if h.IsAccessControlAllowOrigin(k) {
+				hd[k] = origin
+			}
+		}
+		return hd
+	}
+	for k, v := range h {
+		if !strings.Contains(k, "Access-Control-Allow-") {
+			hd[k] = v
+		}
+	}
+	return hd
+}
+
+//hasCross 是否允许跨域访问
+func (h Headers) hasCross(origin string) bool {
+	value, ok := h["Access-Control-Allow-Origin"]
+	if !ok {
+		return false
+	}
+	if value == "*" {
+		return true
+	}
+	vv := strings.Split(value, ",")
+	for _, v := range vv {
+		if v == origin { //allow
+			return true
+		}
+	}
+	return false
 }
 
 //GetConf 设置header
