@@ -44,18 +44,28 @@ func (a *Includes) In(service string) bool {
 			2. /a/ **
 			3. /a/ * /d
 		**/
+
+		//长度不匹配，且未包含**,跳过
 		if uc != sc && !strings.HasSuffix(u, "**") {
 			continue
 		}
+
+		//原段较长，不可能匹配跳过
 		if uc > sc {
 			continue
 		}
+
+		//原段较短，或有**进行分段检查
 		isMatch := true
 		for i := 0; i < uc; i++ {
+
+			//此段为 **
 			if uparties[i] == "**" {
 				a.cache.SetIfAbsent(service, true)
 				return true
 			}
+
+			//此段为 *,匹配后续段
 			if uparties[i] == "*" {
 				for j := i + 1; j < uc; j++ {
 					if uparties[j] != sparties[j] {

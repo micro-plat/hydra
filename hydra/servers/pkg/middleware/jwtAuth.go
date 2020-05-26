@@ -65,7 +65,7 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 	}
 
 	//保存到Context中
-	ctx.User().Auth().Cache(data)
+	ctx.User().Auth().Request(data)
 	return data, nil
 }
 

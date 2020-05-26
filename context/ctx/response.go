@@ -106,6 +106,10 @@ func (c *response) swap(content interface{}) interface{} {
 		c.ContentType(ctp)
 		return fmt.Sprint(content)
 	default:
+		if content == nil {
+			c.ContentType(ctp)
+			return fmt.Sprint(content)
+		}
 		tp := reflect.TypeOf(content).Kind()
 		value := reflect.ValueOf(content)
 		if tp == reflect.Ptr {

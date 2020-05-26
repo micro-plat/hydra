@@ -86,9 +86,11 @@ type IResponse interface {
 
 //IAuth 认证信息
 type IAuth interface {
-	Save(v interface{})
-	Get() interface{}
-	Cache(v interface{})
+	//Request 获取或设置用户请求的认证信息
+	Request(...interface{}) interface{}
+
+	//Response 获取或设置系统响应的认证信息
+	Response(...interface{}) interface{}
 	Bind(out interface{})
 }
 

@@ -45,6 +45,7 @@ func GetConf(cnf conf.IMainConf) *JWTAuth {
 	if b, err := govalidator.ValidateStruct(&jwt); !b {
 		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
+	jwt.Includes = conf.NewInCludes(jwt.Exclude...)
 
 	return &jwt
 }

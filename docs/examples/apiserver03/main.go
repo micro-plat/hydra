@@ -14,8 +14,19 @@ func main() {
 	)
 
 	app.API("/order/request", hello)
+	app.API("/member/login", login)
+	app.API("/index", index)
 	app.Start()
 }
 func hello(ctx hydra.IContext) interface{} {
 	return "success"
+}
+func login(ctx hydra.IContext) interface{} {
+	ctx.User().Auth().Response(map[string]interface{}{
+		"uid": "abc",
+	})
+	return "success"
+}
+func index(ctx hydra.IContext) interface{} {
+	return ctx.User().Auth().Request()
 }

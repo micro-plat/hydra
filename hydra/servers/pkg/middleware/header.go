@@ -10,7 +10,7 @@ func Header() Handler {
 		//1. 获取header配置
 		headers := ctx.ServerConf().GetHeaderConf()
 		if len(headers) > 0 {
-			ctx.Response().AddSpecial("header")
+			ctx.Response().AddSpecial("H")
 		}
 
 		//3. 处理响应header参数

@@ -29,7 +29,7 @@ func FixedSecretAuth() Handler {
 		}
 
 		//检查必须参数
-		ctx.Response().AddSpecial("fsa")
+		ctx.Response().AddSpecial("fsa--x")
 		if err := ctx.Request().Check("sign", "timestamp"); err != nil {
 			ctx.Response().AbortWithError(402, err)
 			return

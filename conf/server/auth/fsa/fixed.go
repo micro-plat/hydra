@@ -24,7 +24,7 @@ type FixedSecretAuth struct {
 func New(secret string, opts ...FixedOption) *FixedSecretAuth {
 	f := &FixedSecretAuth{
 		Secret:  secret,
-		Include: []string{"**"},
+		Include: []string{"/**"},
 		Mode:    "MD5",
 	}
 	for _, opt := range opts {

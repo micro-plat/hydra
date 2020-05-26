@@ -13,18 +13,19 @@ type auth struct {
 	response interface{}
 }
 
-//Save  保存用户的登录信息
-func (c *auth) Save(v interface{}) {
-	c.response = v
+//Response  用户响应的认证信息
+func (c *auth) Response(v ...interface{}) interface{} {
+	if len(v) > 0 {
+		c.response = v[0]
+	}
+	return c.response
 }
 
-//Cache  将用户登录信息缓存到组件
-func (c *auth) Cache(v interface{}) {
-	c.request = v
-}
-
-//Get 获取请求的用户信息
-func (c *auth) Get() interface{} {
+//Request  用户请求的认证信息
+func (c *auth) Request(v ...interface{}) interface{} {
+	if len(v) > 0 {
+		c.request = v[0]
+	}
 	return c.request
 }
 
