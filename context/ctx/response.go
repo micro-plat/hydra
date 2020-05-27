@@ -225,20 +225,24 @@ func (c *response) Flush() {
 func (c *response) getString(ctp string, v interface{}) string {
 	switch {
 	case strings.Contains(ctp, "xml"):
-		buff, err := xml.Marshal(c.content)
+		buff, err := xml.Marshal(v)
 		if err != nil {
 			panic(err)
 		}
-		return fmt.Sprint(buff)
+		return string(buff)
 	case strings.Contains(ctp, "yaml"):
-		if buff, err := yaml.Marshal(c.content); err == nil {
-			return string(buff)
+		buff, err := yaml.Marshal(v)
+		if err != nil {
+			panic(err)
 		}
-		return fmt.Sprint(c.content)
-	default:
-		if buff, err := json.Marshal(c.content); err == nil {
-			return string(buff)
+		return string(buff)
+	case strings.Contains(ctp, "json"):
+		buff, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
 		}
-		return fmt.Sprint(c.content)
+		return string(buff)
+
 	}
+	return fmt.Sprint(v)
 }
