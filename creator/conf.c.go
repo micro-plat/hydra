@@ -8,6 +8,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
+	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 )
@@ -20,6 +21,15 @@ type IConf interface {
 
 	//API api服务器配置
 	API(address string, opts ...api.Option) httpBuilder
+
+	//GetAPI() 获取API服务器配置
+	GetAPI() httpBuilder
+
+	//Web web服务器配置
+	Web(address string, opts ...api.Option) httpBuilder
+
+	//GetWeb() 获取Web服务器配置
+	GetWeb() httpBuilder
 
 	//Custome 自定义服务器配置
 	Custome(tp string, s ...interface{}) customerBuilder
@@ -60,22 +70,19 @@ func (c *conf) Load() error {
 	}
 	types := servers.GetServerTypes()
 	for _, t := range types {
-		if p, ok := c.data[t]; !ok {
+		_, ok := c.data[t]
+		if !ok {
 			switch t {
 			case global.API:
-				h := newHTTP(":8080")
-				h.Load()
-				c.data[global.API] = h
+				c.data[global.API] = c.GetAPI()
 			case global.Web:
-				h := newHTTP(":8089")
-				h.Load()
-				c.data[global.Web] = h
+				c.data[global.Web] = c.GetWeb()
 			default:
 				c.data[t] = newCustomerBuilder()
 			}
-		} else {
-			p.Load()
 		}
+		c.data[t].Load()
+
 	}
 	//添加其它服务器
 	return nil
@@ -86,6 +93,30 @@ func (c *conf) API(address string, opts ...api.Option) httpBuilder {
 	api := newHTTP(address, opts...)
 	c.data[global.API] = api
 	return api
+}
+
+//GetAPI 获取当前已配置的api服务器
+func (c *conf) GetAPI() httpBuilder {
+	if api, ok := c.data[global.API]; ok {
+		return api.(httpBuilder)
+	}
+	return c.API(":8080")
+}
+
+//Web web服务器配置
+func (c *conf) Web(address string, opts ...api.Option) httpBuilder {
+	web := newHTTP(address, opts...)
+	web.Static(static.WithArchive(global.AppName))
+	c.data[global.Web] = web
+	return web
+}
+
+//GetWeb 获取当前已配置的web服务器
+func (c *conf) GetWeb() httpBuilder {
+	if web, ok := c.data[global.Web]; ok {
+		return web.(httpBuilder)
+	}
+	return c.Web(":8089")
 }
 
 //CRON cron服务器配置

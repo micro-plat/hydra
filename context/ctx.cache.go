@@ -25,8 +25,8 @@ func Cache(s IContext) uint64 {
 	return tid
 }
 
-//Get 从缓存中获取请求上下文配置
-func Get() IContext {
+//Current 从缓存中获取请求上下文配置
+func Current() IContext {
 	if c, ok := ctxMap.Load(getGID()); ok {
 		return c.(IContext)
 	}

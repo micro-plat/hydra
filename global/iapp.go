@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/micro-plat/hydra/conf/server"
-	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -45,12 +43,6 @@ var ServerTypes = []string{}
 
 //IGlobal 应用程序信息
 type IGlobal interface {
-
-	//Server 服务器配置
-	Server(tp string) server.IServerConf
-
-	//Context 当前context
-	Context() context.IContext
 
 	//GetRegistryAddr 注册中心
 	GetRegistryAddr() string

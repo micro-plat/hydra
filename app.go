@@ -40,21 +40,9 @@ func NewApp(opts ...Option) (m *MicroApp) {
 	return m
 }
 
-//NewCliApp 创建cli app
-func NewCliApp(opts ...Option) (m *MicroApp) {
-	nopts := make([]Option, 0, len(opts)+4)
-	nopts = append(nopts, WithRegistry("lm://."),
-		WithPlatName("hydra"),
-		WithSystemName("apiserver"),
-		WithClusterName("t"))
-	nopts = append(nopts, opts...)
-	return NewApp(nopts...)
-}
-
 //Start 启动服务器
 func (m *MicroApp) Start() {
 	defer logger.Close()
 	m.app = cli.New(cli.WithVersion(global.Version), cli.WithUsage(global.Usage))
 	m.app.Start()
-
 }

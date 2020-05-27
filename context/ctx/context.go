@@ -7,7 +7,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -39,7 +38,11 @@ type Ctx struct {
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx := contextPool.Get().(*Ctx)
 	ctx.context = c
-	ctx.serverConf = global.Current().Server(tp)
+	var err error
+	ctx.serverConf, err = server.Cache.GetServerConf(tp)
+	if err != nil {
+		panic(err)
+	}
 	ctx.user = &user{ctx: c, auth: &auth{}}
 	ctx.request = newRequest(c)
 	ctx.log = logger.GetSession(ctx.serverConf.GetMainConf().GetServerName(), ctx.User().GetRequestID())
@@ -91,5 +94,6 @@ func (c *Ctx) Close() {
 	c.request = nil
 	c.cancelFunc()
 	c.ctx = nil
+
 	contextPool.Put(c)
 }

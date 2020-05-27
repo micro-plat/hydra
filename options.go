@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Option 配置选项
@@ -35,7 +36,11 @@ func WithSystemName(sysName string) Option {
 //WithServerTypes 设置系统类型
 func WithServerTypes(serverType ...string) Option {
 	return func() {
-		global.Def.ServerTypes = serverType
+		for _, s := range serverType {
+			if !types.StringContains(global.Def.ServerTypes, s) {
+				global.Def.ServerTypes = append(global.Def.ServerTypes, s)
+			}
+		}
 	}
 }
 

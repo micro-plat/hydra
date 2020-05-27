@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 )
@@ -50,8 +51,8 @@ func Get() *UUID {
 		if err != nil {
 			panic(err)
 		}
-		uuid, err = NewUUID(global.Def.Context().ServerConf().GetMainConf().GetServerPubPath(),
-			global.Def.Context().ServerConf().GetMainConf().GetClusterID(), r)
+		uuid, err = NewUUID(context.Current().ServerConf().GetMainConf().GetServerPubPath(),
+			context.Current().ServerConf().GetMainConf().GetClusterID(), r)
 		if err != nil {
 			panic(err)
 		}

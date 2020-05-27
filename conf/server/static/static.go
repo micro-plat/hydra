@@ -8,6 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/archiver"
 )
 
@@ -45,12 +46,13 @@ func (s *Static) AllowRequest(m string) bool {
 //GetConf 设置static
 func GetConf(cnf conf.IMainConf) *Static {
 	//设置静态文件路由
-	static := Static{Disable: true}
+	static := Static{}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	if err == conf.ErrNoSetting {
+		static.Disable = true
 		return &static
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
@@ -66,6 +68,13 @@ func unarchive(dir string, path string) (string, error) {
 	if path == "" {
 		return dir, nil
 	}
+	reader, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return dir, nil
+		}
+		return "", fmt.Errorf("无法打开文件:%w", err)
+	}
 	archive := archiver.MatchingFormat(path)
 	if archive == nil {
 		return "", fmt.Errorf("指定的文件不是归档文件:%s", path)
@@ -74,16 +83,21 @@ func unarchive(dir string, path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
-	reader, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("无法打开文件:%s(%v)", path, err)
-	}
+
 	defer reader.Close()
-	err = archive.Read(reader, tmpDir)
+	ndir := filepath.Join(tmpDir, dir)
+	err = archive.Read(reader, ndir)
 	if err != nil {
 		return "", fmt.Errorf("读取归档文件失败:%v", err)
 	}
-	ndir := filepath.Join(tmpDir, dir)
 	waitRemoveDir = append(waitRemoveDir, tmpDir)
 	return ndir, nil
+}
+func init() {
+	global.Def.AddCloser(func() error {
+		for _, d := range waitRemoveDir {
+			os.RemoveAll(d)
+		}
+		return nil
+	})
 }

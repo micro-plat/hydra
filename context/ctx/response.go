@@ -67,7 +67,8 @@ func (c *response) File(path string) {
 	if c.ctx.Written() {
 		panic(fmt.Sprint("不能重复写入到响应流::", path))
 	}
-	c.File(path)
+	c.ctx.File(path)
+	c.ctx.Abort()
 }
 
 //WriteAny 将结果写入响应流，并自动处理响应码
@@ -77,33 +78,41 @@ func (c *response) WriteAny(v interface{}) error {
 
 //Write 将结果写入响应流，自动检查内容处理状态码
 func (c *response) Write(status int, content interface{}) error {
-	if c.ctx.Written() {
+	if c.ctx.Written() || c.asyncWrite != nil {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
-	switch v := content.(type) {
-	case errs.IError:
-		status = v.GetCode()
-		content = v.GetError().Error()
-		c.log.Error(content)
-		if global.IsDebug {
-			content = "Internal Server Error"
-		}
-	case error:
-		if status >= 200 && status < 400 {
-			status = 400
-		}
-		content = v.Error()
-		c.log.Error(content)
-		if global.IsDebug {
-			content = "Internal Server Error"
-		}
-	}
+	rstatus, rcontent := c.swapBytp(status, content)
 	c.asyncWrite = func() error {
-		return c.writeNow(status, c.swap(content))
+		return c.writeNow(rstatus, c.swapByctp(rcontent))
 	}
 	return nil
 }
-func (c *response) swap(content interface{}) interface{} {
+func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
+	rs = status
+	rc = content
+	switch v := content.(type) {
+	case errs.IError:
+		rs = v.GetCode()
+		rc = v.GetError().Error()
+		if global.IsDebug {
+			rc = "Internal Server Error"
+		}
+	case error:
+		if status >= 200 && status < 400 {
+			rs = 400
+		}
+		rc = v.Error()
+		if global.IsDebug {
+			rc = "Internal Server Error"
+		}
+	default:
+		return rs, rc
+	}
+	c.log.Error(content)
+	return rs, rc
+}
+
+func (c *response) swapByctp(content interface{}) interface{} {
 	ctp := c.getContentType()
 	switch {
 	case strings.Contains(ctp, "plain"):

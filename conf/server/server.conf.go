@@ -29,6 +29,13 @@ type IServerConf interface {
 type ServerConf struct {
 	mainConf conf.IMainConf
 	varConf  conf.IVarConf
+	header   header.Headers
+	jwt      *jwt.JWTAuth
+	metric   *metric.Metric
+	static   *static.Static
+	router   *router.Routers
+	fsa      *fsa.FixedSecretAuth
+	ras      ras.RASAuths
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -42,6 +49,13 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	if err != nil {
 		return nil, err
 	}
+	s.header = header.GetConf(s.mainConf)
+	s.jwt = jwt.GetConf(s.mainConf)
+	s.metric = metric.GetConf(s.mainConf)
+	s.static = static.GetConf(s.mainConf)
+	s.router = router.GetConf(s.mainConf)
+	s.fsa = fsa.GetConf(s.mainConf)
+	s.ras = ras.GetConf(s.mainConf)
 	return s, nil
 
 }
@@ -65,35 +79,35 @@ func (s *ServerConf) GetVarConf() conf.IVarConf {
 
 //GetHeaderConf 获取响应头配置
 func (s *ServerConf) GetHeaderConf() header.Headers {
-	return header.GetConf(s.mainConf)
+	return s.header
 }
 
 //GetJWTConf 获取jwt配置
 func (s *ServerConf) GetJWTConf() *jwt.JWTAuth {
-	return jwt.GetConf(s.mainConf)
+	return s.jwt
 }
 
 //GetMetricConf 获取metric配置
 func (s *ServerConf) GetMetricConf() *metric.Metric {
-	return metric.GetConf(s.mainConf)
+	return s.metric
 }
 
 //GetStaticConf 获取静态文件配置
 func (s *ServerConf) GetStaticConf() *static.Static {
-	return static.GetConf(s.mainConf)
+	return s.static
 }
 
 //GetRouterConf 获取路由信息
 func (s *ServerConf) GetRouterConf() *router.Routers {
-	return router.GetConf(s.mainConf)
+	return s.router
 }
 
 //GetFSAConf 获取路由信息
 func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
-	return fsa.GetConf(s.mainConf)
+	return s.fsa
 }
 
 //GetRASConf 获取路由信息
 func (s *ServerConf) GetRASConf() ras.RASAuths {
-	return ras.GetConf(s.mainConf)
+	return s.ras
 }
