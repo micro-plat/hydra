@@ -19,6 +19,7 @@ var _ context.IResponse = &response{}
 type response struct {
 	ctx        context.IInnerContext
 	conf       server.IServerConf
+	status     int
 	content    interface{}
 	log        logger.ILogger
 	asyncWrite func() error
@@ -81,9 +82,10 @@ func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() || c.asyncWrite != nil {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
-	rstatus, rcontent := c.swapBytp(status, content)
+	c.status, c.content = c.swapBytp(status, content)
+	c.content = c.swapByctp(c.content)
 	c.asyncWrite = func() error {
-		return c.writeNow(rstatus, c.swapByctp(rcontent))
+		return c.writeNow(c.status, c.content)
 	}
 	return nil
 }
@@ -121,7 +123,7 @@ func (c *response) swapByctp(content interface{}) interface{} {
 	default:
 		if content == nil {
 			c.ContentType(ctp)
-			return fmt.Sprint(content)
+			return ""
 		}
 		tp := reflect.TypeOf(content).Kind()
 		value := reflect.ValueOf(content)
@@ -187,7 +189,6 @@ func (c *response) writeNow(status int, content interface{}) error {
 	if c.ctx.WHeader("Content-Type") == "" {
 		c.ContentType("application/json; charset=UTF-8")
 	}
-	c.content = content
 	tpName := c.ctx.WHeader("Content-Type")
 	switch v := content.(type) {
 	case []byte:

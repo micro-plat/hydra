@@ -6,25 +6,25 @@ import (
 	"github.com/micro-plat/hydra/context/ctx"
 )
 
-type iNext interface {
+type imiddle interface {
 	Next()
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数
 type IMiddleContext interface {
-	Next()
+	imiddle
 	context.IContext
 }
 
 //MiddleContext 中间件转换器，在context.IContext中扩展next函数
 type MiddleContext struct {
 	context.IContext
-	iNext
+	imiddle
 }
 
 //newMiddleContext 构建中间件处理handler
-func newMiddleContext(c context.IContext, n iNext) IMiddleContext {
-	return &MiddleContext{IContext: c, iNext: n}
+func newMiddleContext(c context.IContext, n imiddle) IMiddleContext {
+	return &MiddleContext{IContext: c, imiddle: n}
 }
 
 //Handler 通用的中间件处理服务

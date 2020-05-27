@@ -83,10 +83,14 @@ func (c *Ctx) ServerConf() server.IServerConf {
 	return c.serverConf
 }
 
+//Flush 将结果刷新到响应流中
+func (c *Ctx) Flush() {
+	c.response.Flush()
+}
+
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
 	context.Del(c.tid) //从当前请求上下文中删除
-	c.response.Flush()
 	c.context = nil
 	c.serverConf = nil
 	c.user = nil

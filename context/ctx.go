@@ -109,5 +109,6 @@ type IContext interface {
 	ServerConf() server.IServerConf
 	User() IUser
 	Log() logger.ILogger
+	Flush()
 	Close()
 }

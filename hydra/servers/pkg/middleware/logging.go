@@ -16,14 +16,17 @@ func Logging() Handler {
 		//2. 处理业务
 		ctx.Next()
 
-		//3. 处理响应
+		//3. 将结果刷新到响应流
+		ctx.Flush()
+
+		//4. 处理响应日志
 		if ctx.Response().GetStatusCode() >= 200 && ctx.Response().GetStatusCode() < 400 {
 			ctx.Log().Info(ctx.ServerConf().GetMainConf().GetServerType()+".response:", ctx.ServerConf().GetMainConf().GetServerName(), ctx.Request().Path().GetMethod(), path, ctx.Response().GetStatusCode(), ctx.Response().GetSpecials(), time.Since(start))
 		} else {
 			ctx.Log().Error(ctx.ServerConf().GetMainConf().GetServerType()+".response:", ctx.ServerConf().GetMainConf().GetServerName(), ctx.Request().Path().GetMethod(), path, ctx.Response().GetStatusCode(), ctx.Response().GetSpecials(), time.Since(start))
 		}
 
-		//4.释放资源
+		//5.释放资源
 		ctx.Close()
 	}
 }
