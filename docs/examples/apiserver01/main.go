@@ -59,13 +59,24 @@ func request(ctx hydra.IContext) (r interface{}) {
 	case "10":
 		return `<?xml version='1.0'?><xml><name>colin</name><age>8</age></xml>`
 	case "11":
-		return errs.NewError(201, "无需处理")
+		ctx.Response().ContentType("application/xml; charset=UTF-8")
+		type order struct {
+			ID string `json:"id" xml:"id"`
+		}
+		type result struct {
+			Name   string   `json:"name" xml:"name"`
+			Age    int      `json:"age" xml:"age"`
+			Orders []*order `json:"orders" xml:"orders"`
+		}
+		return &result{Name: "colin", Age: 8, Orders: []*order{&order{ID: "897776666"}}}
 	case "12":
+		return errs.NewError(201, "无需处理")
+	case "13":
 		if err := ctx.Request().Check("order_id"); err != nil {
 			return err
 		}
 		return ctx.Request().GetString("order_id")
-	case "13":
+	case "14":
 		return hydra.Global.PlatName
 	default:
 		return fmt.Errorf("值错误，请传入1-12")

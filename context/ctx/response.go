@@ -3,6 +3,7 @@ package ctx
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"reflect"
 	"strings"
@@ -12,18 +13,28 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
+	"gopkg.in/yaml.v2"
+)
+
+const (
+	JSON  = "application/json; charset=UTF-8"
+	PLAIN = "application/xml; charset=UTF-8"
+	YAML  = "text/yaml; charset=UTF-8"
+	HTML  = "text/html; charset=UTF-8"
+	XML   = "text/plain; charset=UTF-8"
 )
 
 var _ context.IResponse = &response{}
 
 type response struct {
-	ctx        context.IInnerContext
-	conf       server.IServerConf
-	status     int
-	content    interface{}
-	log        logger.ILogger
-	asyncWrite func() error
-	specials   []string
+	ctx         context.IInnerContext
+	conf        server.IServerConf
+	status      int
+	contentType string
+	content     string
+	log         logger.ILogger
+	asyncWrite  func() error
+	specials    []string
 }
 
 //Header 设置头信息到response里
@@ -82,10 +93,11 @@ func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() || c.asyncWrite != nil {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
-	c.status, c.content = c.swapBytp(status, content)
-	c.content = c.swapByctp(c.content)
+	nstatus, ncontent := c.swapBytp(status, content)
+	c.contentType, c.content = c.swapByctp(ncontent)
+	c.status = nstatus
 	c.asyncWrite = func() error {
-		return c.writeNow(c.status, c.content)
+		return c.writeNow(c.status, c.contentType, c.content)
 	}
 	return nil
 }
@@ -114,16 +126,14 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	return rs, rc
 }
 
-func (c *response) swapByctp(content interface{}) interface{} {
+func (c *response) swapByctp(content interface{}) (string, string) {
 	ctp := c.getContentType()
 	switch {
 	case strings.Contains(ctp, "plain"):
-		c.ContentType(ctp)
-		return fmt.Sprint(content)
+		return ctp, fmt.Sprint(content)
 	default:
 		if content == nil {
-			c.ContentType(ctp)
-			return ""
+			return ctp, ""
 		}
 		tp := reflect.TypeOf(content).Kind()
 		value := reflect.ValueOf(content)
@@ -136,40 +146,33 @@ func (c *response) swapByctp(content interface{}) interface{} {
 			switch {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
-				c.ContentType("application/json; charset=UTF-8")
-				return content
+				return JSON, content.(string)
 			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				c.ContentType("application/xml; charset=UTF-8")
-				return content
+				return XML, content.(string)
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
-				c.ContentType("text/html; charset=UTF-8")
-				return content
+				return HTML, content.(string)
 			case strings.Contains(ctp, "yaml"):
-				c.ContentType(ctp)
-				return content
+				return YAML, content.(string)
 			case ctp == "" || strings.Contains(ctp, "plain"):
-				c.ContentType("text/plain; charset=UTF-8")
-				return content
+				return PLAIN, content.(string)
 			default:
-				c.ContentType(ctp)
-				return map[string]interface{}{
+				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
-				}
+				})
 			}
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 			if ctp == "" {
-				c.ContentType("text/plain; charset=UTF-8")
-				return content
+				return PLAIN, fmt.Sprint(content)
 			}
-			return map[string]interface{}{
+			return ctp, c.getString(ctp, map[string]interface{}{
 				"data": content,
-			}
+			})
 		default:
 			if ctp == "" {
 				c.ContentType("application/json; charset=UTF-8")
-				return content
+				return JSON, c.getString(JSON, content)
 			}
-			return content
+			return ctp, c.getString(ctp, content)
 		}
 
 	}
@@ -185,30 +188,9 @@ func (c *response) getContentType() string {
 }
 
 //writeNow 将状态码、内容写入到响应流中
-func (c *response) writeNow(status int, content interface{}) error {
-	if c.ctx.WHeader("Content-Type") == "" {
-		c.ContentType("application/json; charset=UTF-8")
-	}
-	tpName := c.ctx.WHeader("Content-Type")
-	switch v := content.(type) {
-	case []byte:
-		c.ctx.Data(status, tpName, v)
-		return nil
-	case string:
-		c.ctx.Data(status, tpName, []byte(v))
-		return nil
-	}
-	switch {
-	case strings.Contains(tpName, "xml"):
-		c.ctx.XML(status, content)
-	case strings.Contains(tpName, "yaml"):
-		c.ctx.YAML(status, content)
-	default:
-		c.ctx.JSON(status, content)
-	}
-
+func (c *response) writeNow(status int, ctyp string, content string) error {
+	c.ctx.Data(status, ctyp, []byte(content))
 	return nil
-
 }
 
 //Redirect 转跳g刚才gc
@@ -231,25 +213,32 @@ func (c *response) GetSpecials() string {
 
 //GetResponse 获取响应内容信息
 func (c *response) GetResponse() string {
-	if c.content == nil {
-		return "[nil]"
-	}
-	switch v := c.content.(type) {
-	case []byte:
-		return string(v)
-	case string:
-		return v
-	default:
-		if buff, err := json.Marshal(c.content); err == nil {
-			return string(buff)
-		}
-		return fmt.Sprint(c.content)
-	}
+	return c.content
 }
 func (c *response) Flush() {
 	if c.asyncWrite != nil {
 		if err := c.asyncWrite(); err != nil {
 			panic(err)
 		}
+	}
+}
+func (c *response) getString(ctp string, v interface{}) string {
+	switch {
+	case strings.Contains(ctp, "xml"):
+		buff, err := xml.Marshal(c.content)
+		if err != nil {
+			panic(err)
+		}
+		return fmt.Sprint(buff)
+	case strings.Contains(ctp, "yaml"):
+		if buff, err := yaml.Marshal(c.content); err == nil {
+			return string(buff)
+		}
+		return fmt.Sprint(c.content)
+	default:
+		if buff, err := json.Marshal(c.content); err == nil {
+			return string(buff)
+		}
+		return fmt.Sprint(c.content)
 	}
 }
