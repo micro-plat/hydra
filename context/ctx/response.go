@@ -242,7 +242,6 @@ func (c *response) getString(ctp string, v interface{}) string {
 			panic(err)
 		}
 		return string(buff)
-
 	}
 	return fmt.Sprint(v)
 }
