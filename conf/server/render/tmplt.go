@@ -3,13 +3,11 @@ package render
 import (
 	"bytes"
 	"text/template"
-
-	"github.com/micro-plat/lib4go/security/md5"
 )
 
 //translate 翻译模板
-func translate(s string, funcs map[string]interface{}, input interface{}) (c string, err error) {
-	tmpl, err := getTmplt(s, funcs)
+func translate(path string, tmplt string, funcs map[string]interface{}, input interface{}) (c string, err error) {
+	tmpl, err := getTmplt(path, tmplt, funcs)
 	if err != nil {
 		return "", err
 	}
@@ -22,8 +20,7 @@ func translate(s string, funcs map[string]interface{}, input interface{}) (c str
 }
 
 //getTmplt 获取模板信息
-func getTmplt(tmpl string, funcs map[string]interface{}) (*template.Template, error) {
-	key := md5.Encrypt(tmpl)
-	return template.New(key).Funcs(funcs).Parse(tmpl)
+func getTmplt(path string, tmpl string, funcs map[string]interface{}) (*template.Template, error) {
+	return template.New(path).Funcs(funcs).Parse(tmpl)
 
 }

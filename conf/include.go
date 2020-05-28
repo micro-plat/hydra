@@ -21,17 +21,17 @@ func NewInCludes(all ...string) *Includes {
 }
 
 //In 是否匹配，支付完全匹配，模糊匹配，分段匹配
-func (a *Includes) In(service string) bool {
+func (a *Includes) In(service string) (bool, string) {
 	if v, ok := a.cache.Get(service); ok {
-		return v.(bool)
+		return v != "", v.(string)
 	}
 	sparties := strings.Split(service, "/")
 	//排除指定请求
 	for _, u := range a.all {
 		//完全匹配
 		if strings.EqualFold(u, service) {
-			a.cache.SetIfAbsent(service, true)
-			return true
+			a.cache.SetIfAbsent(service, u)
+			return true, u
 		}
 		//分段模糊
 		uparties := strings.Split(u, "/")
@@ -61,8 +61,8 @@ func (a *Includes) In(service string) bool {
 
 			//此段为 **
 			if uparties[i] == "**" {
-				a.cache.SetIfAbsent(service, true)
-				return true
+				a.cache.SetIfAbsent(service, u)
+				return true, u
 			}
 
 			//此段为 *,匹配后续段
@@ -76,8 +76,8 @@ func (a *Includes) In(service string) bool {
 				if !isMatch {
 					break
 				}
-				a.cache.SetIfAbsent(service, true)
-				return true
+				a.cache.SetIfAbsent(service, u)
+				return true, u
 			}
 			if uparties[i] != sparties[i] {
 				break
@@ -85,6 +85,6 @@ func (a *Includes) In(service string) bool {
 		}
 
 	}
-	a.cache.SetIfAbsent(service, false)
-	return false
+	a.cache.SetIfAbsent(service, "")
+	return false, ""
 }

@@ -105,6 +105,7 @@ type IUser interface {
 
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
+	Funcs() map[string]interface{}
 	Request() IRequest
 	Response() IResponse
 	Context() context.Context

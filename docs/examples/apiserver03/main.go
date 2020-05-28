@@ -19,7 +19,7 @@ func main() {
 	app.Start()
 }
 func hello(ctx hydra.IContext) interface{} {
-	return "success"
+	return "order/request"
 }
 func login(ctx hydra.IContext) interface{} {
 	ctx.User().Auth().Response(map[string]interface{}{

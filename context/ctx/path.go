@@ -60,3 +60,9 @@ func (c *rpath) GetCookie(name string) (string, bool) {
 	}
 	return "", false
 }
+
+//GetCookie 获取cookie信息
+func (c *rpath) getCookie(name string) string {
+	m, _ := c.GetCookie(name)
+	return m
+}

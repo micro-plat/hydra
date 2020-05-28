@@ -15,7 +15,7 @@ func init() {
 			// Fsa(fsa.CreateSecret(), fsa.WithInclude("/order/*")).
 			Jwt(jwt.WithExclude("/member/**"), jwt.WithHeader()).
 			Static(static.WithArchive("./static.zip")).
-			Render(render.WithStatus("200")).
+			Render(render.WithTmplt("/member/*", `{"id":{{get_status}}}`), render.WithTmplt("/order/request", `success{{get_path}}`)).
 			Header(header.WithCrossDomain())
 	})
 }

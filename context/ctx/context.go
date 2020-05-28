@@ -31,6 +31,7 @@ type Ctx struct {
 	user       *user
 	serverConf server.IServerConf
 	cancelFunc func()
+	funs       map[string]interface{}
 	tid        uint64
 }
 
@@ -50,12 +51,30 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.tid = context.Cache(ctx) //保存到缓存中
 	timeout := time.Duration(ctx.serverConf.GetMainConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
+	ctx.funs = map[string]interface{}{
+		"get_req":        ctx.request.GetString,
+		"get_req_string": ctx.request.GetString,
+		"get_req_int":    ctx.request.GetInt,
+		"get_param":      ctx.request.Param,
+		"get_path":       ctx.request.path.GetPath,
+		"get_header":     ctx.request.path.GetHeader,
+		"get_cookie":     ctx.request.path.getCookie,
+		"get_status":     ctx.response.GetStatusCode,
+		"get_content":    ctx.response.getContent,
+		"get_client_ip":  ctx.user.GetClientIP,
+		"get_request_id": ctx.user.GetRequestID,
+	}
 	return ctx
 }
 
 //Request 获取请求对象
 func (c *Ctx) Request() context.IRequest {
 	return c.request
+}
+
+//Funcs 提供用于模板转换的函数表达式
+func (c *Ctx) Funcs() map[string]interface{} {
+	return c.funs
 }
 
 //Response 获取响应对象

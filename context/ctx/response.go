@@ -229,6 +229,7 @@ func (c *response) GetRaw() interface{} {
 func (c *response) GetResponse() (int, string) {
 	return c.status, c.content
 }
+
 func (c *response) Flush() {
 	if c.asyncWrite != nil {
 		if err := c.asyncWrite(); err != nil {
@@ -258,4 +259,8 @@ func (c *response) getString(ctp string, v interface{}) string {
 		return string(buff)
 	}
 	return fmt.Sprint(v)
+}
+
+func (c *response) getContent() string {
+	return c.content
 }

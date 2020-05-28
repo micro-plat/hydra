@@ -1,18 +1,14 @@
 package render
 
-//Option jwt配置选项
-type Option func(Tmplt)
+import "github.com/micro-plat/lib4go/types"
 
-//WithStatus 设置状态码对应的模板
-func WithStatus(tmplt string) Option {
-	return func(a Tmplt) {
-		a["render/status"] = tmplt
-	}
-}
+type Option func(*Render)
 
-//WithContent 设置响应内容的模板
-func WithContent(tmplt string) Option {
-	return func(a Tmplt) {
-		a["render/content"] = tmplt
+//WithTmplt 添加模板
+func WithTmplt(path string, content string, status ...string) Option {
+	return func(a *Render) {
+		if _, ok := a.Tmplts[path]; !ok {
+			a.Tmplts[path] = &Tmplt{Content: content, Status: types.GetStringByIndex(status, 0, "")}
+		}
 	}
 }

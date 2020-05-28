@@ -69,9 +69,6 @@ func (b httpBuilder) Static(opts ...static.Option) httpBuilder {
 
 //Render 响应渲染配置
 func (b httpBuilder) Render(opts ...render.Option) httpBuilder {
-	kv := render.NewTmplt(opts...)
-	for k, v := range kv {
-		b[k] = v
-	}
+	b["render"] = render.NewRender(opts...)
 	return b
 }
