@@ -8,6 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
@@ -37,7 +38,7 @@ func New(secret string, opts ...FixedOption) *FixedSecretAuth {
 //GetConf 获取FixedSecretAuth
 func GetConf(cnf conf.IMainConf) *FixedSecretAuth {
 	fsa := FixedSecretAuth{}
-	_, err := cnf.GetSubObject("fsa", &fsa)
+	_, err := cnf.GetSubObject(registry.Join("auth", "fsa"), &fsa)
 	if err == conf.ErrNoSetting {
 		return &FixedSecretAuth{Disable: true, Includes: conf.NewInCludes()}
 	}

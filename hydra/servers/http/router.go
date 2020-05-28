@@ -23,6 +23,7 @@ func (s *Server) addRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.FixedSecretAuth().GinFunc())
 	s.engine.Use(middleware.JwtAuth().GinFunc())   //jwt安全认证
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头
+	s.engine.Use(middleware.Render().GinFunc())    //响应渲染组件
 	s.engine.Use(middleware.JwtWriter().GinFunc()) //设置jwt回写
 	s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
 	s.addRouter(routers...)

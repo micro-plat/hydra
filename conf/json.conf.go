@@ -55,6 +55,7 @@ func NewJSONConf(message []byte, version int32) (c *JSONConf, err error) {
 		signature: md5.EncryptBytes(message),
 		version:   version,
 	}
+
 	if err = json.Unmarshal(message, &c.data); err != nil {
 		return nil, err
 	}

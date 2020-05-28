@@ -42,6 +42,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 }
 
 func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
+
 	value, err := getJSON(&v)
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
@@ -69,15 +70,19 @@ func deleteAll(r registry.IRegistry, path string) error {
 	}
 	for _, c := range child {
 		npath := registry.Join(path, c)
-		if err := r.Delete(npath); err != nil {
-			return err
-		}
+		return deleteAll(r, npath)
 	}
-	return r.Delete(path)
+	if err := r.Delete(path); err != nil {
+		return fmt.Errorf("删除节点%s出错 %w", path, err)
+	}
+	return nil
 }
 
 //getJSON 将对象序列化为json字符串
 func getJSON(v interface{}) (value string, err error) {
+	if x, ok := v.(string); ok {
+		return x, nil
+	}
 	buff, err := json.Marshal(&v)
 	if err != nil {
 		return "", err

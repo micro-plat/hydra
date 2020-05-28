@@ -10,28 +10,18 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/zkfy/log"
 )
 
 func show() error {
-
 	//1. 处理日志
 	print := log.New(os.Stdout, "", log.Llongcolor).Info
-
 	//2. 创建注册中心
 	rgst, err := registry.NewRegistry(global.Current().GetRegistryAddr(), global.Current().Log())
 	if err != nil {
 		return err
-	}
-
-	//3. 处理本地内存作为注册中心的服务发布问题
-	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
-			return err
-		}
 	}
 
 	queryIndex := 0

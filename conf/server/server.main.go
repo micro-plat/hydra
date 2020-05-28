@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //MainConf 服务器主配置
@@ -46,26 +47,43 @@ func (c *MainConf) load() (err error) {
 		err = fmt.Errorf("%s配置有误:%v", c.GetMainPath(), err)
 		return err
 	}
-	confs, _, err := c.registry.GetChildren(c.GetMainPath())
+
+	err = c.getSubConf(c.GetMainPath())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (c *MainConf) getSubConf(path string, n ...string) error {
+	confs, _, err := c.registry.GetChildren(path)
 	if err != nil {
 		return err
 	}
 	for _, p := range confs {
-		childConfPath := registry.Join(c.GetMainPath(), p)
+		childConfPath := registry.Join(path, p)
 		data, version, err := c.registry.GetValue(childConfPath)
 		if err != nil {
-			return fmt.Errorf("获取子配置信息出错 %s[%s] %w", c.GetMainPath(), p, err)
+			return fmt.Errorf("获取子配置信息出错 %s[%s] %w", path, p, err)
 		}
+
 		rdata, err := decrypt(data)
 		if err != nil {
-			return fmt.Errorf("%s[%s]解密子配置失败:%w", c.GetMainPath(), p, err)
+			return fmt.Errorf("%s[%s]解密子配置失败:%w", path, p, err)
+		}
+		if len(rdata) == 0 {
+			rdata = []byte("{}")
 		}
 		childConf, err := conf.NewJSONConf(rdata, version)
 		if err != nil {
-			err = fmt.Errorf("%s[%s]配置有误:%w", c.GetMainPath(), p, err)
+			err = fmt.Errorf("%s/%s配置有误:%w", path, p, err)
 			return err
 		}
-		c.subConfs[p] = *childConf
+		nodePath := registry.Trim(registry.Join(types.GetStringByIndex(n, 0, ""), p))
+		c.subConfs[nodePath] = *childConf
+
+		if err := c.getSubConf(childConfPath, p); err != nil {
+			return err
+		}
 	}
 	return nil
 }

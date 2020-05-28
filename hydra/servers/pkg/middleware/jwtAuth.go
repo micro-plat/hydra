@@ -22,15 +22,15 @@ func JwtAuth() Handler {
 			return
 		}
 
-		//2.检查是否需要跳过请求
+		//2.检查jwt是否有效
+		ctx.Response().AddSpecial("jwt")
+
+		//3.检查是否需要跳过请求
 		if jwtAuth.In(ctx.Request().Path().GetPath()) ||
 			jwtAuth.In(ctx.Request().Path().GetService()) {
 			ctx.Next()
 			return
 		}
-
-		//3.检查jwt是否有效
-		ctx.Response().AddSpecial("jwt")
 
 		//4. 验证jwt
 		_, err := checkJWT(ctx, jwtAuth)

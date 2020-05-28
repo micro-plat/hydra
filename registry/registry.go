@@ -123,6 +123,11 @@ func Join(elem ...string) string {
 	}
 	return strings.TrimSuffix(builder.String(), "/")
 }
+
+//Trim 去掉前后的""/"
+func Trim(l string) string {
+	return strings.Trim(l, "/")
+}
 func getAddrByUserPass(addr string) (u string, p string, address string, err error) {
 	if !strings.Contains(addr, "@") {
 		return "", "", addr, nil

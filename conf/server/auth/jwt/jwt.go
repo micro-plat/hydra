@@ -5,6 +5,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -35,7 +36,7 @@ func NewJWT(opts ...Option) *JWTAuth {
 //GetConf 获取jwt
 func GetConf(cnf conf.IMainConf) *JWTAuth {
 	jwt := JWTAuth{}
-	_, err := cnf.GetSubObject("jwt", &jwt)
+	_, err := cnf.GetSubObject(registry.Join("auth", "fsa"), &jwt)
 	if err == conf.ErrNoSetting {
 		return &JWTAuth{jwtOption: jwtOption{Disable: true}}
 	}

@@ -1,9 +1,13 @@
 package header
 
-import "strings"
+import (
+	"net/http"
+	"strings"
+)
 
-var allow = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "hsid"}
-var expose = []string{"Authorization-Jwt"}
+var allowHeader = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "Authorization-Jwt", "Origin", "Accept"}
+var exposeHeader = []string{"Authorization-Jwt"}
+var allMethods = []string{http.MethodHead, http.MethodOptions, http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}
 
 //Option 配置选项
 type Option func(Headers)
@@ -17,9 +21,9 @@ func WithCrossDomain(host ...string) Option {
 		}
 		a["Access-Control-Allow-Credentials"] = "true"
 		a["Access-Control-Allow-Origin"] = origin
-		a["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-		a["Access-Control-Allow-Headers"] = strings.Join(allow, ",")
-		a["Access-Control-Expose-Headers"] = strings.Join(expose, ",")
+		a["Access-Control-Allow-Methods"] = strings.Join(allMethods, ",")
+		a["Access-Control-Allow-Headers"] = strings.Join(allowHeader, ",")
+		a["Access-Control-Expose-Headers"] = strings.Join(exposeHeader, ",")
 	}
 }
 
@@ -33,14 +37,14 @@ func WithAllowMethods(method ...string) Option {
 //WithAllowHeaders 设置允许请求的头信息
 func WithAllowHeaders(header ...string) Option {
 	return func(a Headers) {
-		a["Access-Control-Allow-Headers"] = strings.Join(append(allow, header...), ",")
+		a["Access-Control-Allow-Headers"] = strings.Join(append(allowHeader, header...), ",")
 	}
 }
 
 //WithExposeHeaders 设置允许导出的头信息
 func WithExposeHeaders(header ...string) Option {
 	return func(a Headers) {
-		a["Access-Control-Expose-Headers"] = strings.Join(append(expose, header...), ",")
+		a["Access-Control-Expose-Headers"] = strings.Join(append(exposeHeader, header...), ",")
 	}
 }
 

@@ -3,6 +3,7 @@ package static
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -40,7 +41,7 @@ func New(opts ...Option) *Static {
 
 //AllowRequest 是否是合适的请求
 func (s *Static) AllowRequest(m string) bool {
-	return m == "GET" || m == "HEAD"
+	return m == http.MethodGet || m == http.MethodHead
 }
 
 //GetConf 设置static

@@ -31,6 +31,7 @@ type response struct {
 	conf        server.IServerConf
 	status      int
 	contentType string
+	raw         interface{}
 	content     string
 	log         logger.ILogger
 	asyncWrite  func() error
@@ -61,11 +62,12 @@ func (c *response) AbortWithError(s int, err error) {
 
 //GetStatusCode 获取response状态码
 func (c *response) GetStatusCode() int {
-	return c.ctx.Status()
+	return c.status
 }
 
 //SetStatusCode 设置response状态码
 func (c *response) SetStatusCode(s int) {
+	c.status = s
 	c.ctx.WStatus(s)
 }
 
@@ -93,6 +95,7 @@ func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() || c.asyncWrite != nil {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
+	c.raw = content
 	nstatus, ncontent := c.swapBytp(status, content)
 	c.contentType, c.content = c.swapByctp(ncontent)
 	c.status = nstatus
@@ -100,6 +103,12 @@ func (c *response) Write(status int, content interface{}) error {
 		return c.writeNow(c.status, c.contentType, c.content)
 	}
 	return nil
+}
+
+//Render 修改实际渲染的内容
+func (c *response) Render(status int, content string) {
+	c.status = status
+	c.content = content
 }
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
@@ -211,9 +220,14 @@ func (c *response) GetSpecials() string {
 	return strings.Join(c.specials, "|")
 }
 
+//GetRaw 获取原始响应请求
+func (c *response) GetRaw() interface{} {
+	return c.raw
+}
+
 //GetResponse 获取响应内容信息
-func (c *response) GetResponse() string {
-	return c.content
+func (c *response) GetResponse() (int, string) {
+	return c.status, c.content
 }
 func (c *response) Flush() {
 	if c.asyncWrite != nil {

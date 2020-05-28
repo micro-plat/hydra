@@ -13,7 +13,7 @@ func ExecuteHandler(service string) Handler {
 
 		h, ok := services.Def.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		if !ok {
-			ctx.Response().AddSpecial("h")
+			ctx.Response().AddSpecial("handler")
 			panic(fmt.Errorf("未找到服务：%s", service))
 		}
 

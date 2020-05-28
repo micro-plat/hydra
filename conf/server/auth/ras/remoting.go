@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/registry"
 )
 
 //RASAuth 远程认证服务
@@ -74,7 +75,7 @@ func (a RASAuths) Contains(p string) (bool, *RASAuth) {
 //GetConf 获取配置信息
 func GetConf(cnf conf.IMainConf) (auths RASAuths) {
 	//设置Remote安全认证参数
-	_, err := cnf.GetSubObject("ras", &auths)
+	_, err := cnf.GetSubObject(registry.Join("auth", "ras"), &auths)
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("remote-auth-service配置有误:%v", err))
 	}

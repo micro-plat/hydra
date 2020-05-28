@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -16,7 +17,7 @@ var WEB = newAPIRouter()
 //RPC rpc服务的路由信息
 var RPC = newAPIRouter()
 
-var defRequestMethod = []string{"get", "post", "put", "delete"}
+var defRequestMethod = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
 
 type apiRouter struct {
 	routers     *router.Routers

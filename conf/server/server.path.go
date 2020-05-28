@@ -43,8 +43,10 @@ func (c *Pub) GetMainPath() string {
 }
 
 //GetSubConfPath 获取子配置路径
-func (c *Pub) GetSubConfPath(name string) string {
-	return registry.Join(c.GetMainPath(), name)
+func (c *Pub) GetSubConfPath(name ...string) string {
+	l := []string{c.GetMainPath()}
+	l = append(l, name...)
+	return registry.Join(l...)
 }
 
 //GetVarPath 获取var配置路径

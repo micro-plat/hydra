@@ -33,19 +33,19 @@ func (b httpBuilder) Load() {
 
 //Jwt jwt配置
 func (b httpBuilder) Jwt(opts ...jwt.Option) httpBuilder {
-	b["jwt"] = jwt.NewJWT(opts...)
+	b["auth/jwt"] = jwt.NewJWT(opts...)
 	return b
 }
 
 //Fsa fsa静态密钥错误
 func (b httpBuilder) Fsa(secret string, opts ...fsa.FixedOption) httpBuilder {
-	b["fsa"] = fsa.New(secret, opts...)
+	b["auth/fsa"] = fsa.New(secret, opts...)
 	return b
 }
 
 //Ras 远程认证服务配置
 func (b httpBuilder) Ras(service string, opts ...ras.RemotingOption) httpBuilder {
-	b["ras"] = ras.New(service, opts...)
+	b["auth/ras"] = ras.New(service, opts...)
 	return b
 }
 
@@ -69,6 +69,9 @@ func (b httpBuilder) Static(opts ...static.Option) httpBuilder {
 
 //Render 响应渲染配置
 func (b httpBuilder) Render(opts ...render.Option) httpBuilder {
-	b["render"] = render.New(opts...)
+	kv := render.NewTmplt(opts...)
+	for k, v := range kv {
+		b[k] = v
+	}
 	return b
 }

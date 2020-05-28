@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
+	"github.com/micro-plat/hydra/conf/server/render"
+	"github.com/micro-plat/hydra/conf/server/render/rcontent"
+	"github.com/micro-plat/hydra/conf/server/render/rstatus"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/registry"
@@ -23,19 +26,23 @@ type IServerConf interface {
 	GetRouterConf() *router.Routers
 	GetFSAConf() *fsa.FixedSecretAuth
 	GetRASConf() ras.RASAuths
+	GetStatusRenderConf() *render.Render
+	GetContentRenderConf() *render.Render
 }
 
 //ServerConf 服务器配置信息
 type ServerConf struct {
-	mainConf conf.IMainConf
-	varConf  conf.IVarConf
-	header   header.Headers
-	jwt      *jwt.JWTAuth
-	metric   *metric.Metric
-	static   *static.Static
-	router   *router.Routers
-	fsa      *fsa.FixedSecretAuth
-	ras      ras.RASAuths
+	mainConf      conf.IMainConf
+	varConf       conf.IVarConf
+	header        header.Headers
+	jwt           *jwt.JWTAuth
+	metric        *metric.Metric
+	static        *static.Static
+	router        *router.Routers
+	fsa           *fsa.FixedSecretAuth
+	ras           ras.RASAuths
+	statusRender  *render.Render
+	contentRender *render.Render
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -56,6 +63,8 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.router = router.GetConf(s.mainConf)
 	s.fsa = fsa.GetConf(s.mainConf)
 	s.ras = ras.GetConf(s.mainConf)
+	s.statusRender = rstatus.GetConf(s.mainConf)
+	s.contentRender = rcontent.GetConf(s.mainConf)
 	return s, nil
 
 }
@@ -110,4 +119,14 @@ func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
 //GetRASConf 获取路由信息
 func (s *ServerConf) GetRASConf() ras.RASAuths {
 	return s.ras
+}
+
+//GetStatusRenderConf 获取状态渲染控件
+func (s *ServerConf) GetStatusRenderConf() *render.Render {
+	return s.statusRender
+}
+
+//GetContentRenderConf 获取内容渲染控件
+func (s *ServerConf) GetContentRenderConf() *render.Render {
+	return s.contentRender
 }
