@@ -79,6 +79,7 @@ func request(ctx hydra.IContext) (r interface{}) {
 		}
 		return ctx.Request().GetString("order_id")
 	case "14":
+		ctx.Log().Info(ctx.Request().GetBody())
 		return fmt.Sprintf(`<?xml version='1.0'?><xml><name>%s</name><age>8</age></xml>`, ctx.Request().GetString("name"))
 	case "15":
 		ctx.Log().Info(ctx.Request().GetBody())

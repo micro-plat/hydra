@@ -16,7 +16,7 @@ func Trace() Handler {
 		//1. 打印请求参数
 		if strings.ToLower(ctx.Request().Path().GetMethod()) != "get" {
 			input, _ := ctx.Request().GetData()
-			ctx.Log().Info("> request:", input)
+			ctx.Log().Info("> trace.request:", input)
 		}
 
 		//2. 业务处理
@@ -24,7 +24,7 @@ func Trace() Handler {
 
 		//3. 打印响应参数
 		s, c := ctx.Response().GetFinalResponse()
-		ctx.Log().Info("> response:", s, c)
+		ctx.Log().Info("> trace.response:", s, c)
 
 	}
 }

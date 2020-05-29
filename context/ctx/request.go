@@ -22,6 +22,8 @@ type request struct {
 }
 
 //newRequest 构建请求的Request
+//自动对请求进行解码，响应结果进行编码。
+//当指定为gbk,gb2312后,请求方式为application/x-www-form-urlencoded或application/xml、application/json时内容必须编码为指定的格式，否则会解码失败
 func newRequest(c context.IInnerContext, s server.IServerConf) *request {
 	rpath := newRpath(c, s)
 	return &request{
@@ -111,8 +113,9 @@ func (r *request) GetData() (map[string]interface{}, error) {
 
 //Get 获取字段的值
 func (r *request) Get(name string) (result string, ok bool) {
+	var fromBody bool
 	defer func() {
-		if ok {
+		if ok && !fromBody { //只对url,form中的参数进行解码,body中的参数已经解码了无需再解码
 			u, err := url.QueryUnescape(result)
 			if err != nil {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
@@ -129,11 +132,13 @@ func (r *request) Get(name string) (result string, ok bool) {
 	if result, ok = r.ctx.GetFormValue(name); ok {
 		return
 	}
+	fromBody = true
 	m, err := r.body.GetBodyMap()
 	if err != nil {
 		return "", false
 	}
 	v, b := m[name]
+
 	return fmt.Sprint(v), b
 }
 
