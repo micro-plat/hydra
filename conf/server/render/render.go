@@ -8,8 +8,9 @@ import (
 )
 
 type Tmplt struct {
-	Content string `json:"content,omitempty" valid:"required"`
-	Status  string `json:"status,omitempty" valid:"required"`
+	ContentType string `json:"content_type,omitempty"`
+	Content     string `json:"content,omitempty"`
+	Status      string `json:"status,omitempty" valid:"required"`
 }
 
 //Render 响应模板信息
@@ -49,23 +50,29 @@ func GetConf(cnf conf.IMainConf) (rsp *Render) {
 }
 
 //Get 获取转换结果
-func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, error) {
+func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
 	exists, service := r.Includes.In(path)
 	if !exists {
-		return false, 0, "", nil
+		return false, 0, "", "", nil
 	}
-	var cstatus string
+	tmpltStatus, tmpltContentType, tmpltContent := "", "", ""
 	var err error
 	if r.Tmplts[service].Status != "" {
-		cstatus, err = translate(service, r.Tmplts[service].Status, funcs, i)
-		if err != nil || types.GetInt(cstatus) == 0 {
-			return true, 0, "", fmt.Errorf("状态码模板%s配置有误 %w", r.Tmplts[service].Status, err)
+		tmpltStatus, err = translate(service, r.Tmplts[service].Status, funcs, i)
+		if err != nil || types.GetInt(tmpltStatus) == 0 {
+			return true, 0, "", "", fmt.Errorf("status模板%s配置有误 %w", r.Tmplts[service].Status, err)
+		}
+	}
+	if r.Tmplts[service].ContentType != "" {
+		tmpltContentType, err = translate(service, r.Tmplts[service].ContentType, funcs, i)
+		if err != nil {
+			return true, 0, "", "", fmt.Errorf("content_type模板%s配置有误 %w", r.Tmplts[service].ContentType, err)
 		}
 	}
 
-	ccontent, err := translate(service, r.Tmplts[service].Content, funcs, i)
+	tmpltContent, err = translate(service, r.Tmplts[service].Content, funcs, i)
 	if err != nil {
-		return true, 0, "", fmt.Errorf("响应内容模板%s配置有误 %w", r.Tmplts[service].Content, err)
+		return true, 0, "", "", fmt.Errorf("响应内容模板%s配置有误 %w", r.Tmplts[service].Content, err)
 	}
-	return true, types.GetInt(cstatus, 0), ccontent, nil
+	return true, types.GetInt(tmpltStatus, 0), tmpltContentType, tmpltContent, nil
 }

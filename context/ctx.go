@@ -73,17 +73,17 @@ type IResponse interface {
 	GetSpecials() string
 	SetHeader(string, string)
 	GetRaw() interface{}
-	GetStatusCode() int
 	SetStatusCode(int)
 	ContentType(v string)
-	Render(status int, content string)
+	Render(status int, content string, ctp string)
 	Write(s int, v interface{}) error
 	WriteAny(v interface{}) error
 	Written() bool
 	File(path string)
 	Abort(int)
 	AbortWithError(int, error)
-	GetResponse() (int, string)
+	GetRawResponse() (int, interface{})
+	GetFinalResponse() (int, string)
 }
 
 //IAuth 认证信息

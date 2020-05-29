@@ -1,10 +1,35 @@
 package conf
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
+
+type sortString []string
+
+func (s sortString) Len() int { return len(s) }
+
+func (s sortString) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
+func (s sortString) Less(i, j int) bool {
+	il := len(s[i])
+	jl := len(s[j])
+	for x := 0; x < jl && i < il; x++ {
+		if s[i][x] == s[j][x] {
+			continue
+		}
+		if s[i][x] == []byte("*")[0] {
+			return false
+		}
+		if s[j][x] == []byte("*")[0] {
+			return true
+		}
+		return s[i][x] < s[j][x]
+	}
+	return true
+}
 
 //Includes 构建模糊匹配缓存查找管理器
 type Includes struct {
@@ -14,10 +39,12 @@ type Includes struct {
 
 //NewInCludes 构建模糊匹配缓存查找管理器
 func NewInCludes(all ...string) *Includes {
-	return &Includes{
+	i := &Includes{
 		cache: cmap.New(6),
 		all:   all,
 	}
+	sort.Sort(sortString(i.all))
+	return i
 }
 
 //In 是否匹配，支付完全匹配，模糊匹配，分段匹配

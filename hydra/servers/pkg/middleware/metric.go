@@ -88,7 +88,7 @@ func (m *Metric) Handle() Handler {
 		counter.Dec(1)
 
 		//6. 初始化第四类统计器----状态码上报
-		statusCode, _ := ctx.Response().GetResponse()
+		statusCode, _ := ctx.Response().GetRawResponse()
 		responseName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.response", metrics.METER, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
 

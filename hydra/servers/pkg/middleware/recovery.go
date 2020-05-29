@@ -12,7 +12,7 @@ func Recovery() Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				ctx.Log().Errorf("[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
-				ctx.Response().Render(500, fmt.Sprintf("%v", err))
+				ctx.Response().Render(500, fmt.Sprintf("%v", err), "")
 			}
 		}()
 		ctx.Next()

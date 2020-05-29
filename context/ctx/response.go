@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -26,16 +27,20 @@ const (
 
 var _ context.IResponse = &response{}
 
-type response struct {
-	ctx         context.IInnerContext
-	conf        server.IServerConf
+type rspns struct {
 	status      int
 	contentType string
-	raw         interface{}
-	content     string
-	log         logger.ILogger
-	asyncWrite  func() error
-	specials    []string
+	content     interface{}
+}
+
+type response struct {
+	ctx        context.IInnerContext
+	conf       server.IServerConf
+	raw        rspns
+	final      rspns
+	log        logger.ILogger
+	asyncWrite func() error
+	specials   []string
 }
 
 //Header 设置头信息到response里
@@ -60,14 +65,10 @@ func (c *response) AbortWithError(s int, err error) {
 	c.ctx.Abort()
 }
 
-//GetStatusCode 获取response状态码
-func (c *response) GetStatusCode() int {
-	return c.status
-}
-
 //SetStatusCode 设置response状态码
 func (c *response) SetStatusCode(s int) {
-	c.status = s
+	c.raw.status = s
+	c.final.status = s
 	c.ctx.WStatus(s)
 }
 
@@ -95,20 +96,25 @@ func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() || c.asyncWrite != nil {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
-	c.raw = content
-	nstatus, ncontent := c.swapBytp(status, content)
-	c.contentType, c.content = c.swapByctp(ncontent)
-	c.status = nstatus
+
+	c.raw.status, c.raw.content = status, content
+	var ncontent interface{}
+	c.final.status, ncontent = c.swapBytp(status, content)
+	c.final.contentType, c.final.content = c.swapByctp(ncontent)
+	c.raw.status, c.raw.contentType = c.raw.status, c.final.contentType
 	c.asyncWrite = func() error {
-		return c.writeNow(c.status, c.contentType, c.content)
+		return c.writeNow(c.final.status, c.final.contentType, c.final.content.(string))
 	}
 	return nil
 }
 
 //Render 修改实际渲染的内容
-func (c *response) Render(status int, content string) {
-	c.status = status
-	c.content = content
+func (c *response) Render(status int, content string, ctp string) {
+	if status != 0 {
+		c.final.status = status
+	}
+	c.final.contentType = types.GetString(ctp, c.final.contentType)
+	c.final.content = content
 }
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
@@ -225,9 +231,14 @@ func (c *response) GetRaw() interface{} {
 	return c.raw
 }
 
-//GetResponse 获取响应内容信息
-func (c *response) GetResponse() (int, string) {
-	return c.status, c.content
+//GetRawResponse 获取响应内容信息
+func (c *response) GetRawResponse() (int, interface{}) {
+	return c.raw.status, c.raw.content
+}
+
+//GetFinalResponse 获取响应内容信息
+func (c *response) GetFinalResponse() (int, string) {
+	return c.final.status, c.final.content.(string)
 }
 
 func (c *response) Flush() {
@@ -262,5 +273,8 @@ func (c *response) getString(ctp string, v interface{}) string {
 }
 
 func (c *response) getContent() string {
-	return c.content
+	return c.final.content.(string)
+}
+func (c *response) getStatus() int {
+	return c.raw.status
 }

@@ -12,7 +12,7 @@ func Render() Handler {
 			return
 		}
 
-		enable, status, content, err := render.Get(ctx.Request().Path().GetPath(), ctx.Funcs(), ctx.Response().GetRaw())
+		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetPath(), ctx.Funcs(), ctx.Response().GetRaw())
 		if !enable {
 			return
 		}
@@ -21,9 +21,6 @@ func Render() Handler {
 			ctx.Log().Error("渲染响应结果出错:", err)
 			return
 		}
-		if status == 0 {
-			status = ctx.Response().GetStatusCode()
-		}
-		ctx.Response().Render(status, content)
+		ctx.Response().Render(status, content, ctp)
 	}
 }

@@ -59,7 +59,7 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 		"get_path":       ctx.request.path.GetPath,
 		"get_header":     ctx.request.path.GetHeader,
 		"get_cookie":     ctx.request.path.getCookie,
-		"get_status":     ctx.response.GetStatusCode,
+		"get_status":     ctx.response.getStatus,
 		"get_content":    ctx.response.getContent,
 		"get_client_ip":  ctx.user.GetClientIP,
 		"get_request_id": ctx.user.GetRequestID,
