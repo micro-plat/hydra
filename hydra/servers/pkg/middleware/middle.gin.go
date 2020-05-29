@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -17,12 +18,16 @@ type ginCtx struct {
 
 func (g *ginCtx) load() {
 	g.once.Do(func() {
+
 		if g.Context.ContentType() == binding.MIMEPOSTForm ||
 			g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
+			fmt.Println("parse.form")
 			g.Context.Request.ParseForm()
+		}
+		if g.Context.ContentType() == binding.MIMEPOSTForm {
+			fmt.Println("parse.multi")
 			g.Context.Request.ParseMultipartForm(32 << 20)
 		}
-
 	})
 }
 
@@ -50,7 +55,10 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 }
 func (g *ginCtx) PostForm() url.Values {
 	g.load()
-	return g.Request.PostForm
+	fmt.Println("post.form:", g.Request.PostForm, g.Request.Form, g.Request.FormValue("name"))
+	fmt.Println(g.ContentType())
+	fmt.Println(g.Context.GetPostForm("name"))
+	return g.Request.Form
 }
 
 func (g *ginCtx) WStatus(s int) {

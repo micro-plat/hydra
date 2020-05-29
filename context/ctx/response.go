@@ -20,10 +20,10 @@ import (
 
 const (
 	JSONF  = "application/json; charset=%s"
-	PLAINF = "application/xml; charset=%s"
+	XMLF   = "application/xml; charset=%s"
 	YAMLF  = "text/yaml; charset=%s"
 	HTMLF  = "text/html; charset=%s"
-	XMLF   = "text/plain; charset=%s"
+	PLAINF = "text/plain; charset=%s"
 )
 
 var _ context.IResponse = &response{}

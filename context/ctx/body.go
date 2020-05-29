@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
@@ -39,8 +40,7 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 
 //GetBody 读取body返回body原字符串
 func (w *body) GetBody(e ...string) (s string, err error) {
-	defEncode := types.GetString(w.path.GetRouter().Encoding, "utf-8")
-	encode := types.GetStringByIndex(e, 0, defEncode)
+	encode := types.GetStringByIndex(e, 0, w.path.GetRouter().GetEncoding())
 	if w.hasReadBody {
 		if w.bodyReadErr != nil {
 			return "", w.bodyReadErr
@@ -53,7 +53,15 @@ func (w *body) GetBody(e ...string) (s string, err error) {
 	if w.bodyReadErr != nil {
 		return "", fmt.Errorf("获取body发生错误:%w", w.bodyReadErr)
 	}
+	fmt.Println("body.0:", string(w.body))
+	s, w.bodyReadErr = url.QueryUnescape(string(w.body))
+	if w.bodyReadErr != nil {
+		return "", fmt.Errorf("url.unescape出错:%w", w.bodyReadErr)
+	}
+	fmt.Println("body.1:", s)
+	w.body = []byte(s)
 	var buff []byte
 	buff, w.bodyReadErr = encoding.DecodeBytes(w.body, encode)
-	return string(buff), nil
+	fmt.Println("body.2:", string(buff), w.bodyReadErr)
+	return string(buff), w.bodyReadErr
 }

@@ -80,10 +80,16 @@ func request(ctx hydra.IContext) (r interface{}) {
 		return ctx.Request().GetString("order_id")
 	case "14":
 		fmt.Println("name:", ctx.Request().GetString("name"))
+		// fmt.Println(ctx.Request().GetBody())
 		return ctx.Request().GetString("name")
 	case "15":
-		return hydra.Global.PlatName
+		ctx.Log().Info(ctx.Request().GetBody())
+		r, err := ctx.Request().GetBody()
+		if err != nil {
+			return err
+		}
+		return r
 	default:
-		return fmt.Errorf("值错误，请传入1-12")
+		return hydra.Global.PlatName
 	}
 }

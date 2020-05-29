@@ -53,7 +53,7 @@ func (r *Router) GetEncoding() string {
 
 //IsUTF8 是否是UTF8编码
 func (r *Router) IsUTF8() bool {
-	return r.GetEncoding() == "utf-8"
+	return strings.ToLower(r.GetEncoding()) == "utf-8"
 }
 
 //NewRouters 构建路由

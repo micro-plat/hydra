@@ -3,6 +3,7 @@ package ctx
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -115,18 +116,29 @@ func (r *request) GetData() (map[string]interface{}, error) {
 //Get 获取字段的值
 func (r *request) Get(name string) (result string, ok bool) {
 	defer func() {
-		if ok && r.path.GetRouter().IsUTF8() {
-			r, err := encoding.Decode(result, r.path.GetRouter().GetEncoding())
+		fmt.Println("get:", result, ok, r.ctx.PostForm())
+		if ok && !r.path.GetRouter().IsUTF8() {
+			u, err := url.QueryUnescape(result)
 			if err != nil {
-				panic(err)
+				panic(fmt.Errorf("url.unescape出错:%w", err))
 			}
-			result = string(r)
+			rx, err := encoding.Decode(u, r.path.GetRouter().GetEncoding())
+			if err != nil {
+				result = u
+				return
+			}
+			result = string(rx)
 		}
 	}()
-	if result, ok = r.ctx.GetPostForm(name); ok {
+
+	fmt.Println("request.post.form")
+	var rs []string
+	if rs, ok = r.ctx.PostForm()[name]; ok {
+		result = types.GetStringByIndex(rs, 0, "")
 		return
 	}
-	if result, ok = r.ctx.GetQuery(name); ok {
+	if rs, ok = r.ctx.UrlQuery()[name]; ok {
+		result = types.GetStringByIndex(rs, 0, "")
 		return
 	}
 	m, err := r.body.GetBodyMap()
