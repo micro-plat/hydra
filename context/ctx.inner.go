@@ -20,6 +20,7 @@ type IInnerContext interface {
 	GetForm() url.Values
 	GetQuery(string) (string, bool)       //context.GetQuery
 	GetFormValue(k string) (string, bool) //Context.Request.PostForm
+	ContentType() string
 
 	Abort()
 	WStatus(int)              //c.Context.Writer.WriteHeader(s)

@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"strings"
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/types"
+	"gopkg.in/yaml.v2"
 )
 
 //body 用于处理http请求的body读取
@@ -31,9 +33,26 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	data := make(map[string]interface{})
-	err = json.Unmarshal([]byte(body), &data)
+	ctp := w.ctx.ContentType()
+	switch {
+	case strings.Contains(ctp, "xml"):
+		var m map[string]string
+		m, err = context.UnmarshalXML(body)
+		if err == nil {
+			for k, v := range m {
+				data[k] = v
+			}
+		}
+
+	case strings.Contains(ctp, "yaml"):
+		err = yaml.Unmarshal([]byte(body), &data)
+	case strings.Contains(ctp, "json"):
+		err = json.Unmarshal([]byte(body), &data)
+	default:
+		data["__body"] = body
+	}
 	if err != nil {
-		return nil, fmt.Errorf("将%s转换为map失败:%w", body, err)
+		panic(fmt.Errorf("将%s转换为map失败:%w", body, err))
 	}
 	return data, nil
 }
