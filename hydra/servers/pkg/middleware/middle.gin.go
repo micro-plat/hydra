@@ -1,14 +1,12 @@
 package middleware
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 )
 
 type ginCtx struct {
@@ -18,16 +16,9 @@ type ginCtx struct {
 
 func (g *ginCtx) load() {
 	g.once.Do(func() {
+		g.Context.Request.ParseForm()
+		g.Context.Request.ParseMultipartForm(32 << 20)
 
-		if g.Context.ContentType() == binding.MIMEPOSTForm ||
-			g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
-			fmt.Println("parse.form")
-			g.Context.Request.ParseForm()
-		}
-		if g.Context.ContentType() == binding.MIMEPOSTForm {
-			fmt.Println("parse.multi")
-			g.Context.Request.ParseMultipartForm(32 << 20)
-		}
 	})
 }
 
@@ -41,9 +32,6 @@ func (g *ginCtx) GetBody() io.ReadCloser {
 func (g *ginCtx) GetMethod() string {
 	return g.Request.Method
 }
-func (g *ginCtx) UrlQuery() url.Values {
-	return g.Request.URL.Query()
-}
 func (g *ginCtx) GetURL() *url.URL {
 	return g.Request.URL
 }
@@ -53,11 +41,17 @@ func (g *ginCtx) GetHeaders() http.Header {
 func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
-func (g *ginCtx) PostForm() url.Values {
+func (g *ginCtx) GetFormValue(k string) (string, bool) {
 	g.load()
-	fmt.Println("post.form:", g.Request.PostForm, g.Request.Form, g.Request.FormValue("name"))
-	fmt.Println(g.ContentType())
-	fmt.Println(g.Context.GetPostForm("name"))
+	values := g.Request.Form[k]
+	if len(values) > 0 {
+		return values[0], true
+	}
+	return "", false
+}
+
+func (g *ginCtx) GetForm() url.Values {
+	g.load()
 	return g.Request.Form
 }
 

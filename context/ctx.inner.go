@@ -8,19 +8,18 @@ import (
 
 type IInnerContext interface {
 	ClientIP() string
-	GetBody() io.ReadCloser            //.Request.Body
-	GetMethod() string                 //.Request.Method
-	UrlQuery() url.Values              //url.Query
-	GetURL() *url.URL                  //.Request.URL.Path
-	Header(string, string)             //context.Header
-	GetHeaders() http.Header           //Request.Header
-	GetCookies() []*http.Cookie        //Request.Cookies()
-	Param(string) string               //Context.Param(key)
-	GetRouterPath() string             //Context.FullPath()
-	ShouldBind(interface{}) error      //Context.ShouldBind(&obj)
-	GetPostForm(string) (string, bool) //context GetPostForm)
-	GetQuery(string) (string, bool)    //context.GetQuery
-	PostForm() url.Values              //Context.Request.PostForm
+	GetBody() io.ReadCloser       //.Request.Body
+	GetMethod() string            //.Request.Method
+	GetURL() *url.URL             //.Request.URL.Path
+	Header(string, string)        //context.Header
+	GetHeaders() http.Header      //Request.Header
+	GetCookies() []*http.Cookie   //Request.Cookies()
+	Param(string) string          //Context.Param(key)
+	GetRouterPath() string        //Context.FullPath()
+	ShouldBind(interface{}) error //Context.ShouldBind(&obj)
+	GetForm() url.Values
+	GetQuery(string) (string, bool)       //context.GetQuery
+	GetFormValue(k string) (string, bool) //Context.Request.PostForm
 
 	Abort()
 	WStatus(int)              //c.Context.Writer.WriteHeader(s)

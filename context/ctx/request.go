@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -65,7 +64,7 @@ func (r *request) Bind(obj interface{}) error {
 func (r *request) Check(field ...string) error {
 	data, _ := r.body.GetBodyMap()
 	for _, key := range field {
-		if _, ok := r.ctx.GetPostForm(key); ok {
+		if _, ok := r.ctx.GetFormValue(key); ok {
 			continue
 		}
 		if _, ok := r.ctx.GetQuery(key); ok {
@@ -80,12 +79,8 @@ func (r *request) Check(field ...string) error {
 
 //GetKeys 获取字段名称
 func (r *request) GetKeys() []string {
-	var kvs map[string][]string = r.ctx.UrlQuery()
-	keys := make([]string, 0, len(kvs)+len(r.ctx.PostForm()))
-	for k := range kvs {
-		keys = append(keys, k)
-	}
-	for k := range r.ctx.PostForm() {
+	keys := make([]string, 0, len(r.ctx.GetForm()))
+	for k := range r.ctx.GetForm() {
 		keys = append(keys, k)
 	}
 	data, _ := r.body.GetBodyMap()
@@ -97,27 +92,27 @@ func (r *request) GetKeys() []string {
 
 //GetData 获取请求的参数信息
 func (r *request) GetData() (map[string]interface{}, error) {
+	forms := r.ctx.GetForm()
 	body, err := r.body.GetBodyMap()
 	if err != nil {
 		return nil, err
 	}
-	query := r.ctx.UrlQuery()
-	for k, v := range query {
-		body[k] = strings.Join(v, ",")
-	}
-	forms := r.ctx.PostForm()
+	data := make(map[string]interface{})
 	for k, v := range forms {
-		body[k] = strings.Join(v, ",")
+		data[k] = v[0]
 	}
-	return body, nil
+	for k, v := range body {
+		data[k] = v
+	}
+
+	return data, nil
 
 }
 
 //Get 获取字段的值
 func (r *request) Get(name string) (result string, ok bool) {
 	defer func() {
-		fmt.Println("get:", result, ok, r.ctx.PostForm())
-		if ok && !r.path.GetRouter().IsUTF8() {
+		if ok {
 			u, err := url.QueryUnescape(result)
 			if err != nil {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
@@ -131,14 +126,7 @@ func (r *request) Get(name string) (result string, ok bool) {
 		}
 	}()
 
-	fmt.Println("request.post.form")
-	var rs []string
-	if rs, ok = r.ctx.PostForm()[name]; ok {
-		result = types.GetStringByIndex(rs, 0, "")
-		return
-	}
-	if rs, ok = r.ctx.UrlQuery()[name]; ok {
-		result = types.GetStringByIndex(rs, 0, "")
+	if result, ok = r.ctx.GetFormValue(name); ok {
 		return
 	}
 	m, err := r.body.GetBodyMap()

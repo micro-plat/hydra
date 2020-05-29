@@ -33,7 +33,7 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 	err = json.Unmarshal([]byte(body), &data)
 	if err != nil {
-		return nil, fmt.Errorf("将body转换为map失败:%w", err)
+		return nil, fmt.Errorf("将%s转换为map失败:%w", body, err)
 	}
 	return data, nil
 }
@@ -53,15 +53,12 @@ func (w *body) GetBody(e ...string) (s string, err error) {
 	if w.bodyReadErr != nil {
 		return "", fmt.Errorf("获取body发生错误:%w", w.bodyReadErr)
 	}
-	fmt.Println("body.0:", string(w.body))
 	s, w.bodyReadErr = url.QueryUnescape(string(w.body))
 	if w.bodyReadErr != nil {
 		return "", fmt.Errorf("url.unescape出错:%w", w.bodyReadErr)
 	}
-	fmt.Println("body.1:", s)
 	w.body = []byte(s)
 	var buff []byte
 	buff, w.bodyReadErr = encoding.DecodeBytes(w.body, encode)
-	fmt.Println("body.2:", string(buff), w.bodyReadErr)
 	return string(buff), w.bodyReadErr
 }
