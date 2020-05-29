@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type ginCtx struct {
@@ -16,9 +17,11 @@ type ginCtx struct {
 
 func (g *ginCtx) load() {
 	g.once.Do(func() {
-		g.Context.Request.ParseForm()
-		g.Context.Request.ParseMultipartForm(32 << 20)
-
+		if g.Context.ContentType() == binding.MIMEPOSTForm ||
+			g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
+			g.Context.Request.ParseForm()
+			g.Context.Request.ParseMultipartForm(32 << 20)
+		}
 	})
 }
 
@@ -27,6 +30,7 @@ func (g *ginCtx) GetRouterPath() string {
 	return g.Context.FullPath()
 }
 func (g *ginCtx) GetBody() io.ReadCloser {
+	g.load()
 	return g.Request.Body
 }
 func (g *ginCtx) GetMethod() string {
