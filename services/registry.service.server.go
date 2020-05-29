@@ -1,13 +1,13 @@
 package services
 
 type serverServices struct {
-	extHandle func(u *Unit, ext ...string) error
+	extHandle func(u *Unit, ext ...interface{}) error
 	*metaServices
 	*handleHook
 	*serverHook
 }
 
-func newServerServices(v func(u *Unit, ext ...string) error) *serverServices {
+func newServerServices(v func(u *Unit, ext ...interface{}) error) *serverServices {
 	return &serverServices{
 		handleHook:   newHandleHook(),
 		metaServices: newService(),
@@ -17,7 +17,7 @@ func newServerServices(v func(u *Unit, ext ...string) error) *serverServices {
 }
 
 //Register 注册服务
-func (s *serverServices) Register(name string, h interface{}, ext ...string) {
+func (s *serverServices) Register(name string, h interface{}, ext ...interface{}) {
 	groups, err := reflectHandle(name, h)
 	if err != nil {
 		panic(err)
@@ -26,7 +26,7 @@ func (s *serverServices) Register(name string, h interface{}, ext ...string) {
 		panic(err)
 	}
 }
-func (s *serverServices) handleExt(g *Unit, ext ...string) error {
+func (s *serverServices) handleExt(g *Unit, ext ...interface{}) error {
 	if s.extHandle == nil {
 		return nil
 	}
@@ -34,7 +34,7 @@ func (s *serverServices) handleExt(g *Unit, ext ...string) error {
 }
 
 //addGroup 添加服务注册
-func (s *serverServices) addGroup(g *UnitGroup, ext ...string) error {
+func (s *serverServices) addGroup(g *UnitGroup, ext ...interface{}) error {
 	for _, u := range g.Services {
 
 		//添加预处理函数

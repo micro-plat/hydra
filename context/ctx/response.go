@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
@@ -18,11 +19,11 @@ import (
 )
 
 const (
-	JSON  = "application/json; charset=UTF-8"
-	PLAIN = "application/xml; charset=UTF-8"
-	YAML  = "text/yaml; charset=UTF-8"
-	HTML  = "text/html; charset=UTF-8"
-	XML   = "text/plain; charset=UTF-8"
+	JSONF  = "application/json; charset=%s"
+	PLAINF = "application/xml; charset=%s"
+	YAMLF  = "text/yaml; charset=%s"
+	HTMLF  = "text/html; charset=%s"
+	XMLF   = "text/plain; charset=%s"
 )
 
 var _ context.IResponse = &response{}
@@ -36,11 +37,21 @@ type rspns struct {
 type response struct {
 	ctx        context.IInnerContext
 	conf       server.IServerConf
+	path       *rpath
 	raw        rspns
 	final      rspns
 	log        logger.ILogger
 	asyncWrite func() error
 	specials   []string
+}
+
+func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger) *response {
+	return &response{
+		ctx:  ctx,
+		conf: conf,
+		path: newRpath(ctx, conf),
+		log:  log,
+	}
 }
 
 //Header 设置头信息到response里
@@ -97,11 +108,23 @@ func (c *response) Write(status int, content interface{}) error {
 		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
 	}
 
+	//保存初始状态与结果
 	c.raw.status, c.raw.content = status, content
 	var ncontent interface{}
+
+	//检查内容获取匹配的状态码
 	c.final.status, ncontent = c.swapBytp(status, content)
+
+	//检查内容类型并转换成字符串
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
-	c.raw.status, c.raw.contentType = c.raw.status, c.final.contentType
+
+	//将编码设置到content type
+	c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetRouter().GetEncoding())
+
+	//记录为原始状态
+	c.raw.contentType = c.final.contentType
+
+	//将写入操作处理为异步流程
 	c.asyncWrite = func() error {
 		return c.writeNow(c.final.status, c.final.contentType, c.final.content.(string))
 	}
@@ -161,15 +184,15 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			switch {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
-				return JSON, content.(string)
+				return JSONF, content.(string)
 			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				return XML, content.(string)
+				return XMLF, content.(string)
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
-				return HTML, content.(string)
+				return HTMLF, content.(string)
 			case strings.Contains(ctp, "yaml"):
-				return YAML, content.(string)
+				return YAMLF, content.(string)
 			case ctp == "" || strings.Contains(ctp, "plain"):
-				return PLAIN, content.(string)
+				return PLAINF, content.(string)
 			default:
 				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
@@ -177,7 +200,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			}
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 			if ctp == "" {
-				return PLAIN, fmt.Sprint(content)
+				return PLAINF, fmt.Sprint(content)
 			}
 			return ctp, c.getString(ctp, map[string]interface{}{
 				"data": content,
@@ -185,7 +208,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 		default:
 			if ctp == "" {
 				c.ContentType("application/json; charset=UTF-8")
-				return JSON, c.getString(JSON, content)
+				return JSONF, c.getString(JSONF, content)
 			}
 			return ctp, c.getString(ctp, content)
 		}
@@ -204,7 +227,15 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
-	c.ctx.Data(status, ctyp, []byte(content))
+	if c.path.GetRouter().IsUTF8() {
+		c.ctx.Data(status, ctyp, []byte(content))
+		return nil
+	}
+	buff, err := encoding.Encode(content, c.path.GetRouter().GetEncoding())
+	if err != nil {
+		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", c.path.GetRouter().GetEncoding(), err, content)
+	}
+	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
 

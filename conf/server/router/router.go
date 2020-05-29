@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type Routers struct {
@@ -22,20 +23,37 @@ func (p *Routers) String() string {
 
 //Router 路由信息
 type Router struct {
-	Path    string   `json:"path,omitempty" valid:"ascii,required"`
-	Action  []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
-	Service string   `json:"service" valid:"ascii,required"`
-	Pages   []string `json:"pages,omitempty"`
+	Path     string   `json:"path,omitempty" valid:"ascii,required"`
+	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
+	Service  string   `json:"service" valid:"ascii,required"`
+	Encoding string   `json:"encoding,omitempty"`
+	Pages    []string `json:"pages,omitempty"`
 }
 
 //NewRouter 构建路径配置
-func NewRouter(path string, service string, action []string, pages ...string) *Router {
-	return &Router{
+func NewRouter(path string, service string, action []string, opts ...Option) *Router {
+	r := &Router{
 		Path:    path,
 		Action:  action,
 		Service: service,
-		Pages:   pages,
 	}
+	for _, opt := range opts {
+		opt(r)
+	}
+	return r
+}
+
+//GetEncoding 获取encoding配置，未配置时返回utf-8
+func (r *Router) GetEncoding() string {
+	if r.Encoding != "" {
+		return r.Encoding
+	}
+	return "utf-8"
+}
+
+//IsUTF8 是否是UTF8编码
+func (r *Router) IsUTF8() bool {
+	return r.GetEncoding() == "utf-8"
 }
 
 //NewRouters 构建路由
@@ -47,9 +65,19 @@ func NewRouters() *Routers {
 }
 
 //Append 添加路由信息
-func (h *Routers) Append(path string, service string, action []string, pages ...string) *Routers {
-	h.Routers = append(h.Routers, NewRouter(path, service, action, pages...))
+func (h *Routers) Append(path string, service string, action []string, opts ...Option) *Routers {
+	h.Routers = append(h.Routers, NewRouter(path, service, action, opts...))
 	return h
+}
+
+//Match 根据请求路径匹配指定的路由配置
+func (h *Routers) Match(path string, method string) *Router {
+	for _, r := range h.Routers {
+		if r.Path == path && types.StringContains(r.Action, method) {
+			return r
+		}
+	}
+	panic(fmt.Sprintf("未找到与%s %s匹配的路由", path, method))
 }
 
 //GetConf 设置路由

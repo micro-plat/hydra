@@ -8,25 +8,27 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/types"
 )
 
 type request struct {
-	ctx context.IInnerContext
+	ctx        context.IInnerContext
+	serverConf server.IServerConf
 	*body
 	path *rpath
 }
 
 //newRequest 构建请求的Request
-func newRequest(c context.IInnerContext) *request {
-	r := &request{
+func newRequest(c context.IInnerContext, s server.IServerConf) *request {
+	rpath := newRpath(c, s)
+	return &request{
 		ctx:  c,
-		body: &body{ctx: c},
-		path: &rpath{ctx: c},
+		body: newBody(c, rpath),
+		path: rpath,
 	}
-
-	return r
 }
 
 //Path 获取请求路径信息
@@ -112,6 +114,15 @@ func (r *request) GetData() (map[string]interface{}, error) {
 
 //Get 获取字段的值
 func (r *request) Get(name string) (result string, ok bool) {
+	defer func() {
+		if ok && r.path.GetRouter().IsUTF8() {
+			r, err := encoding.Decode(result, r.path.GetRouter().GetEncoding())
+			if err != nil {
+				panic(err)
+			}
+			result = string(r)
+		}
+	}()
 	if result, ok = r.ctx.GetPostForm(name); ok {
 		return
 	}

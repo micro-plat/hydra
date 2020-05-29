@@ -16,6 +16,7 @@ type IInnerContext interface {
 	GetHeaders() http.Header           //Request.Header
 	GetCookies() []*http.Cookie        //Request.Cookies()
 	Param(string) string               //Context.Param(key)
+	GetRouterPath() string             //Context.FullPath()
 	ShouldBind(interface{}) error      //Context.ShouldBind(&obj)
 	GetPostForm(string) (string, bool) //context GetPostForm)
 	GetQuery(string) (string, bool)    //context.GetQuery

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 )
@@ -19,23 +20,22 @@ const defClose = "Close"
 //IService 服务注册接口
 type IService interface {
 	//Micro 注册为微服务，包括api,web,rpc,websocket
-	Micro(name string, h interface{}, pages ...string)
+	Micro(name string, h interface{}, r ...router.Option)
 
 	//Flow 注册为流程,包括mqc,cron
 	Flow(name string, h interface{})
 
 	//API 注册为http api服务
-	API(name string, h interface{}, pages ...string)
+	API(name string, h interface{}, r ...router.Option)
 
 	//Web 注册为web服务
-	Web(name string, h interface{}, pages ...string)
+	Web(name string, h interface{}, r ...router.Option)
 
 	//RPC 注册为RPC服务
-	RPC(name string, h interface{}, pages ...string)
+	RPC(name string, h interface{}, r ...router.Option)
 
 	//WS 注册为websocket服务
-	WS(name string, h interface{}, pages ...string)
-
+	WS(name string, h interface{}, r ...router.Option)
 	//MQC 注册为消息消费服务
 	MQC(name string, h interface{}, queues ...string)
 
@@ -43,10 +43,10 @@ type IService interface {
 	CRON(name string, h interface{}, crons ...string)
 
 	//custome 注册为自定义服务器的服务
-	Custome(tp string, name string, h interface{}, ext ...string)
+	Custome(tp string, name string, h interface{}, ext ...interface{})
 
 	//RegisterServer 注册新的服务器类型
-	RegisterServer(tp string, f ...func(g *Unit, ext ...string) error)
+	RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error)
 
 	//OnStarting 服务器启动勾子，服务器启动完成前执行
 	OnStarting(h func(server.IServerConf) error, tps ...string)
@@ -74,10 +74,10 @@ type regist struct {
 }
 
 //Micro 注册为微服务包括api,web,rpc
-func (s *regist) Micro(name string, h interface{}, pages ...string) {
-	s.Custome(global.API, name, h, pages...)
-	s.Custome(global.Web, name, h, pages...)
-	s.Custome(global.WS, name, h, pages...)
+func (s *regist) Micro(name string, h interface{}, r ...router.Option) {
+	s.API(name, h, r...)
+	s.Web(name, h, r...)
+	s.WS(name, h, r...)
 }
 
 //Flow 注册为流程服务，包括mqc,cron
@@ -87,42 +87,66 @@ func (s *regist) Flow(name string, h interface{}) {
 }
 
 //API 注册为API服务
-func (s *regist) API(name string, h interface{}, pages ...string) {
-	s.get(global.API).Register(name, h, pages...)
+func (s *regist) API(name string, h interface{}, ext ...router.Option) {
+	v := make([]interface{}, 0, len(ext))
+	for _, e := range ext {
+		v = append(v, e)
+	}
+	s.Custome(global.API, name, h, v...)
 }
 
 //Web 注册为web服务
-func (s *regist) Web(name string, h interface{}, pages ...string) {
-	s.Custome(global.Web, name, h, pages...)
+func (s *regist) Web(name string, h interface{}, ext ...router.Option) {
+	v := make([]interface{}, 0, len(ext))
+	for _, e := range ext {
+		v = append(v, e)
+	}
+	s.Custome(global.Web, name, h, v...)
 }
 
 //RPC 注册为rpc服务
-func (s *regist) RPC(name string, h interface{}, pages ...string) {
-	s.Custome(global.WS, name, h, pages...)
+func (s *regist) RPC(name string, h interface{}, ext ...router.Option) {
+	v := make([]interface{}, 0, len(ext))
+	for _, e := range ext {
+		v = append(v, e)
+	}
+	s.Custome(global.WS, name, h, v...)
 }
 
 //WS 注册为websocket服务
-func (s *regist) WS(name string, h interface{}, pages ...string) {
-	s.Custome(global.WS, name, h, pages...)
+func (s *regist) WS(name string, h interface{}, ext ...router.Option) {
+	v := make([]interface{}, 0, len(ext))
+	for _, e := range ext {
+		v = append(v, e)
+	}
+	s.Custome(global.WS, name, h, v...)
 }
 
 //MQC 注册为消息队列服务
 func (s *regist) MQC(name string, h interface{}, queues ...string) {
-	s.Custome(global.MQC, name, h, queues...)
+	v := make([]interface{}, 0, len(queues))
+	for _, e := range queues {
+		v = append(v, e)
+	}
+	s.Custome(global.MQC, name, h, v...)
 }
 
 //CRON 注册为定时任务服务
 func (s *regist) CRON(name string, h interface{}, crons ...string) {
-	s.Custome(global.CRON, name, h, crons...)
+	v := make([]interface{}, 0, len(crons))
+	for _, e := range crons {
+		v = append(v, e)
+	}
+	s.Custome(global.CRON, name, h, v...)
 }
 
 //Custome 自定义服务注册
-func (s *regist) Custome(tp string, name string, h interface{}, ext ...string) {
+func (s *regist) Custome(tp string, name string, h interface{}, ext ...interface{}) {
 	s.get(tp).Register(name, h, ext...)
 }
 
 //RegisterServer 注册服务器
-func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...string) error) {
+func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error) {
 	if _, ok := s.servers[tp]; ok {
 		panic(fmt.Errorf("服务%s已存在，不能重复注册", tp))
 	}
@@ -250,28 +274,28 @@ func (s *regist) Close() error {
 
 //init 处理服务初始化及特殊注册函数
 func init() {
-	Def.servers[global.API] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.API] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return API.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	Def.servers[global.Web] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.Web] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return WEB.Add(g.Path, g.Service, g.Actions, ext...)
 	})
-	Def.servers[global.RPC] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.RPC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
 	})
 
 	Def.servers[global.WS] = newServerServices(nil)
 
-	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			CRON.Add(t, g.Service)
+			CRON.Add(t.(string), g.Service)
 		}
 		return nil
 
 	})
-	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...string) error {
+	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			MQC.Add(t, g.Service)
+			MQC.Add(t.(string), g.Service)
 		}
 		return nil
 	})

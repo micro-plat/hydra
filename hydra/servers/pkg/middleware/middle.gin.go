@@ -26,6 +26,10 @@ func (g *ginCtx) load() {
 	})
 }
 
+//
+func (g *ginCtx) GetRouterPath() string {
+	return g.Context.FullPath()
+}
 func (g *ginCtx) GetBody() io.ReadCloser {
 	return g.Request.Body
 }

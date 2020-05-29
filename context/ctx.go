@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -40,8 +41,8 @@ type IGetter interface {
 //IPath 请求参数
 type IPath interface {
 	GetMethod() string
-	GetService() string
-	GetPath() string
+	GetRouter() *router.Router
+	GetRequestPath() string
 	GetURL() string
 	GetCookie(string) (string, bool)
 	GetHeader(string) string

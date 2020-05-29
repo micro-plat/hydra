@@ -31,11 +31,11 @@ func newAPIRouter() *apiRouter {
 	}
 }
 
-func (s *apiRouter) Add(path string, service string, action []string, pages ...string) error {
+func (s *apiRouter) Add(path string, service string, action []string, opts ...interface{}) error {
 	if _, ok := s.pathRouters[path]; !ok {
 		s.pathRouters[path] = newPathRouter(path)
 	}
-	if err := s.pathRouters[path].Add(service, action, pages...); err != nil {
+	if err := s.pathRouters[path].Add(service, action, opts...); err != nil {
 		return err
 	}
 	return nil
@@ -74,14 +74,24 @@ func newPathRouter(path string) *pathRouter {
 	}
 	return r
 }
-func (p *pathRouter) Add(service string, action []string, pages ...string) error {
+func (p *pathRouter) Add(service string, action []string, opts ...interface{}) error {
 	for _, a := range action {
 		if _, ok := p.action[a]; !ok {
 			return fmt.Errorf("服务%s不能重复注册", service)
 		}
 		delete(p.action, a)
 	}
-	p.routers = append(p.routers, router.NewRouter(p.path, service, action, pages...))
+
+	//转换输入参数
+	nopts := make([]router.Option, 0, len(opts))
+	for _, p := range opts {
+		v, ok := p.(router.Option)
+		if !ok {
+			panic(fmt.Errorf("%s注册的服务类型必须是router.Option", service))
+		}
+		nopts = append(nopts, v)
+	}
+	p.routers = append(p.routers, router.NewRouter(p.path, service, action, nopts...))
 	return nil
 }
 func (p *pathRouter) GetRouters() ([]*router.Router, error) {

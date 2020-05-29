@@ -3,6 +3,8 @@ package ctx
 import (
 	"strings"
 
+	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 )
 
@@ -10,7 +12,15 @@ var _ context.IPath = &rpath{}
 
 //rpath 处理请求的路径信息
 type rpath struct {
-	ctx context.IInnerContext
+	ctx        context.IInnerContext
+	serverConf server.IServerConf
+}
+
+func newRpath(ctx context.IInnerContext, serverConf server.IServerConf) *rpath {
+	return &rpath{
+		ctx:        ctx,
+		serverConf: serverConf,
+	}
 }
 
 //GetMethod 获取服务请求方式
@@ -18,9 +28,9 @@ func (c *rpath) GetMethod() string {
 	return c.ctx.GetMethod()
 }
 
-//GetService 获取处理的服务名
-func (c *rpath) GetService() string {
-	return ""
+//GetRouter 获取路由信息
+func (c *rpath) GetRouter() *router.Router {
+	return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
 }
 
 //GetURL 获取请求路径
@@ -28,8 +38,8 @@ func (c *rpath) GetURL() string {
 	return c.ctx.GetURL().String()
 }
 
-//GetPath 获取请求路径
-func (c *rpath) GetPath() string {
+//GetRequestPath 获取请求路径
+func (c *rpath) GetRequestPath() string {
 	return c.ctx.GetURL().Path
 }
 

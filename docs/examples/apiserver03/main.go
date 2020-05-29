@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
@@ -13,7 +14,7 @@ func main() {
 		hydra.WithDebug(),
 	)
 
-	app.API("/order/request", hello)
+	app.API("/order/request", hello, router.WithEncoding("gbk"))
 	app.API("/member/login", login)
 	app.API("/index", index)
 	app.Start()

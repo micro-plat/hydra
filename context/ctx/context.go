@@ -44,10 +44,10 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	if err != nil {
 		panic(err)
 	}
-	ctx.user = &user{ctx: c, auth: &auth{}}
-	ctx.request = newRequest(c)
+	ctx.user = newUser(c)
+	ctx.request = newRequest(c, ctx.serverConf)
 	ctx.log = logger.GetSession(ctx.serverConf.GetMainConf().GetServerName(), ctx.User().GetRequestID())
-	ctx.response = &response{ctx: c, conf: ctx.serverConf, log: ctx.log}
+	ctx.response = newResponse(c, ctx.serverConf, ctx.log)
 	ctx.tid = context.Cache(ctx) //保存到缓存中
 	timeout := time.Duration(ctx.serverConf.GetMainConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
@@ -56,7 +56,8 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 		"get_req_string": ctx.request.GetString,
 		"get_req_int":    ctx.request.GetInt,
 		"get_param":      ctx.request.Param,
-		"get_path":       ctx.request.path.GetPath,
+		"get_path":       ctx.request.path.GetRequestPath,
+		"get_router":     ctx.request.path.GetRouter,
 		"get_header":     ctx.request.path.GetHeader,
 		"get_cookie":     ctx.request.path.getCookie,
 		"get_status":     ctx.response.getStatus,

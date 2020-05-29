@@ -67,7 +67,7 @@ func (m *Metric) Handle() Handler {
 		ctx.Response().AddSpecial("metric")
 
 		//1. 初始化三类统计器---请求的QPS/正在处理的计数器/时间统计器
-		url := ctx.Request().Path().GetPath()
+		url := ctx.Request().Path().GetRequestPath()
 		conterName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.WORKING, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url) //堵塞计数
 		timerName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.TIMER, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //堵塞计数
 		requestName := metrics.MakeName(ctx.ServerConf().GetMainConf().GetServerType()+".server.request", metrics.QPS, "server", ctx.ServerConf().GetMainConf().GetServerName(), "host", m.ip, "url", url)    //请求数

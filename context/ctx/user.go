@@ -17,6 +17,13 @@ type user struct {
 	jwtToken  interface{}
 }
 
+func newUser(ctx context.IInnerContext) *user {
+	return &user{
+		ctx:  ctx,
+		auth: &auth{},
+	}
+}
+
 //GetRequestID 获取请求编号
 func (c *user) GetRequestID() string {
 	ids := c.ctx.GetHeaders()[xRequestID]

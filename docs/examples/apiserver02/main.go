@@ -12,7 +12,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 	)
 
-	app.API("/order/request", request, "/order/*")
+	app.API("/order/request", request)
 	app.API("/order", &OrderService{})
 
 	app.OnStarting(func(server.IServerConf) error {

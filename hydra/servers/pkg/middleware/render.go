@@ -12,7 +12,7 @@ func Render() Handler {
 			return
 		}
 
-		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetPath(), ctx.Funcs(), ctx.Response().GetRaw())
+		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetRequestPath(), ctx.Funcs(), ctx.Response().GetRaw())
 		if !enable {
 			return
 		}

@@ -13,7 +13,7 @@ func Static() Handler {
 			ctx.Next()
 			return
 		}
-		var rpath = ctx.Request().Path().GetPath()
+		var rpath = ctx.Request().Path().GetRequestPath()
 		ok, fpath := static.IsStatic(rpath)
 		if !ok {
 			ctx.Next()

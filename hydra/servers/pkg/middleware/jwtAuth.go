@@ -26,11 +26,11 @@ func JwtAuth() Handler {
 		ctx.Response().AddSpecial("jwt")
 
 		//3.检查是否需要跳过请求
-		if ok, _ := jwtAuth.In(ctx.Request().Path().GetPath()); ok {
+		if ok, _ := jwtAuth.In(ctx.Request().Path().GetRequestPath()); ok {
 			ctx.Next()
 			return
 		}
-		if ok, _ := jwtAuth.In(ctx.Request().Path().GetService()); ok {
+		if ok, _ := jwtAuth.In(ctx.Request().Path().GetRouter().Service); ok {
 			ctx.Next()
 			return
 		}

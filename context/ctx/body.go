@@ -13,13 +13,14 @@ import (
 //body 用于处理http请求的body读取
 type body struct {
 	ctx         context.IInnerContext
+	path        *rpath
 	body        []byte
 	bodyReadErr error
 	hasReadBody bool
 }
 
-func newBody(c context.IInnerContext) *body {
-	return &body{ctx: c}
+func newBody(c context.IInnerContext, path *rpath) *body {
+	return &body{ctx: c, path: path}
 }
 
 //GetBodyMap 读取body并返回map
@@ -38,7 +39,8 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 
 //GetBody 读取body返回body原字符串
 func (w *body) GetBody(e ...string) (s string, err error) {
-	encode := types.GetStringByIndex(e, 0, "utf-8")
+	defEncode := types.GetString(w.path.GetRouter().Encoding, "utf-8")
+	encode := types.GetStringByIndex(e, 0, defEncode)
 	if w.hasReadBody {
 		if w.bodyReadErr != nil {
 			return "", w.bodyReadErr
@@ -53,8 +55,5 @@ func (w *body) GetBody(e ...string) (s string, err error) {
 	}
 	var buff []byte
 	buff, w.bodyReadErr = encoding.DecodeBytes(w.body, encode)
-	if w.bodyReadErr != nil {
-		return "", fmt.Errorf("获取body发生错误:%w", w.bodyReadErr)
-	}
 	return string(buff), nil
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
 )
@@ -18,6 +19,7 @@ func main() {
 	)
 
 	app.API("/order/request/:tp", request)
+	app.API("/order/encoding/:tp", request, router.WithEncoding("gbk"))
 	app.Start()
 }
 
@@ -77,6 +79,9 @@ func request(ctx hydra.IContext) (r interface{}) {
 		}
 		return ctx.Request().GetString("order_id")
 	case "14":
+		fmt.Println("name:", ctx.Request().GetString("name"))
+		return ctx.Request().GetString("name")
+	case "15":
 		return hydra.Global.PlatName
 	default:
 		return fmt.Errorf("值错误，请传入1-12")

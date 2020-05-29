@@ -23,7 +23,7 @@ func FixedSecretAuth() Handler {
 			ctx.Next()
 			return
 		}
-		if ok, _ := auth.In(ctx.Request().Path().GetPath()); ok {
+		if ok, _ := auth.In(ctx.Request().Path().GetRequestPath()); ok {
 			ctx.Next()
 			return
 		}
