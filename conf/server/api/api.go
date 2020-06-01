@@ -8,7 +8,7 @@ import (
 var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "dn"}
 
 //SubConfName 子配置中的关键配置名
-var SubConfName = []string{"router"}
+var SubConfName = []string{"router", "metric"}
 
 //Server api server配置信息
 type Server struct {

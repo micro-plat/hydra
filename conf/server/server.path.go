@@ -101,5 +101,5 @@ func (c *Pub) GetClusterName() string {
 
 //GetServerName 获取服务器名称
 func (c *Pub) GetServerName() string {
-	return fmt.Sprintf("%s.%s(%s)", c.sysName, c.clusterName, c.serverType)
+	return fmt.Sprintf("%s.%s.%s", c.sysName, c.clusterName, c.serverType)
 }

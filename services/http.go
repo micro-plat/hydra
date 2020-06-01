@@ -17,7 +17,7 @@ var WEB = newAPIRouter()
 //RPC rpc服务的路由信息
 var RPC = newAPIRouter()
 
-var defRequestMethod = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
+var defRequestMethod = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodHead}
 
 type apiRouter struct {
 	routers     *router.Routers

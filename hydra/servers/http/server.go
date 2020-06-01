@@ -91,8 +91,8 @@ func (s *Server) Start() error {
 //Shutdown 关闭服务器
 func (s *Server) Shutdown() error {
 	if s.server != nil && s.running {
-		s.metric.Stop()
 		s.running = false
+		defer s.metric.Stop()
 		ctx, cannel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cannel()
 		if err := s.server.Shutdown(ctx); err != nil {
@@ -120,7 +120,7 @@ func (s *Server) GetStatus() string {
 
 func (s *Server) getAddress(addr string) (string, error) {
 	host := "0.0.0.0"
-	port := "8081"
+	port := "8080"
 	args := strings.Split(addr, ":")
 	l := len(args)
 	if addr == "" {

@@ -2,6 +2,7 @@ package metric
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -23,6 +24,10 @@ type Metric struct {
 
 //New 构建api server配置信息
 func New(host string, db string, cron string, opts ...Option) *Metric {
+	port := ":8086"
+	if !strings.Contains(host, ":") {
+		host = host + port
+	}
 	m := &Metric{
 		Host:     host,
 		DataBase: db,

@@ -102,5 +102,6 @@ func (m *Metric) Handle() Handler {
 func (m *Metric) Stop() {
 	if m.reporter != nil {
 		m.reporter.Close()
+		m.reporter = nil
 	}
 }

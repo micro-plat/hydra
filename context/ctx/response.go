@@ -269,6 +269,9 @@ func (c *response) GetRawResponse() (int, interface{}) {
 
 //GetFinalResponse 获取响应内容信息
 func (c *response) GetFinalResponse() (int, string) {
+	if c.final.content == nil {
+		return c.final.status, ""
+	}
 	return c.final.status, c.final.content.(string)
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
+	"github.com/micro-plat/hydra/global"
 )
 
 type imiddle interface {
@@ -14,12 +15,21 @@ type imiddle interface {
 type IMiddleContext interface {
 	imiddle
 	context.IContext
+	Trace(...interface{})
 }
 
 //MiddleContext 中间件转换器，在context.IContext中扩展next函数
+
 type MiddleContext struct {
 	context.IContext
 	imiddle
+}
+
+//Trace 输出调试日志
+func (m *MiddleContext) Trace(s ...interface{}) {
+	if global.IsDebug {
+		m.IContext.Log().Debug(s...)
+	}
 }
 
 //newMiddleContext 构建中间件处理handler
