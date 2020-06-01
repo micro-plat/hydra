@@ -1,0 +1,51 @@
+{
+	"ImportPath": "github.com/micro-plat/lib4go/mq/stomp",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v80",
+	"Deps": [
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/concurrent/cmap",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/file",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/jsons",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/logger",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/mq",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/net",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/security/md5",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/ut",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/micro-plat/lib4go/utility",
+			"Rev": "b8442154eb5e0610e70e903b1c3bd4f1aa4ed8e2"
+		},
+		{
+			"ImportPath": "github.com/zkfy/log",
+			"Rev": "7887c61bf0de75586961948b286be6f7d05d9f58"
+		},
+		{
+			"ImportPath": "github.com/zkfy/stompngo",
+			"Rev": "9378e70ca4813277a83cfd0c36531f6101b5b484"
+		}
+	]
+}
