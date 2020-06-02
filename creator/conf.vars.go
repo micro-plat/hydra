@@ -1,9 +1,9 @@
 package creator
 
 import (
-	"github.com/micro-plat/hydra/conf/plat/cache"
-	"github.com/micro-plat/hydra/conf/plat/db"
-	"github.com/micro-plat/hydra/conf/plat/queue"
+	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/hydra/conf/vars/db"
+	"github.com/micro-plat/hydra/conf/vars/queue"
 )
 
 type vars map[string]map[string]interface{}

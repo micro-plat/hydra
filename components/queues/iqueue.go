@@ -1,6 +1,6 @@
 package queues
 
-import "github.com/micro-plat/hydra/components/pkg/mq"
+import "github.com/micro-plat/hydra/components/pkgs/mq"
 
 //IQueue 消息队列
 type IQueue = mq.IMQP

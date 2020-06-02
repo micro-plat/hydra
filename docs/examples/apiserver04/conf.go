@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/plat/db/oracle"
-	"github.com/micro-plat/hydra/conf/plat/queue/lmq"
+	"github.com/micro-plat/hydra/conf/vars/db/oracle"
+	"github.com/micro-plat/hydra/conf/vars/queue/lmq"
 )
 
 func init() {

@@ -7,6 +7,7 @@ github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932/go.mod h1:NOuUCSz6Q9T7+igc/hlvDOUdtWKryOrtFyIVABv/p7k=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
+github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b h1:L/QXpzIa3pOvUGt1D1lA5KjYhPBAN/3iWdP7xeFS9F0=
 github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b/go.mod h1:H0wQNHz2YrLsuXOZozoeDmnHXkNCRmMW0gwFWDfEZDA=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
@@ -17,6 +18,7 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
+github.com/eclipse/paho.mqtt.golang v1.2.0 h1:1F8mhG9+aO5/xpdtFkW4SxOJB67ukuDC3t2y2qayIX0=
 github.com/eclipse/paho.mqtt.golang v1.2.0/go.mod h1:H9keYFcgq3Qr5OUJm/JZI/i6U7joQ8SYLhZwfeOo6Ts=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
@@ -36,6 +38,7 @@ github.com/go-playground/universal-translator v0.17.0 h1:icxd5fm+REJzpZx7ZfpaD87
 github.com/go-playground/universal-translator v0.17.0/go.mod h1:UkSxE5sNxxRwHyU+Scu5vgOQjsIJAF8j9muTVoKLVtA=
 github.com/go-playground/validator/v10 v10.2.0 h1:KgJ0snyC2R9VXYN2rneOtQcw5aHQB1Vv0sFl1UcHBOY=
 github.com/go-playground/validator/v10 v10.2.0/go.mod h1:uOYAAleCW8F/7oMFd6aG0GOhaH6EGOAJShg8Id5JGkI=
+github.com/go-redis/redis v6.15.6+incompatible h1:H9evprGPLI8+ci7fxQx6WNZHJSb7be8FqJQRhdQZ5Sg=
 github.com/go-redis/redis v6.15.6+incompatible/go.mod h1:NAIEuMOZ/fxfXJIrKDQDz8wamY7mA7PouImQ2Jvg6kA=
 github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
@@ -68,6 +71,7 @@ github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/micro-plat/cli v1.1.0 h1:2+EQ9aqjGSIvjMV5Bua3jmarY5jiKjbqmAUo4QggMrU=
 github.com/micro-plat/cli v1.1.0/go.mod h1:GnoRwckiFn8pXqHKZjdmMTQT6CXuJTxgWJJvs32goIw=
+github.com/micro-plat/gmq v1.0.1 h1:ai1PiCEfgBmiqzmZ4iWE3l2Vuz7rOTWOakqRWqi/Hgo=
 github.com/micro-plat/gmq v1.0.1/go.mod h1:93NeUjbgul5ywP+cm4eXERv6Zk0J8zZyrzYrY3q8GVQ=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 h1:ZqeYNhU3OHLH3mGKHDcjJRFFRrJa6eAM5H+CtDdOsPc=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
@@ -103,9 +107,11 @@ github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
 github.com/urfave/cli v1.22.4 h1:u7tSpNPPswAFymm8IehJhy4uJMlUuU/GmqSkvJ1InXA=
 github.com/urfave/cli v1.22.4/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
+github.com/yosssi/gmq v0.0.1 h1:GhlDVaAQoi3Mvjul/qJXXGfL4JBeE0GQwbWp3eIsja8=
 github.com/yosssi/gmq v0.0.1/go.mod h1:mReykazh0U1JabvuWh1PEbzzJftqOQWsjr0Lwg5jL1Y=
 github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8 h1:jxPemXnLeekMXItoaw4jZtDfe8HmvFmviUm2L5tEBhE=
 github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8/go.mod h1:JOZbTZbRDcU9U/JLhwfjNJ9Z3fCrvcwldtFCsB7LnSc=
+github.com/zkfy/go-cache v2.1.0+incompatible h1:EjS1DuoVgnNDp19ugUg7UI8O5I8lzs5h0ubvkTFLR9s=
 github.com/zkfy/go-cache v2.1.0+incompatible/go.mod h1:3BfHxgJ+4h6vTvsIuKZnIf44JzXgECayURPxvafVv5Y=
 github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5 h1:Rb2qQMbEon+BI3IXGh4eW3u/iTLPA3+Y6kNK+gHO32w=
 github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5/go.mod h1:VOfLef4/FOZxeKOJ2BtlXFcirZ3i6/E7dR1wBl37LS8=
@@ -113,6 +119,7 @@ github.com/zkfy/jwt-go v3.0.0+incompatible h1:5hZNIkrRRa0mrkRiXoPFdLJWpMDByIZ6VI
 github.com/zkfy/jwt-go v3.0.0+incompatible/go.mod h1:/VPZ6I97VPxFImaauVUAH0vFDQBwnVZVm9XTexdfD9E=
 github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896 h1:nktyhX5ycnu+WA489Ei7SUi00bF+LW8TF2N7se5gQ/o=
 github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896/go.mod h1:Aiq66eXWCthZ9RAkNFSTXdq4WxeH3IFsHO3/3oAwFJs=
+github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481 h1:dqbWcJVZJv06ZR7zK8yN9w8oNOHL23eylL4o9Xj9Zn0=
 github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481/go.mod h1:YhbMHdfKqDOLUVc2MQoMXRayntbZzMuDnbTZhXWPwZI=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=

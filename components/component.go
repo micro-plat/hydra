@@ -3,6 +3,7 @@ package components
 import (
 	"github.com/micro-plat/hydra/components/caches"
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components/dbs"
 	"github.com/micro-plat/hydra/components/dlock"
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
@@ -16,6 +17,9 @@ type IComponent interface {
 	RPC() rpcs.IComponentRPC
 	Queue() queues.IComponentQueue
 	Cache() caches.IComponentCache
+	DB() dbs.IComponentDB
+	DLock(name string) (dlock.ILock, error)
+	UUID() uuid.IUUID
 }
 
 //Def 默认组件
@@ -27,6 +31,7 @@ type Component struct {
 	rpc   rpcs.IComponentRPC
 	queue queues.IComponentQueue
 	cache caches.IComponentCache
+	db    dbs.IComponentDB
 }
 
 //NewComponent 创建组件
@@ -37,6 +42,7 @@ func NewComponent() *Component {
 	c.rpc = rpcs.NewStandardRPC(c.c)
 	c.queue = queues.NewStandardQueue(c.c)
 	c.cache = caches.NewStandardCache(c.c)
+	c.db = dbs.NewStandardDB(c.c)
 	return c
 }
 
@@ -53,6 +59,11 @@ func (c *Component) Queue() queues.IComponentQueue {
 //Cache 获取Queue组件
 func (c *Component) Cache() caches.IComponentCache {
 	return c.cache
+}
+
+//DB 获取DB组件
+func (c *Component) DB() dbs.IComponentDB {
+	return c.db
 }
 
 //DLock 获取分布式鍞
