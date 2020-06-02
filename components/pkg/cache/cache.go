@@ -37,8 +37,8 @@ func Register(proto string, resolver Resover) {
 	cacheResolvers[proto] = resolver
 }
 
-//NewCache 根据适配器名称及参数返回配置处理器
-func NewCache(address string, conf string) (ICache, error) {
+//New 根据适配器名称及参数返回配置处理器
+func New(address string, conf string) (ICache, error) {
 	proto, addrs, err := getNames(address)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/lib4go/influxdb/escape"
+	"github.com/micro-plat/hydra/components/pkg/influxdb/escape"
 )
 
 var (

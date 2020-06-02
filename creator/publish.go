@@ -38,6 +38,15 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 			}
 		}
 	}
+	for tp, subs := range c.vars {
+		pub := server.NewPub(platName, systemName, global.API, clusterName)
+		for k, v := range subs {
+			if err := publish(r, pub.GetVarPath(tp, k), v, cover); err != nil {
+				return err
+			}
+		}
+
+	}
 	return nil
 }
 

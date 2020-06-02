@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/micro-plat/lib4go/cache"
+	"github.com/micro-plat/hydra/components/pkg/cache"
 )
 
 // Client memcache配置文件
@@ -127,12 +127,12 @@ func (c *Client) Close() error {
 	return nil
 }
 
-type memcacheResolver struct {
+type mresolver struct {
 }
 
-func (s *memcacheResolver) Resolve(address []string, c string) (cache.ICache, error) {
+func (s *mresolver) Resolve(address []string, c string) (cache.ICache, error) {
 	return New(address)
 }
 func init() {
-	cache.Register("memcached", &memcacheResolver{})
+	cache.Register("memcached", &mresolver{})
 }

@@ -14,7 +14,7 @@ type Client struct {
 }
 
 // New 根据配置文件创建一个redis连接
-func New(addrs []string, conf string) (m *Client, err error) {
+func New() (m *Client, err error) {
 	m = &Client{}
 	m.client = gocache.New(5*time.Minute, 10*time.Minute)
 	return
@@ -99,7 +99,7 @@ type cacheResolver struct {
 }
 
 func (s *cacheResolver) Resolve(address []string, conf string) (cache.ICache, error) {
-	return New(address, conf)
+	return New()
 }
 func init() {
 	cache.Register("gocache", &cacheResolver{})

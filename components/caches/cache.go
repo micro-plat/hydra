@@ -38,7 +38,7 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
 	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
-		return cache.NewCache(js.GetString("proto"), string(js.GetRaw()))
+		return cache.New(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

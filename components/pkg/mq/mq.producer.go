@@ -1,57 +1,44 @@
 package mq
 
 import (
+	"errors"
 	"fmt"
-	"sync/atomic"
-	"time"
 )
 
-type ProcuderMessage struct {
-	Headers   []string
-	Queue     string
-	Data      string
-	SendTimes int32
-	Timeout   time.Duration
+var Nil = errors.New("nil")
+
+//IMQP 消息生产
+type IMQP interface {
+	Push(key string, value string) error
+	Pop(key string) (string, error)
+	Count(key string) (int64, error)
+	Close() error
 }
 
-func (p *ProcuderMessage) AddSendTimes() {
-	atomic.AddInt32(&p.SendTimes, 1)
+//imqpResover 定义配置文件转换方法
+type imqpResover interface {
+	Resolve(address []string, opts ...Option) (IMQP, error)
 }
 
-type MQProducer interface {
-	Connect() error
-	GetBackupMessage() chan *ProcuderMessage
-	Send(queue string, msg string, timeout time.Duration) (err error)
-	Close()
-}
-
-//MQConsumerResover 定义配置文件转换方法
-type MQProducerResover interface {
-	Resolve(address string, opts ...Option) (MQProducer, error)
-}
-
-var mqProducerResolvers = make(map[string]MQProducerResover)
+var mqpResolvers = make(map[string]imqpResover)
 
 //RegisterProducer 注册配置文件适配器
-func RegisterProducer(proto string, resolver MQProducerResover) {
-	if resolver == nil {
-		panic("mq: Register adapter is nil")
+func RegisterProducer(proto string, resolver imqpResover) {
+	if _, ok := mqpResolvers[proto]; ok {
+		panic("mqp: 不能重复注册producer " + proto)
 	}
-	if _, ok := mqProducerResolvers[proto]; ok {
-		panic("mq: Register called twice for adapter " + proto)
-	}
-	mqProducerResolvers[proto] = resolver
+	mqpResolvers[proto] = resolver
 }
 
-//NewMQProducer 根据适配器名称及参数返回配置处理器
-func NewMQProducer(address string, opts ...Option) (MQProducer, error) {
-	proto, addrs, err := getMQNames(address)
+//NewMQP 根据适配器名称及参数返回配置处理器
+func NewMQP(address string, opts ...Option) (IMQP, error) {
+	proto, addrs, err := getNames(address)
 	if err != nil {
 		return nil, err
 	}
-	resolver, ok := mqProducerResolvers[proto]
+	resolver, ok := mqpResolvers[proto]
 	if !ok {
-		return nil, fmt.Errorf("mq.producer: unknown adapter name %q (forgotten import?)", proto)
+		return nil, fmt.Errorf("mqp: 不支持的消息协议 %s", proto)
 	}
-	return resolver.Resolve(addrs[0], opts...)
+	return resolver.Resolve(addrs, opts...)
 }

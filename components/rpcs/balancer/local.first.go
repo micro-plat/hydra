@@ -16,17 +16,12 @@ import (
 // LocalFirst returns a Balancer that selects addresses round-robin. It uses r to watch
 // the name resolution updates and updates the addresses available correspondingly.
 func LocalFirst(service string, ip string, r naming.Resolver, limits ...map[string]int) CustomerBalancer {
-	l := make(map[string]int)
-	if len(limits) > 0 {
-		l = limits[0]
-	}
-	return &localFirst{r: r, ip: ip, limiter: NewLimiter(service, l)}
+	return &localFirst{r: r, ip: ip}
 }
 
 type localFirst struct {
 	r        naming.Resolver
 	w        naming.Watcher
-	limiter  *Limiter
 	ip       string
 	hasFirst bool
 	addrs    []*addrInfo // all the addresses the client should potentially connect
@@ -37,9 +32,6 @@ type localFirst struct {
 	done     bool                // The Balancer is closed.
 }
 
-func (rr *localFirst) UpdateLimiter(lt map[string]int) {
-	rr.limiter.Update(lt)
-}
 func (rr *localFirst) watchAddrUpdates() error {
 	updates, err := rr.w.Next()
 	if err != nil {
@@ -185,7 +177,7 @@ func (rr *localFirst) Get(ctx context.Context, opts grpc.BalancerGetOptions) (ad
 		for {
 			a := rr.addrs[next]
 			next = (next + 1) % len(rr.addrs)
-			if (a.connected || !rr.hasFirst || (rr.hasFirst && strings.HasPrefix(a.addr.Addr, rr.ip))) && rr.limiter.Check(a.addr.Addr) {
+			if a.connected || !rr.hasFirst || (rr.hasFirst && strings.HasPrefix(a.addr.Addr, rr.ip)) {
 				addr = a.addr
 				rr.next = next
 				rr.mu.Unlock()
@@ -205,7 +197,6 @@ func (rr *localFirst) Get(ctx context.Context, opts grpc.BalancerGetOptions) (ad
 		}
 		// Returns the next addr on rr.addrs for failfast RPCs.
 		addr = rr.addrs[rr.next].addr
-		rr.limiter.Check(addr.Addr)
 		rr.next++
 		rr.mu.Unlock()
 		return
@@ -239,7 +230,7 @@ func (rr *localFirst) Get(ctx context.Context, opts grpc.BalancerGetOptions) (ad
 				for {
 					a := rr.addrs[next]
 					next = (next + 1) % len(rr.addrs)
-					if (a.connected || !rr.hasFirst || (rr.hasFirst && strings.HasPrefix(a.addr.Addr, rr.ip))) && rr.limiter.Check(a.addr.Addr) {
+					if a.connected || !rr.hasFirst || (rr.hasFirst && strings.HasPrefix(a.addr.Addr, rr.ip)) {
 						addr = a.addr
 						rr.next = next
 						rr.mu.Unlock()

@@ -10,8 +10,6 @@ import (
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/lib4go/logger"
 
-	"errors"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -254,15 +252,6 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 		return NewResponseByStatus(500, err)
 	}
 	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult())
-}
-
-//Limite 修改服务器限流规则
-func (c *Client) Limite(limit map[string]int) error {
-	if c.balancer != nil {
-		c.balancer.UpdateLimiter(limit)
-		return nil
-	}
-	return errors.New("rpc.client.未指定balancer")
 }
 
 //Close 关闭RPC客户端连接

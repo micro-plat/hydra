@@ -1,67 +1,80 @@
 package lmq
 
 import (
-	"errors"
-	"time"
+	"fmt"
 
-	"github.com/micro-plat/lib4go/mq"
-	"github.com/micro-plat/lib4go/queue/lmq"
+	"github.com/micro-plat/hydra/components/pkg/mq"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
-//lmqProducer 基于本地channel的Producer
-type lmqProducer struct {
-	backupMsg chan *mq.ProcuderMessage
-	client    *lmq.LMQClient
-	closeCh   chan struct{}
-	done      bool
+var queues cmap.ConcurrentMap
+
+// Producer 消息生产者
+type Producer struct {
 }
 
-//newlmqProducer 创建新的producer
-func newlmqProducer(address string, opts ...mq.Option) (producer *lmqProducer, err error) {
-	m, err := lmq.New([]string{address}, "")
-	if err != nil {
-		return nil, err
+// New 创建消息生产者
+func New(addrs []string, opts ...mq.Option) (m *Producer, err error) {
+	return &Producer{}, nil
+}
+
+//GetQueue 获取队列
+func GetQueue(key string) (chan string, bool) {
+	v, ok := queues.Get(key)
+	if !ok {
+		return nil, ok
 	}
-	producer = &lmqProducer{client: m}
-	producer.closeCh = make(chan struct{})
-	return
+	return v.(chan string), true
 }
 
-//Connect  循环连接服务器
-func (producer *lmqProducer) Connect() (err error) {
+//GetOrAddQueue 获取队列
+func GetOrAddQueue(key string) chan string {
+	_, i := queues.SetIfAbsent(key, make(chan string, 10000))
+	return i.(chan string)
+}
+
+// Push 向存于 key 的列表的尾部插入所有指定的值
+func (c *Producer) Push(key string, value string) error {
+	ch := GetOrAddQueue(key)
+	select {
+	case ch <- value:
+		return nil
+	default:
+		return fmt.Errorf("消息队列(%s)已满", key)
+	}
+}
+
+// Pop 移除并且返回 key 对应的 list 的第一个元素。
+func (c *Producer) Pop(key string) (string, error) {
+	ch := GetOrAddQueue(key)
+	v, ok := <-ch
+	if !ok {
+		return "", mq.Nil
+	}
+	return v, nil
+}
+
+// Count 队列中元素个数
+func (c *Producer) Count(key string) (int64, error) {
+	return int64(len(GetOrAddQueue(key))), nil
+}
+
+// Close 释放资源
+func (c *Producer) Close() error {
+	queues.RemoveIterCb(func(key string, v interface{}) bool {
+		close(v.(chan string))
+		return true
+	})
 	return nil
 }
 
-//GetBackupMessage 获取备份数据
-func (producer *lmqProducer) GetBackupMessage() chan *mq.ProcuderMessage {
-	return producer.backupMsg
+type lmqResolver struct {
 }
 
-//Send 发送消息
-func (producer *lmqProducer) Send(queue string, msg string, timeout time.Duration) (err error) {
-	if producer.done {
-		return errors.New("lmq producer 已关闭")
-	}
-	err = producer.client.Push(queue, msg)
-	return
-}
-
-//Close 关闭当前连接
-func (producer *lmqProducer) Close() {
-	if !producer.done {
-		producer.done = true
-		close(producer.closeCh)
-		close(producer.backupMsg)
-		producer.client.Close()
-	}
-}
-
-type lmqProducerResolver struct {
-}
-
-func (s *lmqProducerResolver) Resolve(address string, opts ...mq.Option) (mq.MQProducer, error) {
-	return newlmqProducer(address, opts...)
+func (s *lmqResolver) Resolve(address []string, opts ...mq.Option) (mq.IMQP, error) {
+	return New(address, opts...)
 }
 func init() {
-	mq.RegisterProducer("lmq", &lmqProducerResolver{})
+	queues = cmap.New(4)
+	mq.RegisterProducer("lmq", &lmqResolver{})
 }

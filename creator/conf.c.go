@@ -19,6 +19,8 @@ type IConf interface {
 	//OnReady 系统准备好后触发
 	OnReady(fs ...interface{})
 
+	//Var 参数配置
+	Vars() vars
 	//API api服务器配置
 	API(address string, opts ...api.Option) httpBuilder
 
@@ -36,11 +38,15 @@ type IConf interface {
 }
 
 //Conf 配置服务
-var Conf = &conf{data: make(map[string]iCustomerBuilder)}
+var Conf = &conf{
+	data: make(map[string]iCustomerBuilder),
+	vars: make(map[string]map[string]interface{}),
+}
 
 type conf struct {
 	funcs []func() error
 	data  map[string]iCustomerBuilder
+	vars  map[string]map[string]interface{}
 }
 
 //OnReady 注册配置准备函数
@@ -124,6 +130,11 @@ func (c *conf) CRON(opts ...cron.Option) cronBuilder {
 	cron := newCron(opts...)
 	c.data[global.CRON] = cron
 	return cron
+}
+
+//Vars 平台变量配置
+func (c *conf) Vars() vars {
+	return c.vars
 }
 
 //Custome 用户自定义配置服务

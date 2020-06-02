@@ -1,33 +1,32 @@
 package lmq
 
-
-//LMQMessage reids消息
-type LMQMessage struct {
+//Message 消息信息
+type Message struct {
 	Message string
 	HasData bool
 }
 
 //Ack 确定消息
-func (m *LMQMessage) Ack() error {
+func (m *Message) Ack() error {
 	return nil
 }
 
 //Nack 取消消息
-func (m *LMQMessage) Nack() error {
+func (m *Message) Nack() error {
 	return nil
 }
 
 //GetMessage 获取消息
-func (m *LMQMessage) GetMessage() string {
+func (m *Message) GetMessage() string {
 	return m.Message
 }
 
 //Has 是否有数据
-func (m *LMQMessage) Has() bool {
+func (m *Message) Has() bool {
 	return m.HasData
 }
 
-//NewLMQMessage 创建消息
-func NewLMQMessage(msg string) *LMQMessage {
-	return &LMQMessage{Message: msg, HasData: len(msg) > 0}
+//newMessage 创建消息
+func newMessage(msg string) *Message {
+	return &Message{Message: msg, HasData: len(msg) > 0}
 }

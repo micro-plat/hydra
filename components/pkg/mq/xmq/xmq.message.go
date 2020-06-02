@@ -16,7 +16,8 @@ import (
 
 var xmqSEQId int64 = 10000
 
-type XMQMessage struct {
+//Message 消息体
+type Message struct {
 	CMD       int      `json:"cmd"`  //0发送
 	Mode      int      `json:"mod"`  //模式是否需要回复:0:需要 1:不需要
 	Timeout   int      `json:"time"` //超时时长
@@ -28,10 +29,10 @@ type XMQMessage struct {
 	signKey   string
 }
 
-//NewXMQHeartBit 构建消息信息
-func NewXMQHeartBit() *XMQMessage {
+//newHeartBit 构建消息信息
+func newHeartBit() *Message {
 
-	r := &XMQMessage{
+	r := &Message{
 		CMD:       99,
 		Mode:      1,
 		Timestmap: time.Now().Unix(),
@@ -39,14 +40,13 @@ func NewXMQHeartBit() *XMQMessage {
 	}
 	id := atomic.AddInt64(&xmqSEQId, 1)
 	r.SEQ, _ = strconv.ParseInt(fmt.Sprintf("%d", id), 10, 0)
-	//r.SEQ = r.Timestmap
 	return r
 }
 
-//NewXMQMessage 构建消息信息
-func NewXMQMessage(queueName string, msg string, timeout int) *XMQMessage {
+//newMessage 构建消息信息
+func newMessage(queueName string, msg string, timeout int) *Message {
 
-	r := &XMQMessage{
+	r := &Message{
 		CMD:       0,
 		Mode:      1,
 		QueueName: queueName,
@@ -57,12 +57,11 @@ func NewXMQMessage(queueName string, msg string, timeout int) *XMQMessage {
 	}
 	id := atomic.AddInt64(&xmqSEQId, 1)
 	r.SEQ, _ = strconv.ParseInt(fmt.Sprintf("%d", id), 10, 0)
-	// r.SEQ = r.Timestmap
 	return r
 }
 
-//MakeMessage 构建消息
-func (x *XMQMessage) MakeMessage() (string, error) {
+//Make 构建消息
+func (x *Message) Make() (string, error) {
 	buff := &bytes.Buffer{}
 	buff.WriteString(strconv.Itoa(x.CMD))
 	buff.WriteString(fmt.Sprint(x.SEQ))

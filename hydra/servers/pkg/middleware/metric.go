@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/micro-plat/hydra/components/pkg/metrics"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/lib4go/metrics"
 	"github.com/micro-plat/lib4go/net"
 )
 

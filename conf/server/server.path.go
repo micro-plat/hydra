@@ -50,8 +50,15 @@ func (c *Pub) GetSubConfPath(name ...string) string {
 }
 
 //GetVarPath 获取var配置路径
-func (c *Pub) GetVarPath() string {
-	return registry.Join(c.platName, "var")
+func (c *Pub) GetVarPath(tp ...string) string {
+	if len(tp) == 0 {
+		return registry.Join(c.platName, "var")
+	}
+	l := make([]string, 0, len(tp)+2)
+	l = append(l, c.platName)
+	l = append(l, "var")
+	l = append(l, tp...)
+	return registry.Join(l...)
 }
 
 //GetServicePubPathByService 获取服务发布跟路径

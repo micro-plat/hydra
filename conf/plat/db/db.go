@@ -6,25 +6,24 @@ import "github.com/micro-plat/hydra/conf"
 type DB struct {
 	Provider   string `json:"provider" valid:"required"`
 	ConnString string `json:"connString" valid:"required"`
-	*option
+	MaxOpen    int    `json:"maxOpen" valid:"required"`
+	MaxIdle    int    `json:"maxIdle" valid:"required"`
+	LifeTime   int    `json:"lifeTime" valid:"required"`
 }
 
 //New 构建DB连接信息
 func New(provider string, connString string, opts ...Option) *DB {
-	ora := &DB{
+	db := &DB{
 		Provider:   provider,
 		ConnString: connString,
-		option: &option{
-			MaxOpen:  10,
-			MaxIdle:  3,
-			LifeTime: 600,
-		},
+		MaxOpen:    10,
+		MaxIdle:    3,
+		LifeTime:   600,
 	}
 	for _, opt := range opts {
-		opt(ora.option)
+		opt(db)
 	}
-	return ora
-
+	return db
 }
 
 //GetConf 获取主配置信息

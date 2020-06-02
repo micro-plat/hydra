@@ -1,9 +1,9 @@
 package queues
 
-import "github.com/micro-plat/lib4go/queue"
+import "github.com/micro-plat/hydra/components/pkg/mq"
 
 //IQueue 消息队列
-type IQueue = queue.IQueue
+type IQueue = mq.IMQP
 
 //IComponentQueue Component Queue
 type IComponentQueue interface {

@@ -12,6 +12,8 @@ require (
 	github.com/pkg/profile v1.4.0
 	github.com/ugorji/go/codec v1.1.7
 	github.com/urfave/cli v1.22.4
+	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
+	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 	golang.org/x/sys v0.0.0-20200508214444-3aab700007d7

@@ -2,8 +2,8 @@ package queues
 
 import (
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components/pkg/mq"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/lib4go/queue"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -36,7 +36,7 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
 	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
-		return queue.NewQueue(js.GetString("proto"), string(js.GetRaw()))
+		return mq.NewMQP(js.GetString("proto"), mq.WithRaw(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

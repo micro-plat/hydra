@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/lib4go/cache"
-	"github.com/micro-plat/lib4go/redis"
+	"github.com/micro-plat/hydra/components/pkg/cache"
+	"github.com/micro-plat/hydra/components/pkg/redis"
 )
 
 // Client redis配置文件
@@ -16,9 +16,9 @@ type Client struct {
 }
 
 // New 根据配置文件创建一个redis连接
-func New(addrs []string, conf string) (m *Client, err error) {
+func New(addrs []string, raw string) (m *Client, err error) {
 	m = &Client{servers: addrs}
-	m.client, err = redis.NewClientByJSON(conf)
+	m.client, err = redis.New(redis.WithRaw(raw))
 	if err != nil {
 		return
 	}

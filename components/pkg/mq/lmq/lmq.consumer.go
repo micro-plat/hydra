@@ -5,35 +5,34 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/micro-plat/hydra/components/pkg/mq"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"github.com/micro-plat/lib4go/mq"
-	"github.com/micro-plat/lib4go/queue/lmq"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//lmqConsumer 基于本地channel的Consumer
-type lmqConsumer struct {
+//Consumer 基于本地channel的Consumer
+type Consumer struct {
 	queues  cmap.ConcurrentMap
 	closeCh chan struct{}
 	done    bool
 	once    sync.Once
 }
 
-//newlmqConsumer 创建新的Consumer
-func newlmqConsumer(address string, opts ...mq.Option) (consumer *lmqConsumer, err error) {
-	consumer = &lmqConsumer{
+//newConsumer 创建新的Consumer
+func newConsumer(address string, opts ...mq.Option) (consumer *Consumer, err error) {
+	consumer = &Consumer{
 		queues:  cmap.New(4),
 		closeCh: make(chan struct{})}
 	return consumer, nil
 }
 
 //Connect  连接服务器
-func (consumer *lmqConsumer) Connect() (err error) {
+func (consumer *Consumer) Connect() (err error) {
 	return nil
 }
 
 //Consume 注册消费信息
-func (consumer *lmqConsumer) Consume(queue string, concurrency int, callback func(mq.IMessage)) (err error) {
+func (consumer *Consumer) Consume(queue string, concurrency int, callback func(mq.IMQCMessage)) (err error) {
 	if strings.EqualFold(queue, "") {
 		return errors.New("队列名字不能为空")
 	}
@@ -44,7 +43,7 @@ func (consumer *lmqConsumer) Consume(queue string, concurrency int, callback fun
 		queue := input[0].(string)
 		unconsumeCh := make(chan struct{}, 1)
 		nconcurrency := types.GetMax(concurrency, 10)
-		msgChan := make(chan *LMQMessage, nconcurrency)
+		msgChan := make(chan *Message, nconcurrency)
 		for i := 0; i < nconcurrency; i++ {
 			go func() {
 			START:
@@ -65,7 +64,7 @@ func (consumer *lmqConsumer) Consume(queue string, concurrency int, callback fun
 		}
 
 		go func() {
-			currQueue := lmq.GetOrAddQueue(queue)
+			currQueue := GetOrAddQueue(queue)
 		START:
 			for {
 				select {
@@ -74,7 +73,7 @@ func (consumer *lmqConsumer) Consume(queue string, concurrency int, callback fun
 				case <-unconsumeCh:
 					break START
 				case msg := <-currQueue:
-					message := NewLMQMessage(msg)
+					message := newMessage(msg)
 					if message.Has() {
 						msgChan <- message
 					}
@@ -88,7 +87,7 @@ func (consumer *lmqConsumer) Consume(queue string, concurrency int, callback fun
 }
 
 //UnConsume 取消注册消费
-func (consumer *lmqConsumer) UnConsume(queue string) {
+func (consumer *Consumer) UnConsume(queue string) {
 	if c, ok := consumer.queues.Get(queue); ok {
 		close(c.(chan struct{}))
 	}
@@ -96,7 +95,7 @@ func (consumer *lmqConsumer) UnConsume(queue string) {
 }
 
 //Close 关闭当前连接
-func (consumer *lmqConsumer) Close() {
+func (consumer *Consumer) Close() {
 	consumer.once.Do(func() {
 		close(consumer.closeCh)
 	})
@@ -108,12 +107,12 @@ func (consumer *lmqConsumer) Close() {
 	})
 }
 
-type lmqConsumerResolver struct {
+type consumerResolver struct {
 }
 
-func (s *lmqConsumerResolver) Resolve(address string, opts ...mq.Option) (mq.MQConsumer, error) {
-	return newlmqConsumer(address, opts...)
+func (s *consumerResolver) Resolve(address string, opts ...mq.Option) (mq.IMQC, error) {
+	return newConsumer(address, opts...)
 }
 func init() {
-	mq.RegisterCosnumer("lmq", &lmqConsumerResolver{})
+	mq.RegisterConsumer("lmq", &consumerResolver{})
 }
