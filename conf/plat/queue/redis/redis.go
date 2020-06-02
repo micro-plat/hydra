@@ -1,6 +1,6 @@
 package redis
 
-import "github.com/micro-plat/hydra/conf/server/queue"
+import "github.com/micro-plat/hydra/conf/plat/queue"
 
 //Redis redis缓存配置
 type Redis struct {

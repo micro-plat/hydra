@@ -15,7 +15,7 @@ type MQTT struct {
 func New(address string, opts ...Option) *MQTT {
 	r := &MQTT{
 		Address: address,
-		Proto:   "mqtt",
+		Queue:   &queue.Queue{Proto: "mqtt"},
 	}
 	for _, opt := range opts {
 		opt(r)
