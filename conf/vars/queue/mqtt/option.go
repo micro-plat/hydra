@@ -1,0 +1,19 @@
+package mqtt
+
+//Option 配置选项
+type Option func(*MQTT)
+
+//WithUP 设置用户名密码
+func WithUP(userName string, password string) Option {
+	return func(a *MQTT) {
+		a.UserName = userName
+		a.Password = password
+	}
+}
+
+//WithCert 设置证书地址
+func WithCert(cert string) Option {
+	return func(a *MQTT) {
+		a.Cert = cert
+	}
+}
