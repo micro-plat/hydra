@@ -5,7 +5,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/types"
 )
 
 //MainConf 服务器主配置
@@ -33,59 +32,68 @@ func NewMainConf(platName string, systemName string, serverType string, clusterN
 //load 加载配置
 func (c *MainConf) load() (err error) {
 
-	var mainConfRaw []byte
-	mainConfRaw, c.version, err = c.registry.GetValue(c.GetMainPath())
+	//获取主配置
+	conf, err := c.getValue(c.GetMainPath())
 	if err != nil {
-		return fmt.Errorf("无法获取主配置信息 %s %w", c.GetMainPath(), err)
-	}
-	rdata, err := decrypt(mainConfRaw)
-	if err != nil {
-		return fmt.Errorf("%s解密失败:%w", c.GetMainPath(), err)
-	}
-	//初始化主配置
-	if c.mainConf, err = conf.NewJSONConf(rdata, c.version); err != nil {
-		err = fmt.Errorf("%s配置有误:%v", c.GetMainPath(), err)
 		return err
 	}
+	c.mainConf = conf
+	c.version = conf.GetVersion()
 
-	err = c.getSubConf(c.GetMainPath())
+	//获取子配置
+	c.subConfs, err = c.getSubConf(c.GetMainPath())
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (c *MainConf) getSubConf(path string, n ...string) error {
+
+func (c *MainConf) getSubConf(path string) (map[string]conf.JSONConf, error) {
 	confs, _, err := c.registry.GetChildren(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	values := make(map[string]conf.JSONConf)
 	for _, p := range confs {
-		childConfPath := registry.Join(path, p)
-		data, version, err := c.registry.GetValue(childConfPath)
+		currentPath := registry.Join(path, p)
+		value, err := c.getValue(currentPath)
 		if err != nil {
-			return fmt.Errorf("获取子配置信息出错 %s[%s] %w", path, p, err)
+			return nil, err
 		}
 
-		rdata, err := decrypt(data)
+		children, err := c.getSubConf(currentPath)
 		if err != nil {
-			return fmt.Errorf("%s[%s]解密子配置失败:%w", path, p, err)
+			return nil, err
 		}
-		if len(rdata) == 0 {
-			rdata = []byte("{}")
+		for k, v := range children {
+			values[registry.Join(p, k)] = v
 		}
-		childConf, err := conf.NewJSONConf(rdata, version)
-		if err != nil {
-			err = fmt.Errorf("%s/%s配置有误:%w", path, p, err)
-			return err
-		}
-		nodePath := registry.Trim(registry.Join(types.GetStringByIndex(n, 0, ""), p))
-		c.subConfs[nodePath] = *childConf
-
-		if err := c.getSubConf(childConfPath, p); err != nil {
-			return err
+		if len(children) == 0 {
+			values[p] = *value
 		}
 	}
-	return nil
+	return values, nil
+}
+
+func (c *MainConf) getValue(path string) (*conf.JSONConf, error) {
+	data, version, err := c.registry.GetValue(path)
+	if err != nil {
+		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
+	}
+
+	rdata, err := decrypt(data)
+	if err != nil {
+		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)
+	}
+	if len(rdata) == 0 {
+		rdata = []byte("{}")
+	}
+	childConf, err := conf.NewJSONConf(rdata, version)
+	if err != nil {
+		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
+		return nil, err
+	}
+	return childConf, nil
 }
 
 //IsTrace 是否跟踪请求或响应

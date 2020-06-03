@@ -12,34 +12,34 @@ func RASAuth() Handler {
 		}
 
 		//检查必须参数
-
-		// b, auth := auth.Contains(ctx.Request().Path().GetService())
+		// b, auth := auth.Contains(ctx.Request().Path().GetRouter().Path)
 		// if !b {
 		// 	ctx.Next()
 		// 	return
 		// }
 
-		ctx.Response().AddSpecial("ras")
+		// ctx.Response().AddSpecial("ras")
 
-		// header := ctx.Request().Path().GetHeaders()
-		// cookie := ctx.Request().Path().GetCookies()
-		// header["method"] = ctx.Request().Path().GetMethod()
-
-		// input := types.NewXMapByMap(ctx.Request().GetData())
+		// input, err := ctx.Request().GetData()
+		// if err != nil {
+		// 	ctx.Response().AbortWithError(500, err)
+		// 	return
+		// }
 
 		// input["__auth_"], err = auth.AuthString()
 		// if err != nil {
 		// 	return fmt.Errorf("将service.auth转换为__auth_失败:%v", err)
 		// }
 
-		// status, result, _, err := ctx.RPC.Request(auth.Service, header, input.ToMap(), true)
-		// if err != nil || status != 200 {
-		// 	return context.NewErrorf(types.GetMax(status, 403), "远程认证失败:%s,err:%v(%d)", err, result, status)
+		// respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
+		// if err != nil || !respones.Success() {
+		// 	return context.NewErrorf(types.GetMax(respones.Status, 403), "远程认证失败:%s,err:%v(%d)", err, result, respones.Status)
 		// }
 		// tmp := types.XMap{}
 		// if err := json.Unmarshal([]byte(result), &tmp); err != nil {
 		// 	return err
 		// }
+
 		// ctx.Request.Metadata.SetStrings(tmp.ToSMap())
 		return
 	}

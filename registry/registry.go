@@ -115,7 +115,7 @@ func Join(elem ...string) string {
 	var builder strings.Builder
 	builder.WriteString("/")
 	for _, v := range elem {
-		if v == "/" || v == "\\" {
+		if v == "/" || v == "\\" || strings.TrimSpace(v) == "" {
 			continue
 		}
 		builder.WriteString(strings.Trim(v, "/"))

@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -15,51 +14,54 @@ import (
 	"github.com/zkfy/log"
 )
 
-func show() error {
-	//1. 处理日志
-	print := log.New(os.Stdout, "", log.Llongcolor).Info
-	//2. 创建注册中心
-	rgst, err := registry.NewRegistry(global.Current().GetRegistryAddr(), global.Current().Log())
+func showConf(addrs string, plat string, sysName string, types []string, cluster string) error {
+	s := newShow(addrs, plat, sysName, types, cluster)
+	return s.Show()
+
+}
+
+type show struct {
+	subs    map[string]interface{}
+	vars    map[string]interface{}
+	nodes   [][]byte
+	print   func(v ...interface{})
+	plat    string
+	sysName string
+	types   []string
+	cluster string
+	addr    string
+	rgst    registry.IRegistry
+}
+
+func newShow(addr string, plat string, sysName string, types []string, cluster string) *show {
+	return &show{
+		subs:    make(map[string]interface{}),
+		vars:    make(map[string]interface{}),
+		print:   log.New(os.Stdout, "", log.Llongcolor).Info,
+		nodes:   make([][]byte, 0, 1),
+		addr:    addr,
+		plat:    plat,
+		sysName: sysName,
+		types:   types,
+		cluster: cluster,
+	}
+}
+func (s *show) Show() error {
+	rgst, err := registry.NewRegistry(s.addr, global.Current().Log())
 	if err != nil {
 		return err
 	}
-
-	queryIndex := 0
-	queryList := make(map[int][]byte)
-	for i, tp := range global.Current().GetServerTypes() {
-		sc, err := server.NewServerConfBy(global.Current().GetPlatName(), global.Current().GetSysName(), tp, global.Current().GetClusterName(), rgst)
-		if err != nil {
-			return err
-		}
-		queryIndex++
-		if i == 0 {
-			print(getPrintNode(sc.GetMainConf().GetMainPath(), queryIndex, 0))
-		} else {
-			print(getPrintNode(sc.GetMainConf().GetMainPath(), queryIndex, 2))
-		}
-		queryList[queryIndex] = sc.GetMainConf().GetMainConf().GetRaw()
-
-		sc.GetMainConf().Iter(func(k string, cn *conf.JSONConf) bool {
-			queryIndex++
-			print(getPrintNode(registry.Join(sc.GetMainConf().GetMainPath(), k), queryIndex, -1))
-			queryList[queryIndex] = cn.GetRaw()
-			return true
-		})
-		if i == len(global.Current().GetServerTypes())-1 {
-			index := -1
-			sc.GetVarConf().Iter(func(k string, cn *conf.JSONConf) bool {
-				queryIndex++
-				if index == -1 {
-					index++
-					print(getPrintNode(registry.Join(sc.GetMainConf().GetPlatName(), "var", k), queryIndex, 1))
-				} else {
-					print(getPrintNode(registry.Join(sc.GetMainConf().GetPlatName(), "var", k), queryIndex, -1))
-				}
-				queryList[queryIndex] = cn.GetRaw()
-				return true
-			})
-		}
+	s.rgst = rgst
+	if err := s.printMainConf(); err != nil {
+		return err
 	}
+	if err := s.printVarConf(); err != nil {
+		return err
+	}
+	return s.readPrint()
+}
+
+func (s *show) readPrint() error {
 	for {
 		fmt.Print("请输入数字序号 > ")
 		var value string
@@ -67,63 +69,87 @@ func show() error {
 		if strings.ToUpper(value) == "Q" {
 			return nil
 		}
-		nv := types.GetInt(value, -1)
-		content, ok := queryList[nv]
-		if !ok {
+		nv := types.GetInt(value, -1) - 1
+		if nv > len(s.nodes)-1 || nv < 0 {
+			s.print("输入的数字无效")
 			continue
 		}
+		content := s.nodes[nv]
 		data := map[string]interface{}{}
 		if err := json.Unmarshal(content, &data); err != nil {
-			print(string(content))
+			s.print(string(content))
 			continue
 		}
 		buff, err := json.MarshalIndent(data, "", "    ")
 		if err != nil {
-			print(string(content))
+			s.print(string(content))
 			continue
 		}
-		print(string(buff))
+		s.print(string(buff))
 	}
-
 }
-func getPrintNode(path string, index int, f int) string {
-	p := strings.Trim(path, "/")
-	ps := strings.Split(p, "/")
-	buff := bytes.NewBufferString("")
-	switch f {
-	case -1:
-		for c := 0; c < len(ps)-1; c++ {
-			buff.WriteString("  ")
+
+func (s *show) printMainConf() error {
+	for _, tp := range s.types {
+		sc, err := server.NewServerConfBy(s.plat, s.sysName, tp, s.cluster, s.rgst)
+		if err != nil {
+			return err
 		}
-		buff.WriteString("└─")
-		buff.WriteString(fmt.Sprintf("[%d]", index))
-		buff.WriteString(ps[len(ps)-1])
-	case 0:
-		for i, v := range ps {
-			for c := 0; c < i; c++ {
-				buff.WriteString("  ")
+		s.getNodes(sc.GetMainConf().GetSubConfPath("main"), sc.GetMainConf().GetMainConf(), s.subs)
+		sc.GetMainConf().Iter(func(path string, v *conf.JSONConf) bool {
+			npath := sc.GetMainConf().GetSubConfPath(path)
+			s.getNodes(npath, v, s.subs)
+			return true
+		})
+	}
+	s.printNodes(s.subs, 0)
+	return nil
+}
+func (s *show) printVarConf() error {
+	sc, err := server.NewServerConfBy(s.plat, s.sysName, global.API, s.cluster, s.rgst)
+	if err != nil {
+		return err
+	}
+	sc.GetVarConf().Iter(func(path string, v *conf.JSONConf) bool {
+		npath := sc.GetMainConf().GetVarPath(path)
+		s.getNodes(npath, v, s.vars)
+		return true
+	})
+
+	s.printNodes(s.vars, 0)
+	return nil
+}
+func (s *show) getNodes(path string, v *conf.JSONConf, input map[string]interface{}) {
+	li := strings.SplitN(strings.Trim(path, "/"), "/", 2)
+	if len(li) == 1 {
+		input[li[0]] = v.GetRaw()
+		return
+	}
+	if len(li) > 1 {
+		if np, ok := input[li[0]]; !ok {
+			nmap := make(map[string]interface{})
+			input[li[0]] = nmap
+			s.getNodes(li[1], v, nmap)
+		} else {
+			switch c := np.(type) {
+			case map[string]interface{}:
+				s.getNodes(li[1], v, c)
+
 			}
-			if i > 0 {
-				buff.WriteString("└─")
-			}
-			if i == len(ps)-1 {
-				buff.WriteString(fmt.Sprintf("[%d]", index))
-			}
-			buff.WriteString(v)
-			buff.WriteString("\n")
-		}
-	default:
-		for i := f; i < len(ps); i++ {
-			for c := -1; c < i-1; c++ {
-				buff.WriteString("  ")
-			}
-			buff.WriteString("└─")
-			if i == len(ps)-1 {
-				buff.WriteString(fmt.Sprintf("[%d]", index))
-			}
-			buff.WriteString(ps[i])
-			buff.WriteString("\n")
+
 		}
 	}
-	return strings.Trim(buff.String(), "\n")
+}
+func (s *show) printNodes(nodes map[string]interface{}, index int) {
+	for k, v := range nodes {
+
+		switch c := v.(type) {
+		case map[string]interface{}:
+			s.print(fmt.Sprintf("%s└─%s", strings.Repeat("  ", index), k))
+			s.printNodes(c, index+1)
+		case []byte:
+			s.nodes = append(s.nodes, c)
+			s.print(fmt.Sprintf("%s└─%s[%d]", strings.Repeat("  ", index), k, len(s.nodes)))
+		}
+	}
 }

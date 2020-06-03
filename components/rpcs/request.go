@@ -6,6 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf"
+	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -18,6 +19,12 @@ const rpcNameNode = "rpc"
 
 var requests = cmap.New(4)
 
+//IRequest Component rpc
+type IRequest interface {
+	rpc.IRequest
+	RequestByCtx(service string, ctx r.IContext) (res *rpc.Response, err error)
+}
+
 //Request RPC Request
 type Request struct {
 	j *conf.JSONConf
@@ -28,6 +35,17 @@ func NewRequest(j *conf.JSONConf) *Request {
 	return &Request{
 		j: j,
 	}
+}
+
+//RequestByCtx 将当前请求转化为RPC调用
+func (r *Request) RequestByCtx(service string, ctx r.IContext) (res *rpc.Response, err error) {
+	input, err := ctx.Request().GetData()
+	if err != nil {
+		return nil, err
+	}
+	headers := ctx.Request().Path().GetHeaders()
+	return r.Request(ctx.Context(), service, input,
+		rpc.WithHeaders(headers), rpc.WithXRequestID(ctx.User().GetRequestID()))
 }
 
 //Request RPC请求

@@ -39,6 +39,7 @@ func (c *VarConf) load() (err error) {
 	}
 
 	//获取第一级目录
+
 	var varfirstNodes []string
 	varfirstNodes, c.varVersion, err = c.registry.GetChildren(c.varConfPath)
 	if err != nil {

@@ -84,9 +84,11 @@ func newOption() *requestOption {
 }
 
 //WithHeaders RPC请求参数
-func WithHeaders(p map[string]string) RequestOption {
+func WithHeaders(p map[string][]string) RequestOption {
 	return func(o *requestOption) {
-		o.headers = p
+		for k, v := range p {
+			o.headers[k] = v[0]
+		}
 	}
 }
 

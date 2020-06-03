@@ -1,63 +1,38 @@
 package conf
 
 import (
-	"sync"
+	"time"
+
+	"github.com/micro-plat/lib4go/types"
 )
 
-type metadata struct {
-	data map[string]interface{}
-	lock sync.RWMutex
+var _ IMeta = meta{}
+
+type IMeta interface {
+	Keys() []string
+	Get(name string) (interface{}, bool)
+	GetValue(name string) interface{}
+	GetString(name string) string
+	GetInt(name string, def ...int) int
+	GetInt64(name string, def ...int64) int64
+	GetFloat32(name string, def ...float32) float32
+	GetFloat64(name string, def ...float64) float64
+	GetMustString(name string) (string, bool)
+	GetMustInt(name string) (int, bool)
+	GetMustFloat32(name string) (float32, bool)
+	GetMustFloat64(name string) (float64, bool)
+	GetDatetime(name string, format ...string) (time.Time, error)
+
+	Set(name string, value interface{})
+	Has(name string) bool
+	IsEmpty() bool
+	Len() int
+	ToStruct(o interface{}) error
 }
 
-func (m *metadata) Get(key string) (interface{}, bool) {
-	m.lock.RLocker().Lock()
-	defer m.lock.RLocker().Unlock()
+type meta types.XMap
 
-	data, ok := m.data[key]
-	return data, ok
-}
-func (m *metadata) Set(key string, value interface{}) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	m.data[key] = value
-}
-func (m *metadata) CSet(key string, value interface{}) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.data == nil {
-		m.data = make(map[string]interface{})
-	}
-	m.data[key] = value
-}
-
-type IMetadata interface {
-	Get(key string) (interface{}, bool)
-	Set(key string, v interface{})
-}
-
-type Metadata struct {
-	Name string
-	Type string
-	data *metadata
-}
-
-func NewMetadata(name, tp string) *Metadata {
-	return &Metadata{
-		Name: name,
-		Type: tp,
-		data: &metadata{
-			data: make(map[string]interface{}),
-		},
-	}
-}
-
-func (s *Metadata) Get(key string) (interface{}, bool) {
-	return s.data.Get(key)
-}
-func (s *Metadata) Set(key string, v interface{}) {
-	s.data.Set(key, v)
-}
-
-func (s *Metadata) CSet(key string, v interface{}) {
-	s.data.CSet(key, v)
+func (m meta) Set(name string, value interface{}) {
+	v := types.IXMap(meta)
+	v.SetValue(name, value)
 }

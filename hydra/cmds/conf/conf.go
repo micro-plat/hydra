@@ -45,5 +45,9 @@ func doConf(c *cli.Context) (err error) {
 		}
 	}
 	//3. 显示配置
-	return show()
+	return showConf(global.Current().GetRegistryAddr(),
+		global.Current().GetPlatName(),
+		global.Current().GetSysName(),
+		global.Current().GetServerTypes(),
+		global.Current().GetClusterName())
 }
