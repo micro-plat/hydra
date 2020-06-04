@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/micro-plat/hydra/components"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/errs"
 )
@@ -12,6 +14,18 @@ import (
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
 
+		//处理RPC服务调用
+		if addr, ok := global.IsProto(service, global.ProtoRPC); ok {
+			response, err := components.Def.RPC().GetRegularRPC().RequestByCtx(addr, ctx)
+			if err != nil {
+				ctx.Response().Write(response.Status, err)
+				return
+			}
+			ctx.Response().Write(response.Status, response.Result)
+			return
+		}
+
+		//获取处理服务
 		h, ok := services.Def.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		if !ok {
 			ctx.Response().AddSpecial("handler")
@@ -20,7 +34,6 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//预处理,用户资源检查，发生错误后不再执行业务处理-------
-
 		globalHandlings := services.Def.GetHandleExecutings(ctx.ServerConf().GetMainConf().GetServerType())
 		for _, h := range globalHandlings {
 			result := h.Handle(ctx)
