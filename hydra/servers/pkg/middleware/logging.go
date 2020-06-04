@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func Logging() Handler {
 
 		//4. 处理响应日志
 		code, _ := ctx.Response().GetFinalResponse()
-		if code >= 200 && code < 400 {
+		if code >= http.StatusOK && code < http.StatusBadRequest {
 			ctx.Log().Info(ctx.ServerConf().GetMainConf().GetServerType()+".response:", ctx.ServerConf().GetMainConf().GetServerName(), ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
 		} else {
 			ctx.Log().Error(ctx.ServerConf().GetMainConf().GetServerType()+".response:", ctx.ServerConf().GetMainConf().GetServerName(), ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))

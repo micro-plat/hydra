@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/logger"
@@ -25,6 +26,7 @@ func init() {
 type Ctx struct {
 	context    context.IInnerContext
 	ctx        r.Context
+	meta       conf.IMeta
 	log        logger.ILogger
 	request    *request
 	response   *response
@@ -38,6 +40,7 @@ type Ctx struct {
 //NewCtx 构建基于gin.Context的上下文
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx := contextPool.Get().(*Ctx)
+	ctx.meta = conf.NewMeta()
 	ctx.context = c
 	var err error
 	ctx.serverConf, err = server.Cache.GetServerConf(tp)
@@ -66,6 +69,11 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 		"get_request_id": ctx.user.GetRequestID,
 	}
 	return ctx
+}
+
+//Meta 获取元数据配置
+func (r *Ctx) Meta() conf.IMeta {
+	return r.meta
 }
 
 //Request 获取请求对象

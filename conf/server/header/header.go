@@ -18,6 +18,8 @@ type Headers map[string]string
 //New 构建请求的头配置
 func New(opts ...Option) Headers {
 	h := make(map[string]string)
+	h["Access-Control-Allow-Headers"] = strings.Join(allowHeader, ",")
+	h["Access-Control-Expose-Headers"] = strings.Join(exposeHeader, ",")
 	for _, opt := range opts {
 		opt(h)
 	}

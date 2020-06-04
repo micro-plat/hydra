@@ -11,25 +11,32 @@ import (
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
-	jwtOption
-	*conf.Includes
+	Name           string   `json:"name" valid:"ascii,required" toml:"name,omitempty"`
+	ExpireAt       int64    `json:"expireAt" valid:"required" toml:"expireAt,omitzero"`
+	Mode           string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
+	Secret         string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
+	Source         string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
+	Excludes       []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	FailedCode     string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)" toml:"failed-code,omitempty"`
+	Redirect       string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
+	Domain         string   `json:"domain,omitempty" valid:"ascii" toml:"domain,omitempty"`
+	Disable        bool     `json:"disable,omitempty" toml:"disable,omitempty"`
+	*conf.Includes `json:"-"`
 }
 
 //NewJWT 构建JWT配置参数发
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
-		jwtOption: jwtOption{
-			Name:     "Authorization-Jwt",
-			Mode:     "HS512",
-			Secret:   utility.GetGUID(),
-			ExpireAt: 86400,
-			Source:   "COOKIE",
-		},
+		Name:     "Authorization-Jwt",
+		Mode:     "HS512",
+		Secret:   utility.GetGUID(),
+		ExpireAt: 86400,
+		Source:   "COOKIE",
 	}
 	for _, opt := range opts {
-		opt(&jwt.jwtOption)
+		opt(jwt)
 	}
-	jwt.Includes = conf.NewInCludes(jwt.Exclude...)
+	jwt.Includes = conf.NewInCludes(jwt.Excludes...)
 	return jwt
 }
 
@@ -38,7 +45,7 @@ func GetConf(cnf conf.IMainConf) *JWTAuth {
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "fsa"), &jwt)
 	if err == conf.ErrNoSetting {
-		return &JWTAuth{jwtOption: jwtOption{Disable: true}}
+		return &JWTAuth{Disable: true}
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("jwt配置有误:%v", err))
@@ -46,7 +53,7 @@ func GetConf(cnf conf.IMainConf) *JWTAuth {
 	if b, err := govalidator.ValidateStruct(&jwt); !b {
 		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
-	jwt.Includes = conf.NewInCludes(jwt.Exclude...)
+	jwt.Includes = conf.NewInCludes(jwt.Excludes...)
 
 	return &jwt
 }

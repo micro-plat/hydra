@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -29,7 +30,7 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 	}
 	jwtToken, err := jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
 	if err != nil {
-		ctx.Response().AbortWithError(500, fmt.Errorf("jwt配置出错：%v", err))
+		ctx.Response().AbortWithError(http.StatusInternalServerError, fmt.Errorf("jwt配置出错：%v", err))
 		return
 	}
 	setToken(ctx, jwtAuth, jwtToken)

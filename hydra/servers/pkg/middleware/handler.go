@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/errs"
@@ -14,7 +15,8 @@ func ExecuteHandler(service string) Handler {
 		h, ok := services.Def.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		if !ok {
 			ctx.Response().AddSpecial("handler")
-			panic(fmt.Errorf("未找到服务：%s", service))
+			ctx.Response().AbortWithError(http.StatusNotFound, fmt.Errorf("未找到服务%s", service))
+			return
 		}
 
 		//预处理,用户资源检查，发生错误后不再执行业务处理-------

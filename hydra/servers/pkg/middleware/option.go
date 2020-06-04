@@ -11,7 +11,7 @@ func Options() Handler {
 		//options请求则自动不再进行后续处理
 		if strings.ToUpper(ctx.Request().Path().GetMethod()) == http.MethodOptions {
 			ctx.Response().AddSpecial("opt")
-			ctx.Response().Abort(200)
+			ctx.Response().Abort(http.StatusOK)
 			return
 		}
 		ctx.Next()

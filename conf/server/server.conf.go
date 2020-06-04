@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/fsa"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
@@ -23,9 +24,12 @@ type IServerConf interface {
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
 	GetFSAConf() *fsa.FixedSecretAuth
-	GetRASConf() ras.RASAuths
+	GetRASConf() *ras.RASAuth
+	GetBasicConf() *basic.BasicAuth
 	GetRenderConf() *render.Render
 }
+
+var _ IServerConf = &ServerConf{}
 
 //ServerConf 服务器配置信息
 type ServerConf struct {
@@ -37,7 +41,8 @@ type ServerConf struct {
 	static   *static.Static
 	router   *router.Routers
 	fsa      *fsa.FixedSecretAuth
-	ras      ras.RASAuths
+	ras      *ras.RASAuth
+	basic    *basic.BasicAuth
 	render   *render.Render
 }
 
@@ -60,6 +65,7 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.fsa = fsa.GetConf(s.mainConf)
 	s.ras = ras.GetConf(s.mainConf)
 	s.render = render.GetConf(s.mainConf)
+	s.basic = basic.GetConf(s.mainConf)
 	return s, nil
 
 }
@@ -112,8 +118,13 @@ func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
 }
 
 //GetRASConf 获取路由信息
-func (s *ServerConf) GetRASConf() ras.RASAuths {
+func (s *ServerConf) GetRASConf() *ras.RASAuth {
 	return s.ras
+}
+
+//GetBasicConf 获取basic认证配置
+func (s *ServerConf) GetBasicConf() *basic.BasicAuth {
+	return s.basic
 }
 
 //GetRenderConf 获取状态渲染控件

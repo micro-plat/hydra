@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
@@ -107,6 +108,7 @@ type IUser interface {
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
 	Funcs() map[string]interface{}
+	Meta() conf.IMeta
 	Request() IRequest
 	Response() IResponse
 	Context() context.Context

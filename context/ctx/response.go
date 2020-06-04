@@ -142,10 +142,17 @@ func (c *response) Render(status int, content string, ctp string) {
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
 	rc = content
+	if content == nil {
+		rc = ""
+	}
+	if status == 0 {
+		rs = 200
+	}
 	switch v := content.(type) {
 	case errs.IError:
 		rs = v.GetCode()
 		rc = v.GetError().Error()
+		c.log.Error(content)
 		if global.IsDebug {
 			rc = "Internal Server Error"
 		}
@@ -153,6 +160,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if status >= 200 && status < 400 {
 			rs = 400
 		}
+		c.log.Error(content)
 		rc = v.Error()
 		if global.IsDebug {
 			rc = "Internal Server Error"
@@ -160,7 +168,6 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	default:
 		return rs, rc
 	}
-	c.log.Error(content)
 	return rs, rc
 }
 
@@ -170,8 +177,8 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 	case strings.Contains(ctp, "plain"):
 		return ctp, fmt.Sprint(content)
 	default:
-		if content == nil {
-			return ctp, ""
+		if content == nil || content == "" {
+			return types.GetString(ctp, PLAINF), ""
 		}
 		tp := reflect.TypeOf(content).Kind()
 		value := reflect.ValueOf(content)

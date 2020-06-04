@@ -2,6 +2,7 @@ package creator
 
 import (
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/fsa"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
@@ -43,8 +44,14 @@ func (b httpBuilder) Fsa(secret string, opts ...fsa.FixedOption) httpBuilder {
 	return b
 }
 
+//Fsa fsa静态密钥错误
+func (b httpBuilder) Basic(opts ...basic.Option) httpBuilder {
+	b["auth/basic"] = basic.NewBasic(opts...)
+	return b
+}
+
 //Ras 远程认证服务配置
-func (b httpBuilder) Ras(service string, opts ...ras.RemotingOption) httpBuilder {
+func (b httpBuilder) Ras(service string, opts ...ras.Option) httpBuilder {
 	b["auth/ras"] = ras.New(service, opts...)
 	return b
 }

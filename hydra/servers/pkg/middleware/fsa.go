@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/context"
@@ -31,7 +32,7 @@ func FixedSecretAuth() Handler {
 		//检查必须参数
 		ctx.Response().AddSpecial("fsa")
 		if err := ctx.Request().Check("sign", "timestamp"); err != nil {
-			ctx.Response().AbortWithError(402, err)
+			ctx.Response().AbortWithError(http.StatusUnauthorized, err)
 			return
 		}
 
@@ -41,7 +42,7 @@ func FixedSecretAuth() Handler {
 			ctx.Next()
 			return
 		}
-		ctx.Response().AbortWithError(401, err)
+		ctx.Response().AbortWithError(http.StatusForbidden, err)
 	}
 }
 

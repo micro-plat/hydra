@@ -6,10 +6,20 @@ import (
 )
 
 //IsStatic 判断当前文件是否一定是静态文件,及文件的完整路径
-func (s *Static) IsStatic(rPath string) (b bool, xname string) {
-	if rPath == "/favicon.ico" || rPath == "/robots.txt" {
-		return true, filepath.Join(s.Dir, rPath)
+func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
+
+	if b = s.IsFavRobot(rPath); b {
+		return b, filepath.Join(s.Dir, rPath)
 	}
+
+	if s.Disable {
+		return false, ""
+	}
+
+	if !s.AllowRequest(method) {
+		return false, ""
+	}
+
 	if s.IsExclude(rPath) {
 		return false, ""
 	}
@@ -23,6 +33,14 @@ func (s *Static) IsStatic(rPath string) (b bool, xname string) {
 		return true, filepath.Join(s.Dir, s.FirstPage)
 	}
 	return false, ""
+}
+
+//IsFavRobot 是否是favicon.ico 或 robots.txt
+func (s *Static) IsFavRobot(rPath string) (b bool) {
+	if rPath == "/favicon.ico" || rPath == "/robots.txt" {
+		return true
+	}
+	return false
 }
 
 //HasPrefix 是否有指定的前缀

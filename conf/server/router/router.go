@@ -73,7 +73,7 @@ func (h *Routers) Append(path string, service string, action []string, opts ...O
 
 //Match 根据请求路径匹配指定的路由配置
 func (h *Routers) Match(path string, method string) *Router {
-	if method == http.MethodOptions || method == http.MethodHead {
+	if path == "" || method == http.MethodOptions || method == http.MethodHead {
 		return &Router{
 			Path:   path,
 			Action: []string{method},
@@ -84,7 +84,7 @@ func (h *Routers) Match(path string, method string) *Router {
 			return r
 		}
 	}
-	panic(fmt.Sprintf("未找到与%s %s匹配的路由", path, method))
+	panic(fmt.Sprintf("未找到与[%s][%s]匹配的路由", path, method))
 }
 
 //GetConf 设置路由
