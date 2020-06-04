@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
-	"github.com/micro-plat/hydra/conf/server/auth/fsa"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
@@ -23,7 +23,7 @@ type IServerConf interface {
 	GetMetricConf() *metric.Metric
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
-	GetFSAConf() *fsa.FixedSecretAuth
+	GetAPIKeyConf() *apikey.APIKeyAuth
 	GetRASConf() *ras.RASAuth
 	GetBasicConf() *basic.BasicAuth
 	GetRenderConf() *render.Render
@@ -40,7 +40,7 @@ type ServerConf struct {
 	metric   *metric.Metric
 	static   *static.Static
 	router   *router.Routers
-	fsa      *fsa.FixedSecretAuth
+	apikey   *apikey.APIKeyAuth
 	ras      *ras.RASAuth
 	basic    *basic.BasicAuth
 	render   *render.Render
@@ -62,7 +62,7 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.metric = metric.GetConf(s.mainConf)
 	s.static = static.GetConf(s.mainConf)
 	s.router = router.GetConf(s.mainConf)
-	s.fsa = fsa.GetConf(s.mainConf)
+	s.apikey = apikey.GetConf(s.mainConf)
 	s.ras = ras.GetConf(s.mainConf)
 	s.render = render.GetConf(s.mainConf)
 	s.basic = basic.GetConf(s.mainConf)
@@ -112,12 +112,12 @@ func (s *ServerConf) GetRouterConf() *router.Routers {
 	return s.router
 }
 
-//GetFSAConf 获取路由信息
-func (s *ServerConf) GetFSAConf() *fsa.FixedSecretAuth {
-	return s.fsa
+//GetAPIKeyConf 获取apikey配置
+func (s *ServerConf) GetAPIKeyConf() *apikey.APIKeyAuth {
+	return s.apikey
 }
 
-//GetRASConf 获取路由信息
+//GetRASConf 获取RAS配置信息
 func (s *ServerConf) GetRASConf() *ras.RASAuth {
 	return s.ras
 }

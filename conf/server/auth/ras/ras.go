@@ -12,30 +12,26 @@ import (
 type RASAuth struct {
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
 	Auth    []*Auth `json:"auth"`
-	*conf.Includes
 }
 
 //NewRASAuth 构建RASAuth认证
 func NewRASAuth(auth ...*Auth) *RASAuth {
 	r := &RASAuth{}
-	r.Auth = append(r.Auth, auth...)
+	for _, a := range auth {
+		a.PathMatch = conf.NewPathMatch(a.Requests...)
+		r.Auth = append(r.Auth, a)
+	}
 	return r
 }
 
-//Contains 检查指定的路径是否允许签名
-func (a RASAuth) Contains(p string) (bool, *Auth) {
-	var last *Auth
+//Match 检查指定的路径是否有对应的认证服务
+func (a RASAuth) Match(p string) (bool, *Auth) {
 	for _, auth := range a.Auth {
-		for _, req := range auth.Requests {
-			if req == p {
-				return true, auth
-			}
-			if req == "*" {
-				last = auth
-			}
+		if ok, _ := auth.Match(p); ok {
+			return true, auth
 		}
 	}
-	return last != nil, last
+	return false, nil
 }
 
 //GetConf 获取配置信息
@@ -55,6 +51,7 @@ func GetConf(cnf conf.IMainConf) (auths *RASAuth) {
 		if b, err := govalidator.ValidateStruct(&auth); !b {
 			panic(fmt.Errorf("RASAuth配置有误:%v", err))
 		}
+		auth.PathMatch = conf.NewPathMatch(auth.Requests...)
 	}
 	return auths
 }

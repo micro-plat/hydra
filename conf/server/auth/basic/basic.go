@@ -11,11 +11,11 @@ import (
 
 //BasicAuth http basic 认证配置
 type BasicAuth struct {
-	Excludes       []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	Members        map[string]string `json:"members"`
-	Disable        bool              `json:"disable,omitempty" toml:"disable,omitempty"`
-	*conf.Includes `json:"-"`
-	authorization  []*auth `json:"-"`
+	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Members         map[string]string `json:"members"`
+	Disable         bool              `json:"disable,omitempty" toml:"disable,omitempty"`
+	*conf.PathMatch `json:"-"`
+	authorization   []*auth `json:"-"`
 }
 
 //NewBasic 构建http basic配置参数发
@@ -27,7 +27,7 @@ func NewBasic(opts ...Option) *BasicAuth {
 	for _, opt := range opts {
 		opt(basic)
 	}
-	basic.Includes = conf.NewInCludes(basic.Excludes...)
+	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
 	return basic
 }
@@ -66,7 +66,7 @@ func GetConf(cnf conf.IMainConf) *BasicAuth {
 	if b, err := govalidator.ValidateStruct(&basic); !b {
 		panic(fmt.Errorf("basic配置有误:%v", err))
 	}
-	basic.Includes = conf.NewInCludes(basic.Excludes...)
+	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
 	return &basic
 }

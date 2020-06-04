@@ -18,7 +18,7 @@ type Render struct {
 	Tmplts map[string]*Tmplt `json:"tmplts,omitemptye" toml:"Tmplts,omitempty"`
 	//Disable 禁用
 	Disable bool `json:"disable,omitemptye" toml:"disable,omitempty"`
-	*conf.Includes
+	*conf.PathMatch
 }
 
 //NewRender 构建模板
@@ -45,13 +45,13 @@ func GetConf(cnf conf.IMainConf) (rsp *Render) {
 	for k := range rsp.Tmplts {
 		paths = append(paths, k)
 	}
-	rsp.Includes = conf.NewInCludes(paths...)
+	rsp.PathMatch = conf.NewPathMatch(paths...)
 	return rsp
 }
 
 //Get 获取转换结果
 func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.Includes.In(path)
+	exists, service := r.PathMatch.Match(path)
 	if !exists {
 		return false, 0, "", "", nil
 	}

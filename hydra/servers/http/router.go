@@ -22,7 +22,7 @@ func (s *Server) addRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Delay().GinFunc())
 	s.engine.Use(middleware.Options().GinFunc()) //处理option响应
 	s.engine.Use(middleware.BasicAuth().GinFunc())
-	s.engine.Use(middleware.FixedSecretAuth().GinFunc())
+	s.engine.Use(middleware.APIKeyAuth().GinFunc())
 	s.engine.Use(middleware.RASAuth().GinFunc())
 	s.engine.Use(middleware.JwtAuth().GinFunc())   //jwt安全认证
 	s.engine.Use(middleware.Render().GinFunc())    //响应渲染组件

@@ -2,8 +2,8 @@ package creator
 
 import (
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
-	"github.com/micro-plat/hydra/conf/server/auth/fsa"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
@@ -39,8 +39,8 @@ func (b httpBuilder) Jwt(opts ...jwt.Option) httpBuilder {
 }
 
 //Fsa fsa静态密钥错误
-func (b httpBuilder) Fsa(secret string, opts ...fsa.FixedOption) httpBuilder {
-	b["auth/fsa"] = fsa.New(secret, opts...)
+func (b httpBuilder) APIKEY(secret string, opts ...apikey.Option) httpBuilder {
+	b["auth/apikey"] = apikey.New(secret, opts...)
 	return b
 }
 

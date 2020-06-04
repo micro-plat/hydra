@@ -11,17 +11,17 @@ import (
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
-	Name           string   `json:"name" valid:"ascii,required" toml:"name,omitempty"`
-	ExpireAt       int64    `json:"expireAt" valid:"required" toml:"expireAt,omitzero"`
-	Mode           string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
-	Secret         string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
-	Source         string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
-	Excludes       []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	FailedCode     string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)" toml:"failed-code,omitempty"`
-	Redirect       string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
-	Domain         string   `json:"domain,omitempty" valid:"ascii" toml:"domain,omitempty"`
-	Disable        bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	*conf.Includes `json:"-"`
+	Name            string   `json:"name" valid:"ascii,required" toml:"name,omitempty"`
+	ExpireAt        int64    `json:"expireAt" valid:"required" toml:"expireAt,omitzero"`
+	Mode            string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
+	Secret          string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
+	Source          string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
+	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	FailedCode      string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)" toml:"failed-code,omitempty"`
+	Redirect        string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
+	Domain          string   `json:"domain,omitempty" valid:"ascii" toml:"domain,omitempty"`
+	Disable         bool     `json:"disable,omitempty" toml:"disable,omitempty"`
+	*conf.PathMatch `json:"-"`
 }
 
 //NewJWT 构建JWT配置参数发
@@ -36,7 +36,7 @@ func NewJWT(opts ...Option) *JWTAuth {
 	for _, opt := range opts {
 		opt(jwt)
 	}
-	jwt.Includes = conf.NewInCludes(jwt.Excludes...)
+	jwt.PathMatch = conf.NewPathMatch(jwt.Excludes...)
 	return jwt
 }
 
@@ -53,7 +53,7 @@ func GetConf(cnf conf.IMainConf) *JWTAuth {
 	if b, err := govalidator.ValidateStruct(&jwt); !b {
 		panic(fmt.Errorf("jwt配置有误:%v", err))
 	}
-	jwt.Includes = conf.NewInCludes(jwt.Excludes...)
+	jwt.PathMatch = conf.NewPathMatch(jwt.Excludes...)
 
 	return &jwt
 }

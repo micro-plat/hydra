@@ -2,6 +2,8 @@ package ras
 
 import (
 	"encoding/json"
+
+	"github.com/micro-plat/hydra/conf"
 )
 
 //Auth 远程认证服务
@@ -33,6 +35,8 @@ type Auth struct {
 
 	//配置是否禁用
 	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
+
+	*conf.PathMatch `json:"-" toml:"-"`
 }
 
 //New 创建远程服务验证参数

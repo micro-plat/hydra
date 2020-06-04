@@ -24,7 +24,7 @@ func Static() Handler {
 		finfo, err := os.Stat(fpath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				err := fmt.Errorf("找不到文件:%s", fpath)
+				err := fmt.Errorf("找不到文件:%s %w", fpath, err)
 				ctx.Response().AbortWithError(http.StatusNotFound, err)
 				return
 			}
