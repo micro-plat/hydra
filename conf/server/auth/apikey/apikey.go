@@ -19,7 +19,7 @@ import (
 type APIKeyAuth struct {
 	Secret   string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
 	Mode     string   `json:"mode" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
-	Excludes []string `json:"excludes" valid:"required" toml:"excludes,omitempty"`
+	Excludes []string `json:"excludes" toml:"excludes,omitempty"`
 	Disable  bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch
 }

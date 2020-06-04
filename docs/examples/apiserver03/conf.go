@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/vars/db/oracle"
 	"github.com/micro-plat/hydra/conf/vars/queue/lmq"
 )
@@ -10,8 +11,8 @@ import (
 func init() {
 	hydra.Conf.OnReady(func() {
 		hydra.Conf.API(":8080", api.WithTrace()).
-			APIKEY("sdfefefefefe").
-			// Basic(basic.WithUP("admin", "123456")).
+			// APIKEY("sdfefefefefe").
+			Basic(basic.WithUP("admin", "123456")).
 			// Fsa(fsa.CreateSecret(), fsa.WithInclude("/order/*")).
 			// Jwt(jwt.WithExcludes("/member/**"), jwt.WithHeader()).
 			// Static(static.WithArchive("./static.zip")).
