@@ -2,6 +2,7 @@ package ctx
 
 import (
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 )
@@ -34,7 +35,11 @@ func (c *user) GetRequestID() string {
 
 //GetClientIP 获取客户端IP地址
 func (c *user) GetClientIP() string {
-	return c.ctx.ClientIP()
+	ip := c.ctx.ClientIP()
+	if ip == "::1" || ip == "127.0.0.1" {
+		return net.GetLocalIPAddress()
+	}
+	return ip
 }
 
 //Auth 用户认证信息

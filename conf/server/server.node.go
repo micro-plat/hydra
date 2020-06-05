@@ -2,19 +2,41 @@ package server
 
 import (
 	"strings"
+
+	"github.com/micro-plat/hydra/conf"
 )
 
-//CNodes 所有集群节点
-type CNodes []*CNode
+var _ conf.ICluster = ClusterNodes{}
 
-//GetCurrent 获取当前节点
-func (c CNodes) GetCurrent() *CNode {
+//ClusterNodes 集群节点信息
+type ClusterNodes []*CNode
+
+//Current 获取当前节点
+func (c ClusterNodes) Current() conf.ICNode {
 	for _, v := range c {
 		if v.IsCurrent() {
 			return v
 		}
 	}
 	return nil
+}
+
+//Iter 迭代所有集群节点
+func (c ClusterNodes) Iter(f func(conf.ICNode) bool) {
+	for _, c := range c {
+		if !f(c) {
+			return
+		}
+	}
+}
+
+//Clone 克隆当前对象
+func (c ClusterNodes) Clone() conf.ICluster {
+	nodes := make([]*CNode, 0, len(c))
+	for _, m := range c {
+		nodes = append(nodes, m.Clone())
+	}
+	return ClusterNodes(nodes)
 }
 
 //CNode 集群节点
@@ -63,4 +85,10 @@ func (c *CNode) IsCurrent() bool {
 //GetIndex 获取当前节点的索引编号
 func (c *CNode) GetIndex() int {
 	return c.index
+}
+
+//Clone 克隆当前对象
+func (c *CNode) Clone() *CNode {
+	node := *c
+	return &node
 }

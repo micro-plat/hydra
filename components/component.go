@@ -19,7 +19,7 @@ type IComponent interface {
 	Cache() caches.IComponentCache
 	DB() dbs.IComponentDB
 	DLock(name string) (dlock.ILock, error)
-	UUID() uuid.IUUID
+	UUID() uuid.UUID
 }
 
 //Def 默认组件
@@ -71,7 +71,8 @@ func (c *Component) DLock(name string) (dlock.ILock, error) {
 	return dlock.NewLock(name, global.Def.RegistryAddr, context.Current().Log())
 }
 
-//UUID 获取全局用户编号
-func (c *Component) UUID() uuid.IUUID {
-	return uuid.Get()
+//UUID 获取全局唯一编号
+func (c *Component) UUID() uuid.UUID {
+	id := context.Current().ServerConf().GetMainConf().GetClusterNode().GetIndex()
+	return uuid.Get(int64(id))
 }

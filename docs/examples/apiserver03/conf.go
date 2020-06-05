@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/vars/db/oracle"
 	"github.com/micro-plat/hydra/conf/vars/queue/lmq"
@@ -10,7 +12,9 @@ import (
 func init() {
 	hydra.Conf.OnReady(func() {
 		hydra.Conf.API(":8080", api.WithTrace()).
-			APIKEY("sdfefefefefe").
+			// APIKEY("sdfefefefefe").
+			WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
+			BlackList(blacklist.WithIP("192.168.4.120")).
 			// Basic(basic.WithUP("admin", "123456")).
 			// Fsa(fsa.CreateSecret(), fsa.WithInclude("/order/*")).
 			// Jwt(jwt.WithExcludes("/member/**"), jwt.WithHeader()).

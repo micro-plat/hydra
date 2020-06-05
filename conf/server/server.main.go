@@ -2,18 +2,24 @@ package server
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/hydra/registry/watcher"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 //MainConf 服务器主配置
 type MainConf struct {
-	mainConf *conf.JSONConf
-	version  int32
-	subConfs map[string]conf.JSONConf
-	registry registry.IRegistry
+	mainConf    *conf.JSONConf
+	version     int32
+	subConfs    map[string]conf.JSONConf
+	currentNode *CNode
+	registry    registry.IRegistry
 	conf.IPub
+	cluster conf.ICluster
+	closeCh chan struct{}
 }
 
 //NewMainConf 管理服务器的主配置信息
@@ -22,6 +28,7 @@ func NewMainConf(platName string, systemName string, serverType string, clusterN
 		registry: rgst,
 		IPub:     NewPub(platName, systemName, serverType, clusterName),
 		subConfs: make(map[string]conf.JSONConf),
+		closeCh:  make(chan struct{}),
 	}
 	if err = s.load(); err != nil {
 		return
@@ -45,6 +52,9 @@ func (c *MainConf) load() (err error) {
 	if err != nil {
 		return err
 	}
+
+	//获取节点信息
+	c.loadCluster()
 	return nil
 }
 
@@ -96,6 +106,58 @@ func (c *MainConf) getValue(path string) (*conf.JSONConf, error) {
 	return childConf, nil
 }
 
+func (c *MainConf) watchCluster() error {
+	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath()}, logger.New("watch.server"))
+	if err != nil {
+		return err
+	}
+	notify, err := wc.Start()
+	if err != nil {
+		return err
+	}
+LOOP:
+	for {
+		select {
+		case <-c.closeCh:
+			break LOOP
+		case <-notify:
+			c.loadCluster()
+		}
+	}
+	return nil
+}
+func (c *MainConf) loadCluster() error {
+	cnodes := make([]*CNode, 0, 2)
+	path := c.GetServerPubPath()
+	children, _, err := c.registry.GetChildren(path)
+	if err != nil {
+		return err
+	}
+
+	for i, name := range children {
+		node := NewCNode(name, c.GetClusterID(), i)
+		cnodes = append(cnodes, node)
+		if node.IsCurrent() {
+			c.currentNode = node
+		}
+	}
+	c.cluster = ClusterNodes(cnodes)
+	errs := make(chan error, 1)
+	go func() {
+		err := c.watchCluster()
+		if err != nil {
+			errs <- err
+		}
+	}()
+	select {
+	case err := <-errs:
+		return err
+	case <-time.After(time.Millisecond * 500):
+		return nil
+	}
+	return nil
+}
+
 //IsTrace 是否跟踪请求或响应
 func (c *MainConf) IsTrace() bool {
 	return c.mainConf.GetString("trace", "true") == "true"
@@ -116,19 +178,9 @@ func (c *MainConf) GetVersion() int32 {
 	return c.version
 }
 
-//GetClusterNodes 获取集群中的所有节点
-func (c *MainConf) GetClusterNodes() []conf.ICNode {
-	cnodes := make([]conf.ICNode, 0, 2)
-	path := c.GetServerPubPath()
-	children, _, err := c.registry.GetChildren(path)
-	if err != nil {
-		return nil
-	}
-
-	for i, name := range children {
-		cnodes = append(cnodes, NewCNode(name, c.GetClusterID(), i))
-	}
-	return cnodes
+//GetCluster 获取集群中的所有节点
+func (c *MainConf) GetCluster() conf.ICluster {
+	return c.cluster.Clone()
 }
 
 //GetMainConf 获取当前主配置
@@ -143,8 +195,12 @@ func (c *MainConf) GetMainObject(v interface{}) (int32, error) {
 		err = fmt.Errorf("获取主配置失败:%v", err)
 		return 0, err
 	}
-
 	return conf.GetVersion(), nil
+}
+
+//GetClusterNode 获取当前集群节点信息
+func (c *MainConf) GetClusterNode() conf.ICNode {
+	return c.currentNode
 }
 
 //GetSubConf 指定子配置
@@ -187,4 +243,10 @@ func (c *MainConf) Iter(f func(path string, conf *conf.JSONConf) bool) {
 			break
 		}
 	}
+}
+
+//Close 关闭清理资源
+func (c *MainConf) Close() error {
+	close(c.closeCh)
+	return nil
 }

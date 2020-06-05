@@ -2,6 +2,8 @@ package server
 
 import (
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -27,23 +29,28 @@ type IServerConf interface {
 	GetRASConf() *ras.RASAuth
 	GetBasicConf() *basic.BasicAuth
 	GetRenderConf() *render.Render
+	GetWhiteListConf() *whitelist.WhiteList
+	GetBlackListConf() *blacklist.BlackList
+	Close() error
 }
 
 var _ IServerConf = &ServerConf{}
 
 //ServerConf 服务器配置信息
 type ServerConf struct {
-	mainConf conf.IMainConf
-	varConf  conf.IVarConf
-	header   header.Headers
-	jwt      *jwt.JWTAuth
-	metric   *metric.Metric
-	static   *static.Static
-	router   *router.Routers
-	apikey   *apikey.APIKeyAuth
-	ras      *ras.RASAuth
-	basic    *basic.BasicAuth
-	render   *render.Render
+	mainConf  conf.IMainConf
+	varConf   conf.IVarConf
+	header    header.Headers
+	jwt       *jwt.JWTAuth
+	metric    *metric.Metric
+	static    *static.Static
+	router    *router.Routers
+	apikey    *apikey.APIKeyAuth
+	ras       *ras.RASAuth
+	basic     *basic.BasicAuth
+	render    *render.Render
+	whiteList *whitelist.WhiteList
+	blackList *blacklist.BlackList
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -66,6 +73,8 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.ras = ras.GetConf(s.mainConf)
 	s.render = render.GetConf(s.mainConf)
 	s.basic = basic.GetConf(s.mainConf)
+	s.blackList = blacklist.GetConf(s.mainConf)
+	s.whiteList = whitelist.GetConf(s.mainConf)
 	return s, nil
 
 }
@@ -75,6 +84,11 @@ func NewServerConf(mainConfpath string, rgst registry.IRegistry) (s *ServerConf,
 	platName, sysName, serverType, clusterName := Split(mainConfpath)
 	return NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
 
+}
+
+//Close 关闭清理资源
+func (s *ServerConf) Close() error {
+	return s.mainConf.Close()
 }
 
 //GetMainConf 获取服务器主配置
@@ -130,4 +144,14 @@ func (s *ServerConf) GetBasicConf() *basic.BasicAuth {
 //GetRenderConf 获取状态渲染控件
 func (s *ServerConf) GetRenderConf() *render.Render {
 	return s.render
+}
+
+//GetWhiteListConf 获取白名单配置
+func (s *ServerConf) GetWhiteListConf() *whitelist.WhiteList {
+	return s.whiteList
+}
+
+//GetBlackListConf 获取黑名单配置
+func (s *ServerConf) GetBlackListConf() *blacklist.BlackList {
+	return s.blackList
 }

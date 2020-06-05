@@ -14,15 +14,17 @@ type IMainConf interface {
 	IPub
 	IsStarted() bool
 	IsTrace() bool
-	GetClusterNodes() []ICNode
+	GetCluster() ICluster
 	GetMainConf() *JSONConf
 	GetMainObject(v interface{}) (int32, error)
+	GetClusterNode() ICNode
 	GetSubConf(name string) (*JSONConf, error)
 	GetSubObject(name string, v interface{}) (int32, error)
 	GetRegistry() registry.IRegistry
 	GetVersion() int32
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
+	Close() error
 }
 
 //ICNode 集群节点配置
@@ -32,6 +34,13 @@ type ICNode interface {
 	GetName() string
 	IsCurrent() bool
 	GetIndex() int
+}
+
+//ICluster 集群信息
+type ICluster interface {
+	Iter(f func(ICNode) bool)
+	Current() ICNode
+	Clone() ICluster
 }
 
 //IPub 发布路径服务

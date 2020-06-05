@@ -1,6 +1,8 @@
 package creator
 
 import (
+	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
@@ -47,6 +49,18 @@ func (b httpBuilder) APIKEY(secret string, opts ...apikey.Option) httpBuilder {
 //Fsa fsa静态密钥错误
 func (b httpBuilder) Basic(opts ...basic.Option) httpBuilder {
 	b["auth/basic"] = basic.NewBasic(opts...)
+	return b
+}
+
+//WhiteList 设置白名单
+func (b httpBuilder) WhiteList(ips ...*whitelist.IPList) httpBuilder {
+	b["acl/white.list"] = whitelist.New(ips...)
+	return b
+}
+
+//BlackList 设置黑名单
+func (b httpBuilder) BlackList(opts ...blacklist.Option) httpBuilder {
+	b["acl/black.list"] = blacklist.New(opts...)
 	return b
 }
 

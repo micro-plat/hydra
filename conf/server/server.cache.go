@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -62,4 +64,33 @@ func (c *cache) GetVarConf() (conf.IVarConf, error) {
 		return s.(conf.IVarConf), nil
 	}
 	return nil, fmt.Errorf("获取var配置失败，缓存中不存在版本[%d]的数据", c.currentVarVersion)
+}
+
+func (c *cache) clear() {
+	tm := time.NewTicker(time.Second * 3600)
+LOOP:
+	for {
+		select {
+		case <-global.Def.ClosingNotify():
+			break LOOP
+		case <-tm.C:
+			c.serverMaps.RemoveIterCb(func(key string, v interface{}) bool {
+				if key != fmt.Sprint(c.currentServerVersion) {
+					if s, ok := v.(IServerConf); ok {
+						s.Close()
+					}
+					global.Def.Log().Debug("清理ServerConf缓存配置", key)
+					return true
+				}
+				return false
+			})
+			c.varMaps.RemoveIterCb(func(key string, v interface{}) bool {
+				global.Def.Log().Debug("清理VarConf缓存配置", key)
+				return key != fmt.Sprint(c.currentVarVersion)
+			})
+		}
+	}
+}
+func init() {
+	go Cache.clear()
 }
