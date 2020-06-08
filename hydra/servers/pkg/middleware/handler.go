@@ -29,7 +29,7 @@ func ExecuteHandler(service string) Handler {
 		h, ok := services.Def.GetHandler(ctx.ServerConf().GetMainConf().GetServerType(), service)
 		if !ok {
 			ctx.Response().AddSpecial("handler")
-			ctx.Response().AbortWithError(http.StatusNotFound, fmt.Errorf("未找到服务%s", service))
+			ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到服务%s", service))
 			return
 		}
 

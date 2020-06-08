@@ -1,8 +1,17 @@
 package global
 
-import "sync"
+import (
+	"io"
+	"sync"
+)
 
-var closers = make([]func() error, 0, 4)
+type closeHandle func() error
+
+func (c closeHandle) Close() error {
+	return c()
+}
+
+var closers = make([]io.Closer, 0, 4)
 var closerLock sync.Mutex
 
 //Close 关闭全局应用
@@ -12,12 +21,17 @@ func (m *global) Close() {
 	closerLock.Lock()
 	defer closerLock.Unlock()
 	for _, c := range closers {
-		c()
+		c.Close()
 	}
 
 }
-func (m *global) AddCloser(f func() error) {
+func (m *global) AddCloser(f interface{}) {
 	closerLock.Lock()
 	defer closerLock.Unlock()
-	closers = append(closers, f)
+	switch t := f.(type) {
+	case io.Closer:
+	case closeHandle:
+		closers = append(closers, t)
+	default:
+	}
 }

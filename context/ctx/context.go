@@ -33,7 +33,7 @@ type Ctx struct {
 	user       *user
 	serverConf server.IServerConf
 	cancelFunc func()
-	funs       map[string]interface{}
+	funs       *tmplFuncs
 	tid        uint64
 }
 
@@ -41,6 +41,7 @@ type Ctx struct {
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx := contextPool.Get().(*Ctx)
 	ctx.meta = conf.NewMeta()
+	ctx.funs = newTmplFunc(ctx)
 	ctx.context = c
 	var err error
 	ctx.serverConf, err = server.Cache.GetServerConf(tp)
@@ -54,20 +55,6 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.tid = context.Cache(ctx) //保存到缓存中
 	timeout := time.Duration(ctx.serverConf.GetMainConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
-	ctx.funs = map[string]interface{}{
-		"get_req":        ctx.request.GetString,
-		"get_req_string": ctx.request.GetString,
-		"get_req_int":    ctx.request.GetInt,
-		"get_param":      ctx.request.Param,
-		"get_path":       ctx.request.path.GetRequestPath,
-		"get_router":     ctx.request.path.GetRouter,
-		"get_header":     ctx.request.path.GetHeader,
-		"get_cookie":     ctx.request.path.getCookie,
-		"get_status":     ctx.response.getStatus,
-		"get_content":    ctx.response.getContent,
-		"get_client_ip":  ctx.user.GetClientIP,
-		"get_request_id": ctx.user.GetRequestID,
-	}
 	return ctx
 }
 
@@ -81,9 +68,9 @@ func (c *Ctx) Request() context.IRequest {
 	return c.request
 }
 
-//Funcs 提供用于模板转换的函数表达式
-func (c *Ctx) Funcs() map[string]interface{} {
-	return c.funs
+//TmplFuncs 提供用于模板转换的函数表达式
+func (c *Ctx) TmplFuncs() context.TFuncs {
+	return c.funs.Instance()
 }
 
 //Response 获取响应对象
@@ -109,11 +96,6 @@ func (c *Ctx) Log() logger.ILogger {
 //ServerConf 获取服务器配置
 func (c *Ctx) ServerConf() server.IServerConf {
 	return c.serverConf
-}
-
-//Flush 将结果刷新到响应流中
-func (c *Ctx) Flush() {
-	c.response.Flush()
 }
 
 //Close 关闭并释放所有资源

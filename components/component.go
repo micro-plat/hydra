@@ -5,6 +5,7 @@ import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/dbs"
 	"github.com/micro-plat/hydra/components/dlock"
+	"github.com/micro-plat/hydra/components/http"
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
 	"github.com/micro-plat/hydra/components/uuid"
@@ -17,6 +18,7 @@ type IComponent interface {
 	RPC() rpcs.IComponentRPC
 	Queue() queues.IComponentQueue
 	Cache() caches.IComponentCache
+	HTTP() http.IComponentHTTPClient
 	DB() dbs.IComponentDB
 	DLock(name string) (dlock.ILock, error)
 	UUID() uuid.UUID
@@ -27,11 +29,12 @@ var Def IComponent = NewComponent()
 
 //Component 组件
 type Component struct {
-	c     container.IContainer
-	rpc   rpcs.IComponentRPC
-	queue queues.IComponentQueue
-	cache caches.IComponentCache
-	db    dbs.IComponentDB
+	c          container.IContainer
+	rpc        rpcs.IComponentRPC
+	queue      queues.IComponentQueue
+	cache      caches.IComponentCache
+	db         dbs.IComponentDB
+	httpClient http.IComponentHTTPClient
 }
 
 //NewComponent 创建组件
@@ -43,6 +46,7 @@ func NewComponent() *Component {
 	c.queue = queues.NewStandardQueue(c.c)
 	c.cache = caches.NewStandardCache(c.c)
 	c.db = dbs.NewStandardDB(c.c)
+	c.httpClient = http.NewStandardHTTPClient(c.c)
 	return c
 }
 
@@ -64,6 +68,11 @@ func (c *Component) Cache() caches.IComponentCache {
 //DB 获取DB组件
 func (c *Component) DB() dbs.IComponentDB {
 	return c.db
+}
+
+//HTTP 获取HTTP Client组件
+func (c *Component) HTTP() http.IComponentHTTPClient {
+	return c.httpClient
 }
 
 //DLock 获取分布式鍞

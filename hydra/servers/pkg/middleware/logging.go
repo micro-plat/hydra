@@ -18,7 +18,7 @@ func Logging() Handler {
 		ctx.Next()
 
 		//3. 将结果刷新到响应流
-		ctx.Flush()
+		ctx.Response().Flush()
 
 		//4. 处理响应日志
 		code, _ := ctx.Response().GetFinalResponse()

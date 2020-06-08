@@ -30,7 +30,7 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 	}
 	jwtToken, err := jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
 	if err != nil {
-		ctx.Response().AbortWithError(http.StatusInternalServerError, fmt.Errorf("jwt配置出错：%v", err))
+		ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("jwt配置出错：%v", err))
 		return
 	}
 	setToken(ctx, jwtAuth, jwtToken)
@@ -40,15 +40,15 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 	switch strings.ToUpper(jwt.Source) {
 	case "HEADER", "H":
-		ctx.Response().SetHeader(jwt.Name, token)
+		ctx.Response().Header(jwt.Name, token)
 	default:
 		expireTime := time.Now().Add(time.Duration(time.Duration(jwt.ExpireAt)*time.Second - 8*60*60*time.Second))
 		expireVal := expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
 
 		if jwt.Domain != "" {
-			ctx.Response().SetHeader("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
+			ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
 			return
 		}
-		ctx.Response().SetHeader("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
+		ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
 	}
 }

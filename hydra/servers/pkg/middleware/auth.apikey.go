@@ -30,21 +30,21 @@ func APIKeyAuth() Handler {
 		//检查必须参数
 		ctx.Response().AddSpecial("apikey")
 		if err := ctx.Request().Check("sign", "timestamp"); err != nil {
-			ctx.Response().AbortWithError(http.StatusUnauthorized, err)
+			ctx.Response().Abort(http.StatusUnauthorized, err)
 			return
 		}
 
 		//获取secret
 		secret, err := getSecret(ctx, auth)
 		if err != nil {
-			ctx.Response().AbortWithError(http.StatusForbidden, err)
+			ctx.Response().Abort(http.StatusForbidden, err)
 			return
 		}
 
 		//验证签名
 		sign, raw := getSignRaw(ctx.Request(), "", "")
 		if err = auth.Verify(raw, secret, sign); err != nil {
-			ctx.Response().AbortWithError(http.StatusForbidden, err)
+			ctx.Response().Abort(http.StatusForbidden, err)
 			return
 		}
 		ctx.Next()

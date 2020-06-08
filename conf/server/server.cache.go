@@ -79,13 +79,13 @@ LOOP:
 					if s, ok := v.(IServerConf); ok {
 						s.Close()
 					}
-					global.Def.Log().Debug("清理ServerConf缓存配置", key)
+					global.Def.Log().Debug("清理缓存配置[ServerConf]", key)
 					return true
 				}
 				return false
 			})
 			c.varMaps.RemoveIterCb(func(key string, v interface{}) bool {
-				global.Def.Log().Debug("清理VarConf缓存配置", key)
+				global.Def.Log().Debug("清理缓存配置[VarConf]", key)
 				return key != fmt.Sprint(c.currentVarVersion)
 			})
 		}

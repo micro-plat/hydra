@@ -55,7 +55,7 @@ func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.
 }
 
 //Header 设置头信息到response里
-func (c *response) SetHeader(k string, v string) {
+func (c *response) Header(k string, v string) {
 	c.ctx.Header(k, v)
 }
 
@@ -64,28 +64,17 @@ func (c *response) ContentType(v string) {
 	c.ctx.Header("Content-Type", v)
 }
 
-//Abort 根据错误码终止应用
-func (c *response) Abort(s int) {
-	c.Write(s, nil)
-	c.ctx.Abort()
-}
-
-//AbortWithError 根据错误码与错误消息终止应用
-func (c *response) AbortWithError(s int, err error) {
+//Abort 根据错误码与错误消息终止应用
+func (c *response) Abort(s int, err error) {
 	c.Write(s, err)
 	c.ctx.Abort()
 }
 
-//SetStatusCode 设置response状态码
-func (c *response) SetStatusCode(s int) {
+//StatusCode 设置response状态码
+func (c *response) StatusCode(s int) {
 	c.raw.status = s
 	c.final.status = s
 	c.ctx.WStatus(s)
-}
-
-//Written 响应是否已写入
-func (c *response) Written() bool {
-	return c.ctx.Written()
 }
 
 //File 输入文件

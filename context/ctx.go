@@ -2,6 +2,7 @@ package context
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -20,6 +21,7 @@ func (h Handler) Handle(c IContext) interface{} {
 
 //IHandler 业务处理接口
 type IHandler interface {
+	//Handle 业务处理
 	Handle(IContext) interface{}
 }
 
@@ -41,13 +43,28 @@ type IGetter interface {
 
 //IPath 请求参数
 type IPath interface {
+	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
+
+	//GetRouter 获取当前请求对应的路由信息
 	GetRouter() *router.Router
+
+	//GetRequestPath 获取请求路径
 	GetRequestPath() string
+
+	//GetURL 获取请求的URL信息
 	GetURL() string
+
+	//GetCookie 获取请求Cookie
 	GetCookie(string) (string, bool)
+
+	//GetHeader 获取头信息
 	GetHeader(string) string
-	GetHeaders() map[string][]string
+
+	//GetHeaders 获取请求头
+	GetHeaders() http.Header
+
+	//GetCookies 获取cookie信息
 	GetCookies() map[string]string
 }
 
@@ -58,34 +75,76 @@ type IVariable interface {
 
 //IRequest 请求信息
 type IRequest interface {
+	//Path 地址、头、cookie相关信息
 	Path() IPath
+
+	//Param 路由参数
 	Param(string) string
+
+	//Bind 将请求的参数绑定到对象
 	Bind(obj interface{}) error
+
+	//Check 检查指定的字段是否有值
 	Check(field ...string) error
-	GetData() (map[string]interface{}, error)
+
+	//GetMap 将当前请求转换为map并返回
+	GetMap() (map[string]interface{}, error)
+
+	//GetBody 获取请求的body参数
 	GetBody(encoding ...string) (string, error)
+
+	//GetBodyMap 将body转换为map
 	GetBodyMap(encoding ...string) (map[string]interface{}, error)
+
+	//GetTrace 获取请求的trace信息
 	GetTrace() string
 	IGetter
 }
 
 //IResponse 响应信息
 type IResponse interface {
+
+	//AddSpecial 添加特殊标记，用于在打印响应内容时知道当前请求进行了哪些特殊处理
 	AddSpecial(t string)
+
+	//GetSpecials 获取特殊标识字段串，多个标记用"|"分隔
 	GetSpecials() string
-	SetHeader(string, string)
+
+	//Header 设置响应头
+	Header(string, string)
+
+	//GetRaw 获取未经处理的响应内容
 	GetRaw() interface{}
-	SetStatusCode(int)
+
+	//StatusCode 设置状态码
+	StatusCode(int)
+
+	//ContentType 设置Content-Type响应头
 	ContentType(v string)
+
+	//Render 修改最终渲染内容
 	Render(status int, content string, ctp string)
+
+	//Write 向响应流中写入状态码与内容(不会立即写入)
 	Write(s int, v interface{}) error
+
+	//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 	WriteAny(v interface{}) error
-	Written() bool
+
+	//File 向响应流中写入文件(立即写入)
 	File(path string)
-	Abort(int)
-	AbortWithError(int, error)
+
+	//Abort 终止当前请求继续执行
+	Abort(int, error)
+
+	//GetRawResponse 获取原始响应状态码与内容
 	GetRawResponse() (int, interface{})
+
+	//GetFinalResponse 获取最终渲染的响应状态码与内容
 	GetFinalResponse() (int, string)
+
+	//Flush 将当前内容写入响应流
+	Flush()
 }
 
 //IAuth 认证信息
@@ -95,26 +154,59 @@ type IAuth interface {
 
 	//Response 获取或设置系统响应的认证信息
 	Response(...interface{}) interface{}
+
+	//Bind 将请求的认证对象绑定为特定的结构体
 	Bind(out interface{})
 }
 
 //IUser 用户相关信息
 type IUser interface {
+
+	//GetClientIP 获取客户端请求IP
 	GetClientIP() string
+
+	//GetRequestID 获取请求编号
 	GetRequestID() string
+
+	//Auth 认证信息
 	Auth() IAuth
 }
 
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
-	Funcs() map[string]interface{}
+
+	//Meta 元数据
 	Meta() conf.IMeta
+
+	//Request 请求信息
 	Request() IRequest
+
+	//Response 响应信息
 	Response() IResponse
+
+	//Context 控制超时的Context
 	Context() context.Context
+
+	//ServerConf 服务器配置
 	ServerConf() server.IServerConf
+
+	//TmplFuncs 模板函数列表
+	TmplFuncs() TFuncs
+
+	//User 用户信息
 	User() IUser
+
+	//Log 日志组件
 	Log() logger.ILogger
-	Flush()
+
+	//Close 关闭并释放资源
 	Close()
+}
+
+//TFuncs 用于模板翻译的函数列表
+type TFuncs map[string]interface{}
+
+//Add 添加一个自定义的函数
+func (f TFuncs) Add(name string, handle interface{}) {
+	f[name] = handle
 }

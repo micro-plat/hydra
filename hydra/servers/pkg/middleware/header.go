@@ -17,7 +17,7 @@ func Header() Handler {
 		origin := ctx.Request().Path().GetHeader(originName)
 		hds := headers.GetHeaderByOrigin(origin)
 		for k, v := range hds {
-			ctx.Response().SetHeader(k, v)
+			ctx.Response().Header(k, v)
 		}
 
 		//2. 业务处理

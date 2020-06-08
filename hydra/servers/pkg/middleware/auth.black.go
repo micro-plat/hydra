@@ -15,7 +15,7 @@ func BlackList() Handler {
 		}
 		if white.IsDeny(ctx.User().GetClientIP()) {
 			err := fmt.Errorf("黑名单限制[%s]不允许访问", ctx.User().GetClientIP())
-			ctx.Response().AbortWithError(http.StatusForbidden, err)
+			ctx.Response().Abort(http.StatusForbidden, err)
 			return
 		}
 		ctx.Next()

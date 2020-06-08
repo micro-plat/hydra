@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server"
@@ -49,7 +50,7 @@ func (c *rpath) GetHeader(key string) string {
 }
 
 //GetHeaders 获取请求的header
-func (c *rpath) GetHeaders() map[string][]string {
+func (c *rpath) GetHeaders() http.Header {
 	return c.ctx.GetHeaders()
 }
 

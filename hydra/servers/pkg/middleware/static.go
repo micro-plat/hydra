@@ -25,16 +25,16 @@ func Static() Handler {
 		if err != nil {
 			if os.IsNotExist(err) {
 				err := fmt.Errorf("找不到文件:%s %w", fpath, err)
-				ctx.Response().AbortWithError(http.StatusNotFound, err)
+				ctx.Response().Abort(http.StatusNotFound, err)
 				return
 			}
 			err := fmt.Errorf("%s,err:%v", fpath, err)
-			ctx.Response().AbortWithError(http.StatusInternalServerError, err)
+			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
 		if finfo.IsDir() {
 			err := fmt.Errorf("找不到文件:%s", fpath)
-			ctx.Response().AbortWithError(http.StatusNotFound, err)
+			ctx.Response().Abort(http.StatusNotFound, err)
 			return
 		}
 		//文件已存在，则返回文件

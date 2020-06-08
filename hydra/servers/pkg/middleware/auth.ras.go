@@ -27,26 +27,26 @@ func RASAuth() Handler {
 
 		ctx.Response().AddSpecial("ras")
 
-		input, err := ctx.Request().GetData()
+		input, err := ctx.Request().GetMap()
 		if err != nil {
-			ctx.Response().AbortWithError(http.StatusInternalServerError, err)
+			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
 
 		input["__auth_"], err = auth.AuthString()
 		if err != nil {
-			ctx.Response().AbortWithError(http.StatusInternalServerError, err)
+			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
 
 		respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
 		if err != nil || !respones.Success() {
-			ctx.Response().AbortWithError(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,err:%v(%d)", err, respones.Result, respones.Status))
+			ctx.Response().Abort(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,err:%v(%d)", err, respones.Result, respones.Status))
 			return
 		}
 		result, err := respones.GetResult()
 		if err != nil {
-			ctx.Response().AbortWithError(http.StatusForbidden, err)
+			ctx.Response().Abort(http.StatusForbidden, err)
 			return
 		}
 		ctx.Meta().MergeMap(result)

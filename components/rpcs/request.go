@@ -39,7 +39,7 @@ func NewRequest(j *conf.JSONConf) *Request {
 
 //RequestByCtx 将当前请求转化为RPC调用
 func (r *Request) RequestByCtx(service string, ctx r.IContext) (res *rpc.Response, err error) {
-	input, err := ctx.Request().GetData()
+	input, err := ctx.Request().GetMap()
 	if err != nil {
 		return nil, err
 	}

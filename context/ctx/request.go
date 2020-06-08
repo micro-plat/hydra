@@ -92,8 +92,8 @@ func (r *request) GetKeys() []string {
 	return keys
 }
 
-//GetData 获取请求的参数信息
-func (r *request) GetData() (map[string]interface{}, error) {
+//GetMap 获取请求的参数信息
+func (r *request) GetMap() (map[string]interface{}, error) {
 	forms := r.ctx.GetForm()
 	body, err := r.body.GetBodyMap()
 	if err != nil {
@@ -191,7 +191,7 @@ func (r *request) IsEmpty(name string) bool {
 
 //GetTrace 获取trace信息
 func (r *request) GetTrace() string {
-	data, err := r.GetData()
+	data, err := r.GetMap()
 	if err != nil {
 		return err.Error()
 	}

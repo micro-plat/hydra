@@ -106,27 +106,25 @@ func (c *MainConf) getValue(path string) (*conf.JSONConf, error) {
 	return childConf, nil
 }
 
-func (c *MainConf) watchCluster() error {
-	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath()}, logger.New("watch.server"))
-	if err != nil {
-		return err
-	}
-	notify, err := wc.Start()
-	if err != nil {
-		return err
-	}
-LOOP:
-	for {
-		select {
-		case <-c.closeCh:
-			break LOOP
-		case <-notify:
-			c.loadCluster()
-		}
-	}
-	return nil
-}
 func (c *MainConf) loadCluster() error {
+	if err := c.getCluster(); err != nil {
+		return err
+	}
+	errs := make(chan error, 1)
+	go func() {
+		err := c.watchCluster()
+		if err != nil {
+			errs <- err
+		}
+	}()
+	select {
+	case err := <-errs:
+		return err
+	case <-time.After(time.Millisecond * 500):
+		return nil
+	}
+}
+func (c *MainConf) getCluster() error {
 	cnodes := make([]*CNode, 0, 2)
 	path := c.GetServerPubPath()
 	children, _, err := c.registry.GetChildren(path)
@@ -142,18 +140,25 @@ func (c *MainConf) loadCluster() error {
 		}
 	}
 	c.cluster = ClusterNodes(cnodes)
-	errs := make(chan error, 1)
-	go func() {
-		err := c.watchCluster()
-		if err != nil {
-			errs <- err
-		}
-	}()
-	select {
-	case err := <-errs:
+	return nil
+}
+func (c *MainConf) watchCluster() error {
+	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath()}, logger.New("watch.server"))
+	if err != nil {
 		return err
-	case <-time.After(time.Millisecond * 500):
-		return nil
+	}
+	notify, err := wc.Start()
+	if err != nil {
+		return err
+	}
+LOOP:
+	for {
+		select {
+		case <-c.closeCh:
+			break LOOP
+		case <-notify:
+			c.getCluster()
+		}
 	}
 	return nil
 }

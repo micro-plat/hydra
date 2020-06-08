@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -45,7 +46,7 @@ func JwtAuth() Handler {
 
 		//5.jwt验证失败后返回错误
 		ctx.Log().Error(err)
-		ctx.Response().Abort(errs.GetCode(err, http.StatusForbidden))
+		ctx.Response().Abort(errs.GetCode(err, http.StatusForbidden), errors.New("jwt验证串错误，禁止访问"))
 		return
 
 	}

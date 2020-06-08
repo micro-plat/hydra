@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 )
 
@@ -38,8 +39,8 @@ func BasicAuthForRealm(realm string) Handler {
 			return
 		}
 
-		ctx.Response().SetHeader("WWW-Authenticate", basic.GetRealm(realm))
-		ctx.Response().Abort(http.StatusUnauthorized)
+		ctx.Response().Header("WWW-Authenticate", basic.GetRealm(realm))
+		ctx.Response().Abort(http.StatusUnauthorized, errors.New("未提供验证信息"))
 		return
 
 	}
