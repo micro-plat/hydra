@@ -36,7 +36,11 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
 	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
-		return mq.NewMQP(js.GetString("proto"), mq.WithRaw(js.GetRaw()))
+		raw, err := mq.WithRaw(js.GetRaw())
+		if err != nil {
+			return nil, err
+		}
+		return mq.NewMQP(js.GetString("proto"), raw)
 	})
 	if err != nil {
 		return nil, err

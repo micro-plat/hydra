@@ -39,7 +39,7 @@ func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf
 		return nil, err
 	}
 	js, err := vc.GetConf(typ, name)
-	if err != nil {
+	if err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}
 	key := fmt.Sprintf("%s_%s_%d", typ, name, js.GetVersion())

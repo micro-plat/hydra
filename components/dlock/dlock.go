@@ -46,7 +46,7 @@ func (d *DLock) TryLock() (err error) {
 	d.path, err = d.registry.CreateSeqNode(registry.Join(d.name, "dlock_"),
 		fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
-		return fmt.Errorf("创建锁%s失败:%v", registry.Join(d.name, "dlock_"), err)
+		return fmt.Errorf("创建分布式锁%s失败:%v", registry.Join(d.name, "dlock_"), err)
 	}
 
 	cldrs, _, err := d.registry.GetChildren(d.name)

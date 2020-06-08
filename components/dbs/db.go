@@ -45,7 +45,7 @@ func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 		var dbConf xdb.DB
 		err := js.Unmarshal(&dbConf)
 		if err != nil {
-			return nil, fmt.Errorf("[%s/%s]配置有误：%w", dbTypeNode, name, err)
+			return nil, fmt.Errorf("数据库[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
 		return db.NewDB(dbConf.Provider,
 			dbConf.ConnString,

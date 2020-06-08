@@ -55,7 +55,7 @@ func (r *Request) Request(ctx context.Context, service string, form map[string]i
 		return
 	}
 	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%s_%d", rservice, server, domain, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
-		if isip {
+		if isip && r.j != nil {
 			if len(r.j.GetStrings("tls")) == 2 {
 				return rpc.NewClient(service, rpc.WithTLS(r.j.GetStrings("tls")))
 			}

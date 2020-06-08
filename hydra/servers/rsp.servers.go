@@ -18,6 +18,7 @@ import (
 type RspServers struct {
 	registryAddr string
 	registry     registry.IRegistry
+	delayChan    chan string
 	path         []string
 	mpath        string
 	notify       chan *watcher.ValueChangeArgs
@@ -32,6 +33,7 @@ type RspServers struct {
 func NewRspServers(registryAddr string, platName, sysName string, serverTypes []string, clusterName string) *RspServers {
 	server := &RspServers{
 		registryAddr: registryAddr,
+		delayChan:    make(chan string, 10),
 		closeChan:    make(chan struct{}),
 		servers:      make(map[string]IResponsiveServer),
 		log:          logger.New("hydra"),
@@ -91,6 +93,13 @@ LOOP:
 		select {
 		case <-r.closeChan:
 			break LOOP
+		case p := <-r.delayChan:
+			if r.done {
+				break LOOP
+			}
+			if err := r.checkServer(p); err != nil {
+				r.log.Error(err)
+			}
 		case u := <-r.notify:
 			if r.done {
 				break LOOP
@@ -148,6 +157,7 @@ func (r *RspServers) checkServer(path string) error {
 			r.servers[conf.GetMainConf().GetServerType()] = srvr
 			r.log.Infof("启动[%s]服务...", conf.GetMainConf().GetServerType())
 			if err := srvr.Start(); err != nil {
+				r.delayPub(path)
 				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
 			}
 		} else {
@@ -161,9 +171,22 @@ func (r *RspServers) checkServer(path string) error {
 	if change {
 		server.Cache.Save(conf)
 	}
-
 	return nil
 
+}
+
+//delayPub 延迟启动，当依赖的服务没有正确启动时通过延迟重试进行启动
+func (r *RspServers) delayPub(p string) {
+	go func() {
+		if r.done {
+			return
+		}
+		time.Sleep(time.Second * 5)
+		if r.done {
+			return
+		}
+		r.delayChan <- p
+	}()
 }
 
 //Shutdown 关闭所有服务器

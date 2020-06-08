@@ -63,11 +63,13 @@ func WithKey(key string) Option {
 }
 
 //WithRaw 通过json原串初始化
-func WithRaw(raw []byte) Option {
-	return func(o *ConfOpt) {
-		if err := json.Unmarshal(raw, o); err != nil {
-			panic(err)
-		}
-		o.Raw = string(raw)
+func WithRaw(raw []byte) (Option, error) {
+	c := &ConfOpt{}
+	if err := json.Unmarshal(raw, c); err != nil {
+		panic(err)
 	}
+	c.Raw = string(raw)
+	return func(o *ConfOpt) {
+		o = c
+	}, nil
 }
