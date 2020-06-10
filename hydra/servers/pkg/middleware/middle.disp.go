@@ -75,14 +75,16 @@ func (g *dispCtx) ClientIP() string {
 func (g *dispCtx) ContentType() string {
 	return g.Context.GetHeader("Content-Type")
 }
-func (g *dispCtx) File(name string) error {
+func (g *dispCtx) File(name string) {
 	ff, err := ioutil.ReadFile(name)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	body := base64.StdEncoding.EncodeToString(ff)
-	_, err = g.Writer.WriteString(body)
-	return err
+	g.Context.Header("file", name)
+	g.Context.JSON(200, map[string]interface{}{
+		"__body": body,
+	})
 }
 func (g *dispCtx) ShouldBind(v interface{}) error {
 	js, err := json.Marshal(g.Context.Request.GetForm)
