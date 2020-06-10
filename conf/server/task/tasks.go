@@ -34,14 +34,19 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 }
 
 //GetConf 根据服务嚣配置获取task
-func GetConf(cnf conf.IMainConf) (tasks *Tasks, err error) {
-	if _, err = cnf.GetSubObject("task", &tasks); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("task:%v", err)
+func GetConf(cnf conf.IMainConf) (tasks *Tasks) {
+	tasks = &Tasks{}
+	_, err := cnf.GetSubObject("task", tasks)
+	if err != nil && err != conf.ErrNoSetting {
+		panic(fmt.Errorf("task:%v", err))
+	}
+	if err == conf.ErrNoSetting {
+		return tasks
 	}
 	if len(tasks.Tasks) > 0 {
 		if b, err := govalidator.ValidateStruct(&tasks); !b {
-			return nil, fmt.Errorf("task配置有误:%v", err)
+			panic(fmt.Errorf("task配置有误:%v", err))
 		}
 	}
-	return
+	return tasks
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
+	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -25,6 +26,7 @@ type IServerConf interface {
 	GetMetricConf() *metric.Metric
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
+	GetTaskConf() *task.Tasks
 	GetAPIKeyConf() *apikey.APIKeyAuth
 	GetRASConf() *ras.RASAuth
 	GetBasicConf() *basic.BasicAuth
@@ -51,6 +53,7 @@ type ServerConf struct {
 	render    *render.Render
 	whiteList *whitelist.WhiteList
 	blackList *blacklist.BlackList
+	task      *task.Tasks
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -75,6 +78,7 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.basic = basic.GetConf(s.mainConf)
 	s.blackList = blacklist.GetConf(s.mainConf)
 	s.whiteList = whitelist.GetConf(s.mainConf)
+	s.task = task.GetConf(s.mainConf)
 	return s, nil
 
 }
@@ -154,4 +158,9 @@ func (s *ServerConf) GetWhiteListConf() *whitelist.WhiteList {
 //GetBlackListConf 获取黑名单配置
 func (s *ServerConf) GetBlackListConf() *blacklist.BlackList {
 	return s.blackList
+}
+
+//GetTaskConf 获取cron任务配置
+func (s *ServerConf) GetTaskConf() *task.Tasks {
+	return s.task
 }

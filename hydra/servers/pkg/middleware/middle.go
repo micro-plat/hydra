@@ -5,6 +5,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 )
 
 type imiddle interface {
@@ -43,10 +44,22 @@ type Handler func(IMiddleContext)
 //GinFunc 返回GIN对应的处理函数
 func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		v, ok := c.Get("__gin_middle_context__")
+		v, ok := c.Get("__middle_context__")
 		if !ok {
 			v = newMiddleContext(ctx.NewCtx(&ginCtx{Context: c}, tps[0]), c)
-			c.Set("__gin_middle_context__", v)
+			c.Set("__middle_context__", v)
+		}
+		h(v.(IMiddleContext))
+	}
+}
+
+//DispFunc 返回disp对应的处理函数
+func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
+	return func(c *dispatcher.Context) {
+		v, ok := c.Get("__middle_context__")
+		if !ok {
+			v = newMiddleContext(ctx.NewCtx(&dispCtx{Context: c}, tps[0]), c)
+			c.Set("__middle_context__", v)
 		}
 		h(v.(IMiddleContext))
 	}

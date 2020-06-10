@@ -29,8 +29,8 @@ type IInnerContext interface {
 	WHeader(string) string    //c.Context.Writer.Header().Get
 	File(string)              //Context.File(path)
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)
-	XML(int, interface{})
-	YAML(int, interface{})
-	JSON(int, interface{})
+	// XML(int, interface{})
+	// YAML(int, interface{})
+	// JSON(int, interface{})
 	Redirect(int, string)
 }
