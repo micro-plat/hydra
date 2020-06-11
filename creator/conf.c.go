@@ -22,19 +22,25 @@ type IConf interface {
 	//Var 参数配置
 	Vars() vars
 	//API api服务器配置
-	API(address string, opts ...api.Option) httpBuilder
+	API(address string, opts ...api.Option) *httpBuilder
 
 	//GetAPI() 获取API服务器配置
-	GetAPI() httpBuilder
+	GetAPI() *httpBuilder
 
 	//Web web服务器配置
-	Web(address string, opts ...api.Option) httpBuilder
+	Web(address string, opts ...api.Option) *httpBuilder
 
 	//GetWeb() 获取Web服务器配置
-	GetWeb() httpBuilder
+	GetWeb() *httpBuilder
 
 	//Custome 自定义服务器配置
 	Custome(tp string, s ...interface{}) customerBuilder
+
+	//CRON 构建cron服务器配置
+	CRON(opts ...cron.Option) *cronBuilder
+
+	//GetCRON 获取CRON服务器配置
+	GetCRON() *cronBuilder
 }
 
 //Conf 配置服务
@@ -83,6 +89,8 @@ func (c *conf) Load() error {
 				c.data[global.API] = c.GetAPI()
 			case global.Web:
 				c.data[global.Web] = c.GetWeb()
+			case global.CRON:
+				c.data[global.CRON] = c.GetCRON()
 			default:
 				c.data[t] = newCustomerBuilder()
 			}
@@ -95,22 +103,22 @@ func (c *conf) Load() error {
 }
 
 //API api服务器配置
-func (c *conf) API(address string, opts ...api.Option) httpBuilder {
+func (c *conf) API(address string, opts ...api.Option) *httpBuilder {
 	api := newHTTP(address, opts...)
 	c.data[global.API] = api
 	return api
 }
 
 //GetAPI 获取当前已配置的api服务器
-func (c *conf) GetAPI() httpBuilder {
+func (c *conf) GetAPI() *httpBuilder {
 	if api, ok := c.data[global.API]; ok {
-		return api.(httpBuilder)
+		return api.(*httpBuilder)
 	}
 	return c.API(":8080")
 }
 
 //Web web服务器配置
-func (c *conf) Web(address string, opts ...api.Option) httpBuilder {
+func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
 	web := newHTTP(address, opts...)
 	web.Static(static.WithArchive(global.AppName))
 	c.data[global.Web] = web
@@ -118,18 +126,26 @@ func (c *conf) Web(address string, opts ...api.Option) httpBuilder {
 }
 
 //GetWeb 获取当前已配置的web服务器
-func (c *conf) GetWeb() httpBuilder {
+func (c *conf) GetWeb() *httpBuilder {
 	if web, ok := c.data[global.Web]; ok {
-		return web.(httpBuilder)
+		return web.(*httpBuilder)
 	}
 	return c.Web(":8089")
 }
 
 //CRON cron服务器配置
-func (c *conf) CRON(opts ...cron.Option) cronBuilder {
+func (c *conf) CRON(opts ...cron.Option) *cronBuilder {
 	cron := newCron(opts...)
 	c.data[global.CRON] = cron
 	return cron
+}
+
+//GetWeb 获取当前已配置的web服务器
+func (c *conf) GetCRON() *cronBuilder {
+	if cron, ok := c.data[global.CRON]; ok {
+		return cron.(*cronBuilder)
+	}
+	return c.CRON()
 }
 
 //Vars 平台变量配置

@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
 )
 
 var _ context.IPath = &rpath{}
@@ -31,7 +32,13 @@ func (c *rpath) GetMethod() string {
 
 //GetRouter 获取路由信息
 func (c *rpath) GetRouter() *router.Router {
-	return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+	switch c.serverConf.GetMainConf().GetServerType() {
+	case global.API, global.Web, global.WS:
+		return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+	default:
+		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8"))
+	}
+
 }
 
 //GetURL 获取请求路径

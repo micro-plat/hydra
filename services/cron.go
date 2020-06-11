@@ -15,6 +15,13 @@ type subscriber struct {
 //CRON cron消息
 var CRON = newCron()
 
+var _ ICRON = CRON
+
+//ICRON CRON动态服务
+type ICRON interface {
+	Add(cron string, service string) ICRON
+}
+
 type cron struct {
 	tasks  *task.Tasks
 	events []*subscriber
@@ -32,8 +39,13 @@ func newCron() *cron {
 	return c
 }
 
+//GetTasks 获取任务列表
+func (c *cron) GetTasks() *task.Tasks {
+	return c.tasks
+}
+
 //Add 添加任务
-func (c *cron) Add(cron string, service string) *cron {
+func (c *cron) Add(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)

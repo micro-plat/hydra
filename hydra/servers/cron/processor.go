@@ -30,12 +30,17 @@ type Processor struct {
 //NewProcessor 创建processor
 func NewProcessor() (p *Processor) {
 	p = &Processor{
-		Engine:    dispatcher.New(),
 		closeChan: make(chan struct{}),
 		span:      time.Second,
 		length:    60,
 		startTime: time.Now(),
 	}
+	p.Engine = dispatcher.New()
+	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
+	p.Engine.Use(middleware.Logging().DispFunc())
+	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
+	p.Engine.Use(middleware.Delay().DispFunc()) //
+
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
@@ -60,12 +65,23 @@ START:
 //Add 添加任务
 func (s *Processor) Add(ts ...*task.Task) (err error) {
 	for _, t := range ts {
+		if t.Disable {
+			s.Remove(t.GetUNQ())
+			continue
+		}
+
+		//处理单次执行服务
+		if ok, err := s.onceHandle(t); ok {
+			return err
+		}
+
 		task, err := NewCronTask(t)
 		if err != nil {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
+
 		if !s.Engine.Find(task.GetService()) {
-			s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.Service).DispFunc())
+			s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.Service).DispFunc(CRON))
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err
@@ -74,6 +90,27 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 	return
 
 }
+func (s *Processor) onceHandle(t *task.Task) (bool, error) {
+	if t.Cron != "@once" && t.Cron != "@now" {
+		return false, nil
+	}
+	if s.isPause {
+		return true, fmt.Errorf("当前服务器已暂停，不再执行任务:%s", t.GetUNQ())
+	}
+
+	//注册服务
+	task, _ := NewCronTask(t)
+
+	//注册服务
+	if !s.Engine.Find(task.GetService()) {
+		s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.Service).DispFunc(CRON))
+	}
+
+	//异步执行
+	go s.Engine.HandleRequest(task)
+	return true, nil
+}
+
 func (s *Processor) add(task *CronTask) (offset int, round int, err error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
@@ -162,10 +199,7 @@ func (s *Processor) handle(task *CronTask) error {
 	}
 	if !s.isPause {
 		task.Counter.Increase()
-		_, err := s.Engine.HandleRequest(task)
-		if err != nil {
-			// task.Errorf("%s执行出错:%v", task.GetName(), err)
-		}
+		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
 	_, _, err := s.add(task)
 	if err != nil {

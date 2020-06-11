@@ -15,81 +15,83 @@ import (
 	"github.com/micro-plat/hydra/services"
 )
 
-type httpBuilder = customerBuilder
+type httpBuilder struct {
+	customerBuilder
+}
 
 //newHTTP 构建http生成器
-func newHTTP(address string, opts ...api.Option) httpBuilder {
-	b := make(map[string]interface{})
-	b["main"] = api.New(address, opts...)
+func newHTTP(address string, opts ...api.Option) *httpBuilder {
+	b := &httpBuilder{customerBuilder: make(map[string]interface{})}
+	b.customerBuilder["main"] = api.New(address, opts...)
 	return b
 }
 
 //Load 加载路由
-func (b httpBuilder) Load() {
+func (b *httpBuilder) Load() {
 	routers, err := services.API.GetRouters()
 	if err != nil {
 		panic(err)
 	}
-	b["router"] = routers
+	b.customerBuilder["router"] = routers
 	return
 }
 
 //Jwt jwt配置
-func (b httpBuilder) Jwt(opts ...jwt.Option) httpBuilder {
-	b["auth/jwt"] = jwt.NewJWT(opts...)
+func (b *httpBuilder) Jwt(opts ...jwt.Option) *httpBuilder {
+	b.customerBuilder["auth/jwt"] = jwt.NewJWT(opts...)
 	return b
 }
 
 //Fsa fsa静态密钥错误
-func (b httpBuilder) APIKEY(secret string, opts ...apikey.Option) httpBuilder {
-	b["auth/apikey"] = apikey.New(secret, opts...)
+func (b *httpBuilder) APIKEY(secret string, opts ...apikey.Option) *httpBuilder {
+	b.customerBuilder["auth/apikey"] = apikey.New(secret, opts...)
 	return b
 }
 
 //Fsa fsa静态密钥错误
-func (b httpBuilder) Basic(opts ...basic.Option) httpBuilder {
-	b["auth/basic"] = basic.NewBasic(opts...)
+func (b *httpBuilder) Basic(opts ...basic.Option) *httpBuilder {
+	b.customerBuilder["auth/basic"] = basic.NewBasic(opts...)
 	return b
 }
 
 //WhiteList 设置白名单
-func (b httpBuilder) WhiteList(ips ...*whitelist.IPList) httpBuilder {
-	b["acl/white.list"] = whitelist.New(ips...)
+func (b *httpBuilder) WhiteList(ips ...*whitelist.IPList) *httpBuilder {
+	b.customerBuilder["acl/white.list"] = whitelist.New(ips...)
 	return b
 }
 
 //BlackList 设置黑名单
-func (b httpBuilder) BlackList(opts ...blacklist.Option) httpBuilder {
-	b["acl/black.list"] = blacklist.New(opts...)
+func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
+	b.customerBuilder["acl/black.list"] = blacklist.New(opts...)
 	return b
 }
 
 //Ras 远程认证服务配置
-func (b httpBuilder) Ras(service string, opts ...ras.Option) httpBuilder {
-	b["auth/ras"] = ras.New(service, opts...)
+func (b *httpBuilder) Ras(service string, opts ...ras.Option) *httpBuilder {
+	b.customerBuilder["auth/ras"] = ras.New(service, opts...)
 	return b
 }
 
 //Header 头配置
-func (b httpBuilder) Header(opts ...header.Option) httpBuilder {
-	b["header"] = header.New(opts...)
+func (b *httpBuilder) Header(opts ...header.Option) *httpBuilder {
+	b.customerBuilder["header"] = header.New(opts...)
 	return b
 }
 
 //Header 头配置
-func (b httpBuilder) Metric(host string, db string, cron string, opts ...metric.Option) httpBuilder {
-	b["metric"] = metric.New(host, db, cron, opts...)
+func (b *httpBuilder) Metric(host string, db string, cron string, opts ...metric.Option) *httpBuilder {
+	b.customerBuilder["metric"] = metric.New(host, db, cron, opts...)
 	return b
 }
 
 //Static 静态文件配置
-func (b httpBuilder) Static(opts ...static.Option) httpBuilder {
-	b["static"] = static.New(opts...)
+func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
+	b.customerBuilder["static"] = static.New(opts...)
 	return b
 }
 
 //Render 响应渲染配置
-func (b httpBuilder) Render(opts ...render.Option) httpBuilder {
-	b["render"] = render.NewRender(opts...)
+func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
+	b.customerBuilder["render"] = render.NewRender(opts...)
 	return b
 }

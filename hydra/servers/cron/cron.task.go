@@ -31,9 +31,9 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 	}
 	r.schedule, err = cron.ParseStandard(t.Cron)
 	if err != nil {
-		return nil, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Service, t.Cron)
+		return r, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Service, t.Cron)
 	}
-	return
+	return r, nil
 }
 
 //GetName 获取任务名称

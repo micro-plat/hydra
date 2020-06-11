@@ -16,6 +16,8 @@ type iCustomerBuilder interface {
 	Map() map[string]interface{}
 }
 
+var _ iCustomerBuilder = customerBuilder{}
+
 type customerBuilder map[string]interface{}
 
 //newHTTP 构建http生成器
@@ -50,4 +52,7 @@ func (b customerBuilder) Sub(name string, s ...interface{}) ISUB {
 }
 func (b customerBuilder) Map() map[string]interface{} {
 	return b
+}
+func (b customerBuilder) Load() {
+
 }

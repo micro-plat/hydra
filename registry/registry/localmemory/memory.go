@@ -51,11 +51,12 @@ func (l *localMemory) print() {
 func (l *localMemory) GetValue(path string) (data []byte, version int32, err error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
-	if v, ok := l.nodes[r.Join(path)]; ok {
+	vpath := r.Join(path)
+	if v, ok := l.nodes[vpath]; ok {
 		return []byte(v), 0, nil
 	}
 
-	return nil, 0, fmt.Errorf("节点[%s]不存在", path)
+	return nil, 0, fmt.Errorf("节点[%s]不存在", vpath)
 
 }
 func (l *localMemory) Update(path string, data string, version int32) (err error) {

@@ -90,6 +90,7 @@ func (s *show) readPrint() error {
 }
 
 func (s *show) printMainConf() error {
+
 	for _, tp := range s.types {
 		sc, err := server.NewServerConfBy(s.plat, s.sysName, tp, s.cluster, s.rgst)
 		if err != nil {
@@ -106,7 +107,10 @@ func (s *show) printMainConf() error {
 	return nil
 }
 func (s *show) printVarConf() error {
-	sc, err := server.NewServerConfBy(s.plat, s.sysName, global.API, s.cluster, s.rgst)
+	if len(s.types) == 0 {
+		return nil
+	}
+	sc, err := server.NewServerConfBy(s.plat, s.sysName, s.types[0], s.cluster, s.rgst)
 	if err != nil {
 		return err
 	}

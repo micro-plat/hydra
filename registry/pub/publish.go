@@ -17,7 +17,7 @@ import (
 //IPublisher 服务发布程序
 type IPublisher interface {
 	WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error
-	Publish(serverName string, data map[string]interface{}, service ...string) error
+	Publish(serverName string, serviceAddr string, clusterID string, service ...string) error
 	Clear()
 	Close()
 }
@@ -83,9 +83,16 @@ func (p *Publisher) WatchClusterChange(notify func(isMaster bool, sharding int, 
 }
 
 //Publish 发布所有服务（集群节点，服务节点，DNS节点）
-func (p *Publisher) Publish(serverName string, input map[string]interface{}, service ...string) error {
+func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID string, service ...string) error {
+	input := map[string]interface{}{}
+	input["addr"] = serviceAddr
+	input["cluster_id"] = clusterID
+	input["time"] = time.Now().Unix()
 
-	buff, _ := jsons.Marshal(input)
+	buff, err := jsons.Marshal(input)
+	if err != nil {
+		return fmt.Errorf("服务器发布数据转换为json失败:%w", err)
+	}
 	data := string(buff)
 	if err := p.pubServerNode(serverName, data); err != nil {
 		return err
@@ -229,3 +236,11 @@ func (p *Publisher) Clear() {
 	p.pubs = make(map[string]string)
 	p.watchChan = make(chan struct{})
 }
+
+// if len(service)%2 > 0 {
+// 	return fmt.Errorf("发布服务的扩展参数必须成对出现：%d", len(service))
+// }
+
+// for i := 0; i+1 < len(service); i = i + 2 {
+// 	input[service[i]] = service[i+1]
+// }

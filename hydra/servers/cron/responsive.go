@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/cron"
+	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry/pub"
@@ -44,12 +45,20 @@ func (w *Responsive) Start() (err error) {
 		err = fmt.Errorf("启动失败 %w", err)
 		return
 	}
+
+	//动态监听任务
+	services.CRON.Subscribe(func(t *task.Task) {
+		if err := w.Server.Add(t); err != nil {
+			w.log.Errorf("服务[%v]添加失败 %w", t, err)
+		}
+	})
+
 	if err = w.publish(); err != nil {
 		err = fmt.Errorf("服务发布失败 %w", err)
 		w.Shutdown()
 		return err
 	}
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetRouterConf().Routers))
+	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetTaskConf().Tasks))
 	return nil
 }
 
@@ -93,11 +102,7 @@ func (w *Responsive) Shutdown() {
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-
-	if err := w.pub.Publish(serverName, map[string]interface{}{
-		"service":    addr,
-		"cluster_id": w.conf.GetMainConf().GetClusterID(),
-	}); err != nil {
+	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetClusterID()); err != nil {
 		return err
 	}
 
@@ -107,7 +112,6 @@ func (w *Responsive) publish() (err error) {
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	return NewServer(cnf.GetMainConf().GetServerName(), cnf.GetTaskConf().Tasks...)
-
 }
 
 func init() {

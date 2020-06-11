@@ -20,6 +20,9 @@ var Services services.IService = services.Def
 //Conf 配置组件
 var Conf creator.IConf = creator.Conf
 
+//CRON CRON服务可进行动态注册服务
+var CRON services.ICRON = services.CRON
+
 //IContext 请求上下文
 type IContext = context.IContext
 

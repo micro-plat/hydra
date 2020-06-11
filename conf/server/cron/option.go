@@ -18,22 +18,22 @@ func WithTrace() Option {
 	}
 }
 
-//WitchMasterSlave 设置为主备模式
-func WitchMasterSlave() Option {
+//WithMasterSlave 设置为主备模式
+func WithMasterSlave() Option {
 	return func(a *option) {
 		a.Sharding = 1
 	}
 }
 
-//WitchSharding 设置为分片模式
-func WitchSharding(i int) Option {
+//WithSharding 设置为分片模式
+func WithSharding(i int) Option {
 	return func(a *option) {
 		a.Sharding = i
 	}
 }
 
-//WitchP2P 设置为对等模式
-func WitchP2P() Option {
+//WithP2P 设置为对等模式
+func WithP2P() Option {
 	return func(a *option) {
 		a.Sharding = 0
 	}

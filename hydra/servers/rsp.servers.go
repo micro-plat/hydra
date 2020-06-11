@@ -82,17 +82,21 @@ func (r *RspServers) loopRecvNotify() {
 			case <-tk.C:
 				debug.FreeOSMemory()
 			case <-r.closeChan:
-				r.log.Debug("退出")
 				break LOOP
 			}
 		}
 
 	}()
+	waitTimeout := time.After(time.Second)
 LOOP:
 	for {
 		select {
 		case <-r.closeChan:
 			break LOOP
+		case <-waitTimeout:
+			if len(r.servers) == 0 {
+				r.log.Debug("监听服务器配置...")
+			}
 		case p := <-r.delayChan:
 			if r.done {
 				break LOOP

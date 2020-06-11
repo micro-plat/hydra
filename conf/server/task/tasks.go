@@ -44,7 +44,7 @@ func GetConf(cnf conf.IMainConf) (tasks *Tasks) {
 		return tasks
 	}
 	if len(tasks.Tasks) > 0 {
-		if b, err := govalidator.ValidateStruct(&tasks); !b {
+		if b, err := govalidator.ValidateStruct(tasks); !b {
 			panic(fmt.Errorf("task配置有误:%v", err))
 		}
 	}

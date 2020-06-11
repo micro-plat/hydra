@@ -94,10 +94,7 @@ func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
 
-	if err := w.pub.Publish(serverName, map[string]interface{}{
-		"service":    addr,
-		"cluster_id": w.conf.GetMainConf().GetClusterID(),
-	}); err != nil {
+	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetClusterID()); err != nil {
 		return err
 	}
 
