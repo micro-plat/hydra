@@ -52,13 +52,6 @@ func WithExcludes(p ...string) Option {
 	}
 }
 
-//WithFailedCode 设置验证失败的错误码（400-999）
-func WithFailedCode(code string) Option {
-	return func(a *JWTAuth) {
-		a.FailedCode = code
-	}
-}
-
 //WithRedirect 设置转跳URL
 func WithRedirect(url string) Option {
 	return func(a *JWTAuth) {
