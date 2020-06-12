@@ -17,7 +17,7 @@ type JWTAuth struct {
 	Source     string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)"`
 	Secret     string   `json:"secret" valid:"ascii,required"`
 	Exclude    []string `json:"exclude,omitempty"`
-	FailedCode string   `json:"failed-code,omitempty" valid:"numeric,range(400|999)"`
+	FailedCode string   `json:"failed-code,omitempty"`
 	Redirect   string   `json:"redirect,omitempty" valid:"ascii"`
 	Domain     string   `json:"domain,omitempty" valid:"ascii"`
 	Disable    bool     `json:"disable,omitempty"`
