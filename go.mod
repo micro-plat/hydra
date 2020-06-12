@@ -14,6 +14,7 @@ require (
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v0.4.0
 	github.com/pkg/profile v1.4.0
+	github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
 	github.com/ugorji/go/codec v1.1.7
 	github.com/urfave/cli v1.22.4
 	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8

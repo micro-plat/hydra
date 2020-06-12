@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/utility"
 )
 
 var _ conf.IPub = &Pub{}
@@ -33,7 +33,7 @@ func NewPub(platName string, sysName string, serverType string, clusterName stri
 		sysName:     sysName,
 		serverType:  serverType,
 		clusterName: clusterName,
-		clusterID:   utility.GetGUID()[0:8],
+		clusterID:   global.GetMatchineCode(),
 	}
 }
 

@@ -22,7 +22,8 @@ const (
 )
 
 //Get 获取全局唯一编号每个节点每秒1000个不重复
-func Get(wid int64) UUID {
+func Get(clusterID string) UUID {
+	wid := fnv32(clusterID)
 	// 获取生成时的时间戳
 	now := time.Now().UnixNano() / 1e9 // 纳秒转秒
 	id := atomic.AddInt64(&currentNum, 1)
@@ -33,4 +34,13 @@ func Get(wid int64) UUID {
 	// 如果在程序跑了一段时间修改了epoch这个值 可能会导致生成相同的ID
 	nid := int64((now-epoch)<<timeShift | (int64(wid) % workerMax << workerShift) | id)
 	return UUID(nid)
+}
+func fnv32(key string) uint32 {
+	hash := uint32(2166136261)
+	const prime32 = uint32(16777619)
+	for i := 0; i < len(key); i++ {
+		hash *= prime32
+		hash ^= uint32(key[i])
+	}
+	return hash
 }

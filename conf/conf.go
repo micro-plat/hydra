@@ -20,6 +20,7 @@ type IMainConf interface {
 	GetSubObject(name string, v interface{}) (int32, error)
 	GetRegistry() registry.IRegistry
 	GetVersion() int32
+	GetCluster() ICluster
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
 	Close() error
@@ -32,13 +33,16 @@ type ICNode interface {
 	GetName() string
 	IsCurrent() bool
 	GetIndex() int
+	//IsBefore 判断当前节点是否是前i个
+	IsBefore(i int) bool
+	Clone() ICNode
 }
 
 //ICluster 集群信息
 type ICluster interface {
 	Iter(f func(ICNode) bool)
 	Current() ICNode
-	Clone() ICluster
+	Watch() chan ICNode
 }
 
 //IPub 发布路径服务

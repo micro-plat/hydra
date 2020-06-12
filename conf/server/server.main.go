@@ -120,6 +120,13 @@ func (c *MainConf) GetSubConf(name string) (*conf.JSONConf, error) {
 	return nil, conf.ErrNoSetting
 }
 
+//GetCluster 获取集群信息
+func (c *MainConf) GetCluster() conf.ICluster {
+	cluster, err := getCluster(c.IPub, c.registry)
+	panic(err)
+	return cluster
+}
+
 //GetSubObject 获取子配置信息
 func (c *MainConf) GetSubObject(name string, v interface{}) (int32, error) {
 	conf, err := c.GetSubConf(name)
