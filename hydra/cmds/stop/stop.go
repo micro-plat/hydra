@@ -3,8 +3,8 @@ package stop
 import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/daemon"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs/daemon"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )

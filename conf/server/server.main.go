@@ -2,23 +2,18 @@ package server
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/registry/watcher"
-	"github.com/micro-plat/lib4go/logger"
 )
 
 //MainConf 服务器主配置
 type MainConf struct {
-	mainConf    *conf.JSONConf
-	version     int32
-	subConfs    map[string]conf.JSONConf
-	currentNode *CNode
-	registry    registry.IRegistry
+	mainConf *conf.JSONConf
+	version  int32
+	subConfs map[string]conf.JSONConf
+	registry registry.IRegistry
 	conf.IPub
-	cluster conf.ICluster
 	closeCh chan struct{}
 }
 
@@ -40,7 +35,7 @@ func NewMainConf(platName string, systemName string, serverType string, clusterN
 func (c *MainConf) load() (err error) {
 
 	//获取主配置
-	conf, err := c.getValue(c.GetMainPath())
+	conf, err := getValue(c.registry, c.GetMainPath())
 	if err != nil {
 		return err
 	}
@@ -52,9 +47,6 @@ func (c *MainConf) load() (err error) {
 	if err != nil {
 		return err
 	}
-
-	//获取节点信息
-	c.loadCluster()
 	return nil
 }
 
@@ -66,7 +58,7 @@ func (c *MainConf) getSubConf(path string) (map[string]conf.JSONConf, error) {
 	values := make(map[string]conf.JSONConf)
 	for _, p := range confs {
 		currentPath := registry.Join(path, p)
-		value, err := c.getValue(currentPath)
+		value, err := getValue(c.registry, currentPath)
 		if err != nil {
 			return nil, err
 		}
@@ -83,84 +75,6 @@ func (c *MainConf) getSubConf(path string) (map[string]conf.JSONConf, error) {
 		}
 	}
 	return values, nil
-}
-
-func (c *MainConf) getValue(path string) (*conf.JSONConf, error) {
-	data, version, err := c.registry.GetValue(path)
-	if err != nil {
-		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
-	}
-
-	rdata, err := decrypt(data)
-	if err != nil {
-		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)
-	}
-	if len(rdata) == 0 {
-		rdata = []byte("{}")
-	}
-	childConf, err := conf.NewJSONConf(rdata, version)
-	if err != nil {
-		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
-		return nil, err
-	}
-	return childConf, nil
-}
-
-func (c *MainConf) loadCluster() error {
-	if err := c.getCluster(); err != nil {
-		return err
-	}
-	errs := make(chan error, 1)
-	go func() {
-		err := c.watchCluster()
-		if err != nil {
-			errs <- err
-		}
-	}()
-	select {
-	case err := <-errs:
-		return err
-	case <-time.After(time.Millisecond * 500):
-		return nil
-	}
-}
-func (c *MainConf) getCluster() error {
-	cnodes := make([]*CNode, 0, 2)
-	path := c.GetServerPubPath()
-	children, _, err := c.registry.GetChildren(path)
-	if err != nil {
-		return err
-	}
-
-	for i, name := range children {
-		node := NewCNode(name, c.GetClusterID(), i)
-		cnodes = append(cnodes, node)
-		if node.IsCurrent() {
-			c.currentNode = node
-		}
-	}
-	c.cluster = ClusterNodes(cnodes)
-	return nil
-}
-func (c *MainConf) watchCluster() error {
-	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath()}, logger.New("watch.server"))
-	if err != nil {
-		return err
-	}
-	notify, err := wc.Start()
-	if err != nil {
-		return err
-	}
-LOOP:
-	for {
-		select {
-		case <-c.closeCh:
-			break LOOP
-		case <-notify:
-			c.getCluster()
-		}
-	}
-	return nil
 }
 
 //IsTrace 是否跟踪请求或响应
@@ -183,11 +97,6 @@ func (c *MainConf) GetVersion() int32 {
 	return c.version
 }
 
-//GetCluster 获取集群中的所有节点
-func (c *MainConf) GetCluster() conf.ICluster {
-	return c.cluster.Clone()
-}
-
 //GetMainConf 获取当前主配置
 func (c *MainConf) GetMainConf() *conf.JSONConf {
 	return c.mainConf
@@ -201,11 +110,6 @@ func (c *MainConf) GetMainObject(v interface{}) (int32, error) {
 		return 0, err
 	}
 	return conf.GetVersion(), nil
-}
-
-//GetClusterNode 获取当前集群节点信息
-func (c *MainConf) GetClusterNode() conf.ICNode {
-	return c.currentNode
 }
 
 //GetSubConf 指定子配置
@@ -254,4 +158,24 @@ func (c *MainConf) Iter(f func(path string, conf *conf.JSONConf) bool) {
 func (c *MainConf) Close() error {
 	close(c.closeCh)
 	return nil
+}
+func getValue(registry registry.IRegistry, path string) (*conf.JSONConf, error) {
+	data, version, err := registry.GetValue(path)
+	if err != nil {
+		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
+	}
+
+	rdata, err := decrypt(data)
+	if err != nil {
+		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)
+	}
+	if len(rdata) == 0 {
+		rdata = []byte("{}")
+	}
+	childConf, err := conf.NewJSONConf(rdata, version)
+	if err != nil {
+		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
+		return nil, err
+	}
+	return childConf, nil
 }

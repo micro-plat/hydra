@@ -14,10 +14,8 @@ type IMainConf interface {
 	IPub
 	IsStarted() bool
 	IsTrace() bool
-	GetCluster() ICluster
 	GetMainConf() *JSONConf
 	GetMainObject(v interface{}) (int32, error)
-	GetClusterNode() ICNode
 	GetSubConf(name string) (*JSONConf, error)
 	GetSubObject(name string, v interface{}) (int32, error)
 	GetRegistry() registry.IRegistry

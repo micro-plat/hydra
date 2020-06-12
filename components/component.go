@@ -82,6 +82,7 @@ func (c *Component) DLock(name string) (dlock.ILock, error) {
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
-	id := context.Current().ServerConf().GetMainConf().GetClusterNode().GetIndex()
+	// id := context.Current().ServerConf().GetMainConf().GetClusterNode().GetIndex()
+	id := 0
 	return uuid.Get(int64(id))
 }
