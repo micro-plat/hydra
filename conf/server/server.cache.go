@@ -49,7 +49,7 @@ func (c *cache) GetServerConf(serverType string) (IServerConf, error) {
 	defer c.lock.RUnlock()
 	serverVerion, ok := c.currentServerVersion.Get(serverType)
 	if !ok {
-		panic(fmt.Errorf("未找到%s的缓存配置信息", serverVerion))
+		panic(fmt.Errorf("未找到%s的缓存配置信息", serverType))
 	}
 	if s, ok := c.serverMaps.Get(getKey(serverType, serverVerion)); ok {
 		return s.(IServerConf), nil

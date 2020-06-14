@@ -136,12 +136,11 @@ func (r *RspServers) checkServer(path string) error {
 	}
 
 	//检查服务器是否已创建
-	var change bool
 	srvr, ok := r.servers[conf.GetMainConf().GetServerType()]
 	if ok {
 		//通知已创建的服务器
 		r.log.Debugf("%s配置发生变化", conf.GetMainConf().GetMainPath())
-		change, err = srvr.Notify(conf)
+		change, err := srvr.Notify(conf)
 		if err != nil {
 			return err
 		}
@@ -154,6 +153,7 @@ func (r *RspServers) checkServer(path string) error {
 	} else {
 		//创建新服务器
 		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
+			server.Cache.Save(conf)
 			srvr, err := creator.Create(conf)
 			if err != nil {
 				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
@@ -168,13 +168,8 @@ func (r *RspServers) checkServer(path string) error {
 			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
 			return nil
 		}
-		change = true
 	}
 
-	//缓存服务器配置
-	if change {
-		server.Cache.Save(conf)
-	}
 	return nil
 
 }

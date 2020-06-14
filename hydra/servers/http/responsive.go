@@ -31,6 +31,7 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 		pub:      pub.New(cnf.GetMainConf()),
 		comparer: conf.NewComparer(cnf.GetMainConf(), api.MainConfName, api.SubConfName...),
 	}
+	server.Cache.Save(cnf)
 	h.Server, err = h.getServer(cnf)
 	return h, err
 }
@@ -44,6 +45,7 @@ func (w *Responsive) Start() (err error) {
 		err = fmt.Errorf("启动失败 %w", err)
 		return
 	}
+
 	if err = w.publish(); err != nil {
 		err = fmt.Errorf("服务发布失败 %w", err)
 		w.Shutdown()
@@ -63,6 +65,7 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.log.Info("关键配置发生变化，准备重启服务器")
 		w.Shutdown()
 
+		server.Cache.Save(c)
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -73,6 +76,7 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.conf = c
 		return true, nil
 	}
+	server.Cache.Save(c)
 	w.conf = c
 	return true, nil
 }
