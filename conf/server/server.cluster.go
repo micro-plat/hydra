@@ -32,6 +32,7 @@ type Cluster struct {
 	nodes    cmap.ConcurrentMap
 	closeCh  chan struct{}
 	lock     sync.Mutex
+	watchers cmap.ConcurrentMap
 }
 
 //NewCluster 管理服务器的主配置信息
@@ -40,6 +41,7 @@ func NewCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) 
 		IPub:     pub,
 		registry: rgst,
 		nodes:    cmap.New(4),
+		watchers: cmap.New(2),
 		closeCh:  make(chan struct{}),
 	}
 	if err = s.load(); err != nil {
@@ -67,14 +69,22 @@ func (c *Cluster) Iter(f func(conf.ICNode) bool) {
 }
 
 //Watch 监控节点变化
-func (c *Cluster) Watch() chan conf.ICNode {
-	return nil
+func (c *Cluster) Watch() conf.IWatcher {
+	w := newCWatcher(c)
+	c.watchers.Set(w.id, w)
+	w.notify(c.current)
+	return w
 }
 
 //Close 关闭当前集群管理
 func (c *Cluster) Close() error {
 	close(c.closeCh)
 	return nil
+}
+
+//removeWatcher 移除监控器
+func (c *Cluster) removeWatcher(id string) {
+	c.watchers.Remove(id)
 }
 
 //-------------------------------------内部处理-----------------------------------
@@ -128,6 +138,13 @@ func (c *Cluster) getCluster() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.current = current
+
+	//通知所有订阅者
+	c.watchers.IterCb(func(key string, v interface{}) bool {
+		watcher := v.(*cwatcher)
+		watcher.notify(c.current)
+		return true
+	})
 	return nil
 }
 func (c *Cluster) watchCluster() error {

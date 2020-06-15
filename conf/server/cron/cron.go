@@ -10,14 +10,17 @@ var SubConfName = []string{"task"}
 
 //Server 服务嚣配置信息
 type Server struct {
-	*option
+	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
+	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	Timeout  int    `json:"timeout,omitempty" toml:"timeout,omitzero"`
 }
 
 //New 构建cron server配置，默认为对等模式
 func New(opts ...Option) *Server {
-	s := &Server{option: &option{}}
+	s := &Server{}
 	for _, opt := range opts {
-		opt(s.option)
+		opt(s)
 	}
 	return s
 }

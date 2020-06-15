@@ -52,16 +52,22 @@ func (s *Server) Shutdown() {
 }
 
 //Pause 暂停服务器
-func (s *Server) Pause() {
-	s.running = false
-	s.Processor.Pause()
-	time.Sleep(time.Second)
+func (s *Server) Pause() error {
+	if s.running {
+		s.running = false
+		s.Processor.Pause()
+		time.Sleep(time.Second)
+	}
+	return nil
+
 }
 
 //Resume 恢复执行
 func (s *Server) Resume() error {
-	s.running = true
-	s.Processor.Resume()
+	if !s.running {
+		s.running = true
+		s.Processor.Resume()
+	}
 	return nil
 }
 

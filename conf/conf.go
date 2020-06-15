@@ -42,7 +42,7 @@ type ICNode interface {
 type ICluster interface {
 	Iter(f func(ICNode) bool)
 	Current() ICNode
-	Watch() chan ICNode
+	Watch() IWatcher
 }
 
 //IPub 发布路径服务
@@ -71,4 +71,10 @@ type IVarConf interface {
 	GetClone() IVarConf
 	Has(tp string, name string) bool
 	Iter(f func(k string, conf *JSONConf) bool)
+}
+
+//IWatcher 集群监控
+type IWatcher interface {
+	Notify() chan ICNode
+	Close() error
 }

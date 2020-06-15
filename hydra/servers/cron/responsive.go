@@ -59,6 +59,10 @@ func (w *Responsive) Start() (err error) {
 		w.Shutdown()
 		return err
 	}
+
+	//监控服务节点变化并切换工作模式
+	w.watch()
+
 	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetTaskConf().Tasks))
 	return nil
 }
