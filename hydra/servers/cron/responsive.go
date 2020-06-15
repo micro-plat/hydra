@@ -32,6 +32,7 @@ func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 		pub:      pub.New(cnf.GetMainConf()),
 		comparer: conf.NewComparer(cnf.GetMainConf(), cron.MainConfName, cron.SubConfName...),
 	}
+	server.Cache.Save(cnf)
 	h.Server, err = h.getServer(cnf)
 	return h, err
 }
@@ -71,6 +72,7 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
 		w.Shutdown()
+
 		server.Cache.Save(c)
 		w.Server, err = w.getServer(c)
 		if err != nil {

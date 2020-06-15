@@ -153,7 +153,6 @@ func (r *RspServers) checkServer(path string) error {
 	} else {
 		//创建新服务器
 		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
-			server.Cache.Save(conf)
 			srvr, err := creator.Create(conf)
 			if err != nil {
 				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
