@@ -13,6 +13,12 @@ import (
 	"github.com/micro-plat/lib4go/utility"
 )
 
+const (
+	unstarted = 1
+	pause     = 2
+	running   = 4
+)
+
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	*dispatcher.Engine
@@ -24,12 +30,13 @@ type Processor struct {
 	span      time.Duration
 	slots     []cmap.ConcurrentMap //time slots
 	startTime time.Time
-	isPause   bool
+	status    int
 }
 
 //NewProcessor 创建processor
 func NewProcessor() (p *Processor) {
 	p = &Processor{
+		status:    unstarted,
 		closeChan: make(chan struct{}),
 		span:      time.Second,
 		length:    60,
@@ -94,8 +101,8 @@ func (s *Processor) onceHandle(t *task.Task) (bool, error) {
 	if t.Cron != "@once" && t.Cron != "@now" {
 		return false, nil
 	}
-	if s.isPause {
-		return true, fmt.Errorf("当前服务器已暂停，不再执行任务:%s", t.GetUNQ())
+	if s.status != running {
+		return true, fmt.Errorf("当前服务器已暂停或未启动，不再执行任务:%s", t.GetUNQ())
 	}
 
 	//注册服务
@@ -145,15 +152,21 @@ func (s *Processor) Remove(name string) {
 }
 
 //Pause 暂停所有任务
-func (s *Processor) Pause() error {
-	s.isPause = true
-	return nil
+func (s *Processor) Pause() (bool, error) {
+	if s.status != pause {
+		s.status = pause
+		return true, nil
+	}
+	return false, nil
 }
 
 //Resume 恢复所有任务
-func (s *Processor) Resume() error {
-	s.isPause = false
-	return nil
+func (s *Processor) Resume() (bool, error) {
+	if s.status != running {
+		s.status = running
+		return true, nil
+	}
+	return false, nil
 }
 
 //Close 退出
@@ -197,7 +210,7 @@ func (s *Processor) handle(task *CronTask) error {
 	if s.done || task.Disable {
 		return nil
 	}
-	if !s.isPause {
+	if s.status == running {
 		task.Counter.Increase()
 		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}

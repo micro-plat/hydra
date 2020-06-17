@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
@@ -17,7 +18,7 @@ type Pub struct {
 	sysName     string
 	serverType  string
 	clusterName string
-	clusterID   string
+	serverID    string
 }
 
 //Split 根据主配置获取平台名称、系统名称、服务类型、集群名
@@ -33,7 +34,7 @@ func NewPub(platName string, sysName string, serverType string, clusterName stri
 		sysName:     sysName,
 		serverType:  serverType,
 		clusterName: clusterName,
-		clusterID:   global.GetMatchineCode(),
+		serverID:    global.GetMatchineCode() + time.Now().Format("0405"),
 	}
 }
 
@@ -81,9 +82,9 @@ func (c *Pub) GetServerPubPath() string {
 	return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "servers")
 }
 
-//GetClusterID 获取当前服务的集群编号
-func (c *Pub) GetClusterID() string {
-	return c.clusterID
+//GetServerID 获取当前服务的集群编号
+func (c *Pub) GetServerID() string {
+	return c.serverID
 }
 
 //GetPlatName 获取平台名称

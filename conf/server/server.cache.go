@@ -88,7 +88,7 @@ LOOP:
 
 				if key != currentKey {
 					conf.Close()
-					global.Def.Log().Debug("清理缓存配置[ServerConf]", key)
+					global.Def.Log().Debug("清理缓存配置[%s]", conf.GetMainConf().GetMainPath())
 					return true
 				}
 				return false
@@ -97,7 +97,7 @@ LOOP:
 				currentVer, _ := c.currentVarVersion.Get(varNodeName)
 				currentKey := getKey(varNodeName, currentVer)
 				if key != currentKey {
-					global.Def.Log().Debug("清理缓存配置[VarConf]", key)
+					global.Def.Log().Debug("清理缓存配置[%s]", key)
 					return true
 				}
 				return false

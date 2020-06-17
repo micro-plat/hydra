@@ -99,6 +99,10 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 				case <-time.After(time.Millisecond * (time.Duration((1000 / nconcurrency / 2)) + 1)):
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
+						if err := cmd.Err(); err != nil {
+							consumer.log.Error("从redis中获取消息失败:%w", err)
+							continue
+						}
 						message := NewRedisMessage(cmd)
 						if message.Has() {
 							msgChan <- message

@@ -39,6 +39,12 @@ func NewJWT(opts ...Option) *JWTAuth {
 	return jwt
 }
 
+type ConfHandler func(cnf conf.IMainConf) *JWTAuth
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取jwt
 func GetConf(cnf conf.IMainConf) *JWTAuth {
 	jwt := JWTAuth{}

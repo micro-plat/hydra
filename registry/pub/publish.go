@@ -3,6 +3,7 @@ package pub
 import (
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 type IPublisher interface {
 	WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error
 	Publish(serverName string, serviceAddr string, clusterID string, service ...string) error
+	Update(serverName string, serviceAddr string, clusterID string, kv ...string) error
 	Clear()
 	Close()
 }
@@ -113,6 +115,42 @@ func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID str
 	return nil
 }
 
+//Update 更新服务器配置
+func (p *Publisher) Update(serverName string, serviceAddr string, clusterID string, kv ...string) error {
+	input := map[string]interface{}{}
+	input["addr"] = serviceAddr
+	input["cluster_id"] = clusterID
+	input["time"] = time.Now().Unix()
+
+	if len(kv)%2 > 0 {
+		return fmt.Errorf("更新服务器发布数据,展参数必须成对出现：%d", len(kv))
+	}
+	for i := 0; i+1 < len(kv); i = i + 2 {
+		input[kv[i]] = kv[i+1]
+	}
+
+	buff, err := jsons.Marshal(input)
+	if err != nil {
+		return fmt.Errorf("更新服务器发布数据失败:%w", err)
+	}
+	ndata := string(buff)
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	for path := range p.pubs {
+		if p.done {
+			break
+		}
+		if strings.Contains(path, serverName) {
+			p.pubs[path] = ndata
+		}
+		err := p.c.GetRegistry().Update(path, ndata)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 //pubRPCServiceNode 发布RPC服务节点
 func (p *Publisher) pubRPCServiceNode(serverName string, service string, data string) error {
 	path := registry.Join(p.c.GetServicePubPathByService(service), serverName+"_")
@@ -163,7 +201,7 @@ func (p *Publisher) pubDNSNode(serverName string) error {
 
 //pubServerNode 发布集群节点，用于服务监控
 func (p *Publisher) pubServerNode(serverName string, data string) error {
-	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", serverName, p.c.GetClusterID()))
+	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", serverName, p.c.GetServerID()))
 
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
@@ -213,6 +251,11 @@ func (p *Publisher) check() {
 				break
 			}
 			p.log.Infof("节点(%s)已恢复", path)
+		} else {
+			err := p.c.GetRegistry().Update(path, data)
+			if err != nil {
+				break
+			}
 		}
 	}
 }

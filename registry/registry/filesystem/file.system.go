@@ -74,7 +74,7 @@ func (l *fileSystem) GetValue(path string) (data []byte, version int32, err erro
 	return nil, 0, fmt.Errorf("节点[%s]不存在", path)
 
 }
-func (l *fileSystem) Update(path string, data string, version int32) (err error) {
+func (l *fileSystem) Update(path string, data string) (err error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 	if _, ok := l.nodes[r.Join(path)]; ok {

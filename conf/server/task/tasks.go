@@ -33,6 +33,12 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 	return t
 }
 
+type ConfHandler func(cnf conf.IMainConf) (tasks *Tasks)
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 根据服务嚣配置获取task
 func GetConf(cnf conf.IMainConf) (tasks *Tasks) {
 	tasks = &Tasks{}

@@ -139,7 +139,7 @@ func (r *RspServers) checkServer(path string) error {
 	srvr, ok := r.servers[conf.GetMainConf().GetServerType()]
 	if ok {
 		//通知已创建的服务器
-		r.log.Debugf("%s配置发生变化", conf.GetMainConf().GetMainPath())
+		r.log.Debugf("配置发生变化%s", conf.GetMainConf().GetMainPath())
 		change, err := srvr.Notify(conf)
 		if err != nil {
 			return err
@@ -155,14 +155,14 @@ func (r *RspServers) checkServer(path string) error {
 		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
 			srvr, err := creator.Create(conf)
 			if err != nil {
-				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
+				return fmt.Errorf("服务器构建失败  %w", err)
 			}
-			r.servers[conf.GetMainConf().GetServerType()] = srvr
 			r.log.Infof("启动[%s]服务...", conf.GetMainConf().GetServerType())
 			if err := srvr.Start(); err != nil {
 				r.delayPub(path)
-				return fmt.Errorf("服务器%s %w", conf.GetMainConf().GetMainPath(), err)
+				return fmt.Errorf("服务器启动失败 %w", err)
 			}
+			r.servers[conf.GetMainConf().GetServerType()] = srvr
 		} else {
 			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
 			return nil
@@ -179,7 +179,7 @@ func (r *RspServers) delayPub(p string) {
 		if r.done {
 			return
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 300)
 		if r.done {
 			return
 		}

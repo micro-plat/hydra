@@ -11,6 +11,8 @@ import (
 	"github.com/micro-plat/hydra/components/uuid"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+
+	_ "github.com/micro-plat/hydra/components/pkgs/mq/lmq"
 )
 
 //IComponent 组件
@@ -82,6 +84,6 @@ func (c *Component) DLock(name string) (dlock.ILock, error) {
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
-	id := context.Current().ServerConf().GetMainConf().GetCluster().Current().GetClusterID()
+	id := context.Current().ServerConf().GetMainConf().GetCluster().Current().GetServerID()
 	return uuid.Get(id)
 }

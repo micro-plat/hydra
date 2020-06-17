@@ -28,7 +28,7 @@ type IRegistry interface {
 	CreatePersistentNode(path string, data string) (err error)
 	CreateTempNode(path string, data string) (err error)
 	CreateSeqNode(path string, data string) (rpath string, err error)
-	Update(path string, data string, version int32) (err error)
+	Update(path string, data string) (err error)
 	Delete(path string) error
 	Exists(path string) (bool, error)
 	Close() error

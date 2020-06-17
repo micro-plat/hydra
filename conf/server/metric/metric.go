@@ -40,6 +40,12 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 	return m
 }
 
+type ConfHandler func(cnf conf.IMainConf) *Metric
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置metric
 func GetConf(cnf conf.IMainConf) (metric *Metric) {
 	metric = &Metric{}

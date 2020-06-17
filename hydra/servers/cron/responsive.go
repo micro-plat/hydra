@@ -22,12 +22,14 @@ type Responsive struct {
 	comparer conf.IComparer
 	pub      pub.IPublisher
 	log      logger.ILogger
+	first    bool
 }
 
 //NewResponsive 创建响应式服务器
 func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
 	h = &Responsive{
 		conf:     cnf,
+		first:    true,
 		log:      logger.New(cnf.GetMainConf().GetServerName()),
 		pub:      pub.New(cnf.GetMainConf()),
 		comparer: conf.NewComparer(cnf.GetMainConf(), cron.MainConfName, cron.SubConfName...),
@@ -47,13 +49,7 @@ func (w *Responsive) Start() (err error) {
 		return
 	}
 
-	//动态监听任务
-	services.CRON.Subscribe(func(t *task.Task) {
-		if err := w.Server.Add(t); err != nil {
-			w.log.Errorf("服务[%v]添加失败 %w", t, err)
-		}
-	})
-
+	//发布集群节点
 	if err = w.publish(); err != nil {
 		err = fmt.Errorf("服务发布失败 %w", err)
 		w.Shutdown()
@@ -61,9 +57,16 @@ func (w *Responsive) Start() (err error) {
 	}
 
 	//监控服务节点变化并切换工作模式
-	w.watch()
+	go w.watch()
 
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetTaskConf().Tasks))
+	//动态监听任务
+	services.CRON.Subscribe(func(t *task.Task) {
+		if err := w.Server.Add(t); err != nil {
+			w.log.Errorf("服务[%v]添加失败 %w", t, err)
+		}
+	})
+
+	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetCRONTaskConf().Tasks))
 	return nil
 }
 
@@ -109,7 +112,18 @@ func (w *Responsive) Shutdown() {
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetClusterID()); err != nil {
+	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID()); err != nil {
+		return err
+	}
+
+	return
+}
+
+//update 更新发布数据
+func (w *Responsive) update(kv ...string) (err error) {
+	addr := w.Server.GetAddress()
+	serverName := strings.Split(addr, "://")[1]
+	if err := w.pub.Update(serverName, addr, w.conf.GetMainConf().GetServerID(), kv...); err != nil {
 		return err
 	}
 
@@ -118,7 +132,7 @@ func (w *Responsive) publish() (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
-	return NewServer(cnf.GetMainConf().GetServerName(), cnf.GetTaskConf().Tasks...)
+	return NewServer(cnf.GetCRONTaskConf().Tasks...)
 }
 
 func init() {

@@ -42,7 +42,7 @@ func (s *Comparer) IsChanged() bool {
 	if s.nconf == nil || reflect.ValueOf(s.nconf).IsNil() {
 		return false
 	}
-	return s.oconf.GetVersion() != s.nconf.GetVersion()
+	return s.oconf.GetVersion() < s.nconf.GetVersion()
 }
 
 //IsValueChanged 配置内容是否发生变化

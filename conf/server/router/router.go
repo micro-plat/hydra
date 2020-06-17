@@ -87,6 +87,12 @@ func (h *Routers) Match(path string, method string) *Router {
 	panic(fmt.Sprintf("未找到与[%s][%s]匹配的路由", path, method))
 }
 
+type ConfHandler func(cnf conf.IMainConf) *Routers
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置路由
 func GetConf(cnf conf.IMainConf) (router *Routers) {
 	router = new(Routers)

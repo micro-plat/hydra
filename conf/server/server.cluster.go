@@ -54,6 +54,9 @@ func NewCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) 
 func (c *Cluster) Current() conf.ICNode {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	if c.current == nil {
+		return &CNode{}
+	}
 	return c.current.Clone()
 }
 
@@ -108,7 +111,7 @@ func (c *Cluster) load() error {
 }
 func (c *Cluster) getCluster() error {
 	path := c.GetServerPubPath()
-	current := c.Current()
+	current := c.current
 	children, _, err := c.registry.GetChildren(path)
 	if err != nil {
 		return err
@@ -129,7 +132,7 @@ func (c *Cluster) getCluster() error {
 
 	//设置或添加在线节点
 	for i, name := range children {
-		node := NewCNode(name, c.GetClusterID(), i)
+		node := NewCNode(name, c.GetServerID(), i)
 		c.nodes.Set(name, node)
 		if node.IsCurrent() {
 			current = node

@@ -59,7 +59,7 @@ func (l *localMemory) GetValue(path string) (data []byte, version int32, err err
 	return nil, 0, fmt.Errorf("节点[%s]不存在", vpath)
 
 }
-func (l *localMemory) Update(path string, data string, version int32) (err error) {
+func (l *localMemory) Update(path string, data string) (err error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 	if _, ok := l.nodes[r.Join(path)]; ok {

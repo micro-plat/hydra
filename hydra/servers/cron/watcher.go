@@ -13,16 +13,38 @@ LOOP:
 			watcher.Close()
 			break LOOP
 		case <-notify:
+
 			server, err := cron.GetConf(w.conf.GetMainConf())
 			if err != nil {
-				w.log.Errorf("加载cron服务失败：%w", err)
+				w.log.Errorf("加载cron配置失败：%w", err)
 				continue
 			}
-			if cluster.Current().IsBefore(server.Sharding) {
-				w.Server.Resume()
+			if !cluster.Current().IsAvailable() {
+				w.log.Error("当前集群节点不可用")
 				continue
 			}
-			w.Server.Pause()
+
+			if server.Sharding == 0 || cluster.Current().IsMaster(server.Sharding) {
+				ok, err := w.Server.Resume()
+				if err != nil {
+					w.log.Error("恢复mqc服务器失败:", err)
+					continue
+				}
+				if ok {
+					w.update("run-mode", "master")
+					w.log.Debugf("this cron server is started as master")
+				}
+				continue
+			}
+			ok, err := w.Server.Pause()
+			if err != nil {
+				w.log.Error("暂停mqc服务器失败:", err)
+				continue
+			}
+			if ok {
+				w.update("run-mode", "slave")
+				w.log.Debugf("this cron server is started as slave")
+			}
 		}
 	}
 }

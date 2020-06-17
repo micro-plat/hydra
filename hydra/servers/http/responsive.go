@@ -98,7 +98,7 @@ func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
 
-	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetClusterID()); err != nil {
+	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID()); err != nil {
 		return err
 	}
 

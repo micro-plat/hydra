@@ -31,6 +31,12 @@ func (w *BlackList) IsDeny(ip string) bool {
 	return ok
 }
 
+type ConfHandler func(cnf conf.IMainConf) *BlackList
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取BlackList
 func GetConf(cnf conf.IMainConf) *BlackList {
 	ip := BlackList{}

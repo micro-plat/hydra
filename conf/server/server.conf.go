@@ -10,6 +10,8 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
+	"github.com/micro-plat/hydra/conf/server/mqc"
+	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -26,7 +28,10 @@ type IServerConf interface {
 	GetMetricConf() *metric.Metric
 	GetStaticConf() *static.Static
 	GetRouterConf() *router.Routers
-	GetTaskConf() *task.Tasks
+	GetCRONTaskConf() *task.Tasks
+
+	GetMQCMainConf() *mqc.Server
+	GetMQCQueueConf() *queue.Queues
 	GetAPIKeyConf() *apikey.APIKeyAuth
 	GetRASConf() *ras.RASAuth
 	GetBasicConf() *basic.BasicAuth
@@ -40,20 +45,11 @@ var _ IServerConf = &ServerConf{}
 
 //ServerConf 服务器配置信息
 type ServerConf struct {
-	mainConf  conf.IMainConf
-	varConf   conf.IVarConf
-	header    header.Headers
-	jwt       *jwt.JWTAuth
-	metric    *metric.Metric
-	static    *static.Static
-	router    *router.Routers
-	apikey    *apikey.APIKeyAuth
-	ras       *ras.RASAuth
-	basic     *basic.BasicAuth
-	render    *render.Render
-	whiteList *whitelist.WhiteList
-	blackList *blacklist.BlackList
-	task      *task.Tasks
+	mainConf conf.IMainConf
+	varConf  conf.IVarConf
+	*httpSub
+	*cronSub
+	*mqcSub
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -67,18 +63,9 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	if err != nil {
 		return nil, err
 	}
-	s.header = header.GetConf(s.mainConf)
-	s.jwt = jwt.GetConf(s.mainConf)
-	s.metric = metric.GetConf(s.mainConf)
-	s.static = static.GetConf(s.mainConf)
-	s.router = router.GetConf(s.mainConf)
-	s.apikey = apikey.GetConf(s.mainConf)
-	s.ras = ras.GetConf(s.mainConf)
-	s.render = render.GetConf(s.mainConf)
-	s.basic = basic.GetConf(s.mainConf)
-	s.blackList = blacklist.GetConf(s.mainConf)
-	s.whiteList = whitelist.GetConf(s.mainConf)
-	s.task = task.GetConf(s.mainConf)
+	s.httpSub = newhttpSub(s.mainConf)
+	s.cronSub = newCronSub(s.mainConf)
+	s.mqcSub = newMQCSub(s.mainConf)
 	return s, nil
 
 }
@@ -103,64 +90,4 @@ func (s *ServerConf) GetMainConf() conf.IMainConf {
 //GetVarConf 获取变量配置
 func (s *ServerConf) GetVarConf() conf.IVarConf {
 	return s.varConf
-}
-
-//GetHeaderConf 获取响应头配置
-func (s *ServerConf) GetHeaderConf() header.Headers {
-	return s.header
-}
-
-//GetJWTConf 获取jwt配置
-func (s *ServerConf) GetJWTConf() *jwt.JWTAuth {
-	return s.jwt
-}
-
-//GetMetricConf 获取metric配置
-func (s *ServerConf) GetMetricConf() *metric.Metric {
-	return s.metric
-}
-
-//GetStaticConf 获取静态文件配置
-func (s *ServerConf) GetStaticConf() *static.Static {
-	return s.static
-}
-
-//GetRouterConf 获取路由信息
-func (s *ServerConf) GetRouterConf() *router.Routers {
-	return s.router
-}
-
-//GetAPIKeyConf 获取apikey配置
-func (s *ServerConf) GetAPIKeyConf() *apikey.APIKeyAuth {
-	return s.apikey
-}
-
-//GetRASConf 获取RAS配置信息
-func (s *ServerConf) GetRASConf() *ras.RASAuth {
-	return s.ras
-}
-
-//GetBasicConf 获取basic认证配置
-func (s *ServerConf) GetBasicConf() *basic.BasicAuth {
-	return s.basic
-}
-
-//GetRenderConf 获取状态渲染控件
-func (s *ServerConf) GetRenderConf() *render.Render {
-	return s.render
-}
-
-//GetWhiteListConf 获取白名单配置
-func (s *ServerConf) GetWhiteListConf() *whitelist.WhiteList {
-	return s.whiteList
-}
-
-//GetBlackListConf 获取黑名单配置
-func (s *ServerConf) GetBlackListConf() *blacklist.BlackList {
-	return s.blackList
-}
-
-//GetTaskConf 获取cron任务配置
-func (s *ServerConf) GetTaskConf() *task.Tasks {
-	return s.task
 }

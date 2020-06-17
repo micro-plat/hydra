@@ -44,6 +44,12 @@ func (s *Static) AllowRequest(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead
 }
 
+type ConfHandler func(cnf conf.IMainConf) *Static
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置static
 func GetConf(cnf conf.IMainConf) *Static {
 	//设置静态文件路由

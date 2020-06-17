@@ -100,12 +100,10 @@ LOOP:
 			if err = content.GetError(); err != nil {
 				goto LOOP
 			}
-
 			if b, _ := w.registry.Exists(path); !b {
 				w.deleted()
 				goto LOOP
 			}
-
 			data, version := content.GetValue()
 			w.changed(data, version)
 			//继续监控值变化
@@ -156,16 +154,19 @@ func (w *ChildWatcher) changed(children []string, version int32) {
 	return
 }
 func (w *ChildWatcher) notify(a *watcher.ChildChangeArgs) {
+	if len(a.Children) == 0 {
+		return
+	}
 	if a.Deep == 1 && a.OP != watcher.DEL {
 		w.notifyChan <- a
 		return
 	}
+	w.notifyChan <- a
 	for _, path := range a.Children {
 		switch a.OP {
 		case watcher.ADD, watcher.CHANGE:
 			w.changeChilrenWatcher(path)
 		case watcher.DEL:
-			w.notifyChan <- a
 			w.delChilrenWatcher(path)
 		}
 	}
@@ -180,7 +181,6 @@ func (w *ChildWatcher) delChilrenWatcher(path string) {
 }
 
 func (w *ChildWatcher) changeChilrenWatcher(path string) {
-
 	if _, ok := w.watchers[path]; ok {
 		return
 	}
@@ -201,6 +201,7 @@ func (w *ChildWatcher) changeChilrenWatcher(path string) {
 					return
 				}
 				w.notify(arg)
+			default:
 			}
 		}
 	}()

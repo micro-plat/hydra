@@ -8,6 +8,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
+	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
@@ -41,6 +42,12 @@ type IConf interface {
 
 	//GetCRON 获取CRON服务器配置
 	GetCRON() *cronBuilder
+
+	//CRON 构建mqc服务器配置
+	MQC(addr string, opts ...mqc.Option) *mqcBuilder
+
+	//GetMQC 获取MQC服务器配置
+	GetMQC() *mqcBuilder
 }
 
 //Conf 配置服务
@@ -91,6 +98,8 @@ func (c *conf) Load() error {
 				c.data[global.Web] = c.GetWeb()
 			case global.CRON:
 				c.data[global.CRON] = c.GetCRON()
+			case global.MQC:
+				c.data[global.MQC] = c.GetMQC()
 			default:
 				c.data[t] = newCustomerBuilder()
 			}
@@ -146,6 +155,21 @@ func (c *conf) GetCRON() *cronBuilder {
 		return cron.(*cronBuilder)
 	}
 	return c.CRON()
+}
+
+//MQC mqc服务器配置
+func (c *conf) MQC(addr string, opts ...mqc.Option) *mqcBuilder {
+	mqc := newMQC(addr, opts...)
+	c.data[global.MQC] = mqc
+	return mqc
+}
+
+//GetMQC 获取当前已配置的mqc服务器
+func (c *conf) GetMQC() *mqcBuilder {
+	if mqc, ok := c.data[global.MQC]; ok {
+		return mqc.(*mqcBuilder)
+	}
+	panic("未指定mqc服务器配置")
 }
 
 //Vars 平台变量配置

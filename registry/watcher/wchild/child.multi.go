@@ -15,11 +15,11 @@ type MultiChildWatcher struct {
 //NewMultiChildWatcher 监控服务器变化
 func NewMultiChildWatcher(rgst registry.IRegistry, path []string, logger logger.ILogging) (w *MultiChildWatcher, err error) {
 	w = &MultiChildWatcher{
-		notifyChan: make(chan *watcher.ChildChangeArgs, 10),
+		notifyChan: make(chan *watcher.ChildChangeArgs, 100),
 	}
 	w.watchers = make([]*ChildWatcher, 0, len(path))
-	for _, path := range path {
-		watcher := NewChildWatcher(rgst, path, logger)
+	for _, p := range path {
+		watcher := NewChildWatcher(rgst, p, logger)
 		w.watchers = append(w.watchers, watcher)
 	}
 	return

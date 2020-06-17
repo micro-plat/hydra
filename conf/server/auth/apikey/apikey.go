@@ -57,6 +57,12 @@ func (a *APIKeyAuth) Verify(raw string, secret string, sign string) error {
 
 }
 
+type ConfHandler func(cnf conf.IMainConf) *APIKeyAuth
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取APIKeyAuth
 func GetConf(cnf conf.IMainConf) *APIKeyAuth {
 	fsa := APIKeyAuth{}

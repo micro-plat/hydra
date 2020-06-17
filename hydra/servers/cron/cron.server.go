@@ -16,7 +16,7 @@ type Server struct {
 }
 
 //NewServer 创建mqc服务器
-func NewServer(name string, tasks ...*task.Task) (t *Server, err error) {
+func NewServer(tasks ...*task.Task) (t *Server, err error) {
 	t = &Server{Processor: NewProcessor()}
 	if err := t.Processor.Add(tasks...); err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (s *Server) Start() error {
 		}
 	}(errChan)
 	select {
-	case <-time.After(time.Millisecond * 500):
+	case <-time.After(time.Millisecond * 200):
 		return nil
 	case err := <-errChan:
 		s.running = false
@@ -52,23 +52,22 @@ func (s *Server) Shutdown() {
 }
 
 //Pause 暂停服务器
-func (s *Server) Pause() error {
-	if s.running {
+func (s *Server) Pause() (bool, error) {
+	ok, err := s.Processor.Pause()
+	if ok {
 		s.running = false
-		s.Processor.Pause()
-		time.Sleep(time.Second)
 	}
-	return nil
+	return ok, err
 
 }
 
 //Resume 恢复执行
-func (s *Server) Resume() error {
-	if !s.running {
+func (s *Server) Resume() (bool, error) {
+	ok, err := s.Processor.Resume()
+	if ok {
 		s.running = true
-		s.Processor.Resume()
 	}
-	return nil
+	return ok, err
 }
 
 //GetAddress 获取当前服务地址

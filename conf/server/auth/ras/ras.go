@@ -34,6 +34,12 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 	return false, nil
 }
 
+type ConfHandler func(cnf conf.IMainConf) *RASAuth
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取配置信息
 func GetConf(cnf conf.IMainConf) (auths *RASAuth) {
 	auths = &RASAuth{}

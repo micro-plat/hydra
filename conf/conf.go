@@ -28,13 +28,14 @@ type IMainConf interface {
 
 //ICNode 集群节点配置
 type ICNode interface {
+	IsAvailable() bool
 	GetHost() string
-	GetClusterID() string
+	GetServerID() string
 	GetName() string
 	IsCurrent() bool
 	GetIndex() int
-	//IsBefore 判断当前节点是否是前i个
-	IsBefore(i int) bool
+	//IsMaster 判断当前节点是否是主服务器
+	IsMaster(i int) bool
 	Clone() ICNode
 }
 
@@ -53,7 +54,7 @@ type IPub interface {
 	GetServicePubPath() string
 	GetDNSPubPath(svName string) string
 	GetServerPubPath() string
-	GetClusterID() string
+	GetServerID() string
 	GetPlatName() string
 	GetSysName() string
 	GetServerType() string

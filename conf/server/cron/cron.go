@@ -27,7 +27,9 @@ func New(opts ...Option) *Server {
 
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
-	if _, err := cnf.GetMainObject(&s); err != nil && err != conf.ErrNoSetting {
+	s = &Server{}
+	_, err = cnf.GetMainObject(s)
+	if err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}
 	return s, nil

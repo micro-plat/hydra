@@ -82,6 +82,7 @@ var registryFlag = cli.StringFlag{
 	Name:        "registry,r",
 	Destination: &global.Def.RegistryAddr,
 	EnvVar:      "registry",
+	Value:       "lm://.",
 	Usage: "\033[;31m*\033[0m" + `注册中心地址。目前支持zookeeper(zk)和本地文件系统(fs)。注册中心用于保存服务启动和运行参数，
 	服务注册与发现等数据，格式:proto://host。proto的取值有zk,fs; host的取值根据不同的注册中心各不同,
 	如zookeeper则为ip地址(加端口号),多个ip用逗号分隔,如:zk://192.168.0.2,192.168.0.107:12181。本地文
@@ -106,6 +107,7 @@ var platFlag = cli.StringFlag{
 var sysNameFlag = cli.StringFlag{
 	Name:        "system,s",
 	Destination: &global.Def.SysName,
+	Value:       global.AppName,
 	Usage:       "\033[;31m*\033[0m系统名称",
 }
 var serverTypesFlag = cli.StringFlag{
@@ -115,6 +117,7 @@ var serverTypesFlag = cli.StringFlag{
 }
 var clusterFlag = cli.StringFlag{
 	Name:        "cluster,c",
+	Value:       global.Version,
 	Destination: &global.Def.ClusterName,
 	Usage:       "\033[;31m*\033[0m集群名称",
 }

@@ -30,6 +30,12 @@ func NewRender(opts ...Option) *Render {
 	return r
 }
 
+type ConfHandler func(cnf conf.IMainConf) *Render
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置GetRender配置
 func GetConf(cnf conf.IMainConf) (rsp *Render) {
 	rsp = &Render{}

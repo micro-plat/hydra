@@ -44,6 +44,12 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 	return true
 }
 
+type ConfHandler func(cnf conf.IMainConf) *WhiteList
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取WhiteList
 func GetConf(cnf conf.IMainConf) *WhiteList {
 	ip := WhiteList{}

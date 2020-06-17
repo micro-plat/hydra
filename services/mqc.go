@@ -37,6 +37,7 @@ func newMQC() *mqc {
 func (c *mqc) Add(mqName string, service string, concurrency ...int) *mqc {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	mqName = global.MQConf.GetQueueName(mqName)
 	task := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
 	c.queues.Append(task)
 	for _, s := range c.events {
@@ -50,6 +51,7 @@ func (c *mqc) Add(mqName string, service string, concurrency ...int) *mqc {
 func (c *mqc) Remove(mqName string, service string) *mqc {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	mqName = global.MQConf.GetQueueName(mqName)
 	task := queue.NewQueue(mqName, service)
 	task.Disable = true
 	c.queues.Append(task)
@@ -73,6 +75,11 @@ func (c *mqc) Subscribe(f func(t *queue.Queue)) {
 	}
 	c.events = append(c.events, subscriber)
 
+}
+
+//GetTasks 获取任务列表
+func (c *mqc) GetQueues() *queue.Queues {
+	return c.queues
 }
 
 //notify 通知任务

@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+//VarRootName 在var中的跟路径
+const VarRootName = "queue"
+
 //Queues queue任务
 type Queues struct {
 	Queues []*Queue `json:"queues" toml:"queues,omitempty"`
@@ -34,15 +37,22 @@ func (t *Queues) Append(queues ...*Queue) *Queues {
 	return t
 }
 
+type ConfHandler func(cnf conf.IMainConf) *Queues
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置queue
-func GetConf(cnf conf.IMainConf) (queues *Queues, err error) {
-	if _, err = cnf.GetSubObject("queue", &queues); err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("queue:%v", err)
+func GetConf(cnf conf.IMainConf) (queues *Queues) {
+	queues = &Queues{}
+	if _, err := cnf.GetSubObject("queue", queues); err != nil && err != conf.ErrNoSetting {
+		panic(err)
 	}
 	if len(queues.Queues) > 0 {
-		if b, err := govalidator.ValidateStruct(&queues); !b {
-			return nil, fmt.Errorf("queue配置有误:%v", err)
+		if b, err := govalidator.ValidateStruct(queues); !b {
+			panic(fmt.Errorf("queue配置有误:%v", err))
 		}
 	}
-	return queues, nil
+	return queues
 }

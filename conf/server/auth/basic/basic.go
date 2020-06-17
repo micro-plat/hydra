@@ -53,6 +53,12 @@ func (b *BasicAuth) GetRealm(realm string) string {
 	return "Basic realm=" + strconv.Quote("Authorization Required")
 }
 
+type ConfHandler func(cnf conf.IMainConf) *BasicAuth
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 获取basic
 func GetConf(cnf conf.IMainConf) *BasicAuth {
 	basic := BasicAuth{}

@@ -67,6 +67,12 @@ func (h Headers) hasCross(origin string) bool {
 	return false
 }
 
+type ConfHandler func(cnf conf.IMainConf) Headers
+
+func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
+	return h(cnf)
+}
+
 //GetConf 设置header
 func GetConf(cnf conf.IMainConf) (header Headers) {
 	_, err := cnf.GetSubObject("header", &header)
