@@ -12,15 +12,12 @@ func main() {
 		hydra.WithDebug(),
 	)
 	app.API("/send", send)
-	hydra.Conf.OnReady(func() {
-		app.MQC("/order/request", show, "order:request")
-	})
+	app.MQC("/order/request", show, "order:request")
 
 	app.Start()
 
 }
 func send(ctx hydra.IContext) interface{} {
-	hydra.CRON.Add("@now", "/order/query")
 	hydra.Component.Queue().GetRegularQueue().Push("order:request", `{"id":500}`)
 	return "success"
 }

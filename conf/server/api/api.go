@@ -12,18 +12,23 @@ var SubConfName = []string{"router", "metric"}
 
 //Server api server配置信息
 type Server struct {
-	Address string `json:"address,omitempty" valid:"dialstring" toml:"addr,omitempty"`
-	*option
+	Address   string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty"`
+	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
+	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
+	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
+	Host      string `json:"host,omitempty" toml:"host,omitempty"`
+	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
+	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
 //New 构建api server配置信息
 func New(address string, opts ...Option) *Server {
 	a := &Server{
 		Address: address,
-		option:  &option{},
 	}
 	for _, opt := range opts {
-		opt(a.option)
+		opt(a)
 	}
 	return a
 }

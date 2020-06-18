@@ -14,9 +14,9 @@ type Routers struct {
 	Routers []*Router `json:"routers,omitempty"`
 }
 
-func (p *Routers) String() string {
+func (h *Routers) String() string {
 	var sb strings.Builder
-	for _, v := range p.Routers {
+	for _, v := range h.Routers {
 		sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v\n", v.Path, v.Service, strings.Join(v.Action, " "), v.Pages))
 	}
 	return sb.String()
@@ -85,6 +85,15 @@ func (h *Routers) Match(path string, method string) *Router {
 		}
 	}
 	panic(fmt.Sprintf("未找到与[%s][%s]匹配的路由", path, method))
+}
+
+//GetPath 获取所有路由信息
+func (h *Routers) GetPath() []string {
+	list := make([]string, 0, len(h.Routers))
+	for _, v := range h.Routers {
+		list = append(list, v.Path)
+	}
+	return list
 }
 
 type ConfHandler func(cnf conf.IMainConf) *Routers

@@ -9,6 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/watcher"
 	"github.com/micro-plat/lib4go/jsons"
@@ -100,12 +101,12 @@ func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID str
 		return err
 	}
 	switch p.c.GetServerType() {
-	case "API", "WEB":
+	case global.API, global.Web:
 		if err := p.pubDNSNode(serverName); err != nil {
 			return err
 		}
 		return p.pubAPIServiceNode(serverName, data)
-	case "RPC":
+	case global.RPC:
 		for _, srv := range service {
 			if err := p.pubRPCServiceNode(serverName, srv, data); err != nil {
 				return err
@@ -153,7 +154,7 @@ func (p *Publisher) Update(serverName string, serviceAddr string, clusterID stri
 
 //pubRPCServiceNode 发布RPC服务节点
 func (p *Publisher) pubRPCServiceNode(serverName string, service string, data string) error {
-	path := registry.Join(p.c.GetServicePubPathByService(service), serverName+"_")
+	path := registry.Join(p.c.GetRPCServicePubPath(service), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
 		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)

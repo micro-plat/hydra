@@ -15,7 +15,7 @@ import (
 
 // LocalFirst returns a Balancer that selects addresses round-robin. It uses r to watch
 // the name resolution updates and updates the addresses available correspondingly.
-func LocalFirst(service string, ip string, r naming.Resolver, limits ...map[string]int) CustomerBalancer {
+func LocalFirst(service string, ip string, r naming.Resolver) CustomerBalancer {
 	return &localFirst{r: r, ip: ip}
 }
 

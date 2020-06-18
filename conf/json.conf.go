@@ -25,6 +25,13 @@ type IConf interface {
 	GetSignature() string
 }
 
+//EmptyJSONConf 空的jsonconf
+var EmptyJSONConf = &JSONConf{
+	raw:       []byte("{}"),
+	signature: md5.EncryptBytes([]byte("{}")),
+	data:      map[string]interface{}{},
+}
+
 //JSONConf json配置文件
 type JSONConf struct {
 	raw       json.RawMessage

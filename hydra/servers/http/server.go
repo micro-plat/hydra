@@ -18,7 +18,6 @@ import (
 
 //Server api服务器
 type Server struct {
-	name string
 	*option
 	server  *x.Server
 	engine  *gin.Engine
@@ -31,7 +30,6 @@ type Server struct {
 //NewServer 创建http api服务嚣
 func NewServer(name string, addr string, routers []*router.Router, opts ...Option) (t *Server, err error) {
 	t = &Server{
-		name: name,
 		option: &option{
 			serverType:        "api",
 			readHeaderTimeout: 6,

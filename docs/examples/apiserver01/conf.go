@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	hydra.Conf.OnReady(func() {
+	hydra.OnReady(func() {
 		hydra.Conf.API(":8080", api.WithTrace())
 	})
 }

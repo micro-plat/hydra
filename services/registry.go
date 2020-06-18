@@ -110,7 +110,7 @@ func (s *regist) RPC(name string, h interface{}, ext ...router.Option) {
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	s.Custome(global.WS, name, h, v...)
+	s.Custome(global.RPC, name, h, v...)
 }
 
 //WS 注册为websocket服务

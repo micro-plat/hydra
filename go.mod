@@ -22,7 +22,6 @@ require (
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 	github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 	golang.org/x/sys v0.0.0-20200508214444-3aab700007d7
 	google.golang.org/grpc v1.27.1

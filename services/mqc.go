@@ -33,33 +33,14 @@ func newMQC() *mqc {
 	return c
 }
 
-//Add 添加任务
+//Add 添加任务,队列名称需要接平台名称时将会自动转为异步注册(系统准备好后注册)
 func (c *mqc) Add(mqName string, service string, concurrency ...int) *mqc {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	mqName = global.MQConf.GetQueueName(mqName)
-	task := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
-	c.queues.Append(task)
-	for _, s := range c.events {
-		s.msg <- task
-	}
-	c.n <- struct{}{}
-	return c
+	return c.add(mqName, service, false, concurrency...)
 }
 
 //Remove 移除任务
 func (c *mqc) Remove(mqName string, service string) *mqc {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	mqName = global.MQConf.GetQueueName(mqName)
-	task := queue.NewQueue(mqName, service)
-	task.Disable = true
-	c.queues.Append(task)
-	for _, s := range c.events {
-		s.msg <- task
-	}
-	c.n <- struct{}{}
-	return c
+	return c.add(mqName, service, true, 0)
 }
 
 //Subscribe 订阅任务
@@ -105,4 +86,25 @@ BREAK:
 			c.lock.Unlock()
 		}
 	}
+}
+
+func (c *mqc) add(mqName string, service string, disable bool, concurrency ...int) *mqc {
+	f := func() {
+		c.lock.Lock()
+		defer c.lock.Unlock()
+		mqName = global.MQConf.GetQueueName(mqName)
+		task := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
+		task.Disable = disable
+		c.queues.Append(task)
+		for _, s := range c.events {
+			s.msg <- task
+		}
+		c.n <- struct{}{}
+	}
+	if !global.MQConf.NeedAddPrefix() {
+		f()
+		return c
+	}
+	global.OnReady(f)
+	return c
 }

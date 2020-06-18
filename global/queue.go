@@ -23,6 +23,11 @@ func (m *messageQueueConf) Separate(v string) {
 	m.separate = v
 }
 
+//NeedAddPrefix 是否需要增加前缀
+func (m *messageQueueConf) NeedAddPrefix() bool {
+	return m.platNameAsPrefix
+}
+
 //GetQueueName 获取队列名称
 func (m *messageQueueConf) GetQueueName(n string) string {
 	if m.platNameAsPrefix {

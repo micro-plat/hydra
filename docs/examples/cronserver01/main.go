@@ -13,7 +13,6 @@ func main() {
 	app.CRON("/order/request", request, "@every 5s")
 	app.CRON("/order/query", query)
 	app.Start()
-
 }
 func request(ctx hydra.IContext) interface{} {
 	hydra.CRON.Add("@now", "/order/query")

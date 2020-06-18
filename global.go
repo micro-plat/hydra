@@ -29,6 +29,9 @@ type IContext = context.IContext
 //Component 基础组件
 var Component = components.Def
 
+//OnReady 系统准备好后执行
+var OnReady = global.OnReady
+
 //Server 通过服务类型从全局缓存中获取服务配置
 func Server(tp string) server.IServerConf {
 	s, err := server.Cache.GetServerConf(tp)

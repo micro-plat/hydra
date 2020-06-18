@@ -50,7 +50,7 @@ type ICluster interface {
 type IPub interface {
 	GetMainPath() string
 	GetSubConfPath(name ...string) string
-	GetServicePubPathByService(svName string) string
+	GetRPCServicePubPath(svName string) string
 	GetServicePubPath() string
 	GetDNSPubPath(svName string) string
 	GetServerPubPath() string

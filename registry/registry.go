@@ -124,6 +124,11 @@ func Join(elem ...string) string {
 	return strings.TrimSuffix(builder.String(), "/")
 }
 
+//Split 将路径分隔为多段数组
+func Split(path string) []string {
+	return strings.Split(Trim(path), "/")
+}
+
 //Trim 去掉前后的""/"
 func Trim(l string) string {
 	return strings.Trim(l, "/")

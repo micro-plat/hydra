@@ -87,7 +87,7 @@ func (c *VarConf) GetConf(tp string, name string) (*conf.JSONConf, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
-	return nil, conf.ErrNoSetting
+	return conf.EmptyJSONConf, conf.ErrNoSetting
 }
 
 //GetConfVersion 获取配置的版本号

@@ -12,7 +12,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 //IRequest RPC请求
@@ -131,20 +130,20 @@ func (r *requestOption) getData(v interface{}) ([]byte, error) {
 }
 
 //WithRoundRobinBalancer 配置为轮询负载均衡器
-func WithRoundRobinBalancer(plat, server, service string, limit ...map[string]int) ClientOption {
+func WithRoundRobinBalancer(plat, service string) ClientOption {
 	return func(o *clientOption) {
 		o.service = service
-		o.resolver = balancer.NewResolver(plat, server, service, "")
-		o.balancer = balancer.RoundRobin(service, o.resolver, o.log, limit...)
+		o.resolver = balancer.NewResolver(plat, service, "")
+		o.balancer = balancer.RoundRobin(service, o.resolver, o.log)
 	}
 }
 
 //WithLocalFirstBalancer 配置为本地优先负载均衡器
-func WithLocalFirstBalancer(plat, server, service string, local string, limit ...map[string]int) ClientOption {
+func WithLocalFirstBalancer(plat, service string, local string) ClientOption {
 	return func(o *clientOption) {
 		o.service = service
-		o.resolver = balancer.NewResolver(plat, server, service, local)
-		o.balancer = balancer.LocalFirst(service, local, o.resolver, limit...)
+		o.resolver = balancer.NewResolver(plat, service, local)
+		o.balancer = balancer.LocalFirst(service, local, o.resolver)
 	}
 }
 
@@ -180,42 +179,16 @@ func (c *Client) connect() (err error) {
 		return nil
 	}
 	if c.balancer == nil {
-		switch len(c.tls) {
-		case 2: //使用安全证书
-			creds, err := credentials.NewClientTLSFromFile(c.tls[0], c.tls[1])
-			if err != nil {
-				return err
-			}
-			c.conn, err = grpc.Dial(c.address,
-				grpc.WithInsecure(),
-				grpc.WithTimeout(c.connectionTimeout),
-				grpc.WithTransportCredentials(creds))
-		default:
-			c.conn, err = grpc.Dial(c.address,
-				grpc.WithInsecure(),
-				grpc.WithTimeout(c.connectionTimeout))
+		c.conn, err = grpc.Dial(c.address,
+			grpc.WithInsecure(),
+			grpc.WithTimeout(c.connectionTimeout))
 
-		}
 	} else {
 		ctx, _ := context.WithTimeout(context.Background(), c.connectionTimeout)
-		switch len(c.tls) {
-		case 2: //使用安全证书
-			creds, err := credentials.NewClientTLSFromFile(c.tls[0], c.tls[1])
-			if err != nil {
-				return err
-			}
-			c.conn, err = grpc.DialContext(ctx,
-				c.address,
-				grpc.WithInsecure(),
-				grpc.WithBalancer(c.balancer),
-				grpc.WithTransportCredentials(creds))
-		default:
-			c.conn, err = grpc.DialContext(ctx,
-				c.address,
-				grpc.WithInsecure(),
-				grpc.WithBalancer(c.balancer))
-		}
-
+		c.conn, err = grpc.DialContext(ctx,
+			c.address,
+			grpc.WithInsecure(),
+			grpc.WithBalancer(c.balancer))
 	}
 	if err != nil {
 		return

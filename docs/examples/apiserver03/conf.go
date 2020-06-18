@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	hydra.Conf.OnReady(func() {
+	hydra.OnReady(func() {
 		hydra.Conf.API(":8080", api.WithTrace()).
 			// APIKEY("sdfefefefefe").
 			WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).

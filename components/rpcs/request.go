@@ -9,6 +9,7 @@ import (
 	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/net"
 )
 
 //rpcTypeNode rpc在var配置中的类型名称
@@ -50,17 +51,15 @@ func (r *Request) RequestByCtx(service string, ctx r.IContext) (res *rpc.Respons
 
 //Request RPC请求
 func (r *Request) Request(ctx context.Context, service string, form map[string]interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
-	isip, rservice, domain, server, err := rpc.ResolvePath(service, global.Current().GetPlatName(), global.Current().GetSysName())
+	isip, rservice, platName, err := rpc.ResolvePath(service, global.Current().GetPlatName())
 	if err != nil {
 		return
 	}
-	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%s_%d", rservice, server, domain, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
-		if isip && r.j != nil {
-			if len(r.j.GetStrings("tls")) == 2 {
-				return rpc.NewClient(service, rpc.WithTLS(r.j.GetStrings("tls")))
-			}
+	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
+		if isip {
+			return rpc.NewClient(platName)
 		}
-		return rpc.NewClient(service)
+		return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, net.GetLocalIPAddress()))
 	})
 	if err != nil {
 		return nil, err

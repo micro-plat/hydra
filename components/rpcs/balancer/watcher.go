@@ -2,7 +2,6 @@ package balancer
 
 import (
 	"strings"
-	"time"
 
 	"github.com/micro-plat/hydra/registry"
 	r "github.com/micro-plat/lib4go/registry"
@@ -22,7 +21,6 @@ type Watcher struct {
 	isInitialized bool
 	caches        map[string]bool
 	plat          string
-	server        string
 	path          string
 	service       string
 	sortPrefix    string
@@ -45,7 +43,6 @@ start:
 	if !w.isInitialized {
 		path, err := w.initialize()
 		if err != nil {
-			time.Sleep(time.Second)
 			return w.getUpdates([]string{}), nil
 		}
 		w.path = path
@@ -112,58 +109,60 @@ func (w *Watcher) extractAddrs(resp []string) []string {
 }
 
 func (w *Watcher) initialize() (string, error) {
-	rpath := fmt.Sprintf("/%s/services/rpc/%s%s/providers", w.plat, w.server, w.service)
+
+	//根据绝对路径查询服务
+	rpath := registry.Join(w.plat, "services", "rpc", w.service, "providers")
 	b, err := w.client.Exists(rpath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("检查服务地址出错 %s %w", rpath, err)
 	}
 	if b {
-		clds, _, err := w.client.GetChildren(rpath)
-		if err != nil {
-			return "", err
-		}
-		if len(clds) > 0 {
-			return rpath, nil
-		}
+		return rpath, nil
 	}
-	root := fmt.Sprintf("/%s/services/rpc/%s", w.plat, w.server)
-	items := strings.Split(strings.Trim(w.service, "/"), "/")
-	list, err := w.findRealPath([]string{root}, items...)
-	if err != nil {
-		return "", err
-	}
-	for _, li := range list {
-		path := registry.Join(li, "providers")
-		clds, _, err := w.client.GetChildren(path)
-		if err != nil {
-			return "", err
-		}
-		if len(clds) > 0 {
-			return path, nil
-		}
-	}
-	return "", fmt.Errorf("未找到服务提供程序:%s", rpath)
 
+	//查询模糊匹配的节点
+	root := registry.Join(w.plat, "services", "rpc")
+	items := registry.Split(w.service)
+
+	list, err := w.findServicePath([]string{root}, items...)
+	if err != nil {
+		return "", fmt.Errorf("获取服务地址失败 %w", err)
+	}
+
+	//对查询到的路径进行排序
+	sort.Strings(list)
+	if len(list) == 0 {
+		return "", fmt.Errorf("未找到服务提供程序:%s", rpath)
+	}
+	return list[0], nil
 }
 
-func (w *Watcher) findRealPath(roots []string, items ...string) ([]string, error) {
-	if len(items) == 0 {
-		return roots, nil
+func (w *Watcher) findServicePath(roots []string, names ...string) ([]string, error) {
+
+	//查找完成所有节点
+	if len(names) == 0 {
+		providers := make([]string, 0, len(roots))
+		for _, r := range roots {
+			providers = append(providers, registry.Join(r, "providers"))
+		}
+		return providers, nil
 	}
-	rmatch := make([]string, 0, 1)
+
+	//查找匹配的节点
+	matchPaths := make([]string, 0, 1)
 	for _, root := range roots {
 		paths, _, err := w.client.GetChildren(root)
 		if err != nil {
 			return nil, err
 		}
 		for _, p := range paths {
-			if p == items[0] || strings.HasPrefix(p, ":") {
-				rmatch = append(rmatch, registry.Join(root, p))
+			if p == names[0] || strings.HasPrefix(p, ":") {
+				matchPaths = append(matchPaths, registry.Join(root, p))
 			}
 		}
 	}
-	if len(rmatch) == 0 {
-		return nil, fmt.Errorf("未找到匹配的路径：%v %s", roots, items[0])
+	if len(matchPaths) == 0 {
+		return nil, fmt.Errorf("未找到匹配的路径：%v %s", roots, names[0])
 	}
-	return w.findRealPath(rmatch, items[1:]...)
+	return w.findServicePath(matchPaths, names[1:]...)
 }

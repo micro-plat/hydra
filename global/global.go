@@ -12,6 +12,8 @@ import (
 
 var traces = []string{"cpu", "mem", "block", "mutex", "web"}
 
+var isReady = false
+
 //Def 默认appliction
 var Def = &global{
 	log:           logger.New("hydra"),
@@ -66,10 +68,6 @@ func (m *global) Bind() (err error) {
 		return err
 	}
 
-	//增加调试参数
-	if IsDebug {
-		m.PlatName += "_debug"
-	}
 	return nil
 }
 
@@ -150,7 +148,6 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 
 //check 检查参数
 func (m *global) check() (err error) {
-
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
@@ -184,6 +181,11 @@ func (m *global) check() (err error) {
 	if m.Trace != "" && !types.StringContains(traces, m.Trace) {
 		return fmt.Errorf("trace名称只能是%v", traces)
 	}
+	//增加调试参数
+	if IsDebug {
+		m.PlatName += "_debug"
+	}
 
-	return nil
+	isReady = true
+	return doReadyFuncs()
 }

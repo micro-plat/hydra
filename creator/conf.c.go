@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
+	"github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
@@ -16,9 +17,6 @@ import (
 
 //IConf 配置注册管理
 type IConf interface {
-
-	//OnReady 系统准备好后触发
-	OnReady(fs ...interface{})
 
 	//Var 参数配置
 	Vars() vars
@@ -33,6 +31,12 @@ type IConf interface {
 
 	//GetWeb() 获取Web服务器配置
 	GetWeb() *httpBuilder
+
+	//RPC rpc服务器配置
+	RPC(address string, opts ...rpc.Option) *rpcBuilder
+
+	//GetRPC() 获取rpc服务器配置
+	GetRPC() *rpcBuilder
 
 	//Custome 自定义服务器配置
 	Custome(tp string, s ...interface{}) customerBuilder
@@ -57,36 +61,12 @@ var Conf = &conf{
 }
 
 type conf struct {
-	funcs []func() error
-	data  map[string]iCustomerBuilder
-	vars  map[string]map[string]interface{}
-}
-
-//OnReady 注册配置准备函数
-func (c *conf) OnReady(fs ...interface{}) {
-	for _, fn := range fs {
-		if f, ok := fn.(func()); ok {
-			c.funcs = append(c.funcs, func() error {
-				f()
-				return nil
-			})
-			continue
-		}
-		if f, ok := fn.(func() error); ok {
-			c.funcs = append(c.funcs, f)
-			continue
-		}
-		panic("函数签名格式不正确，支持的格式有func()、func()error")
-	}
+	data map[string]iCustomerBuilder
+	vars map[string]map[string]interface{}
 }
 
 //Load 加载所有配置
 func (c *conf) Load() error {
-	for _, f := range c.funcs {
-		if err := f(); err != nil {
-			return err
-		}
-	}
 	types := servers.GetServerTypes()
 	for _, t := range types {
 		_, ok := c.data[t]
@@ -96,6 +76,8 @@ func (c *conf) Load() error {
 				c.data[global.API] = c.GetAPI()
 			case global.Web:
 				c.data[global.Web] = c.GetWeb()
+			case global.RPC:
+				c.data[global.RPC] = c.GetRPC()
 			case global.CRON:
 				c.data[global.CRON] = c.GetCRON()
 			case global.MQC:
@@ -140,6 +122,21 @@ func (c *conf) GetWeb() *httpBuilder {
 		return web.(*httpBuilder)
 	}
 	return c.Web(":8089")
+}
+
+//RPC rpc服务器配置
+func (c *conf) RPC(address string, opts ...rpc.Option) *rpcBuilder {
+	rpc := newRPC(address, opts...)
+	c.data[global.RPC] = rpc
+	return rpc
+}
+
+//GetRPC 获取当前已配置的rpc服务器
+func (c *conf) GetRPC() *rpcBuilder {
+	if rpc, ok := c.data[global.RPC]; ok {
+		return rpc.(*rpcBuilder)
+	}
+	return c.RPC(":8090")
 }
 
 //CRON cron服务器配置

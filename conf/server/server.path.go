@@ -62,14 +62,14 @@ func (c *Pub) GetVarPath(tp ...string) string {
 	return registry.Join(l...)
 }
 
-//GetServicePubPathByService 获取服务发布跟路径
-func (c *Pub) GetServicePubPathByService(svName string) string {
-	return registry.Join(c.platName, "services", c.serverType, c.sysName, svName, "providers")
+//GetRPCServicePubPath 获取服务发布跟路径
+func (c *Pub) GetRPCServicePubPath(svName string) string {
+	return registry.Join(c.platName, "services", c.serverType, svName, "providers")
 }
 
 //GetServicePubPath 获取服务发布跟路径
 func (c *Pub) GetServicePubPath() string {
-	return registry.Join(c.platName, "services", c.serverType, c.sysName, "providers")
+	return registry.Join(c.platName, "services", c.serverType, "providers")
 }
 
 //GetDNSPubPath 获取DNS服务路径
