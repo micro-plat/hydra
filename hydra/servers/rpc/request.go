@@ -21,17 +21,16 @@ func NewRequest(request *pb.RequestContext) (r *Request, err error) {
 		form:    make(map[string]interface{}),
 		header:  make(map[string]string),
 	}
-	if err = json.Unmarshal([]byte(request.Input), &r.form); err != nil {
-		return nil, fmt.Errorf("rpc请求参数转换失败:%s %w", request.Input, err)
-	}
+	//处理请求头
 	if err = json.Unmarshal([]byte(request.Header), &r.header); err != nil {
 		return nil, fmt.Errorf("rpc请求头转换失败 %s %w", request.Header, err)
 	}
-	if v, ok := r.form["__header__"].(map[string]interface{}); ok {
-		for n, m := range v {
-			r.header[n] = fmt.Sprint(m)
-		}
+
+	//处理正常请求参数
+	if err = json.Unmarshal([]byte(request.Input), &r.form); err != nil {
+		return nil, fmt.Errorf("rpc请求参数转换失败:%s %w", request.Input, err)
 	}
+
 	return r, nil
 }
 
@@ -58,4 +57,8 @@ func (m *Request) GetForm() map[string]interface{} {
 //GetHeader 头信息
 func (m *Request) GetHeader() map[string]string {
 	return m.header
+}
+
+func (m *Request) getHeader(key string) string {
+	return m.header[key]
 }

@@ -3,6 +3,7 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -82,7 +83,14 @@ func newOption() *requestOption {
 	}
 }
 
-//WithHeaders RPC请求参数
+//WithHeader 请求头信息
+func WithHeader(k string, v string) RequestOption {
+	return func(o *requestOption) {
+		o.headers[k] = v
+	}
+}
+
+//WithHeaders 设置请求头
 func WithHeaders(p map[string][]string) RequestOption {
 	return func(o *requestOption) {
 		for k, v := range p {
@@ -174,6 +182,10 @@ func NewClient(address string, opts ...ClientOption) (*Client, error) {
 }
 
 //Connect 连接到RPC服务器，如果当前无法连接系统会定时自动重连
+//未使用压缩，由于传输数据默认限制为4M(已修改为20M)压缩后会影响系统并发能力
+// grpc.WithDefaultCallOptions(grpc.UseCompressor(Snappy)),
+// grpc.WithDecompressor(grpc.NewGZIPDecompressor()),
+// grpc.WithCompressor(grpc.NewGZIPCompressor()),
 func (c *Client) connect() (err error) {
 	if c.IsConnect {
 		return nil
@@ -181,6 +193,7 @@ func (c *Client) connect() (err error) {
 	if c.balancer == nil {
 		c.conn, err = grpc.Dial(c.address,
 			grpc.WithInsecure(),
+
 			grpc.WithTimeout(c.connectionTimeout))
 
 	} else {
@@ -224,9 +237,9 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 		},
 		grpc.FailFast(o.failFast))
 	if err != nil {
-		return NewResponseByStatus(500, err)
+		return NewResponseByStatus(http.StatusInternalServerError, err), err
 	}
-	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult())
+	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 
 //Close 关闭RPC客户端连接

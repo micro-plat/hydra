@@ -11,6 +11,14 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 )
 
+const (
+	JSONF  = "application/json; charset=%s"
+	XMLF   = "application/xml; charset=%s"
+	YAMLF  = "text/yaml; charset=%s"
+	HTMLF  = "text/html; charset=%s"
+	PLAINF = "text/plain; charset=%s"
+)
+
 //Handler 业务处理Handler
 type Handler func(IContext) interface{}
 

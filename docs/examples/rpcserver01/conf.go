@@ -6,6 +6,6 @@ import (
 
 func init() {
 	hydra.OnReady(func() {
-		hydra.Conf.RPC(":8091")
+		hydra.Conf.RPC(":8092")
 	})
 }

@@ -30,12 +30,13 @@ func doConf(c *cli.Context) (err error) {
 	}
 
 	//2.检查是否安装注册中心配置
-	if installRegistry {
+	if installRegistry && registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
 			logs.Log.Error("安装到配置中心:", pkgs.Failed)
 			return err
 		}
-		logs.Log.Debug("安装到配置中心:" + pkgs.Success)
+		logs.Log.Info("安装到配置中心:" + pkgs.Success)
+		return
 	}
 
 	//3. 处理本地内存作为注册中心的服务发布问题

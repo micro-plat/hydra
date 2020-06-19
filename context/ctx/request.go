@@ -3,6 +3,7 @@ package ctx
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"reflect"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -73,7 +75,7 @@ func (r *request) Check(field ...string) error {
 			continue
 		}
 		if v, ok := data[key]; !ok || fmt.Sprint(v) == "" {
-			return fmt.Errorf("输入参数:%s值不能为空", key)
+			return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数:%s值不能为空", key))
 		}
 	}
 	return nil

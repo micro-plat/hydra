@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,16 @@ import (
 	"net/url"
 
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
+	"github.com/qxnw/lib4go/types"
 )
+
+type buffer struct {
+	*bytes.Buffer
+}
+
+func (b *buffer) Close() error {
+	return nil
+}
 
 type dispCtx struct {
 	*dispatcher.Context
@@ -21,7 +31,9 @@ func (g *dispCtx) GetRouterPath() string {
 	return g.Context.Request.GetService()
 }
 func (g *dispCtx) GetBody() io.ReadCloser {
-	return nil
+	text := g.Request.GetForm()["__body_"]
+	b := bytes.NewBufferString(types.GetString(text))
+	return &buffer{Buffer: b}
 }
 func (g *dispCtx) GetMethod() string {
 	return g.Context.Request.GetMethod()
@@ -83,7 +95,7 @@ func (g *dispCtx) File(name string) {
 	body := base64.StdEncoding.EncodeToString(ff)
 	g.Context.Header("file", name)
 	g.Context.JSON(200, map[string]interface{}{
-		"__body": body,
+		"__body_": body,
 	})
 }
 func (g *dispCtx) ShouldBind(v interface{}) error {

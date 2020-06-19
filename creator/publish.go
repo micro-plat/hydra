@@ -73,18 +73,35 @@ func deleteAll(r registry.IRegistry, path string) error {
 	if b, err := r.Exists(path); err != nil || !b {
 		return err
 	}
-	child, _, err := r.GetChildren(path)
+	list, err := getAllPath(r, path)
 	if err != nil {
 		return err
 	}
-	for _, c := range child {
-		npath := registry.Join(path, c)
-		return deleteAll(r, npath)
-	}
-	if err := r.Delete(path); err != nil {
-		return fmt.Errorf("删除节点%s出错 %w", path, err)
+	for _, v := range list {
+		if err := r.Delete(v); err != nil {
+			return err
+		}
 	}
 	return nil
+
+}
+func getAllPath(r registry.IRegistry, path string) ([]string, error) {
+	child, _, err := r.GetChildren(path)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]string, 0, 1+len(child))
+	for _, c := range child {
+		npath := registry.Join(path, c)
+		nlist, err := getAllPath(r, npath)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, nlist...)
+	}
+	list = append(list, path)
+	return list, nil
+
 }
 
 //getJSON 将对象序列化为json字符串

@@ -23,10 +23,15 @@ type Server struct {
 }
 
 //NewServer 创建mqc服务器
+//未使用压缩，由于传输数据默认限制为4M(已修改为20M)压缩后会影响系统并发能力
+// grpc.RPCDecompressor(grpc.NewGZIPDecompressor())
 func NewServer(addr string, routers []*router.Router) (t *Server, err error) {
 	t = &Server{
 		Processor: NewProcessor(routers...),
-		engine:    grpc.NewServer(),
+		engine: grpc.NewServer(
+			grpc.MaxRecvMsgSize(1024*1024*20),
+			grpc.MaxSendMsgSize(1024*1024*20),
+		),
 	}
 	if t.addr, err = getAddress(addr); err != nil {
 		return nil, err

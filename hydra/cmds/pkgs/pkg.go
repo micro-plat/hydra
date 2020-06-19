@@ -16,7 +16,6 @@ const Failed = "\t\t\t\t\t[\033[31mFAILED\033[0m]" // Show colored "FAILED"
 
 //Pub2Registry 发布到注册中心
 func Pub2Registry(cover bool) error {
-
 	if err := creator.Conf.Load(); err != nil {
 		return err
 	}

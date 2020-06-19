@@ -76,9 +76,6 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//处理输出, 只会将业务处理结果进行输出---------------
-		if err := errs.GetError(result); err != nil {
-			ctx.Log().Error("err:", err)
-		}
 		ctx.Response().WriteAny(result)
 	}
 }

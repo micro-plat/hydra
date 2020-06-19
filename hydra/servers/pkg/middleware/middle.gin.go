@@ -17,9 +17,9 @@ type ginCtx struct {
 
 func (g *ginCtx) load() {
 	g.once.Do(func() {
+		g.Context.Request.ParseForm()
 		if g.Context.ContentType() == binding.MIMEPOSTForm ||
 			g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
-			g.Context.Request.ParseForm()
 			g.Context.Request.ParseMultipartForm(32 << 20)
 		}
 	})

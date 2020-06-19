@@ -49,7 +49,7 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 	case strings.Contains(ctp, "json"):
 		err = json.Unmarshal([]byte(body), &data)
 	default:
-		data["__body"] = body
+		data["__body_"] = body
 	}
 	if err != nil {
 		panic(fmt.Errorf("将%s转换为map失败:%w", body, err))

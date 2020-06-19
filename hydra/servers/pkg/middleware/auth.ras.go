@@ -40,13 +40,14 @@ func RASAuth() Handler {
 		}
 
 		respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
-		if err != nil || !respones.Success() {
+		if err != nil || !respones.IsSuccess() {
 			ctx.Response().Abort(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,err:%v(%d)", err, respones.Result, respones.Status))
 			return
 		}
+
 		result, err := respones.GetResult()
 		if err != nil {
-			ctx.Response().Abort(http.StatusForbidden, err)
+			ctx.Response().Abort(http.StatusForbidden, fmt.Errorf("远程请求结果解析错误 %w", err))
 			return
 		}
 		ctx.Meta().MergeMap(result)

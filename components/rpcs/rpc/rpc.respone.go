@@ -1,6 +1,11 @@
 package rpc
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/micro-plat/lib4go/jsons"
 )
 
@@ -9,44 +14,72 @@ import (
 //Response 请求结果
 type Response struct {
 	Status int
-	Header map[string]interface{}
+	Header string
+	hdMap  map[string]string
 	Result string
 }
 
 //NewResponse 请求响应
-func NewResponse(status int, p string, result string) (*Response, error) {
-	res := &Response{
+func NewResponse(status int, header string, result string) (res *Response) {
+	res = &Response{
 		Status: status,
 		Result: result,
+		Header: header,
 	}
-	if p != "" {
-		mh, err := jsons.Unmarshal([]byte(p))
-		if err != nil {
-			return nil, err
-		}
-		res.Header = mh
-	}
-	return res, nil
+	res.hdMap, _ = getHeader(header)
+	return res
 }
 
 //NewResponseByStatus 根据状态构建响应
-func NewResponseByStatus(status int, err error) (*Response, error) {
-	r, _ := NewResponse(500, "", "{}")
-	return r, err
+func NewResponseByStatus(status int, err error) *Response {
+	r := NewResponse(status, "{}", err.Error())
+	return r
 }
 
-//Success 请求是否成功
-func (r *Response) Success() bool {
-	return r.Status == 200
+//IsSuccess 请求是否成功
+func (r *Response) IsSuccess() bool {
+	return r.Status == http.StatusOK
+}
+
+//IsJSON 结果是否是json串
+func (r *Response) IsJSON() bool {
+	ctp := r.GetHeader("Content-Type")
+	buff := []byte(r.Result)
+	if (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(buff) && (strings.HasPrefix(r.Result, "{") ||
+		strings.HasPrefix(r.Result, "[")) {
+		return true
+	}
+	return false
 }
 
 //GetResult 获取请求结果
 func (r *Response) GetResult() (map[string]interface{}, error) {
-	out, err := jsons.Unmarshal([]byte(r.Result))
-	return out, err
+	return jsons.Unmarshal([]byte(r.Result))
 }
 
 //GetHeader 根据KEY获取参数
-func (r *Response) GetHeader(key string) interface{} {
-	return r.Header[key]
+func (r *Response) GetHeader(key string) string {
+	return r.hdMap[key]
+}
+
+func getHeader(h string) (map[string]string, error) {
+	hd := make(map[string]string)
+	if h == "" {
+		return hd, nil
+	}
+	mh, err := jsons.Unmarshal([]byte(h))
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range mh {
+		switch t := v.(type) {
+		case []string:
+			hd[k] = strings.Join(t, ",")
+		case string:
+			hd[k] = t
+		default:
+			hd[k] = fmt.Sprint(t)
+		}
+	}
+	return hd, nil
 }

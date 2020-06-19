@@ -18,14 +18,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	JSONF  = "application/json; charset=%s"
-	XMLF   = "application/xml; charset=%s"
-	YAMLF  = "text/yaml; charset=%s"
-	HTMLF  = "text/html; charset=%s"
-	PLAINF = "text/plain; charset=%s"
-)
-
 var _ context.IResponse = &response{}
 
 type rspns struct {
@@ -167,7 +159,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 		return ctp, fmt.Sprint(content)
 	default:
 		if content == nil || content == "" {
-			return types.GetString(ctp, PLAINF), ""
+			return types.GetString(ctp, context.PLAINF), ""
 		}
 		tp := reflect.TypeOf(content).Kind()
 		value := reflect.ValueOf(content)
@@ -180,15 +172,15 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			switch {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
-				return JSONF, content.(string)
+				return context.JSONF, content.(string)
 			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				return XMLF, content.(string)
+				return context.XMLF, content.(string)
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
-				return HTMLF, content.(string)
+				return context.HTMLF, content.(string)
 			case strings.Contains(ctp, "yaml"):
-				return YAMLF, content.(string)
+				return context.YAMLF, content.(string)
 			case ctp == "" || strings.Contains(ctp, "plain"):
-				return PLAINF, content.(string)
+				return context.PLAINF, content.(string)
 			default:
 				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
@@ -196,7 +188,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			}
 		case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 			if ctp == "" {
-				return PLAINF, fmt.Sprint(content)
+				return context.PLAINF, fmt.Sprint(content)
 			}
 			return ctp, c.getString(ctp, map[string]interface{}{
 				"data": content,
@@ -204,7 +196,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 		default:
 			if ctp == "" {
 				c.ContentType("application/json; charset=UTF-8")
-				return JSONF, c.getString(JSONF, content)
+				return context.JSONF, c.getString(context.JSONF, content)
 			}
 			return ctp, c.getString(ctp, content)
 		}
