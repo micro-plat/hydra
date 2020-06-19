@@ -19,7 +19,7 @@ type RPCAppender struct {
 	name        string
 	buffer      *bytes.Buffer
 	lastWrite   time.Time
-	layout      *logger.Appender
+	layout      *logger.Layout
 	ticker      *time.Ticker
 	locker      sync.Mutex
 	writer      io.WriteCloser
@@ -28,7 +28,7 @@ type RPCAppender struct {
 }
 
 //NewRPCAppender 构建writer日志输出对象
-func NewRPCAppender(writer io.WriteCloser, layout *logger.Appender) (fa *RPCAppender, err error) {
+func NewRPCAppender(writer io.WriteCloser, layout *logger.Layout) (fa *RPCAppender, err error) {
 	fa = &RPCAppender{layout: layout, writer: writer}
 	fa.output = log.New(fa.buffer, "", log.Llongcolor)
 	fa.output.SetOutput(os.Stderr)
@@ -55,7 +55,6 @@ func (f *RPCAppender) Reset(intervalStr string, writer io.WriteCloser) error {
 		err = fmt.Errorf("rpc日志的interval字段配置有误:%v", interval)
 		return err
 	}
-	//f.ticker.Stop()
 	f.ticker = time.NewTicker(interval)
 	f.writer = writer
 	return nil
