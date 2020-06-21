@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/micro-plat/hydra"
@@ -19,10 +18,7 @@ func main() {
 	app := hydra.NewApp(
 		hydra.WithServerTypes(rpc.RPC, http.API),
 	)
-	buff, err = ioutil.ReadFile("/home/yanglei/abc.doc")
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	app.API("/request", request)
 	app.RPC("/rpc", rpcRequest)
 	app.Start()
@@ -31,7 +27,7 @@ func main() {
 func request(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("id:", ctx.Request().GetString("id"))
 
-	response, err := hydra.Component.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc", buff)
+	response, err := hydra.Component.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc", "abc")
 
 	if err != nil {
 		return err
