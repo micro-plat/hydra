@@ -43,6 +43,7 @@ func NewWSServer(name string, addr string, routers []*router.Router, opts ...Opt
 	if err != nil {
 		return
 	}
+	t.proto = "ws"
 	t.addWSRouters(routers...)
 	return
 }
@@ -50,6 +51,7 @@ func NewWSServer(name string, addr string, routers []*router.Router, opts ...Opt
 //new 创建http api服务嚣
 func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	t = &Server{
+		proto: "http",
 		option: &option{
 			readHeaderTimeout: 6,
 			readTimeout:       6,
@@ -87,7 +89,6 @@ func (s *Server) Start() error {
 			}
 		}(errChan)
 	default:
-		s.proto = "http"
 		go func(ch chan error) {
 			if err := s.server.ListenAndServe(); err != nil {
 				ch <- err

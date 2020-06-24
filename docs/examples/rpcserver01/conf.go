@@ -7,7 +7,7 @@ import (
 
 func init() {
 	hydra.OnReady(func() {
-		hydra.Conf.RPC(":8092")
+		hydra.Conf.API(":8070")
 		hydra.Conf.Vars().RLog("/rpc/log", rlog.WithDisable())
 	})
 }
