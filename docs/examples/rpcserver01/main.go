@@ -13,6 +13,13 @@ import (
 var buff []byte
 var err error
 
+type logstruct struct {
+	ServerIP string `json:"server-ip"`
+	Time     string `json:"time"`
+	Level    string `json:"level"`
+	Session  string `json:"session"`
+}
+
 //服务注册与系统勾子函数
 func main() {
 	app := hydra.NewApp(
@@ -21,6 +28,7 @@ func main() {
 
 	app.API("/request", request)
 	app.RPC("/rpc", rpcRequest)
+	app.RPC("/rpc/log", log)
 	app.Start()
 }
 
@@ -33,6 +41,14 @@ func request(ctx hydra.IContext) (r interface{}) {
 		return err
 	}
 	return response.Result
+}
+func log(ctx hydra.IContext) (r interface{}) {
+	fmt.Println(ctx.Request().GetBodyMap())
+	fmt.Println(ctx.Request().GetBody())
+	fmt.Println("content:", ctx.Request().GetString("server-ip"))
+	list := make([]*logstruct, 0, 1)
+	err := ctx.Request().Bind(&list)
+	return nil
 }
 
 func rpcRequest(ctx hydra.IContext) (r interface{}) {

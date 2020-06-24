@@ -32,8 +32,18 @@ func (g *dispCtx) GetRouterPath() string {
 }
 func (g *dispCtx) GetBody() io.ReadCloser {
 	text := g.Request.GetForm()["__body_"]
-	b := bytes.NewBufferString(types.GetString(text))
-	return &buffer{Buffer: b}
+	switch v := text.(type) {
+	case json.RawMessage:
+		b := bytes.NewBuffer([]byte(v))
+		return &buffer{Buffer: b}
+	case []byte:
+		b := bytes.NewBuffer(v)
+		return &buffer{Buffer: b}
+	default:
+		b := bytes.NewBufferString(types.GetString(text))
+		return &buffer{Buffer: b}
+	}
+
 }
 func (g *dispCtx) GetMethod() string {
 	return g.Context.Request.GetMethod()
@@ -99,6 +109,16 @@ func (g *dispCtx) File(name string) {
 	})
 }
 func (g *dispCtx) ShouldBind(v interface{}) error {
+	if body, ok := g.Context.Request.GetForm()["__body_"]; ok && len(g.Context.Request.GetForm()) == 1 {
+		switch msg := body.(type) {
+		case json.RawMessage:
+			return json.Unmarshal(msg, v)
+		case []byte:
+			return json.Unmarshal(msg, v)
+		default:
+			return json.Unmarshal([]byte(fmt.Sprint(msg)), v)
+		}
+	}
 	js, err := json.Marshal(g.Context.Request.GetForm)
 	if err != nil {
 		return fmt.Errorf("ShouldBind将输入的信息转换为JSON时失败 %w", err)

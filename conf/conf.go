@@ -61,6 +61,7 @@ type IPub interface {
 	GetClusterName() string
 	GetServerName() string
 	GetVarPath(p ...string) string
+	GetRLogPath() string
 }
 
 //IVarConf 变量配置

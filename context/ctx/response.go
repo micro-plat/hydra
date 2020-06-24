@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 
@@ -39,10 +40,11 @@ type response struct {
 
 func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger) *response {
 	return &response{
-		ctx:  ctx,
-		conf: conf,
-		path: newRpath(ctx, conf),
-		log:  log,
+		ctx:   ctx,
+		conf:  conf,
+		path:  newRpath(ctx, conf),
+		log:   log,
+		final: rspns{status: http.StatusNotFound},
 	}
 }
 

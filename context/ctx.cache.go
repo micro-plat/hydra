@@ -2,9 +2,12 @@ package context
 
 import (
 	"bytes"
+	"context"
 	"runtime"
 	"strconv"
 	"sync"
+
+	"github.com/micro-plat/hydra/global"
 )
 
 func getGID() uint64 {
@@ -23,6 +26,14 @@ func Cache(s IContext) uint64 {
 	tid := getGID()
 	ctxMap.Store(tid, s)
 	return tid
+}
+
+//GetContextWithDefault 获取可用的context.Context
+func GetContextWithDefault() context.Context {
+	if c, ok := ctxMap.Load(getGID()); ok {
+		return c.(IContext).Context()
+	}
+	return context.WithValue(context.Background(), "X-Request-Id", global.Def.Log().GetSessionID())
 }
 
 //Current 从缓存中获取请求上下文配置

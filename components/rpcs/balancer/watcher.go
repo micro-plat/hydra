@@ -42,10 +42,12 @@ start:
 	w.lastErr = nil
 	if !w.isInitialized {
 		path, err := w.initialize()
+
 		if err != nil {
 			return w.getUpdates([]string{}), nil
 		}
 		w.path = path
+
 		resp, _, err := w.client.GetChildren(w.path)
 		if err == nil {
 			w.isInitialized = true

@@ -194,7 +194,7 @@ func (r *RspServers) Shutdown() {
 	defer r.lock.Unlock()
 	cl := make(chan struct{})
 
-	//新协程去关闭服务器
+	//新协程关闭服务器
 	go func() {
 		for _, server := range r.servers {
 			server.Shutdown()

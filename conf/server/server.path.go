@@ -19,6 +19,7 @@ type Pub struct {
 	serverType  string
 	clusterName string
 	serverID    string
+	*varPath
 }
 
 //Split 根据主配置获取平台名称、系统名称、服务类型、集群名
@@ -35,6 +36,7 @@ func NewPub(platName string, sysName string, serverType string, clusterName stri
 		serverType:  serverType,
 		clusterName: clusterName,
 		serverID:    global.GetMatchineCode() + time.Now().Format("0405"),
+		varPath:     NewVarPath(platName),
 	}
 }
 
@@ -47,18 +49,6 @@ func (c *Pub) GetMainPath() string {
 func (c *Pub) GetSubConfPath(name ...string) string {
 	l := []string{c.GetMainPath()}
 	l = append(l, name...)
-	return registry.Join(l...)
-}
-
-//GetVarPath 获取var配置路径
-func (c *Pub) GetVarPath(tp ...string) string {
-	if len(tp) == 0 {
-		return registry.Join(c.platName, "var")
-	}
-	l := make([]string, 0, len(tp)+2)
-	l = append(l, c.platName)
-	l = append(l, "var")
-	l = append(l, tp...)
 	return registry.Join(l...)
 }
 

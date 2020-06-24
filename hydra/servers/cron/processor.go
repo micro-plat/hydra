@@ -102,7 +102,7 @@ func (s *Processor) onceHandle(t *task.Task) (bool, error) {
 		return false, nil
 	}
 	if s.status != running {
-		return true, fmt.Errorf("当前服务器已暂停或未启动，不再执行任务:%s", t.GetUNQ())
+		return true, fmt.Errorf("当前服务器未启动或已暂停，无法执行任务:%s(%s)", t.Service, t.Cron)
 	}
 
 	//注册服务

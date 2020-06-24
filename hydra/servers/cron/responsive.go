@@ -59,15 +59,19 @@ func (w *Responsive) Start() (err error) {
 	//监控服务节点变化并切换工作模式
 	go w.watch()
 
+	w.subscribe()
+
+	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetCRONTaskConf().Tasks))
+	return nil
+}
+
+func (w *Responsive) subscribe() {
 	//动态监听任务
 	services.CRON.Subscribe(func(t *task.Task) {
 		if err := w.Server.Add(t); err != nil {
 			w.log.Errorf("服务[%v]添加失败 %w", t, err)
 		}
 	})
-
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetCRONTaskConf().Tasks))
-	return nil
 }
 
 //Notify 服务器配置变更通知

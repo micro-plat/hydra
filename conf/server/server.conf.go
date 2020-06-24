@@ -16,6 +16,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
+	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -38,6 +39,9 @@ type IServerConf interface {
 	GetRenderConf() *render.Render
 	GetWhiteListConf() *whitelist.WhiteList
 	GetBlackListConf() *blacklist.BlackList
+
+	//获取远程日志配置
+	GetRLogConf() *rlog.Layout
 	Close() error
 }
 
@@ -50,6 +54,7 @@ type ServerConf struct {
 	*httpSub
 	*cronSub
 	*mqcSub
+	*varSub
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -66,6 +71,7 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.httpSub = newhttpSub(s.mainConf)
 	s.cronSub = newCronSub(s.mainConf)
 	s.mqcSub = newMQCSub(s.mainConf)
+	s.varSub = newVarSub(s.varConf)
 	return s, nil
 
 }

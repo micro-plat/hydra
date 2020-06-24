@@ -68,9 +68,9 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	}
 	client := c.(*rpc.Client)
 	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
-	nopts = append(nopts, rpc.WithXRequestID(ctx.Value("X-Request-Id").(string)))
+	nopts = append(nopts, rpc.WithXRequestID(fmt.Sprint(ctx.Value("X-Request-Id"))))
 	fm := getRequestForm(input)
-	return client.Request(ctx, service, fm, nopts...)
+	return client.Request(ctx, rservice, fm, nopts...)
 }
 
 //Close 关闭RPC连接

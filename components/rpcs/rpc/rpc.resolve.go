@@ -21,7 +21,7 @@ func ResolvePath(address string, defPlatName string) (isip bool, service string,
 	if addrs[0] == "" {
 		return false, "", "", fmt.Errorf("服务地址%s不能为空", address)
 	}
-	service = "/" + strings.Trim(strings.Replace(raddress, ".", "/", -1), "/")
+	service = "/" + strings.Trim(strings.Replace(addrs[0], ".", "/", -1), "/")
 	platName = defPlatName
 
 	if len(addrs) > 1 && addrs[1] != "" {
