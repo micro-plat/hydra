@@ -32,6 +32,12 @@ type IConf interface {
 	//GetWeb() 获取Web服务器配置
 	GetWeb() *httpBuilder
 
+	//WS ws服务器配置
+	WS(address string, opts ...api.Option) *httpBuilder
+
+	//GetWS() 获取ws服务器配置
+	GetWS() *httpBuilder
+
 	//RPC rpc服务器配置
 	RPC(address string, opts ...rpc.Option) *rpcBuilder
 
@@ -76,6 +82,8 @@ func (c *conf) Load() error {
 				c.data[global.API] = c.GetAPI()
 			case global.Web:
 				c.data[global.Web] = c.GetWeb()
+			case global.WS:
+				c.data[global.WS] = c.GetWS()
 			case global.RPC:
 				c.data[global.RPC] = c.GetRPC()
 			case global.CRON:
@@ -122,6 +130,22 @@ func (c *conf) GetWeb() *httpBuilder {
 		return web.(*httpBuilder)
 	}
 	return c.Web(":8089")
+}
+
+//Web web服务器配置
+func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
+	web := newHTTP(address, opts...)
+	web.Static(static.WithArchive(global.AppName))
+	c.data[global.Web] = web
+	return web
+}
+
+//GetWeb 获取当前已配置的web服务器
+func (c *conf) GetWS() *httpBuilder {
+	if web, ok := c.data[global.Web]; ok {
+		return web.(*httpBuilder)
+	}
+	return c.Web(":8070")
 }
 
 //RPC rpc服务器配置

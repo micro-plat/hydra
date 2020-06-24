@@ -29,9 +29,28 @@ type Server struct {
 
 //NewServer 创建http api服务嚣
 func NewServer(name string, addr string, routers []*router.Router, opts ...Option) (t *Server, err error) {
+	t, err = new(name, addr, opts...)
+	if err != nil {
+		return
+	}
+	t.addHttpRouters(routers...)
+	return
+}
+
+//NewWSServer 创建web socket服务嚣
+func NewWSServer(name string, addr string, routers []*router.Router, opts ...Option) (t *Server, err error) {
+	t, err = new(name, addr, opts...)
+	if err != nil {
+		return
+	}
+	t.addWSRouters(routers...)
+	return
+}
+
+//new 创建http api服务嚣
+func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	t = &Server{
 		option: &option{
-			serverType:        "api",
 			readHeaderTimeout: 6,
 			readTimeout:       6,
 			writeTimeout:      6,
@@ -52,7 +71,6 @@ func NewServer(name string, addr string, routers []*router.Router, opts ...Optio
 		WriteTimeout:      time.Second * time.Duration(t.option.writeTimeout),
 		MaxHeaderBytes:    1 << 20,
 	}
-	t.addRouters(routers...)
 	return
 }
 

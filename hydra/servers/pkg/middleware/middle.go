@@ -46,7 +46,9 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
-			v = newMiddleContext(ctx.NewCtx(&ginCtx{Context: c}, tps[0]), c)
+			nctx := ctx.NewCtx(&ginCtx{Context: c}, tps[0])
+			nctx.Meta().Set("__context_", c)
+			v = newMiddleContext(nctx, c)
 			c.Set("__middle_context__", v)
 		}
 		h(v.(IMiddleContext))
@@ -58,7 +60,9 @@ func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 	return func(c *dispatcher.Context) {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
-			v = newMiddleContext(ctx.NewCtx(&dispCtx{Context: c}, tps[0]), c)
+			nctx := ctx.NewCtx(&dispCtx{Context: c}, tps[0])
+			nctx.Meta().Set("__context_", c)
+			v = newMiddleContext(nctx, c)
 			c.Set("__middle_context__", v)
 		}
 		h(v.(IMiddleContext))

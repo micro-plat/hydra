@@ -2,6 +2,7 @@ package header
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -27,6 +28,16 @@ func New(opts ...Option) Headers {
 //IsAccessControlAllowOrigin 是否是Access-Control-Allow-Origin
 func (h Headers) IsAccessControlAllowOrigin(k string) bool {
 	return strings.EqualFold(k, "Access-Control-Allow-Origin")
+}
+
+//GetHTTPHeaderByOrigin 根据请求origin获取http请求头
+func (h Headers) GetHTTPHeaderByOrigin(origin string) http.Header {
+	hd := make(http.Header)
+	header := h.GetHeaderByOrigin(origin)
+	for k, v := range header {
+		hd[k] = []string{v}
+	}
+	return hd
 }
 
 //GetHeaderByOrigin 根据origin选择合适的header

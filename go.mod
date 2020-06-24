@@ -11,6 +11,7 @@ require (
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/golang/protobuf v1.3.3
 	github.com/golang/snappy v0.0.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v0.4.0

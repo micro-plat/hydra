@@ -46,8 +46,8 @@ func log(ctx hydra.IContext) (r interface{}) {
 	fmt.Println(ctx.Request().GetBodyMap())
 	fmt.Println(ctx.Request().GetBody())
 	fmt.Println("content:", ctx.Request().GetString("server-ip"))
-	list := make([]*logstruct, 0, 1)
-	err := ctx.Request().Bind(&list)
+	// list := make([]*logstruct, 0, 1)
+	// err := ctx.Request().Bind(&list)
 	return nil
 }
 

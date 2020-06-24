@@ -107,14 +107,27 @@ func (w *Responsive) publish() (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
-	return NewServer(cnf.GetMainConf().GetServerName(),
-		cnf.GetMainConf().GetMainConf().GetString("address", ":8080"),
-		cnf.GetRouterConf().Routers,
-		WithServerType(cnf.GetMainConf().GetServerType()),
-		WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
-		WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
-			cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
-			cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
+	tp := cnf.GetMainConf().GetServerType()
+	switch tp {
+	case WS:
+		return NewWSServer(cnf.GetMainConf().GetServerName(),
+			cnf.GetMainConf().GetMainConf().GetString("address", ":8070"),
+			cnf.GetRouterConf().Routers,
+			WithServerType(cnf.GetMainConf().GetServerType()),
+			WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
+			WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
+				cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
+				cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
+	default:
+		return NewServer(cnf.GetMainConf().GetServerName(),
+			cnf.GetMainConf().GetMainConf().GetString("address", ":8080"),
+			cnf.GetRouterConf().Routers,
+			WithServerType(cnf.GetMainConf().GetServerType()),
+			WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
+			WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
+				cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
+				cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
+	}
 
 }
 
@@ -124,6 +137,7 @@ func init() {
 	}
 	servers.Register(API, fn)
 	servers.Register(Web, fn)
+	servers.Register(WS, fn)
 }
 
 //API api服务器
@@ -131,3 +145,6 @@ const API = global.API
 
 //Web web服务器
 const Web = global.Web
+
+//WS web socket服务器
+const WS = global.WS
