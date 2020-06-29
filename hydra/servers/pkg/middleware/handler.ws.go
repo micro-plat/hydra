@@ -35,7 +35,6 @@ func WSExecuteHandler(service string) Handler {
 		go h.readPump()
 		h.writePump()
 		ctx.Response().NoNeedWrite(c.Writer.Status())
-
 	}
 }
 func getUpgrader(w http.ResponseWriter, r *http.Request, h http.Header) (*websocket.Conn, error) {

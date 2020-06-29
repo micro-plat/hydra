@@ -23,7 +23,7 @@ func newWSEngine(routers ...*router.Router) *wsEngine {
 	s := &wsEngine{Engine: dispatcher.New()}
 	s.Engine.Use(Recovery().DispFunc(global.WS))
 	s.Engine.Use(Logging().DispFunc()) //记录请求日志
-	s.Engine.Use(WSTag().DispFunc())
+	s.Engine.Use(Tag().DispFunc())
 	s.Engine.Use(Trace().DispFunc()) //跟踪信息
 	s.Engine.Use(Delay().DispFunc()) //
 	// s.engine.Use(Options().DispFunc())   //处理option响应
