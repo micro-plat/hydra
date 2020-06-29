@@ -77,7 +77,7 @@ func (c *cron) Subscribe(f func(t *task.Task)) {
 	defer c.lock.Unlock()
 	subscriber := &subscriber{
 		f:   f,
-		msg: make(chan *task.Task, len(c.tasks.Tasks)+100),
+		msg: make(chan *task.Task, 255),
 	}
 	for _, t := range c.tasks.Tasks {
 		subscriber.msg <- t

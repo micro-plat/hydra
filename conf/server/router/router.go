@@ -10,6 +10,18 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//Methods 支持的http请求类型
+var Methods = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodHead}
+
+//GetWSHomeRouter 获取ws主页路由
+func GetWSHomeRouter() *Router {
+	return &Router{
+		Path:    "/ws",
+		Action:  Methods,
+		Service: "/ws",
+	}
+}
+
 type Routers struct {
 	Routers []*Router `json:"routers,omitempty"`
 }

@@ -7,17 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/micro-plat/hydra/components/ws"
-	"github.com/micro-plat/hydra/conf/server/router"
 )
 
 //upgrader 处理ws请求
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 //WSExecuteHandler 业务处理Handler
-func WSExecuteHandler(service string, routers ...*router.Router) Handler {
+func WSExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
 		n, ok := ctx.Meta().Get("__context_")
 		if !ok {
@@ -25,28 +20,32 @@ func WSExecuteHandler(service string, routers ...*router.Router) Handler {
 		}
 		c := n.(*gin.Context)
 
-		//构建ws处理对象
-		headers := ctx.ServerConf().GetHeaderConf()
-		hh := headers.GetHTTPHeaderByOrigin(ctx.Request().Path().GetHeader(originName))
-		conn, err := upgrader.Upgrade(c.Writer, c.Request, hh)
+		conn, err := getUpgrader(c.Writer, c.Request, c.Request.Header)
 		if err != nil {
-			ctx.Response().Abort(http.StatusNotAcceptable, fmt.Errorf("无法初始化ws.upgrader %w", err))
+			ctx.Response().Write(http.StatusNotAcceptable, fmt.Errorf("无法初始化ws.upgrader %w", err))
 			return
 		}
 
 		//构建处理函数
-		h := newWSHandler(conn, ctx.User().GetRequestID(), routers...)
+		h := newWSHandler(conn, ctx.User().GetRequestID(), ctx.User().GetClientIP())
 		ws.WSExchange.Subscribe(ctx.User().GetRequestID(), h.recvNotify(c))
 		defer ws.WSExchange.Unsubscribe(ctx.User().GetRequestID())
 
 		//异步读取与写入
 		go h.readPump()
 		h.writePump()
+		ctx.Response().NoNeedWrite(c.Writer.Status())
+
 	}
 }
-
-func init() {
-	upgrader.CheckOrigin = func(r *http.Request) bool {
-		return true
+func getUpgrader(w http.ResponseWriter, r *http.Request, h http.Header) (*websocket.Conn, error) {
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		Subprotocols:    []string{h.Get("Sec-WebSocket-Extensions")},
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
 	}
+	return upgrader.Upgrade(w, r, nil)
 }

@@ -11,7 +11,7 @@ var coverIfExists = false
 func getFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
 	flags = append(flags, cli.BoolFlag{
-		Name:        "cover,c",
+		Name:        "cover,v",
 		Destination: &coverIfExists,
 		Usage:       `-覆盖配置，覆盖配置中心和本地服务`,
 	})

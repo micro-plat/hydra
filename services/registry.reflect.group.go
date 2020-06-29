@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/registry"
 )
@@ -74,10 +75,10 @@ func (g *UnitGroup) getPaths(path string, name string) (rpath string, service st
 	if name == "" {
 		return path, path, []string{}
 	}
-	for _, m := range defRequestMethod {
+	for _, m := range router.Methods {
 		if m == name {
 			return path, registry.Join(path, "$"+name), []string{m}
 		}
 	}
-	return registry.Join(path, name), registry.Join(path, name), defRequestMethod
+	return registry.Join(path, name), registry.Join(path, name), router.Methods
 }

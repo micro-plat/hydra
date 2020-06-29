@@ -28,14 +28,15 @@ type rspns struct {
 }
 
 type response struct {
-	ctx        context.IInnerContext
-	conf       server.IServerConf
-	path       *rpath
-	raw        rspns
-	final      rspns
-	log        logger.ILogger
-	asyncWrite func() error
-	specials   []string
+	ctx         context.IInnerContext
+	conf        server.IServerConf
+	path        *rpath
+	raw         rspns
+	final       rspns
+	noneedWrite bool
+	log         logger.ILogger
+	asyncWrite  func() error
+	specials    []string
 }
 
 func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger) *response {
@@ -82,13 +83,19 @@ func (c *response) File(path string) {
 
 //WriteAny 将结果写入响应流，并自动处理响应码
 func (c *response) WriteAny(v interface{}) error {
-	return c.Write(200, v)
+	return c.Write(http.StatusOK, v)
+}
+
+//NoNeedWrite 无需写入响应数据到缓存
+func (c *response) NoNeedWrite(status int) {
+	c.noneedWrite = true
+	c.final.status = status
 }
 
 //Write 将结果写入响应流，自动检查内容处理状态码
 func (c *response) Write(status int, content interface{}) error {
-	if c.ctx.Written() || c.asyncWrite != nil {
-		panic(fmt.Sprint("不能重复写入到响应流:status:", status, content))
+	if c.ctx.Written() {
+		panic(fmt.Sprintf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status))
 	}
 
 	//保存初始状态与结果
@@ -129,7 +136,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		rc = ""
 	}
 	if status == 0 {
-		rs = 200
+		rs = http.StatusOK
 	}
 	switch v := content.(type) {
 	case errs.IError:
@@ -140,8 +147,8 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 			rc = "Internal Server Error"
 		}
 	case error:
-		if status >= 200 && status < 400 {
-			rs = 400
+		if status >= http.StatusOK && status < http.StatusBadRequest {
+			rs = http.StatusBadRequest
 		}
 		c.log.Error(content)
 		rc = v.Error()
@@ -266,11 +273,13 @@ func (c *response) GetFinalResponse() (int, string) {
 }
 
 func (c *response) Flush() {
-	if c.asyncWrite != nil {
-		if err := c.asyncWrite(); err != nil {
-			panic(err)
-		}
+	if c.noneedWrite || c.asyncWrite == nil {
+		return
 	}
+	if err := c.asyncWrite(); err != nil {
+		panic(err)
+	}
+
 }
 func (c *response) getString(ctp string, v interface{}) string {
 	switch {

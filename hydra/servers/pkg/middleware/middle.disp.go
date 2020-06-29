@@ -92,6 +92,9 @@ func (g *dispCtx) WHeader(k string) string {
 	return g.Context.Writer.Header().Get(k)
 }
 func (g *dispCtx) ClientIP() string {
+	if ip := g.GetHeader("Client-IP"); ip != "" {
+		return ip
+	}
 	return g.Context.GetClientIP()
 }
 func (g *dispCtx) ContentType() string {

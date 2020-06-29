@@ -130,6 +130,9 @@ type IResponse interface {
 	//ContentType 设置Content-Type响应头
 	ContentType(v string)
 
+	//NoNeedWrite 无需写入响应数据到缓存
+	NoNeedWrite(status int)
+
 	//Render 修改最终渲染内容
 	Render(status int, content string, ctp string)
 

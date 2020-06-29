@@ -13,7 +13,6 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
-
 		//处理RPC服务调用
 		if addr, ok := global.IsProto(service, global.ProtoRPC); ok {
 			response, err := components.Def.RPC().GetRegularRPC().RequestByCtx(addr, ctx)

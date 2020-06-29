@@ -27,7 +27,7 @@ LOOP:
 			if server.Sharding == 0 || cluster.Current().IsMaster(server.Sharding) {
 				ok, err := w.Server.Resume()
 				if err != nil {
-					w.log.Error("恢复mqc服务器失败:", err)
+					w.log.Error("恢复服务器失败:", err)
 					continue
 				}
 				if ok {
@@ -38,7 +38,7 @@ LOOP:
 			}
 			ok, err := w.Server.Pause()
 			if err != nil {
-				w.log.Error("暂停mqc服务器失败:", err)
+				w.log.Error("暂停服务器失败:", err)
 				continue
 			}
 			if ok {

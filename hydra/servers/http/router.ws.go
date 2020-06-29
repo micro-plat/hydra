@@ -13,17 +13,22 @@ func (s *Server) addWSRouters(routers ...*router.Router) {
 	if !global.IsDebug {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
-	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
+	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
+	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
+	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
 	s.addWSRouter(routers...)
 	s.server.Handler = s.engine
 	return
 }
 func (s *Server) addWSRouter(routers ...*router.Router) {
-	for _, router := range routers {
-		for _, method := range router.Action {
-			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.WSExecuteHandler(router.Service).GinFunc())
-		}
+
+	middleware.InitWSInternalEngine(routers...)
+
+	router := router.GetWSHomeRouter()
+	for _, method := range router.Action {
+		s.engine.Handle(strings.ToUpper(method), router.Path, middleware.WSExecuteHandler(router.Service).GinFunc())
 	}
 }

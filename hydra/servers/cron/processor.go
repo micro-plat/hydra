@@ -101,9 +101,16 @@ func (s *Processor) onceHandle(t *task.Task) (bool, error) {
 	if t.Cron != "@once" && t.Cron != "@now" {
 		return false, nil
 	}
-	if s.status != running {
-		return true, fmt.Errorf("当前服务器未启动或已暂停，无法执行任务:%s(%s)", t.Service, t.Cron)
+	if s.status == unstarted {
+		select {
+		case <-time.After(time.Second):
+			if s.status == unstarted {
+				return true, nil
+			}
+		}
 	}
+	if s.status == pause{
+		return true,nil
 
 	//注册服务
 	task, _ := NewCronTask(t)
