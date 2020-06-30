@@ -29,6 +29,10 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 		form:    make(map[string]interface{}),
 		header:  make(map[string]string),
 	}
+	if t.IsOnce() {
+		return r, nil
+	}
+
 	r.schedule, err = cron.ParseStandard(t.Cron)
 	if err != nil {
 		return r, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Service, t.Cron)
@@ -43,6 +47,9 @@ func (m *CronTask) GetName() string {
 
 //NextTime 下次执行时间
 func (m *CronTask) NextTime(t time.Time) time.Time {
+	if m.IsOnce() {
+		return time.Now()
+	}
 	return m.schedule.Next(t)
 }
 

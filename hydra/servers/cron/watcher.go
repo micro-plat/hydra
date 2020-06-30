@@ -13,7 +13,6 @@ LOOP:
 			watcher.Close()
 			break LOOP
 		case <-notify:
-
 			server, err := cron.GetConf(w.conf.GetMainConf())
 			if err != nil {
 				w.log.Errorf("加载cron配置失败：%w", err)

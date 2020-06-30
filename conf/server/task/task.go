@@ -27,6 +27,11 @@ func (t *Task) GetUNQ() string {
 	return md5.Encrypt(fmt.Sprintf("%s(%s)", t.Service, t.Cron))
 }
 
+//IsOnce 是否只需要处理一次
+func (t *Task) IsOnce() bool {
+	return t.Cron == "@once" || t.Cron == "@now"
+}
+
 //Validate 验证任务参数
 func (t *Task) Validate() error {
 	if b, err := govalidator.ValidateStruct(t); !b && err != nil {

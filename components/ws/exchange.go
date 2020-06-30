@@ -2,93 +2,75 @@ package ws
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
+
+	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/errs"
 )
 
-//WSExchange web socket exchange
+//WSExchange web socket message exchange
 var WSExchange = NewExchange()
 
 //Exchange 数据交换中心
 type Exchange struct {
-	uuid      map[string]func(i ...interface{}) error
-	lRelation map[string]string
-	rRelation map[string]string
-	lock      sync.RWMutex
+	uuid            cmap.ConcurrentMap
+	queueFormatName string
+	service         string
+	once            sync.Once
 }
 
 //NewExchange 构建数据交换中心
 func NewExchange() *Exchange {
 	return &Exchange{
-		uuid:      make(map[string]func(i ...interface{}) error),
-		lRelation: make(map[string]string),
-		rRelation: make(map[string]string),
+		uuid:            cmap.New(8),
+		queueFormatName: "%s:ws:%s",
+		service:         "/ws/handle",
 	}
 }
 
 //Subscribe 订阅消息通知
 func (e *Exchange) Subscribe(uuid string, f func(...interface{}) error) error {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	if _, ok := e.uuid[uuid]; !ok {
-		e.uuid[uuid] = f
-		e.rRelation[uuid] = uuid
-		return nil
+	e.once.Do(func() {
+		hydra.Services.MQC(e.service, e.handle) //注册全局处理函数
+	})
+
+	if ok, _ := e.uuid.SetIfAbsent(uuid, f); ok {
+		hydra.MQC.Add(e.getQueueName(uuid), e.service)
 	}
-	return fmt.Errorf("重复的消息订阅：%s", uuid)
+	return nil
 }
 
 //Unsubscribe 取消订阅
 func (e *Exchange) Unsubscribe(uuid string) {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	if _, ok := e.uuid[uuid]; ok {
-		delete(e.uuid, uuid)
-	}
-	if _, ok := e.rRelation[uuid]; ok {
-		delete(e.rRelation, uuid)
-	}
-	if v, ok := e.lRelation[uuid]; ok {
-		delete(e.rRelation, v)
-		delete(e.lRelation, uuid)
-	}
-}
-
-//Relate 关联别名
-func (e *Exchange) Relate(uuid string, name string) {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	e.lRelation[uuid] = name
-	e.rRelation[name] = uuid
-}
-
-//Clear 清除所有订阅者
-func (e *Exchange) Clear() {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	e.uuid = make(map[string]func(i ...interface{}) error)
-	e.lRelation = make(map[string]string)
-	e.rRelation = make(map[string]string)
+	e.uuid.Remove(uuid)
+	hydra.MQC.Remove(e.getQueueName(uuid), e.service)
 }
 
 //Notify 消息通知
-func (e *Exchange) Notify(name string, i ...interface{}) error {
-	e.lock.RLock()
-	defer e.lock.RUnlock()
-	uuid := e.rRelation[name]
-	if v, ok := e.uuid[uuid]; ok {
-		return v(i...)
-	}
-	return fmt.Errorf("未找到消息订阅者:%s %v", name, e.uuid)
+func (e *Exchange) Notify(name string, msg string) error {
+	hydra.Component.Queue().GetRegularQueue().Push(e.getQueueName(name), msg)
+	return nil
 }
 
-//Broadcast 发送广播消息
-func (e *Exchange) Broadcast(v ...interface{}) error {
-	e.lock.RLock()
-	defer e.lock.RUnlock()
-	for _, f := range e.uuid {
-		if err := f(v...); err != nil {
-			return err
-		}
+//handle 业务回调处理
+func (e *Exchange) handle(ctx context.IContext) interface{} {
+	uuid := ctx.User().GetRequestID()
+	v, ok := e.uuid.Get(uuid)
+	if !ok {
+		return errs.NewError(http.StatusNoContent, nil)
 	}
-	return nil
+	callback := v.(func(...interface{}) error)
+	body, err := ctx.Request().GetBody()
+	if err != nil {
+		return err
+	}
+	return callback(body)
+
+}
+func (e *Exchange) getQueueName(id string) string {
+	return fmt.Sprintf(e.queueFormatName, global.Def.PlatName, id)
 }

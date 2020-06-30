@@ -69,7 +69,11 @@ func (s *Processor) Start(wait ...bool) error {
 //Add 添加队列信息
 func (s *Processor) Add(queues ...*queue.Queue) error {
 	for _, queue := range queues {
-		s.queues.SetIfAbsent(queue.Queue, queue)
+		if ok, _ := s.queues.SetIfAbsent(queue.Queue, queue); ok && s.status == running {
+			if err := s.consume(queue); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -108,16 +112,22 @@ func (s *Processor) Resume() (bool, error) {
 		items := s.queues.Items()
 		for _, v := range items {
 			queue := v.(*queue.Queue)
-			if !s.Engine.Find(queue.Service) {
-				s.Engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler(queue.Service).DispFunc(MQC))
-			}
-			if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
+			if err := s.consume(queue); err != nil {
 				return true, err
 			}
 		}
 		return true, nil
 	}
 	return false, nil
+}
+func (s *Processor) consume(queue *queue.Queue) error {
+	if !s.Engine.Find(queue.Service) {
+		s.Engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler(queue.Service).DispFunc(MQC))
+	}
+	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
+		return err
+	}
+	return nil
 }
 
 //Close 退出

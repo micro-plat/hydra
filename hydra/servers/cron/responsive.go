@@ -65,15 +65,6 @@ func (w *Responsive) Start() (err error) {
 	return nil
 }
 
-func (w *Responsive) subscribe() {
-	//动态监听任务
-	services.CRON.Subscribe(func(t *task.Task) {
-		if err := w.Server.Add(t); err != nil {
-			w.log.Errorf("服务[%v]添加失败 %w", t, err)
-		}
-	})
-}
-
 //Notify 服务器配置变更通知
 func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 	w.comparer.Update(c.GetMainConf())
@@ -100,6 +91,15 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 	return true, nil
 }
 
+func (w *Responsive) subscribe() {
+	//动态监听任务
+	services.CRON.Subscribe(func(t *task.Task) {
+		if err := w.Server.Add(t); err != nil {
+			w.log.Errorf("服务[%v]添加失败 %w", t, err)
+		}
+	})
+}
+
 //Shutdown 关闭服务器
 func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
@@ -119,7 +119,6 @@ func (w *Responsive) publish() (err error) {
 	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID()); err != nil {
 		return err
 	}
-
 	return
 }
 
@@ -136,6 +135,7 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
+	//初始化server
 	return NewServer(cnf.GetCRONTaskConf().Tasks...)
 }
 

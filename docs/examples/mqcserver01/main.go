@@ -12,16 +12,18 @@ func main() {
 		hydra.WithDebug(),
 	)
 	app.API("/send", send)
-	app.MQC("/order/request", show, "order:request")
-
+	app.MQC("/order/request", show)
 	app.Start()
 
 }
 func send(ctx hydra.IContext) interface{} {
+	hydra.MQC.Add("order:request", "/order/request")
 	hydra.Component.Queue().GetRegularQueue().Push("order:request", `{"id":500}`)
+	hydra.MQC.Remove("order:request", "/order/request")
 	return "success"
 }
 func show(ctx hydra.IContext) interface{} {
+	ctx.Log().Info("show....")
 	ctx.Log().Info("id:", ctx.Request().GetString("id"))
 	return "success"
 }

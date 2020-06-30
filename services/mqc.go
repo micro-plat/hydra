@@ -8,6 +8,11 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//IMQC MQC动态服务管理
+type IMQC interface {
+	Add(mqName string, service string, concurrency ...int) IMQC
+	Remove(mqName string, service string) IMQC
+}
 type mqcSubscriber struct {
 	f   func(t *queue.Queue)
 	msg chan *queue.Queue
@@ -34,12 +39,12 @@ func newMQC() *mqc {
 }
 
 //Add 添加任务,队列名称需要接平台名称时将会自动转为异步注册(系统准备好后注册)
-func (c *mqc) Add(mqName string, service string, concurrency ...int) *mqc {
+func (c *mqc) Add(mqName string, service string, concurrency ...int) IMQC {
 	return c.add(mqName, service, false, concurrency...)
 }
 
 //Remove 移除任务
-func (c *mqc) Remove(mqName string, service string) *mqc {
+func (c *mqc) Remove(mqName string, service string) IMQC {
 	return c.add(mqName, service, true, 0)
 }
 

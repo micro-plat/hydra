@@ -76,12 +76,6 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 			s.Remove(t.GetUNQ())
 			continue
 		}
-
-		//处理单次执行服务
-		if ok, err := s.onceHandle(t); ok {
-			return err
-		}
-
 		task, err := NewCronTask(t)
 		if err != nil {
 			return fmt.Errorf("构建cron.task失败:%v", err)
@@ -96,33 +90,6 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 	}
 	return
 
-}
-func (s *Processor) onceHandle(t *task.Task) (bool, error) {
-	if t.Cron != "@once" && t.Cron != "@now" {
-		return false, nil
-	}
-	if s.status == unstarted {
-		select {
-		case <-time.After(time.Second):
-			if s.status == unstarted {
-				return true, nil
-			}
-		}
-	}
-	if s.status == pause{
-		return true,nil
-
-	//注册服务
-	task, _ := NewCronTask(t)
-
-	//注册服务
-	if !s.Engine.Find(task.GetService()) {
-		s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.Service).DispFunc(CRON))
-	}
-
-	//异步执行
-	go s.Engine.HandleRequest(task)
-	return true, nil
 }
 
 func (s *Processor) add(task *CronTask) (offset int, round int, err error) {
@@ -221,10 +188,10 @@ func (s *Processor) handle(task *CronTask) error {
 		task.Counter.Increase()
 		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
-	_, _, err := s.add(task)
-	if err != nil {
-		return err
+	if task.IsOnce() {
+		return nil
 	}
-	return nil
+	_, _, err := s.add(task)
+	return err
 
 }
