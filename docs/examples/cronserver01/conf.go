@@ -7,6 +7,6 @@ import (
 
 func init() {
 	hydra.OnReady(func() {
-		hydra.Conf.CRON(cron.WithP2P(), cron.WithTrace())
+		hydra.Conf.CRON(cron.WithMasterSlave(), cron.WithTrace())
 	})
 }
