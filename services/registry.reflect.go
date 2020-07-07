@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
 )
 
 func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
@@ -13,6 +14,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	if path == "" || h == nil {
 		return nil, fmt.Errorf("注册对象不能为空")
 	}
+
 	//输入参数为函数
 	current := newUnitGroup(path)
 	if vv, ok := h.(func(context.IContext) interface{}); ok {
@@ -23,6 +25,12 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	//检查输入的注册服务必须为struct
 	typ := reflect.TypeOf(h)
 	val := reflect.ValueOf(h)
+	if val.Kind() == reflect.String {
+		if addr, ok := global.IsProto(h.(string), global.ProtoRPC); ok {
+			current.AddHandle("", nil)
+			return current, nil
+		}
+	}
 	if val.Kind() != reflect.Ptr {
 		return nil, fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
 	}
