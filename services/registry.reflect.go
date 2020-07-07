@@ -26,7 +26,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	typ := reflect.TypeOf(h)
 	val := reflect.ValueOf(h)
 	if val.Kind() == reflect.String {
-		if addr, ok := global.IsProto(h.(string), global.ProtoRPC); ok {
+		if _, ok := global.IsProto(h.(string), global.ProtoRPC); ok {
 			current.AddHandle("", nil)
 			return current, nil
 		}
