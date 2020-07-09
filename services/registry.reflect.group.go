@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -73,9 +72,6 @@ func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
 	g.Services[service] = &Unit{Group: g, Service: service, Fallback: h}
 }
 func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {
-	defer func() {
-		fmt.Println("get.path:", rpath, service, action)
-	}()
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {
 		return path, path, []string{}

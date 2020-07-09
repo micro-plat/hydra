@@ -116,12 +116,10 @@ func (p *pathRouter) Add(service string, action []string, opts ...interface{}) e
 	return nil
 }
 func (p *pathRouter) GetRouters() ([]*router.Router, error) {
-	fmt.Println("pth.router:", p.path, p.action)
 	//检查配置中是否有且只有一个路由未指定action
 	var first = -1
 	var hasRepeat bool
 	for i, r := range p.routers {
-		fmt.Println("router:", r.Service, r.Action)
 		if len(r.Action) == 0 {
 			if first != -1 {
 				hasRepeat = true
