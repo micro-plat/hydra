@@ -284,14 +284,14 @@ func init() {
 		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
 	})
 
-	Def.servers[global.WS] = newServerServices(nil)
-
+	Def.servers[global.WS] = newServerServices(func(g *Unit, ext ...interface{}) error {
+		return WS.Add(g.Path, g.Service, g.Actions, ext...)
+	})
 	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
 			CRON.Add(t.(string), g.Service)
 		}
 		return nil
-
 	})
 	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {

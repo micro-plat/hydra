@@ -7,12 +7,19 @@ import (
 
 //服务器各种返回结果
 func main() {
-	app := hydra.NewApp(
-		hydra.WithServerTypes(http.WS))
-	app.Micro("/order/request", hello)
+
+	app := hydra.NewApp(hydra.WithServerTypes(http.WS))
+
+	//注册服务
+	app.WS("/api", api)
+
 	app.Start()
 }
 
-func hello(ctx hydra.IContext) interface{} {
-	return "success"
+func api(ctx hydra.IContext) interface{} {
+	ctx.Log().Info("--------api--------------")
+	return map[string]interface{}{
+		"name": "colin",
+		"id":   ctx.Request().GetInt("id"),
+	}
 }

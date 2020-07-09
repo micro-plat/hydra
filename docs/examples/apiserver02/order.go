@@ -37,7 +37,8 @@ func (o *OrderService) PostHandle(ctx hydra.IContext) interface{} {
 	}
 	return t
 }
-func (o *OrderService) Handle(ctx hydra.IContext) interface{} {
+
+func (o *OrderService) PutHandle(ctx hydra.IContext) interface{} {
 	ctx.Log().Info("order.handle.order_no:", ctx.Request().GetString("order_no"))
 	return "order.others.handle"
 }

@@ -27,7 +27,7 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 		Round:   &Round{},
 		method:  "GET",
 		form:    make(map[string]interface{}),
-		header:  make(map[string]string),
+		header:  map[string]string{"Client-IP": "127.0.0.1"},
 	}
 	if t.IsOnce() {
 		return r, nil

@@ -3,11 +3,10 @@ package http
 import (
 	"context"
 	"fmt"
+	xnet "net"
 	x "net/http"
-	"strings"
 	"time"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
@@ -22,6 +21,7 @@ type Server struct {
 	server  *x.Server
 	engine  *gin.Engine
 	running bool
+	ip      string
 	proto   string
 	host    string
 	port    string
@@ -52,6 +52,7 @@ func NewWSServer(name string, addr string, routers []*router.Router, opts ...Opt
 func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	t = &Server{
 		proto: "http",
+		ip:    net.GetLocalIPAddress(),
 		option: &option{
 			readHeaderTimeout: 6,
 			readTimeout:       6,
@@ -62,12 +63,12 @@ func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	for _, opt := range opts {
 		opt(t.option)
 	}
-	naddr, err := t.getAddress(addr)
+	t.host, t.port, err = global.GetHostPort(addr)
 	if err != nil {
 		return nil, err
 	}
 	t.server = &x.Server{
-		Addr:              naddr,
+		Addr:              xnet.JoinHostPort(t.host, t.port),
 		ReadHeaderTimeout: time.Second * time.Duration(t.option.readHeaderTimeout),
 		ReadTimeout:       time.Second * time.Duration(t.option.readTimeout),
 		WriteTimeout:      time.Second * time.Duration(t.option.writeTimeout),
@@ -127,56 +128,13 @@ func (s *Server) GetAddress(h ...string) string {
 	if len(h) > 0 && h[0] != "" {
 		return fmt.Sprintf("%s://%s:%s", s.proto, h[0], s.port)
 	}
+	if s.host == "0.0.0.0" {
+		return fmt.Sprintf("%s://%s:%s", s.proto, s.ip, s.port)
+	}
 	return fmt.Sprintf("%s://%s:%s", s.proto, s.host, s.port)
 }
 
 //GetStatus 获取当前服务器状态
 func (s *Server) GetStatus() string {
 	return types.DecodeString(s.running, true, "运行中", "停止")
-}
-
-func (s *Server) getAddress(addr string) (string, error) {
-	host := "0.0.0.0"
-	port := "8080"
-	args := strings.Split(addr, ":")
-	l := len(args)
-	if addr == "" {
-		l = 0
-	}
-	switch l {
-	case 0:
-	case 1:
-		if govalidator.IsPort(args[0]) {
-			port = args[0]
-		} else {
-			host = args[0]
-		}
-	case 2:
-		host = args[0]
-		port = args[1]
-	default:
-		return "", fmt.Errorf("%s地址不合法", addr)
-	}
-	switch host {
-	case "0.0.0.0", "":
-		s.host = net.GetLocalIPAddress()
-	case "127.0.0.1", "localhost":
-		s.host = host
-	default:
-		if net.GetLocalIPAddress(host) != host {
-			return "", fmt.Errorf("%s地址不合法", addr)
-		}
-		s.host = host
-	}
-
-	if !govalidator.IsPort(port) {
-		return "", fmt.Errorf("%s端口不合法", addr)
-	}
-	if port == "80" {
-		if err := global.CheckPrivileges(); err != nil {
-			return "", err
-		}
-	}
-	s.port = port
-	return fmt.Sprintf("%s:%s", host, s.port), nil
 }

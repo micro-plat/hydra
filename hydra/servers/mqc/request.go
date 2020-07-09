@@ -36,6 +36,7 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 			r.header[n] = fmt.Sprint(m)
 		}
 	}
+	r.header["Client-IP"] = "127.0.0.1"
 	r.form["__body_"] = m.GetMessage()
 	return r, nil
 }

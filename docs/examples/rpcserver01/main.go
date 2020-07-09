@@ -23,6 +23,10 @@ type logstruct struct {
 //服务注册与系统勾子函数
 func main() {
 	app := hydra.NewApp(
+		hydra.WithPlatName("taobao"),
+		hydra.WithSystemName("apiserver"),
+		hydra.WithClusterName("A"),
+		hydra.WithRegistry("zk://192.168.0.109"),
 		hydra.WithServerTypes(rpc.RPC, http.API),
 	)
 

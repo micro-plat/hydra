@@ -1,3 +1,7 @@
+/*
+处理cron任务，包括任务注册、已注册任务获取、服务器订阅
+*/
+
 package services
 
 import (

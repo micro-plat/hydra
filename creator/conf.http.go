@@ -17,18 +17,19 @@ import (
 
 type httpBuilder struct {
 	customerBuilder
+	tp string
 }
 
 //newHTTP 构建http生成器
-func newHTTP(address string, opts ...api.Option) *httpBuilder {
-	b := &httpBuilder{customerBuilder: make(map[string]interface{})}
+func newHTTP(tp string, address string, opts ...api.Option) *httpBuilder {
+	b := &httpBuilder{tp: tp, customerBuilder: make(map[string]interface{})}
 	b.customerBuilder["main"] = api.New(address, opts...)
 	return b
 }
 
 //Load 加载路由
 func (b *httpBuilder) Load() {
-	routers, err := services.API.GetRouters()
+	routers, err := services.GetRouter(b.tp).GetRouters()
 	if err != nil {
 		panic(err)
 	}

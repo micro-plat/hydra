@@ -38,6 +38,7 @@ func Static() Handler {
 			return
 		}
 		//文件已存在，则返回文件
+		ctx.Response().StatusCode(200)
 		ctx.Response().File(fpath)
 		return
 	}

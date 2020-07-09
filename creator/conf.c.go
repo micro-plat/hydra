@@ -103,7 +103,7 @@ func (c *conf) Load() error {
 
 //API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) *httpBuilder {
-	api := newHTTP(address, opts...)
+	api := newHTTP(global.API, address, opts...)
 	c.data[global.API] = api
 	return api
 }
@@ -118,7 +118,7 @@ func (c *conf) GetAPI() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
-	web := newHTTP(address, opts...)
+	web := newHTTP(global.Web, address, opts...)
 	web.Static(static.WithArchive(global.AppName))
 	c.data[global.Web] = web
 	return web
@@ -134,18 +134,18 @@ func (c *conf) GetWeb() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
-	web := newHTTP(address, opts...)
-	web.Static(static.WithArchive(global.AppName))
-	c.data[global.Web] = web
-	return web
+	ws := newHTTP(global.WS, address, opts...)
+	ws.Static(static.WithArchive(global.AppName))
+	c.data[global.WS] = ws
+	return ws
 }
 
 //GetWeb 获取当前已配置的web服务器
 func (c *conf) GetWS() *httpBuilder {
-	if web, ok := c.data[global.Web]; ok {
-		return web.(*httpBuilder)
+	if ws, ok := c.data[global.WS]; ok {
+		return ws.(*httpBuilder)
 	}
-	return c.Web(":8070")
+	return c.WS(":8070")
 }
 
 //RPC rpc服务器配置
