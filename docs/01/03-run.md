@@ -23,7 +23,7 @@
         hydra.WithRegistry("zk://192.168.0.109"),
         hydra.WithServerTypes(rpc.RPC, http.API))
 ```
-* 也可以在通过命令行指定:
+* 也可通过命令行指定:
 
 可查看应用的`run`命令的请求参数
 ```sh
