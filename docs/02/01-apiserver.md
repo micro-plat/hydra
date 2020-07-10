@@ -66,6 +66,7 @@ hydra.Conf.API(":8081", api.WithTrace(),api.WithTimeout(5,5))
 
 |名称|说明|
 |-----|:-----|
+|Limiter|服务器限流配置|
 |WhiteList|IP白名单，根据请求地址进行限制|
 |BlackList|IP黑名单，指定后所有服务都不能访问|
 |Delay|请求延迟处理组件|

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
@@ -16,12 +17,16 @@ var _ context.IPath = &rpath{}
 type rpath struct {
 	ctx        context.IInnerContext
 	serverConf server.IServerConf
+	meta       conf.IMeta
+	isLimit    bool
+	fallback   bool
 }
 
-func newRpath(ctx context.IInnerContext, serverConf server.IServerConf) *rpath {
+func newRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
 	return &rpath{
 		ctx:        ctx,
 		serverConf: serverConf,
+		meta:       meta,
 	}
 }
 
@@ -83,4 +88,20 @@ func (c *rpath) GetCookie(name string) (string, bool) {
 func (c *rpath) getCookie(name string) string {
 	m, _ := c.GetCookie(name)
 	return m
+}
+
+//Limit 限流设置
+func (c *rpath) Limit(isLimit bool, fallback bool) {
+	c.isLimit = isLimit
+	c.fallback = fallback
+}
+
+//IsLimited 是否已限流
+func (c *rpath) IsLimited() bool {
+	return c.isLimit
+}
+
+//AllowFallback 是否允许降级
+func (c *rpath) AllowFallback() bool {
+	return c.fallback
 }

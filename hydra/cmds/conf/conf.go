@@ -12,15 +12,26 @@ import (
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
-			Name:   "conf",
-			Usage:  "查看配置信息",
-			Flags:  getFlags(),
-			Action: doConf,
+			Name:  "conf",
+			Usage: "配置管理",
+			Subcommands: []cli.Command{
+				{
+					Name:   "show",
+					Usage:  "查看注册中心的配置信息",
+					Action: showNow,
+					Flags:  pkgs.GetBaseFlags(),
+				},
+				{
+					Name:   "install",
+					Usage:  "将配置信息安装到注册中心",
+					Flags:  getInstallFlags(),
+					Action: installNow,
+				},
+			},
 		}
 	})
 }
-
-func doConf(c *cli.Context) (err error) {
+func showNow(c *cli.Context) (err error) {
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(); err != nil {
@@ -28,18 +39,7 @@ func doConf(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
-
-	//2.检查是否安装注册中心配置
-	if installRegistry && registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
-		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			logs.Log.Error("安装到配置中心:", pkgs.Failed)
-			return err
-		}
-		logs.Log.Info("安装到配置中心:" + pkgs.Success)
-		return
-	}
-
-	//3. 处理本地内存作为注册中心的服务发布问题
+	//2. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
 		if err := pkgs.Pub2Registry(true); err != nil {
 			return err
@@ -51,4 +51,26 @@ func doConf(c *cli.Context) (err error) {
 		global.Current().GetSysName(),
 		global.Current().GetServerTypes(),
 		global.Current().GetClusterName())
+}
+
+func installNow(c *cli.Context) (err error) {
+	//1. 绑定应用程序参数
+	global.Current().Log().Pause()
+	if err := global.Def.Bind(); err != nil {
+		logs.Log.Error(err)
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return nil
+	}
+
+	//2.检查是否安装注册中心配置
+	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
+		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
+			logs.Log.Error("安装到配置中心:", pkgs.Failed)
+			return err
+		}
+		logs.Log.Info("安装到配置中心:" + pkgs.Success)
+		return
+	}
+	return nil
+
 }

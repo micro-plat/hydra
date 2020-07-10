@@ -48,10 +48,10 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	if err != nil {
 		panic(err)
 	}
-	ctx.user = newUser(c)
-	ctx.request = newRequest(c, ctx.serverConf)
+	ctx.user = newUser(c, ctx.meta)
+	ctx.request = newRequest(c, ctx.serverConf, ctx.meta)
 	ctx.log = logger.GetSession(ctx.serverConf.GetMainConf().GetServerName(), ctx.User().GetRequestID())
-	ctx.response = newResponse(c, ctx.serverConf, ctx.log)
+	ctx.response = newResponse(c, ctx.serverConf, ctx.log, ctx.meta)
 	ctx.tid = context.Cache(ctx) //保存到缓存中
 	timeout := time.Duration(ctx.serverConf.GetMainConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)

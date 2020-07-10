@@ -11,11 +11,11 @@ import (
 	"github.com/micro-plat/hydra/services"
 )
 
-//Global 全局应用程序配置
-var Global = global.Def
+//G 全局应用程序配置
+var G = global.Def
 
-//Services 服务中心
-var Services services.IService = services.Def
+//S 服务中心
+var S services.IService = services.Def
 
 //Conf 配置组件
 var Conf creator.IConf = creator.Conf
@@ -29,8 +29,8 @@ var MQC services.IMQC = services.MQC
 //IContext 请求上下文
 type IContext = context.IContext
 
-//Component 基础组件
-var Component = components.Def
+//C 基础组件
+var C = components.Def
 
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady

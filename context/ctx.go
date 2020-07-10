@@ -74,6 +74,14 @@ type IPath interface {
 
 	//GetCookies 获取cookie信息
 	GetCookies() map[string]string
+
+	//Limit 设置限流信息
+	Limit(isLimit bool, fallback bool)
+	//IsLimited 是否已限流
+	IsLimited() bool
+
+	//AllowFallback 是否允许降级
+	AllowFallback() bool
 }
 
 //IVariable 参与变量

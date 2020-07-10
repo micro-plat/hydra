@@ -26,16 +26,13 @@ func newWSEngine(routers ...*router.Router) *wsEngine {
 	s.Engine.Use(Tag().DispFunc())
 	s.Engine.Use(Trace().DispFunc()) //跟踪信息
 	s.Engine.Use(Delay().DispFunc()) //
-	// s.engine.Use(Options().DispFunc())   //处理option响应
-	// s.engine.Use(Static().DispFunc())    //处理静态文件
-	// s.engine.Use(Header().DispFunc())    //设置请求头
-	// s.engine.Use(BasicAuth().DispFunc()) //
-	// s.engine.Use(APIKeyAuth().DispFunc())
-	// s.engine.Use(RASAuth().DispFunc())
-	// s.engine.Use(JwtAuth().DispFunc())   //jwt安全认证
-	// s.engine.Use(Render().DispFunc())    //响应渲染组件
-	// s.engine.Use(JwtWriter().DispFunc()) //设置jwt回写
-	// s.engine.Use(s.metric.Handle().DispFunc()) //生成metric报表
+	s.Engine.Use(APIKeyAuth().DispFunc())
+	s.Engine.Use(RASAuth().DispFunc())
+	s.Engine.Use(JwtAuth().DispFunc())   //jwt安全认证
+	s.Engine.Use(Render().DispFunc())    //响应渲染组件
+	s.Engine.Use(JwtWriter().DispFunc()) //设置jwt回写
+	// s.Engine.Use(s.metric.Handle().DispFunc()) //生成metric报表
+	s.Engine.Use(Limit().DispFunc()) //限流处理
 	s.addWSRouter(routers...)
 	return s
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
+	"github.com/micro-plat/hydra/conf/server/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -88,6 +89,12 @@ func (b *httpBuilder) Metric(host string, db string, cron string, opts ...metric
 //Static 静态文件配置
 func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 	b.customerBuilder["static"] = static.New(opts...)
+	return b
+}
+
+//Limit 服务器限流配置
+func (b *httpBuilder) Limit(r *limiter.Rule, rules ...*limiter.Rule) *httpBuilder {
+	b.customerBuilder["acl/limit"] = limiter.New(r, rules...)
 	return b
 }
 

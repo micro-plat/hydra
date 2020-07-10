@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
@@ -26,8 +27,8 @@ type request struct {
 //newRequest 构建请求的Request
 //自动对请求进行解码，响应结果进行编码。
 //当指定为gbk,gb2312后,请求方式为application/x-www-form-urlencoded或application/xml、application/json时内容必须编码为指定的格式，否则会解码失败
-func newRequest(c context.IInnerContext, s server.IServerConf) *request {
-	rpath := newRpath(c, s)
+func newRequest(c context.IInnerContext, s server.IServerConf, meta conf.IMeta) *request {
+	rpath := newRpath(c, s, meta)
 	return &request{
 		ctx:  c,
 		body: newBody(c, rpath),

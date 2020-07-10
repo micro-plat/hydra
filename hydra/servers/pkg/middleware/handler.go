@@ -13,6 +13,14 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
+
+		//检查是否被限流
+		if ctx.Request().Path().IsLimited() {
+			//降级处理
+			fallback(ctx, service)
+			return
+		}
+
 		//处理RPC服务调用
 		if addr, ok := global.IsProto(service, global.ProtoRPC); ok {
 			response, err := components.Def.RPC().GetRegularRPC().RequestByCtx(addr, ctx)

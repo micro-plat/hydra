@@ -35,7 +35,7 @@ func NewExchange() *Exchange {
 //Subscribe 订阅消息通知
 func (e *Exchange) Subscribe(uuid string, f func(...interface{}) error) error {
 	e.once.Do(func() {
-		hydra.Services.MQC(e.service, e.handle) //注册全局处理函数
+		hydra.S.MQC(e.service, e.handle) //注册全局处理函数
 	})
 
 	if ok, _ := e.uuid.SetIfAbsent(uuid, f); ok {
@@ -52,7 +52,7 @@ func (e *Exchange) Unsubscribe(uuid string) {
 
 //Notify 消息通知
 func (e *Exchange) Notify(name string, msg string) error {
-	hydra.Component.Queue().GetRegularQueue().Push(e.getQueueName(name), msg)
+	hydra.C.Queue().GetRegularQueue().Push(e.getQueueName(name), msg)
 	return nil
 }
 

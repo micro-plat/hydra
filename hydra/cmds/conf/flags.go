@@ -5,17 +5,11 @@ import (
 	"github.com/urfave/cli"
 )
 
-var installRegistry = false
 var coverIfExists = false
 
-//getFlags 获取运行时的参数
-func getFlags() []cli.Flag {
+//getInstallFlags 获取运行时的参数
+func getInstallFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
-	flags = append(flags, cli.BoolFlag{
-		Name:        "install,i",
-		Destination: &installRegistry,
-		Usage:       `-安装配置信息到注册中心`,
-	})
 	flags = append(flags, cli.BoolFlag{
 		Name:        "cover,v",
 		Destination: &coverIfExists,

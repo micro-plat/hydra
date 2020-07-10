@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/types"
@@ -12,16 +13,18 @@ var xRequestID = "X-Request-Id"
 var _ context.IUser = &user{}
 
 type user struct {
+	meta      conf.IMeta
 	ctx       context.IInnerContext
 	requestID string
 	auth      *auth
 	jwtToken  interface{}
 }
 
-func newUser(ctx context.IInnerContext) *user {
+func newUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 	return &user{
 		ctx:  ctx,
 		auth: &auth{},
+		meta: meta,
 	}
 }
 

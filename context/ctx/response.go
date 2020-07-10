@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
@@ -39,11 +40,11 @@ type response struct {
 	specials    []string
 }
 
-func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger) *response {
+func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger, meta conf.IMeta) *response {
 	return &response{
 		ctx:   ctx,
 		conf:  conf,
-		path:  newRpath(ctx, conf),
+		path:  newRpath(ctx, conf, meta),
 		log:   log,
 		final: rspns{status: http.StatusNotFound},
 	}
@@ -224,6 +225,11 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
+	if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
+		c.ctx.Redirect(status, content)
+		return nil
+	}
+
 	if c.path.GetRouter().IsUTF8() {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
