@@ -1,11 +1,28 @@
 {
     "url":"/01/01-helloworld.html",
+    "title":"hydra帮助手册",
+    "navs":[{
+        "title":"起步",
+        "icon":"navicon",
+        "url":"/03-settings.html"
+    },{
+        "title":"进阶",
+        "icon":"stats-bars",
+        "url":"/03-settings.html"
+    },{
+        "title":"高级",
+        "icon":"settings",
+        "url":"/03-settings.html"
+    }
+
+],
     "menus":[
         {
             "title":"起步",
             "items":[
                 {
                     "title":"概述",
+                    "icon":"log-in",
                     "url":"/01/01-helloworld.html"
                 },
                 {

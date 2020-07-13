@@ -66,6 +66,9 @@ func GetConf(cnf conf.IMainConf) *Static {
 		panic(fmt.Errorf("static配置有误:%v", err))
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
+	if err != nil {
+		panic(fmt.Errorf("%s获取失败:%v", static.Archive, err))
+	}
 	return &static
 }
 

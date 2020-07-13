@@ -66,14 +66,15 @@ func (s *Static) IsExclude(rPath string) bool {
 
 //IsContainExt 是否是包含在指定的ext中
 func (s *Static) IsContainExt(rPath string) bool {
-	if len(s.Exts) == 0 {
-		return false
-	}
+
 	name := filepath.Base(rPath)
 	pExt := filepath.Ext(name)
 	hasExt := strings.Contains(pExt, ".")
 	if !hasExt {
 		return false
+	}
+	if len(s.Exts) == 0 {
+		return true
 	}
 	for _, ext := range s.Exts {
 		if pExt == ext || ext == "*" {

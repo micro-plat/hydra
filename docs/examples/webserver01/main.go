@@ -11,7 +11,8 @@ func main() {
 		hydra.WithServerTypes(http.Web),
 		hydra.WithDebug(),
 	)
-	app.Micro("/order/request",hello)
+	hydra.Conf.Web(":80")
+	app.Micro("/order/request", hello)
 	app.Start()
 }
 

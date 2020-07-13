@@ -12,7 +12,7 @@ func newStatic() *Static {
 	a.FirstPage = "index.html"
 	a.Rewriters = []string{"/", "index.htm", "default.html"}
 	a.Exclude = []string{"/views/", ".exe", ".so"}
-	a.Exts = []string{".json", ".md", ".txt", ".html", ".htm", ".js", ".css", ".map", ".ttf", ".woff", ".woff2", ".woff2", ".jpg", ".jpeg", ".png", ".gif", ".ico", ".tif", ".pcx", ".tga", ".exif", ".fpx", ".svg", ".psd", ".cdr", ".pcd", ".dxf", ".ufo", ".eps", ".ai", ".raw", ".WMF", ".webp"}
+	a.Exts = []string{}
 	return a
 }
 
@@ -20,7 +20,7 @@ func newStatic() *Static {
 func WithImages() Option {
 	return func(s *Static) {
 		s.Dir = "./src"
-		s.Exts = []string{".jpg", ".jpeg", ".png", ".gif", ".ico", ".tif", ".pcx", ".tga", ".exif", ".fpx", ".svg", ".psd", ".cdr", ".pcd", ".dxf", ".ufo", ".eps", ".ai", ".raw", ".WMF", ".webp"}
+		s.Exts = []string{}
 	}
 }
 
