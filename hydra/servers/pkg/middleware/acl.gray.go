@@ -27,13 +27,14 @@ func Gray() Handler {
 			return
 		}
 
-		ctx.Response().AddSpecial("gray")
 		//获取当前http信息
+		ctx.Response().AddSpecial("gray")
 		req, resp := ctx.GetHttpReqResp()
 		if req == nil || resp == nil {
 			ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("只有api,web服务器支持灰度配置"))
 			return
 		}
+
 		//获取服务器列表
 		url, err := gray.Next()
 		if err != nil {
@@ -44,7 +45,6 @@ func Gray() Handler {
 		//转到上游
 		proxy := httputil.NewSingleHostReverseProxy(url)
 		proxy.ServeHTTP(resp, req)
-
 		ctx.Response().Stop(http.StatusUseProxy)
 	}
 }
