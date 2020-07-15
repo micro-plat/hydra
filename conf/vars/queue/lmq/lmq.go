@@ -9,3 +9,6 @@ type LMQ = queue.Queue
 func New() *LMQ {
 	return &LMQ{Proto: "lmq"}
 }
+
+//MQ LMQ地址
+const MQ = "lmq://"

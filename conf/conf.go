@@ -20,7 +20,7 @@ type IMainConf interface {
 	GetSubObject(name string, v interface{}) (int32, error)
 	GetRegistry() registry.IRegistry
 	GetVersion() int32
-	GetCluster() ICluster
+	GetCluster(clustName ...string) (ICluster, error)
 	Has(names ...string) bool
 	Iter(f func(path string, conf *JSONConf) bool)
 	Close() error
@@ -30,6 +30,7 @@ type IMainConf interface {
 type ICNode interface {
 	IsAvailable() bool
 	GetHost() string
+	GetPort() string
 	GetServerID() string
 	GetName() string
 	IsCurrent() bool
@@ -44,6 +45,9 @@ type ICluster interface {
 	Iter(f func(ICNode) bool)
 	Current() ICNode
 	Watch() IWatcher
+	Next() (ICNode, bool)
+	GetType() string
+	Close() error
 }
 
 //IPub 发布路径服务
@@ -53,7 +57,7 @@ type IPub interface {
 	GetRPCServicePubPath(svName string) string
 	GetServicePubPath() string
 	GetDNSPubPath(svName string) string
-	GetServerPubPath() string
+	GetServerPubPath(clustName ...string) string
 	GetServerID() string
 	GetPlatName() string
 	GetSysName() string
@@ -62,6 +66,7 @@ type IPub interface {
 	GetServerName() string
 	GetVarPath(p ...string) string
 	GetRLogPath() string
+	AllowGray() bool
 }
 
 //IVarConf 变量配置

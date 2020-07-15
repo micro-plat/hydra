@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
+	"github.com/micro-plat/hydra/conf/server/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
@@ -41,6 +42,7 @@ type IServerConf interface {
 	GetWhiteListConf() *whitelist.WhiteList
 	GetBlackListConf() *blacklist.BlackList
 	GetLimiter() *limiter.Limiter
+	GetGray() *gray.Gray
 	//获取远程日志配置
 	GetRLogConf() *rlog.Layout
 	Close() error

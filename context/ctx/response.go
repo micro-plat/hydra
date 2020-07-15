@@ -66,6 +66,13 @@ func (c *response) Abort(s int, err error) {
 	c.ctx.Abort()
 }
 
+//Stop 停止当前服务执行
+func (c *response) Stop(s int) {
+	c.noneedWrite = true
+	c.final.status = s
+	c.ctx.Abort()
+}
+
 //StatusCode 设置response状态码
 func (c *response) StatusCode(s int) {
 	c.raw.status = s

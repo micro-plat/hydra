@@ -129,7 +129,7 @@ func api(ctx hydra.IContext) interface{} {
 {"service":"/api","id":100}
 ```
 
-![在线发送](../src/ws01.png)
+![在线发送](../img/ws01.png)
 
 222.209.84.37:8121为localhost:8070的公网访问入口
 

@@ -8,6 +8,6 @@ import (
 )
 
 func init() {
-	hydra.Conf.MQC("lmq://queue", mqc.WitchMasterSlave()).Queue(queue.NewQueue("order.query", "/order/request"))
-	hydra.Conf.Vars().Queue("queue", lmq.New())
+
+	hydra.Conf.MQC(lmq.MQ, mqc.WitchMasterSlave()).Queue(queue.NewQueue("order.query", "/order/request"))
 }

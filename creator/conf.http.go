@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
+	"github.com/micro-plat/hydra/conf/server/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
@@ -95,6 +96,12 @@ func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 //Limit 服务器限流配置
 func (b *httpBuilder) Limit(r *limiter.Rule, rules ...*limiter.Rule) *httpBuilder {
 	b.customerBuilder["acl/limit"] = limiter.New(r, rules...)
+	return b
+}
+
+//Gray 灰度配置
+func (b *httpBuilder) Gray(filter string, upcluster string) *httpBuilder {
+	b.customerBuilder["acl/gray"] = gray.New(filter, upcluster)
 	return b
 }
 

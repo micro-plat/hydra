@@ -1,6 +1,8 @@
 package components
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/components/caches"
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/dbs"
@@ -84,6 +86,10 @@ func (c *Component) DLock(name string) (dlock.ILock, error) {
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
-	id := context.Current().ServerConf().GetMainConf().GetCluster().Current().GetServerID()
+	cluster, err := context.Current().ServerConf().GetMainConf().GetCluster()
+	if err != nil {
+		panic(fmt.Errorf("获取集群信息失败:%w", err))
+	}
+	id := cluster.Current().GetServerID()
 	return uuid.Get(id)
 }

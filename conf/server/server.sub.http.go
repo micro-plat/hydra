@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
+	"github.com/micro-plat/hydra/conf/server/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
@@ -30,6 +31,7 @@ type httpSub struct {
 	whiteList *Loader
 	blackList *Loader
 	limit     *Loader
+	gray      *Loader
 }
 
 func newhttpSub(cnf conf.IMainConf) *httpSub {
@@ -46,6 +48,7 @@ func newhttpSub(cnf conf.IMainConf) *httpSub {
 	s.whiteList = GetLoader(cnf, whitelist.ConfHandler(whitelist.GetConf).Handle)
 	s.blackList = GetLoader(cnf, blacklist.ConfHandler(blacklist.GetConf).Handle)
 	s.limit = GetLoader(cnf, limiter.ConfHandler(limiter.GetConf).Handle)
+	s.gray = GetLoader(cnf, gray.ConfHandler(gray.GetConf).Handle)
 	return s
 }
 
@@ -107,4 +110,9 @@ func (s *httpSub) GetBlackListConf() *blacklist.BlackList {
 //GetLimiter 获取限流配置
 func (s *httpSub) GetLimiter() *limiter.Limiter {
 	return s.limit.GetConf().(*limiter.Limiter)
+}
+
+//GetGray 获取灰度配置
+func (s *httpSub) GetGray() *gray.Gray {
+	return s.gray.GetConf().(*gray.Gray)
 }

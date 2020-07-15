@@ -283,7 +283,6 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token punctuation">)</span>
 
 <span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  
 	app <span class="token operator">:=</span> hydra<span class="token punctuation">.</span><span class="token function">NewApp</span><span class="token punctuation">(</span>
             hydra<span class="token punctuation">.</span><span class="token function">WithServerTypes</span><span class="token punctuation">(</span>http<span class="token punctuation">.</span>API<span class="token punctuation">)</span><span class="token punctuation">,</span>
     <span class="token punctuation">)</span>
@@ -306,6 +305,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token keyword">import</span> <span class="token punctuation">(</span>
     <span class="token string">&quot;github.com/micro-plat/hydra&quot;</span>
     <span class="token string">&quot;github.com/micro-plat/hydra/hydra/servers/mqc&quot;</span>
+    <span class="token string">&quot;github.com/micro-plat/hydra/conf/vars/queue/lmq&quot;</span>
 <span class="token punctuation">)</span>
 
 <span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -317,16 +317,20 @@ pre[data-line] .line-highlight[data-end]:after {
     <span class="token comment">//&#x6CE8;&#x518C;&#x670D;&#x52A1;</span>
     app<span class="token punctuation">.</span><span class="token function">MQC</span><span class="token punctuation">(</span><span class="token string">&quot;/hello&quot;</span><span class="token punctuation">,</span>hello<span class="token punctuation">,</span><span class="token string">&quot;queue-name&quot;</span><span class="token punctuation">)</span>
 
+    <span class="token comment">//&#x8BBE;&#x7F6E;&#x6D88;&#x606F;&#x961F;&#x5217;&#x670D;&#x52A1;&#x5668;</span>
+    hydra<span class="token punctuation">.</span>Conf<span class="token punctuation">.</span><span class="token function">MQC</span><span class="token punctuation">(</span>lmq<span class="token punctuation">.</span>MQ<span class="token punctuation">)</span>
+
     app<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function">hello</span><span class="token punctuation">(</span>ctx hydra<span class="token punctuation">.</span>IContext<span class="token punctuation">)</span> <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">{</span>
         <span class="token keyword">return</span> <span class="token string">&quot;success&quot;</span>
 <span class="token punctuation">}</span>
-</pre><p>&#x76D1;&#x542C;&#x6D88;&#x606F;&#x961F;&#x5217;<code>queue-name</code>&#xFF0C;&#x6709;&#x65B0;&#x6D88;&#x606F;&#x5230;&#x8FBE;&#x65F6;&#x6267;&#x884C;&#x670D;&#x52A1;<code>/hello</code>&#x5373;<code>hello</code>&#x51FD;&#x6570;</p>
+</pre><p>&#x76D1;&#x542C;&#x6D88;&#x606F;&#x961F;&#x5217;<code>queue-name</code>&#xFF0C;&#x6709;&#x65B0;&#x6D88;&#x606F;&#x5230;&#x8FBE;&#x65F6;&#x6267;&#x884C;&#x670D;&#x52A1;<code>/hello</code><br>
+&#x672C;&#x793A;&#x4F8B;&#x4EE5;&#x672C;&#x5730;&#x5185;&#x5B58;&#x4F5C;&#x4E3A;&#x6D88;&#x606F;&#x961F;&#x5217;&#x670D;&#x52A1;&#x5668;(&#x5355;&#x673A;&#x5E94;&#x7528;)</p>
 <h3 class="mume-header" id="%E4%B8%89-%E6%9E%84%E5%BB%BAcron-server">&#x4E09;&#x3001;&#x6784;&#x5EFA;cron  server</h3>
 
-<p>&#x63D0;&#x4F9B;&#x5B9A;&#x65F6;&#x4EFB;&#x52A1;&#x670D;&#x52A1;&#x5668;</p>
+<p>&#x63D0;&#x4F9B;&#x5B9A;&#x65F6;&#x4EFB;&#x52A1;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x6309;&#x5468;&#x671F;&#x5B9A;&#x65F6;&#x6267;&#x884C;&#x4EFB;&#x52A1;</p>
 <pre data-role="codeBlock" data-info="go" class="language-go"><span class="token keyword">package</span> main
 
 <span class="token keyword">import</span> <span class="token punctuation">(</span>
@@ -377,7 +381,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token keyword">func</span> <span class="token function">hello</span><span class="token punctuation">(</span>ctx hydra<span class="token punctuation">.</span>IContext<span class="token punctuation">)</span> <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">{</span>
         <span class="token keyword">return</span> <span class="token string">&quot;success&quot;</span>
 <span class="token punctuation">}</span>
-</pre><p>&#x5BF9;&#x5916;&#x63D0;&#x4F9B;&#x57FA;&#x4E8E;RPC&#x534F;&#x8BAE;&#x7684;&#x670D;&#x52A1;&#xFF0C;&#x53EF;&#x901A;&#x8FC7;hydra.C.RPC&#x7EC4;&#x4EF6;&#x8FDB;&#x884C;&#x8C03;&#x7528;</p>
+</pre><p>&#x5BF9;&#x5916;&#x63D0;&#x4F9B;&#x57FA;&#x4E8E;RPC&#x534F;&#x8BAE;&#x7684;&#x670D;&#x52A1;&#xFF0C;&#x53EF;&#x901A;&#x8FC7;hydra.C.RPC().Request&#x7EC4;&#x4EF6;&#x8FDB;&#x884C;&#x8C03;&#x7528;</p>
 <h3 class="mume-header" id="%E4%BA%94-%E6%9E%84%E5%BB%BAws-server">&#x4E94;&#x3001;&#x6784;&#x5EFA;ws server</h3>
 
 <p>&#x63D0;&#x4F9B;web socket &#x670D;&#x52A1;&#x5668;</p>
@@ -408,7 +412,7 @@ pre[data-line] .line-highlight[data-end]:after {
 </pre><p>&#x5BF9;&#x5916;&#x63D0;&#x4F9B;<code>/ws</code>&#x670D;&#x52A1;&#xFF0C;&#x5916;&#x90E8;&#x53EF;&#x901A;&#x8FC7;json&#x65B9;&#x5F0F;&#x8BF7;&#x6C42;&#x670D;&#x52A1;<code>/hello</code></p>
 <h3 class="mume-header" id="%E5%85%AD-%E6%9E%84%E5%BB%BAweb-server">&#x516D;&#x3001;&#x6784;&#x5EFA;web server</h3>
 
-<p>&#x63D0;&#x4F9B;&#x9759;&#x6001;&#x6587;&#x4EF6;&#x53CA;API&#x670D;&#x52A1;</p>
+<p>&#x63D0;&#x4F9B;&#x9759;&#x6001;&#x6587;&#x4EF6;&#x670D;&#x52A1;</p>
 <pre data-role="codeBlock" data-info="go" class="language-go"><span class="token keyword">package</span> main
 
 <span class="token keyword">import</span> <span class="token punctuation">(</span>

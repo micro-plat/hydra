@@ -3,9 +3,11 @@ package server
 import (
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/watcher"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -14,9 +16,9 @@ import (
 
 var cluster = cmap.New(2)
 
-func getCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) {
-	_, c, err := cluster.SetIfAbsentCb(pub.GetServerPubPath(), func(...interface{}) (interface{}, error) {
-		return NewCluster(pub, rgst)
+func getCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
+	_, c, err := cluster.SetIfAbsentCb(pub.GetServerPubPath(clusterName...), func(...interface{}) (interface{}, error) {
+		return NewCluster(pub, rgst, clusterName...)
 	})
 	if err != nil {
 		return nil, err
@@ -27,22 +29,27 @@ func getCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) 
 //Cluster 集群
 type Cluster struct {
 	conf.IPub
-	registry registry.IRegistry
-	current  conf.ICNode
-	nodes    cmap.ConcurrentMap
-	closeCh  chan struct{}
-	lock     sync.Mutex
-	watchers cmap.ConcurrentMap
+	index       int64
+	registry    registry.IRegistry
+	current     conf.ICNode
+	nodes       cmap.ConcurrentMap
+	keyCache    []string
+	closeCh     chan struct{}
+	lock        sync.RWMutex
+	watchers    cmap.ConcurrentMap
+	clusterName []string
 }
 
 //NewCluster 管理服务器的主配置信息
-func NewCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) {
+func NewCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
 	s = &Cluster{
-		IPub:     pub,
-		registry: rgst,
-		nodes:    cmap.New(4),
-		watchers: cmap.New(2),
-		closeCh:  make(chan struct{}),
+		IPub:        pub,
+		registry:    rgst,
+		nodes:       cmap.New(4),
+		watchers:    cmap.New(2),
+		clusterName: clusterName,
+		keyCache:    make([]string, 0, 1),
+		closeCh:     make(chan struct{}),
 	}
 	if err = s.load(); err != nil {
 		return
@@ -52,12 +59,25 @@ func NewCluster(pub conf.IPub, rgst registry.IRegistry) (s *Cluster, err error) 
 
 //Current 获取当前节点
 func (c *Cluster) Current() conf.ICNode {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	if c.current == nil {
 		return &CNode{}
 	}
 	return c.current.Clone()
+}
+
+//Next 采用轮循的方式获得下一个节点
+func (c *Cluster) Next() (conf.ICNode, bool) {
+	nid := atomic.AddInt64(&c.index, 1)
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	key := c.keyCache[int(nid%int64(len(c.keyCache)))]
+	v, ok := c.nodes.Get(key)
+	if ok {
+		return v.(conf.ICNode), true
+	}
+	return nil, false
 }
 
 //Iter 迭代所有集群节点
@@ -77,6 +97,11 @@ func (c *Cluster) Watch() conf.IWatcher {
 	c.watchers.Set(w.id, w)
 	w.notify(c.current)
 	return w
+}
+
+//GetType 获取集群类型
+func (c *Cluster) GetType() string {
+	return c.GetServerType()
 }
 
 //Close 关闭当前集群管理
@@ -110,7 +135,7 @@ func (c *Cluster) load() error {
 	}
 }
 func (c *Cluster) getCluster() error {
-	path := c.GetServerPubPath()
+	path := c.GetServerPubPath(c.clusterName...)
 	current := c.current
 	children, _, err := c.registry.GetChildren(path)
 	if err != nil {
@@ -127,13 +152,19 @@ func (c *Cluster) getCluster() error {
 				break
 			}
 		}
+		//移除缓存key
+		if removeNow {
+			c.removeKey(key)
+		}
 		return removeNow
 	})
 
 	//设置或添加在线节点
 	for i, name := range children {
 		node := NewCNode(name, c.GetServerID(), i)
-		c.nodes.Set(name, node)
+		if ok, _ := c.nodes.SetIfAbsent(name, node); ok {
+			c.addKey(name) //添加到缓存keys中
+		}
 		if node.IsCurrent() {
 			current = node
 		}
@@ -151,7 +182,7 @@ func (c *Cluster) getCluster() error {
 	return nil
 }
 func (c *Cluster) watchCluster() error {
-	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath()}, logger.New("watch.server"))
+	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath(c.clusterName...)}, logger.New("watch.server"))
 	if err != nil {
 		return err
 	}
@@ -162,6 +193,8 @@ func (c *Cluster) watchCluster() error {
 LOOP:
 	for {
 		select {
+		case <-global.Def.ClosingNotify():
+			break LOOP
 		case <-c.closeCh:
 			break LOOP
 		case <-notify:
@@ -169,4 +202,22 @@ LOOP:
 		}
 	}
 	return nil
+}
+
+//addKey 将key添加到顺序缓存表
+func (c *Cluster) addKey(name string) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.keyCache = append(c.keyCache, name) //添加到缓存中
+}
+
+//removeKey 将key从顺序缓存表中移除
+func (c *Cluster) removeKey(name string) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	for i, k := range c.keyCache {
+		if k == name {
+			c.keyCache = append(c.keyCache[:i], c.keyCache[i+1:]...)
+		}
+	}
 }

@@ -68,8 +68,11 @@ func (c *Pub) GetDNSPubPath(svName string) string {
 }
 
 //GetServerPubPath 获取服务器发布的跟路径
-func (c *Pub) GetServerPubPath() string {
-	return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "servers")
+func (c *Pub) GetServerPubPath(clustName ...string) string {
+	if len(clustName) == 0 {
+		return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "servers")
+	}
+	return registry.Join(c.platName, c.sysName, c.serverType, clustName[0], "servers")
 }
 
 //GetServerID 获取当前服务的集群编号
@@ -100,4 +103,10 @@ func (c *Pub) GetClusterName() string {
 //GetServerName 获取服务器名称
 func (c *Pub) GetServerName() string {
 	return fmt.Sprintf("%s(%s)", c.sysName, c.clusterName)
+}
+
+//AllowGray 是否允许灰度到其它集群
+func (c *Pub) AllowGray() bool {
+	return c.serverType == global.API ||
+		c.serverType == global.Web
 }

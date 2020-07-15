@@ -152,7 +152,7 @@ func main() {
 
 通过浏览器访问 `http://localhost:8089`
 
-![图片](../src/webserver--01.png)
+![图片](../img/webserver--01.png)
 
 
 

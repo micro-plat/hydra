@@ -16,6 +16,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
+	s.engine.Use(middleware.Gray().GinFunc())      //灰度配置
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
 	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
 	s.engine.Use(middleware.Trace().GinFunc())     //跟踪信息

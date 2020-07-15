@@ -121,12 +121,12 @@ func (c *MainConf) GetSubConf(name string) (*conf.JSONConf, error) {
 }
 
 //GetCluster 获取集群信息
-func (c *MainConf) GetCluster() conf.ICluster {
-	cluster, err := getCluster(c.IPub, c.registry)
+func (c *MainConf) GetCluster(clustName ...string) (conf.ICluster, error) {
+	cluster, err := getCluster(c.IPub, c.registry, clustName...)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return cluster
+	return cluster, nil
 }
 
 //GetSubObject 获取子配置信息

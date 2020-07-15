@@ -11,6 +11,7 @@ const (
 	ProtoHTTP = "http"
 	ProtoLM   = "lm"
 	ProtoFS   = "fs"
+	ProtoLMQ  = "lmq"
 )
 
 //ParseProto 解析协议信息
@@ -28,4 +29,9 @@ func ParseProto(address string) (string, string, error) {
 func IsProto(addr string, proto string) (string, bool) {
 	p, addrs, _ := ParseProto(addr)
 	return addrs, p == proto
+}
+
+//IsLocal 是否是本地服务
+func IsLocal(proto string) bool {
+	return strings.EqualFold(proto, ProtoLM) || strings.EqualFold(proto, ProtoLMQ)
 }

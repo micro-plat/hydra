@@ -1,7 +1,20 @@
 package mqc
 
+import "time"
+
 func (w *Responsive) watch() {
-	cluster := w.conf.GetMainConf().GetCluster()
+START:
+	cluster, err := w.conf.GetMainConf().GetCluster()
+	if err != nil {
+		w.log.Errorf("无法获取到集群信息：%v", err)
+		tk := time.After(time.Second)
+		select {
+		case <-tk:
+			goto START
+		case <-w.closeChan:
+			return
+		}
+	}
 	watcher := cluster.Watch()
 	notify := watcher.Notify()
 LOOP:

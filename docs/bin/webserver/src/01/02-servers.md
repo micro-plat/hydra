@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-  
 	app := hydra.NewApp(
             hydra.WithServerTypes(http.API),
     )
@@ -45,6 +44,7 @@ package main
 import (
     "github.com/micro-plat/hydra"
     "github.com/micro-plat/hydra/hydra/servers/mqc"
+    "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 )
 
 func main() {
@@ -56,6 +56,9 @@ func main() {
     //注册服务
     app.MQC("/hello",hello,"queue-name")
 
+    //设置消息队列服务器
+    hydra.Conf.MQC(lmq.MQ)
+
     app.Start()
 }
 
@@ -63,13 +66,13 @@ func hello(ctx hydra.IContext) interface{} {
         return "success"
 }
 ```
-监听消息队列`queue-name`，有新消息到达时执行服务`/hello`即`hello`函数
-
+监听消息队列`queue-name`，有新消息到达时执行服务`/hello`
+本示例以本地内存作为消息队列服务器(单机应用)
 
 
 ### 三、构建cron  server
 
-提供定时任务服务器
+提供定时任务服务器，按周期定时执行任务
 
 ```go
 package main
@@ -129,7 +132,7 @@ func hello(ctx hydra.IContext) interface{} {
         return "success"
 }
 ```
-对外提供基于RPC协议的服务，可通过hydra.C.RPC组件进行调用
+对外提供基于RPC协议的服务，可通过hydra.C.RPC().Request组件进行调用
 
 ### 五、构建ws server
 
@@ -166,7 +169,7 @@ func hello(ctx hydra.IContext) interface{} {
 
 ### 六、构建web server
 
-提供静态文件及API服务
+提供静态文件服务
 
 ```go
 package main

@@ -156,6 +156,9 @@ type IResponse interface {
 	//Abort 终止当前请求继续执行
 	Abort(int, error)
 
+	//Stop 停止当前服务执行
+	Stop(int)
+
 	//GetRawResponse 获取原始响应状态码与内容
 	GetRawResponse() (int, interface{})
 

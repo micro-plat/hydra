@@ -12,6 +12,7 @@ type CNode struct {
 	root     string
 	path     string
 	host     string
+	port     string
 	index    int
 	serverID string
 	mid      string
@@ -20,13 +21,18 @@ type CNode struct {
 //NewCNode 构建集群节点信息
 func NewCNode(name string, mid string, index int) *CNode {
 	items := strings.Split(name, "_")
-	return &CNode{
+	hostPort := strings.Split(items[0], ":")
+	c := &CNode{
 		name:     name,
 		mid:      mid,
 		index:    index,
-		host:     items[0],
+		host:     hostPort[0],
 		serverID: items[1],
 	}
+	if len(hostPort) > 1 {
+		c.port = hostPort[1]
+	}
+	return c
 }
 
 //IsAvailable 当前节点是否是可用的
@@ -37,6 +43,11 @@ func (c *CNode) IsAvailable() bool {
 //GetHost 获取服务器信息
 func (c *CNode) GetHost() string {
 	return c.host
+}
+
+//GetPort 获取端口信息
+func (c *CNode) GetPort() string {
+	return c.port
 }
 
 //GetServerID 获取节点编号
