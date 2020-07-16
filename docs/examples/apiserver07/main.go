@@ -8,9 +8,9 @@ import (
 func main() {
 	app := hydra.NewApp(
 		hydra.WithServerTypes(http.API),
-		// hydra.WithClusterName("prod"),
+		hydra.WithSystemName("apiserver"),
 	)
-	hydra.Conf.API(":8888").Gray(`{{$id := get_req "id"}}{{if eq $id "100"}}true{{end}}`, "prod")
+	hydra.Conf.API(":8080").Gray(`{{$id := get_req "id"}}{{if eq $id "100"}}true{{end}}`, "prod")
 	app.API("/api", api)
 	app.Start()
 }

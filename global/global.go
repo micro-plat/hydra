@@ -8,6 +8,7 @@ import (
 
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
+	"github.com/urfave/cli"
 )
 
 var traces = []string{"cpu", "mem", "block", "mutex", "web"}
@@ -62,9 +63,19 @@ type global struct {
 }
 
 //Bind 处理app命令行参数
-func (m *global) Bind() (err error) {
+func (m *global) Bind(c *cli.Context) (err error) {
 	//处理参数
 	if err := m.check(); err != nil {
+		return err
+	}
+
+	//处理服务回调
+	if err := doCliCallback(c); err != nil {
+		return err
+	}
+
+	//处理所有预处理函数
+	if err := doReadyFuncs(); err != nil {
 		return err
 	}
 
@@ -185,7 +196,6 @@ func (m *global) check() (err error) {
 	if IsDebug {
 		m.PlatName += "_debug"
 	}
-
 	isReady = true
-	return doReadyFuncs()
+	return nil
 }

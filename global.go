@@ -48,3 +48,6 @@ func Server(tp string) server.IServerConf {
 func CurrentContext() context.IContext {
 	return context.Current()
 }
+
+//ICli 终端命令参数
+type ICli = global.ICli

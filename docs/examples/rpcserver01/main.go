@@ -39,7 +39,7 @@ func main() {
 func request(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("id:", ctx.Request().GetString("id"))
 
-	response, err := hydra.Component.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc", "abc")
+	response, err := hydra.C.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc", "abc")
 
 	if err != nil {
 		return err

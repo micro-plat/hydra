@@ -27,12 +27,14 @@ import (
 type MicroApp struct {
 	app *cli.App
 	services.IService
+	Cli *ucli
 }
 
 //NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{
 		IService: services.Def,
+		Cli:      newUCli(),
 	}
 	for _, opt := range opts {
 		opt()

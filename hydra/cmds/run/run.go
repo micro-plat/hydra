@@ -31,31 +31,31 @@ func init() {
 func doRun(c *cli.Context) (err error) {
 
 	//1. 绑定应用程序参数
-	if err := global.Def.Bind(); err != nil {
+	if err := global.Def.Bind(c); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
 	}
 
-	//2. 注册远程日志组件
+	//3. 注册远程日志组件
 	if err = rlog.Registry(global.Def.PlatName, global.Def.RegistryAddr); err != nil {
 		logs.Log.Error(err)
 		return nil
 	}
 
-	//3.创建trace性能跟踪
+	//4.创建trace性能跟踪
 	if err = startTrace(global.Current().GetTrace()); err != nil {
 		return
 	}
 
-	//4. 处理本地内存作为注册中心的服务发布问题
+	//5. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
 		if err := pkgs.Pub2Registry(true); err != nil {
 			return err
 		}
 	}
 
-	//5. 创建服务器
+	//6. 创建服务器
 	server := servers.NewRspServers(global.Current().GetRegistryAddr(),
 		global.Current().GetPlatName(), global.Current().GetSysName(),
 		global.Current().GetServerTypes(), global.Current().GetClusterName())
@@ -63,7 +63,7 @@ func doRun(c *cli.Context) (err error) {
 		return err
 	}
 
-	//6. 堵塞当前进程，直到用户退出
+	//7. 堵塞当前进程，直到用户退出
 	interrupt := make(chan os.Signal, 4)
 	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
 LOOP:
@@ -74,7 +74,7 @@ LOOP:
 		}
 	}
 
-	//6. 关闭服务器释放所有资源
+	//8. 关闭服务器释放所有资源
 	global.Def.Log().Info(global.AppName, "正在退出...")
 
 	//关闭服务器

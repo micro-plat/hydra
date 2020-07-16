@@ -78,3 +78,17 @@ func WithUsage(usage string) Option {
 		global.Usage = fmt.Sprintf("%s(%s)", filepath.Base(os.Args[0]), usage)
 	}
 }
+
+//WithRunFlag 添加run命令扩展参数
+func WithRunFlag(name string, usage string) Option {
+	return func() {
+		global.RunCli.AddFlag(name, usage)
+	}
+}
+
+//WithConfFlag 添加conf命令扩展参数
+func WithConfFlag(name string, usage string) Option {
+	return func() {
+		global.ConfCli.AddFlag(name, usage)
+	}
+}

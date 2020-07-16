@@ -31,7 +31,7 @@ func doInstall(c *cli.Context) (err error) {
 	}
 
 	//2. 绑定应用程序参数
-	if err := global.Def.Bind(); err != nil {
+	if err := global.Def.Bind(c); err != nil {
 		logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return nil
