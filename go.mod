@@ -6,19 +6,25 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
+	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/golang/protobuf v1.3.3
 	github.com/golang/snappy v0.0.1
 	github.com/gorilla/websocket v1.4.2
+	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v0.4.0
+	github.com/nwaples/rardecode v1.1.0 // indirect
+	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
 	github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
 	github.com/ugorji/go/codec v1.1.7
+	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/urfave/cli v1.22.4
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 	github.com/zkfy/go-cache v2.1.0+incompatible
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
