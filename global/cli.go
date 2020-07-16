@@ -1,0 +1,95 @@
+package global
+
+import (
+	"strings"
+
+	"github.com/urfave/cli"
+)
+
+//RunCli 执行运行相关的终端参数管理
+var RunCli = newCli("run")
+
+//ConfCli 配置处理相关的终端参数
+var ConfCli = newCli("conf")
+
+var clis = make([]*ucli, 0, 1)
+
+//IUCLI 终端命令参数
+type IUCLI interface {
+	AddFlag(name string, usage string)
+	AddSliceFlag(name string, usage string)
+	OnStarting(callback func(ICli) error)
+}
+
+type ucli struct {
+	Name     string
+	flags    []cli.Flag
+	callBack func(ICli) error
+}
+
+func newCli(name string) *ucli {
+	return &ucli{
+		Name:  name,
+		flags: make([]cli.Flag, 0, 1),
+	}
+}
+
+//AddFlag 添加命令行参数
+func (c *ucli) AddFlag(name string, usage string) {
+	flag := cli.StringFlag{
+		Name:  name,
+		Usage: usage,
+	}
+	c.flags = append(c.flags, flag)
+}
+
+//AddSliceFlag 添加命令行参数
+func (c *ucli) AddSliceFlag(name string, usage string) {
+	flag := cli.StringSliceFlag{
+		Name:  name,
+		Usage: usage,
+	}
+	c.flags = append(c.flags, flag)
+}
+
+//GetFlags 获取可用的flags参数
+func (c *ucli) GetFlags() []cli.Flag {
+	return c.flags
+}
+
+//OnStarting 当启动时执行
+func (c *ucli) OnStarting(callback func(ICli) error) {
+	c.callBack = callback
+}
+
+//Callback 回调onstarting函数
+func (c *ucli) Callback(ctx *cli.Context) error {
+	if c.callBack == nil {
+		return nil
+	}
+	return c.callBack(ctx)
+}
+
+//ICli cli终端参数
+type ICli interface {
+	IsSet(string) bool
+	String(string) string
+	StringSlice(string) []string
+	FlagNames() []string
+	NArg() int
+}
+
+func doCliCallback(c *cli.Context) error {
+	name := c.Command.FullName()
+	for _, cli := range clis {
+		if strings.HasPrefix(name, cli.Name) {
+			return cli.Callback(c)
+		}
+	}
+	return nil
+}
+
+func init() {
+	clis = append(clis, RunCli)
+	clis = append(clis, ConfCli)
+}
