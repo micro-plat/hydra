@@ -1,0 +1,49 @@
+package update
+
+import (
+	"github.com/micro-plat/cli/cmds"
+	"github.com/micro-plat/cli/logs"
+	"github.com/micro-plat/hydra/global"
+	"github.com/urfave/cli"
+)
+
+func init() {
+	cmds.RegisterFunc(func() cli.Command {
+		return cli.Command{
+			Name:   "update",
+			Usage:  "更新当前应用程序",
+			Flags:  getFlags(),
+			Action: doUpdate,
+		}
+	})
+}
+
+func doUpdate(c *cli.Context) (err error) {
+	//1. 绑定应用程序参数
+	global.Current().Log().Pause()
+	if err := global.Def.Bind(c); err != nil {
+		logs.Log.Error(err)
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return nil
+	}
+
+	//2.获取应用服务器包配置信息
+	pkg, err := GetPackage(url)
+	if err != nil {
+		return err
+	}
+
+	//3. 检查是否需要更新
+	if ok, err := pkg.Check(); !ok {
+		logs.Log.Errorf("更新失败：%v", err)
+		return err
+	}
+
+	//4.立即更新
+	if err = pkg.Update(logs.Log, func() {
+		//关闭服务器
+	}); err != nil {
+		return err
+	}
+	return nil
+}
