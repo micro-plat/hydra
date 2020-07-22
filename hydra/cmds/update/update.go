@@ -10,10 +10,21 @@ import (
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
-			Name:   "update",
-			Usage:  "更新当前应用程序",
-			Flags:  getFlags(),
-			Action: doUpdate,
+			Name:  "update",
+			Usage: "更新应用",
+			Subcommands: []cli.Command{
+				{
+					Name:   "install",
+					Usage:  "更新当前应用。下载安装包并自动安装",
+					Flags:  getInstallFlags(),
+					Action: doUpdate,
+				}, {
+					Name:   "build",
+					Usage:  "打包安装包。创建压缩包，生成安装配置",
+					Flags:  getBuildFlags(),
+					Action: doBuild,
+				},
+			},
 		}
 	})
 }

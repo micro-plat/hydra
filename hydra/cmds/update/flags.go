@@ -6,15 +6,33 @@ import (
 )
 
 var url string
+var coverIfExists = false
 
 //getInstallFlags 获取运行时的参数
-func getFlags() []cli.Flag {
+func getInstallFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
 	flags = append(flags, cli.StringFlag{
 		Name:        "url,u",
 		Required:    true,
 		Destination: &url,
 		Usage:       "\033[;31m*\033[0m" + `应用下载地址`,
+	})
+	return flags
+}
+
+//getBuildFlags 获取运行时的参数
+func getBuildFlags() []cli.Flag {
+	flags := make([]cli.Flag, 0, 1) // pkgs.GetBaseFlags()
+	flags = append(flags, cli.StringFlag{
+		Name:        "url,u",
+		Required:    true,
+		Destination: &url,
+		Usage:       "\033[;31m*\033[0m" + `应用下载地址`,
+	})
+	flags = append(flags, cli.BoolFlag{
+		Name:        "cover,v",
+		Destination: &coverIfExists,
+		Usage:       `-文件已存在是否删除`,
 	})
 	return flags
 }

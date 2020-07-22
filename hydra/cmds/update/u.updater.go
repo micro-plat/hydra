@@ -13,13 +13,14 @@ import (
 )
 
 type updater struct {
-	targetPath string
-	currentDir string
-	newDir     string
-	oldDir     string
-	CRC32      uint32
-	targetName string
-	tmpPath    string
+	targetPath   string
+	currentDir   string
+	newDir       string
+	oldDir       string
+	CRC32        uint32
+	targetName   string
+	tmpPath      string
+	needRollback bool
 }
 
 // //UpdaterOptions 文件更新选项
@@ -59,8 +60,8 @@ func (u *updater) Apply(update io.Reader) (err error) {
 		return err
 	}
 	if u.CRC32 > 0 {
-		if crc32.Encrypt(buff) != u.CRC32 {
-			err = fmt.Errorf("文件校验值有误")
+		if v := crc32.Encrypt(buff); v != u.CRC32 {
+			err = fmt.Errorf("文件校验值有误当前[%d]%d", v, u.CRC32)
 			return
 		}
 	}
@@ -97,7 +98,9 @@ func (u *updater) Apply(update io.Reader) (err error) {
 		err = fmt.Errorf("无法修改当前工作目录:%s(%s)(err:%v)", u.currentDir, u.oldDir, err)
 		return err
 	}
+
 	//将新的目标文件修改为当前目录
+	u.needRollback = true
 	err = os.Rename(u.newDir, u.currentDir)
 	if err != nil {
 		err = fmt.Errorf("重命名文件夹失败:%v", err)
@@ -113,6 +116,9 @@ func (u *updater) Apply(update io.Reader) (err error) {
 
 //Rollback 回滚当前更新
 func (u *updater) Rollback() error {
+	if !u.needRollback {
+		return nil
+	}
 	defer os.Chdir(u.currentDir)
 	if _, err := os.Stat(u.oldDir); os.IsNotExist(err) {
 		return fmt.Errorf("无法回滚，原备份文件(%s)不存在", u.oldDir)

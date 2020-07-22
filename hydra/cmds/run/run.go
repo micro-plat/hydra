@@ -1,6 +1,7 @@
 package run
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -65,17 +66,18 @@ func doRun(c *cli.Context) (err error) {
 
 	//7. 堵塞当前进程，直到用户退出
 	interrupt := make(chan os.Signal, 4)
-	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
+	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGUSR2) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
+	var signal os.Signal
 LOOP:
 	for {
 		select {
-		case <-interrupt:
+		case signal = <-interrupt:
 			break LOOP
 		}
 	}
 
 	//8. 关闭服务器释放所有资源
-	global.Def.Log().Info(global.AppName, "正在退出...")
+	global.Def.Log().Info(global.AppName, fmt.Sprintf("正在退出[%v]...", signal))
 
 	//关闭服务器
 	server.Shutdown()

@@ -6,10 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/micro-plat/lib4go/security/crc32"
 
@@ -55,7 +53,7 @@ func GetPackage(url string) (*Package, error) {
 	if b, err := govalidator.ValidateStruct(&pkg); !b {
 		return nil, fmt.Errorf("package配置有误:%v", err)
 	}
-	return nil, nil
+	return &pkg, nil
 }
 
 //Package 更新包
@@ -76,7 +74,7 @@ func NewPackage(url string, version string, crc32 uint32) *Package {
 
 //Check 是否需要更新
 func (p *Package) Check() (bool, error) {
-	if p.Version > global.Version {
+	if p.Version >= global.Version {
 		return true, nil
 	}
 	return false, fmt.Errorf("更新的版本号%s不能低于当前应用的版本号%s", p.Version, global.Version)
@@ -137,47 +135,24 @@ func (p *Package) Decode(path string) error {
 	return nil
 }
 
-//Restart 重启当前服务
-func restart() (err error) {
-	args := getExecuteParams(os.Args)
-	go func() {
-		time.Sleep(time.Second * 5)
-		cmd1 := exec.Command("/bin/bash", "-c", args)
-		cmd1.Stdout = os.Stdout
-		cmd1.Stderr = os.Stderr
-		cmd1.Stdin = os.Stdin
-		err = cmd1.Start()
-		if err != nil {
-			return
-		}
-
-		os.Exit(20)
-	}()
-	return nil
-}
-func getExecuteParams(input []string) string {
-	args := make([]string, 0, len(input))
-	for i := 0; i < len(input); i++ {
-		if strings.HasPrefix(input[i], "-") {
-			args = append(args, input[i])
-			if i+1 < len(input) && !strings.HasPrefix(input[i+1], "-") {
-				args = append(args, fmt.Sprintf(`"%s"`, input[i+1]))
-				i++
-			}
-		} else {
-			args = append(args, input[i])
-		}
-	}
-	return strings.Join(args, " ")
-}
-
 //Archive 生成压缩文件
-func Archive(source string, destination string) error {
+func Archive(source string, destination string, url string) (err error) {
+
+	//创建压缩包
+	rpath := filepath.Join(destination, filepath.Base(source)+".zip")
+	if err := archiver.Archive([]string{source}, rpath); err != nil {
+		return fmt.Errorf("无法构建压缩包:[%s]%s %w", source, rpath, err)
+	}
+	defer func() {
+		if err != nil {
+			os.RemoveAll(rpath)
+		}
+	}()
 
 	//读取文件
-	buff, err := ioutil.ReadFile(source)
+	buff, err := ioutil.ReadFile(rpath)
 	if err != nil {
-		return fmt.Errorf("无法读取文件%s %w", source, err)
+		return fmt.Errorf("无法读取文件%s %w", rpath, err)
 	}
 
 	//获取版本号
@@ -187,14 +162,9 @@ func Archive(source string, destination string) error {
 	}
 
 	//生成pkg文件
-	pkg := NewPackage("", v, crc32.Encrypt(buff))
+	pkg := NewPackage(url, v, crc32.Encrypt(buff))
 	if err := pkg.Decode(filepath.Join(destination, "package.json")); err != nil {
 		return err
-	}
-
-	//创建压缩包
-	if err := archiver.Archive([]string{source}, filepath.Join(destination, filepath.Base(source)+".zip")); err != nil {
-		return fmt.Errorf("无法构建压缩包:[%s]%s %w", source, filepath.Join(destination, filepath.Base(source)+".zip"), err)
 	}
 	return nil
 }
@@ -215,7 +185,7 @@ func createTruncFile(path string) (f *os.File, err error) {
 func getVerion(p string) (string, error) {
 
 	//获取版本号
-	v, err := pipes.BashRun(fmt.Sprintf("%s --version", p))
+	v, err := pipes.RunString(fmt.Sprintf("%s --version", p))
 	if err != nil {
 		return "", fmt.Errorf("无法获取应用程序版本号%w", err)
 	}

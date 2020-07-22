@@ -9,7 +9,6 @@ import (
 	_ "github.com/micro-plat/hydra/registry/watcher/wchild"
 	_ "github.com/micro-plat/hydra/registry/watcher/wvalue"
 
-	_ "github.com/micro-plat/hydra/hydra/cmds/build"
 	_ "github.com/micro-plat/hydra/hydra/cmds/conf"
 	_ "github.com/micro-plat/hydra/hydra/cmds/install"
 	_ "github.com/micro-plat/hydra/hydra/cmds/remove"
