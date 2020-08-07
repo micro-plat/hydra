@@ -57,15 +57,15 @@ func (b *httpBuilder) Basic(opts ...basic.Option) *httpBuilder {
 	return b
 }
 
-//WhiteList 设置白名单
-func (b *httpBuilder) WhiteList(ips ...*whitelist.IPList) *httpBuilder {
+//WhiteListGroup 设置白名单
+func (b *httpBuilder) WhiteListGroup(ips ...*whitelist.IPList) *httpBuilder {
 	b.customerBuilder["acl/white.list"] = whitelist.New(ips...)
 	return b
 }
 
 //BlackList 设置黑名单
-func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
-	b.customerBuilder["acl/black.list"] = blacklist.New(opts...)
+func (b *httpBuilder) BlackList(ip ...string) *httpBuilder {
+	b.customerBuilder["acl/black.list"] = blacklist.New(blacklist.WithIP(ip...))
 	return b
 }
 

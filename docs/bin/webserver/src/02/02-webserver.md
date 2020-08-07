@@ -113,8 +113,8 @@ API接口与API服务支持的组件相同：
 ```go
 hydra.OnReady(func() {
 	hydra.Conf.WEB(":8090", api.WithTrace()).		
-	WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
-	BlackList(blacklist.WithIP("192.168.4.120")).	
+	WhiteListGroup(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
+	BlackList("192.168.4.120").	
 	Header()
 })
 ```

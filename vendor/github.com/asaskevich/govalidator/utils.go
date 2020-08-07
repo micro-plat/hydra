@@ -76,7 +76,7 @@ func StripLow(str string, keepNewLines bool) string {
 	return BlackList(str, chars)
 }
 
-// ReplacePattern replace regular expression pattern in string
+// ReplacePattern replace regulBlackList(blacklist.ar expression pattern in string
 func ReplacePattern(str, pattern, replace string) string {
 	r, _ := regexp.Compile(pattern)
 	return r.ReplaceAllString(str, replace)

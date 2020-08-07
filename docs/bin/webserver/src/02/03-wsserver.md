@@ -74,8 +74,8 @@ hydra.Conf.WS(":8081", api.WithTrace(),api.WithTimeout(5,5))
 ```go
 hydra.OnReady(func() {
 	hydra.Conf.WS(":8080", api.WithTrace()).		
-	WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
-	BlackList(blacklist.WithIP("192.168.4.120")).	
+	WhiteListGroup(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
+	BlackList("192.168.4.120").	
 	Header()
 })
 ```
