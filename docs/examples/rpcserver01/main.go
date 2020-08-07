@@ -121,6 +121,6 @@ func rpcRequest(ctx hydra.IContext) (r interface{}) {
 		}
 		return r
 	default:
-		return hydra.Global.PlatName
+		return hydra.G.PlatName
 	}
 }

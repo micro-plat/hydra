@@ -16,12 +16,12 @@ func main() {
 	app.API("/order", &OrderService{})
 
 	app.OnStarting(func(server.IServerConf) error {
-		hydra.Global.Log().Info("server.OnServerStarting")
+		hydra.G.Log().Info("server.OnServerStarting")
 		return nil
 	})
 
 	app.OnClosing(func(server.IServerConf) error {
-		hydra.Global.Log().Info("server.OnServerClosing")
+		hydra.G.Log().Info("server.OnServerClosing")
 		return nil
 	})
 

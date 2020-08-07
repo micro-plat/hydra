@@ -29,5 +29,5 @@ func login(ctx hydra.IContext) interface{} {
 	return "success"
 }
 func index(ctx hydra.IContext) interface{} {
-	return hydra.Component.UUID().ToString()
+	return hydra.C.UUID().ToString()
 }

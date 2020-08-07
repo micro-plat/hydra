@@ -47,6 +47,6 @@ func (o *OrderService) QueryHandle(ctx context.IContext) interface{} {
 	return "order.query.handle"
 }
 func (o *OrderService) Close() error {
-	hydra.Global.Log().Info("order.Close")
+	hydra.G.Log().Info("order.Close")
 	return nil
 }

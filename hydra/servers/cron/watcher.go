@@ -1,11 +1,30 @@
 package cron
 
-import "github.com/micro-plat/hydra/conf/server/cron"
+import (
+	"time"
+
+	"github.com/micro-plat/hydra/conf/server/cron"
+)
 
 func (w *Responsive) watch() {
-	cluster := w.conf.GetMainConf().GetCluster()
+
+	//监控集群信息
+START:
+	cluster, err := w.conf.GetMainConf().GetCluster()
+	if err != nil {
+		w.log.Error("获取集群信息失败", err)
+		select {
+		case <-w.closeChan:
+			return
+		default:
+		}
+		time.Sleep(time.Second)
+		goto START
+	}
 	watcher := cluster.Watch()
 	notify := watcher.Notify()
+
+	//循环监控集群变化
 LOOP:
 	for {
 		select {
