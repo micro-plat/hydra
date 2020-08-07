@@ -1,0 +1,11 @@
+[[layouts]]
+  type = "file"
+  level = "All"
+  path = "/home/yanglei/work/src/github.com/micro-plat/hydra/docs/bin/logs/%date.log"
+  layout = "[%datetime.%ms][%l][%session] %content%n"
+
+[[layouts]]
+  type = "stdout"
+  level = "All"
+  path = ""
+  layout = "[%datetime.%ms][%l][%session]%content"
