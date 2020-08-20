@@ -31,7 +31,7 @@ import (
 func APM() Handler {
 
 	return func(ctx IMiddleContext) {
-		fmt.Println("middleware.apm")
+		//fmt.Println("middleware.apm")
 		//获取apm配置
 		apmconf := ctx.ServerConf().GetAPMConf()
 		if apmconf.Disable {
@@ -41,7 +41,7 @@ func APM() Handler {
 		ctx.Response().AddSpecial("apm")
 
 		octx := ctx.Context()
-		fmt.Println("middleware.apm-1", octx)
+		//fmt.Println("middleware.apm-1", octx)
 		oreq, _ := ctx.GetHttpReqResp()
 
 		tracer, err := global.Def.APM.CreateTracer(global.Def.GetAPMService())
@@ -50,7 +50,7 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
-		fmt.Println("middleware.apm-2", tracer, err)
+		//fmt.Println("middleware.apm-2", tracer, err)
 		span, _, err := tracer.CreateEntrySpan(octx, getOperationName("", oreq), func() (string, error) {
 			return oreq.Header.Get(apm.Header), nil
 		})
@@ -59,7 +59,7 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
-		fmt.Println("middleware.apm-3", oreq.Header.Get("X-Request-Id"))
+		//fmt.Println("middleware.apm-3", oreq.Header.Get("X-Request-Id"))
 		span.SetComponent(componentIDGOHttpServer)
 		span.Tag("X-Request-Id", oreq.Header.Get("X-Request-Id"))
 		// for k, v := range h.extraTags {
@@ -75,7 +75,7 @@ func APM() Handler {
 			if code >= 400 {
 				span.Error(time.Now(), "Error on handling request")
 			}
-			fmt.Println("middleware.apm-4", statusCode)
+			//fmt.Println("middleware.apm-4", statusCode)
 			span.Tag(apm.TagStatusCode, strconv.Itoa(code))
 			span.End()
 		}()
