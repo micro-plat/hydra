@@ -5,9 +5,12 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/components"
+	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //服务器各种返回结果
@@ -16,6 +19,9 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
+		hydra.WithAPM(),
+		hydra.WithPlatName("test"),
+		hydra.WithSystemName("apiserver"),
 	)
 
 	app.API("/order/request/:tp", request)
@@ -27,7 +33,19 @@ func request(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("------request------")
 	switch ctx.Request().Param("tp") { //从路由配置中获取参数值 ctx.Request.Param.Get...
 	case "1":
-		return "success"
+		time.Sleep(5 * time.Second)
+
+		url := "http://192.168.5.108:8082/order/request"
+		client, err := components.Def.HTTP().GetClient()
+		if err != nil {
+			return fmt.Errorf("GetClient():%+v", err)
+		}
+		status, content, err := client.Get(url)
+		return types.XMap{
+			"status":  status,
+			"content": content,
+			"err":     err,
+		}
 	case "2":
 		return 100
 	case "3":
@@ -88,6 +106,19 @@ func request(ctx hydra.IContext) (r interface{}) {
 			return err
 		}
 		return r
+	case "16":
+		url := "http://192.168.5.108:8081/order/request/1"
+		client, err := components.Def.HTTP().GetClient()
+		if err != nil {
+			return fmt.Errorf("GetClient():%+v", err)
+		}
+		status, content, err := client.Get(url)
+		return types.XMap{
+			"status":  status,
+			"content": content,
+			"err":     err,
+		}
+
 	default:
 		return hydra.G.PlatName
 	}

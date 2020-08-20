@@ -2,16 +2,12 @@ package main
 
 import (
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
-	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
-	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/vars/db/oracle"
-	"github.com/micro-plat/hydra/conf/vars/queue/lmq"
+	"github.com/micro-plat/hydra/conf/server/apm"
 )
 
 func init() {
 	hydra.OnReady(func() {
-		hydra.Conf.API(":8080", api.WithTrace()).
+		/*hydra.Conf.API(":8080", api.WithTrace()).
 			// APIKEY("sdfefefefefe").
 			WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
 			BlackList(blacklist.WithIP("192.168.4.120")).
@@ -25,5 +21,7 @@ func init() {
 			Header()
 
 		hydra.Conf.Vars().DB("db", oracle.New("hydra/hydra")).Queue("queue", lmq.New())
+		*/
+		hydra.Conf.API(":8083").APM(apm.WithEnable())
 	})
 }

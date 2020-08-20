@@ -1,7 +1,11 @@
 package main
 
 import (
+	"time"
+
 	"github.com/micro-plat/hydra"
+
+	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
@@ -11,11 +15,15 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
+		hydra.WithAPM(),
+		hydra.WithPlatName("test"),
+		hydra.WithSystemName("apiserver04"),
 	)
 
 	app.API("/order/request", hello)
 	app.Start()
 }
 func hello(ctx hydra.IContext) interface{} {
+	time.Sleep(time.Second * 2)
 	return "order/request"
 }

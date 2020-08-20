@@ -1,7 +1,11 @@
 package main
 
 import (
+	"time"
+
 	"github.com/micro-plat/hydra"
+
+	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
@@ -12,6 +16,9 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
+		hydra.WithAPM(),
+		hydra.WithPlatName("test"),
+		hydra.WithSystemName("apiserver03"),
 	)
 
 	app.API("/order/request", hello, router.WithEncoding("gbk"))
@@ -29,5 +36,6 @@ func login(ctx hydra.IContext) interface{} {
 	return "success"
 }
 func index(ctx hydra.IContext) interface{} {
+	time.Sleep(time.Second * 4)
 	return hydra.C.UUID().ToString()
 }
