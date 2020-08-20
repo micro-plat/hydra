@@ -67,10 +67,10 @@ func installNow(c *cli.Context) (err error) {
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			logs.Log.Error("安装到配置中心:", pkgs.Failed)
+			logs.Log.Error("安装到配置中心:", pkgs.FAILED)
 			return err
 		}
-		logs.Log.Info("安装到配置中心:" + pkgs.Success)
+		logs.Log.Info("安装到配置中心:" + pkgs.SUCCESS)
 		return
 	}
 	return nil

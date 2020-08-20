@@ -68,6 +68,7 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	}
 	client := c.(*rpc.Client)
 	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
+	nopts = append(nopts, opts...)
 	nopts = append(nopts, rpc.WithXRequestID(fmt.Sprint(ctx.Value("X-Request-Id"))))
 	fm := getRequestForm(input)
 	return client.Request(ctx, rservice, fm, nopts...)

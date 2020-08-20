@@ -7,11 +7,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/watcher"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/net"
 )
 
 //RspServers 响应式服务管理器,监控配置变更自动创建、停止服务器
@@ -167,6 +169,7 @@ func (r *RspServers) checkServer(path string) error {
 			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
 			return nil
 		}
+		r.startApm(conf)
 	}
 
 	return nil
@@ -209,4 +212,15 @@ func (r *RspServers) Shutdown() {
 	case <-cl:
 		return
 	}
+}
+
+func (r *RspServers) startApm(conf *server.ServerConf) {
+	if !global.Def.UseAPM {
+		return
+	}
+	instance := fmt.Sprintf("%s_%s", global.Def.PlatName, net.GetLocalIPAddress())
+	cpmsApm := components.Def.APM()
+	apmInstance := cpmsApm.GetRegularAPM(instance)
+	global.Def.APM = apmInstance
+	return
 }

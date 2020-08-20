@@ -43,7 +43,8 @@ func NewClient(opts ...Option) (client *Client, err error) {
 	if err != nil {
 		return nil, err
 	}
-	client.client = &http.Client{
+
+	orginalClient := &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: client.conf.Keepalive,
 			TLSClientConfig:   tlsConf,
@@ -60,20 +61,21 @@ func NewClient(opts ...Option) (client *Client, err error) {
 			ResponseHeaderTimeout: 0,
 		},
 	}
+	client.client, err = newTracerClient(WithClient(orginalClient))
 	return
 }
 
 // Get http get请求
 func (c *Client) Get(url string, charset ...string) (content string, status int, err error) {
 	ncharset := getCharset(charset...)
-	r, s, err := c.Request(http.MethodGet, url, "", ncharset, nil)
+	r, s, err := c.Request(http.MethodGet, url, "", ncharset, http.Header{})
 	return string(r), s, err
 }
 
 // Post http Post请求
 func (c *Client) Post(url string, params string, charset ...string) (content string, status int, err error) {
 	ncharset := getCharset(charset...)
-	r, s, err := c.Request(http.MethodPost, url, params, ncharset, nil)
+	r, s, err := c.Request(http.MethodPost, url, params, ncharset, http.Header{})
 	return string(r), s, err
 }
 

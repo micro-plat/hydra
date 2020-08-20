@@ -41,13 +41,10 @@ func Register(tp string, creator IServerCreatorHandler) {
 //GetServerTypes 获取支付的服务器类型
 func GetServerTypes() []string {
 	tps := make([]string, 0, len(creators))
-	for k := range creators {
-		for _, s := range global.Def.ServerTypes {
-			if k == s {
-				tps = append(tps, k)
-			}
+	for _, s := range global.Def.ServerTypes {
+		if _, ok := creators[s]; ok {
+			tps = append(tps, s)
 		}
-
 	}
 	return tps
 }

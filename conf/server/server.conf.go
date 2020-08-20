@@ -4,6 +4,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
+	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -36,6 +37,7 @@ type IServerConf interface {
 	GetMQCMainConf() *mqc.Server
 	GetMQCQueueConf() *queue.Queues
 	GetAPIKeyConf() *apikey.APIKeyAuth
+	GetAPMConf() *apm.APM
 	GetRASConf() *ras.RASAuth
 	GetBasicConf() *basic.BasicAuth
 	GetRenderConf() *render.Render
@@ -58,6 +60,7 @@ type ServerConf struct {
 	*cronSub
 	*mqcSub
 	*varSub
+	*apmSub
 }
 
 //NewServerConfBy 构建服务器配置缓存
@@ -75,6 +78,7 @@ func NewServerConfBy(platName, sysName, serverType, clusterName string, rgst reg
 	s.cronSub = newCronSub(s.mainConf)
 	s.mqcSub = newMQCSub(s.mainConf)
 	s.varSub = newVarSub(s.varConf)
+	s.apmSub = newapmSub(s.mainConf)
 	return s, nil
 
 }

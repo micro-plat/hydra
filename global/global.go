@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
@@ -55,9 +56,12 @@ type global struct {
 	//log 日志管理
 	log logger.ILogger
 
+	APM apm.IAPM
+
 	//LocalConfName 本地配置文件名称
 	LocalConfName string
 
+	UseAPM bool
 	//close 关闭通道
 	close chan struct{}
 }
@@ -141,6 +145,16 @@ func (m *global) ClosingNotify() chan struct{} {
 //Log 获取日志组件
 func (m *global) Log() logger.ILogger {
 	return m.log
+}
+
+//IsUseAPM 使用调用链
+func (m *global) IsUseAPM() bool {
+	return m.UseAPM
+}
+
+//IsUseAPM 使用调用链
+func (m *global) GetAPMService() string {
+	return fmt.Sprintf("%s_%s", m.GetPlatName(), m.GetSysName())
 }
 
 //parsePath 转换平台服务路径

@@ -4,6 +4,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -108,5 +109,11 @@ func (b *httpBuilder) Gray(filter string, upcluster string) *httpBuilder {
 //Render 响应渲染配置
 func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
 	b.customerBuilder["render"] = render.NewRender(opts...)
+	return b
+}
+
+//Gray 灰度配置
+func (b *httpBuilder) APM(opts ...apm.Option) *httpBuilder {
+	b.customerBuilder["apm"] = apm.New(opts...)
 	return b
 }
