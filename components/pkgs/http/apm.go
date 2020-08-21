@@ -34,8 +34,8 @@ const componentIDGOHttpClient = 5005
 type ClientConfig struct {
 	name      string
 	client    *http.Client
-	tracer    apm.Tracer
 	extraTags map[string]string
+	apmInfo   *apm.APMInfo
 }
 
 // ClientOption allows optional configuration of Client.
@@ -66,8 +66,10 @@ func WithClient(client *http.Client) ClientOption {
 }
 
 // newTracerClient returns an HTTP Client with tracer
-func newTracerClient(options ...ClientOption) (*http.Client, error) {
-	co := &ClientConfig{}
+func newTracerClient(apmInfo *apm.APMInfo, options ...ClientOption) (*http.Client, error) {
+	co := &ClientConfig{
+		apmInfo: apmInfo,
+	}
 	for _, option := range options {
 		option(co)
 	}
@@ -77,13 +79,6 @@ func newTracerClient(options ...ClientOption) (*http.Client, error) {
 	if !global.Def.IsUseAPM() {
 		return co.client, nil
 	}
-
-	tracer, err := global.Def.APM.CreateTracer(global.Def.GetAPMService())
-	if err != nil {
-		err = fmt.Errorf("newTracerClient:%+v", err)
-		return nil, err
-	}
-	co.tracer = tracer
 
 	tp := &transport{
 		ClientConfig: co,
@@ -102,7 +97,12 @@ type transport struct {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error) {
-	span, err := t.tracer.CreateExitSpan(req.Context(), getOperationName(t.name, req), req.Host, func(header string) error {
+	apmInfo := t.apmInfo
+	rootCtx := apmInfo.RootCtx
+	tracer := apmInfo.Tracer
+
+	span, err := tracer.CreateExitSpan(rootCtx, getOperationName(t.name, req), req.Host, func(header string) error {
+		fmt.Println("CreateExitSpan:", req.URL.Host, req.URL.Port(), getOperationName("", req), header)
 		req.Header.Set(apm.Header, header)
 		return nil
 	})

@@ -50,8 +50,9 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
+
 		//fmt.Println("middleware.apm-2", tracer, err)
-		span, _, err := tracer.CreateEntrySpan(octx, getOperationName("", oreq), func() (string, error) {
+		span, rootctx, err := tracer.CreateEntrySpan(octx, getOperationName("", oreq), func() (string, error) {
 			return oreq.Header.Get(apm.Header), nil
 		})
 		if err != nil {
@@ -59,6 +60,10 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
+		ctx.Meta().Set("apm_info", &apm.APMInfo{
+			Tracer:  tracer,
+			RootCtx: rootctx,
+		})
 		//fmt.Println("middleware.apm-3", oreq.Header.Get("X-Request-Id"))
 		span.SetComponent(componentIDGOHttpServer)
 		span.Tag("X-Request-Id", oreq.Header.Get("X-Request-Id"))

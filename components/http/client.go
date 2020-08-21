@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/hydra/components/pkgs/http"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -39,15 +40,23 @@ func (s *StandardHTTPClient) GetRegularClient(names ...string) (d IClient) {
 func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
 	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
-		opt := http.WithRequestID(context.Current().User().GetRequestID())
+		ctx := context.Current()
+		opt := []http.Option{
+			http.WithRequestID(ctx.User().GetRequestID()),
+		}
+		if apmInfo, ok := ctx.Meta().Get("apm_info"); ok {
+			opt = append(opt, http.WithAPMInfo(apmInfo.(*apm.APMInfo)))
+		}
+
 		if js == nil {
-			return http.NewClient(opt)
+			return http.NewClient(opt...)
 		}
 		raw, err := http.WithRaw(js.GetRaw())
 		if err != nil {
 			return nil, err
 		}
-		return http.NewClient(opt, raw)
+		opt = append(opt, raw)
+		return http.NewClient(opt...)
 	})
 	if err != nil {
 		return nil, err

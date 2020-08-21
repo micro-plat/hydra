@@ -1,6 +1,7 @@
 package apm
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -34,4 +35,9 @@ func New(apmtype string, instance, conf string) (IAPM, error) {
 		return nil, fmt.Errorf("cache: unknown adapter name %q (forgotten import?)", apmtype)
 	}
 	return resolver.Resolve(instance, conf)
+}
+
+type APMInfo struct {
+	Tracer  Tracer
+	RootCtx context.Context
 }

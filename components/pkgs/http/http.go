@@ -61,7 +61,7 @@ func NewClient(opts ...Option) (client *Client, err error) {
 			ResponseHeaderTimeout: 0,
 		},
 	}
-	client.client, err = newTracerClient(WithClient(orginalClient))
+	client.client, err = newTracerClient(client.apmInfo, WithClient(orginalClient))
 	return
 }
 

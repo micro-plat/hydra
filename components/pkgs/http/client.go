@@ -25,6 +25,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	if err != nil {
 		return
 	}
+
 	for _, cookie := range cookies {
 		req.AddCookie(cookie)
 	}
