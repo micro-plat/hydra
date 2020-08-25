@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type ICacheExt interface {
+	GetServers() []string
+}
+
 //ICache 缓存接口
 type ICache interface {
 	Get(key string) (string, error)

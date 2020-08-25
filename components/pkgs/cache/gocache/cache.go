@@ -5,19 +5,29 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/components/pkgs/cache"
+	"github.com/micro-plat/lib4go/net"
 	gocache "github.com/zkfy/go-cache"
 )
 
 // Client redis配置文件
 type Client struct {
-	client *gocache.Cache
+	servers []string
+	client  *gocache.Cache
 }
 
 // New 根据配置文件创建一个redis连接
 func New() (m *Client, err error) {
 	m = &Client{}
 	m.client = gocache.New(5*time.Minute, 10*time.Minute)
+	m.servers = []string{
+		net.GetLocalIPAddress(),
+	}
 	return
+}
+
+//GetServers 获取服务器列表
+func (c *Client) GetServers() []string {
+	return c.servers
 }
 
 // Get 根据key获取redis中的数据

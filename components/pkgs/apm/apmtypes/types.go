@@ -12,5 +12,5 @@ const ComponentIDGOHttpClient = 5005
 
 const ComponentIDGORpcServer = 5101
 const ComponentIDGORpcClient = 5102
-const ComponentIDGORedisClient = 5103
+const ComponentIDGOCacheClient = 5103
 const ComponentIDGODBClient = 5104
