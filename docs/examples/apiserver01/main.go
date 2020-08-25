@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/mattn/go-oci8"
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/components"
-	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
+	apmtypes "github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
@@ -19,7 +20,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
-		hydra.WithAPM(),
+		hydra.WithAPM(apmtypes.SkyWalking),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver"),
 	)
@@ -118,7 +119,47 @@ func request(ctx hydra.IContext) (r interface{}) {
 			"content": content,
 			"err":     err,
 		}
+	case "17":
 
+		sql := `insert into sup_system_logs
+(log_id, object_name, error_code, error_desc, create_time)
+values
+(seq_sys_log.nextval, 'test', 100, @err_desc, sysdate)`
+
+		params := map[string]interface{}{
+			"err_desc": time.Now().Format("20060102150405"),
+		}
+
+		dbObj := components.Def.DB().GetRegularDB()
+
+		data, q, a, err := dbObj.Scalar("select 1 from dual", nil)
+		ctx.Log().Info("dbObj.Scalar:", data, q, a, err)
+
+		rows, q, a, err := dbObj.Query("select 1 r from dual", nil)
+		ctx.Log().Info("dbObj.Query:", rows, q, a, err)
+
+		effRow, q, a, err := dbObj.Execute(sql, params)
+		ctx.Log().Info("dbObj.Execute:", effRow, q, a, err)
+
+		lastID, effRow, q, a, err := dbObj.Executes(sql, params)
+		ctx.Log().Info("dbObj.Executes:", lastID, effRow, q, a, err)
+
+		trans, err := dbObj.Begin()
+
+		data, q, a, err = trans.Scalar("select 1 from dual", nil)
+		ctx.Log().Info("trans.Scalar:", data, q, a, err)
+
+		rows, q, a, err = trans.Query("select 1 r from dual", nil)
+		ctx.Log().Info("trans.Query:", rows, q, a, err)
+
+		effRow, q, a, err = trans.Execute(sql, params)
+		ctx.Log().Info("trans.Execute:", effRow, q, a, err)
+
+		lastID, effRow, q, a, err = trans.Executes(sql, params)
+		ctx.Log().Info("trans.Executes:", lastID, effRow, q, a, err)
+
+		trans.Commit()
+		return "db.test"
 	default:
 		return hydra.G.PlatName
 	}

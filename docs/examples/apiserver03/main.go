@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra"
 
-	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
@@ -16,7 +16,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
-		hydra.WithAPM(),
+		hydra.WithAPM(apmtypes.SkyWalking),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver03"),
 	)

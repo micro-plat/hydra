@@ -7,7 +7,8 @@ import (
 	"github.com/micro-plat/hydra"
 
 	"github.com/micro-plat/hydra/components"
-	_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
+	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/apm"
@@ -20,7 +21,7 @@ func main() {
 	app := hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithDebug(),
-		hydra.WithAPM(),
+		hydra.WithAPM(apmtypes.SkyWalking),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver02"),
 	)
@@ -51,19 +52,19 @@ func main() {
 
 func request(ctx hydra.IContext) (r interface{}) {
 	time.Sleep(3 * time.Second)
-	// request, err := components.Def.RPC().GetRPC()
-	// if err != nil {
-	// 	return fmt.Errorf("RPC().GetRPC:%s", err.Error())
-	// }
-	// resp, err := request.Request(ctx.Context(), "/rpc@rpcserver01.test_debug", map[string]string{
-	// 	"demo": "apiserver3",
-	// })
-	// if err != nil {
-	// 	return fmt.Errorf("RPC.Request%s", err.Error())
-	// }
-	// fmt.Println("RPC.Header", resp.Header)
-	// fmt.Println("RPC.Result", resp.Result)
-	// fmt.Println("RPC.Status", resp.Status)
+	request, err := components.Def.RPC().GetRPC()
+	if err != nil {
+		return fmt.Errorf("RPC().GetRPC:%s", err.Error())
+	}
+	resp, err := request.Request(ctx.Context(), "/rpc", map[string]string{
+		"tp": "1",
+	}, rpc.WithContentType("application/json"))
+	if err != nil {
+		return fmt.Errorf("RPC.Request%s", err.Error())
+	}
+	fmt.Println("RPC.Header", resp.Header)
+	fmt.Println("RPC.Result", resp.Result)
+	fmt.Println("RPC.Status", resp.Status)
 
 	client, err := components.Def.HTTP().GetClient()
 	if err != nil {
