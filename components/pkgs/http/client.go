@@ -51,6 +51,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		c.printResponseError(method, url, c.Response.Status, time.Now().Sub(start), err)
 		return
 	}
+
 	c.printResponse(method, url, c.Response.Status, time.Now().Sub(start), string(body))
 	status = c.Response.StatusCode
 	ct, err := encoding.DecodeBytes(body, charset)

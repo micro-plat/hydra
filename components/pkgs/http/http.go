@@ -10,6 +10,9 @@ import (
 	"os"
 
 	"time"
+
+	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/context"
 )
 
 //Client HTTP客户端
@@ -42,6 +45,10 @@ func NewClient(opts ...Option) (client *Client, err error) {
 	tlsConf, err := getCert(client.conf)
 	if err != nil {
 		return nil, err
+	}
+	ctx := context.Current()
+	if apmInfo, ok := ctx.Meta().Get(apm.TraceInfo); ok {
+		client.conf.apmInfo = apmInfo.(*apm.APMInfo)
 	}
 
 	orginalClient := &http.Client{

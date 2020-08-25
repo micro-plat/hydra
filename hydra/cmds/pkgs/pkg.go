@@ -47,33 +47,40 @@ func GetAppNameDesc(vname string) (string, string) {
 //GetBaseFlags 获取运行时的参数
 func GetBaseFlags() []cli.Flag {
 	flags := make([]cli.Flag, 0, 4)
-	if global.Def.RegistryAddr == "" {
-		flags = append(flags, registryFlag)
-	}
-	if global.Def.Name == "" &&
-		global.Def.PlatName == "" && global.Def.SysName == "" && len(global.Def.ServerTypes) == 0 &&
-		global.Def.ClusterName == "" {
-		flags = append(flags, nameFlag)
-	} else {
-		if global.Def.PlatName == "" {
-			flags = append(flags, platFlag)
-		}
-		if global.Def.SysName == "" {
-			flags = append(flags, sysNameFlag)
-		}
-		if len(global.Def.ServerTypes) == 0 {
-			flags = append(flags, serverTypesFlag)
-		}
-		if global.Def.ClusterName == "" {
-			flags = append(flags, clusterFlag)
-		}
-	}
+	// if global.Def.RegistryAddr == "" {
+	// 	flags = append(flags, registryFlag)
+	// }
+	// if global.Def.Name == "" &&
+	// 	global.Def.PlatName == "" && global.Def.SysName == "" && len(global.Def.ServerTypes) == 0 &&
+	// 	global.Def.ClusterName == "" {
+	// 	flags = append(flags, nameFlag)
+	// } else {
+	// 	if global.Def.PlatName == "" {
+	// 		flags = append(flags, platFlag)
+	// 	}
+	// 	if global.Def.SysName == "" {
+	// 		flags = append(flags, sysNameFlag)
+	// 	}
+	// 	if len(global.Def.ServerTypes) == 0 {
+	// 		flags = append(flags, serverTypesFlag)
+	// 	}
+	// 	if global.Def.ClusterName == "" {
+	// 		flags = append(flags, clusterFlag)
+	// 	}
+	// }
+
+	flags = append(flags, registryFlag)
+	flags = append(flags, nameFlag)
+	flags = append(flags, platFlag)
+	flags = append(flags, sysNameFlag)
+	flags = append(flags, serverTypesFlag)
+	flags = append(flags, clusterFlag)
 	return flags
 }
 
 var registryFlag = cli.StringFlag{
 	Name:        "registry,r",
-	Destination: &global.Def.RegistryAddr,
+	Destination: &global.FlagVal.RegistryAddr,
 	EnvVar:      "registry",
 	Value:       "lm://.",
 	Usage: "\033[;31m*\033[0m" + `注册中心地址。目前支持zookeeper(zk)和本地文件系统(fs)。注册中心用于保存服务启动和运行参数，
@@ -85,7 +92,7 @@ var registryFlag = cli.StringFlag{
 var nameFlag = cli.StringFlag{
 	Name:        "name,n",
 	EnvVar:      "name",
-	Destination: &global.Def.Name,
+	Destination: &global.FlagVal.Name,
 	Usage: "\033[;31m*\033[0m" + `服务全名，指服务在注册中心的完整名称，该名称是以/分隔的多级目录结构，完整的表示该服务所在平台，系统，服务
 	类型，集群名称，格式：/平台名称/系统名称/服务器类型/集群名称; 平台名称，系统名称，集群名称可以是任意字母
 	下划线或数字，服务器类型则为目前支持的几种服务器类型有:api,web,rpc,mqc,cron,ws。该参数可从环境变量中获取，
@@ -93,24 +100,22 @@ var nameFlag = cli.StringFlag{
 }
 var platFlag = cli.StringFlag{
 	Name:        "plat,p",
-	Destination: &global.Def.PlatName,
+	Destination: &global.FlagVal.PlatName,
 	Usage:       "\033[;31m*\033[0m平台名称",
 }
 
 var sysNameFlag = cli.StringFlag{
 	Name:        "system,s",
-	Destination: &global.Def.SysName,
-	Value:       global.AppName,
+	Destination: &global.FlagVal.SysName,
 	Usage:       "\033[;31m*\033[0m系统名称",
 }
 var serverTypesFlag = cli.StringFlag{
 	Name:        "server-types,S",
-	Destination: &global.Def.ServerTypeNames,
+	Destination: &global.FlagVal.ServerTypeNames,
 	Usage:       fmt.Sprintf("\033[;31m*\033[0m服务类型，目前支持的服务器类型有api,web,rpc,cron,mqc,ws"),
 }
 var clusterFlag = cli.StringFlag{
 	Name:        "cluster,c",
-	Value:       global.Version,
-	Destination: &global.Def.ClusterName,
+	Destination: &global.FlagVal.ClusterName,
 	Usage:       "\033[;31m*\033[0m集群名称",
 }

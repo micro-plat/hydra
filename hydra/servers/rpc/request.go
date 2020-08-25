@@ -39,6 +39,11 @@ func (m *Request) GetName() string {
 	return m.request.Service
 }
 
+//GetHost 远程Host
+func (m *Request) GetHost() string {
+	return m.header["Host"]
+}
+
 //GetService 服务名
 func (m *Request) GetService() string {
 	return m.request.Service

@@ -11,9 +11,22 @@ type Request struct {
 	form   map[string]interface{}
 	header map[string]string
 }
+type WSOption func(*Request)
+
+func WithUUID(uuid string) WSOption {
+	return func(req *Request) {
+		req.header["X-Request-Id"] = uuid
+	}
+}
+
+func WithClientIP(clientIP string) WSOption {
+	return func(req *Request) {
+		req.header["Client-IP"] = clientIP
+	}
+}
 
 //NewRequest 构建任务请求
-func NewRequest(method string, content []byte, uuid string, clientip string) (r *Request, err error) {
+func NewRequest(method string, content []byte, uuid string, clientip string, opts ...WSOption) (r *Request, err error) {
 	r = &Request{
 		method: method,
 		form:   make(map[string]interface{}),
@@ -21,6 +34,9 @@ func NewRequest(method string, content []byte, uuid string, clientip string) (r 
 			"X-Request-Id": uuid,
 			"Client-IP":    clientip,
 		},
+	}
+	for _, o := range opts {
+		o(r)
 	}
 	if err = json.Unmarshal(content, &r.form); err != nil {
 		return nil, fmt.Errorf("ws请求数据不是有效的json:%s %w", content, err)
@@ -31,6 +47,11 @@ func NewRequest(method string, content []byte, uuid string, clientip string) (r 
 //GetName 获取任务名称
 func (m *Request) GetName() string {
 	return m.form["service"].(string)
+}
+
+//GetHost 获取Client-IP
+func (m *Request) GetHost() string {
+	return m.header["Client-IP"]
 }
 
 //GetService 服务名

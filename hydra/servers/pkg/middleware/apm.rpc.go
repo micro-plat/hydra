@@ -19,16 +19,19 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
+	"github.com/micro-plat/lib4go/net"
 )
 
-//APM 调用链
-func APM() Handler {
+//APMRpc 调用链
+func APMRpc() Handler {
 
 	return func(ctx IMiddleContext) {
 		//fmt.Println("middleware.apm")
@@ -38,13 +41,24 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
-		ctx.Response().AddSpecial("apm")
+		ctx.Response().AddSpecial("apm.rpc")
 
 		octx := ctx.Context()
-		//fmt.Println("middleware.apm-1", octx)
-		oreq, _ := ctx.GetHttpReqResp()
+		tmpCtx, ok := ctx.Meta().Get("__context_")
+		if !ok {
+			ctx.Next()
+			return
+		}
+		dispCtx := tmpCtx.(*dispatcher.Context)
 
-		tracer, err := global.Def.APM.CreateTracer(global.Def.GetAPMService())
+		req := dispCtx.Request
+		header := req.GetHeader()
+
+		instance := fmt.Sprintf("%s_%s", global.Def.PlatName, net.GetLocalIPAddress())
+
+		apmInstance := components.Def.APM().GetRegularAPM(instance, apmconf.Config)
+
+		tracer, err := apmInstance.CreateTracer(global.Def.GetAPMService())
 		if err != nil {
 			ctx.Log().Warnf("APM.CreateTracer:%+v", err)
 			ctx.Next()
@@ -52,33 +66,34 @@ func APM() Handler {
 		}
 
 		//fmt.Println("middleware.apm-2", tracer, err)
-		span, rootctx, err := tracer.CreateEntrySpan(octx, getOperationName("", oreq), func() (string, error) {
-			return oreq.Header.Get(apm.Header), nil
+		span, rootctx, err := tracer.CreateEntrySpan(octx, getrpcOperationName(req), func() (string, error) {
+			return header[apm.Header], nil
+
 		})
 		if err != nil {
 			ctx.Log().Warnf("APM.CreateEntrySpan:%+v", err)
 			ctx.Next()
 			return
 		}
-		ctx.Meta().Set("apm_info", &apm.APMInfo{
+		ctx.Meta().Set(apm.TraceInfo, &apm.APMInfo{
 			Tracer:  tracer,
 			RootCtx: rootctx,
 		})
 		//fmt.Println("middleware.apm-3", oreq.Header.Get("X-Request-Id"))
-		span.SetComponent(componentIDGOHttpServer)
-		span.Tag("X-Request-Id", oreq.Header.Get("X-Request-Id"))
+		span.SetComponent(apmtypes.ComponentIDGORpcServer)
+		span.Tag("X-Request-Id", header["X-Request-Id"])
 		// for k, v := range h.extraTags {
 		//
 		// }
-		span.Tag(apm.TagHTTPMethod, oreq.Method)
-		span.Tag(apm.TagURL, fmt.Sprintf("%s%s", oreq.Host, oreq.URL.Path))
+		span.Tag(apm.TagHTTPMethod, req.GetMethod())
+		span.Tag(apm.TagURL, fmt.Sprintf("%s%s", req.GetHost(), req.GetService()))
 		span.SetSpanLayer(apm.SpanLayer_Http)
 
 		defer func() {
 			statusCode, _ := ctx.Response().GetRawResponse()
 			code := statusCode
 			if code >= 400 {
-				span.Error(time.Now(), "Error on handling request")
+				span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(code))
 			}
 			//fmt.Println("middleware.apm-4", statusCode)
 			span.Tag(apm.TagStatusCode, strconv.Itoa(code))
@@ -89,11 +104,6 @@ func APM() Handler {
 	}
 }
 
-const componentIDGOHttpServer = 5004
-
-func getOperationName(name string, r *http.Request) string {
-	if name == "" {
-		return fmt.Sprintf("/%s%s", r.Method, r.URL.Path)
-	}
-	return name
+func getrpcOperationName(r dispatcher.IRequest) string {
+	return fmt.Sprintf("%s", r.GetService())
 }

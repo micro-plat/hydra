@@ -24,12 +24,11 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/global"
 )
 
 var errInvalidTracer = fmt.Errorf("invalid tracer")
-
-const componentIDGOHttpClient = 5005
 
 type ClientConfig struct {
 	name      string
@@ -110,7 +109,7 @@ func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error)
 		return t.delegated.RoundTrip(req)
 	}
 	defer span.End()
-	span.SetComponent(componentIDGOHttpClient)
+	span.SetComponent(apmtypes.ComponentIDGOHttpClient)
 	for k, v := range t.extraTags {
 		span.Tag(k, v)
 	}
@@ -131,7 +130,7 @@ func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error)
 
 func getOperationName(name string, r *http.Request) string {
 	if name == "" {
-		return fmt.Sprintf("/%s%s", r.Method, r.URL.Path)
+		return fmt.Sprintf("%s", r.URL.Path)
 	}
 	return name
 }

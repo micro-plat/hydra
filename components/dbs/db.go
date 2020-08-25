@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components/container"
-	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/conf"
@@ -47,11 +46,13 @@ func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 		if err != nil {
 			return nil, fmt.Errorf("数据库[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
-		return db.NewDB(dbConf.Provider,
-			dbConf.ConnString,
-			dbConf.MaxOpen,
-			dbConf.MaxIdle,
-			dbConf.LifeTime)
+
+		return NewAPMDB(dbConf)
+		// return db.NewDB(dbConf.Provider,
+		// 	dbConf.ConnString,
+		// 	dbConf.MaxOpen,
+		// 	dbConf.MaxIdle,
+		// 	dbConf.LifeTime)
 	})
 	if err != nil {
 		return nil, err

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
@@ -56,12 +55,12 @@ type global struct {
 	//log 日志管理
 	log logger.ILogger
 
-	APM apm.IAPM
-
 	//LocalConfName 本地配置文件名称
 	LocalConfName string
 
-	UseAPM bool
+	//APMName APMName
+	APMName string
+
 	//close 关闭通道
 	close chan struct{}
 }
@@ -149,10 +148,10 @@ func (m *global) Log() logger.ILogger {
 
 //IsUseAPM 使用调用链
 func (m *global) IsUseAPM() bool {
-	return m.UseAPM
+	return m.APMName != ""
 }
 
-//IsUseAPM 使用调用链
+//IsUseAPM 调用链服务
 func (m *global) GetAPMService() string {
 	return fmt.Sprintf("%s_%s", m.GetPlatName(), m.GetSysName())
 }
@@ -173,6 +172,24 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 
 //check 检查参数
 func (m *global) check() (err error) {
+	if FlagVal.RegistryAddr != "" {
+		m.RegistryAddr = FlagVal.RegistryAddr
+	}
+	if FlagVal.Name != "" {
+		m.Name = FlagVal.Name
+	}
+	if FlagVal.PlatName != "" {
+		m.PlatName = FlagVal.PlatName
+	}
+	if FlagVal.SysName != "" {
+		m.SysName = FlagVal.SysName
+	}
+	if FlagVal.ServerTypeNames != "" {
+		m.ServerTypeNames = FlagVal.ServerTypeNames
+	}
+	if FlagVal.ClusterName != "" {
+		m.ClusterName = FlagVal.ClusterName
+	}
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
@@ -186,6 +203,9 @@ func (m *global) check() (err error) {
 		if !types.StringContains(ServerTypes, s) {
 			return fmt.Errorf("%s不支持，只能是%v", s, ServerTypes)
 		}
+	}
+	if m.SysName == "" {
+		m.SysName = AppName
 	}
 
 	if m.RegistryAddr == "" {

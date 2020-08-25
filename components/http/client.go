@@ -2,7 +2,6 @@ package http
 
 import (
 	"github.com/micro-plat/hydra/components/container"
-	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/hydra/components/pkgs/http"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -44,10 +43,6 @@ func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 		opt := []http.Option{
 			http.WithRequestID(ctx.User().GetRequestID()),
 		}
-		if apmInfo, ok := ctx.Meta().Get("apm_info"); ok {
-			opt = append(opt, http.WithAPMInfo(apmInfo.(*apm.APMInfo)))
-		}
-
 		if js == nil {
 			return http.NewClient(opt...)
 		}

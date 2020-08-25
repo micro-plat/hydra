@@ -82,10 +82,3 @@ func WithRaw(raw []byte) (Option, error) {
 		o = c
 	}, nil
 }
-
-//WithAPMInfo 设置请求上下文
-func WithAPMInfo(apmInfo *apm.APMInfo) Option {
-	return func(o *conf) {
-		o.apmInfo = apmInfo
-	}
-}

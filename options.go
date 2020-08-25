@@ -94,11 +94,8 @@ func WithConfFlag(name string, usage string) Option {
 }
 
 //WithAPM 调用链
-func WithAPM() Option {
+func WithAPM(name string) Option {
 	return func() {
-		OnReady(func() error {
-			global.Def.UseAPM = true
-			return nil
-		})
+		global.Def.APMName = name
 	}
 }

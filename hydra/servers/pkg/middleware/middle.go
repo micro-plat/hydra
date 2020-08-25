@@ -69,6 +69,7 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 //DispFunc 返回disp对应的处理函数
 func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 	return func(c *dispatcher.Context) {
+		
 		v, ok := c.Get("__middle_context__")
 		if !ok {
 			nctx := ctx.NewCtx(&dispCtx{Context: c}, tps[0])

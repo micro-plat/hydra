@@ -49,7 +49,7 @@ func buildOptions(config string) (opts []grpcreporter.GRPCReporterOption, err er
 	opts = make([]grpcreporter.GRPCReporterOption, 0)
 	json.Unmarshal([]byte(config), &cfgMap)
 	if v, ok := cfgMap["check_interval"]; ok {
-		opts = append(opts, grpcreporter.WithCheckInterval(time.Duration(types.GetInt64(v))))
+		opts = append(opts, grpcreporter.WithCheckInterval(time.Second*time.Duration(types.GetInt64(v))))
 	}
 
 	if v, ok := cfgMap["max_send_queue_size"]; ok {

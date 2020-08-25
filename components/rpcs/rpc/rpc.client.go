@@ -10,6 +10,7 @@ import (
 	"github.com/micro-plat/hydra/components/rpcs/balancer"
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/net"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -67,6 +68,8 @@ func WithTLS(tls []string) ClientOption {
 }
 
 type requestOption struct {
+	name     string
+	service  string
 	headers  map[string]string
 	failFast bool
 	method   string
@@ -99,6 +102,17 @@ func WithHeaders(p map[string][]string) RequestOption {
 	}
 }
 
+//WithHost 设置当前机器IP
+func WithHost(s ...string) RequestOption {
+	return func(o *requestOption) {
+		if len(s) > 0 {
+			o.headers["Host"] = strings.Join(s, ",")
+		} else {
+			o.headers["Host"] = net.GetLocalIPAddress()
+		}
+	}
+}
+
 //WithXRequestID 设置请求编号
 func WithXRequestID(s string) RequestOption {
 	return func(o *requestOption) {
@@ -126,6 +140,21 @@ func WithMethod(m string) RequestOption {
 		o.method = strings.ToUpper(m)
 	}
 }
+
+//WithContentType 设置请求类型
+func WithContentType(m string) RequestOption {
+	return func(o *requestOption) {
+		o.headers["Content-Type"] = m
+	}
+}
+
+//WithOperationName 设置请求延迟时长
+func WithOperationName(name string) RequestOption {
+	return func(o *requestOption) {
+		o.name = name
+	}
+}
+
 func (r *requestOption) getData(v interface{}) ([]byte, error) {
 	buff, err := json.Marshal(&v)
 	if err != nil {
@@ -212,30 +241,14 @@ func (c *Client) connect() (err error) {
 
 //Request 发送Request请求
 func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error) {
-
 	//处理可选参数
 	o := newOption()
 	for _, opt := range opts {
 		opt(o)
 	}
+	o.service = service
+	response, err := c.clientRequest(ctx, o, form)
 
-	h, err := o.getData(o.headers)
-	if err != nil {
-		return nil, err
-	}
-	f, err := o.getData(form)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := c.client.Request(ctx,
-		&pb.RequestContext{
-			Method:  o.method,
-			Service: service,
-			Header:  string(h),
-			Input:   string(f),
-		},
-		grpc.FailFast(o.failFast))
 	if err != nil {
 		return NewResponseByStatus(http.StatusInternalServerError, err), err
 	}

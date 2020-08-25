@@ -5,6 +5,11 @@ import (
 	"fmt"
 )
 
+const (
+	//TraceInfo TraceInfo
+	TraceInfo = "__apm_trace_info"
+)
+
 //IAPM 缓存接口
 type IAPM interface {
 	CreateTracer(service string) (tracer Tracer, err error)

@@ -35,9 +35,10 @@ type Request struct {
 
 //NewRequest 构建请求
 func NewRequest(j *conf.JSONConf) *Request {
-	return &Request{
+	req := &Request{
 		j: j,
 	}
+	return req
 }
 
 //RequestByCtx 将当前请求转化为RPC调用

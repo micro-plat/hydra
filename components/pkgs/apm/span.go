@@ -4,6 +4,7 @@ const (
 	TagURL             = "url"
 	TagStatusCode      = "status_code"
 	TagHTTPMethod      = "http.method"
+	TagRPCMethod       = "rpc.method"
 	TagDBType          = "db.type"
 	TagDBInstance      = "db.instance"
 	TagDBStatement     = "db.statement"
@@ -22,7 +23,7 @@ const (
 	SpanLayer_Cache        = 5
 )
 
-var (
+const (
 	Header string = "sw8"
 )
 
@@ -47,5 +48,12 @@ func WithSpanLayer(spanLayer int32) SpanOption {
 func WithTag(k, v string) SpanOption {
 	return func(s Span) {
 		s.Tag(k, v)
+	}
+}
+
+//WithOperationName x
+func WithOperationName(name string) SpanOption {
+	return func(s Span) {
+		s.SetOperationName(name)
 	}
 }
