@@ -37,7 +37,7 @@ func APMHttp() Handler {
 		//fmt.Println("middleware.apm")
 		//获取apm配置
 		apmconf := ctx.ServerConf().GetAPMConf()
-		if apmconf.Disable {
+		if !apmconf.GetEnable() {
 			ctx.Next()
 			return
 		}
@@ -48,7 +48,7 @@ func APMHttp() Handler {
 		oreq, _ := ctx.GetHttpReqResp()
 		instance := fmt.Sprintf("%s_%s", global.Def.PlatName, net.GetLocalIPAddress())
 
-		apmInstance := components.Def.APM().GetRegularAPM(instance, apmconf.Config)
+		apmInstance := components.Def.APM().GetRegularAPM(instance, apmconf.GetConfig())
 
 		tracer, err := apmInstance.CreateTracer(global.Def.GetAPMService())
 		if err != nil {

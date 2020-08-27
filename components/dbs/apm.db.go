@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
@@ -16,6 +17,7 @@ var _ IDB = &APMDB{}
 
 type APMDB struct {
 	orgdb    IDB
+	name     string
 	provider string
 }
 
@@ -31,7 +33,7 @@ type CallResult struct {
 	Data     interface{}
 }
 
-func NewAPMDB(dbConf xdb.DB) (IDB, error) {
+func NewAPMDB(dbName string, dbConf xdb.DB) (IDB, error) {
 
 	orgdb, err := db.NewDB(dbConf.Provider,
 		dbConf.ConnString,
@@ -43,6 +45,7 @@ func NewAPMDB(dbConf xdb.DB) (IDB, error) {
 	}
 
 	return &APMDB{
+		name:     dbName,
 		orgdb:    orgdb,
 		provider: dbConf.Provider,
 	}, err
@@ -59,7 +62,9 @@ func (d *APMDB) Query(sql string, input map[string]interface{}) (db.QueryRows, s
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "db.Query", callback)
+
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "db.Query", sqlkey, callback)
 	return result.Rows, result.Query, result.Args, result.Error
 }
 func (d *APMDB) Scalar(sql string, input map[string]interface{}) (interface{}, string, []interface{}, error) {
@@ -73,7 +78,8 @@ func (d *APMDB) Scalar(sql string, input map[string]interface{}) (interface{}, s
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "db.Scalar", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "db.Scalar", sqlkey, callback)
 	return result.Data, result.Query, result.Args, result.Error
 }
 func (d *APMDB) Execute(sql string, input map[string]interface{}) (int64, string, []interface{}, error) {
@@ -87,7 +93,8 @@ func (d *APMDB) Execute(sql string, input map[string]interface{}) (int64, string
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.provider, "db.Execute", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "db.Execute", sqlkey, callback)
 	return result.EffCount, result.Query, result.Args, result.Error
 
 }
@@ -102,7 +109,8 @@ func (d *APMDB) Executes(sql string, input map[string]interface{}) (int64, int64
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.provider, "db.Executes", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "db.Executes", sqlkey, callback)
 	return result.LastID, result.EffCount, result.Query, result.Args, result.Error
 
 }
@@ -115,7 +123,7 @@ func (d *APMDB) ExecuteSP(procName string, input map[string]interface{}, output 
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.provider, "db.ExecuteSP", callback)
+	result := apmExecute(d.provider, d.name, "db.ExecuteSP", procName, callback)
 	return result.EffCount, result.Query, result.Error
 
 }
@@ -129,7 +137,7 @@ func (d *APMDB) Begin() (db.IDBTrans, error) {
 			Error:   err,
 		}
 	}
-	result := apmExecute(d.provider, "db.Begin", callback)
+	result := apmExecute(d.provider, d.name, "db.Begin", d.name, callback)
 	return NewAPMDBTrans(d, result.DBTrans), result.Error
 }
 func (d *APMDB) Close() {
@@ -140,13 +148,15 @@ func (d *APMDB) GetProvider() string {
 	return d.provider
 }
 
-func apmExecute(provider, operationName string, callback DBCallback) *CallResult {
+func apmExecute(provider, name, operationName, sqlkey string, callback DBCallback) *CallResult {
+
 	ctx := context.Current()
 	apmCfg := ctx.ServerConf().GetAPMConf()
-	if apmCfg.Disable {
+	fmt.Println(apmCfg.String())
+	if !apmCfg.GetEnable() {
 		return callback()
 	}
-	if !apmCfg.DB {
+	if !apmCfg.GetDB(name) {
 		return callback()
 	}
 	fmt.Println("apmExecute.1")
@@ -163,6 +173,7 @@ func apmExecute(provider, operationName string, callback DBCallback) *CallResult
 		return nil
 	})
 	if err != nil {
+		ctx.Log().Error("(DB/Trans).tracer.CreateExitSpan:", err)
 		return callback()
 	}
 	fmt.Println("apmExecute.3")
@@ -170,8 +181,18 @@ func apmExecute(provider, operationName string, callback DBCallback) *CallResult
 	//执行db 请求
 	res := callback()
 	span.SetComponent(apmtypes.ComponentIDGODBClient)
-	span.Tag("DBProvider", provider)
+	span.Tag("DBProvider", fmt.Sprintf("%s[%s]", provider, name))
+	span.Tag("SQLKey", sqlkey)
 	span.SetSpanLayer(apm.SpanLayer_Database)
 
 	return res
+}
+
+func getSQLKey() string {
+	pc, file, line, ok := runtime.Caller(2)
+	if !ok {
+		return ""
+	}
+	fn := runtime.FuncForPC(pc)
+	return fmt.Sprintf("%s:%d=>%s", file, line, fn.Name())
 }

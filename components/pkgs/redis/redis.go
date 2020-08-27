@@ -40,3 +40,8 @@ func New(opts ...Option) (r *Client, err error) {
 	_, err = r.UniversalClient.Ping().Result()
 	return
 }
+
+//GetAddrs GetAddrs
+func (c *Client) GetAddrs() []string {
+	return c.opt.Address
+}

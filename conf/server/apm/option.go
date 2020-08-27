@@ -6,34 +6,34 @@ type Option func(*APM)
 //WithDisable 禁用配置
 func WithDisable() Option {
 	return func(a *APM) {
-		a.Disable = true
+		a.m["enable"] = false
 	}
 }
 
 //WithEnable 启用配置
 func WithEnable() Option {
 	return func(a *APM) {
-		a.Disable = false
+		a.m["enable"] = true
 	}
 }
 
 //WithConfig 配置名称
 func WithConfig(config string) Option {
 	return func(a *APM) {
-		a.Config = config
+		a.m["config"] = config
 	}
 }
 
 //WithDB 配置DB参与监控
 func WithDB(db bool) Option {
 	return func(a *APM) {
-		a.DB = db
+		a.m["db"] = db
 	}
 }
 
 //WithCache 配置Cache参与监控
 func WithCache(cache bool) Option {
 	return func(a *APM) {
-		a.Cache = cache
+		a.m["cache"] = cache
 	}
 }

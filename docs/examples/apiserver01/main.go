@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/components"
 	apmtypes "github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
+_	"github.com/micro-plat/hydra/components/pkgs/cache/redis"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
@@ -20,7 +21,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
-		hydra.WithAPM(apmtypes.SkyWalking),
+		hydra.WithAPM(apmtypes.SkyWalking),		
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver"),
 	)
@@ -121,7 +122,7 @@ func request(ctx hydra.IContext) (r interface{}) {
 		}
 	case "17":
 
-		sql := `insert into sup_system_logs
+		sqlxxxx := `insert into sup_system_logs
 (log_id, object_name, error_code, error_desc, create_time)
 values
 (seq_sys_log.nextval, 'test', 100, @err_desc, sysdate)`
@@ -138,10 +139,10 @@ values
 		rows, q, a, err := dbObj.Query("select 1 r from dual", nil)
 		ctx.Log().Info("dbObj.Query:", rows, q, a, err)
 
-		effRow, q, a, err := dbObj.Execute(sql, params)
+		effRow, q, a, err := dbObj.Execute(sqlxxxx, params)
 		ctx.Log().Info("dbObj.Execute:", effRow, q, a, err)
 
-		lastID, effRow, q, a, err := dbObj.Executes(sql, params)
+		lastID, effRow, q, a, err := dbObj.Executes(sqlxxxx, params)
 		ctx.Log().Info("dbObj.Executes:", lastID, effRow, q, a, err)
 
 		trans, err := dbObj.Begin()
@@ -152,14 +153,58 @@ values
 		rows, q, a, err = trans.Query("select 1 r from dual", nil)
 		ctx.Log().Info("trans.Query:", rows, q, a, err)
 
-		effRow, q, a, err = trans.Execute(sql, params)
+		effRow, q, a, err = trans.Execute(sqlxxxx, params)
 		ctx.Log().Info("trans.Execute:", effRow, q, a, err)
 
-		lastID, effRow, q, a, err = trans.Executes(sql, params)
+		lastID, effRow, q, a, err = trans.Executes(sqlxxxx, params)
 		ctx.Log().Info("trans.Executes:", lastID, effRow, q, a, err)
 
 		trans.Commit()
 		return "db.test"
+
+	case "18":
+		cacheObj := components.Def.Cache().GetRegularCache()
+		key:= "hydra:newcache:apm"
+		value:="10"
+		keys:= []string{key}
+		delta:= int64(2)
+		expiresAt := 120
+  
+		err := cacheObj.Add(key  , value  , expiresAt)
+
+		ctx.Log().Info("cacheObj.Add:", err)
+
+	r,err:=	cacheObj.Get(key  ) 
+	ctx.Log().Info("cacheObj.Get:", r,err)
+
+	v,err:=	cacheObj.Decrement(key  , delta  )
+
+	ctx.Log().Info("cacheObj.Decrement:", v,err)
+		v,err= cacheObj.Increment(key  , delta  )
+
+	ctx.Log().Info("cacheObj.Increment:", v,err)
+		rs,err:=cacheObj.Gets(keys ... ) 
+
+	ctx.Log().Info("cacheObj.Gets:", rs,err)
+	
+		err = cacheObj.Set(key  , value  , expiresAt  )
+
+	ctx.Log().Info("cacheObj.Set:", err)
+		err = cacheObj.Delay(key  , expiresAt  ) 
+
+	ctx.Log().Info("cacheObj.Delay:", err)
+		exists  := cacheObj.Exists(key  ) 
+
+	ctx.Log().Info("cacheObj.Exists.1:", exists)
+		err = cacheObj.Delete(key  ) 
+
+	ctx.Log().Info("cacheObj.Delete:", err)
+		
+		
+	exists  = cacheObj.Exists(key  ) 
+
+	ctx.Log().Info("cacheObj.Exists.2:",exists)
+return "cache.test"
 	default:
 		return hydra.G.PlatName
 	}

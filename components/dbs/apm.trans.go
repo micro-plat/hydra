@@ -10,6 +10,7 @@ var _ db.IDBTrans = &APMDBTrans{}
 type APMDBTrans struct {
 	orgTrans db.IDBTrans
 	provider string
+	name     string
 }
 
 func NewAPMDBTrans(dbObj *APMDB, dbTrans db.IDBTrans) db.IDBTrans {
@@ -18,6 +19,7 @@ func NewAPMDBTrans(dbObj *APMDB, dbTrans db.IDBTrans) db.IDBTrans {
 	}
 	return &APMDBTrans{
 		orgTrans: dbTrans,
+		name:     dbObj.name,
 		provider: dbObj.provider,
 	}
 }
@@ -33,7 +35,8 @@ func (d *APMDBTrans) Query(sql string, input map[string]interface{}) (db.QueryRo
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Query", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "Trans.Query", sqlkey, callback)
 	return result.Rows, result.Query, result.Args, result.Error
 }
 func (d *APMDBTrans) Scalar(sql string, input map[string]interface{}) (interface{}, string, []interface{}, error) {
@@ -47,7 +50,8 @@ func (d *APMDBTrans) Scalar(sql string, input map[string]interface{}) (interface
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Scalar", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider,  d.name,"Trans.Scalar", sqlkey, callback)
 	return result.Data, result.Query, result.Args, result.Error
 }
 func (d *APMDBTrans) Execute(sql string, input map[string]interface{}) (int64, string, []interface{}, error) {
@@ -61,7 +65,8 @@ func (d *APMDBTrans) Execute(sql string, input map[string]interface{}) (int64, s
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Execute", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "Trans.Execute", sqlkey, callback)
 	return result.EffCount, result.Query, result.Args, result.Error
 
 }
@@ -76,7 +81,8 @@ func (d *APMDBTrans) Executes(sql string, input map[string]interface{}) (int64, 
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Executes", callback)
+	sqlkey := getSQLKey()
+	result := apmExecute(d.provider, d.name, "Trans.Executes", sqlkey, callback)
 	return result.LastID, result.EffCount, result.Query, result.Args, result.Error
 
 }
@@ -88,7 +94,7 @@ func (d *APMDBTrans) Rollback() error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Rollback", callback)
+	result := apmExecute(d.provider, d.name, "Trans.Rollback", d.name, callback)
 	return result.Error
 
 }
@@ -99,7 +105,7 @@ func (d *APMDBTrans) Commit() error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.provider, "Trans.Commit", callback)
+	result := apmExecute(d.provider, d.name, "Trans.Commit", d.name, callback)
 	return result.Error
 }
 

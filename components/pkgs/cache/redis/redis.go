@@ -22,6 +22,7 @@ func New(addrs []string, raw string) (m *Client, err error) {
 	if err != nil {
 		return
 	}
+	m.servers = m.client.GetAddrs()
 	return
 }
 

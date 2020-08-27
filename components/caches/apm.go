@@ -16,6 +16,7 @@ var _ ICache = &APMCache{}
 
 type APMCache struct {
 	orgCache ICache
+	name     string
 	proto    string
 	servers  []string
 }
@@ -29,29 +30,27 @@ type CallResult struct {
 	Vals     []string
 }
 
-func NewAPMCache(js *conf.JSONConf) (ICache, error) {
+func NewAPMCache(name string, js *conf.JSONConf) (ICache, error) {
 	//dbConf cache.ICache
+	fmt.Println("NewAPMCache.0")
 	orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
 	if !global.Def.IsUseAPM() {
 		return orgCache, err
 	}
+	fmt.Println("NewAPMCache.1")
 	cacheExt, ok := orgCache.(cache.ICacheExt)
 	if !ok {
+		fmt.Println("NewAPMCache.1.e")
 		return orgCache, err
 	}
+	fmt.Println("NewAPMCache.2")
 	return &APMCache{
+		name:     name,
 		orgCache: orgCache,
 		proto:    js.GetString("proto"),
 		servers:  cacheExt.GetServers(),
 	}, err
 }
-
-//
-//
-//
-//
-
-// Close() error
 
 func (d *APMCache) Get(key string) (string, error) {
 	callback := func() *CallResult {
@@ -61,7 +60,7 @@ func (d *APMCache) Get(key string) (string, error) {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Get", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Get", key, d.servers, callback)
 	return result.Val, result.Error
 }
 
@@ -73,7 +72,7 @@ func (d *APMCache) Decrement(key string, delta int64) (n int64, err error) {
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Decrement", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Decrement", key, d.servers, callback)
 	return result.EffCount, result.Error
 }
 
@@ -85,7 +84,7 @@ func (d *APMCache) Increment(key string, delta int64) (n int64, err error) {
 			Error:    err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Increment", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Increment", key, d.servers, callback)
 	return result.EffCount, result.Error
 }
 
@@ -97,7 +96,7 @@ func (d *APMCache) Gets(key ...string) (r []string, err error) {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Gets", strings.Join(key, ";"), d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Gets", strings.Join(key, ";"), d.servers, callback)
 	return result.Vals, result.Error
 }
 func (d *APMCache) Add(key string, value string, expiresAt int) error {
@@ -107,7 +106,7 @@ func (d *APMCache) Add(key string, value string, expiresAt int) error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Add", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Add", key, d.servers, callback)
 	return result.Error
 }
 func (d *APMCache) Set(key string, value string, expiresAt int) error {
@@ -117,7 +116,7 @@ func (d *APMCache) Set(key string, value string, expiresAt int) error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Set", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Set", key, d.servers, callback)
 	return result.Error
 }
 func (d *APMCache) Delete(key string) error {
@@ -127,7 +126,7 @@ func (d *APMCache) Delete(key string) error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Delete", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Delete", key, d.servers, callback)
 	return result.Error
 }
 func (d *APMCache) Exists(key string) bool {
@@ -137,7 +136,7 @@ func (d *APMCache) Exists(key string) bool {
 			Exists: exists,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Exists", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Exists", key, d.servers, callback)
 	return result.Exists
 }
 func (d *APMCache) Delay(key string, expiresAt int) error {
@@ -147,7 +146,7 @@ func (d *APMCache) Delay(key string, expiresAt int) error {
 			Error: err,
 		}
 	}
-	result := apmExecute(d.proto, "Cache.Delay", key, d.servers, callback)
+	result := apmExecute(d.proto, d.name, "Cache.Delay", key, d.servers, callback)
 	return result.Error
 }
 
@@ -159,38 +158,42 @@ func (d *APMCache) GetProvider() string {
 	return d.proto
 }
 
-func apmExecute(provider, operationName, url string, servers []string, callback DBCallback) *CallResult {
+func apmExecute(provider, name, operationName, url string, servers []string, callback DBCallback) *CallResult {
 	ctx := context.Current()
 	apmCfg := ctx.ServerConf().GetAPMConf()
-	if apmCfg.Disable {
+	if !apmCfg.GetEnable() {
 		return callback()
 	}
-	if !apmCfg.Cache {
+	if !apmCfg.GetCache(name) {
 		return callback()
 	}
-	fmt.Println("apmExecute.1")
+	//fmt.Println("apmExecute.1")
 	tmp, ok := ctx.Meta().Get(apm.TraceInfo)
 	if !ok {
 		return callback()
 	}
-	fmt.Println("apmExecute.2")
+	//fmt.Println("apmExecute.2")
 	apmInfo := tmp.(*apm.APMInfo)
 	rootCtx := apmInfo.RootCtx
 	tracer := apmInfo.Tracer
 
-	span, err := tracer.CreateExitSpan(rootCtx, operationName, strings.Join(servers, ","), func(header string) error {
+	peer := strings.Join(servers, ",")
+	//fmt.Println("apmExecute.2-1", peer)
+
+	span, err := tracer.CreateExitSpan(rootCtx, operationName, peer, func(header string) error {
 		return nil
 	})
 	if err != nil {
+		ctx.Log().Error("tracer.CreateExitSpan:", err)
 		return callback()
 	}
-	fmt.Println("apmExecute.3")
+	//fmt.Println("apmExecute.3")
 	defer span.End()
 	//执行db 请求
 	res := callback()
 	span.SetComponent(apmtypes.ComponentIDGOCacheClient)
-	span.Tag("CacheProvider", provider)
-	span.Tag(apm.TagURL, url)
+	span.Tag("CacheProto", fmt.Sprintf("%s[%s]", provider, name))
+	span.Tag("CacheKey", url)
 	span.SetSpanLayer(apm.SpanLayer_Cache)
 
 	return res

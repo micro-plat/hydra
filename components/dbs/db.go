@@ -47,7 +47,7 @@ func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 			return nil, fmt.Errorf("数据库[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
 
-		return NewAPMDB(dbConf)
+		return NewAPMDB(name, dbConf)
 		// return db.NewDB(dbConf.Provider,
 		// 	dbConf.ConnString,
 		// 	dbConf.MaxOpen,
