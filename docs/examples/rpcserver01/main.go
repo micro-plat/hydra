@@ -5,9 +5,13 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	//_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
+	crpc "github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/types"
 )
 
 var buff []byte
@@ -23,13 +27,16 @@ type logstruct struct {
 //服务注册与系统勾子函数
 func main() {
 	app := hydra.NewApp(
-		hydra.WithPlatName("taobao"),
-		hydra.WithSystemName("apiserver"),
-		hydra.WithClusterName("A"),
-		hydra.WithRegistry("zk://192.168.0.109"),
+		//hydra.WithPlatName("taobao"),
+		//hydra.WithSystemName("apiserver"),
+		hydra.WithDebug(),
+		hydra.WithClusterName("t"),
 		hydra.WithServerTypes(rpc.RPC, http.API),
+		hydra.WithAPM(apmtypes.SkyWalking),
+		hydra.WithPlatName("test"),
+		hydra.WithSystemName("rpcserver01"),
 	)
-
+	hydra.Conf.RPC(":8281")
 	app.API("/request", request)
 	app.RPC("/rpc", rpcRequest)
 	app.RPC("/rpc/log", log)
@@ -38,8 +45,14 @@ func main() {
 
 func request(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("id:", ctx.Request().GetString("id"))
-
-	response, err := hydra.C.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc", "abc")
+	ctx.Log().Debug(
+		hydra.G.GetClusterName(),
+		hydra.G.GetPlatName(),
+		hydra.G.GetSysName(),
+	)
+	response, err := hydra.C.RPC().GetRegularRPC().Request(ctx.Context(), "/rpc@test_debug", map[string]string{
+		"tp": ctx.Request().GetString("id"),
+	}, crpc.WithContentType("application/json"))
 
 	if err != nil {
 		return err
@@ -57,7 +70,13 @@ func log(ctx hydra.IContext) (r interface{}) {
 
 func rpcRequest(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("------request------")
-	switch ctx.Request().GetString("tp") { //从路由配置中获取参数值 ctx.Request.Param.Get...
+	ctx.Log().Info(ctx.Request().GetMap())
+	var bdmp types.XMap
+	bdmp, err := ctx.Request().GetBodyMap()
+	ctx.Log().Info(ctx.Request().GetBody())
+
+	ctx.Log().Error(err)
+	switch bdmp.GetString("tp") { //从路由配置中获取参数值 ctx.Request.Param.Get...
 	case "1":
 		return "success"
 	case "2":

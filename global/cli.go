@@ -14,6 +14,17 @@ var ConfCli = newCli("conf")
 
 var clis = make([]*ucli, 0, 1)
 
+type CliFlagObject struct {
+	RegistryAddr    string
+	Name            string
+	PlatName        string
+	SysName         string
+	ServerTypeNames string
+	ClusterName     string
+}
+
+var FlagVal = &CliFlagObject{}
+
 //IUCLI 终端命令参数
 type IUCLI interface {
 	AddFlag(name string, usage string)

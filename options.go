@@ -92,3 +92,10 @@ func WithConfFlag(name string, usage string) Option {
 		global.ConfCli.AddFlag(name, usage)
 	}
 }
+
+//WithAPM 调用链
+func WithAPM(name string) Option {
+	return func() {
+		global.Def.APMName = name
+	}
+}

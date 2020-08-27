@@ -22,7 +22,13 @@ func New(addrs []string, raw string) (m *Client, err error) {
 	if err != nil {
 		return
 	}
+	m.servers = m.client.GetAddrs()
 	return
+}
+
+//GetServers 获取服务器列表
+func (c *Client) GetServers() []string {
+	return c.servers
 }
 
 // Get 根据key获取redis中的数据

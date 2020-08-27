@@ -44,22 +44,22 @@ func doRun(c *cli.Context) (err error) {
 		return nil
 	}
 
+	globalData := global.Current()
 	//4.创建trace性能跟踪
-	if err = startTrace(global.Current().GetTrace()); err != nil {
+	if err = startTrace(globalData.GetTrace()); err != nil {
 		return
 	}
 
 	//5. 处理本地内存作为注册中心的服务发布问题
-	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
+	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
 		if err := pkgs.Pub2Registry(true); err != nil {
 			return err
 		}
 	}
-
 	//6. 创建服务器
-	server := servers.NewRspServers(global.Current().GetRegistryAddr(),
-		global.Current().GetPlatName(), global.Current().GetSysName(),
-		global.Current().GetServerTypes(), global.Current().GetClusterName())
+	server := servers.NewRspServers(globalData.GetRegistryAddr(),
+		globalData.GetPlatName(), globalData.GetSysName(),
+		globalData.GetServerTypes(), globalData.GetClusterName())
 	if err := server.Start(); err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ LOOP:
 	}
 
 	//通知关闭各组件
-	global.Current().Close()
+	globalData.Close()
 
 	global.Def.Log().Info(global.AppName, "已安全退出")
 	return nil

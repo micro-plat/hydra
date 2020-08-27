@@ -3,11 +3,14 @@ package http
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/micro-plat/hydra/components/pkgs/apm"
 )
 
 //conf 配置信息
 type conf struct {
 	RequestId         string        `json:"-"`
+	apmInfo           *apm.APMInfo  `json:"-"`
 	ConnectionTimeout time.Duration `json:"ctime"`
 	RequestTimeout    time.Duration `json:"rtime"`
 	Certs             []string      `json:"certs"`

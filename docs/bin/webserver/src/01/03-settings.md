@@ -100,8 +100,8 @@ OPTIONS:
 ```go
 hydra.OnReady(func() {
       hydra.Conf.API(":8080", api.WithTrace()).
-      WhiteListGroup(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
-      BlackList("192.168.4.120").	
+      WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
+      BlackList(blacklist.WithIP("192.168.4.120")).	
       Header()	
 })
 ```
