@@ -83,12 +83,8 @@ START:
 		select {
 		case _, ok := <-f.ticker.C:
 			if ok {
-				f.lock.Lock()
-				_, err := f.buffer.WriteTo(writeHandler(f.writeNow))
-				f.buffer.Reset()
-				f.lock.Unlock()
-				if err != nil {
-					logger.SysLog.Error(err)
+				if err := f.writeNow(); err != nil {
+					logger.SysLog.Errorf("未正确写入日志:%v", err)
 				}
 			} else {
 				break START
@@ -98,22 +94,31 @@ START:
 }
 
 //writeNow 将数据写入远程请求
-func (f *RPCAppender) writeNow(p []byte) (n int, err error) {
-	if len(p) == 0 {
+func (f *RPCAppender) writeNow() (err error) {
+	if f.buffer.Len() == 0 {
 		return 0, nil
 	}
-	p[0] = byte('[')
-	p = append(p, byte(']'))
-	var buff bytes.Buffer
-	if err := json.Compact(&buff, []byte(p)); err != nil {
-		err = fmt.Errorf("json.compact.err:%v", err)
-		return 0, err
+	write := func(p []byte) (n int, err error) {
+		p[0] = byte('[')
+		p = append(p, byte(']'))
+		var buff bytes.Buffer
+		if err := json.Compact(&buff, []byte(p)); err != nil {
+			err = fmt.Errorf("json.compact.err:%v", err)
+			return 0, err
+		}
+		_, err = components.Def.RPC().GetRegularRPC().Request(context.GetContextWithDefault(), f.service, buff.Bytes())
+		if err != nil {
+			return 0, fmt.Errorf("rlog写入日志失败 %s %w", f.service, err)
+		}
+		return len(p) - 1, nil
 	}
-	_, err = components.Def.RPC().GetRegularRPC().Request(context.GetContextWithDefault(), f.service, buff.Bytes())
-	if err != nil {
-		return 0, fmt.Errorf("rlog写入日志失败 %s %w", f.service, err)
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	if _, err := f.buffer.WriteTo(writeHandler(write)); err != nil {
+		return err
 	}
-	return len(p) - 1, nil
+	f.buffer.Reset()
+	return nil
 }
 
 type writeHandler func(p []byte) (n int, err error)
