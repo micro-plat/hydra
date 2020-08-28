@@ -69,7 +69,7 @@ func (f *RPCAppender) Close() error {
 		f.ticker.Stop()
 		f.lock.Lock()
 		defer f.lock.Unlock()
-		f.buffer.WriteTo(writeHandler(f.writeNow))
+		f.writeNow()
 	})
 
 	return nil
@@ -96,7 +96,7 @@ START:
 //writeNow 将数据写入远程请求
 func (f *RPCAppender) writeNow() (err error) {
 	if f.buffer.Len() == 0 {
-		return 0, nil
+		return nil
 	}
 	write := func(p []byte) (n int, err error) {
 		p[0] = byte('[')

@@ -52,7 +52,7 @@ func (s *Comparer) IsValueChanged(names ...string) (isChanged bool) {
 	}
 	knames := append(s.valueNames, names...)
 	for _, name := range knames {
-		if s.nconf.GetMainConf().GetString(name) != s.oconf.GetMainConf().GetString(name) {
+		if s.nconf.GetRootConf().GetString(name) != s.oconf.GetRootConf().GetString(name) {
 			return true
 		}
 	}

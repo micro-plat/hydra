@@ -121,7 +121,7 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
-	return NewServer(cnf.GetMainConf().GetMainConf().GetString("address"), cnf.GetRouterConf().Routers)
+	return NewServer(cnf.GetMainConf().GetRootConf().GetString("address"), cnf.GetRouterConf().Routers)
 }
 
 func init() {

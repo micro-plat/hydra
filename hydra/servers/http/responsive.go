@@ -111,22 +111,22 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	switch tp {
 	case WS:
 		return NewWSServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetMainConf().GetString("address", ":8070"),
+			cnf.GetMainConf().GetRootConf().GetString("address", ":8070"),
 			cnf.GetRouterConf().Routers,
 			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
+			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
+			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
+				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
+				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
 	default:
 		return NewServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetMainConf().GetString("address", ":8080"),
+			cnf.GetMainConf().GetRootConf().GetString("address", ":8080"),
 			cnf.GetRouterConf().Routers,
 			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetMainConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetMainConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetMainConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetMainConf().GetInt("rhTimeout", 30)))
+			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
+			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
+				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
+				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
 	}
 
 }
