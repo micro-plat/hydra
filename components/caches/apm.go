@@ -184,7 +184,7 @@ func apmExecute(provider, name, operationName, url string, servers []string, cal
 		return nil
 	})
 	if err != nil {
-		ctx.Log().Error("tracer.CreateExitSpan:", err)
+		err = fmt.Errorf("tracer.CreateExitSpan:%+v", err)
 		return callback()
 	}
 	//fmt.Println("apmExecute.3")
