@@ -1,12 +1,26 @@
 # github.com/BurntSushi/toml v0.3.1
+## explicit
 github.com/BurntSushi/toml
+# github.com/SkyAPM/go2sky v0.5.0
+## explicit
+github.com/SkyAPM/go2sky
+github.com/SkyAPM/go2sky/internal/idgen
+github.com/SkyAPM/go2sky/internal/tool
+github.com/SkyAPM/go2sky/propagation
+github.com/SkyAPM/go2sky/reporter
+github.com/SkyAPM/go2sky/reporter/grpc/common
+github.com/SkyAPM/go2sky/reporter/grpc/language-agent
+github.com/SkyAPM/go2sky/reporter/grpc/management
 # github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
+## explicit
 github.com/asaskevich/govalidator
 # github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
+## explicit
 github.com/bradfitz/gomemcache/memcache
 # github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/dsnet/compress v0.0.1
+## explicit
 github.com/dsnet/compress
 github.com/dsnet/compress/bzip2
 github.com/dsnet/compress/bzip2/internal/sais
@@ -14,11 +28,13 @@ github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
 # github.com/eclipse/paho.mqtt.golang v1.2.0
+## explicit
 github.com/eclipse/paho.mqtt.golang
 github.com/eclipse/paho.mqtt.golang/packets
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.6.2
+## explicit
 github.com/gin-gonic/gin
 github.com/gin-gonic/gin/binding
 github.com/gin-gonic/gin/internal/bytesconv
@@ -32,6 +48,7 @@ github.com/go-playground/universal-translator
 # github.com/go-playground/validator/v10 v10.2.0
 github.com/go-playground/validator/v10
 # github.com/go-redis/redis v6.15.6+incompatible
+## explicit
 github.com/go-redis/redis
 github.com/go-redis/redis/internal
 github.com/go-redis/redis/internal/consistenthash
@@ -40,33 +57,46 @@ github.com/go-redis/redis/internal/pool
 github.com/go-redis/redis/internal/proto
 github.com/go-redis/redis/internal/util
 # github.com/golang/protobuf v1.3.3
+## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.1
+## explicit
 github.com/golang/snappy
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
+## explicit
 github.com/gorilla/websocket
 # github.com/json-iterator/go v1.1.9
 github.com/json-iterator/go
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
+## explicit
 github.com/keybase/go-ps/darwincgo
 # github.com/leodido/go-urn v1.2.0
 github.com/leodido/go-urn
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
+# github.com/mattn/go-oci8 v0.0.8
+## explicit
+github.com/mattn/go-oci8
 # github.com/mholt/archiver v3.1.1+incompatible
+## explicit
 github.com/mholt/archiver
 # github.com/micro-plat/cli v1.1.0
+## explicit
 github.com/micro-plat/cli
 github.com/micro-plat/cli/cmds
 github.com/micro-plat/cli/logs
 # github.com/micro-plat/gmq v1.0.1
+## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
 # github.com/micro-plat/lib4go v0.4.0 => ../../../github.com/micro-plat/lib4go
+## explicit
 github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/concurrent/cmap
 github.com/micro-plat/lib4go/db
@@ -96,13 +126,19 @@ github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
 github.com/modern-go/reflect2
 # github.com/nwaples/rardecode v1.1.0
+## explicit
 github.com/nwaples/rardecode
 # github.com/pierrec/lz4 v2.5.2+incompatible
+## explicit
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
 # github.com/pkg/profile v1.4.0
+## explicit
 github.com/pkg/profile
 # github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
+## explicit
 github.com/qxnw/lib4go/security/md5
 github.com/qxnw/lib4go/sysinfo/pipes
 github.com/qxnw/lib4go/types
@@ -114,32 +150,44 @@ github.com/samuel/go-zookeeper/zk
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/ugorji/go/codec v1.1.7
+## explicit
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.7
+## explicit
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
 # github.com/urfave/cli v1.22.4
+## explicit
 github.com/urfave/cli
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+## explicit
 github.com/xi2/xz
 # github.com/yosssi/gmq v0.0.1
 github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
 # github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
+## explicit
 github.com/zkfy/cron
 # github.com/zkfy/go-cache v2.1.0+incompatible
+## explicit
 github.com/zkfy/go-cache
 # github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
+## explicit
 github.com/zkfy/go-metrics
 # github.com/zkfy/jwt-go v3.0.0+incompatible
 github.com/zkfy/jwt-go
 # github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
+## explicit
 github.com/zkfy/log
 # github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
+## explicit
 github.com/zkfy/stompngo
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+## explicit
 # golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
+## explicit
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -151,6 +199,7 @@ golang.org/x/net/proxy
 golang.org/x/net/trace
 golang.org/x/net/websocket
 # golang.org/x/sys v0.0.0-20200508214444-3aab700007d7
+## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -167,10 +216,12 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+## explicit
 golang.org/x/time/rate
 # google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.27.1
+## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -208,4 +259,6 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # gopkg.in/yaml.v2 v2.2.8
+## explicit
 gopkg.in/yaml.v2
+# github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

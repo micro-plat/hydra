@@ -14,7 +14,7 @@ type IMainConf interface {
 	IPub
 	IsStarted() bool
 	IsTrace() bool
-	GetMainConf() *JSONConf
+	GetRootConf() *JSONConf
 	GetMainObject(v interface{}) (int32, error)
 	GetSubConf(name string) (*JSONConf, error)
 	GetSubObject(name string, v interface{}) (int32, error)

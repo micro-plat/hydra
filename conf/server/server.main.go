@@ -9,10 +9,10 @@ import (
 
 //MainConf 服务器主配置
 type MainConf struct {
-	mainConf *conf.JSONConf
-	version  int32
-	subConfs map[string]conf.JSONConf
-	registry registry.IRegistry
+	rootConf    *conf.JSONConf
+	rootVersion int32
+	subConfs    map[string]conf.JSONConf
+	registry    registry.IRegistry
 	conf.IPub
 	closeCh chan struct{}
 }
@@ -39,8 +39,8 @@ func (c *MainConf) load() (err error) {
 	if err != nil {
 		return err
 	}
-	c.mainConf = conf
-	c.version = conf.GetVersion()
+	c.rootConf = conf
+	c.rootVersion = conf.GetVersion()
 
 	//获取子配置
 	c.subConfs, err = c.getSubConf(c.GetMainPath())
@@ -79,7 +79,7 @@ func (c *MainConf) getSubConf(path string) (map[string]conf.JSONConf, error) {
 
 //IsTrace 是否跟踪请求或响应
 func (c *MainConf) IsTrace() bool {
-	return c.mainConf.GetString("trace", "true") == "true"
+	return c.rootConf.GetString("trace", "true") == "true"
 }
 
 //GetRegistry 获取注册中心
@@ -89,22 +89,22 @@ func (c *MainConf) GetRegistry() registry.IRegistry {
 
 //IsStarted 当前服务是否已启动
 func (c *MainConf) IsStarted() bool {
-	return c.mainConf.GetString("status", "start") == "start"
+	return c.rootConf.GetString("status", "start") == "start"
 }
 
 //GetVersion 获取版本号
 func (c *MainConf) GetVersion() int32 {
-	return c.version
+	return c.rootVersion
 }
 
-//GetMainConf 获取当前主配置
-func (c *MainConf) GetMainConf() *conf.JSONConf {
-	return c.mainConf
+//GetRootConf 获取当前主配置
+func (c *MainConf) GetRootConf() *conf.JSONConf {
+	return c.rootConf
 }
 
 //GetMainObject 获取主配置信息
 func (c *MainConf) GetMainObject(v interface{}) (int32, error) {
-	conf := c.GetMainConf()
+	conf := c.GetRootConf()
 	if err := conf.Unmarshal(&v); err != nil {
 		err = fmt.Errorf("获取主配置失败:%v", err)
 		return 0, err

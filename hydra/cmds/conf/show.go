@@ -96,7 +96,7 @@ func (s *show) printMainConf() error {
 		if err != nil {
 			return err
 		}
-		s.getNodes(sc.GetMainConf().GetSubConfPath("main"), sc.GetMainConf().GetMainConf(), s.subs)
+		s.getNodes(sc.GetMainConf().GetSubConfPath("main"), sc.GetMainConf().GetRootConf(), s.subs)
 		sc.GetMainConf().Iter(func(path string, v *conf.JSONConf) bool {
 			npath := sc.GetMainConf().GetSubConfPath(path)
 			s.getNodes(npath, v, s.subs)
