@@ -37,7 +37,7 @@ func APMRpc() Handler {
 		//fmt.Println("middleware.apm")
 		//获取apm配置
 		apmconf := ctx.ServerConf().GetAPMConf()
-		if !apmconf.GetEnable() {
+		if apmconf.Disable {
 			ctx.Next()
 			return
 		}
