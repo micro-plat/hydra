@@ -152,7 +152,6 @@ func apmExecute(provider, name, operationName, sqlkey string, callback DBCallbac
 
 	ctx := context.Current()
 	apmCfg := ctx.ServerConf().GetAPMConf()
-	fmt.Println(apmCfg.String())
 	if !apmCfg.GetEnable() {
 		return callback()
 	}
@@ -173,7 +172,7 @@ func apmExecute(provider, name, operationName, sqlkey string, callback DBCallbac
 		return nil
 	})
 	if err != nil {
-		ctx.Log().Error("(DB/Trans).tracer.CreateExitSpan:", err)
+		err = fmt.Errorf("(DB/Trans).tracer.CreateExitSpan:%+v", err)
 		return callback()
 	}
 	fmt.Println("apmExecute.3")
