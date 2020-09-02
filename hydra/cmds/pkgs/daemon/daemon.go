@@ -177,6 +177,11 @@ type Daemon interface {
 
 	// Run - run executable service
 	Run(e Executable) (string, error)
+
+	//Rollback the service install
+	Rollback(string) (string, error)
+
+	Backup(string) (string, error)
 }
 
 // Executable interface defines controlling methods of executable service

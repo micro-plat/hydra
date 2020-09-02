@@ -11,13 +11,16 @@ import (
 
 	_ "github.com/micro-plat/hydra/hydra/cmds/conf"
 	_ "github.com/micro-plat/hydra/hydra/cmds/install"
-	_ "github.com/micro-plat/hydra/hydra/cmds/remove"
+		_ "github.com/micro-plat/hydra/hydra/cmds/remove"
 	_ "github.com/micro-plat/hydra/hydra/cmds/run"
 	_ "github.com/micro-plat/hydra/hydra/cmds/update"
 
 	_ "github.com/micro-plat/hydra/hydra/cmds/start"
 	_ "github.com/micro-plat/hydra/hydra/cmds/status"
 	_ "github.com/micro-plat/hydra/hydra/cmds/stop"
+
+	_ "github.com/micro-plat/hydra/hydra/cmds/backup"
+	_ "github.com/micro-plat/hydra/hydra/cmds/rollback"
 
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"

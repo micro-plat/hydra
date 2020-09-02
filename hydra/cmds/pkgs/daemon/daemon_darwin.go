@@ -193,6 +193,51 @@ func (darwin *darwinRecord) Run(e Executable) (string, error) {
 	return runAction + " completed.", nil
 }
 
+//Rollback the service install
+func (darwin *darwinRecord) Rollback(backupfile string) (string, error) {
+	rollbackAction := "Rollbacking " + darwin.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return rollbackAction + failed, err
+	}
+
+	if !darwin.isInstalled() {
+		return rollbackAction + failed, ErrNotInstalled
+	}
+
+	if err := exec.Command("cp", backupfile,  darwin.servicePath()).Run(); err != nil {
+		return rollbackAction + failed, err
+	} 
+
+	if err := exec.Command("launchctl", "load", darwin.servicePath()).Run(); err != nil {
+		return rollbackAction + failed, err
+	}
+
+	return rollbackAction + success, nil
+}
+
+func (darwin *darwinRecord) Backup(backupfile string)  (string, error)  {
+	backupAction := "Backuping " + darwin.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return backupAction + failed, err
+	}
+
+	if !darwin.isInstalled() {
+		return backupAction + success, ErrNotInstalled
+	}
+
+	if _, ok := darwin.checkRunning(); ok {
+		return backupAction + failed, ErrAlreadyRunning
+	}
+
+	if err := exec.Command("cp",  darwin.servicePath(), backupfile).Run(); err != nil {
+		return backupAction + failed, err
+	}
+
+	return backupAction + success, nil
+}
+
 var propertyList = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">

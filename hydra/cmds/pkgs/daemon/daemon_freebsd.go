@@ -234,6 +234,51 @@ func (bsd *bsdRecord) Run(e Executable) (string, error) {
 	return runAction + " completed.", nil
 }
 
+//Rollback the service install
+func (darwin *bsdRecord) Rollback(backupfile string) (string, error) {
+	rollbackAction := "Rollbacking " + darwin.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return rollbackAction + failed, err
+	}
+
+	if !darwin.isInstalled() {
+		return rollbackAction + failed, ErrNotInstalled
+	}
+	srvPath := darwin.servicePath()
+	if err := exec.Command("cp", backupfile, srvPath).Run(); err != nil {
+		return rollbackAction + failed, err
+	}
+
+	if err := os.Chmod(srvPath, 0755); err != nil {
+		return rollbackAction + failed, err
+	}
+
+	return rollbackAction + success, nil
+}
+
+func (darwin *bsdRecord) Backup(backupfile string) (string, error) {
+	backupAction := "Backuping " + darwin.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return backupAction + failed, err
+	}
+
+	if !darwin.isInstalled() {
+		return backupAction + success, ErrNotInstalled
+	}
+
+	if _, ok := darwin.checkRunning(); ok {
+		return backupAction + failed, ErrAlreadyRunning
+	}
+
+	if err := exec.Command("cp", darwin.servicePath(), backupfile).Run(); err != nil {
+		return backupAction + failed, err
+	}
+
+	return backupAction + success, nil
+}
+
 var bsdConfig = `#!/bin/sh
 #
 # PROVIDE: {{.Name}}

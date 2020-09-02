@@ -320,3 +320,27 @@ func (windows *windowsRecord) Run(e Executable) (string, error) {
 
 	return runAction + " completed.", nil
 }
+
+//Rollback the service install
+func (windows *windowsRecord) Rollback(backupfile string) (string, error) {
+	rollbackAction := "Rollbacking " + windows.description + ":"
+	return rollbackAction + "window backup 未实现", nil
+	// filebytes, err := ioutil.ReadFile(backupfile)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// argsVal := string(filebytes)
+
+	// msg, err := windows.Install(strings.Split(argsVal, ",")...)
+	// if err != nil {
+	// 	return msg, err
+	// }
+
+	//return rollbackAction + success, nil
+}
+
+func (windows *windowsRecord) Backup(backupfile string) (string, error) {
+	backupAction := "Backuping " + windows.description + ":"
+
+	return backupAction + "window backup 未实现", nil
+}

@@ -215,6 +215,63 @@ func (linux *systemVRecord) Run(e Executable) (string, error) {
 	return runAction + " completed.", nil
 }
 
+//Rollback the service install
+func (linux *systemVRecord) Rollback(backupfile string) (string, error) {
+	rollbackAction := "Rollbacking " + linux.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return rollbackAction + failed, err
+	}
+
+	if !linux.isInstalled() {
+		return rollbackAction + failed, ErrNotInstalled
+	}
+	srvPath := linux.servicePath()
+
+	if err := exec.Command("cp", backupfile, srvPath).Run(); err != nil {
+		return rollbackAction + failed, err
+	}
+
+	if err := os.Chmod(srvPath, 0755); err != nil {
+		return rollbackAction + failed, err
+	}
+
+	for _, i := range [...]string{"2", "3", "4", "5"} {
+		if err := os.Symlink(srvPath, "/etc/rc"+i+".d/S87"+linux.name); err != nil {
+			continue
+		}
+	}
+	for _, i := range [...]string{"0", "1", "6"} {
+		if err := os.Symlink(srvPath, "/etc/rc"+i+".d/K17"+linux.name); err != nil {
+			continue
+		}
+	}
+
+	return rollbackAction + success, nil
+}
+
+func (linux *systemVRecord) Backup(backupfile string) (string, error) {
+	backupAction := "Backuping " + linux.description + ":"
+
+	if ok, err := checkPrivileges(); !ok {
+		return backupAction + failed, err
+	}
+
+	if !linux.isInstalled() {
+		return backupAction + success, ErrNotInstalled
+	}
+
+	if _, ok := linux.checkRunning(); ok {
+		return backupAction + failed, ErrAlreadyRunning
+	}
+
+	if err := exec.Command("cp", linux.servicePath(), backupfile).Run(); err != nil {
+		return backupAction + failed, err
+	}
+
+	return backupAction + success, nil
+}
+
 var systemVConfig = `#! /bin/sh
 #
 #       /etc/rc.d/init.d/{{.Name}}
