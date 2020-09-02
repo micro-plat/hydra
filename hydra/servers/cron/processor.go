@@ -48,6 +48,10 @@ func NewProcessor() (p *Processor) {
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc()) //
 
+	middleware.AddMiddlewareHook(cronmiddlewares, func(item middleware.Handler) {
+		p.Engine.Use(item.DispFunc())
+	})
+
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
