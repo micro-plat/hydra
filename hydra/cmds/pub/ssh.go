@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/micro-plat/lib4go/utility"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
@@ -18,8 +19,10 @@ type sshClient struct {
 	userName   string
 	pwd        string
 	client     *ssh.Client
+	tmpPath    string
 	localpath  string
-	remotepath string
+	remotePath string
+	remoteFile string
 }
 
 func (s *sshClient) Bind(host string, localpath string, pwd string) error {
@@ -39,7 +42,7 @@ func (s *sshClient) Bind(host string, localpath string, pwd string) error {
 	if len(paths) != 2 || paths[1] == "" || paths[0] == "" {
 		return fmt.Errorf("%s 远程路径有误,格式:userName@ip:/path", host)
 	}
-	s.remotepath = paths[1]
+
 	hosts := strings.Split(paths[0], "@")
 	if len(hosts) != 2 || hosts[1] == "" || hosts[0] == "" {
 		return fmt.Errorf("%s 远程服务有误,格式:userName@ip:/path", host)
@@ -47,6 +50,9 @@ func (s *sshClient) Bind(host string, localpath string, pwd string) error {
 	s.userName = hosts[0]
 	s.ip = hosts[1]
 	s.localpath = localpath
+	s.remotePath = paths[1]
+	s.remoteFile = path.Join(s.remotePath, path.Base(s.localpath))
+	s.tmpPath = path.Join(os.TempDir(), utility.GetGUID())
 	s.pwd = pwd
 	return nil
 }
@@ -87,7 +93,6 @@ func (s *sshClient) GetFileName() string {
 func (s *sshClient) UploadFile() error {
 
 	//1.处理文件名
-	remoteFileName := path.Base(s.localpath)
 	srcFile, err := os.Open(s.localpath)
 	if err != nil {
 		return fmt.Errorf("打开文件失败%w", err)
@@ -98,12 +103,13 @@ func (s *sshClient) UploadFile() error {
 	//2. 构建sftp客户端
 	ftpclient, err := sftp.NewClient(s.client)
 	if err != nil {
-		return fmt.Errorf("创建ftp客户端失败%w", err)
+		return fmt.Errorf("创建sftp客户端失败%w", err)
 	}
 	defer ftpclient.Close()
 
 	//3. 创建远程文件
-	dstFile, e := ftpclient.Create(path.Join(s.remotepath, remoteFileName))
+
+	dstFile, e := ftpclient.Create(s.tmpPath)
 	if e != nil {
 		return fmt.Errorf("创建文件失败%w", e)
 
@@ -136,7 +142,7 @@ func (s *sshClient) UploadScript() (string, error) {
 
 	//2. 创建远程文件
 	p, script := getScript()
-	dstFile, e := ftpclient.Create(path.Join(s.remotepath, p))
+	dstFile, e := ftpclient.Create(path.Join(s.remotePath, p))
 	if e != nil {
 		return "", fmt.Errorf("创建文件失败%w", e)
 
@@ -149,13 +155,13 @@ func (s *sshClient) UploadScript() (string, error) {
 
 //GoWorkDir 转到工作目录
 func (s *sshClient) GoWorkDir() (err error) {
-	if _, err = s.run(cmdCD.CMD(s.remotepath)); err == nil {
+	if _, err = s.run(cmdCD.CMD(s.remotePath)); err == nil {
 		return nil
 	}
-	if _, err = s.run(cmdMkdir.CMD(s.remotepath)); err != nil {
+	if _, err = s.run(cmdMkdir.CMD(s.remotePath)); err != nil {
 		return err
 	}
-	if _, err = s.run(cmdCD.CMD(s.remotepath)); err == nil {
+	if _, err = s.run(cmdCD.CMD(s.remotePath)); err == nil {
 		return nil
 	}
 	return err
@@ -166,5 +172,8 @@ func (s *sshClient) ExecScript(p string) error {
 	if _, err := s.run(cmdRunScript.CMD(p)); err == nil {
 		return nil
 	}
+	return nil
+}
+func (s *sshClient) Close() error {
 	return nil
 }

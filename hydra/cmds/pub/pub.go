@@ -36,6 +36,7 @@ func doPub(c *cli.Context) (err error) {
 	}
 
 	//4.切换工作目录
+	defer client.Close()
 	if err := client.GoWorkDir(); err != nil {
 		return err
 	}
