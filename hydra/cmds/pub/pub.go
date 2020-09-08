@@ -26,7 +26,7 @@ func doPub(c *cli.Context) (err error) {
 	}
 
 	//2.绑定请求参数
-	if err = client.Bind(c.Args().Get(1), global.AppName, pwd); err != nil {
+	if err = client.Bind(c.Args().Get(0), global.AppName, pwd); err != nil {
 		return err
 	}
 
@@ -56,5 +56,11 @@ func doPub(c *cli.Context) (err error) {
 	if err := client.ExecScript(path); err != nil {
 		return err
 	}
+
+	//8.删除文件
+	if err := client.RmWorkDir(); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -3,9 +3,11 @@ package pub
 import (
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/micro-plat/lib4go/utility"
 	"github.com/pkg/sftp"
@@ -15,14 +17,15 @@ import (
 var client = &sshClient{}
 
 type sshClient struct {
-	ip         string
-	userName   string
-	pwd        string
-	client     *ssh.Client
-	tmpPath    string
-	localpath  string
-	remotePath string
-	remoteFile string
+	ip          string
+	userName    string
+	pwd         string
+	client      *ssh.Client
+	tmpDir      string
+	tmpPath     string
+	tmpFile     string
+	localPath   string
+	projectPath string
 }
 
 func (s *sshClient) Bind(host string, localpath string, pwd string) error {
@@ -49,10 +52,11 @@ func (s *sshClient) Bind(host string, localpath string, pwd string) error {
 	}
 	s.userName = hosts[0]
 	s.ip = hosts[1]
-	s.localpath = localpath
-	s.remotePath = paths[1]
-	s.remoteFile = path.Join(s.remotePath, path.Base(s.localpath))
-	s.tmpPath = path.Join(os.TempDir(), utility.GetGUID())
+	s.localPath = localpath
+	_, s.projectPath = path.Split(paths[1])
+	s.tmpDir = utility.GetGUID()
+	s.tmpFile = path.Join(s.tmpDir, s.localPath)
+	s.tmpPath = path.Join(os.TempDir(), s.tmpDir)
 	s.pwd = pwd
 	return nil
 }
@@ -63,37 +67,43 @@ func (s *sshClient) Login() (err error) {
 		return fmt.Errorf("服务器ip,用户名，密码不能为空")
 	}
 	//通过ssh连接到远程服务器
-	s.client, err = ssh.Dial("tcp", s.ip, &ssh.ClientConfig{
+	address := fmt.Sprintf("%s:22", s.ip)
+	s.client, err = ssh.Dial("tcp", address, &ssh.ClientConfig{
 		User: s.userName,
 		Auth: []ssh.AuthMethod{ssh.Password(s.pwd)},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
+		},
+		Timeout: 30 * time.Second,
 	})
 	return err
 }
 
 //run 执行命令
-func (s *sshClient) run(cmd string) (string, error) {
+func (s *sshClient) run(cmd string) error {
 	if s.client == nil {
-		return "", fmt.Errorf("服务器未登录")
+		return fmt.Errorf("服务器未登录")
 	}
 	session, err := s.client.NewSession()
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer session.Close()
-	buff, err := session.CombinedOutput(cmd)
-	return string(buff), err
+	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
+	return session.Run(cmd)
 }
 
 //获取当前文件名
 func (s *sshClient) GetFileName() string {
-	return path.Base(s.localpath)
+	return path.Base(s.localPath)
 }
 
 //上传文件
 func (s *sshClient) UploadFile() error {
 
 	//1.处理文件名
-	srcFile, err := os.Open(s.localpath)
+	srcFile, err := os.Open(s.localPath)
 	if err != nil {
 		return fmt.Errorf("打开文件失败%w", err)
 
@@ -109,11 +119,14 @@ func (s *sshClient) UploadFile() error {
 
 	//3. 创建远程文件
 
-	dstFile, e := ftpclient.Create(s.tmpPath)
+	dstFile, e := ftpclient.Create(path.Join(s.tmpPath, s.localPath))
 	if e != nil {
 		return fmt.Errorf("创建文件失败%w", e)
 
 	}
+
+	fileInfo, _ := srcFile.Stat()
+	idx := 0
 	defer dstFile.Close()
 	buffer := make([]byte, 1024)
 	for {
@@ -125,8 +138,13 @@ func (s *sshClient) UploadFile() error {
 				return fmt.Errorf("读取文件出错%w", err)
 			}
 		}
+		idx++
+		percent := Progress(1024 * 100 * idx / int(fileInfo.Size()))
+		percent.Show()
 		dstFile.Write(buffer[:n])
 	}
+
+	fmt.Print("\n")
 	return nil
 }
 
@@ -142,7 +160,7 @@ func (s *sshClient) UploadScript() (string, error) {
 
 	//2. 创建远程文件
 	p, script := getScript()
-	dstFile, e := ftpclient.Create(path.Join(s.remotePath, p))
+	dstFile, e := ftpclient.Create(path.Join(s.tmpPath, p))
 	if e != nil {
 		return "", fmt.Errorf("创建文件失败%w", e)
 
@@ -150,30 +168,34 @@ func (s *sshClient) UploadScript() (string, error) {
 	defer dstFile.Close()
 	dstFile.Write([]byte(script))
 
+	if err := ftpclient.Chmod(path.Join(s.tmpPath, p), 755); err != nil {
+		return "", fmt.Errorf("更改脚本文件权限失败%w", e)
+	}
+
 	return p, nil
 }
 
 //GoWorkDir 转到工作目录
 func (s *sshClient) GoWorkDir() (err error) {
-	if _, err = s.run(cmdCD.CMD(s.remotePath)); err == nil {
-		return nil
-	}
-	if _, err = s.run(cmdMkdir.CMD(s.remotePath)); err != nil {
+
+	if err := s.run(cmdMkdir.CMD(s.tmpPath)); err != nil {
 		return err
 	}
-	if _, err = s.run(cmdCD.CMD(s.remotePath)); err == nil {
-		return nil
-	}
-	return err
+
+	return s.run(cmdCD.CMD(s.tmpPath))
 }
 
 //ExecScript
 func (s *sshClient) ExecScript(p string) error {
-	if _, err := s.run(cmdRunScript.CMD(p)); err == nil {
-		return nil
-	}
-	return nil
+	scriptPath := path.Join(s.tmpPath, p)
+	return s.run(cmdRunScript.CMD(scriptPath))
 }
+
 func (s *sshClient) Close() error {
 	return nil
+}
+
+//删除工作目录
+func (s *sshClient) RmWorkDir() (err error) {
+	return s.run(cmdRm.CMD(s.tmpPath))
 }
