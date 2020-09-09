@@ -30,6 +30,7 @@ require (
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/urfave/cli v1.22.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
+	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da
 	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 	github.com/zkfy/go-cache v2.1.0+incompatible
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
@@ -41,6 +42,7 @@ require (
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	google.golang.org/grpc v1.27.1
 	gopkg.in/yaml.v2 v2.2.8
+	layeh.com/gopher-luar v1.0.8
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

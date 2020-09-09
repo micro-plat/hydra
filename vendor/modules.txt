@@ -174,6 +174,12 @@ github.com/xi2/xz
 # github.com/yosssi/gmq v0.0.1
 github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
+# github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da
+## explicit
+github.com/yuin/gopher-lua
+github.com/yuin/gopher-lua/ast
+github.com/yuin/gopher-lua/parse
+github.com/yuin/gopher-lua/pm
 # github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 ## explicit
 github.com/zkfy/cron
@@ -278,4 +284,7 @@ google.golang.org/grpc/tap
 # gopkg.in/yaml.v2 v2.2.8
 ## explicit
 gopkg.in/yaml.v2
+# layeh.com/gopher-luar v1.0.8
+## explicit
+layeh.com/gopher-luar
 # github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

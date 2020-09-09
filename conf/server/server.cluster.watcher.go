@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/micro-plat/hydra/conf"
-	"github.com/qxnw/lib4go/utility"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 type cwatcher struct {
