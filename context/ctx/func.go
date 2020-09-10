@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/micro-plat/hydra/context"
-	lua "github.com/yuin/gopher-lua"
 )
 
 type funcs struct {
@@ -39,24 +38,4 @@ func (r *funcs) TmplFuncs() context.TFuncs {
 		r.tmplFuncs["get_request_id"] = r.ctx.user.GetRequestID
 	})
 	return r.tmplFuncs
-}
-func (r *funcs) LuaFuncs() context.LuaModules {
-	r.lonce.Do(func() {
-		r.luaFuncs["request"] = map[string]lua.LGFunction{
-			"get_string":     r.ctx.getLuaRquestString,
-			"get_int":        r.ctx.getLuaRquestInt,
-			"get_param":      r.ctx.getLuaRequestParam,
-			"get_path":       r.ctx.getLuaRequestPath,
-			"get_router":     r.ctx.getLuaRouter,
-			"get_header":     r.ctx.getLuaHeader,
-			"get_cookie":     r.ctx.getLuaCookie,
-			"get_client_ip":  r.ctx.getLuaClientIP,
-			"get_request_id": r.ctx.getLuaRquestID,
-		}
-		r.luaFuncs["response"] = map[string]lua.LGFunction{
-			"get_status":  r.ctx.getLuaResponseStatus,
-			"get_content": r.ctx.getLuaResponseContent,
-		}
-	})
-	return r.luaFuncs
 }
