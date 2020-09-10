@@ -1,6 +1,7 @@
 package lua
 
 import (
+	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 )
 
@@ -24,10 +25,41 @@ func WithKV(kv map[string]interface{}) Option {
 }
 
 //WithType 添加全局类型
-func WithType(name string, value interface{}) Option {
+func WithType(tpName string, value interface{}) Option {
 	return func(L *VM) {
-		L.s.SetGlobal(name, luar.NewType(L.s, value))
+		L.s.SetGlobal(tpName, luar.NewType(L.s, value))
 
+	}
+}
+
+//WithMT 将对象转换为LuaTable
+func WithMT(tpName string, value interface{}) Option {
+	return func(L *VM) {
+		L.s.SetGlobal(tpName, luar.MT(L.s, value))
+	}
+}
+
+//WithModule 添加模块
+func WithModule(module string, exports map[string]lua.LGFunction) Option {
+	return func(L *VM) {
+		L.s.PreloadModule(module, func(L *lua.LState) int {
+			mod := L.SetFuncs(L.NewTable(), exports)
+			L.Push(mod)
+			return 1
+		})
+	}
+}
+
+//WithModules 添加多个模块
+func WithModules(modules map[string]map[string]lua.LGFunction) Option {
+	return func(L *VM) {
+		for module, exports := range modules {
+			L.s.PreloadModule(module, func(L *lua.LState) int {
+				mod := L.SetFuncs(L.NewTable(), exports)
+				L.Push(mod)
+				return 1
+			})
+		}
 	}
 }
 

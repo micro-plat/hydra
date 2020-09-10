@@ -32,8 +32,8 @@ type VM struct {
 
 //New 构建LUA虚拟机
 func New(script string, opts ...Option) (*VM, error) {
-	L := lua.NewState(lua.Options{SkipOpenLibs: true})
-	vm := &VM{s: L}
+	s := lua.NewState(lua.Options{IncludeGoStackTrace: true})
+	vm := &VM{s: s}
 	for _, opt := range opts {
 		opt(vm)
 	}
@@ -53,7 +53,7 @@ func New(script string, opts ...Option) (*VM, error) {
 		if err != nil {
 			return nil, fmt.Errorf("脚本加载失败%w", err)
 		}
-		vm.main = L.NewFunctionFromProto(proto)
+		vm.main = vm.s.NewFunctionFromProto(proto)
 	}
 	return vm, nil
 }

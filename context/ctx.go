@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
+	lua "github.com/yuin/gopher-lua"
 )
 
 const (
@@ -215,6 +216,9 @@ type IContext interface {
 	//TmplFuncs 模板函数列表
 	TmplFuncs() TFuncs
 
+	//LuaFuncs 脚本函数列表
+	LuaModules() LuaModules
+
 	//User 用户信息
 	User() IUser
 
@@ -227,6 +231,9 @@ type IContext interface {
 
 //TFuncs 用于模板翻译的函数列表
 type TFuncs map[string]interface{}
+
+//LuaModules 供lua脚本使用的模块信息
+type LuaModules map[string]map[string]lua.LGFunction
 
 //Add 添加一个自定义的函数
 func (f TFuncs) Add(name string, handle interface{}) {

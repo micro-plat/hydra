@@ -4,35 +4,59 @@ import (
 	"sync"
 
 	"github.com/micro-plat/hydra/context"
+	lua "github.com/yuin/gopher-lua"
 )
 
-type tmplFuncs struct {
-	once  sync.Once
-	funcs map[string]interface{}
-	ctx   *Ctx
+type funcs struct {
+	tonce     sync.Once
+	lonce     sync.Once
+	tmplFuncs context.TFuncs
+	luaFuncs  context.LuaModules
+	ctx       *Ctx
 }
 
-func newTmplFunc(ctx *Ctx) *tmplFuncs {
-	return &tmplFuncs{
-		funcs: make(map[string]interface{}),
-		ctx:   ctx,
+func newTmplFunc(ctx *Ctx) *funcs {
+	return &funcs{
+		tmplFuncs: make(context.TFuncs),
+		luaFuncs:  make(context.LuaModules),
+		ctx:       ctx,
 	}
 }
 
-func (r *tmplFuncs) Instance() context.TFuncs {
-	r.once.Do(func() {
-		r.funcs["get_req"] = r.ctx.request.GetString
-		r.funcs["get_req_string"] = r.ctx.request.GetString
-		r.funcs["get_req_int"] = r.ctx.request.GetInt
-		r.funcs["get_param"] = r.ctx.request.Param
-		r.funcs["get_path"] = r.ctx.request.path.GetRequestPath
-		r.funcs["get_router"] = r.ctx.request.path.GetRouter
-		r.funcs["get_header"] = r.ctx.request.path.GetHeader
-		r.funcs["get_cookie"] = r.ctx.request.path.getCookie
-		r.funcs["get_status"] = r.ctx.response.getStatus
-		r.funcs["get_content"] = r.ctx.response.getContent
-		r.funcs["get_client_ip"] = r.ctx.user.GetClientIP
-		r.funcs["get_request_id"] = r.ctx.user.GetRequestID
+func (r *funcs) TmplFuncs() context.TFuncs {
+	r.tonce.Do(func() {
+		r.tmplFuncs["get_req"] = r.ctx.request.GetString
+		r.tmplFuncs["get_req_string"] = r.ctx.request.GetString
+		r.tmplFuncs["get_req_int"] = r.ctx.request.GetInt
+		r.tmplFuncs["get_param"] = r.ctx.request.Param
+		r.tmplFuncs["get_path"] = r.ctx.request.path.GetRequestPath
+		r.tmplFuncs["get_router"] = r.ctx.request.path.GetRouter
+		r.tmplFuncs["get_header"] = r.ctx.request.path.GetHeader
+		r.tmplFuncs["get_cookie"] = r.ctx.request.path.getCookie
+		r.tmplFuncs["get_status"] = r.ctx.response.getStatus
+		r.tmplFuncs["get_content"] = r.ctx.response.getContent
+		r.tmplFuncs["get_client_ip"] = r.ctx.user.GetClientIP
+		r.tmplFuncs["get_request_id"] = r.ctx.user.GetRequestID
 	})
-	return r.funcs
+	return r.tmplFuncs
+}
+func (r *funcs) LuaFuncs() context.LuaModules {
+	r.lonce.Do(func() {
+		r.luaFuncs["request"] = map[string]lua.LGFunction{
+			"get_string":     r.ctx.getLuaRquestString,
+			"get_int":        r.ctx.getLuaRquestInt,
+			"get_param":      r.ctx.getLuaRequestParam,
+			"get_path":       r.ctx.getLuaRequestPath,
+			"get_router":     r.ctx.getLuaRouter,
+			"get_header":     r.ctx.getLuaHeader,
+			"get_cookie":     r.ctx.getLuaCookie,
+			"get_client_ip":  r.ctx.getLuaClientIP,
+			"get_request_id": r.ctx.getLuaRquestID,
+		}
+		r.luaFuncs["response"] = map[string]lua.LGFunction{
+			"get_status":  r.ctx.getLuaResponseStatus,
+			"get_content": r.ctx.getLuaResponseContent,
+		}
+	})
+	return r.luaFuncs
 }

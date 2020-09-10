@@ -33,7 +33,7 @@ type Ctx struct {
 	user       *user
 	serverConf server.IServerConf
 	cancelFunc func()
-	funs       *tmplFuncs
+	funs       *funcs
 	tid        uint64
 }
 
@@ -59,8 +59,8 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 }
 
 //Meta 获取元数据配置
-func (r *Ctx) Meta() conf.IMeta {
-	return r.meta
+func (c *Ctx) Meta() conf.IMeta {
+	return c.meta
 }
 
 //Request 获取请求对象
@@ -70,7 +70,12 @@ func (c *Ctx) Request() context.IRequest {
 
 //TmplFuncs 提供用于模板转换的函数表达式
 func (c *Ctx) TmplFuncs() context.TFuncs {
-	return c.funs.Instance()
+	return c.funs.TmplFuncs()
+}
+
+//LuaModules 提供用于模板转换的函数表达式
+func (c *Ctx) LuaModules() context.LuaModules {
+	return c.funs.LuaFuncs()
 }
 
 //Response 获取响应对象
