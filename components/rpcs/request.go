@@ -30,11 +30,11 @@ type IRequest interface {
 
 //Request RPC Request
 type Request struct {
-	j *conf.JSONConf
+	j *conf.RawConf
 }
 
 //NewRequest 构建请求
-func NewRequest(j *conf.JSONConf) *Request {
+func NewRequest(j *conf.RawConf) *Request {
 	req := &Request{
 		j: j,
 	}

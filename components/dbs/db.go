@@ -40,7 +40,7 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
 		var dbConf xdb.DB
 		err := js.Unmarshal(&dbConf)
 		if err != nil {

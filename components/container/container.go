@@ -18,7 +18,7 @@ type ICloser interface {
 
 //IContainer 组件容器
 type IContainer interface {
-	GetOrCreate(typ string, name string, creator func(conf *conf.JSONConf) (interface{}, error)) (interface{}, error)
+	GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error)
 	ICloser
 }
 
@@ -40,7 +40,7 @@ func NewContainer() *Container {
 }
 
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
-func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.JSONConf) (interface{}, error)) (interface{}, error) {
+func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error) {
 
 	vc, err := server.Cache.GetVarConf()
 	if err != nil {

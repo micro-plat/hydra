@@ -17,7 +17,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/qxnw/lib4go/sysinfo/pipes"
+	"github.com/micro-plat/lib4go/sysinfo/pipes"
 )
 
 //GetPackage 获取文件package信息
@@ -42,7 +42,7 @@ func GetPackage(url string) (*Package, error) {
 		return nil, fmt.Errorf("下载package更新包出错:%w", err)
 	}
 
-	cnf, err := conf.NewJSONConf(buffer, 0)
+	cnf, err := conf.NewRawConfByJson(buffer, 0)
 	if err != nil {
 		return nil, fmt.Errorf("package更新包必须是有效的json格式:%w", err)
 	}

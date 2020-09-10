@@ -14,15 +14,15 @@ type IMainConf interface {
 	IPub
 	IsStarted() bool
 	IsTrace() bool
-	GetRootConf() *JSONConf
+	GetRootConf() *RawConf
 	GetMainObject(v interface{}) (int32, error)
-	GetSubConf(name string) (*JSONConf, error)
+	GetSubConf(name string) (*RawConf, error)
 	GetSubObject(name string, v interface{}) (int32, error)
 	GetRegistry() registry.IRegistry
 	GetVersion() int32
 	GetCluster(clustName ...string) (ICluster, error)
 	Has(names ...string) bool
-	Iter(f func(path string, conf *JSONConf) bool)
+	Iter(f func(path string, conf *RawConf) bool)
 	Close() error
 }
 
@@ -72,12 +72,12 @@ type IPub interface {
 //IVarConf 变量配置
 type IVarConf interface {
 	GetVersion() int32
-	GetConf(tp string, name string) (*JSONConf, error)
+	GetConf(tp string, name string) (*RawConf, error)
 	GetConfVersion(tp string, name string) (int32, error)
 	GetObject(tp string, name string, v interface{}) (int32, error)
 	GetClone() IVarConf
 	Has(tp string, name string) bool
-	Iter(f func(k string, conf *JSONConf) bool)
+	Iter(f func(k string, conf *RawConf) bool)
 }
 
 //IWatcher 集群监控

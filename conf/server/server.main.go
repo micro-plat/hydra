@@ -9,9 +9,9 @@ import (
 
 //MainConf 服务器主配置
 type MainConf struct {
-	rootConf    *conf.JSONConf
+	rootConf    *conf.RawConf
 	rootVersion int32
-	subConfs    map[string]conf.JSONConf
+	subConfs    map[string]conf.RawConf
 	registry    registry.IRegistry
 	conf.IPub
 	closeCh chan struct{}
@@ -22,7 +22,7 @@ func NewMainConf(platName string, systemName string, serverType string, clusterN
 	s = &MainConf{
 		registry: rgst,
 		IPub:     NewPub(platName, systemName, serverType, clusterName),
-		subConfs: make(map[string]conf.JSONConf),
+		subConfs: make(map[string]conf.RawConf),
 		closeCh:  make(chan struct{}),
 	}
 	if err = s.load(); err != nil {
@@ -50,12 +50,12 @@ func (c *MainConf) load() (err error) {
 	return nil
 }
 
-func (c *MainConf) getSubConf(path string) (map[string]conf.JSONConf, error) {
+func (c *MainConf) getSubConf(path string) (map[string]conf.RawConf, error) {
 	confs, _, err := c.registry.GetChildren(path)
 	if err != nil {
 		return nil, err
 	}
-	values := make(map[string]conf.JSONConf)
+	values := make(map[string]conf.RawConf)
 	for _, p := range confs {
 		currentPath := registry.Join(path, p)
 		value, err := getValue(c.registry, currentPath)
@@ -98,7 +98,7 @@ func (c *MainConf) GetVersion() int32 {
 }
 
 //GetRootConf 获取当前主配置
-func (c *MainConf) GetRootConf() *conf.JSONConf {
+func (c *MainConf) GetRootConf() *conf.RawConf {
 	return c.rootConf
 }
 
@@ -113,7 +113,7 @@ func (c *MainConf) GetMainObject(v interface{}) (int32, error) {
 }
 
 //GetSubConf 指定子配置
-func (c *MainConf) GetSubConf(name string) (*conf.JSONConf, error) {
+func (c *MainConf) GetSubConf(name string) (*conf.RawConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
@@ -155,7 +155,7 @@ func (c *MainConf) Has(names ...string) bool {
 }
 
 //Iter 迭代所有配置
-func (c *MainConf) Iter(f func(path string, conf *conf.JSONConf) bool) {
+func (c *MainConf) Iter(f func(path string, conf *conf.RawConf) bool) {
 	for path, v := range c.subConfs {
 		if !f(path, &v) {
 			break
@@ -168,7 +168,7 @@ func (c *MainConf) Close() error {
 	close(c.closeCh)
 	return nil
 }
-func getValue(registry registry.IRegistry, path string) (*conf.JSONConf, error) {
+func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	data, version, err := registry.GetValue(path)
 	if err != nil {
 		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
@@ -181,7 +181,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.JSONConf, error) 
 	if len(rdata) == 0 {
 		rdata = []byte("{}")
 	}
-	childConf, err := conf.NewJSONConf(rdata, version)
+	childConf, err := conf.NewRawConfByJson(rdata, version)
 	if err != nil {
 		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
 		return nil, err

@@ -1,27 +1,27 @@
 package ctx
 
 import (
-	"github.com/micro-plat/hydra/context"
+	xlua "github.com/micro-plat/hydra/pkgs/lua"
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 )
 
-func (r *funcs) LuaFuncs() context.LuaModules {
+func (r *funcs) LuaFuncs() xlua.Modules {
 	r.lonce.Do(func() {
 		r.luaFuncs["request"] = map[string]lua.LGFunction{
-			"get_string":     r.getLuaRquestString,
-			"get_int":        r.getLuaRquestInt,
-			"get_param":      r.getLuaRequestParam,
-			"get_path":       r.getLuaRequestPath,
-			"get_router":     r.getLuaRouter,
-			"get_header":     r.getLuaHeader,
-			"get_cookie":     r.getLuaCookie,
-			"get_client_ip":  r.getLuaClientIP,
-			"get_request_id": r.getLuaRquestID,
+			"getString":    r.getLuaRquestString,
+			"getInt":       r.getLuaRquestInt,
+			"getParam":     r.getLuaRequestParam,
+			"getPath":      r.getLuaRequestPath,
+			"getRouter":    r.getLuaRouter,
+			"getHeader":    r.getLuaHeader,
+			"getCookie":    r.getLuaCookie,
+			"getClientIP":  r.getLuaClientIP,
+			"getRequestID": r.getLuaRquestID,
 		}
 		r.luaFuncs["response"] = map[string]lua.LGFunction{
-			"get_status":  r.getLuaResponseStatus,
-			"get_content": r.getLuaResponseContent,
+			"getStatus":  r.getLuaResponseStatus,
+			"getContent": r.getLuaResponseContent,
 		}
 	})
 	return r.luaFuncs

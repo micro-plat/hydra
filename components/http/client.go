@@ -38,7 +38,7 @@ func (s *StandardHTTPClient) GetRegularClient(names ...string) (d IClient) {
 //GetClient 获取http请求对象
 func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
 		ctx := context.Current()
 		opt := []http.Option{
 			http.WithRequestID(ctx.User().GetRequestID()),

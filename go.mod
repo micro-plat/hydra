@@ -20,12 +20,11 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v0.4.0
+	github.com/micro-plat/lib4go v1.0.2
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
 	github.com/pkg/sftp v1.12.0
-	github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
 	github.com/ugorji/go/codec v1.1.7
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/urfave/cli v1.22.4
@@ -45,4 +44,4 @@ require (
 	layeh.com/gopher-luar v1.0.8
 )
 
-replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+// replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

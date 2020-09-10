@@ -99,7 +99,7 @@ github.com/micro-plat/cli/logs
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v0.4.0 => ../../../github.com/micro-plat/lib4go
+# github.com/micro-plat/lib4go v1.0.2
 ## explicit
 github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -121,6 +121,7 @@ github.com/micro-plat/lib4go/security/jwt
 github.com/micro-plat/lib4go/security/md5
 github.com/micro-plat/lib4go/security/sha1
 github.com/micro-plat/lib4go/security/sha256
+github.com/micro-plat/lib4go/sysinfo/pipes
 github.com/micro-plat/lib4go/transform
 github.com/micro-plat/lib4go/types
 github.com/micro-plat/lib4go/utility
@@ -144,12 +145,6 @@ github.com/pkg/profile
 # github.com/pkg/sftp v1.12.0
 ## explicit
 github.com/pkg/sftp
-# github.com/qxnw/lib4go v0.0.0-20180426074627-c80c7e84b925
-## explicit
-github.com/qxnw/lib4go/security/md5
-github.com/qxnw/lib4go/sysinfo/pipes
-github.com/qxnw/lib4go/types
-github.com/qxnw/lib4go/utility
 # github.com/russross/blackfriday/v2 v2.0.1
 github.com/russross/blackfriday/v2
 # github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
@@ -287,4 +282,3 @@ gopkg.in/yaml.v2
 # layeh.com/gopher-luar v1.0.8
 ## explicit
 layeh.com/gopher-luar
-# github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

@@ -30,7 +30,7 @@ type CallResult struct {
 	Vals     []string
 }
 
-func NewAPMCache(name string, js *conf.JSONConf) (ICache, error) {
+func NewAPMCache(name string, js *conf.RawConf) (ICache, error) {
 	//dbConf cache.ICache
 	fmt.Println("NewAPMCache.0")
 	orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))

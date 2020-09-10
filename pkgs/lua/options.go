@@ -5,6 +5,9 @@ import (
 	luar "layeh.com/gopher-luar"
 )
 
+//Modules 供lua脚本使用的模块信息
+type Modules map[string]map[string]lua.LGFunction
+
 //Option 配置选项
 type Option func(*VM)
 
@@ -51,7 +54,7 @@ func WithModule(module string, exports map[string]lua.LGFunction) Option {
 }
 
 //WithModules 添加多个模块
-func WithModules(modules map[string]map[string]lua.LGFunction) Option {
+func WithModules(modules Modules) Option {
 	return func(L *VM) {
 		for module, exports := range modules {
 			L.s.PreloadModule(module, func(L *lua.LState) int {

@@ -13,7 +13,7 @@ var _ conf.IVarConf = &VarConf{}
 type VarConf struct {
 	varConfPath  string
 	varVersion   int32
-	varNodeConfs map[string]conf.JSONConf
+	varNodeConfs map[string]conf.RawConf
 	registry     registry.IRegistry
 }
 
@@ -22,7 +22,7 @@ func NewVarConf(varConfPath string, rgst registry.IRegistry) (s *VarConf, err er
 	s = &VarConf{
 		varConfPath:  varConfPath,
 		registry:     rgst,
-		varNodeConfs: make(map[string]conf.JSONConf),
+		varNodeConfs: make(map[string]conf.RawConf),
 	}
 	if err = s.load(); err != nil {
 		return
@@ -66,7 +66,7 @@ func (c *VarConf) load() (err error) {
 			if err != nil {
 				return err
 			}
-			varConf, err := conf.NewJSONConf(rdata, version)
+			varConf, err := conf.NewRawConfByJson(rdata, version)
 			if err != nil {
 				err = fmt.Errorf("%s配置有误:%v", nodePath, err)
 				return err
@@ -83,7 +83,7 @@ func (c *VarConf) GetVersion() int32 {
 }
 
 //GetConf 指定配置文件名称，获取var配置信息
-func (c *VarConf) GetConf(tp string, name string) (*conf.JSONConf, error) {
+func (c *VarConf) GetConf(tp string, name string) (*conf.RawConf, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
@@ -117,7 +117,7 @@ func (c *VarConf) GetClone() conf.IVarConf {
 	s := &VarConf{
 		varConfPath:  c.varConfPath,
 		registry:     c.registry,
-		varNodeConfs: make(map[string]conf.JSONConf),
+		varNodeConfs: make(map[string]conf.RawConf),
 	}
 	for k, v := range c.varNodeConfs {
 		s.varNodeConfs[k] = v
@@ -132,7 +132,7 @@ func (c *VarConf) Has(tp string, name string) bool {
 }
 
 //Iter 迭代所有子配置
-func (c *VarConf) Iter(f func(path string, conf *conf.JSONConf) bool) {
+func (c *VarConf) Iter(f func(path string, conf *conf.RawConf) bool) {
 	for path, v := range c.varNodeConfs {
 		if !f(path, &v) {
 			break

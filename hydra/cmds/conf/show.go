@@ -97,7 +97,7 @@ func (s *show) printMainConf() error {
 			return err
 		}
 		s.getNodes(sc.GetMainConf().GetSubConfPath("main"), sc.GetMainConf().GetRootConf(), s.subs)
-		sc.GetMainConf().Iter(func(path string, v *conf.JSONConf) bool {
+		sc.GetMainConf().Iter(func(path string, v *conf.RawConf) bool {
 			npath := sc.GetMainConf().GetSubConfPath(path)
 			s.getNodes(npath, v, s.subs)
 			return true
@@ -114,7 +114,7 @@ func (s *show) printVarConf() error {
 	if err != nil {
 		return err
 	}
-	sc.GetVarConf().Iter(func(path string, v *conf.JSONConf) bool {
+	sc.GetVarConf().Iter(func(path string, v *conf.RawConf) bool {
 		npath := sc.GetMainConf().GetVarPath(path)
 		s.getNodes(npath, v, s.vars)
 		return true
@@ -123,7 +123,7 @@ func (s *show) printVarConf() error {
 	s.printNodes(s.vars, 0)
 	return nil
 }
-func (s *show) getNodes(path string, v *conf.JSONConf, input map[string]interface{}) {
+func (s *show) getNodes(path string, v *conf.RawConf, input map[string]interface{}) {
 	li := strings.SplitN(strings.Trim(path, "/"), "/", 2)
 	if len(li) == 1 {
 		input[li[0]] = v.GetRaw()

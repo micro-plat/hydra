@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/pkgs/lua"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -74,7 +75,7 @@ func (c *Ctx) TmplFuncs() context.TFuncs {
 }
 
 //LuaModules 提供用于模板转换的函数表达式
-func (c *Ctx) LuaModules() context.LuaModules {
+func (c *Ctx) LuaModules() lua.Modules {
 	return c.funs.LuaFuncs()
 }
 

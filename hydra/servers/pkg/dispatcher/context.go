@@ -13,7 +13,6 @@ const abortIndex int8 = math.MaxInt8 / 2
 type IRequest interface {
 	GetService() string
 	GetMethod() string
-	GetHost() string
 	GetForm() map[string]interface{}
 	GetHeader() map[string]string
 }

@@ -88,7 +88,7 @@ func TestUserType(t *testing.T) {
 }
 
 func TestMainFuncMode(t *testing.T) {
-	vm, err := New(`function main(a,b)
+	vm, err := New(`function getNow(a,b)
 		return get('hello')..a..b;
 	end`, With("get", get), WithMainFuncMode())
 
@@ -96,7 +96,7 @@ func TestMainFuncMode(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	v, err := vm.CallByMethod("main", " colin ", 10)
+	v, err := vm.CallByMethod("getNow", " colin ", 10)
 	if err != nil {
 		t.Error(err)
 	}
@@ -104,7 +104,20 @@ func TestMainFuncMode(t *testing.T) {
 		t.Error("结果不一致:", v)
 	}
 }
-
+func TestTrue(t *testing.T) {
+	vm, err := New(`return true`, With("get", get))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	v, err := vm.Call()
+	if err != nil {
+		t.Error(err)
+	}
+	if v != "true" {
+		t.Error("结果不一致:", v)
+	}
+}
 func TestCodeBlockMode(t *testing.T) {
 	vm, err := New(`return get('abc')`, With("get", get))
 	if err != nil {

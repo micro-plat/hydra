@@ -39,7 +39,7 @@ func (s *StandardAPM) GetRegularAPM(instance string, names ...string) (c IAPM) {
 //GetAPM 获取缓存操作对象
 func (s *StandardAPM) GetAPM(instance string, names ...string) (c IAPM, err error) {
 	name := types.GetStringByIndex(names, 0, APMNameNode)
-	obj, err := s.c.GetOrCreate(APMTypeNode, name, func(js *conf.JSONConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(APMTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
 		return apm.New(js.GetString("apmtype"), instance, string(js.GetRaw()))
 	})
 	if err != nil {
