@@ -15,17 +15,16 @@ import (
 type Gray struct {
 	Disable           bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Script            string `json:"script" valid:"required" toml:"script,omitempty"`
-	getUpStreamMethod string
-	go2UpStreamMethod string
-	conf              conf.IMainConf
+	GetUpStreamMethod string
+	Go2UpStreamMethod string
 	cluster           conf.ICluster
 }
 
 //New 灰度设置
 func New(script string) *Gray {
 	return &Gray{
-		getUpStreamMethod: "getUpStream",
-		go2UpStreamMethod: "go2UpStream",
+		GetUpStreamMethod: "getUpStream",
+		Go2UpStreamMethod: "go2UpStream",
 		Script:            script,
 	}
 }
@@ -54,23 +53,23 @@ func (g *Gray) Next() (u *url.URL, err error) {
 
 //checkServers 检查服务器信息
 func (g *Gray) checkServers(c conf.IMainConf) error {
-	vm, err := lua.New(g.Script)
+	vm, err := lua.New(g.Script, lua.WithMainFuncMode())
 	if err != nil {
 		return err
 	}
 	defer vm.Shutdown()
 
-	rts, err := vm.CallByMethod(g.getUpStreamMethod)
+	rts, err := vm.CallByMethod(g.GetUpStreamMethod)
 	if err != nil {
-		return fmt.Errorf("调用%s出错%w", g.getUpStreamMethod, err)
+		return err
 	}
-	if len(rts) <= 1 {
-		return fmt.Errorf("%s至少包含一个返回参数", g.getUpStreamMethod)
+	if len(rts) < 1 {
+		return fmt.Errorf("%s至少包含一个返回参数", g.GetUpStreamMethod)
 	}
 
 	cluster, err := c.GetCluster(rts[0])
 	if err != nil {
-		return err
+		return fmt.Errorf("获取指定的集群信息失败：%w", err)
 	}
 	g.cluster = cluster
 	return nil
@@ -95,7 +94,6 @@ func GetConf(cnf conf.IMainConf) *Gray {
 		panic(fmt.Errorf("acl.gray配置有误:%v", err))
 	}
 	gray := New(string(raw.GetRaw()))
-
 	if err := gray.checkServers(cnf); err != nil {
 		panic(err)
 	}

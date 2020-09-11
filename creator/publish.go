@@ -52,7 +52,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 
 func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
 
-	value, err := getJSON(&v)
+	value, err := getJSON(v)
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
 	}
@@ -109,6 +109,7 @@ func getJSON(v interface{}) (value string, err error) {
 	if x, ok := v.(string); ok {
 		return x, nil
 	}
+
 	buff, err := json.Marshal(&v)
 	if err != nil {
 		return "", err

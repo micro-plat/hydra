@@ -132,6 +132,35 @@ func TestCodeBlockMode(t *testing.T) {
 		t.Error("结果不一致:", v)
 	}
 }
+
+func BenchmarkFullMainFuncMode(b *testing.B) {
+
+	f := func() {
+		vm, err := New(`function main()
+		return get('abc');
+	end`, With("get", get), WithMainFuncMode())
+
+		if err != nil {
+			b.Error(err)
+			return
+		}
+		defer vm.s.Close()
+
+		h, err := vm.Call()
+		if err != nil {
+			b.Error(err)
+			return
+		}
+		if h != "abc" {
+			b.Error("err:", h)
+			return
+		}
+
+	}
+	for i := 0; i < b.N; i++ {
+		f()
+	}
+}
 func BenchmarkMainFuncMode(b *testing.B) {
 	vm, err := New(`function main()
 		return get('abc');
@@ -171,6 +200,7 @@ func BenchmarkCodeBlockMode(b *testing.B) {
 		}
 	}
 }
+
 func get(s string) string {
 	return s
 }

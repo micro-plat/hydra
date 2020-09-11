@@ -5,6 +5,10 @@ import (
 	luar "layeh.com/gopher-luar"
 )
 
+type LGFunction = lua.LGFunction
+type LState = lua.LState
+type LString = lua.LString
+
 //Modules 供lua脚本使用的模块信息
 type Modules map[string]map[string]lua.LGFunction
 

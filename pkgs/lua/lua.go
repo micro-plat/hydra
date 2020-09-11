@@ -6,10 +6,9 @@ import (
 	"sync"
 
 	"github.com/micro-plat/lib4go/types"
+	lua "github.com/yuin/gopher-lua"
 	"github.com/yuin/gopher-lua/parse"
 	luar "layeh.com/gopher-luar"
-
-	lua "github.com/yuin/gopher-lua"
 )
 
 const (
@@ -37,9 +36,6 @@ func New(script string, opts ...Option) (*VM, error) {
 	for _, opt := range opts {
 		opt(vm)
 	}
-	if err := vm.s.DoString(script); err != nil {
-		return nil, err
-	}
 	switch vm.mode {
 	case MainFuncMode:
 		if err := vm.s.DoString(script); err != nil {
@@ -56,6 +52,17 @@ func New(script string, opts ...Option) (*VM, error) {
 		vm.main = vm.s.NewFunctionFromProto(proto)
 	}
 	return vm, nil
+}
+
+//PreloadModule 预加载模块
+func (v *VM) PreloadModule(modules Modules) {
+	for module, exports := range modules {
+		v.s.PreloadModule(module, func(L *lua.LState) int {
+			mod := L.SetFuncs(L.NewTable(), exports)
+			L.Push(mod)
+			return 1
+		})
+	}
 }
 
 //Call 执行脚本
