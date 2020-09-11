@@ -13,7 +13,7 @@ func (g *Gray) NeedGo2UpStream(module lua.Modules) (bool, error) {
 	}
 	defer vm.Shutdown()
 
-	v, err := vm.CallByMethod(g.Go2UpStreamMethod)
+	v, err := vm.CallByMethod(g.go2UpStreamMethod)
 	if err != nil {
 		return false, err
 	}

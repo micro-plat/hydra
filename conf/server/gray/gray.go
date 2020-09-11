@@ -15,16 +15,16 @@ import (
 type Gray struct {
 	Disable           bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Script            string `json:"script" valid:"required" toml:"script,omitempty"`
-	GetUpStreamMethod string
-	Go2UpStreamMethod string
+	getUpStreamMethod string
+	go2UpStreamMethod string
 	cluster           conf.ICluster
 }
 
 //New 灰度设置
 func New(script string) *Gray {
 	return &Gray{
-		GetUpStreamMethod: "getUpStream",
-		Go2UpStreamMethod: "go2UpStream",
+		getUpStreamMethod: "getUpStream",
+		go2UpStreamMethod: "go2UpStream",
 		Script:            script,
 	}
 }
@@ -59,12 +59,12 @@ func (g *Gray) checkServers(c conf.IMainConf) error {
 	}
 	defer vm.Shutdown()
 
-	rts, err := vm.CallByMethod(g.GetUpStreamMethod)
+	rts, err := vm.CallByMethod(g.getUpStreamMethod)
 	if err != nil {
 		return err
 	}
 	if len(rts) < 1 {
-		return fmt.Errorf("%s至少包含一个返回参数", g.GetUpStreamMethod)
+		return fmt.Errorf("%s至少包含一个返回参数", g.getUpStreamMethod)
 	}
 
 	cluster, err := c.GetCluster(rts[0])
