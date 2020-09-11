@@ -14,11 +14,22 @@ github.com/SkyAPM/go2sky/reporter/grpc/management
 # github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 ## explicit
 github.com/asaskevich/govalidator
+# github.com/bgentry/speakeasy v0.1.0
+## explicit
 # github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 ## explicit
 github.com/bradfitz/gomemcache/memcache
+# github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa
+## explicit
+# github.com/coreos/go-semver v0.3.0
+github.com/coreos/go-semver/semver
+# github.com/coreos/go-systemd/v22 v22.0.0
+## explicit
+github.com/coreos/go-systemd/v22/journal
 # github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d
 github.com/cpuguy83/go-md2man/v2/md2man
+# github.com/creack/pty v1.1.11
+## explicit
 # github.com/dsnet/compress v0.0.1
 ## explicit
 github.com/dsnet/compress
@@ -27,10 +38,16 @@ github.com/dsnet/compress/bzip2/internal/sais
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
+# github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4
+## explicit
 # github.com/eclipse/paho.mqtt.golang v1.2.0
 ## explicit
 github.com/eclipse/paho.mqtt.golang
 github.com/eclipse/paho.mqtt.golang/packets
+# github.com/etcd-io/gofail v0.0.0-20190801230047-ad7f989257ca
+## explicit
+# github.com/fatih/color v1.7.0
+## explicit
 # github.com/frankban/quicktest v1.10.2
 ## explicit
 # github.com/gin-contrib/sse v0.1.0
@@ -58,7 +75,11 @@ github.com/go-redis/redis/internal/hashtag
 github.com/go-redis/redis/internal/pool
 github.com/go-redis/redis/internal/proto
 github.com/go-redis/redis/internal/util
-# github.com/golang/protobuf v1.3.3
+# github.com/gogo/protobuf v1.3.1
+github.com/gogo/protobuf/gogoproto
+github.com/gogo/protobuf/proto
+github.com/gogo/protobuf/protoc-gen-gogo/descriptor
+# github.com/golang/protobuf v1.4.2
 ## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -73,8 +94,9 @@ github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket
-# github.com/json-iterator/go v1.1.10
+# github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
+# github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
 ## explicit
@@ -83,6 +105,8 @@ github.com/keybase/go-ps/darwincgo
 github.com/kr/fs
 # github.com/leodido/go-urn v1.2.0
 github.com/leodido/go-urn
+# github.com/mattn/go-colorable v0.0.9
+## explicit
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-oci8 v0.0.8
@@ -100,7 +124,7 @@ github.com/micro-plat/cli/logs
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.0.3
+# github.com/micro-plat/lib4go v1.0.2
 ## explicit
 github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -127,9 +151,14 @@ github.com/micro-plat/lib4go/transform
 github.com/micro-plat/lib4go/types
 github.com/micro-plat/lib4go/utility
 github.com/micro-plat/lib4go/zk
-# github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421
+# github.com/micro/go-micro/v3 v3.0.0-beta.2
+## explicit
+# github.com/mitchellh/hashstructure v1.0.0
+## explicit
+# github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+## explicit
 github.com/modern-go/concurrent
-# github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+# github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
 # github.com/nwaples/rardecode v1.1.0
 ## explicit
@@ -146,18 +175,18 @@ github.com/pkg/profile
 # github.com/pkg/sftp v1.12.0
 ## explicit
 github.com/pkg/sftp
-# github.com/micro-plat/lib4go v0.0.0-20180426074627-c80c7e84b925
-## explicit
-github.com/micro-plat/lib4go/security/md5
-github.com/micro-plat/lib4go/sysinfo/pipes
-github.com/micro-plat/lib4go/types
-github.com/micro-plat/lib4go/utility
 # github.com/russross/blackfriday/v2 v2.0.1
+## explicit
 github.com/russross/blackfriday/v2
 # github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
+## explicit
 github.com/samuel/go-zookeeper/zk
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
+# github.com/spf13/cobra v0.0.3
+## explicit
+# github.com/spf13/pflag v1.0.1
+## explicit
 # github.com/ugorji/go/codec v1.1.7
 ## explicit
 github.com/ugorji/go/codec
@@ -174,6 +203,7 @@ github.com/urfave/cli
 ## explicit
 github.com/xi2/xz
 # github.com/yosssi/gmq v0.0.1
+## explicit
 github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
 # github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da
@@ -182,6 +212,27 @@ github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
 github.com/yuin/gopher-lua/parse
 github.com/yuin/gopher-lua/pm
+# github.com/zhiyunliu/etcd v3.4.19+incompatible
+## explicit
+github.com/zhiyunliu/etcd/auth/authpb
+github.com/zhiyunliu/etcd/clientv3
+github.com/zhiyunliu/etcd/clientv3/balancer
+github.com/zhiyunliu/etcd/clientv3/balancer/picker
+github.com/zhiyunliu/etcd/clientv3/balancer/resolver/endpoint
+github.com/zhiyunliu/etcd/clientv3/credentials
+github.com/zhiyunliu/etcd/etcdserver/api/membership/membershippb
+github.com/zhiyunliu/etcd/etcdserver/api/v3rpc/rpctypes
+github.com/zhiyunliu/etcd/etcdserver/etcdserverpb
+github.com/zhiyunliu/etcd/mvcc/mvccpb
+github.com/zhiyunliu/etcd/pkg/logutil
+github.com/zhiyunliu/etcd/pkg/systemd
+github.com/zhiyunliu/etcd/pkg/types
+github.com/zhiyunliu/etcd/raft
+github.com/zhiyunliu/etcd/raft/confchange
+github.com/zhiyunliu/etcd/raft/quorum
+github.com/zhiyunliu/etcd/raft/raftpb
+github.com/zhiyunliu/etcd/raft/tracker
+github.com/zhiyunliu/etcd/version
 # github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 ## explicit
 github.com/zkfy/cron
@@ -192,6 +243,7 @@ github.com/zkfy/go-cache
 ## explicit
 github.com/zkfy/go-metrics
 # github.com/zkfy/jwt-go v3.0.0+incompatible
+## explicit
 github.com/zkfy/jwt-go
 # github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 ## explicit
@@ -199,6 +251,18 @@ github.com/zkfy/log
 # github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
 ## explicit
 github.com/zkfy/stompngo
+# go.uber.org/atomic v1.6.0
+go.uber.org/atomic
+# go.uber.org/multierr v1.5.0
+go.uber.org/multierr
+# go.uber.org/zap v1.15.0
+## explicit
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 ## explicit
 golang.org/x/crypto/blowfish
@@ -210,7 +274,7 @@ golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/poly1305
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
-# golang.org/x/net v0.0.0-20200602114024-627f9648deb9
+# golang.org/x/net v0.0.0-20200707034311-ab3426394381
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -222,7 +286,7 @@ golang.org/x/net/internal/timeseries
 golang.org/x/net/proxy
 golang.org/x/net/trace
 golang.org/x/net/websocket
-# golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae
+# golang.org/x/sys v0.0.0-20200803210538-64077c9b5642
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
@@ -231,7 +295,8 @@ golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
 golang.org/x/sys/windows/svc
 golang.org/x/sys/windows/svc/mgr
-# golang.org/x/text v0.3.2
+# golang.org/x/text v0.3.3
+## explicit
 golang.org/x/text/encoding
 golang.org/x/text/encoding/internal
 golang.org/x/text/encoding/internal/identifier
@@ -243,15 +308,16 @@ golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 ## explicit
 golang.org/x/time/rate
-# google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
+# google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.27.1
+# google.golang.org/grpc v1.31.1
 ## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base
+google.golang.org/grpc/balancer/grpclb/state
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
@@ -267,23 +333,63 @@ google.golang.org/grpc/internal/balancerload
 google.golang.org/grpc/internal/binarylog
 google.golang.org/grpc/internal/buffer
 google.golang.org/grpc/internal/channelz
+google.golang.org/grpc/internal/credentials
 google.golang.org/grpc/internal/envconfig
+google.golang.org/grpc/internal/grpclog
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
+google.golang.org/grpc/internal/grpcutil
 google.golang.org/grpc/internal/resolver/dns
 google.golang.org/grpc/internal/resolver/passthrough
+google.golang.org/grpc/internal/serviceconfig
+google.golang.org/grpc/internal/status
 google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
-google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
+google.golang.org/grpc/resolver/dns
+google.golang.org/grpc/resolver/passthrough
 google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# gopkg.in/yaml.v2 v2.2.8
+# google.golang.org/grpc/examples v0.0.0-20200902210233-8630cac324bf
+## explicit
+# google.golang.org/protobuf v1.25.0
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/fieldsort
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genid
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/mapsort
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/types/known/anypb
+google.golang.org/protobuf/types/known/durationpb
+google.golang.org/protobuf/types/known/timestamppb
+# gopkg.in/cheggaaa/pb.v1 v1.0.25
+## explicit
+# gopkg.in/yaml.v2 v2.3.0
 ## explicit
 gopkg.in/yaml.v2
 # layeh.com/gopher-luar v1.0.8
