@@ -15,7 +15,7 @@ type funcs struct {
 	ctx       *Ctx
 }
 
-func newTmplFunc(ctx *Ctx) *funcs {
+func newFunc(ctx *Ctx) *funcs {
 	return &funcs{
 		tmplFuncs: make(context.TFuncs),
 		luaFuncs:  make(lua.Modules),
