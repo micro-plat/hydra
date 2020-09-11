@@ -12,7 +12,6 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/hydra/global"
 	r "github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
 )
 
@@ -178,14 +177,26 @@ type eventWatcher struct {
 }
 
 //fsFactory 基于本地文件系统
-type fsFactory struct{}
+type fsFactory struct {
+	opts *r.Options
+}
 
 //Build 根据配置生成文件系统注册中心
-func (z *fsFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
-	return newfileSystem(global.Def.PlatName, global.Def.SysName, global.Def.ClusterName, filepath.Join(addrs[0], global.Def.LocalConfName))
+func (z *fsFactory) Create(opts ...r.Option) (r.IRegistry, error) {
+	//addrs []string, u string, p string, log logger.ILogging
+	for i := range opts {
+		opts[i](z.opts)
+	}
+
+	return newfileSystem(global.Def.PlatName,
+		global.Def.SysName,
+		global.Def.ClusterName,
+		filepath.Join(z.opts.Addrs[0], global.Def.LocalConfName))
 
 }
 
 func init() {
-	r.Register(r.FileSystem, &fsFactory{})
+	r.Register(r.FileSystem, &fsFactory{
+		opts: &r.Options{},
+	})
 }

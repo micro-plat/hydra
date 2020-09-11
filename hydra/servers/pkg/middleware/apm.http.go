@@ -19,19 +19,19 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/net"
 )
 
 //APMHttp 调用链
-func APMHttp() Handler {
+func APM() Handler {
 
 	return func(ctx IMiddleContext) {
 		//fmt.Println("middleware.apm")
@@ -41,11 +41,11 @@ func APMHttp() Handler {
 			ctx.Next()
 			return
 		}
-		ctx.Response().AddSpecial("apm.http")
+		ctx.Response().AddSpecial("apm.middle")
 
 		octx := ctx.Context()
 		//fmt.Println("middleware.apm-1", octx)
-		oreq, _ := ctx.GetHttpReqResp()
+		oreq := ctx.Request()
 		instance := fmt.Sprintf("%s_%s", global.Def.PlatName, net.GetLocalIPAddress())
 
 		apmInstance := components.Def.APM().GetRegularAPM(instance, apmconf.GetConfig())
@@ -58,8 +58,8 @@ func APMHttp() Handler {
 		}
 
 		//fmt.Println("middleware.apm-2", tracer, err)
-		span, rootctx, err := tracer.CreateEntrySpan(octx, gethttpOperationName("", oreq), func() (string, error) {
-			return oreq.Header.Get(apm.Header), nil
+		span, rootctx, err := tracer.CreateEntrySpan(octx, gethttpOperationName(oreq), func() (string, error) {
+			return oreq.Path().GetHeader(apm.Header), nil
 		})
 		if err != nil {
 			ctx.Log().Warnf("APM.CreateEntrySpan:%+v", err)
@@ -72,16 +72,16 @@ func APMHttp() Handler {
 		})
 		//fmt.Println("middleware.apm-3", oreq.Header.Get("X-Request-Id"))
 		span.SetComponent(apmtypes.ComponentIDGOHttpServer)
-		span.Tag("X-Request-Id", oreq.Header.Get("X-Request-Id"))
+		span.Tag("X-Request-Id", ctx.User().GetRequestID())
 		// for k, v := range h.extraTags {
 		//
 		// }
-		span.Tag(apm.TagHTTPMethod, oreq.Method)
-		span.Tag(apm.TagURL, fmt.Sprintf("%s%s", oreq.Host, oreq.URL.Path))
+		span.Tag(apm.TagHTTPMethod, oreq.Path().GetMethod())
+		span.Tag(apm.TagURL, oreq.Path().GetURL())
 		span.SetSpanLayer(apm.SpanLayer_Http)
 
 		defer func() {
-			statusCode, _ := ctx.Response().GetRawResponse()
+			statusCode, _ := ctx.Response().GetFinalResponse()
 			code := statusCode
 			if code >= 400 {
 				span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(code))
@@ -95,9 +95,6 @@ func APMHttp() Handler {
 	}
 }
 
-func gethttpOperationName(name string, r *http.Request) string {
-	if name == "" {
-		return fmt.Sprintf("%s", r.URL.Path)
-	}
-	return name
+func gethttpOperationName(r context.IRequest) string {
+	return r.Path().GetURL()
 }

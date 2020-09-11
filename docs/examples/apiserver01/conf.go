@@ -9,7 +9,8 @@ import (
 
 func init() {
 	hydra.OnReady(func() {
-		hydra.Conf.API(":8081", api.WithTrace()).APM(apm.WithEnable())
+		hydra.Conf.API(":8081", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)).
+			APM(apm.WithEnable(), apm.WithConfig("apm"), apm.WithDB("db", "sup17", "common"), apm.WithCache("cache", "redis", "mem"))
 		//hydra.Conf.Vars().RLog("/rpc/log@hydra", rlog.WithAll())
 		hydra.Conf.Vars()["apm"] = types.XMap{
 			"apm": types.XMap{

@@ -97,6 +97,9 @@ type transport struct {
 
 func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error) {
 	apmInfo := t.apmInfo
+	if apmInfo == nil {
+		return t.delegated.RoundTrip(req)
+	}
 	rootCtx := apmInfo.RootCtx
 	tracer := apmInfo.Tracer
 

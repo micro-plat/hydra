@@ -86,7 +86,7 @@ func APMRpc() Handler {
 		//
 		// }
 		span.Tag(apm.TagHTTPMethod, req.GetMethod())
-		span.Tag(apm.TagURL, fmt.Sprintf("%s", req.GetService()))
+		span.Tag(apm.TagURL, fmt.Sprintf("%s%s", req.GetHost(), req.GetService()))
 		span.SetSpanLayer(apm.SpanLayer_Http)
 
 		defer func() {
