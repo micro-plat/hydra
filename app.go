@@ -29,6 +29,8 @@ import (
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
+	_ "github.com/micro-plat/hydra/registry/registry/etcd"
+
 )
 
 //MicroApp  微服务应用

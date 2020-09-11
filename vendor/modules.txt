@@ -146,6 +146,12 @@ github.com/pkg/profile
 # github.com/pkg/sftp v1.12.0
 ## explicit
 github.com/pkg/sftp
+# github.com/micro-plat/lib4go v0.0.0-20180426074627-c80c7e84b925
+## explicit
+github.com/micro-plat/lib4go/security/md5
+github.com/micro-plat/lib4go/sysinfo/pipes
+github.com/micro-plat/lib4go/types
+github.com/micro-plat/lib4go/utility
 # github.com/russross/blackfriday/v2 v2.0.1
 github.com/russross/blackfriday/v2
 # github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da

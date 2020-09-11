@@ -35,10 +35,11 @@ type Client struct {
 type clientOption struct {
 	connectionTimeout time.Duration
 	log               *logger.Logger
-	balancer          balancer.CustomerBalancer
-	resolver          balancer.ServiceResolver
-	service           string
-	tls               []string
+	balancer          string
+	localIP           string
+	//resolver          balancer.ServiceResolver
+	service string
+	tls     []string
 }
 
 //ClientOption 客户端配置选项
@@ -170,8 +171,9 @@ func (r *requestOption) getData(v interface{}) ([]byte, error) {
 func WithRoundRobinBalancer(plat, service string) ClientOption {
 	return func(o *clientOption) {
 		o.service = service
-		o.resolver = balancer.NewResolver(plat, service, "")
-		o.balancer = balancer.RoundRobin(service, o.resolver, o.log)
+		//o.resolver = balancer.NewResolver(plat, service, "")
+		//o.balancer = balancer.RoundRobin(service, o.resolver, o.log)
+		o.balancer = balancer.RoundRobin
 	}
 }
 
@@ -179,18 +181,28 @@ func WithRoundRobinBalancer(plat, service string) ClientOption {
 func WithLocalFirstBalancer(plat, service string, local string) ClientOption {
 	return func(o *clientOption) {
 		o.service = service
-		o.resolver = balancer.NewResolver(plat, service, local)
-		o.balancer = balancer.LocalFirst(service, local, o.resolver)
+		//o.resolver = balancer.NewResolver(plat, service, local)
+		//o.balancer = balancer.LocalFirst(service, local, o.resolver)
+		o.balancer = balancer.LocalFirst
+		o.localIP = local
 	}
 }
 
 //WithBalancer 设置负载均衡器
-func WithBalancer(service string, lb balancer.CustomerBalancer) ClientOption {
+func WithBalancer(service string, lbname string) ClientOption {
 	return func(o *clientOption) {
 		o.service = service
-		o.balancer = lb
+		o.balancer = lbname
 	}
 }
+
+// //WithBalancer 设置负载均衡器
+// func WithBalancer(service string, lb balancer.CustomerBalancer) ClientOption {
+// 	return func(o *clientOption) {
+// 		o.service = service
+// 		o.balancer = lb
+// 	}
+// }
 
 //NewClient 创建RPC客户端,地址是远程RPC服务器地址或注册中心地址
 func NewClient(address string, opts ...ClientOption) (*Client, error) {
@@ -219,10 +231,9 @@ func (c *Client) connect() (err error) {
 	if c.IsConnect {
 		return nil
 	}
-	if c.balancer == nil {
+	if c.balancer == "" {
 		c.conn, err = grpc.Dial(c.address,
 			grpc.WithInsecure(),
-
 			grpc.WithTimeout(c.connectionTimeout))
 
 	} else {
@@ -230,7 +241,7 @@ func (c *Client) connect() (err error) {
 		c.conn, err = grpc.DialContext(ctx,
 			c.address,
 			grpc.WithInsecure(),
-			grpc.WithBalancer(c.balancer))
+			grpc.WithBalancerName(c.balancer))
 	}
 	if err != nil {
 		return
@@ -258,9 +269,9 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 //Close 关闭RPC客户端连接
 func (c *Client) Close() {
 	c.isClose = true
-	if c.resolver != nil {
-		c.resolver.Close()
-	}
+	// if c.resolver != nil {
+	// 	c.resolver.Close()
+	// }
 	if c.conn != nil {
 		c.conn.Close()
 	}

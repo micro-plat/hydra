@@ -7,7 +7,6 @@ import (
 	"sync/atomic"
 
 	r "github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
 )
 
@@ -176,13 +175,20 @@ type eventWatcher struct {
 }
 
 //zkRegistry 基于zookeeper的注册中心
-type lmFactory struct{}
+type lmFactory struct {
+	opts *r.Options
+}
 
 //Build 根据配置生成文件系统注册中心
-func (z *lmFactory) Create(addrs []string, u string, p string, log logger.ILogging) (r.IRegistry, error) {
+func (z *lmFactory) Create(opts ...r.Option) (r.IRegistry, error) {
+	for i := range opts {
+		opts[i](z.opts)
+	}
 	return Local, nil
 }
 
 func init() {
-	r.Register(r.LocalMemory, &lmFactory{})
+	r.Register(r.LocalMemory, &lmFactory{
+		opts: &r.Options{},
+	})
 }

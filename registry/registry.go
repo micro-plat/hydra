@@ -5,6 +5,7 @@ import (
 
 	"strings"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
@@ -18,6 +19,12 @@ const Zookeeper = "zk"
 
 //FileSystem 本地文件系统
 const FileSystem = "fs"
+
+//Etcd Etcd
+const Etcd = "etcd"
+
+//Redis redis
+const Redis = "redis"
 
 //IRegistry 注册中心接口
 type IRegistry interface {
@@ -36,7 +43,7 @@ type IRegistry interface {
 
 //IFactory 注册中心构建器
 type IFactory interface {
-	Create(addrs []string, userName string, password string, log logger.ILogging) (IRegistry, error)
+	Create(...Option) (IRegistry, error)
 }
 
 var registryMap = cmap.New(2)
@@ -68,7 +75,14 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 		rsvr := input[0].(IFactory)
 		srvs := input[1].([]string)
 		log := input[2].(logger.ILogging)
-		return rsvr.Create(srvs, u, p, log)
+
+		//addrs []string, userName string, password string, log logger.ILogging
+
+		return rsvr.Create(Addrs(srvs...),
+			WithAuthCreds(u, p),
+			WithLogger(log),
+			Domain(global.Def.PlatName))
+
 	}, resolver, addrs, log)
 	if err != nil {
 		return

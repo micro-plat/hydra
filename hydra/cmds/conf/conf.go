@@ -1,6 +1,8 @@
 package conf
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
@@ -64,6 +66,7 @@ func installNow(c *cli.Context) (err error) {
 		return nil
 	}
 
+	fmt.Println("global.Current().GetRegistryAddr()", global.Current().GetRegistryAddr())
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {

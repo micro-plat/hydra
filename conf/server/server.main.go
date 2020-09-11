@@ -33,9 +33,10 @@ func NewMainConf(platName string, systemName string, serverType string, clusterN
 
 //load 加载配置
 func (c *MainConf) load() (err error) {
-
+	mainpath := c.GetMainPath()
+	fmt.Println("mainpath:", mainpath)
 	//获取主配置
-	conf, err := getValue(c.registry, c.GetMainPath())
+	conf, err := getValue(c.registry, mainpath)
 	if err != nil {
 		return err
 	}
