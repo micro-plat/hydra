@@ -12,16 +12,16 @@ require (
 	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-redis/redis v6.15.6+incompatible
-	github.com/gogf/gf v1.13.4 // indirect
 	github.com/golang/protobuf v1.3.3
 	github.com/golang/snappy v0.0.1
 	github.com/gorilla/websocket v1.4.2
+	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect
 	github.com/mattn/go-oci8 v0.0.8
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.0.2
+	github.com/micro-plat/lib4go v1.0.3
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0

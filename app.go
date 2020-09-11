@@ -1,6 +1,8 @@
 package hydra
 
 import (
+	"syscall"
+
 	"github.com/micro-plat/cli"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -53,4 +55,10 @@ func (m *MicroApp) Start() {
 	defer logger.Close()
 	m.app = cli.New(cli.WithVersion(global.Version), cli.WithUsage(global.Usage))
 	m.app.Start()
+}
+
+//Close 关闭服务器
+func (m *MicroApp) Close() {
+	parent := syscall.Getppid()
+	syscall.Kill(parent, syscall.SIGUSR2)
 }

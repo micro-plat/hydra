@@ -58,8 +58,6 @@ github.com/go-redis/redis/internal/hashtag
 github.com/go-redis/redis/internal/pool
 github.com/go-redis/redis/internal/proto
 github.com/go-redis/redis/internal/util
-# github.com/gogf/gf v1.13.4
-## explicit
 # github.com/golang/protobuf v1.3.3
 ## explicit
 github.com/golang/protobuf/proto
@@ -76,6 +74,7 @@ github.com/google/uuid
 ## explicit
 github.com/gorilla/websocket
 # github.com/json-iterator/go v1.1.10
+## explicit
 github.com/json-iterator/go
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
 ## explicit
@@ -101,7 +100,7 @@ github.com/micro-plat/cli/logs
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.0.2
+# github.com/micro-plat/lib4go v1.0.3
 ## explicit
 github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/concurrent/cmap

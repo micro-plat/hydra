@@ -1,4 +1,4 @@
-package gray
+package test
 
 import (
 	"testing"
@@ -47,6 +47,7 @@ func getGray() (*gray.Gray, error) {
 
 	return gray.GetConf(mconf), nil
 }
+
 func TestNoSetting(t *testing.T) {
 	nconf, err := getGray()
 	if err != nil {
