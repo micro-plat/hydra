@@ -14,17 +14,19 @@ import (
 
 func getServer() *hydra.MicroApp {
 	//设置服务器参数
-	raw := `
+	raw := `	
+	
 	local ips = {}
 	local upstream = ""
 	
 	
 	function getUpStream()
-		return upstream
+		return upstream;
 	end
 		
-	function go2UpStream() 
-		return false
+	function go2UpStream() 			
+		local req = require("request")
+		return req.getClientIP()
 	end`
 
 	hydra.Conf.API(":8081").Gray(raw)
@@ -47,7 +49,7 @@ func TestGray(t *testing.T) {
 	os.Args = []string{"test", "run"}
 	app := getServer()
 	go app.Start()
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 1)
 
 	resp, err := xhttp.Get("http://localhost:8081/hello")
 	if err != nil {
@@ -56,10 +58,9 @@ func TestGray(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-	if resp.Status != "200" || string(bodyBytes) != "SUCCESS" {
+	if resp.StatusCode != 200 || string(bodyBytes) != "SUCCESS" {
 		t.Error(resp.Status, string(bodyBytes))
 	}
-
 }
 
 func BenchmarkServerGray(t *testing.B) {
@@ -89,5 +90,4 @@ func BenchmarkServerGray(t *testing.B) {
 	for i := 0; i < t.N; i++ {
 		request()
 	}
-
 }

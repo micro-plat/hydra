@@ -42,7 +42,6 @@ type Ctx struct {
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx := contextPool.Get().(*Ctx)
 	ctx.meta = conf.NewMeta()
-	ctx.funs = newTmplFunc(ctx)
 	ctx.context = c
 	var err error
 	ctx.serverConf, err = server.Cache.GetServerConf(tp)
@@ -56,6 +55,7 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.tid = context.Cache(ctx) //保存到缓存中
 	timeout := time.Duration(ctx.serverConf.GetMainConf().GetRootConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
+	ctx.funs = newFunc(ctx)
 	return ctx
 }
 

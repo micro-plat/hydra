@@ -1,5 +1,6 @@
 package logger
 
+
 //ILogging 基础日志记录接口
 type ILogging interface {
 	Printf(format string, content ...interface{})
@@ -29,16 +30,4 @@ type ILogger interface {
 	GetSessionID() string
 	Pause()
 	Resume()
-}
-
-var globalPause bool
-
-//Pause 暂停记录
-func Pause() {
-	globalPause = true
-}
-
-//Resume 恢复记录
-func Resume() {
-	globalPause = false
 }
