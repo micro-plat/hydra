@@ -19,7 +19,7 @@ func Gray() Handler {
 		}
 
 		//检查当前请求是否需要进行灰度
-		need, err := gray.NeedGo2UpStream(ctx.LuaModules())
+		need, err := gray.Check(ctx.TmplFuncs(), nil)
 		if err != nil {
 			ctx.Response().AddSpecial("gray")
 			ctx.Response().Abort(http.StatusBadGateway, err)

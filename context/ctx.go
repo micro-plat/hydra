@@ -8,7 +8,6 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
-	"github.com/micro-plat/hydra/pkgs/lua"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -215,9 +214,6 @@ type IContext interface {
 
 	//TmplFuncs 模板函数列表
 	TmplFuncs() TFuncs
-
-	//LuaFuncs 脚本函数列表
-	LuaModules() lua.Modules
 
 	//User 用户信息
 	User() IUser

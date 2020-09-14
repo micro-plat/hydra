@@ -46,7 +46,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/yosssi/gmq v0.0.1 // indirect
-	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da
+	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	github.com/zhiyunliu/etcd v3.4.19+incompatible
 	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 	github.com/zkfy/go-cache v2.1.0+incompatible
@@ -64,7 +64,7 @@ require (
 	google.golang.org/grpc/examples v0.0.0-20200902210233-8630cac324bf // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.25 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	layeh.com/gopher-luar v1.0.8
+	layeh.com/gopher-luar v1.0.8 // indirect
 )
 
 // replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

@@ -7,25 +7,23 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/pkgs/lua"
 	"github.com/micro-plat/hydra/registry"
 )
 
 //Gray 灰度设置
 type Gray struct {
-	Disable           bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-	Script            string `json:"script" valid:"required" toml:"script,omitempty"`
-	getUpStreamMethod string
-	go2UpStreamMethod string
-	cluster           conf.ICluster
+	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
+	Filter    string `json:"filter" valid:"required" toml:"filter,omitempty"`
+	UPCluster string `json:"upcluster" valid:"required" toml:"upcluster,omitempty"`
+	conf      conf.IMainConf
+	cluster   conf.ICluster
 }
 
 //New 灰度设置
-func New(script string) *Gray {
+func New(filter string, upcluster string) *Gray {
 	return &Gray{
-		getUpStreamMethod: "getUpStream",
-		go2UpStreamMethod: "go2UpStream",
-		Script:            script,
+		Filter:    filter,
+		UPCluster: upcluster,
 	}
 }
 
@@ -51,25 +49,10 @@ func (g *Gray) Next() (u *url.URL, err error) {
 	return url, nil
 }
 
-//checkServers 检查服务器信息
 func (g *Gray) checkServers(c conf.IMainConf) error {
-	vm, err := lua.New(g.Script, lua.WithMainFuncMode())
+	cluster, err := c.GetCluster(g.UPCluster)
 	if err != nil {
 		return err
-	}
-	defer vm.Shutdown()
-
-	rts, err := vm.CallByMethod(g.getUpStreamMethod)
-	if err != nil {
-		return err
-	}
-	if len(rts) < 1 {
-		return fmt.Errorf("%s至少包含一个返回参数", g.getUpStreamMethod)
-	}
-
-	cluster, err := c.GetCluster(rts[0])
-	if err != nil {
-		return fmt.Errorf("获取指定的集群信息失败：%w", err)
 	}
 	g.cluster = cluster
 	return nil
@@ -83,20 +66,18 @@ func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
 
 //GetConf 获取BlackList
 func GetConf(cnf conf.IMainConf) *Gray {
-	raw, err := cnf.GetSubConf(registry.Join("acl", "gray"))
+	gray := Gray{}
+	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), &gray)
 	if err == conf.ErrNoSetting {
 		return &Gray{Disable: true}
 	}
-	if err != nil {
-		panic(fmt.Errorf("脚本加载失败 %w", err))
-	}
+
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("acl.gray配置有误:%v", err))
 	}
-	gray := New(string(raw.GetRaw()))
 	if err := gray.checkServers(cnf); err != nil {
 		panic(err)
 	}
 
-	return gray
+	return &gray
 }

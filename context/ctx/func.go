@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/pkgs/lua"
+	// "github.com/micro-plat/hydra/pkgs/lua"
 )
 
 type funcs struct {
