@@ -3,7 +3,6 @@ package etcd
 import (
 	"context"
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
@@ -26,12 +25,12 @@ func newEtcdWatcher(c *clientv3.Client, timeout time.Duration, opts ...registry.
 	var wo registry.WatchOptions
 	for _, o := range opts {
 		o(&wo)
-	} 
-	watchPath := wo.Service
-	if !strings.HasSuffix(wo.Service, "/") {
-		watchPath = wo.Service + "/"
 	}
-
+	watchPath := wo.Service
+	// if !strings.HasSuffix(wo.Service, "/") {
+	// 	watchPath = wo.Service + "/"
+	// }
+	//fmt.Println("newEtcdWatcher.watchPath:", watchPath)
 	ctx, cancel := context.WithCancel(context.Background())
 	w := c.Watch(ctx, watchPath, clientv3.WithPrefix(), clientv3.WithPrevKV())
 	stop := make(chan bool, 1)
@@ -65,8 +64,8 @@ func (ew *etcdWatcher) Next() (*registry.Result, error) {
 					action = "update"
 				}
 			case clientv3.EventTypeDelete:
-				action = "delete" 
- 				data = ev.PrevKv.Value
+				action = "delete"
+				data = ev.PrevKv.Value
 			}
 
 			if data == nil {
