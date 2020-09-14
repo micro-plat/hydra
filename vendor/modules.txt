@@ -208,10 +208,6 @@ github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
 # github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da
 ## explicit
-github.com/yuin/gopher-lua
-github.com/yuin/gopher-lua/ast
-github.com/yuin/gopher-lua/parse
-github.com/yuin/gopher-lua/pm
 # github.com/zhiyunliu/etcd v3.4.19+incompatible
 ## explicit
 github.com/zhiyunliu/etcd/auth/authpb
@@ -394,4 +390,3 @@ google.golang.org/protobuf/types/known/timestamppb
 gopkg.in/yaml.v2
 # layeh.com/gopher-luar v1.0.8
 ## explicit
-layeh.com/gopher-luar

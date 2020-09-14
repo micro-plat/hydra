@@ -54,7 +54,7 @@ require (
 	github.com/zkfy/jwt-go v3.0.0+incompatible // indirect
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 	github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
- 	go.uber.org/zap v1.15.0 // indirect
+	go.uber.org/zap v1.15.0 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	golang.org/x/sys v0.0.0-20200803210538-64077c9b5642

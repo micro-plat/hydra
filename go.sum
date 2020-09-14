@@ -639,6 +639,7 @@ github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896 h1:nktyhX5ycnu+WA489Ei7SU
 github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896/go.mod h1:Aiq66eXWCthZ9RAkNFSTXdq4WxeH3IFsHO3/3oAwFJs=
 github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481 h1:dqbWcJVZJv06ZR7zK8yN9w8oNOHL23eylL4o9Xj9Zn0=
 github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481/go.mod h1:YhbMHdfKqDOLUVc2MQoMXRayntbZzMuDnbTZhXWPwZI=
+go.etcd.io/bbolt v1.3.5 h1:XAzx9gjCb0Rxj7EoqcClPD1d5ZBxZJk0jbuoPHenBt0=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.opencensus.io v0.20.1/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
 go.opencensus.io v0.20.2/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
