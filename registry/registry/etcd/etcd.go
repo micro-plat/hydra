@@ -18,24 +18,22 @@ type etcdRegistry struct {
 	CloseCh chan struct{}
 	// register and leases are grouped by domain
 	sync.RWMutex
-	register map[string]register
-	leases   map[string]leases
+	leases sync.Map
 
-	seqValue int32 
+	seqValue int32
 }
 
-type register map[string]uint64
-type leases map[string]clientv3.LeaseID
+type leases clientv3.LeaseID
 
 // NewRegistry returns an initialized etcd registry
 func NewRegistry(opts ...registry.Option) *etcdRegistry {
 
 	e := &etcdRegistry{
-		options:  &registry.Options{},
-		register: make(map[string]register),
-		leases:   make(map[string]leases),
+		options: &registry.Options{},
 	}
+	e.CloseCh = make(chan struct{})
 	configure(e, opts...)
+	go e.leaseRemain()
 	return e
 }
 
