@@ -1,30 +1,32 @@
 package ctx
 
 import (
+	"fmt"
+
 	xlua "github.com/micro-plat/hydra/pkgs/lua"
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 )
 
 func (r *funcs) LuaFuncs() xlua.Modules {
-	r.lonce.Do(func() {
-		r.luaFuncs["request"] = map[string]lua.LGFunction{
-			"getString":    r.getLuaRquestString,
-			"getInt":       r.getLuaRquestInt,
-			"getParam":     r.getLuaRequestParam,
-			"getPath":      r.getLuaRequestPath,
-			"getRouter":    r.getLuaRouter,
-			"getHeader":    r.getLuaHeader,
-			"getCookie":    r.getLuaCookie,
-			"getClientIP":  r.getLuaClientIP,
-			"getRequestID": r.getLuaRquestID,
-		}
-		r.luaFuncs["response"] = map[string]lua.LGFunction{
-			"getStatus":  r.getLuaResponseStatus,
-			"getContent": r.getLuaResponseContent,
-		}
-	})
-	return r.luaFuncs
+	modules := make(xlua.Modules)
+	modules["request"] = map[string]lua.LGFunction{
+		"getString":    r.getLuaRquestString,
+		"getInt":       r.getLuaRquestInt,
+		"getParam":     r.getLuaRequestParam,
+		"getPath":      r.getLuaRequestPath,
+		"getRouter":    r.getLuaRouter,
+		"getHeader":    r.getLuaHeader,
+		"getCookie":    r.getLuaCookie,
+		"getClientIP":  r.getLuaClientIP,
+		"getRequestID": r.getLuaRquestID,
+	}
+	modules["response"] = map[string]lua.LGFunction{
+		"getStatus":  r.getLuaResponseStatus,
+		"getContent": r.getLuaResponseContent,
+	}
+
+	return modules
 }
 
 func (c *funcs) getLuaRquestString(L *lua.LState) int {
@@ -71,6 +73,7 @@ func (c *funcs) getLuaCookie(L *lua.LState) int {
 	return 2
 }
 func (c *funcs) getLuaClientIP(L *lua.LState) int {
+	fmt.Println("abcef")
 	ret := c.ctx.user.GetClientIP()
 	L.Push(lua.LString(ret))
 	return 1

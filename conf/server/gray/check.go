@@ -18,6 +18,9 @@ import (
 
 //NeedGo2UpStream 检查当前是否需要转到上游服务器处理
 func (g *Gray) NeedGo2UpStream(module lua.Modules) (bool, error) {
+	for k, v := range module {
+		fmt.Println(k, v)
+	}
 	vm, err := lua.New(g.Script, lua.WithMainFuncMode(), lua.WithModules(module))
 	if err != nil {
 		return false, err

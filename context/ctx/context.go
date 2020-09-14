@@ -114,6 +114,7 @@ func (c *Ctx) Close() {
 	c.request = nil
 	c.cancelFunc()
 	c.ctx = nil
+	c.funs = nil
 
 	contextPool.Put(c)
 }
