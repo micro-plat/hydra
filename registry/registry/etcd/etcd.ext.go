@@ -274,7 +274,7 @@ func (e *etcdRegistry) leaseRemain() {
 			e.leases.Range(func(key, val interface{}) bool {
 				path := key.(string)
 				//fmt.Println("leases.Range.", path, key)
-				e.leaseKeepAliveOnce(path)
+				go e.leaseKeepAliveOnce(path)
 				return true
 			})
 		}
