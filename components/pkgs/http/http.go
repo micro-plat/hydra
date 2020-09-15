@@ -11,7 +11,6 @@ import (
 
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
 	"github.com/micro-plat/hydra/context"
 )
 
@@ -46,10 +45,6 @@ func NewClient(opts ...Option) (client *Client, err error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx := context.Current()
-	if apmInfo, ok := ctx.Meta().Get(apm.TraceInfo); ok {
-		client.conf.apmInfo = apmInfo.(*apm.APMInfo)
-	}
 
 	orginalClient := &http.Client{
 		Transport: &http.Transport{
@@ -68,7 +63,24 @@ func NewClient(opts ...Option) (client *Client, err error) {
 			ResponseHeaderTimeout: 0,
 		},
 	}
-	client.client, err = newTracerClient(client.apmInfo, WithClient(orginalClient))
+	client.client = orginalClient
+
+	err = procApmClient(client)
+	return
+}
+
+//procApmClient 处理是否需要启动apm 监控
+func procApmClient(client *Client) (err error) {
+	ctx := context.Current()
+	apmCtx := ctx.APMContext()
+	if apmCtx == nil {
+		return
+	}
+	apmConf := ctx.ServerConf().GetAPMConf()
+	if apmConf.Disable {
+		return
+	}
+	client.client, err = newAPMClient(client.apmCtx)
 	return
 }
 

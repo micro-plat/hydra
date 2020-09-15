@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/context/apm"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -194,6 +195,11 @@ type IUser interface {
 	Auth() IAuth
 }
 
+type IAPMContext interface {
+	GetTracer() apm.Tracer
+	GetRootCtx() context.Context
+}
+
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
 
@@ -223,6 +229,10 @@ type IContext interface {
 
 	//Close 关闭并释放资源
 	Close()
+
+	APMContext() IAPMContext
+
+	StoreAPMCtx(ctx IAPMContext)
 }
 
 //TFuncs 用于模板翻译的函数列表

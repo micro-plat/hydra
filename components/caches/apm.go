@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/components/pkgs/cache"
-	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/context/apm"
 )
 
 var _ ICache = &APMCache{}
@@ -30,24 +27,19 @@ type CallResult struct {
 	Vals     []string
 }
 
-func NewAPMCache(name string, js *conf.RawConf) (ICache, error) {
-	//dbConf cache.ICache
-	fmt.Println("NewAPMCache.0")
-	orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
-	if !global.Def.IsUseAPM() {
-		return orgCache, err
-	}
-	fmt.Println("NewAPMCache.1")
+func NewAPMCache(name string, orgCache ICache) (obj ICache, err error) {
+
+	//fmt.Println("NewAPMCache.1")
 	cacheExt, ok := orgCache.(cache.ICacheExt)
 	if !ok {
-		fmt.Println("NewAPMCache.1.e")
-		return orgCache, err
+		return orgCache, nil
 	}
-	fmt.Println("NewAPMCache.2")
+	//fmt.Println("NewAPMCache.2")
+
 	return &APMCache{
 		name:     name,
 		orgCache: orgCache,
-		proto:    js.GetString("proto"),
+		proto:    cacheExt.GetProto(),
 		servers:  cacheExt.GetServers(),
 	}, err
 }
@@ -161,21 +153,18 @@ func (d *APMCache) GetProvider() string {
 func apmExecute(provider, name, operationName, url string, servers []string, callback DBCallback) *CallResult {
 	ctx := context.Current()
 	apmCfg := ctx.ServerConf().GetAPMConf()
-	if !apmCfg.GetEnable() {
+	if apmCfg.Disable {
 		return callback()
 	}
-	if !apmCfg.GetCache(name) {
+	if !apmCfg.GetCacheEnable(name) {
 		return callback()
 	}
-	//fmt.Println("apmExecute.1")
-	tmp, ok := ctx.Meta().Get(apm.TraceInfo)
-	if !ok {
+	apmCtx := ctx.APMContext()
+	if apmCtx == nil {
 		return callback()
 	}
-	//fmt.Println("apmExecute.2")
-	apmInfo := tmp.(*apm.APMInfo)
-	rootCtx := apmInfo.RootCtx
-	tracer := apmInfo.Tracer
+	rootCtx := apmCtx.GetRootCtx()
+	tracer := apmCtx.GetTracer()
 
 	peer := strings.Join(servers, ",")
 	//fmt.Println("apmExecute.2-1", peer)
@@ -191,7 +180,7 @@ func apmExecute(provider, name, operationName, url string, servers []string, cal
 	defer span.End()
 	//执行db 请求
 	res := callback()
-	span.SetComponent(apmtypes.ComponentIDGOCacheClient)
+	span.SetComponent(apm.ComponentIDGOCacheClient)
 	span.Tag("CacheProto", fmt.Sprintf("%s[%s]", provider, name))
 	span.Tag("CacheKey", url)
 	span.SetSpanLayer(apm.SpanLayer_Cache)

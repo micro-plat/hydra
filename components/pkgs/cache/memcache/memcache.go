@@ -9,6 +9,9 @@ import (
 	"github.com/micro-plat/hydra/components/pkgs/cache"
 )
 
+//Proto Proto
+const Proto = "memcached"
+
 // Client memcache配置文件
 type Client struct {
 	servers []string
@@ -26,6 +29,11 @@ func New(addrs []string) (m *Client, err error) {
 //GetServers 获取服务器列表
 func (c *Client) GetServers() []string {
 	return c.servers
+}
+
+//GetProto 获取服务类型
+func (c *Client) GetProto() string {
+	return Proto
 }
 
 // Get 根据key获取memcache中的数据

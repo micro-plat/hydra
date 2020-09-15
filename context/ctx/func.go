@@ -11,15 +11,15 @@ type funcs struct {
 	tonce     sync.Once
 	lonce     sync.Once
 	tmplFuncs context.TFuncs
-	luaFuncs  lua.Modules
-	ctx       *Ctx
+	//luaFuncs  lua.Modules
+	ctx *Ctx
 }
 
 func newFunc(ctx *Ctx) *funcs {
 	return &funcs{
 		tmplFuncs: make(context.TFuncs),
-		luaFuncs:  make(lua.Modules),
-		ctx:       ctx,
+		//luaFuncs:  make(lua.Modules),
+		ctx: ctx,
 	}
 }
 

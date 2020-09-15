@@ -6,6 +6,7 @@ import (
 )
 
 type ICacheExt interface {
+	GetProto() string
 	GetServers() []string
 }
 

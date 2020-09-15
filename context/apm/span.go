@@ -24,6 +24,15 @@ const (
 )
 
 const (
+	ComponentIDGOHttpServer  = 5004
+	ComponentIDGOHttpClient  = 5005
+	ComponentIDGORpcServer   = 5101
+	ComponentIDGORpcClient   = 5102
+	ComponentIDGOCacheClient = 5103
+	ComponentIDGODBClient    = 5104
+)
+
+const (
 	Header string = "sw8"
 )
 

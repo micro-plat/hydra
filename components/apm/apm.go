@@ -28,6 +28,7 @@ func NewStandardAPM(c container.IContainer) IComponentAPM {
 }
 
 //GetRegularAPM 获取正式的没有异常缓存实例
+//instance 格式建议PlatName+LocalIP
 func (s *StandardAPM) GetRegularAPM(instance string, names ...string) (c IAPM) {
 	c, err := s.GetAPM(instance, names...)
 	if err != nil {
@@ -37,10 +38,11 @@ func (s *StandardAPM) GetRegularAPM(instance string, names ...string) (c IAPM) {
 }
 
 //GetAPM 获取缓存操作对象
+//instance 格式建议PlatName_LocalIP
 func (s *StandardAPM) GetAPM(instance string, names ...string) (c IAPM, err error) {
 	name := types.GetStringByIndex(names, 0, APMNameNode)
 	obj, err := s.c.GetOrCreate(APMTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
-		return apm.New(js.GetString("apmtype"), instance, string(js.GetRaw()))
+		return apm.New(name, instance, string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

@@ -111,8 +111,8 @@ func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
 	return b
 }
 
-//Gray 灰度配置
-func (b *httpBuilder) APM(opts ...apm.Option) *httpBuilder {
-	b.customerBuilder["apm"] = apm.New(opts...)
+//APM 调用链配置
+func (b *httpBuilder) APM(name string, opts ...apm.Option) *httpBuilder {
+	b.customerBuilder["apm"] = apm.New(name, opts...)
 	return b
 }

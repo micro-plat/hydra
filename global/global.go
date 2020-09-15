@@ -151,11 +151,6 @@ func (m *global) IsUseAPM() bool {
 	return m.APMName != ""
 }
 
-//IsUseAPM 调用链服务
-func (m *global) GetAPMService() string {
-	return fmt.Sprintf("%s_%s", m.GetPlatName(), m.GetSysName())
-}
-
 //parsePath 转换平台服务路径
 func parsePath(p string) (platName string, systemName string, serverTypes []string, clusterName string, err error) {
 	fs := strings.Split(strings.Trim(p, "/"), "/")

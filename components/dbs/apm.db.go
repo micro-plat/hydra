@@ -4,13 +4,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/context/apm"
 	"github.com/micro-plat/lib4go/db"
-
-	xdb "github.com/micro-plat/hydra/conf/vars/db"
 )
 
 var _ IDB = &APMDB{}
@@ -33,22 +29,13 @@ type CallResult struct {
 	Data     interface{}
 }
 
-func NewAPMDB(dbName string, dbConf xdb.DB) (IDB, error) {
-
-	orgdb, err := db.NewDB(dbConf.Provider,
-		dbConf.ConnString,
-		dbConf.MaxOpen,
-		dbConf.MaxIdle,
-		dbConf.LifeTime)
-	if !global.Def.IsUseAPM() {
-		return orgdb, err
-	}
+func NewAPMDB(provider, dbName string, orgdb IDB) (IDB, error) {
 
 	return &APMDB{
 		name:     dbName,
 		orgdb:    orgdb,
-		provider: dbConf.Provider,
-	}, err
+		provider: provider,
+	}, nil
 }
 
 func (d *APMDB) Query(sql string, input map[string]interface{}) (db.QueryRows, string, []interface{}, error) {
@@ -151,22 +138,12 @@ func (d *APMDB) GetProvider() string {
 func apmExecute(provider, name, operationName, sqlkey string, callback DBCallback) *CallResult {
 
 	ctx := context.Current()
-	apmCfg := ctx.ServerConf().GetAPMConf()
-	if !apmCfg.GetEnable() {
+	apmCtx := ctx.APMContext()
+	if apmCtx == nil {
 		return callback()
 	}
-	if !apmCfg.GetDB(name) {
-		return callback()
-	}
-	fmt.Println("apmExecute.1")
-	tmp, ok := ctx.Meta().Get(apm.TraceInfo)
-	if !ok {
-		return callback()
-	}
-	fmt.Println("apmExecute.2")
-	apmInfo := tmp.(*apm.APMInfo)
-	rootCtx := apmInfo.RootCtx
-	tracer := apmInfo.Tracer
+	rootCtx := apmCtx.GetRootCtx()
+	tracer := apmCtx.GetTracer()
 
 	span, err := tracer.CreateExitSpan(rootCtx, operationName, "db.Host", func(header string) error {
 		return nil
@@ -179,7 +156,7 @@ func apmExecute(provider, name, operationName, sqlkey string, callback DBCallbac
 	defer span.End()
 	//执行db 请求
 	res := callback()
-	span.SetComponent(apmtypes.ComponentIDGODBClient)
+	span.SetComponent(apm.ComponentIDGODBClient)
 	span.Tag("DBProvider", fmt.Sprintf("%s[%s]", provider, name))
 	span.Tag("SQLKey", sqlkey)
 	span.SetSpanLayer(apm.SpanLayer_Database)

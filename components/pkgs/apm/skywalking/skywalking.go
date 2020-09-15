@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components/pkgs/apm"
+	ctxapm "github.com/micro-plat/hydra/context/apm"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -14,7 +15,7 @@ const (
 
 //Client x
 type Client struct {
-	reporter apm.Reporter
+	reporter ctxapm.Reporter
 	instance string
 }
 
@@ -38,7 +39,7 @@ func New(instance, raw string) (m *Client, err error) {
 	return
 }
 
-func (c *Client) CreateTracer(service string) (tracer apm.Tracer, err error) {
+func (c *Client) CreateTracer(service string) (tracer ctxapm.Tracer, err error) {
 	return NewTracer(service, WithReporter(c.reporter), WithInstance(c.instance))
 }
 

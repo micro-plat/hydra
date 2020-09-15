@@ -7,8 +7,7 @@ import (
 
 	"github.com/SkyAPM/go2sky"
 	grpcreporter "github.com/SkyAPM/go2sky/reporter"
-
-	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/context/apm"
 	"github.com/micro-plat/lib4go/types"
 	"google.golang.org/grpc/credentials"
 )

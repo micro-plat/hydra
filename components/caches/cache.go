@@ -2,7 +2,9 @@ package caches
 
 import (
 	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components/pkgs/cache"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -37,7 +39,19 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
 	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
-		return NewAPMCache(name, js)
+
+		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
+
+		ctx := context.Current()
+		apmCfg := ctx.ServerConf().GetAPMConf()
+		if apmCfg.Disable {
+			return orgCache, err
+		}
+		if !apmCfg.GetDBEnable(name) {
+			return orgCache, err
+		}
+
+		return NewAPMCache(name, orgCache)
 		//return cache.New(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {

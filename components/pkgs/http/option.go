@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/context"
 )
 
 //conf 配置信息
 type conf struct {
-	RequestId         string        `json:"-"`
-	apmInfo           *apm.APMInfo  `json:"-"`
-	ConnectionTimeout time.Duration `json:"ctime"`
-	RequestTimeout    time.Duration `json:"rtime"`
-	Certs             []string      `json:"certs"`
-	Ca                string        `json:"ca"`
-	Proxy             string        `json:"proxy"`
-	Keepalive         bool          `json:"keepalive"`
-	Trace             bool          `json:"trace"`
+	RequestId         string              `json:"-"`
+	apmCtx            context.IAPMContext `json:"-"`
+	ConnectionTimeout time.Duration       `json:"ctime"`
+	RequestTimeout    time.Duration       `json:"rtime"`
+	Certs             []string            `json:"certs"`
+	Ca                string              `json:"ca"`
+	Proxy             string              `json:"proxy"`
+	Keepalive         bool                `json:"keepalive"`
+	Trace             bool                `json:"trace"`
 }
 
 //Option 配置选项

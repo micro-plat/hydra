@@ -1,18 +1,16 @@
 package apm
 
-import (
-	"context"
+import ( 
 	"fmt"
+
+	"github.com/micro-plat/hydra/context/apm"
 )
 
-const (
-	//TraceInfo TraceInfo
-	TraceInfo = "__apm_trace_info"
-)
+
 
 //IAPM 缓存接口
 type IAPM interface {
-	CreateTracer(service string) (tracer Tracer, err error)
+	CreateTracer(service string) (tracer apm.Tracer, err error)
 }
 
 //Resover 定义配置文件转换方法
@@ -42,7 +40,3 @@ func New(apmtype string, instance, conf string) (IAPM, error) {
 	return resolver.Resolve(instance, conf)
 }
 
-type APMInfo struct {
-	Tracer  Tracer
-	RootCtx context.Context
-}

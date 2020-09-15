@@ -9,7 +9,7 @@ import (
 	"github.com/SkyAPM/go2sky/propagation"
 	v3 "github.com/SkyAPM/go2sky/reporter/grpc/language-agent"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
+	"github.com/micro-plat/hydra/context/apm"
 )
 
 func NewTracer(service string, opts ...apm.TracerOption) (tracer apm.Tracer, err error) {

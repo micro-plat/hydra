@@ -17,10 +17,10 @@ func WithEnable() Option {
 	}
 }
 
-//WithConfig 配置名称
-func WithConfig(config string) Option {
+//WithName 配置名称
+func WithName(name string) Option {
 	return func(a *APM) {
-		a.Config = config
+		a.Name = name
 	}
 }
 

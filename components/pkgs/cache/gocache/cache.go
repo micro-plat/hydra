@@ -9,6 +9,9 @@ import (
 	gocache "github.com/zkfy/go-cache"
 )
 
+//Proto Proto
+const Proto = "gocache"
+
 // Client redis配置文件
 type Client struct {
 	servers []string
@@ -28,6 +31,11 @@ func New() (m *Client, err error) {
 //GetServers 获取服务器列表
 func (c *Client) GetServers() []string {
 	return c.servers
+}
+
+//GetProto 获取服务类型
+func (c *Client) GetProto() string {
+	return Proto
 }
 
 // Get 根据key获取redis中的数据

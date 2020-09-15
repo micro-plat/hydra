@@ -23,24 +23,23 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
-	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/context/apm"
 )
 
 var errInvalidTracer = fmt.Errorf("invalid tracer")
 
 type ClientConfig struct {
+	apmCtx    context.IAPMContext
 	name      string
 	client    *http.Client
 	extraTags map[string]string
-	apmInfo   *apm.APMInfo
 }
 
 // ClientOption allows optional configuration of Client.
 type ClientOption func(*ClientConfig)
 
-// WithOperationName override default operation name.
+// WithClientOperationName override default operation name.
 func WithClientOperationName(name string) ClientOption {
 	return func(c *ClientConfig) {
 		c.name = name
@@ -64,19 +63,16 @@ func WithClient(client *http.Client) ClientOption {
 	}
 }
 
-// newTracerClient returns an HTTP Client with tracer
-func newTracerClient(apmInfo *apm.APMInfo, options ...ClientOption) (*http.Client, error) {
+// newAPMClient returns an HTTP Client with tracer
+func newAPMClient(apmctx context.IAPMContext, options ...ClientOption) (*http.Client, error) {
 	co := &ClientConfig{
-		apmInfo: apmInfo,
+		apmCtx: apmctx,
 	}
 	for _, option := range options {
 		option(co)
 	}
 	if co.client == nil {
 		co.client = &http.Client{}
-	}
-	if !global.Def.IsUseAPM() {
-		return co.client, nil
 	}
 
 	tp := &transport{
@@ -96,14 +92,13 @@ type transport struct {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error) {
-	apmInfo := t.apmInfo
-	if apmInfo == nil {
+
+	if t.apmCtx == nil {
 		return t.delegated.RoundTrip(req)
 	}
-	rootCtx := apmInfo.RootCtx
-	tracer := apmInfo.Tracer
 
-	span, err := tracer.CreateExitSpan(rootCtx, getOperationName(t.name, req), req.Host, func(header string) error {
+	tracer := t.apmCtx.GetTracer()
+	span, err := tracer.CreateExitSpan(t.apmCtx.GetRootCtx(), getOperationName(t.name, req), req.Host, func(header string) error {
 		fmt.Println("CreateExitSpan:", req.URL.Host, req.URL.Port(), getOperationName("", req), header)
 		req.Header.Set(apm.Header, header)
 		return nil
@@ -112,7 +107,7 @@ func (t *transport) RoundTrip(req *http.Request) (res *http.Response, err error)
 		return t.delegated.RoundTrip(req)
 	}
 	defer span.End()
-	span.SetComponent(apmtypes.ComponentIDGOHttpClient)
+	span.SetComponent(apm.ComponentIDGOHttpClient)
 	for k, v := range t.extraTags {
 		span.Tag(k, v)
 	}

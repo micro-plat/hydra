@@ -5,10 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
+	"github.com/micro-plat/hydra/context/apm"
+
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
-	"github.com/micro-plat/hydra/global"
 
 	r "github.com/micro-plat/hydra/context"
 	"golang.org/x/net/context"
@@ -35,24 +34,26 @@ func (c *Client) clientRequest(ctx context.Context, o *requestOption, form map[s
 			},
 			grpc.FailFast(o.failFast))
 	}
-	if !global.Def.IsUseAPM() {
+
+	hydractx := r.Current()
+	apmCtx := hydractx.APMContext()
+	if apmCtx == nil {
 		return remotecallback()
 	}
 
-	response, err = c.processApmTrace(o, remotecallback)
+	apmConf := hydractx.ServerConf().GetAPMConf()
+	if apmConf.Disable {
+		return remotecallback()
+	}
+
+	response, err = c.execAPMRequest(apmCtx, o, remotecallback)
 	return
 }
 
-func (c *Client) processApmTrace(o *requestOption, callback func() (*pb.ResponseContext, error)) (res *pb.ResponseContext, err error) {
+func (c *Client) execAPMRequest(apmCtx r.IAPMContext, o *requestOption, callback func() (*pb.ResponseContext, error)) (res *pb.ResponseContext, err error) {
 
-	hydractx := r.Current()
-	tmpInfo, ok := hydractx.Meta().Get(apm.TraceInfo)
-	if !ok {
-		return callback()
-	}
-	apmInfo := tmpInfo.(*apm.APMInfo)
-	tracer := apmInfo.Tracer
-	rootCtx := apmInfo.RootCtx
+	tracer := apmCtx.GetTracer()
+	rootCtx := apmCtx.GetRootCtx()
 
 	span, err := tracer.CreateExitSpan(rootCtx, getOperationName(o), c.conn.Target(), func(header string) error {
 		o.headers[apm.Header] = header
@@ -62,7 +63,7 @@ func (c *Client) processApmTrace(o *requestOption, callback func() (*pb.Response
 		return callback()
 	}
 	defer span.End()
-	span.SetComponent(apmtypes.ComponentIDGORpcClient)
+	span.SetComponent(apm.ComponentIDGORpcClient)
 	span.Tag("X-Request-Id", o.headers["X-Request-Id"])
 
 	span.Tag(apm.TagRPCMethod, o.method) //span.Tag(apm.TagHTTPMethod, req.Method)
@@ -83,8 +84,5 @@ func (c *Client) processApmTrace(o *requestOption, callback func() (*pb.Response
 }
 
 func getOperationName(r *requestOption) string {
-	if r.name == "" {
-		return fmt.Sprintf("/%s%s", r.service)
-	}
-	return r.name
+	return r.service
 }
