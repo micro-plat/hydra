@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	conf "github.com/micro-plat/hydra/conf/vars/apm"
+
 	"github.com/micro-plat/hydra/components/pkgs/apm"
 	ctxapm "github.com/micro-plat/hydra/context/apm"
-	"github.com/micro-plat/lib4go/types"
 )
 
 const (
@@ -21,8 +22,8 @@ type Client struct {
 
 // New 根据配置文件创建一个APM对象
 func New(instance, raw string) (m *Client, err error) {
-	confdata := types.XMap{}
-	err = json.Unmarshal([]byte(raw), &confdata)
+	conf := conf.APM{}
+	err = json.Unmarshal([]byte(raw), &conf)
 	if err != nil {
 		err = fmt.Errorf("json.Unmarshal:%s;%+v", raw, err)
 		return
@@ -30,8 +31,7 @@ func New(instance, raw string) (m *Client, err error) {
 	m = &Client{
 		instance: instance,
 	}
-	serverAddr := confdata.GetString("server_address")
-	m.reporter, err = NewReporter(serverAddr, raw)
+	m.reporter, err = NewReporter(conf.ServerAddress, &conf)
 	if err != nil {
 		err = fmt.Errorf("apm.NewReporter:%s;%+v", raw, err)
 		return

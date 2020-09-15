@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/micro-plat/hydra/conf"
 	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
 )
 
 //APM 消息队列配置
@@ -16,7 +16,14 @@ type APM struct {
 	ReportCheckInterval int               `json:"report_check_interval,omitempty" toml:"report_check_interval,omitempty"`
 	InstanceProps       map[string]string `json:"instance_props,omitempty" toml:"instance_props,omitempty"`
 	MaxSendQueueSize    int               `json:"max_send_queue_size,omitempty" toml:"max_send_queue_size,omitempty"`
+	Credentials         *Credential       `json:"transport_credentials,omitempty"  toml:"transport_credentials,omitempty"`
+	AuthenticationKey   string            `json:"authentication_key,omitempty"  toml:"authentication_key,omitempty" `
 	Raw                 []byte            `json:"-"`
+}
+
+type Credential struct {
+	CertFile   string `json:"cert_file,omitempty" toml:"cert_file,omitempty"`
+	ServerName string `json:"server_name,omitempty" toml:"server_name,omitempty"`
 }
 
 //New 构建apm信息
