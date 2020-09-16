@@ -82,18 +82,18 @@ type innerreporter struct {
 	reporter go2sky.Reporter
 }
 
-func (r innerreporter) Boot(service string, serviceInstance string) {
+func (r *innerreporter) Boot(service string, serviceInstance string) {
 	r.reporter.Boot(service, serviceInstance)
 }
 
-func (r innerreporter) Send(spans []apm.Span) {
+func (r *innerreporter) Send(spans []apm.Span) {
 	var reportspans = make([]go2sky.ReportedSpan, len(spans))
 	for i, s := range spans {
 		reportspans[i] = s.GetRealSpan().(go2sky.ReportedSpan)
 	}
 	r.reporter.Send(reportspans)
 }
-func (r innerreporter) Close() {
+func (r *innerreporter) Close() {
 	r.reporter.Close()
 }
 
