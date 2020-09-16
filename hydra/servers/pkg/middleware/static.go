@@ -37,8 +37,15 @@ func Static() Handler {
 			ctx.Response().Abort(http.StatusNotFound, err)
 			return
 		}
+		//fmt.Println("statis:", static.GetFileMap(), fpath)
 		//文件已存在，则返回文件
 		ctx.Response().StatusCode(200)
+		if gzfile := static.GetGzFile(fpath); gzfile != "" {
+			//fmt.Println("GetGzFile:", gzfile)
+			ctx.Response().File(gzfile)
+			ctx.Response().Header("Content-Encoding", "gzip")
+			return
+		}
 		ctx.Response().File(fpath)
 		return
 	}

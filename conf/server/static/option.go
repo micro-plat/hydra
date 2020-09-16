@@ -7,7 +7,9 @@ type Option func(*Static)
 
 //newStatic 构建Web服务静态文件配置
 func newStatic() *Static {
-	a := &Static{}
+	a := &Static{
+		fileMap: map[string]FileInfo{},
+	}
 	a.Dir = "./src"
 	a.FirstPage = "index.html"
 	a.Rewriters = []string{"/", "index.htm", "default.html"}

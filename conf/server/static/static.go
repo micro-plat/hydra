@@ -20,14 +20,20 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
-	Dir       string   `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
-	Archive   string   `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
-	Prefix    string   `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
-	Exts      []string `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
-	Exclude   []string `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
-	FirstPage string   `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
-	Rewriters []string `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
-	Disable   bool     `json:"disable,omitempty" toml:"disable,omitempty"`
+	Dir       string              `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
+	Archive   string              `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
+	Prefix    string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
+	Exts      []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
+	Exclude   []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
+	FirstPage string              `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
+	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
+	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
+	fileMap   map[string]FileInfo `json:"-"`
+}
+
+type FileInfo struct {
+	GzFile string
+	HasGz  bool
 }
 
 //New 构建静态文件配置信息
@@ -36,6 +42,7 @@ func New(opts ...Option) *Static {
 	for _, opt := range opts {
 		opt(s)
 	}
+	s.RereshData()
 	return s
 }
 
@@ -53,7 +60,9 @@ func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
 //GetConf 设置static
 func GetConf(cnf conf.IMainConf) *Static {
 	//设置静态文件路由
-	static := Static{}
+	static := Static{
+		fileMap: map[string]FileInfo{},
+	}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("static配置有误:%v", err))
@@ -69,6 +78,7 @@ func GetConf(cnf conf.IMainConf) *Static {
 	if err != nil {
 		panic(fmt.Errorf("%s获取失败:%v", static.Archive, err))
 	}
+	static.RereshData()
 	return &static
 }
 

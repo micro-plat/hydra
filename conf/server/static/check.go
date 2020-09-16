@@ -1,6 +1,9 @@
 package static
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -93,4 +96,55 @@ func (s *Static) NeedRewrite(p string) bool {
 		}
 	}
 	return false
+}
+
+//GetGzFile 获取gz 压缩包
+func (s *Static) GetGzFile(rPath string) string {
+
+	fi, ok := s.fileMap[rPath]
+	if !ok {
+		return ""
+	}
+	if !fi.HasGz {
+		return ""
+	}
+	return fi.GzFile
+}
+
+//RereshData 刷新配置数据
+func (s *Static) RereshData() {
+	s.recursiveDir(strings.TrimPrefix(s.Dir, "./"))
+}
+
+func (s *Static) GetFileMap() map[string]FileInfo {
+	return s.fileMap
+}
+
+func (s *Static) recursiveDir(dir string) {
+	children := []string{}
+	const suffix = ".gz"
+	list, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	var cur os.FileInfo
+	for i := range list {
+		cur = list[i]
+		if !cur.IsDir() {
+			if strings.HasSuffix(cur.Name(), suffix) {
+				fpath := fmt.Sprintf("%s/%s", dir, strings.TrimSuffix(cur.Name(), suffix))
+				s.fileMap[fpath] = FileInfo{
+					HasGz:  true,
+					GzFile: fpath + suffix,
+				}
+			}
+			continue
+		}
+		children = append(children, fmt.Sprintf("%s/%s", dir, cur.Name()))
+	}
+
+	for i := range children {
+		s.recursiveDir(children[i])
+	}
+	return
 }
