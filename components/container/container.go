@@ -42,6 +42,7 @@ func NewContainer() *Container {
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
 func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error) {
 
+	//参数获取依赖强,不便于测试
 	vc, err := server.Cache.GetVarConf()
 	if err != nil {
 		return nil, err
