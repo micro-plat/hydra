@@ -88,13 +88,13 @@ func procMiddle(ctx IMiddleContext, tracer apm.Tracer) error {
 	span.SetSpanLayer(apm.SpanLayer_Http)
 
 	defer func() {
-		statusCode, _ := ctx.Response().GetFinalResponse()
-		code := statusCode
-		if code >= 400 {
-			span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(code))
+		statusCode, v := ctx.Response().GetFinalResponse()
+
+		if statusCode >= 400 {
+			span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(statusCode), v)
 		}
 		//fmt.Println("middleware.apm-4", statusCode)
-		span.Tag(apm.TagStatusCode, strconv.Itoa(code))
+		span.Tag(apm.TagStatusCode, strconv.Itoa(statusCode))
 		span.End()
 	}()
 	return nil

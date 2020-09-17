@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/pkgs"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/grpclog"
@@ -23,7 +23,7 @@ func newBuilder(localip string) balancer.Builder {
 }
 
 func init() {
-	balancer.Register(newBuilder(net.GetLocalIPAddress()))
+	balancer.Register(newBuilder(pkgs.LocalIP()))
 }
 
 type lfPickerBuilder struct {

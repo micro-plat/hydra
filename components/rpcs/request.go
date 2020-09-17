@@ -11,7 +11,7 @@ import (
 	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/pkgs"
 )
 
 //rpcTypeNode rpc在var配置中的类型名称
@@ -62,7 +62,7 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 		if isip {
 			return rpc.NewClient(platName)
 		}
-		return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, net.GetLocalIPAddress()))
+		return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, pkgs.LocalIP()))
 	})
 	if err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ package global
 import (
 	xnet "net"
 
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
@@ -22,5 +22,5 @@ func getMatchineCode() string {
 		}
 		return md5.Encrypt(mac)[:8]
 	}
-	return md5.Encrypt(net.GetLocalIPAddress())[:8]
+	return md5.Encrypt(pkgs.LocalIP())[:8]
 }

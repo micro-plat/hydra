@@ -12,7 +12,7 @@ import (
 type APM struct {
 	APMName string `json:"-"`
 	//ServerAddress 单个地址（不支持多个）
-	ServerAddress       string            `json:"server_address,omitempty" toml:"server_address,omitempty"`
+	ServerAddress       string            `json:"server_address" toml:"server_address"`
 	ReportCheckInterval int               `json:"report_check_interval,omitempty" toml:"report_check_interval,omitempty"`
 	InstanceProps       map[string]string `json:"instance_props,omitempty" toml:"instance_props,omitempty"`
 	MaxSendQueueSize    int               `json:"max_send_queue_size,omitempty" toml:"max_send_queue_size,omitempty"`
@@ -32,7 +32,10 @@ func New(apmname string, raw []byte) *APM {
 		APMName: apmname,
 		Raw:     raw,
 	}
-	json.Unmarshal(raw, m)
+	err := json.Unmarshal(raw, m)
+	if err != nil {
+		panic(fmt.Sprintf("新建apm配置失败：%s,content:%s", err, string(raw)))
+	}
 	return m
 }
 
