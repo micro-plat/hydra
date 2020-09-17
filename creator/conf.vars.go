@@ -46,6 +46,6 @@ func (v vars) APM(q *apm.APM) vars {
 	if _, ok := v["apm"]; !ok {
 		v["apm"] = make(map[string]interface{})
 	}
-	v["apm"]["apm"] = q
+	v["apm"][q.APMName] = q
 	return v
 }
