@@ -32,7 +32,10 @@ func New(apmname string, raw []byte) *APM {
 		APMName: apmname,
 		Raw:     raw,
 	}
-	json.Unmarshal(raw, m)
+	err := json.Unmarshal(raw, m)
+	if err != nil {
+		panic(fmt.Sprintf("新建apm配置失败：%s,content:%s", err, string(raw)))
+	}
 	return m
 }
 
