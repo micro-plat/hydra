@@ -16,6 +16,7 @@ import (
 	"github.com/micro-plat/hydra/components/uuid"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/registry"
 
 	_ "github.com/micro-plat/hydra/components/pkgs/mq/lmq"
 )
@@ -87,7 +88,7 @@ func (c *Component) HTTP() http.IComponentHTTPClient {
 
 //DLock 获取分布式鍞
 func (c *Component) DLock(name string) (dlock.ILock, error) {
-	return dlock.NewLock(name, global.Def.RegistryAddr, context.Current().Log())
+	return dlock.NewLock(registry.Join(global.Def.PlatName, "dlock", name), global.Def.RegistryAddr, context.Current().Log())
 }
 
 //APM 调用链

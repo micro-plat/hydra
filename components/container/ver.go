@@ -29,6 +29,7 @@ func (v *vers) Add(tp string, name string, key string) {
 		return
 	}
 	v.keys[tps].current = key
+	//这里是否需要对keys--[]string验证重复,不然只要两个不同的key交替请求,就会造成内存一直升高
 	v.keys[tps].keys = append(v.keys[key].keys, key)
 }
 func (v *vers) Remove(f func(key string) bool) {
