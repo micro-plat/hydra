@@ -21,6 +21,7 @@ require (
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect

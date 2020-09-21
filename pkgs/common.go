@@ -1,16 +1,23 @@
 package pkgs
 
 import (
+	"sync"
+
 	"github.com/micro-plat/lib4go/net"
 )
 
 var (
-	mask = ""
+	mask    = ""
+	localip = ""
 )
+var onceLock sync.Once
 
 //LocalIP LocalIP
 func LocalIP() string {
-	return net.GetLocalIPAddress(mask)
+	onceLock.Do(func() {
+		localip = net.GetLocalIPAddress(mask)
+	})
+	return localip
 }
 
 //WithIPMask WithIPMask

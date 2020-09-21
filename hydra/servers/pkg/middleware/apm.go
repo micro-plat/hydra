@@ -51,18 +51,21 @@ func APM() Handler {
 			ctx.Next()
 			return
 		}
-		err = procMiddle(ctx, tracer)
+		callback, err := procMiddle(ctx, tracer)
 		if err != nil {
 			ctx.Next()
 			return
 		}
+		defer callback()
 		ctx.Response().AddSpecial("apm")
 		ctx.Next()
 	}
 }
 
 //ProcMiddle ProcMiddle
-func procMiddle(ctx IMiddleContext, tracer apm.Tracer) error {
+func procMiddle(ctx IMiddleContext, tracer apm.Tracer) (callback func(), err error) {
+
+	callback = func() {}
 
 	oreq := ctx.Request()
 
@@ -72,7 +75,7 @@ func procMiddle(ctx IMiddleContext, tracer apm.Tracer) error {
 	})
 	if err != nil {
 		ctx.Log().Warnf("APM.CreateEntrySpan:%+v", err)
-		return err
+		return
 	}
 
 	ctx.StoreAPMCtx(apm.NewCtx(rootctx, tracer))
@@ -87,15 +90,15 @@ func procMiddle(ctx IMiddleContext, tracer apm.Tracer) error {
 	span.Tag(apm.TagURL, oreq.Path().GetURL())
 	span.SetSpanLayer(apm.SpanLayer_Http)
 
-	defer func() {
+	callback = func() {
 		statusCode, v := ctx.Response().GetFinalResponse()
 
 		if statusCode >= 400 {
+			v = v[0:300]
 			span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(statusCode), v)
 		}
-		//fmt.Println("middleware.apm-4", statusCode)
 		span.Tag(apm.TagStatusCode, strconv.Itoa(statusCode))
 		span.End()
-	}()
-	return nil
+	}
+	return
 }

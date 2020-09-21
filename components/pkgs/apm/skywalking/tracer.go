@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/micro-plat/hydra/pkgs"
+
 	"github.com/SkyAPM/go2sky"
 	"github.com/SkyAPM/go2sky/propagation"
 	v3 "github.com/SkyAPM/go2sky/reporter/grpc/language-agent"
@@ -24,9 +29,10 @@ func NewTracer(service string, opts ...apm.TracerOption) (tracer apm.Tracer, err
 		skyopts = append(skyopts, go2sky.WithReporter(rpter))
 	}
 
-	if innertracer.instance != "" {
-		skyopts = append(skyopts, go2sky.WithInstance(innertracer.instance))
+	if innertracer.instance == "" {
+		innertracer.instance = getTraceID()
 	}
+	skyopts = append(skyopts, go2sky.WithInstance(innertracer.instance))
 
 	skytracer, err := go2sky.NewTracer(service, skyopts...)
 	if err != nil {
@@ -154,4 +160,13 @@ func (ds *innerSpan) IsExit() bool {
 
 func (ds *innerSpan) GetRealSpan() interface{} {
 	return ds.span
+}
+
+// UUID generate UUID
+func getTraceID() string {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		panic("获取github.com/google/uuid失败")
+	}
+	return strings.ReplaceAll(id.String(), "-", "") + "@" + pkgs.LocalIP()
 }
