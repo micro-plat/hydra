@@ -44,6 +44,7 @@ func (v *valuesEntity) GetPath() string {
 }
 
 func (r *redisRegistry) WatchChildren(path string) (ch chan registry.ChildrenWatcher, err error) {
+	fmt.Println("ccccccccccc:", path)
 	ch = make(chan registry.ChildrenWatcher, 1)
 	changeCh := make(chan valuesEntity, 1)
 	errCh := make(chan error, 1)
@@ -114,7 +115,6 @@ func (r *redisRegistry) WatchChildren(path string) (ch chan registry.ChildrenWat
 			}(changeCh, errCh)
 		}
 	}
-	return
 }
 func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, err error) {
 	ch = make(chan registry.ValueWatcher, 1)
@@ -141,6 +141,7 @@ func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, 
 			ch <- &v
 			return
 		case <-time.After(time.Second * 3):
+			// fmt.Println("yyyyyyyyyyyyyy:", path)
 			go func(changeCh chan valueEntity, eCh chan error) {
 				pathKey := joinR(path)
 				res, vers, err := r.GetValue(pathKey)
@@ -167,6 +168,7 @@ func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, 
 					}
 				}
 				if b {
+					// fmt.Println("zzzzzzzzzzz:", string(res))
 					changeCh <- valueEntity{path: path, Err: nil, Value: res, version: vers}
 					return
 				}
@@ -174,5 +176,4 @@ func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, 
 			}(changeCh, errCh)
 		}
 	}
-	return
 }

@@ -240,7 +240,7 @@ func (p *Publisher) check() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	for path, data := range p.pubs {
-		fmt.Println("------------------:", path)
+		// fmt.Println("------------------:", path)
 		if p.done {
 			break
 		}

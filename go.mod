@@ -30,7 +30,8 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.0.2
+	github.com/micro-plat/lib4go v0.3.1
+	// github.com/micro-plat/lib4go v1.0.2
 	github.com/micro/go-micro/v3 v3.0.0-beta.2 // indirect
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -39,7 +40,7 @@ require (
 	github.com/pkg/profile v1.4.0
 	github.com/pkg/sftp v1.12.0
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
-	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
+	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
 	github.com/spf13/cobra v0.0.3 // indirect
 	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.1.7
@@ -68,4 +69,4 @@ require (
 	layeh.com/gopher-luar v1.0.8 // indirect
 )
 
-// replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
