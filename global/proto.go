@@ -6,12 +6,13 @@ import (
 )
 
 const (
-	ProtoZK   = "zk"
-	ProtoRPC  = "rpc"
-	ProtoHTTP = "http"
-	ProtoLM   = "lm"
-	ProtoFS   = "fs"
-	ProtoLMQ  = "lmq"
+	ProtoZK    = "zk"
+	ProtoRPC   = "rpc"
+	ProtoHTTP  = "http"
+	ProtoLM    = "lm"
+	ProtoFS    = "fs"
+	ProtoLMQ   = "lmq"
+	ProtoREDIS = "redis"
 )
 
 //ParseProto 解析协议信息

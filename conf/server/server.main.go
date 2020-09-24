@@ -42,7 +42,6 @@ func (c *MainConf) load() (err error) {
 	}
 	c.rootConf = conf
 	c.rootVersion = conf.GetVersion()
-
 	//获取子配置
 	c.subConfs, err = c.getSubConf(c.GetMainPath())
 	if err != nil {
@@ -56,6 +55,7 @@ func (c *MainConf) getSubConf(path string) (map[string]conf.RawConf, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	values := make(map[string]conf.RawConf)
 	for _, p := range confs {
 		currentPath := registry.Join(path, p)

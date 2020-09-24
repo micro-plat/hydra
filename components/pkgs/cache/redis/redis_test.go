@@ -115,6 +115,30 @@ func TestRedisSet(t *testing.T) {
 	}
 }
 
+func TestRedisX(t *testing.T) {
+	redisClient, err := New([]string{"192.168.0.116:6379"}, `{"addrs":["192.168.0.116:6379","192.168.0.113:6379"],"db":1}`)
+	if err != nil {
+		t.Errorf("获取redis对象失败,err:%+v", err)
+		return
+	}
+
+	n, err := redisClient.Increment("taosytest123", 1)
+	if err != nil {
+		t.Errorf("添加redis数据失败,err:%+v", err)
+		return
+	}
+
+	t.Errorf("n:%d \n", n)
+	res, err := redisClient.Get("taosytest123")
+	if err != nil {
+		t.Errorf("获取redis对象失败,err:%+v", err)
+		return
+	}
+
+	t.Errorf("res:%s \n", res)
+
+}
+
 func TestRedisY(t *testing.T) {
 	redisClient, err := New([]string{"192.168.0.116:6379"}, `{"addrs":["192.168.0.116:6379","192.168.0.113:6379"],"db":1}`)
 	if err != nil {
@@ -122,9 +146,10 @@ func TestRedisY(t *testing.T) {
 		return
 	}
 
+	redisClient.Delete("taosytest123")
 	var add int64 = 0
 	var deduct int64 = 0
-	for i := 0; i <= 1000; i++ {
+	for i := 0; i < 100; i++ {
 		var wg sync.WaitGroup
 		for j := 0; j < 100; j++ {
 			wg.Add(1)
@@ -133,15 +158,15 @@ func TestRedisY(t *testing.T) {
 				if n == 0 {
 					if _, err := redisClient.Decrement("taosytest123", 1); err != nil {
 						t.Errorf("添加redis数据失败,err:%+v", err)
-						return
+					} else {
+						deduct++
 					}
-					add++
 				} else {
 					if _, err := redisClient.Increment("taosytest123", 1); err != nil {
 						t.Errorf("添加redis数据失败,err:%+v", err)
-						return
+					} else {
+						add++
 					}
-					deduct++
 				}
 				wg.Done()
 			}()
@@ -149,6 +174,7 @@ func TestRedisY(t *testing.T) {
 		wg.Wait()
 	}
 
+	t.Errorf("add:%d,deduct:%d", add, deduct)
 	res, err := redisClient.Get("taosytest123")
 	if err != nil {
 		t.Errorf("获取redis对象失败,err:%+v", err)
@@ -165,4 +191,67 @@ func TestRedisY(t *testing.T) {
 		t.Errorf("删除redis数据失败,err:%+v", err)
 		return
 	}
+}
+
+func TestXXX(t *testing.T) {
+	redisClient, err := New([]string{"192.168.0.116:6379"}, `{"addrs":["192.168.0.116:6379","192.168.0.113:6379"],"db":1}`)
+	if err != nil {
+		t.Errorf("获取redis对象失败,err:%+v", err)
+		return
+	}
+
+	list := []string{}
+	c := uint64(0)
+	for {
+		res := redisClient.client.Scan(c, "17sup_v2_debug:inbound_list_main:*", 100)
+		arry, c1, err := res.Result()
+		if err != nil {
+			t.Errorf("添加redis数据失败,err:%+v", err)
+			return
+		}
+		if arry != nil && len(arry) > 0 {
+			allArry := make([]string, len(arry)+len(list))
+			copy(allArry, list)
+			copy(allArry[len(list):], arry)
+			list = allArry
+		}
+		if c1 == 0 {
+			break
+		}
+		c = c1
+	}
+
+	t.Errorf("n:%s\n", list)
+}
+
+func TestXXX1(t *testing.T) {
+	redisClient, err := New([]string{"192.168.0.116:6379"}, `{"addrs":["192.168.0.116:6379","192.168.0.113:6379"],"db":1}`)
+	if err != nil {
+		t.Errorf("获取redis对象失败,err:%+v", err)
+		return
+	}
+
+	res := redisClient.client.Keys("17sup_v2_debug:inbound_list_main:*")
+	arry, err := res.Result()
+	if err != nil {
+		t.Errorf("添加redis数据失败,err:%+v", err)
+		return
+	}
+
+	t.Errorf("n:%s\n", arry)
+}
+
+func TestXXX2(t *testing.T) {
+	redisClient, err := New([]string{"192.168.0.116:6379"}, `{"addrs":["192.168.0.116:6379","192.168.0.113:6379"],"db":1}`)
+	if err != nil {
+		t.Errorf("获取redis对象失败,err:%+v", err)
+		return
+	}
+
+	res, err := redisClient.client.Del("sdfdfsf").Result()
+
+	// res := redisClient.client.Exists("17sup_v2_debug:inbound_list_main:sdddf")
+	// arry, err := res.Result()
+
+	t.Errorf("n:%d err:%+v\n", res, err)
 }

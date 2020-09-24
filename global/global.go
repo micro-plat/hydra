@@ -202,6 +202,9 @@ func (m *global) check() (err error) {
 	if m.SysName == "" {
 		m.SysName = AppName
 	}
+	if m.RegistryAddr == "" {
+		m.RegistryAddr = "lm://."
+	}
 
 	if m.RegistryAddr == "" {
 		return fmt.Errorf("注册中心地址不能为空")

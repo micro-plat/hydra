@@ -51,12 +51,12 @@ func (c *Client) Get(key string) (string, error) {
 	return data, nil
 }
 
-//Decrement 增加变量的值
+//Decrement 减少变量的值
 func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 	return c.client.DecrBy(key, delta).Result()
 }
 
-//Increment 减少变量的值
+//Increment 增加变量的值
 func (c *Client) Increment(key string, delta int64) (n int64, err error) {
 	return c.client.IncrBy(key, delta).Result()
 }

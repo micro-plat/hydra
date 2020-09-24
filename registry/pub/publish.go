@@ -165,6 +165,7 @@ func (p *Publisher) pubRPCServiceNode(serverName string, service string, data st
 
 //pubAPIServiceNode 发布API服务节点
 func (p *Publisher) pubAPIServiceNode(serverName string, data string) error {
+	fmt.Println("serverName:", serverName, " data:", data)
 	path := registry.Join(p.c.GetServicePubPath(), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
@@ -239,6 +240,7 @@ func (p *Publisher) check() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	for path, data := range p.pubs {
+		fmt.Println("------------------:", path)
 		if p.done {
 			break
 		}
@@ -266,7 +268,7 @@ func (p *Publisher) Close() {
 	p.done = true
 	close(p.closeChan)
 	p.Clear()
-
+	// p.c.GetRegistry().Close()
 }
 
 //Clear 清除所有发布节点

@@ -1,22 +1,25 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"runtime"
-	"strconv"
+	"strings"
 )
 
 func main() {
-
-	fmt.Println(getGID)
+	ss := "/taosytest/test-rgtredis/api/taosy/conf/taosytest:test-rgtredis:api:taosy:conf:router"
+	fmt.Println(JoinR(ss))
 }
 
-func getGID() uint64 {
-	b := make([]byte, 64)
-	b = b[:runtime.Stack(b, false)]
-	b = bytes.TrimPrefix(b, []byte("goroutine "))
-	b = b[:bytes.IndexByte(b, ' ')]
-	n, _ := strconv.ParseUint(string(b), 10, 64)
-	return n
+func JoinR(elem ...string) string {
+	var builder strings.Builder
+	for _, v := range elem {
+		if v == "/" || v == "\\" || strings.TrimSpace(v) == "" {
+			continue
+		}
+		builder.WriteString(strings.Trim(v, "/"))
+		builder.WriteString(":")
+	}
+
+	str := strings.ReplaceAll(builder.String(), "/", ":")
+	return strings.TrimSuffix(str, ":")
 }

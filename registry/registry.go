@@ -75,7 +75,7 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 		rsvr := input[0].(IFactory)
 		srvs := input[1].([]string)
 		log := input[2].(logger.ILogging)
-
+		fmt.Println("+++++++++++:", srvs)
 		//addrs []string, userName string, password string, log logger.ILogging
 
 		return rsvr.Create(Addrs(srvs...),

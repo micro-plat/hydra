@@ -6,9 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zhiyunliu/etcd/clientv3"
-
 	"github.com/micro-plat/hydra/registry"
+	"github.com/zhiyunliu/etcd/clientv3"
 )
 
 type etcdWatcher struct {

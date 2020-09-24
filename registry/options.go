@@ -8,13 +8,17 @@ import (
 )
 
 type Options struct {
-	Domain    string
-	Addrs     []string
-	Timeout   time.Duration
-	TLSConfig *tls.Config
-	Auth      *AuthCreds
-	Logger    logger.ILogging
-	Metadata  map[string]string
+	Domain      string
+	MasterName  string
+	Addrs       []string
+	Timeout     time.Duration
+	DialTimeout int
+	Db          int
+	TLSConfig   *tls.Config
+	Auth        *AuthCreds
+	Logger      logger.ILogging
+	Metadata    map[string]string
+	PoolSize    int
 }
 
 type AuthCreds struct {
@@ -72,3 +76,23 @@ func Domain(domain string) Option {
 	}
 }
 
+//WithMaster 设置哨兵服务器
+func WithMaster(master string) Option {
+	return func(o *Options) {
+		o.MasterName = master
+	}
+}
+
+//WithDB 设置数据库
+func WithDB(db int) Option {
+	return func(o *Options) {
+		o.Db = db
+	}
+}
+
+//WithDialTimeout 设置连接超时时长
+func WithDialTimeout(timeout int) Option {
+	return func(o *Options) {
+		o.DialTimeout = timeout
+	}
+}
