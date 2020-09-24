@@ -38,8 +38,10 @@ type clientOption struct {
 	balancer          string
 	localIP           string
 	//resolver          balancer.ServiceResolver
-	service string
-	tls     []string
+	plat       string
+	service    string
+	sortPrefix string
+	tls        []string
 }
 
 //ClientOption 客户端配置选项
@@ -170,7 +172,9 @@ func (r *requestOption) getData(v interface{}) ([]byte, error) {
 //WithRoundRobinBalancer 配置为轮询负载均衡器
 func WithRoundRobinBalancer(plat, service string) ClientOption {
 	return func(o *clientOption) {
+		o.plat = plat
 		o.service = service
+		o.sortPrefix = ""
 		//o.resolver = balancer.NewResolver(plat, service, "")
 		//o.balancer = balancer.RoundRobin(service, o.resolver, o.log)
 		o.balancer = balancer.RoundRobin
@@ -180,7 +184,9 @@ func WithRoundRobinBalancer(plat, service string) ClientOption {
 //WithLocalFirstBalancer 配置为本地优先负载均衡器
 func WithLocalFirstBalancer(plat, service string, local string) ClientOption {
 	return func(o *clientOption) {
+		o.plat = plat
 		o.service = service
+		o.sortPrefix = local
 		//o.resolver = balancer.NewResolver(plat, service, local)
 		//o.balancer = balancer.LocalFirst(service, local, o.resolver)
 		o.balancer = balancer.LocalFirst
@@ -189,8 +195,9 @@ func WithLocalFirstBalancer(plat, service string, local string) ClientOption {
 }
 
 //WithBalancer 设置负载均衡器
-func WithBalancer(service string, lbname string) ClientOption {
+func WithBalancer(plat, service string, lbname string) ClientOption {
 	return func(o *clientOption) {
+		o.plat = plat
 		o.service = service
 		o.balancer = lbname
 	}
@@ -232,18 +239,21 @@ func (c *Client) connect() (err error) {
 		return nil
 	}
 	if c.balancer == "" {
-		c.conn, err = grpc.Dial(c.address,
-			grpc.WithInsecure(),
-			grpc.WithTimeout(c.connectionTimeout))
-
-	} else {
-		ctx, _ := context.WithTimeout(context.Background(), c.connectionTimeout)
-		c.conn, err = grpc.DialContext(ctx,
-			c.address,
-			grpc.WithInsecure(),
-			grpc.WithBalancerName(c.balancer))
+		c.balancer = balancer.RoundRobin
 	}
+	fmt.Println("client.connect.2", c.balancer, c.address)
+
+	rb := balancer.NewResolverBuilder(c.address, c.plat, c.service, c.sortPrefix)
+
+	ctx, _ := context.WithTimeout(context.Background(), c.connectionTimeout)
+	c.conn, err = grpc.DialContext(ctx,
+		c.address+"/mockrpc",
+		grpc.WithInsecure(),
+		grpc.WithBalancerName(c.balancer),
+		grpc.WithResolvers(rb))
+
 	if err != nil {
+		fmt.Println("client.connect.3", err)
 		return
 	}
 	c.client = pb.NewRPCClient(c.conn)
@@ -259,10 +269,12 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 	}
 	o.service = service
 	response, err := c.clientRequest(ctx, o, form)
-
+	fmt.Println("Client.Request.1")
 	if err != nil {
+		fmt.Println("Client.Request.2", err)
 		return NewResponseByStatus(http.StatusInternalServerError, err), err
 	}
+	fmt.Println("Client.Request.3")
 	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 

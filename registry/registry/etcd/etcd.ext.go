@@ -217,7 +217,12 @@ func (e *etcdRegistry) Delete(path string) (err error) {
 func (e *etcdRegistry) Exists(path string) (exists bool, err error) {
 	//fmt.Println("etcdRegistry.Exists：", path)
 	// create an entry for the node
-	putOpts := []clientv3.OpOption{}
+	putOpts := []clientv3.OpOption{
+		clientv3.WithSerializable(),
+		clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend),
+		clientv3.WithPrefix(),
+		clientv3.WithKeysOnly(),
+	}
 
 	rsp, err := e.client.Get(context.Background(), path, putOpts...)
 	if err != nil {

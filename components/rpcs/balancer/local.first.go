@@ -7,13 +7,10 @@ import (
 	"github.com/micro-plat/hydra/pkgs"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
-	"google.golang.org/grpc/grpclog"
 )
 
 //LocalFirst LocalFirst
 const LocalFirst = "localfirst"
-
-var logger = grpclog.Component("localfirst")
 
 // newBuilder creates a new roundrobin balancer builder.
 func newBuilder(localip string) balancer.Builder {
@@ -31,7 +28,6 @@ type lfPickerBuilder struct {
 }
 
 func (builder *lfPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
-	logger.Infof("roundrobinPicker: newPicker called with info: %v", info)
 	if len(info.ReadySCs) == 0 {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}

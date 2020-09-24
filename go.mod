@@ -9,6 +9,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa // indirect
+	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.0.0 // indirect
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -19,6 +20,7 @@ require (
 	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-redis/redis v6.15.6+incompatible
+	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1
 	github.com/google/uuid v1.1.1
@@ -31,7 +33,6 @@ require (
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.0.2
-	github.com/micro/go-micro/v3 v3.0.0-beta.2 // indirect
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect

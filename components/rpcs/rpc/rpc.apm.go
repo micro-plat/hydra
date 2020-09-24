@@ -25,6 +25,7 @@ func (c *Client) clientRequest(ctx context.Context, o *requestOption, form map[s
 		return nil, err
 	}
 	remotecallback := func() (*pb.ResponseContext, error) {
+		fmt.Println(o.method, o.service, string(h), string(f))
 		return c.client.Request(ctx,
 			&pb.RequestContext{
 				Method:  o.method,
@@ -40,18 +41,15 @@ func (c *Client) clientRequest(ctx context.Context, o *requestOption, form map[s
 	if apmCtx == nil {
 		return remotecallback()
 	}
-
 	apmConf := hydractx.ServerConf().GetAPMConf()
 	if apmConf.Disable {
 		return remotecallback()
 	}
-
 	response, err = c.execAPMRequest(apmCtx, o, remotecallback)
 	return
 }
 
 func (c *Client) execAPMRequest(apmCtx r.IAPMContext, o *requestOption, callback func() (*pb.ResponseContext, error)) (res *pb.ResponseContext, err error) {
-
 	tracer := apmCtx.GetTracer()
 	rootCtx := apmCtx.GetRootCtx()
 
@@ -80,6 +78,7 @@ func (c *Client) execAPMRequest(apmCtx r.IAPMContext, o *requestOption, callback
 	if res.Status >= http.StatusBadRequest {
 		span.Error(time.Now(), "Errors on handling client")
 	}
+
 	return res, nil
 }
 
