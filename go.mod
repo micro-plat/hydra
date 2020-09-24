@@ -40,7 +40,7 @@ require (
 	github.com/pkg/profile v1.4.0
 	github.com/pkg/sftp v1.12.0
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
-	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
+	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
 	github.com/spf13/cobra v0.0.3 // indirect
 	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.1.7
@@ -69,4 +69,4 @@ require (
 	layeh.com/gopher-luar v1.0.8 // indirect
 )
 
-// replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

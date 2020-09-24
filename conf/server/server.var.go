@@ -32,14 +32,12 @@ func NewVarConf(varConfPath string, rgst registry.IRegistry) (s *VarConf, err er
 
 //load 加载所有配置项
 func (c *VarConf) load() (err error) {
-
 	//检查跟路径是否存在
 	if b, err := c.registry.Exists(c.varConfPath); err == nil && !b {
 		return nil
 	}
 
 	//获取第一级目录
-
 	var varfirstNodes []string
 	varfirstNodes, c.varVersion, err = c.registry.GetChildren(c.varConfPath)
 	if err != nil {
@@ -84,6 +82,7 @@ func (c *VarConf) GetVersion() int32 {
 
 //GetConf 指定配置文件名称，获取var配置信息
 func (c *VarConf) GetConf(tp string, name string) (*conf.RawConf, error) {
+
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}

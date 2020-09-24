@@ -165,7 +165,6 @@ func (p *Publisher) pubRPCServiceNode(serverName string, service string, data st
 
 //pubAPIServiceNode 发布API服务节点
 func (p *Publisher) pubAPIServiceNode(serverName string, data string) error {
-	fmt.Println("serverName:", serverName, " data:", data)
 	path := registry.Join(p.c.GetServicePubPath(), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {

@@ -38,6 +38,7 @@ func NewProcessor(addr string, raw []byte) (p *Processor, err error) {
 		startTime: time.Now(),
 		queues:    cmap.New(4),
 	}
+
 	opt, err := mq.WithRaw(raw)
 	if err != nil {
 		return nil, fmt.Errorf("队列配置信息有误:%w", err)

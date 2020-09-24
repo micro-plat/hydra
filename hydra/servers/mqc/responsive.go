@@ -137,7 +137,7 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器地址有误:%w", err)
 	}
-	fmt.Println("proto:", proto)
+	// fmt.Println("proto:", proto)
 	if global.IsLocal(proto) {
 		return NewServer(proto, nil, cnf.GetMQCQueueConf().Queues...)
 	}
