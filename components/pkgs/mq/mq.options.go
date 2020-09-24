@@ -1,6 +1,8 @@
 package mq
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 //ConfOpt 配置选项
 type ConfOpt struct {
@@ -74,6 +76,6 @@ func WithRaw(raw []byte) (Option, error) {
 	}
 	c.Raw = string(raw)
 	return func(o *ConfOpt) {
-		o = c
+		*o = *c
 	}, nil
 }

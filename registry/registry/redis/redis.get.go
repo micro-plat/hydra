@@ -4,6 +4,8 @@ package redis
 import (
 	"fmt"
 	"time"
+
+	"github.com/micro-plat/lib4go/security/md5"
 )
 
 type getChildrenType struct {
@@ -75,10 +77,10 @@ func (r *redisRegistry) GetValue(path string) (data []byte, version int32, err e
 	if r.done {
 		return nil, 0, ErrClientConnClosing
 	}
-
+	// fmt.Println("pathpath:", path)
+	rpath := joinR(path)
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
-		rpath := joinR(path)
 		val, err := r.client.Get(rpath).Result()
 		if err != nil {
 			if err.Error() == "redis: nil" {
@@ -88,6 +90,17 @@ func (r *redisRegistry) GetValue(path string) (data []byte, version int32, err e
 			ch <- getValueType{data: nil, version: 0, err: fmt.Errorf("获取节点[%s]异常,err:%+v", path, err)}
 			return
 		}
+
+		go func() {
+			t, err := r.client.PTTL(rpath).Result()
+			if err != nil {
+				return
+			}
+			if -1*time.Millisecond == t {
+				r.watchMap.Store(path, md5.Encrypt(val))
+			}
+		}()
+
 		ch <- getValueType{data: []byte(val), version: 0, err: nil}
 	}(ch)
 

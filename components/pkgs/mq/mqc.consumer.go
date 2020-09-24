@@ -41,6 +41,7 @@ func NewMQC(address string, opts ...Option) (IMQC, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	resolver, ok := mqcResolvers[proto]
 	if !ok {
 		return nil, fmt.Errorf("mqc: 未知的协议类型 %s", proto)

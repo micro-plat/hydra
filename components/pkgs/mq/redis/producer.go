@@ -19,6 +19,7 @@ func New(addrs []string, opts ...mq.Option) (m *Producer, err error) {
 	for _, opt := range opts {
 		opt(m.conf)
 	}
+
 	m.client, err = redis.New(redis.WithRaw(m.conf.Raw))
 	if err != nil {
 		return

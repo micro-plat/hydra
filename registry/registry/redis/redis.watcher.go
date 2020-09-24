@@ -44,7 +44,6 @@ func (v *valuesEntity) GetPath() string {
 }
 
 func (r *redisRegistry) WatchChildren(path string) (ch chan registry.ChildrenWatcher, err error) {
-	fmt.Println("ccccccccccc:", path)
 	ch = make(chan registry.ChildrenWatcher, 1)
 	changeCh := make(chan valuesEntity, 1)
 	errCh := make(chan error, 1)

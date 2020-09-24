@@ -41,6 +41,7 @@ func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err err
 	for _, opt := range opts {
 		opt(consumer.ConfOpt)
 	}
+
 	consumer.closeCh = make(chan struct{})
 	consumer.queues = cmap.New(2)
 	return
