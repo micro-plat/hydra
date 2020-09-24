@@ -36,7 +36,6 @@ func main() {
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("rpcserver01"),
 	)
-	hydra.Conf.RPC(":8281")
 	app.API("/request", request)
 	app.RPC("/rpc", rpcRequest)
 	app.RPC("/rpc/log", log)
@@ -55,6 +54,7 @@ func request(ctx hydra.IContext) (r interface{}) {
 	}, crpc.WithContentType("application/json"))
 
 	if err != nil {
+		ctx.Log().Info("xxx", err)
 		return err
 	}
 	return response.Result

@@ -11,6 +11,8 @@ import (
 
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server/apm"
+	"github.com/micro-plat/hydra/conf/server/api"
+
 	varapm "github.com/micro-plat/hydra/conf/var/apm"
 	"github.com/micro-plat/hydra/context"
 
@@ -20,8 +22,14 @@ import (
 
 func StartServer( ) {
 
-	hydra.Conf.Vars().APM(varapm.New("skywalking", `{"server_address":"192.168.106.160:11800"}`))
-	hydra.Conf.API(":8070").APM("skywalking", apm.WithEnable())
+	hydra.Conf.Vars().APM(varapm.New("skywalking", []byte(`
+	{
+		"server_address":"192.168.106.160:11800",
+		"instance_props": {"x": "1", "y": "2"}
+	}`),
+	))
+	//hydra.Conf.Vars().APM(varapm.New("skywalking", `{"server_address":"192.168.106.160:11800"}`))
+	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)).APM("skywalking", apm.WithEnable())
 	hydra.Conf.RPC(":8071").APM("skywalking", apm.WithEnable())
 
 	app := hydra.NewApp(
@@ -103,6 +111,11 @@ func buildRequest(caseval string,opts...string) (bytes []byte, err error) {
 	return
 }
 
+func TestStartServer(t *testing.T){
+	StartServer()
+}
+
+
 func BenchmarkApmPerformance(b *testing.B) {
 	StartServer()
 
@@ -110,7 +123,7 @@ func BenchmarkApmPerformance(b *testing.B) {
 	b.N = 1
 
 	for i := 0 ;i<b.N ;i++{
-		bytes, err := buildRequest("1",fmt.Sprintf("time=%s",time.Now().Na))
+		bytes, err := buildRequest("1",fmt.Sprintf("time=%s",time.Now().))
 		if err != nil {
 			b.Error(err)
 			return

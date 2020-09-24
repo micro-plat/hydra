@@ -13,6 +13,9 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"
+
+	_ "runtime/pprof"
+	_ "runtime/net/pprof"
 )
 
 //服务器各种返回结果
