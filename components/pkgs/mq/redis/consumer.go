@@ -101,13 +101,13 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
 						if err := cmd.Err(); err != nil {
-							consumer.log.Error("从redis中获取消息失败:%w", err)
+							//这里打错误日志   会造成退出程序的时候报一次异常
+							// consumer.log.Error("从redis中获取消息失败:%w", err)   && err.Error() != "redis: nil"
 							continue
 						}
 						message := NewRedisMessage(cmd)
 						if message.Has() {
 							msgChan <- message
-
 						}
 					}
 
@@ -133,7 +133,6 @@ func (consumer *Consumer) UnConsume(queue string) {
 
 //Close 关闭当前连接
 func (consumer *Consumer) Close() {
-
 	consumer.once.Do(func() {
 		close(consumer.closeCh)
 	})

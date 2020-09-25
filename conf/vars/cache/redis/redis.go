@@ -1,10 +1,12 @@
 package redis
 
-import "github.com/micro-plat/hydra/conf/vars/queue"
+import (
+	"github.com/micro-plat/hydra/conf/vars/cache"
+)
 
 //Redis redis缓存配置
 type Redis struct {
-	*queue.Queue
+	*cache.Cache
 	Address      string `json:"addrs,omitempty"`
 	DbIndex      int    `json:"db,omitempty"`
 	DialTimeout  int    `json:"dial_timeout,omitempty"`
@@ -17,7 +19,7 @@ type Redis struct {
 func New(address string, opts ...Option) *Redis {
 	r := &Redis{
 		Address:      address,
-		Queue:        &queue.Queue{Proto: "redis"},
+		Cache:        &cache.Cache{Proto: "redis"},
 		DbIndex:      1,
 		DialTimeout:  10,
 		ReadTimeout:  10,

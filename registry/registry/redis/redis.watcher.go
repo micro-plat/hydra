@@ -44,6 +44,11 @@ func (v *valuesEntity) GetPath() string {
 }
 
 func (r *redisRegistry) WatchChildren(path string) (ch chan registry.ChildrenWatcher, err error) {
+	if !r.isConnect {
+		err = ErrColientCouldNotConnect
+		return
+	}
+
 	ch = make(chan registry.ChildrenWatcher, 1)
 	changeCh := make(chan valuesEntity, 1)
 	errCh := make(chan error, 1)
@@ -116,8 +121,7 @@ func (r *redisRegistry) WatchChildren(path string) (ch chan registry.ChildrenWat
 	}
 }
 func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, err error) {
-	ch = make(chan registry.ValueWatcher, 1)
-	if _, err = r.client.Ping().Result(); err != nil {
+	if !r.isConnect {
 		err = ErrColientCouldNotConnect
 		return
 	}
@@ -125,7 +129,7 @@ func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, 
 		err = ErrClientConnClosing
 		return
 	}
-
+	ch = make(chan registry.ValueWatcher, 1)
 	changeCh := make(chan valueEntity, 1)
 	errCh := make(chan error, 1)
 	for {
@@ -173,6 +177,25 @@ func (r *redisRegistry) WatchValue(path string) (ch chan registry.ValueWatcher, 
 				}
 
 			}(changeCh, errCh)
+		}
+	}
+}
+
+func (r *redisRegistry) eventWatch() {
+	for {
+		if r.done {
+			return
+		}
+		select {
+		case <-r.CloseCh:
+			return
+		case <-time.After(time.Second * 3):
+			if _, err := r.client.Ping().Result(); err != nil {
+				r.isConnect = false
+				r.Log.Warnf("reids已断开连接:%v", r.options.Addrs)
+			} else {
+				r.isConnect = true
+			}
 		}
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/micro-plat/hydra/registry"
 
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -23,23 +24,26 @@ var (
 const LEASE_TTL = 30
 
 type redisRegistry struct {
-	CloseCh  chan struct{}
-	client   redis.UniversalClient
-	options  *registry.Options
-	lock     sync.RWMutex
-	leases   sync.Map
-	watchMap sync.Map
+	CloseCh   chan struct{}
+	client    redis.UniversalClient
+	options   *registry.Options
+	lock      sync.RWMutex
+	leases    sync.Map
+	watchMap  sync.Map
+	Log       logger.ILogging
+	isConnect bool
 	// 是否是手动关闭
 	done bool
 }
 
 // NewRegistry returns an initialized redis registry
-func NewRegistry(opts *registry.Options) *redisRegistry {
+func NewRegistry(opts *registry.Options) (*redisRegistry, error) {
 	r := &redisRegistry{
 		options: opts,
 		CloseCh: make(chan struct{}),
 	}
 
+	r.Log = r.options.Logger
 	r.options.DialTimeout = types.DecodeInt(r.options.DialTimeout, 0, 3, r.options.DialTimeout)
 	r.options.PoolSize = types.DecodeInt(r.options.PoolSize, 0, 3, r.options.PoolSize)
 	if r.options.Timeout == 0 {
@@ -59,10 +63,12 @@ func NewRegistry(opts *registry.Options) *redisRegistry {
 	}
 	r.client = redis.NewUniversalClient(ropts)
 	if _, err := r.client.Ping().Result(); err != nil {
-		panic(fmt.Sprintf("redis服务器地址链接异常,err:%+v", err))
+		return nil, fmt.Errorf("redis服务器地址链接异常,err:%+v", err)
 	}
+	r.isConnect = true
+	go r.eventWatch()
 	go r.leaseRemain()
-	return r
+	return r, nil
 }
 
 func (r *redisRegistry) Close() error {

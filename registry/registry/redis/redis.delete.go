@@ -6,6 +6,9 @@ import (
 )
 
 func (r *redisRegistry) Delete(path string) error {
+	if !r.isConnect {
+		return ErrColientCouldNotConnect
+	}
 	if r.done {
 		return ErrClientConnClosing
 	}

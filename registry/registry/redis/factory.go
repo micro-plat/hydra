@@ -22,8 +22,7 @@ func (z *redisFactory) Create(opts ...registry.Option) (registry.IRegistry, erro
 		return nil, fmt.Errorf("未指定redis服务器地址")
 	}
 
-	reg := NewRegistry(z.opts)
-	return reg, nil
+	return NewRegistry(z.opts)
 }
 
 func init() {

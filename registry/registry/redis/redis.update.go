@@ -8,6 +8,9 @@ import (
 )
 
 func (r *redisRegistry) Update(path string, data string) (err error) {
+	if !r.isConnect {
+		return ErrColientCouldNotConnect
+	}
 	if r.done {
 		return ErrClientConnClosing
 	}

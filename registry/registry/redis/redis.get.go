@@ -15,6 +15,9 @@ type getChildrenType struct {
 }
 
 func (r *redisRegistry) GetChildren(path string) (paths []string, version int32, err error) {
+	if !r.isConnect {
+		return nil, 0, ErrColientCouldNotConnect
+	}
 	if r.done {
 		return nil, 0, ErrClientConnClosing
 	}
@@ -74,6 +77,10 @@ type getValueType struct {
 }
 
 func (r *redisRegistry) GetValue(path string) (data []byte, version int32, err error) {
+	if !r.isConnect {
+		return nil, 0, ErrColientCouldNotConnect
+	}
+
 	if r.done {
 		return nil, 0, ErrClientConnClosing
 	}
