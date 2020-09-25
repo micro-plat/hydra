@@ -10,6 +10,10 @@ import (
 )
 
 func (r *redisRegistry) CreatePersistentNode(path string, data string) (err error) {
+	if !r.isConnect {
+		err = ErrColientCouldNotConnect
+		return
+	}
 
 	if r.done {
 		return ErrClientConnClosing

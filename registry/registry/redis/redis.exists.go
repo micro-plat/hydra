@@ -11,6 +11,10 @@ type existsType struct {
 }
 
 func (r *redisRegistry) Exists(path string) (bool, error) {
+	if !r.isConnect {
+		return false, ErrColientCouldNotConnect
+	}
+
 	if r.done {
 		return false, ErrClientConnClosing
 	}
