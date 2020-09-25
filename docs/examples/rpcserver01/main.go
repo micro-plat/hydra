@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	nethttp "net/http"
+
 	"github.com/micro-plat/hydra"
 	//_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
 	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
@@ -12,7 +14,10 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"
-)
+
+	_ "runtime/pprof"
+	_ "net/http/pprof"
+	)
 
 var buff []byte
 var err error
@@ -24,8 +29,13 @@ type logstruct struct {
 	Session  string `json:"session"`
 }
 
-//服务注册与系统勾子函数
+
+//服务器各种返回结果
 func main() {
+
+go func() {
+	nethttp.ListenAndServe("localhost:6060", nil)
+}()
 	app := hydra.NewApp(
 		//hydra.WithPlatName("taobao"),
 		//hydra.WithSystemName("apiserver"),

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
+	nethttp "net/http"
 
 	_ "github.com/mattn/go-oci8"
 	"github.com/micro-plat/hydra"
@@ -15,11 +16,16 @@ import (
 	"github.com/micro-plat/lib4go/types"
 
 	_ "runtime/pprof"
-	_ "runtime/net/pprof"
+	_ "net/http/pprof"
 )
 
 //服务器各种返回结果
 func main() {
+
+	go func() {
+        nethttp.ListenAndServe("localhost:6060", nil)
+}()
+
 	app := hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
