@@ -241,7 +241,7 @@ func (c *Client) connect() (err error) {
 	if c.balancer == "" {
 		c.balancer = balancer.RoundRobin
 	}
-	fmt.Println("client.connect.2", c.balancer, c.address)
+	//fmt.Println("client.connect.2", c.balancer, c.address)
 
 	rb := balancer.NewResolverBuilder(c.address, c.plat, c.service, c.sortPrefix)
 
@@ -269,12 +269,12 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 	}
 	o.service = service
 	response, err := c.clientRequest(ctx, o, form)
-	fmt.Println("Client.Request.1")
+	//fmt.Println("Client.Request.1")
 	if err != nil {
-		fmt.Println("Client.Request.2", err)
+		//fmt.Println("Client.Request.2", err)
 		return NewResponseByStatus(http.StatusInternalServerError, err), err
 	}
-	fmt.Println("Client.Request.3")
+	//fmt.Println("Client.Request.3")
 	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 
