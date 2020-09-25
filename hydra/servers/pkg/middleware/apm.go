@@ -34,7 +34,7 @@ func APM() Handler {
 		//fmt.Println("middleware.apm")
 		//获取apm配置
 		apmconf := ctx.ServerConf().GetAPMConf()
-		if apmconf.Disable {
+		if apmconf.Disable || apmconf.GetName() == "" {
 			ctx.Next()
 			return
 		}
@@ -92,9 +92,10 @@ func procMiddle(ctx IMiddleContext, tracer apm.Tracer) (callback func(), err err
 
 	callback = func() {
 		statusCode, v := ctx.Response().GetFinalResponse()
-
 		if statusCode >= 400 {
-			v = v[0:300]
+			if len(v) > 300 {
+				v = v[:300]
+			}
 			span.Error(time.Now(), "Error on handling request,code:"+strconv.Itoa(statusCode), v)
 		}
 		span.Tag(apm.TagStatusCode, strconv.Itoa(statusCode))

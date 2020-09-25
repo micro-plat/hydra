@@ -1,28 +1,31 @@
-package performance
+package main
 
 import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
-	"testing"
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/apm"
 
-	varapm "github.com/micro-plat/hydra/conf/var/apm"
+	varapm "github.com/micro-plat/hydra/conf/vars/apm"
 	"github.com/micro-plat/hydra/context"
 
+	crpc "github.com/micro-plat/hydra/components/rpcs/rpc"
+
+	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 )
 
-func StartServer( ) {
+func StartServer() {
 
-	hydra.Conf.Vars().APM(varapm.New("skywalking", []byte(`
+	hydra.Conf.Vars().APM(varapm.New(apmtypes.SkyWalking, []byte(`
 	{
 		"server_address":"192.168.106.160:11800",
 		"instance_props": {"x": "1", "y": "2"}
@@ -30,28 +33,32 @@ func StartServer( ) {
 	))
 	//hydra.Conf.Vars().APM(varapm.New("skywalking", `{"server_address":"192.168.106.160:11800"}`))
 	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)).APM("skywalking", apm.WithEnable())
-	hydra.Conf.RPC(":8071").APM("skywalking", apm.WithEnable())
+	hydra.Conf.RPC(":8071").APM(apmtypes.SkyWalking, apm.WithEnable())
 
 	app := hydra.NewApp(
 		hydra.WithServerTypes(rpc.RPC, xhttp.API),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("test-performance"),
 		hydra.WithClusterName("t"),
-		hydra.WithRegistry("lm://"),
+		hydra.WithRegistry("lm://."),
 	)
 
 	app.API("/entrance", func(ctx context.IContext) (r interface{}) {
 		fmt.Println("api:inbound")
 		caseVal, ok := ctx.Request().Get("case")
+
+		mp, err := ctx.Request().GetMap()
+		fmt.Println(mp, err)
+
 		if !ok {
 			return "err"
 		}
-		reqID := ctx.User().GetRequestID
+		reqID := ctx.User().GetRequestID()
 		fmt.Println("api:inbound", caseVal)
 		switch caseVal {
 		case "1":
 			request := hydra.C.RPC().GetRegularRPC()
-			response, err := request.Request(ctx.Context(), "/getgrpc", nil, rpc.WithXRequestID(reqID))
+			response, err := request.Request(ctx.Context(), "/getgrpc", nil, crpc.WithXRequestID(reqID))
 			if err != nil {
 				return err
 			}
@@ -65,11 +72,7 @@ func StartServer( ) {
 	})
 
 	app.RPC("/getgrpc", func(ctx context.IContext) (r interface{}) {
-		return "1"
-	})
-
-	app.RPC("/ttt2", func(ctx context.IContext) (r interface{}) {
-		return nil
+		return ctx.User().GetRequestID()
 	})
 
 	os.Args = []string{"test", "run"}
@@ -78,16 +81,16 @@ func StartServer( ) {
 
 }
 
-func buildRequest(caseval string,opts...string) (bytes []byte, err error) {
+func buildRequest(caseval string, opts ...string) (bytes []byte, err error) {
 
-	v:= strings.Join(opts,"&")
-	if len(v)>0 {
-		v="&"+v
+	v := strings.Join(opts, "&")
+	if len(v) > 0 {
+		v = "&" + v
 	}
+	v = fmt.Sprintf("case=%s%s", caseval, v)
+	fmt.Println(fmt.Sprintf("Sprintf:%s", v))
 
-	reader := strings.NewReader(fmt.Sprintf("case=%s%s", caseval,v))
-
-	req, err := http.NewRequest("get", "http://localhost:8070/entrance",reader)
+	req, err := http.NewRequest("GET", "http://localhost:8070/entrance?"+v, nil)
 	if err != nil {
 		return
 	}
@@ -111,30 +114,21 @@ func buildRequest(caseval string,opts...string) (bytes []byte, err error) {
 	return
 }
 
-func TestStartServer(t *testing.T){
+func main() {
+
 	StartServer()
-}
-
-
-func BenchmarkApmPerformance(b *testing.B) {
-	StartServer()
-
-	b.ResetTimer()
-	b.N = 1
-
-	for i := 0 ;i<b.N ;i++{
-		bytes, err := buildRequest("1",fmt.Sprintf("time=%s",time.Now().))
+	N := 1
+	for i := 0; i < N; i++ {
+		bytes, err := buildRequest("1", fmt.Sprintf("time=%d", time.Now().Nanosecond()))
 		if err != nil {
-			b.Error(err)
+			panic(err)
 			return
 		}
-		if string(bytes) != "1" {
-			t.Error("result", string(bytes))
-			return
-		}
+		fmt.Println("result:", string(bytes))
 	}
 
- 
-
-	time.Sleep(time.Minute)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+	time.Sleep(time.Second * 10)
 }
