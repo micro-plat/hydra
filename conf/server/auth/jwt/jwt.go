@@ -47,8 +47,9 @@ func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
 
 //GetConf 获取jwt
 func GetConf(cnf conf.IMainConf) *JWTAuth {
+
 	jwt := JWTAuth{}
-	_, err := cnf.GetSubObject(registry.Join("auth", "fsa"), &jwt)
+	_, err := cnf.GetSubObject(registry.Join("auth", "jwt"), &jwt)
 	if err == conf.ErrNoSetting {
 		return &JWTAuth{Disable: true}
 	}
