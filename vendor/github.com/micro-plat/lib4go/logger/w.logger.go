@@ -115,7 +115,7 @@ func (logger *Logger) GetSessionID() string {
 
 //Debug 输出debug日志
 func (logger *Logger) Debug(content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.log(SLevel_Debug, content...)
@@ -123,7 +123,7 @@ func (logger *Logger) Debug(content ...interface{}) {
 
 //Debugf 输出debug日志
 func (logger *Logger) Debugf(format string, content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.logfmt(format, SLevel_Debug, content...)
@@ -131,7 +131,7 @@ func (logger *Logger) Debugf(format string, content ...interface{}) {
 
 //Info 输出info日志
 func (logger *Logger) Info(content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.log(SLevel_Info, content...)
@@ -139,7 +139,7 @@ func (logger *Logger) Info(content ...interface{}) {
 
 //Infof 输出info日志
 func (logger *Logger) Infof(format string, content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.logfmt(format, SLevel_Info, content...)
@@ -147,7 +147,7 @@ func (logger *Logger) Infof(format string, content ...interface{}) {
 
 //Warn 输出info日志
 func (logger *Logger) Warn(content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.log(SLevel_Warn, content...)
@@ -155,7 +155,7 @@ func (logger *Logger) Warn(content ...interface{}) {
 
 //Warnf 输出info日志
 func (logger *Logger) Warnf(format string, content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.logfmt(format, SLevel_Warn, content...)
@@ -163,7 +163,7 @@ func (logger *Logger) Warnf(format string, content ...interface{}) {
 
 //Error 输出Error日志
 func (logger *Logger) Error(content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.log(SLevel_Error, content...)
@@ -171,7 +171,7 @@ func (logger *Logger) Error(content ...interface{}) {
 
 //Errorf 输出Errorf日志
 func (logger *Logger) Errorf(format string, content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.logfmt(format, SLevel_Error, content...)
@@ -179,7 +179,7 @@ func (logger *Logger) Errorf(format string, content ...interface{}) {
 
 //Fatal 输出Fatal日志
 func (logger *Logger) Fatal(content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.log(SLevel_Fatal, content...)
@@ -189,7 +189,7 @@ func (logger *Logger) Fatal(content ...interface{}) {
 
 //Fatalf 输出Fatalf日志
 func (logger *Logger) Fatalf(format string, content ...interface{}) {
-	if logger.isPause {
+	if logger.isPause || globalPause {
 		return
 	}
 	logger.logfmt(format, SLevel_Fatal, content...)
