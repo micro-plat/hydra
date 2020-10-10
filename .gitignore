@@ -4,3 +4,4 @@ launch.json
 apiserver*
 rpcserver*
 examples/conf
+logger.toml
