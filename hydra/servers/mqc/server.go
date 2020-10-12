@@ -3,10 +3,11 @@ package mqc
 import (
 	"fmt"
 	"time"
+	"github.com/micro-plat/hydra/pkgs"
+
 
 	"github.com/micro-plat/hydra/conf/server/queue"
-	"github.com/micro-plat/lib4go/net"
-)
+  )
 
 //Server cron服务器
 type Server struct {
@@ -76,5 +77,5 @@ func (s *Server) Resume() (bool, error) {
 
 //GetAddress 获取当前服务地址
 func (s *Server) GetAddress() string {
-	return fmt.Sprintf("mqc://%s", net.GetLocalIPAddress())
+	return fmt.Sprintf("mqc://%s",pkgs.LocalIP())
 }

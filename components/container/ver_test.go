@@ -2,100 +2,89 @@ package container
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
-func TestVerAdd(t *testing.T) {
-	verObj := newVers()
-	tp := "test"
-	name := "taosy"
-	key := "201314"
-	verObj.Add(tp, name, key)
-	tps := fmt.Sprintf("%s-%s", tp, name)
-	if _, ok := verObj.keys[tps]; !ok {
-		t.Error("保存Ver失败")
-		return
-	}
-
-	if len(verObj.keys) != 1 || verObj.keys[tps].current != key || len(verObj.keys[tps].keys) != 1 {
-		t.Error("保存的ver数量不正确")
-		return
-	}
-
-	key = "201313"
-	verObj.Add(tp, name, key)
-	if len(verObj.keys) != 1 || verObj.keys[tps].current != key || len(verObj.keys[tps].keys) != 2 {
-		t.Error("保存的ver数量不正确11")
-		return
-	}
-
-	tp = "test1"
-	name = "taosy1"
-	key = "201312"
-	verObj.Add(tp, name, key)
-	if len(verObj.keys) != 2 {
-		t.Error("保存的ver数量不正确11")
-		return
-	}
-
-	for _, item := range verObj.keys {
-		if len(item.keys) <= 0 {
-			t.Error("保存的ver数量不正确11")
-			return
-		}
-
-		if len(item.keys) == 1 && item.current != key {
-			t.Error("保存的ver数量不正确11")
-			continue
-		}
-
-		res := false
-		for _, str := range item.keys {
-			if str == item.current {
-				res = true
-				continue
-			}
-		}
-		if !res {
-			t.Error("保存的ver数量不正确12")
-			return
-		}
+func Test_newVers(t *testing.T) {
+	l := newVers()
+	if !reflect.DeepEqual(l, &vers{keys: make(map[string]*ver)}) {
+		t.Error("newVers() didn't return *vers")
 	}
 }
 
-func TestVerRemove(t *testing.T) {
-	verObj := newVers()
-	tp := "test"
-	name := "taosy"
-	key := "201314"
-	verObj.Add(tp, name, key)
-	key = "201313"
-	verObj.Add(tp, name, key)
-	tps := fmt.Sprintf("%s-%s", tp, name)
-	t.Logf("add key:%s,len:%v", verObj.keys[tps].current, verObj.keys[tps].keys)
-	verObj.Remove(func(key string) bool {
-		t.Log("移除key")
+func Test_vers_Add(t *testing.T) {
+	type args struct {
+		tp   string
+		name string
+		key  string
+	}
+	s := newVers()
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "1", args: args{tp: "test", name: "test1", key: "123"}},
+		{name: "2", args: args{tp: "test", name: "test2", key: "123"}},
+		{name: "3", args: args{tp: "test", name: "test1", key: "321"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s.Add(tt.args.tp, tt.args.name, tt.args.key)
+			tps := fmt.Sprintf("%s-%s", tt.args.tp, tt.args.name)
+			if ver, ok := s.keys[tps]; !ok {
+				t.Errorf("vers.keys[%s] doesn't exist", tps)
+			} else {
+				if ver.current != tt.args.key {
+					t.Errorf("vers.keys[%s].current isn't right", tps)
+				}
+				fmt.Println(ver.keys)
+				if ver.keys[len(ver.keys)-1] != tt.args.key {
+					t.Errorf("vers.keys[%s].keys isn't right", tps)
+				}
+			}
+		})
+	}
+}
+
+func Test_vers_Remove(t *testing.T) {
+	type data struct {
+		tp   string
+		name string
+		key  string
+	}
+
+	type args struct {
+		f func(key string) bool
+	}
+
+	s := newVers()
+	f := func(key string) bool {
+		t.Log("移除key", key)
 		return true
-	})
-	if _, ok := verObj.keys[tps]; !ok {
-		t.Error("移除key失败")
-		return
 	}
 
-	if len(verObj.keys[tps].keys) != 1 {
-		t.Error("移除key失败1")
-		return
+	tests := []struct {
+		name string
+		data data
+		args args
+	}{
+		{name: "1", data: data{tp: "test", name: "test1", key: "123"}, args: args{f: f}},
+		{name: "2", data: data{tp: "test", name: "test2", key: "123"}, args: args{f: f}},
+		{name: "3", data: data{tp: "test", name: "test1", key: "321"}, args: args{f: f}},
 	}
 
-	if verObj.keys[tps].keys[0] != "201313" {
-		t.Error("移除key失败2")
-		return
+	for _, tt := range tests {
+		s.Add(tt.data.tp, tt.data.name, tt.data.key)
 	}
 
-	if verObj.keys[tps].keys[0] != verObj.keys[tps].current {
-		t.Error("移除key失败3")
-		return
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s.Remove(tt.args.f)
+		})
 	}
 
-	return
+	for k, v := range s.keys {
+		t.Logf("当前剩余key %s:%+v", k, v.keys)
+	}
 }

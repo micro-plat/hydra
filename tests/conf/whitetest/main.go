@@ -57,7 +57,6 @@ func init() {
 
 		return "success"
 	})
-
 }
 
 func main() {

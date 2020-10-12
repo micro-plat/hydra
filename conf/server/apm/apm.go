@@ -45,7 +45,8 @@ func (s *APM) getVal(list []string, name string) (ok bool) {
 //New 创建固定密钥验证服务
 func New(name string, opts ...Option) *APM {
 	f := &APM{
-		Name: name,
+		Name:    name,
+		Disable: true,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -61,7 +62,9 @@ func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
 
 //GetConf 获取APM
 func GetConf(cnf conf.IMainConf) *APM {
-	fsa := &APM{}
+	fsa := &APM{
+		Disable: true,
+	}
 	_, err := cnf.GetSubObject("apm", fsa)
 	if err == conf.ErrNoSetting {
 		return fsa
