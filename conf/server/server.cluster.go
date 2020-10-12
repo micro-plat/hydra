@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -182,6 +183,7 @@ func (c *Cluster) getCluster() error {
 	return nil
 }
 func (c *Cluster) watchCluster() error {
+	fmt.Println("11111111111:", []string{c.GetServerPubPath(c.clusterName...)})
 	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath(c.clusterName...)}, logger.New("watch.server"))
 	if err != nil {
 		return err

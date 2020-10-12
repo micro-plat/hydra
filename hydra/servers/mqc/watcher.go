@@ -1,6 +1,8 @@
 package mqc
 
-import "time"
+import (
+	"time"
+)
 
 func (w *Responsive) watch() {
 START:
@@ -15,6 +17,7 @@ START:
 			return
 		}
 	}
+
 	watcher := cluster.Watch()
 	notify := watcher.Notify()
 LOOP:

@@ -9,7 +9,6 @@ import (
 )
 
 //修改点:1.锁的name应该采用 platname/dlock/自定义名称
-//		2.GetChildren的如参路径错误
 // 		3.isMaster判断时,由于replace出现空字串,所以一直会返回true
 
 func TestTryLock(t *testing.T) {
@@ -61,7 +60,6 @@ func TestTryLock(t *testing.T) {
 }
 
 //修改点:1.锁的name应该采用 platname/dlock/自定义名称
-//		2.GetChildren的如参路径错误
 // 		3.isMaster判断时,由于replace出现空字串,所以一直会返回true
 //		4.锁获取等待默认时间过长;
 //		5.LOOP 中WatchChildren出错,可能会陷入死循环
