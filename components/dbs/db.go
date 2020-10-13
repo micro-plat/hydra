@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components/container"
-	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
 
@@ -55,16 +54,7 @@ func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 			dbConf.MaxIdle,
 			dbConf.LifeTime)
 
-		ctx := context.Current()
-		apmCfg := ctx.ServerConf().GetAPMConf()
-		if apmCfg.Disable {
-			return orgdb, err
-		}
-		if !apmCfg.GetDBEnable(name) {
-			return orgdb, err
-		}
-
-		return NewAPMDB(dbConf.Provider, name, orgdb)
+		return orgdb, err
 	})
 	if err != nil {
 		return nil, err

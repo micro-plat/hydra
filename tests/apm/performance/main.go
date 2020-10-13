@@ -11,29 +11,20 @@ import (
 
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 
-	varapm "github.com/micro-plat/hydra/conf/vars/apm"
 	"github.com/micro-plat/hydra/context"
 
 	crpc "github.com/micro-plat/hydra/components/rpcs/rpc"
 
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 )
 
 func StartServer() {
 
-	hydra.Conf.Vars().APM(varapm.New(apmtypes.SkyWalking, []byte(`
-	{
-		"server_address":"192.168.106.160:11800",
-		"instance_props": {"x": "1", "y": "2"}
-	}`),
-	))
-	//hydra.Conf.Vars().APM(varapm.New("skywalking", `{"server_address":"192.168.106.160:11800"}`))
-	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)).APM("skywalking", apm.WithEnable())
-	hydra.Conf.RPC(":8071").APM(apmtypes.SkyWalking, apm.WithEnable())
+ 
+ 	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30))
+	hydra.Conf.RPC(":8071")
 
 	app := hydra.NewApp(
 		hydra.WithServerTypes(rpc.RPC, xhttp.API),

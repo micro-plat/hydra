@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"github.com/micro-plat/hydra/conf/vars/apm"
 	"github.com/micro-plat/hydra/conf/vars/cache"
 	"github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/queue"
@@ -39,13 +38,5 @@ func (v vars) RLog(service string, opts ...rlog.Option) vars {
 		v[rlog.TypeNodeName] = make(map[string]interface{})
 	}
 	v[rlog.TypeNodeName][rlog.LogName] = rlog.New(service, opts...)
-	return v
-}
-
-func (v vars) APM(q *apm.APM) vars {
-	if _, ok := v["apm"]; !ok {
-		v["apm"] = make(map[string]interface{})
-	}
-	v["apm"][q.APMName] = q
 	return v
 }

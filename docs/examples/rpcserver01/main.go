@@ -7,8 +7,6 @@ import (
 	nethttp "net/http"
 
 	"github.com/micro-plat/hydra"
-	//_ "github.com/micro-plat/hydra/components/pkgs/apm/skywalking"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	crpc "github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
@@ -42,7 +40,6 @@ go func() {
 		hydra.WithDebug(),
 		hydra.WithClusterName("t"),
 		hydra.WithServerTypes(rpc.RPC, http.API),
-		hydra.WithAPM(apmtypes.SkyWalking),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("rpcserver01"),
 	)

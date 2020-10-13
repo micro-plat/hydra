@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/micro-plat/hydra/context"
 )
 
 //conf 配置信息
 type conf struct {
 	RequestId         string              `json:"-"`
-	apmCtx            context.IAPMContext `json:"-"`
-	ConnectionTimeout time.Duration       `json:"ctime"`
+ 	ConnectionTimeout time.Duration       `json:"ctime"`
 	RequestTimeout    time.Duration       `json:"rtime"`
 	Certs             []string            `json:"certs"`
 	Ca                string              `json:"ca"`

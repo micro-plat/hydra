@@ -4,7 +4,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -108,11 +107,5 @@ func (b *httpBuilder) Gray(script string) *httpBuilder {
 //Render 响应渲染配置
 func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
 	b.customerBuilder["render"] = render.NewRender(opts...)
-	return b
-}
-
-//APM 调用链配置
-func (b *httpBuilder) APM(name string, opts ...apm.Option) *httpBuilder {
-	b.customerBuilder["apm"] = apm.New(name, opts...)
 	return b
 }

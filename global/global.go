@@ -57,10 +57,7 @@ type global struct {
 
 	//LocalConfName 本地配置文件名称
 	LocalConfName string
-
-	//APMName APMName
-	APMName string
-
+ 
 	//close 关闭通道
 	close chan struct{}
 }
@@ -145,12 +142,7 @@ func (m *global) ClosingNotify() chan struct{} {
 func (m *global) Log() logger.ILogger {
 	return m.log
 }
-
-//IsUseAPM 使用调用链
-func (m *global) IsUseAPM() bool {
-	return m.APMName != ""
-}
-
+ 
 //parsePath 转换平台服务路径
 func parsePath(p string) (platName string, systemName string, serverTypes []string, clusterName string, err error) {
 	fs := strings.Split(strings.Trim(p, "/"), "/")

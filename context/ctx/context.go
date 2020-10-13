@@ -117,25 +117,3 @@ func (c *Ctx) Close() {
 
 	contextPool.Put(c)
 }
-
-const (
-	apmCtxKey = "__apm_ctx_key"
-)
-
-//APMContext APMContext
-func (c *Ctx) APMContext() context.IAPMContext {
-	tmp, ok := c.Meta().Get(apmCtxKey)
-	if !ok {
-		return nil
-	}
-	val, ok := tmp.(context.IAPMContext)
-	if !ok {
-		return nil
-	}
-	return val
-}
-
-//StoreAPMCtx StoreAPMCtx
-func (c *Ctx) StoreAPMCtx(ctx context.IAPMContext) {
-	c.Meta().Set(apmCtxKey, ctx)
-}
