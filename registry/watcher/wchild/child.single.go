@@ -201,7 +201,6 @@ func (w *ChildWatcher) changeChilrenWatcher(path string) {
 					return
 				}
 				w.notify(arg)
-			default:
 			}
 		}
 	}()
