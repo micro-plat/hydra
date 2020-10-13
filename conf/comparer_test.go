@@ -273,7 +273,7 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "t1", //
+			name: "内容相同,版本号不同测试",
 			fields: fields{oconf: NewTMainConf1(0, []string{}),
 				nconf: NewTMainConf1(1, []string{})},
 			args:          args{names: []string{}},
