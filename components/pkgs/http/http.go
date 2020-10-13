@@ -11,7 +11,6 @@ import (
 
 	"time"
 
-	"github.com/micro-plat/hydra/context"
 )
 
 //Client HTTP客户端
@@ -63,26 +62,10 @@ func NewClient(opts ...Option) (client *Client, err error) {
 			ResponseHeaderTimeout: 0,
 		},
 	}
-	client.client = orginalClient
-
-	err = procApmClient(client)
+	client.client = orginalClient 
 	return
 }
-
-//procApmClient 处理是否需要启动apm 监控
-func procApmClient(client *Client) (err error) {
-	ctx := context.Current()
-	apmCtx := ctx.APMContext()
-	if apmCtx == nil {
-		return
-	}
-	apmConf := ctx.ServerConf().GetAPMConf()
-	if apmConf.Disable {
-		return
-	}
-	client.client, err = newAPMClient(client.apmCtx)
-	return
-}
+ 
 
 // Get http get请求
 func (c *Client) Get(url string, charset ...string) (content string, status int, err error) {

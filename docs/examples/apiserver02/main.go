@@ -7,21 +7,18 @@ import (
 	"github.com/micro-plat/hydra"
 
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
 //服务注册与系统勾子函数
 func main() {
-	hydra.Conf.API(":8082", api.WithTrace()).APM(apm.WithEnable())
+	hydra.Conf.API(":8082", api.WithTrace())
 	app := hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithDebug(),
-		hydra.WithAPM(apmtypes.SkyWalking),
 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver02"),
 	)

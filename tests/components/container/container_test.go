@@ -11,7 +11,6 @@ import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/context"
 	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
@@ -20,7 +19,7 @@ import (
 func StartServer() {
 
 	//hydra.Conf.Vars().APM(varapm.New("skywalking", `{"server_address":"192.168.106.160:11800"}`))
-	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)).APM("skywalking", apm.WithDisable())
+	hydra.Conf.API(":8070", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30))
 	app := hydra.NewApp(
 		hydra.WithServerTypes(xhttp.API),
 		hydra.WithPlatName("test"),

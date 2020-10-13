@@ -7,7 +7,6 @@ import (
 	_ "github.com/micro-plat/hydra/components/pkgs/mq/redis"
 	rpcc "github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	squeue "github.com/micro-plat/hydra/conf/server/queue"
@@ -36,7 +35,7 @@ func init() {
 	hydra.Conf.Vars().DB("taosy_db", oracle.New("connstring", db.WithConnect(10, 10, 10)))
 	// hydra.Conf.Vars().Cache("cache", credis.New("192.168.5.79:6379", credis.WithDbIndex(0), credis.WithPoolSize(10), credis.WithTimeout(10, 10, 10)))
 	// hydra.Conf.Vars().Queue("queue", qredis.New("192.168.5.79:6379", qredis.WithDbIndex(0), qredis.WithPoolSize(10), qredis.WithTimeout(10, 10, 10)))
-	hydra.Conf.RPC(":8071").APM("skywalking", apm.WithDisable())
+	hydra.Conf.RPC(":8071")
 	queues := &squeue.Queues{}
 	queues = queues.Append(squeue.NewQueue("queuename1", "/testmqc"))
 	mqser := hydra.Conf.MQC("redis://queue", mqc.WithTrace(), mqc.WithTimeout(10))
@@ -45,7 +44,7 @@ func init() {
 	tasks := task.Tasks{}
 	tasks.Append(task.NewTask(fmt.Sprintf("@every %ds", 10), "/testcron"))
 	hydra.Conf.CRON(cron.WithEnable(), cron.WithTrace(), cron.WithTimeout(10), cron.WithSharding(1)).Task(tasks.Tasks...)
-	hydra.Conf.API(":8070", api.WithTimeout(10, 10), api.WithEnable()).APM("skywalking", apm.WithDisable())
+	hydra.Conf.API(":8070", api.WithTimeout(10, 10), api.WithEnable())
 	app.API("/taosy/testapi", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("api 接口服务测试")
 		reqID := ctx.User().GetRequestID()

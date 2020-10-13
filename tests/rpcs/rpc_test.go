@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/context"
 
 	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
@@ -20,8 +19,8 @@ import (
 func StartRpc(t *testing.T) {
 
 	hydra.OnReady(func() {
-		hydra.Conf.API(":8070").APM("skywalking", apm.WithDisable())
-		hydra.Conf.RPC(":8071").APM("skywalking", apm.WithDisable())
+		hydra.Conf.API(":8070")
+		hydra.Conf.RPC(":8071")
 	})
 
 	app := hydra.NewApp(
