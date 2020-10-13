@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	"github.com/micro-plat/hydra/components/apm"
+ 
 	"github.com/micro-plat/hydra/components/caches"
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/dbs"
@@ -30,8 +30,7 @@ type IComponent interface {
 	DB() dbs.IComponentDB
 	DLock(name string) (dlock.ILock, error)
 	UUID() uuid.UUID
-	APM() apm.IComponentAPM
-}
+ }
 
 //Def 默认组件
 var Def IComponent = NewComponent()
@@ -44,8 +43,7 @@ type Component struct {
 	cache      caches.IComponentCache
 	db         dbs.IComponentDB
 	httpClient http.IComponentHTTPClient
-	apm        apm.IComponentAPM
-}
+ }
 
 //NewComponent 创建组件
 func NewComponent() *Component {
@@ -57,8 +55,7 @@ func NewComponent() *Component {
 	c.cache = caches.NewStandardCache(c.c)
 	c.db = dbs.NewStandardDB(c.c)
 	c.httpClient = http.NewStandardHTTPClient(c.c)
-	c.apm = apm.NewStandardAPM(c.c)
-	return c
+ 	return c
 }
 
 //RPC 获取rpc组件
@@ -90,11 +87,7 @@ func (c *Component) HTTP() http.IComponentHTTPClient {
 func (c *Component) DLock(name string) (dlock.ILock, error) {
 	return dlock.NewLock(registry.Join(global.Def.PlatName, "dlock", name), global.Def.RegistryAddr, context.Current().Log())
 }
-
-//APM 调用链
-func (c *Component) APM() apm.IComponentAPM {
-	return c.apm
-}
+ 
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
@@ -19,7 +18,7 @@ var app = hydra.NewApp(
 )
 
 func main() {
-	hydra.Conf.API(":8070", api.WithTimeout(10, 10), api.WithEnable()).APM("skywalking", apm.WithDisable())
+	hydra.Conf.API(":8070", api.WithTimeout(10, 10), api.WithEnable())
 	app.API("/taosy/testapi", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("api 接口服务测试")
 		return nil

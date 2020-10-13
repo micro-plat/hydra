@@ -4,7 +4,6 @@ import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/pkgs/cache"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -42,17 +41,7 @@ func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 
 		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
 
-		ctx := context.Current()
-		apmCfg := ctx.ServerConf().GetAPMConf()
-		if apmCfg.Disable {
-			return orgCache, err
-		}
-		if !apmCfg.GetDBEnable(name) {
-			return orgCache, err
-		}
-
-		return NewAPMCache(name, orgCache)
-		//return cache.New(js.GetString("proto"), string(js.GetRaw()))
+		return orgCache, err
 	})
 	if err != nil {
 		return nil, err

@@ -8,8 +8,7 @@ import (
 	_ "github.com/mattn/go-oci8"
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/components"
-	apmtypes "github.com/micro-plat/hydra/components/pkgs/apm/apmtypes"
-	_ "github.com/micro-plat/hydra/components/pkgs/cache/redis"
+ 	_ "github.com/micro-plat/hydra/components/pkgs/cache/redis"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
@@ -30,8 +29,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithUsage("apiserver"),
 		hydra.WithDebug(),
-		hydra.WithAPM(apmtypes.SkyWalking),
-		hydra.WithPlatName("test"),
+ 		hydra.WithPlatName("test"),
 		hydra.WithSystemName("apiserver"),
 	)
 

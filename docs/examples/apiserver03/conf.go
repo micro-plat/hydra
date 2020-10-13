@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/apm"
 )
 
 func init() {
@@ -22,6 +21,6 @@ func init() {
 
 		hydra.Conf.Vars().DB("db", oracle.New("hydra/hydra")).Queue("queue", lmq.New())
 		*/
-		hydra.Conf.API(":8083").APM(apm.WithEnable())
+		hydra.Conf.API(":8083")
 	})
 }

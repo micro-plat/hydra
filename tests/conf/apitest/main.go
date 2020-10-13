@@ -4,7 +4,6 @@ import (
 	"github.com/micro-plat/hydra"
 	_ "github.com/micro-plat/hydra/components/pkgs/mq/redis"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
@@ -35,7 +34,7 @@ func init() {
 	})
 
 	serverApi := hydra.Conf.API(":8070", api.WithTimeout(10, 10), api.WithDisable(), api.WithTrace(), api.WithHost("192.168.5.107"), api.WithDNS(""))
-	serverApi.APM("skywalking", apm.WithDisable())
+	//serverApi.APM("skywalking", apm.WithDisable())
 	app.API("/taosy/testapi/:name", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("api 接口服务测试")
 		ctx.Log().Info("name :", ctx.Request().Param("name"))
