@@ -18,7 +18,7 @@ type Client struct {
 	client  *redis.Client
 }
 
-// New 根据配置文件创建一个redis连接
+// New 根据配置文件创建一个redis连接 @bug addrs没用
 func New(addrs []string, raw string) (m *Client, err error) {
 	m = &Client{servers: addrs}
 	m.client, err = redis.New(redis.WithRaw(raw))
@@ -129,7 +129,7 @@ func (c *Client) Exists(key string) bool {
 	return err == nil && r == 1
 }
 
-//Delay 延长数据在redis中的时间
+//Delay 延长数据在redis中的时间 @bug 非延长时间,而是指定过期时间
 func (c *Client) Delay(key string, expiresAt int) error {
 	expires := time.Duration(expiresAt) * time.Second
 	if expiresAt == 0 {

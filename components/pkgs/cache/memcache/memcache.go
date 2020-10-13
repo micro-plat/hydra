@@ -45,7 +45,7 @@ func (c *Client) Get(key string) (string, error) {
 	return string(data.Value), nil
 }
 
-//Decrement 增加变量的值
+//Decrement 增加变量的值 @bug注释写反
 func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 	value, err := strconv.ParseUint(fmt.Sprintf("%d", delta), 10, 64)
 	if err != nil {
@@ -87,7 +87,7 @@ func (c *Client) Gets(key ...string) (r []string, err error) {
 	}
 	r = make([]string, len(data))
 	for _, v := range key {
-		r = append(r, string(data[v].Value))
+		r = append(r, string(data[v].Value)) //@bug,data返回与key数量不一致,空指针报错
 	}
 	return
 }
