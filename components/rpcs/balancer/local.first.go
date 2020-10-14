@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro-plat/hydra/pkgs"
+	"github.com/micro-plat/hydra/global"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
@@ -20,7 +20,7 @@ func newBuilder(localip string) balancer.Builder {
 }
 
 func init() {
-	balancer.Register(newBuilder(pkgs.LocalIP()))
+	balancer.Register(newBuilder(global.LocalIP()))
 }
 
 type lfPickerBuilder struct {
