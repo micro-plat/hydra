@@ -22,7 +22,7 @@ type body struct {
 	hasReadBody bool
 }
 
-func newBody(c context.IInnerContext, path *rpath) *body {
+func NewBody(c context.IInnerContext, path *rpath) *body {
 	return &body{ctx: c, path: path}
 }
 
