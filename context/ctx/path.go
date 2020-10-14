@@ -22,6 +22,7 @@ type rpath struct {
 	fallback   bool
 }
 
+//NewRpath @todo 使用大写是为了测试时,启动服务获取IServerConf时,可以构建对象
 func NewRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
 	return &rpath{
 		ctx:        ctx,
