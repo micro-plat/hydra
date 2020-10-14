@@ -44,7 +44,7 @@ func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.
 	return &response{
 		ctx:   ctx,
 		conf:  conf,
-		path:  newRpath(ctx, conf, meta),
+		path:  NewRpath(ctx, conf, meta),
 		log:   log,
 		final: rspns{status: http.StatusNotFound},
 	}

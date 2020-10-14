@@ -22,7 +22,7 @@ type rpath struct {
 	fallback   bool
 }
 
-func newRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
+func NewRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
 	return &rpath{
 		ctx:        ctx,
 		serverConf: serverConf,

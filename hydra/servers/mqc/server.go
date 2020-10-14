@@ -3,7 +3,7 @@ package mqc
 import (
 	"fmt"
 	"time"
-	"github.com/micro-plat/hydra/pkgs"
+	"github.com/micro-plat/hydra/global"
 
 
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -77,5 +77,5 @@ func (s *Server) Resume() (bool, error) {
 
 //GetAddress 获取当前服务地址
 func (s *Server) GetAddress() string {
-	return fmt.Sprintf("mqc://%s",pkgs.LocalIP())
+	return fmt.Sprintf("mqc://%s",global.LocalIP())
 }

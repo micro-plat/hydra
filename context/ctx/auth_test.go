@@ -1,7 +1,6 @@
 package ctx
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -81,7 +80,6 @@ func Test_auth_Bind(t *testing.T) {
 	tests := []struct {
 		name           string
 		fields         fields
-		out            map[string]string
 		want           interface{}
 		args           args
 		wantPanicError bool
@@ -94,7 +92,7 @@ func Test_auth_Bind(t *testing.T) {
 			a := 1
 			return a
 		}}, args: args{out: 2}, want: 1, wantPanicError: false},
-		{name: "request is err string", fields: fields{request: `{"key":"value"}`}, out: map[string]string{"1": "1"}, wantPanicError: false},
+		{name: "request is err string", fields: fields{request: `{"key":"value"}`}, args: args{out: map[string]string{"1": "1"}}, wantPanicError: false},
 		{name: "request is string", fields: fields{request: `{"key":"value"}`}, args: args{out: 1}, want: map[string]string{"key": "value"}, wantPanicError: false},
 		{name: "default", fields: fields{request: map[string]string{"a": "b"}}, args: args{out: map[string]string{}}, want: map[string]string{"a": "b"}, wantPanicError: false},
 	}
@@ -117,30 +115,10 @@ func Test_auth_Bind(t *testing.T) {
 					t.Errorf("recover:Bind() = %v", r)
 				}
 			}()
-			c.Bind(&tt.out)
-			dt := reflect.TypeOf(tt.out)
-			fmt.Println(dt)
-			if !reflect.DeepEqual(tt.out, tt.want) {
-				t.Errorf("auth.Bind() out= %v, want %v", tt.out, tt.want)
+			c.Bind(&tt.args.out)
+			if !reflect.DeepEqual(tt.args.out, tt.want) {
+				t.Errorf("auth.Bind() out= %v, want %v", tt.args.out, tt.want)
 			}
 		})
 	}
 }
-
-// func Test_auth_Bind1(t *testing.T) {
-// 	out := 1
-// 	c := &auth{
-// 		request: `{"key":"value"}`,
-// 	}
-// 	c.Bind(&out)
-// 	fmt.Println(out)
-// 	dt := reflect.TypeOf(out)
-// 	fmt.Println(dt)
-// }
-
-// func bind(out interface{}) {
-// 	v := `{"key":"value"}`
-// 	if err := json.Unmarshal([]byte(v), &out); err != nil {
-// 		panic(fmt.Errorf("将用户信息反序化为对象时失败:%w", err))
-// 	}
-// }

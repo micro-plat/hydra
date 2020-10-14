@@ -28,10 +28,13 @@ func (m *global) Close() {
 func (m *global) AddCloser(f interface{}) {
 	closerLock.Lock()
 	defer closerLock.Unlock()
-	switch t := f.(type) {
-	case io.Closer:
-	case closeHandle:
-		closers = append(closers, t)
-	default:
+
+	if v, ok := f.(io.Closer); ok {
+		closers = append(closers, v)
+		return
+	}
+	if v, ok := f.(closeHandle); ok {
+		closers = append(closers, v)
+		return
 	}
 }

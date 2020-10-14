@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
+
+	xnet "github.com/micro-plat/lib4go/net"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -30,4 +33,23 @@ func GetHostPort(addr string) (host string, port string, err error) {
 		return "0.0.0.0", port, nil
 	}
 	return host, port, nil
+}
+
+var (
+	mask    = ""
+	localip = ""
+)
+var onceLock sync.Once
+
+//LocalIP LocalIP
+func LocalIP() string {
+	onceLock.Do(func() {
+		localip = xnet.GetLocalIPAddress(mask)
+	})
+	return localip
+}
+
+//WithIPMask WithIPMask
+func WithIPMask(val string) {
+	mask = val
 }

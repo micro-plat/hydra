@@ -3,5 +3,10 @@ vendor
 launch.json
 apiserver*
 rpcserver*
+mqcserver*
+cronserver*
+flowserver*
+webserver*
+wsserver*
 examples/conf
 logger.toml

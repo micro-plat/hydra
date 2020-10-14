@@ -18,10 +18,10 @@ func Test_newCli(t *testing.T) {
 		want *ucli
 	}{
 		{
-			name: "a",
-			args: args{name: "a"},
+			name: "创建cli对象",
+			args: args{name: "cli_name"},
 			want: &ucli{
-				Name:  "a",
+				Name:  "cli_name",
 				flags: make([]cli.Flag, 0, 1),
 			},
 		},
@@ -37,44 +37,44 @@ func Test_newCli(t *testing.T) {
 }
 
 func Test_ucli_AddFlag(t *testing.T) {
-	c := newCli("a")
-	if c.Name != "a" {
-		t.Error("newCli name与预期不匹配", c.Name, "a")
+	c := newCli("cli_name")
+	if c.Name != "cli_name" {
+		t.Error("newCli name与预期不匹配", c.Name, "cli_name")
 	}
 
-	c.AddFlag("f1", "usage1")
+	c.AddFlag("Flag_01", "usage1")
 
 	if len(c.flags) != 1 {
 		t.Error("AddFlag 长度与预期不匹配")
 	}
 
-	if c.flags[0].GetName() != "f1" {
-		t.Error("AddFlag flags.name与预期不匹配", c.flags[0].GetName(), "f1")
+	if c.flags[0].GetName() != "Flag_01" {
+		t.Error("AddFlag flags.name与预期不匹配", c.flags[0].GetName(), "Flag_01")
 	}
 
-	c.AddFlag("f1", "usage1")
+	c.AddFlag("Flag_01", "usage1")
 	if len(c.flags) != 1 {
 		t.Error("AddFlag 添加重复名称，未去重处理", len(c.flags), 1)
 	}
 }
 
 func Test_ucli_AddSliceFlag(t *testing.T) {
-	c := newCli("a")
-	if c.Name != "a" {
-		t.Error("newCli name与预期不匹配", c.Name, "a")
+	c := newCli("cli_name")
+	if c.Name != "cli_name" {
+		t.Error("newCli name与预期不匹配", c.Name, "cli_name")
 	}
 
-	c.AddSliceFlag("f1", "usage1")
+	c.AddSliceFlag("SliceFlag_01", "usage1")
 
 	if len(c.flags) != 1 {
 		t.Error("AddSliceFlag 长度与预期不匹配")
 	}
 
-	if c.flags[0].GetName() != "f1" {
-		t.Error("AddSliceFlag flags.name与预期不匹配", c.flags[0].GetName(), "f1")
+	if c.flags[0].GetName() != "SliceFlag_01" {
+		t.Error("AddSliceFlag flags.name与预期不匹配", c.flags[0].GetName(), "SliceFlag_01")
 	}
 
-	c.AddSliceFlag("f1", "usage1")
+	c.AddSliceFlag("SliceFlag_01", "usage1")
 	if len(c.flags) != 1 {
 		t.Error("AddSliceFlag 添加重复名称，未去重处理", len(c.flags), 1)
 	}
@@ -84,67 +84,63 @@ func Test_ucli_GetFlags(t *testing.T) {
 	type fields struct {
 		Name     string
 		flags    []cli.Flag
-		callBack func(ICli) error
-	}
+ 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   []cli.Flag
 	}{
 		{
-			name: "test1",
+			name: "测试GetFlags-相同的Flag类型",
 			fields: fields{
 				Name: "getcliflags1",
 				flags: []cli.Flag{
 					cli.StringFlag{
-						Name: "s1",
+						Name: "StringFlag_1",
 					},
 					cli.StringFlag{
-						Name: "s2",
+						Name: "StringFlag_2",
 					},
 				},
 			},
 			want: []cli.Flag{
 				cli.StringFlag{
-					Name: "s1",
+					Name: "StringFlag_1",
 				},
 				cli.StringFlag{
-					Name: "s2",
+					Name: "StringFlag_2",
 				},
 			},
 		},
 		{
-			name: "test2",
+			name: "测试GetFlags-不同的Flag类型",
 			fields: fields{
 				Name: "getcliflags2",
 				flags: []cli.Flag{
 					cli.StringFlag{
-						Name: "s1",
+						Name: "StringFlag_1",
 					},
 					cli.StringSliceFlag{
-						Name: "s2",
+						Name: "StringSliceFlag_1",
 					},
 				},
 			},
 			want: []cli.Flag{
 				cli.StringFlag{
-					Name: "s1",
+					Name: "StringFlag_1",
 				},
 				cli.StringSliceFlag{
-					Name: "s2",
+					Name: "StringSliceFlag_1",
 				},
 			},
-		},
-
-		// TODO: Add test cases.
-	}
+		}, 
+ 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &ucli{
 				Name:     tt.fields.Name,
 				flags:    tt.fields.flags,
-				callBack: tt.fields.callBack,
-			}
+ 			}
 			if got := c.GetFlags(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ucli.GetFlags() = %v, want %v", got, tt.want)
 			}
@@ -158,7 +154,7 @@ func Test_doCliCallback(t *testing.T) {
 	}
 
 	app := cli.NewApp()
-	app.Name = "testdoclicallback"
+	app.Name = "Test_AppName"
 	flags := []cli.Flag{
 		cli.StringFlag{
 			Name: "run",
@@ -167,7 +163,7 @@ func Test_doCliCallback(t *testing.T) {
 	app.Commands = []cli.Command{
 		cli.Command{
 			Name:  "runtest",
-			Usage: "test RU command",
+			Usage: "test RUN command",
 		},
 	}
 
@@ -182,21 +178,27 @@ func Test_doCliCallback(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "callback1",
+			name: "不存在的command名称-完全包含cmdName",
 			args: args{
 				c: newCtx(app, set, "runtest"),
 			},
 			wantErr: true,
 		},
 		{
-			name: "callback2",
+			name: "不存在的command名称-只包含cmdName前缀",
 			args: args{
 				c: newCtx(app, set, "r"),
 			},
 			wantErr: false,
 		},
-		// TODO: Add test cases.
-	}
+		{
+			name: "不存在的command名称-完全不包含cmdName",
+			args: args{
+				c: newCtx(app, set, "xxcmd"),
+			},
+			wantErr: true,
+		},
+ 	}
 	t.Log("clis的长度：", len(clis))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
