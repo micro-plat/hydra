@@ -41,13 +41,13 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) IMainConf {
 	return &TMainConf{rootConf: &nRawConf, rootVersion: rootVersion, subConfs: subm}
 }
 
-func NewTMainConf1(rootVersion int32, keySub []string) IMainConf {
+func NewTMainConf1(rootVersion int32, keySub map[string]string) IMainConf {
 
 	subConf := map[string]RawConf{}
-	for _, str := range keySub {
-		data := map[string]interface{}{"str": str}
+	for k, v := range keySub {
+		data := map[string]interface{}{"value": v}
 		raw1, _ := json.Marshal(data)
-		subConf[str] = RawConf{
+		subConf[k] = RawConf{
 			data:      data,
 			version:   rootVersion,
 			raw:       raw1,
@@ -219,26 +219,37 @@ func TestComparer_IsChanged(t *testing.T) {
 		want   bool
 	}{
 		{
-			name:   "t1", //不存在nconf数据用例
+			name:   "配置不存在",
 			fields: fields{oconf: nil, nconf: nil},
 			want:   false,
-		},
-		{
-			name: "t2", //oconf和nconf版本号相同
-			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
-				nconf: NewTMainConf(1, map[string]interface{}{})},
+		}, {
+			name:   "old配置不存在",
+			fields: fields{oconf: nil, nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"})},
+			want:   true,
+		}, {
+			name:   "new配置不存在",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"}), nconf: nil},
+			want:   true,
+		}, {
+			name: "版本号相同,内容不同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})},
 			want: false,
-		},
-		{
-			name: "t3", //oconf和nconf版本号相同
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{}),
-				nconf: NewTMainConf(1, map[string]interface{}{})},
+		}, {
+			name: "版本号相同,内容相同",
+			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xxx": "ww11"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})},
+			want: false,
+		}, {
+			name: "版本号不同,内容不同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})},
 			want: true,
-		},
-		{
-			name:   "t4", //不存在nconf数据用例
-			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}), nconf: nil},
-			want:   false,
+		}, {
+			name: "版本号不同,内容相同",
+			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xxx": "ww11"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})},
+			want: true,
 		},
 	}
 	for _, tt := range tests {
@@ -255,6 +266,8 @@ func TestComparer_IsChanged(t *testing.T) {
 		})
 	}
 }
+
+//都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsSubConfChanged(t *testing.T) {
 	type fields struct {
 		oconf      IMainConf
@@ -271,41 +284,78 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 		args          args
 		wantIsChanged bool
 	}{
-		// TODO: Add test cases.
 		{
-			name: "内容相同,版本号不同测试",
-			fields: fields{oconf: NewTMainConf1(0, []string{}),
-				nconf: NewTMainConf1(1, []string{})},
+			name: "版本号相同,内容不同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(1, map[string]string{"xx": "44444"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号相同,内容相同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(1, map[string]string{"xx": "123455"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号相同,内容都为空",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(1, map[string]string{})},
 			args:          args{names: []string{}},
 			wantIsChanged: false,
-		},
-		{
-			name: "t2", //
-			fields: fields{oconf: NewTMainConf1(0, []string{}),
-				nconf: NewTMainConf1(1, []string{})},
+		}, {
+			name: "版本号相同,内容都为空1",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(1, map[string]string{})},
 			args:          args{names: []string{"xx"}},
-			wantIsChanged: true,
-		},
-		{
-			name: "t3", //
-			fields: fields{oconf: NewTMainConf1(0, []string{"xx"}),
-				nconf: NewTMainConf1(1, []string{"xx"})},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion > newversion,内容不同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(0, map[string]string{"xx": "44444"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion > newversion,内容相同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(0, map[string]string{"xx": "123455"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion > newversion,内容都为空",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(0, map[string]string{})},
 			args:          args{names: []string{}},
 			wantIsChanged: false,
-		},
-		{
-			name: "t4", //
-			fields: fields{oconf: NewTMainConf1(0, []string{"xx"}),
-				nconf: NewTMainConf1(1, []string{"xx"})},
+		}, {
+			name: "版本号不同,oldversion > newversion,内容都为空1",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(0, map[string]string{})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容不同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(0, map[string]string{"xx": "44444"})},
 			args:          args{names: []string{"xx"}},
 			wantIsChanged: true,
-		},
-		{
-			name: "t5", //
-			fields: fields{oconf: NewTMainConf1(0, []string{"xx1"}),
-				nconf: NewTMainConf1(1, []string{"xx"})},
+		}, {
+			name: "版本号不同,oldversion < newversion,内容相同",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{"xx": "123455"}),
+				nconf: NewTMainConf1(0, map[string]string{"xx": "123455"})},
 			args:          args{names: []string{"xx"}},
-			wantIsChanged: true,
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容都为空",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(0, map[string]string{})},
+			args:          args{names: []string{}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容都为空1",
+			fields: fields{oconf: NewTMainConf1(1, map[string]string{}),
+				nconf: NewTMainConf1(0, map[string]string{})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
 		},
 	}
 	for _, tt := range tests {
@@ -323,6 +373,7 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 	}
 }
 
+//都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsValueChanged(t *testing.T) {
 	type fields struct {
 		oconf      IMainConf
@@ -339,62 +390,78 @@ func TestComparer_IsValueChanged(t *testing.T) {
 		args          args
 		wantIsChanged bool
 	}{
-		// TODO: Add test cases.
 		{
-			name: "t1", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{}),
+			name: "版本号相同,内容不同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xx": "44444"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号相同,内容相同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号相同,内容都为空",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
 				nconf: NewTMainConf(1, map[string]interface{}{})},
 			args:          args{names: []string{}},
 			wantIsChanged: false,
-		},
-		{
-			name: "t2", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xx": "1"}),
-				nconf: NewTMainConf(1, map[string]interface{}{})},
-			args:          args{names: []string{}},
-			wantIsChanged: false,
-		},
-		{
-			name: "t3", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{}),
-				nconf: NewTMainConf(1, map[string]interface{}{"xx": "1"})},
-			args:          args{names: []string{}},
-			wantIsChanged: false,
-		},
-		{
-			name: "t4", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xx": "1"}),
+		}, {
+			name: "版本号相同,内容都为空1",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
 				nconf: NewTMainConf(1, map[string]interface{}{})},
 			args:          args{names: []string{"xx"}},
-			wantIsChanged: true,
-		},
-		{
-			name: "t5", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{}),
-				nconf: NewTMainConf(1, map[string]interface{}{"xx": "1"})},
-			args:          args{names: []string{"xx"}},
-			wantIsChanged: true,
-		},
-		{
-			name: "t6", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xx": "1"}),
-				nconf: NewTMainConf(1, map[string]interface{}{"xx": "1"})},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion > newversion,内容不同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(0, map[string]interface{}{"xx": "44444"})},
 			args:          args{names: []string{"xx"}},
 			wantIsChanged: false,
-		},
-		{
-			name: "t7", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xx": "111"}),
-				nconf: NewTMainConf(1, map[string]interface{}{"xx": "1"})},
-			args:          args{names: []string{"xx1"}},
+		}, {
+			name: "版本号不同,oldversion > newversion,内容相同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(0, map[string]interface{}{"xx": "123455"})},
+			args:          args{names: []string{"xx"}},
 			wantIsChanged: false,
-		},
-		{
-			name: "t8", //
-			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xx": "111"}),
-				nconf: NewTMainConf(1, map[string]interface{}{"xx": "1"})},
+		}, {
+			name: "版本号不同,oldversion > newversion,内容都为空",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
+				nconf: NewTMainConf(0, map[string]interface{}{})},
+			args:          args{names: []string{}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion > newversion,内容都为空1",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
+				nconf: NewTMainConf(0, map[string]interface{}{})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容不同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(0, map[string]interface{}{"xx": "44444"})},
 			args:          args{names: []string{"xx"}},
 			wantIsChanged: true,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容相同",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xx": "123455"}),
+				nconf: NewTMainConf(0, map[string]interface{}{"xx": "123455"})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容都为空",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
+				nconf: NewTMainConf(0, map[string]interface{}{})},
+			args:          args{names: []string{}},
+			wantIsChanged: false,
+		}, {
+			name: "版本号不同,oldversion < newversion,内容都为空1",
+			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}),
+				nconf: NewTMainConf(0, map[string]interface{}{})},
+			args:          args{names: []string{"xx"}},
+			wantIsChanged: false,
 		},
 	}
 	for _, tt := range tests {
