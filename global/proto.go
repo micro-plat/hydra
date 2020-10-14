@@ -17,12 +17,20 @@ const (
 
 //ParseProto 解析协议信息
 func ParseProto(address string) (string, string, error) {
+	address = strings.Trim(address, " ")
+
 	addr := strings.Split(address, "://")
 	if len(addr) != 2 {
-		return "", "", fmt.Errorf("%s协议格式错误:proto://addr", addr)
+		return "", "", fmt.Errorf("%s协议格式错误,正确格式(proto://addr)", addr)
 	}
 	proto := addr[0]
+	if proto == "" {
+		return "", "", fmt.Errorf("%s缺少协议proto,正确格式(proto://addr)", address)
+	}
 	raddr := addr[1]
+	if raddr == "" {
+		return "", "", fmt.Errorf("%s缺少地址addr,正确格式(proto://addr)", address)
+	}
 	return proto, raddr, nil
 }
 
