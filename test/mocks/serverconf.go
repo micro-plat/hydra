@@ -52,7 +52,6 @@ func NewConf() *SConf {
 
 	//处理iconf.load中，服务检查问题
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON}
-	// hydra.WithServerTypes(http.API)
 	return c
 }
 

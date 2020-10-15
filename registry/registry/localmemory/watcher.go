@@ -39,17 +39,17 @@ func (l *localMemory) notifyValueChange(path string) {
 	delete(l.valueWatchs, path)
 }
 func (l *localMemory) notifyParentChange(path string) {
-	path, _, err := l.GetParent(path)
-	if err != nil {
-		return
-	}
-	l.vlock.Lock()
-	defer l.vlock.Unlock()
-	for k, v := range l.childrenWatchs {
-		if k == path {
-			v <- &valuesEntity{path: path}
-		}
-		break
-	}
-	delete(l.childrenWatchs, path)
+	// path, _, err := l.GetParent(path)
+	// if err != nil {
+	// 	return
+	// }
+	// l.vlock.Lock()
+	// defer l.vlock.Unlock()
+	// for k, v := range l.childrenWatchs {
+	// 	if k == path {
+	// 		v <- &valuesEntity{path: path}
+	// 	}
+	// 	break
+	// }
+	// delete(l.childrenWatchs, path)
 }
