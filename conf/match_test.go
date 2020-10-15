@@ -10,27 +10,10 @@ func Test_sortString_Len(t *testing.T) {
 		s    sortString
 		want int
 	}{
-		// TODO: Add test cases.
-		{
-			name: "t1",
-			s:    []string{},
-			want: 0,
-		},
-		{
-			name: "t2",
-			s:    sortString{},
-			want: 0,
-		},
-		{
-			name: "t3",
-			s:    sortString{"123"},
-			want: 1,
-		},
-		{
-			name: "t4",
-			s:    sortString{"123", "3434"},
-			want: 2,
-		},
+		{name: "t1", s: []string{}, want: 0},
+		{name: "t2", s: sortString{}, want: 0},
+		{name: "t3", s: sortString{"123"}, want: 1},
+		{name: "t4", s: sortString{"123", "3434"}, want: 2},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -51,27 +34,10 @@ func Test_sortString_Swap(t *testing.T) {
 		s    sortString
 		args args
 	}{
-		// TODO: Add test cases.
-		{
-			name: "t1",
-			s:    []string{},
-			args: args{i: 0, j: 0},
-		},
-		{
-			name: "t2",
-			s:    sortString{"123", "234"},
-			args: args{i: 0, j: 1},
-		},
-		{
-			name: "t3",
-			s:    sortString{"123", "3434", "656565", "56565444"},
-			args: args{i: 0, j: 3},
-		},
-		{
-			name: "t4",
-			s:    sortString{"123", "3434", "656565", "56565444", "12222"},
-			args: args{i: 1, j: 3},
-		},
+		{name: "t1", s: []string{}, args: args{i: 0, j: 0}},
+		{name: "t2", s: sortString{"123", "234"}, args: args{i: 0, j: 1}},
+		{name: "t3", s: sortString{"123", "3434", "656565", "56565444"}, args: args{i: 0, j: 3}},
+		{name: "t4", s: sortString{"123", "3434", "656565", "56565444", "12222"}, args: args{i: 1, j: 3}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -103,73 +69,19 @@ func Test_sortString_Less(t *testing.T) {
 		args args
 		want bool
 	}{
-		// TODO: Add test cases.
-		{
-			name: "t1",
-			s:    sortString{"/t1", "/*"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t2",
-			s:    sortString{"/*", "/t1"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t3",
-			s:    sortString{"/t1", "/t2"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t4",
-			s:    sortString{"/t1/*", "/t2/*"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t5",
-			s:    sortString{"/t2/*", "/t1/*"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t6",
-			s:    sortString{"/t1/*", "/t1/t2"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t7",
-			s:    sortString{"/t1/t2", "/t2/*"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t8", //**和*号优先级判断
-			s:    sortString{"/t1/**", "/t1/*"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t9", //j字符串被i包含
-			s:    sortString{"/t1/t2/t3", "/t1/t2"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t10", //ip中.的判断
-			s:    sortString{"192.168.*.*", "192.168.5.94"},
-			args: args{i: 0, j: 1},
-			want: false,
-		}, {
-			name: "t11", //ip中.的判断
-			s:    sortString{"192.168.*.94", "192.168.**"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t12", //ip中.的判断
-			s:    sortString{"192.168.*.*", "192.168.**"},
-			args: args{i: 0, j: 1},
-			want: true,
-		}, {
-			name: "t13", //i的字符串被j包含时,数组超过限制崩溃
-			s:    sortString{"/t1/t2", "/t1/t2/t3"},
-			args: args{i: 0, j: 1},
-			want: true,
-		},
+		{name: "t1", s: sortString{"/t1", "/*"}, args: args{i: 0, j: 1}, want: true},
+		{name: "t2", s: sortString{"/*", "/t1"}, args: args{i: 0, j: 1}, want: false},
+		{name: "t3", s: sortString{"/t1", "/t2"}, args: args{i: 0, j: 1}, want: true},
+		{name: "t4", s: sortString{"/t1/*", "/t2/*"}, args: args{i: 0, j: 1}, want: true},
+		{name: "t5", s: sortString{"/t2/*", "/t1/*"}, args: args{i: 0, j: 1}, want: false},
+		{name: "t6", s: sortString{"/t1/*", "/t1/t2"}, args: args{i: 0, j: 1}, want: false},
+		{name: "t7", s: sortString{"/t1/t2", "/t2/*"}, args: args{i: 0, j: 1}, want: true},
+		{name: "t8", s: sortString{"/t1/**", "/t1/*"}, args: args{i: 0, j: 1}, want: false},              //**和*号优先级判断
+		{name: "t9", s: sortString{"/t1/t2/t3", "/t1/t2"}, args: args{i: 0, j: 1}, want: false},          //j字符串被i包含
+		{name: "t10", s: sortString{"192.168.*.*", "192.168.5.94"}, args: args{i: 0, j: 1}, want: false}, //ip中.的判断
+		{name: "t11", s: sortString{"192.168.*.94", "192.168.**"}, args: args{i: 0, j: 1}, want: true},   //ip中.的判断
+		{name: "t12", s: sortString{"192.168.*.*", "192.168.**"}, args: args{i: 0, j: 1}, want: true},    //ip中.的判断
+		{name: "t13", s: sortString{"/t1/t2", "/t1/t2/t3"}, args: args{i: 0, j: 1}, want: true},          //i的字符串被j包含时,数组超过限制崩溃
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -321,6 +233,12 @@ func TestPathMatch_Match(t *testing.T) {
 			args:   args{service: "/t1/t2/t3"},
 			want:   true,
 			want1:  "/**",
+		}, {
+			name:   "t22",
+			fields: fields{all: []string{"/t1/*/*", "/t1/*"}},
+			args:   args{service: "/t1/t3/dd"},
+			want:   true,
+			want1:  "/t1/*/*",
 		},
 	}
 	for _, tt := range tests {

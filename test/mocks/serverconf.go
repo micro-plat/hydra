@@ -55,6 +55,15 @@ func NewConf() *SConf {
 	return c
 }
 
+//NewConf 构建配置信息
+func NewConf1(platName, clusterName string) *SConf {
+	return &SConf{
+		IConf:       creator.New(),
+		PlatName:    platName,
+		ClusterName: clusterName,
+	}
+}
+
 //Conf 配置
 func (s *SConf) Conf() creator.IConf {
 	return s.IConf
@@ -84,6 +93,11 @@ func (s *SConf) GetCronConf() server.IServerConf {
 func (s *SConf) GetMQCConf() server.IServerConf {
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON, mqc.MQC}
 	return s.GetConf(s.PlatName, "mqcserver", "mqc", s.ClusterName)
+}
+
+//GetRPCConf 获取rpc服务器配置
+func (s *SConf) GetRPCConf() server.IServerConf {
+	return s.GetConf(s.PlatName, "rpcserver", "rpc", s.ClusterName)
 }
 
 //GetConf 获取配置信息

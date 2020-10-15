@@ -38,15 +38,15 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 }
 
 //Verify 验证签名是否通过
-func (a *APIKeyAuth) Verify(raw string, secret string, sign string) error {
+func (a *APIKeyAuth) Verify(raw string, sign string) error {
 	var expect string
 	switch strings.ToUpper(a.Mode) {
 	case "MD5":
-		expect = md5.Encrypt(raw + secret)
+		expect = md5.Encrypt(raw + a.Secret)
 	case "SHA1":
-		expect = sha1.Encrypt(raw + secret)
+		expect = sha1.Encrypt(raw + a.Secret)
 	case "SHA256":
-		expect = sha256.Encrypt(raw + secret)
+		expect = sha256.Encrypt(raw + a.Secret)
 	default:
 		return fmt.Errorf("不支持的签名验证方式:%v", a.Mode)
 	}
