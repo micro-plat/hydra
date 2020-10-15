@@ -11,12 +11,17 @@ type sortString []string
 
 func (s sortString) Len() int { return len(s) }
 
-func (s sortString) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s sortString) Swap(i, j int) {
+	if i >= len(s) || j >= len(s) {
+		return
+	}
+	s[i], s[j] = s[j], s[i]
+}
 
 func (s sortString) Less(i, j int) bool {
 	il := len(s[i])
 	jl := len(s[j])
-	for x := 0; x < jl && i < il; x++ {
+	for x := 0; x < jl && x < il; x++ {
 		if s[i][x] == s[j][x] {
 			continue
 		}
@@ -28,7 +33,7 @@ func (s sortString) Less(i, j int) bool {
 		}
 		return s[i][x] < s[j][x]
 	}
-	return true
+	return s[i] < s[j]
 }
 
 //PathMatch 构建模糊匹配缓存查找管理器
@@ -95,6 +100,9 @@ func (a *PathMatch) Match(service string) (bool, string) {
 			//此段为 *,匹配后续段
 			if uparties[i] == "*" {
 				for j := i + 1; j < uc; j++ {
+					if uparties[j] == "*" {
+						continue
+					}
 					if uparties[j] != sparties[j] {
 						isMatch = false
 						break

@@ -141,7 +141,9 @@ func (r *request) Get(name string) (result string, ok bool) {
 		return "", false
 	}
 	v, b := m[name]
-
+	if !b {
+		return "", b
+	}
 	return fmt.Sprint(v), b
 }
 
