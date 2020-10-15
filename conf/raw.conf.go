@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/lib4go/security/md5"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //IConf 配置管理
@@ -152,7 +153,7 @@ func (j *RawConf) GetArray(key string, def ...interface{}) (r []interface{}) {
 //GetBool 获取bool类型值
 func (j *RawConf) GetBool(key string, def ...bool) (r bool) {
 	if val := j.GetString(key); val != "" {
-		if b, err := parseBool(val); err == nil {
+		if b, err := types.ParseBool(val); err == nil {
 			return b
 		}
 	}
@@ -198,36 +199,4 @@ func (j *RawConf) GetSection(section string) (c *RawConf, err error) {
 //GetSignature 获取当前对象的唯一标识
 func (j *RawConf) GetSignature() string {
 	return j.signature
-}
-
-//ParseBool 将字符串转换为bool值
-func parseBool(val interface{}) (value bool, err error) {
-	if val != nil {
-		switch v := val.(type) {
-		case bool:
-			return v, nil
-		case string:
-			switch v {
-			case "1", "t", "T", "true", "TRUE", "True", "YES", "yes", "Yes", "Y", "y", "ON", "on", "On":
-				return true, nil
-			case "0", "f", "F", "false", "FALSE", "False", "NO", "no", "No", "N", "n", "OFF", "off", "Off":
-				return false, nil
-			}
-		case int8, int32, int64:
-			strV := fmt.Sprintf("%s", v)
-			if strV == "1" {
-				return true, nil
-			} else if strV == "0" {
-				return false, nil
-			}
-		case float64:
-			if v == 1 {
-				return true, nil
-			} else if v == 0 {
-				return false, nil
-			}
-		}
-		return false, fmt.Errorf("parsing %q: invalid syntax", val)
-	}
-	return false, fmt.Errorf("parsing <nil>: invalid syntax")
 }
