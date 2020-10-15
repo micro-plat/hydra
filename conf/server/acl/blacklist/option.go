@@ -9,3 +9,17 @@ func WithIP(ip ...string) Option {
 		a.IPS = append(a.IPS, ip...)
 	}
 }
+
+//WithDisable 关闭
+func WithDisable() Option {
+	return func(a *BlackList) {
+		a.Disable = true
+	}
+}
+
+//WithEnable 开启
+func WithEnable() Option {
+	return func(a *BlackList) {
+		a.Disable = false
+	}
+}
