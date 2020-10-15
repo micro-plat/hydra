@@ -11,12 +11,16 @@ import (
 //SConf 服务器配置
 type SConf struct {
 	creator.IConf
+	PlatName    string
+	ClusterName string
 }
 
 //NewConf 构建配置信息
 func NewConf() *SConf {
 	return &SConf{
-		IConf: creator.New(),
+		IConf:       creator.New(),
+		PlatName:    "hydra",
+		ClusterName: "test",
 	}
 }
 
@@ -27,27 +31,27 @@ func (s *SConf) Conf() creator.IConf {
 
 //GetAPIConf 获取API服务器配置
 func (s *SConf) GetAPIConf() server.IServerConf {
-	return s.GetConf("hydra", "apiserver", "api", "test")
+	return s.GetConf(s.PlatName, "apiserver", "api", s.ClusterName)
 }
 
 //GetWebConf 获取web服务器配置
 func (s *SConf) GetWebConf() server.IServerConf {
-	return s.GetConf("hydra", "webserver", "web", "test")
+	return s.GetConf(s.PlatName, "webserver", "web", s.ClusterName)
 }
 
 //GetWSConf 获取API服务器配置
 func (s *SConf) GetWSConf() server.IServerConf {
-	return s.GetConf("hydra", "wsserver", "ws", "test")
+	return s.GetConf(s.PlatName, "wsserver", "ws", s.ClusterName)
 }
 
 //GetCronConf 获取cron服务器配置
 func (s *SConf) GetCronConf() server.IServerConf {
-	return s.GetConf("hydra", "cronserver", "cron", "test")
+	return s.GetConf(s.PlatName, "cronserver", "cron", s.ClusterName)
 }
 
 //GetMQCConf 获取mqc服务器配置
 func (s *SConf) GetMQCConf() server.IServerConf {
-	return s.GetConf("hydra", "mqcserver", "mqc", "test")
+	return s.GetConf(s.PlatName, "mqcserver", "mqc", s.ClusterName)
 }
 
 //GetConf 获取配置信息
