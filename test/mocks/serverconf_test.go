@@ -14,6 +14,6 @@ func TestGetConf(t *testing.T) {
 
 	server := conf.GetAPIConf() //获取配置
 	assert.Equal(t, server.GetMainConf().GetRootConf().GetString("address"), ":8081", "端口一致性检查")
-	assert.Equal(t, server.GetMainConf().GetRootConf().GetInt("rTimeout"), 30, "超时时间不致")
+	assert.Equal(t, server.GetMainConf().GetRootConf().GetInt("rTimeout"), 30, "超时时间检查")
 
 }
