@@ -54,5 +54,4 @@ func (b customerBuilder) Map() map[string]interface{} {
 	return b
 }
 func (b customerBuilder) Load() {
-
 }

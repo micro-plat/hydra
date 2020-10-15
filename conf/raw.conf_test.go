@@ -79,8 +79,8 @@ func TestRawConf_GetString(t *testing.T) {
 	}
 	dn, _ := NewRawConfByMap(nil, 1)
 	dataN := fields{data: dn.data, version: dn.version, raw: dn.raw, signature: dn.signature}
-	dv, _ := NewRawConfByMap(map[string]interface{}{"test": "1"}, 1)
-	dataV := fields{data: dv.data, version: dv.version, raw: dv.raw, signature: dv.signature}
+	// dv, _ := NewRawConfByMap(map[string]interface{}{"test": "1"}, 1)
+	// dataV := fields{data: dv.data, version: dv.version, raw: dv.raw, signature: dv.signature}
 	type args struct {
 		key string
 		def []string
@@ -321,32 +321,6 @@ func TestRawConf_GetSection(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotC, tt.wantC) {
 				t.Errorf("RawConf.GetSection() = %v, want %v", gotC, tt.wantC)
-			}
-		})
-	}
-}
-
-func Test_parseBool(t *testing.T) {
-	type args struct {
-		val interface{}
-	}
-	tests := []struct {
-		name      string
-		args      args
-		wantValue bool
-		wantErr   bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotValue, err := parseBool(tt.args.val)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseBool() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotValue != tt.wantValue {
-				t.Errorf("parseBool() = %v, want %v", gotValue, tt.wantValue)
 			}
 		})
 	}

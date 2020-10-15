@@ -18,19 +18,20 @@ import (
 
 type httpBuilder struct {
 	customerBuilder
-	tp string
+	tp          string
+	fnGetRouter func(string) *services.ORouter
 }
 
 //newHTTP 构建http生成器
-func newHTTP(tp string, address string, opts ...api.Option) *httpBuilder {
-	b := &httpBuilder{tp: tp, customerBuilder: make(map[string]interface{})}
+func newHTTP(tp string, address string, f func(string) *services.ORouter, opts ...api.Option) *httpBuilder {
+	b := &httpBuilder{tp: tp, fnGetRouter: f, customerBuilder: make(map[string]interface{})}
 	b.customerBuilder["main"] = api.New(address, opts...)
 	return b
 }
 
 //Load 加载路由
 func (b *httpBuilder) Load() {
-	routers, err := services.GetRouter(b.tp).GetRouters()
+	routers, err := b.fnGetRouter(b.tp).GetRouters()
 	if err != nil {
 		panic(err)
 	}
@@ -57,8 +58,8 @@ func (b *httpBuilder) Basic(opts ...basic.Option) *httpBuilder {
 }
 
 //WhiteList 设置白名单
-func (b *httpBuilder) WhiteList(ips ...*whitelist.IPList) *httpBuilder {
-	b.customerBuilder["acl/white.list"] = whitelist.New(ips...)
+func (b *httpBuilder) WhiteList(opts ...whitelist.Option) *httpBuilder {
+	b.customerBuilder["acl/white.list"] = whitelist.New(opts...)
 	return b
 }
 
