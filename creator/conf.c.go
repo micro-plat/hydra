@@ -72,23 +72,27 @@ type IConf interface {
 var Conf = New()
 
 //New 构建新的配置
-func New(getRouterFunc ...func(string) *services.ORouter) *conf {
-	c := &conf{
-		data: make(map[string]iCustomerBuilder),
-		vars: make(map[string]map[string]interface{}),
+func New() *conf {
+	return &conf{
+		data:         make(map[string]iCustomerBuilder),
+		vars:         make(map[string]map[string]interface{}),
+		routerLoader: services.GetRouter,
 	}
-	if len(getRouterFunc) == 0 {
-		c.getRouterFunc = services.GetRouter
-		return c
+}
+
+//NewByLoader 设置路由加载器
+func NewByLoader(routerLoader func(string) *services.ORouter) *conf {
+	return &conf{
+		data:         make(map[string]iCustomerBuilder),
+		vars:         make(map[string]map[string]interface{}),
+		routerLoader: routerLoader,
 	}
-	c.getRouterFunc = getRouterFunc[0]
-	return c
 }
 
 type conf struct {
-	data          map[string]iCustomerBuilder
-	vars          map[string]map[string]interface{}
-	getRouterFunc func(string) *services.ORouter
+	data         map[string]iCustomerBuilder
+	vars         map[string]map[string]interface{}
+	routerLoader func(string) *services.ORouter
 }
 
 //Load 加载所有配置
@@ -124,7 +128,7 @@ func (c *conf) Load() error {
 
 //API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) *httpBuilder {
-	api := newHTTP(global.API, address, c.getRouterFunc, opts...)
+	api := newHTTP(global.API, address, c.routerLoader, opts...)
 	c.data[global.API] = api
 	return api
 }
@@ -139,7 +143,7 @@ func (c *conf) GetAPI() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
-	web := newHTTP(global.Web, address, c.getRouterFunc, opts...)
+	web := newHTTP(global.Web, address, c.routerLoader, opts...)
 	web.Static(static.WithArchive(global.AppName))
 	c.data[global.Web] = web
 	return web
@@ -155,7 +159,7 @@ func (c *conf) GetWeb() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
-	ws := newHTTP(global.WS, address, c.getRouterFunc, opts...)
+	ws := newHTTP(global.WS, address, c.routerLoader, opts...)
 	ws.Static(static.WithArchive(global.AppName))
 	c.data[global.WS] = ws
 	return ws
@@ -171,7 +175,7 @@ func (c *conf) GetWS() *httpBuilder {
 
 //RPC rpc服务器配置
 func (c *conf) RPC(address string, opts ...rpc.Option) *rpcBuilder {
-	rpc := newRPC(address, c.getRouterFunc, opts...)
+	rpc := newRPC(address, c.routerLoader, opts...)
 	c.data[global.RPC] = rpc
 	return rpc
 }

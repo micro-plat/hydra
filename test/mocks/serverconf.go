@@ -48,7 +48,7 @@ func NewConf() *SConf {
 	//RPC rpc服务的路由信息
 	c.Service.RPC = services.NewORouter()
 
-	c.IConf = creator.New(c.getRouter)
+	c.IConf = creator.NewByLoader(c.getRouter)
 
 	//处理iconf.load中，服务检查问题
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON}
