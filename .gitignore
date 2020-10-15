@@ -1,5 +1,4 @@
 logs
-vendor
 launch.json
 apiserver*
 rpcserver*
