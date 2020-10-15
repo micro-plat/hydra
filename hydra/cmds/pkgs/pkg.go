@@ -10,9 +10,6 @@ import (
 
 //Pub2Registry 发布到注册中心
 func Pub2Registry(cover bool) error {
-	if err := creator.Conf.Load(); err != nil {
-		return err
-	}
 
 	//2.发布到配置中心
 	if err := creator.Conf.Pub(global.Current().GetPlatName(),

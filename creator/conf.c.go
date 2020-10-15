@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
+	"github.com/micro-plat/hydra/services"
 )
 
 //IConf 配置注册管理
@@ -62,26 +63,37 @@ type IConf interface {
 
 	//Pub 发布服务
 	Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error
+
+	//Load 加载所有配置
+	Load() error
 }
 
 //Conf 配置服务
 var Conf = New()
 
 //New 构建新的配置
-func New() *conf {
-	return &conf{
+func New(getRouterFunc ...func(string) *services.ORouter) *conf {
+	c := &conf{
 		data: make(map[string]iCustomerBuilder),
 		vars: make(map[string]map[string]interface{}),
 	}
+	if len(getRouterFunc) == 0 {
+		c.getRouterFunc = services.GetRouter
+		return c
+	}
+	c.getRouterFunc = getRouterFunc[0]
+	return c
 }
 
 type conf struct {
-	data map[string]iCustomerBuilder
-	vars map[string]map[string]interface{}
+	data          map[string]iCustomerBuilder
+	vars          map[string]map[string]interface{}
+	getRouterFunc func(string) *services.ORouter
 }
 
 //Load 加载所有配置
 func (c *conf) Load() error {
+
 	types := servers.GetServerTypes()
 	for _, t := range types {
 		_, ok := c.data[t]
@@ -112,7 +124,7 @@ func (c *conf) Load() error {
 
 //API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) *httpBuilder {
-	api := newHTTP(global.API, address, opts...)
+	api := newHTTP(global.API, address, c.getRouterFunc, opts...)
 	c.data[global.API] = api
 	return api
 }
@@ -127,7 +139,7 @@ func (c *conf) GetAPI() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
-	web := newHTTP(global.Web, address, opts...)
+	web := newHTTP(global.Web, address, c.getRouterFunc, opts...)
 	web.Static(static.WithArchive(global.AppName))
 	c.data[global.Web] = web
 	return web
@@ -143,7 +155,7 @@ func (c *conf) GetWeb() *httpBuilder {
 
 //Web web服务器配置
 func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
-	ws := newHTTP(global.WS, address, opts...)
+	ws := newHTTP(global.WS, address, c.getRouterFunc, opts...)
 	ws.Static(static.WithArchive(global.AppName))
 	c.data[global.WS] = ws
 	return ws
@@ -159,7 +171,7 @@ func (c *conf) GetWS() *httpBuilder {
 
 //RPC rpc服务器配置
 func (c *conf) RPC(address string, opts ...rpc.Option) *rpcBuilder {
-	rpc := newRPC(address, opts...)
+	rpc := newRPC(address, c.getRouterFunc, opts...)
 	c.data[global.RPC] = rpc
 	return rpc
 }

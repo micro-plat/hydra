@@ -62,9 +62,14 @@ type IService interface {
 }
 
 //Def 服务注册管理
-var Def = &regist{
-	servers: make(map[string]*serverServices),
-	caches:  make(map[string]map[string]interface{}),
+var Def = New()
+
+//New 构建服务组件
+func New() *regist {
+	return &regist{
+		servers: make(map[string]*serverServices),
+		caches:  make(map[string]map[string]interface{}),
+	}
 }
 
 //regist  本地服务

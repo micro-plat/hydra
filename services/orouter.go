@@ -13,16 +13,16 @@ import (
 )
 
 //API  路由信息
-var API = newORouter()
+var API = NewORouter()
 
 //WEB web服务的路由信息
-var WEB = newORouter()
+var WEB = NewORouter()
 
 //WS web socket路由信息
-var WS = newORouter()
+var WS = NewORouter()
 
 //RPC rpc服务的路由信息
-var RPC = newORouter()
+var RPC = NewORouter()
 
 //GetRouter 获取服务器的路由配置
 func GetRouter(tp string) *ORouter {
@@ -45,7 +45,8 @@ type ORouter struct {
 	pathRouters map[string]*pathRouter
 }
 
-func newORouter() *ORouter {
+//NewORouter 构建路由管理器
+func NewORouter() *ORouter {
 	return &ORouter{
 		routers:     router.NewRouters(),
 		pathRouters: make(map[string]*pathRouter),

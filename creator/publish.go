@@ -12,6 +12,9 @@ import (
 
 //Pub 将配置发布到配置中心
 func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+	if err := c.Load(); err != nil {
+		return err
+	}
 
 	//本地文件系统则直接使用toml序列化方式进行发布
 	proto := registry.GetProto(registryAddr)
