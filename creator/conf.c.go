@@ -20,6 +20,7 @@ type IConf interface {
 
 	//Var 参数配置
 	Vars() vars
+
 	//API api服务器配置
 	API(address string, opts ...api.Option) *httpBuilder
 
@@ -58,12 +59,20 @@ type IConf interface {
 
 	//GetMQC 获取MQC服务器配置
 	GetMQC() *mqcBuilder
+
+	//Pub 发布服务
+	Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error
 }
 
 //Conf 配置服务
-var Conf = &conf{
-	data: make(map[string]iCustomerBuilder),
-	vars: make(map[string]map[string]interface{}),
+var Conf = New()
+
+//New 构建新的配置
+func New() *conf {
+	return &conf{
+		data: make(map[string]iCustomerBuilder),
+		vars: make(map[string]map[string]interface{}),
+	}
 }
 
 type conf struct {
