@@ -3,6 +3,8 @@ package context
 import (
 	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/context"
 )
 
 func TestUnmarshalXML(t *testing.T) {
@@ -20,7 +22,7 @@ func TestUnmarshalXML(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := UnmarshalXML(tt.args.s)
+			got, err := context.UnmarshalXML(tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UnmarshalXML() error = %v, wantErr %v", err, tt.wantErr)
 				return

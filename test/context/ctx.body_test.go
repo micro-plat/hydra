@@ -1,49 +1,26 @@
-package tests
+package context
 
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
+	"github.com/micro-plat/hydra/test/mocks"
 )
 
-type Read struct {
-	*strings.Reader
-}
-
-func (r Read) Close() error {
-	return nil
-}
-
-type ErrRead struct {
-}
-
-func (r ErrRead) Read(b []byte) (n int, err error) {
-	return 0, fmt.Errorf("读取出错")
-}
-
-func (r ErrRead) Close() error {
-	return nil
-}
-
 func Test_body_GetBody(t *testing.T) {
-	startServer()
-	serverConf, _ := server.Cache.GetServerConf("api")
-	rpath := ctx.NewRpath(&TestContxt{}, serverConf, conf.NewMeta())
-	w1 := ctx.NewBody(&TestContxt{
-		body: Read{Reader: strings.NewReader("%20+body")},
-	}, rpath)
-	w2 := ctx.NewBody(&TestContxt{
-		body: ErrRead{},
-	}, rpath)
-	w3 := ctx.NewBody(&TestContxt{
-		body: Read{Reader: strings.NewReader("%-+body")},
-	}, rpath)
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
+	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
+	w1 := ctx.NewBody(&mocks.TestContxt{Body: "%20+body"}, rpath)
+	w2 := ctx.NewBody(&mocks.TestContxt{Body: "TEST_BODY_READ_ERR"}, rpath)
+	w3 := ctx.NewBody(&mocks.TestContxt{Body: "%-+body"}, rpath)
 
 	type args struct {
 		e []string
@@ -95,9 +72,12 @@ func Test_body_GetBody(t *testing.T) {
 }
 
 func Test_body_GetBodyMap(t *testing.T) {
-	startServer()
-	serverConf, _ := server.Cache.GetServerConf("api")
-	rpath := ctx.NewRpath(&TestContxt{}, serverConf, conf.NewMeta())
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
+	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 
 	type fields struct {
 		ctx context.IInnerContext
@@ -112,29 +92,21 @@ func Test_body_GetBodyMap(t *testing.T) {
 		want    map[string]interface{}
 		wantErr bool
 	}{
-		{name: "读取正确xml格式数据", fields: fields{ctx: &TestContxt{
-			body: Read{
-				Reader: strings.NewReader(`<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`),
-			},
-			contentType: "text/xml",
+		{name: "读取正确xml格式数据", fields: fields{ctx: &mocks.TestContxt{
+			Body:            `<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`,
+			HttpContentType: context.XMLF,
 		}}, args: args{encoding: []string{"gbk"}}, want: map[string]interface{}{"key1": "1&$", "key2": "value2"}},
-		{name: "读取正确json格式数据", fields: fields{ctx: &TestContxt{
-			body: Read{
-				Reader: strings.NewReader(`{"key1":"value1","key2":"value2"}`),
-			},
-			contentType: "application/json",
+		{name: "读取正确json格式数据", fields: fields{ctx: &mocks.TestContxt{
+			Body:            `{"key1":"value1","key2":"value2"}`,
+			HttpContentType: context.JSONF,
 		}}, args: args{}, want: map[string]interface{}{"key1": "value1", "key2": "value2"}},
-		{name: "读取正确yaml格式数据", fields: fields{ctx: &TestContxt{
-			body: Read{
-				Reader: strings.NewReader(`key1: value1`),
-			},
-			contentType: "application/yaml",
+		{name: "读取正确yaml格式数据", fields: fields{ctx: &mocks.TestContxt{
+			Body:            `key1: value1`,
+			HttpContentType: context.YAMLF,
 		}}, args: args{}, want: map[string]interface{}{"key1": "value1"}},
-		{name: "读取错误的不匹配的格式数据", fields: fields{ctx: &TestContxt{
-			body: Read{
-				Reader: strings.NewReader(`{"key1:"value1"}`),
-			},
-			contentType: "application/json",
+		{name: "读取错误的不匹配的格式数据", fields: fields{ctx: &mocks.TestContxt{
+			Body:            `{"key1:"value1"}`,
+			HttpContentType: context.JSONF,
 		}}, args: args{}, wantErr: true},
 	}
 	for _, tt := range tests {

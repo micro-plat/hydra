@@ -20,7 +20,7 @@ type user struct {
 	jwtToken  interface{}
 }
 
-func newUser(ctx context.IInnerContext, meta conf.IMeta) *user {
+func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 	return &user{
 		ctx:  ctx,
 		auth: &auth{},

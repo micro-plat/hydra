@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -22,7 +23,6 @@ type rpath struct {
 	fallback   bool
 }
 
-//NewRpath @todo 使用大写是为了测试时,启动服务获取IServerConf时,可以构建对象
 func NewRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
 	return &rpath{
 		ctx:        ctx,
@@ -38,6 +38,7 @@ func (c *rpath) GetMethod() string {
 
 //GetRouter 获取路由信息
 func (c *rpath) GetRouter() *router.Router {
+	fmt.Println("xxxxxxx",c.serverConf.GetRouterConf())
 	switch c.serverConf.GetMainConf().GetServerType() {
 	case global.API, global.Web, global.WS:
 		return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())

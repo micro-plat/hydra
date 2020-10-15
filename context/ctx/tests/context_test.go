@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
 	h "github.com/micro-plat/hydra/hydra/servers/http"
+	"github.com/micro-plat/hydra/test/mocks"
 )
 
 func TestNewCtx(t *testing.T) {
@@ -16,7 +17,7 @@ func TestNewCtx(t *testing.T) {
 			t.Errorf("recover:NewCtx() = %v", r)
 		}
 	}()
-	if got := ctx.NewCtx(&TestContxt{}, h.API); got == nil {
+	if got := ctx.NewCtx(&mocks.TestContxt{}, h.API); got == nil {
 		t.Errorf("NewCtx() got nil")
 		return
 	}
@@ -26,7 +27,7 @@ func TestCtx_Close(t *testing.T) {
 
 	startServer()
 
-	c := ctx.NewCtx(&TestContxt{}, h.API)
+	c := ctx.NewCtx(&mocks.TestContxt{}, h.API)
 
 	c.Close()
 

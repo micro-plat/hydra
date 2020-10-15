@@ -22,7 +22,6 @@ type body struct {
 	hasReadBody bool
 }
 
-//NewRpath @todo 使用大写是为了测试时,启动服务获取IServerConf时,可以构建对象
 func NewBody(c context.IInnerContext, path *rpath) *body {
 	return &body{ctx: c, path: path}
 }

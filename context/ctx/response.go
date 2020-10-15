@@ -40,7 +40,7 @@ type response struct {
 	specials    []string
 }
 
-func newResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger, meta conf.IMeta) *response {
+func NewResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger, meta conf.IMeta) *response {
 	return &response{
 		ctx:   ctx,
 		conf:  conf,
