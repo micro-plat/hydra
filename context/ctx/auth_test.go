@@ -21,9 +21,9 @@ func Test_auth_Response(t *testing.T) {
 		args   args
 		want   interface{}
 	}{
-		{name: "1", fields: fields{}, args: args{}, want: nil},
-		{name: "2", fields: fields{}, args: args{v: []interface{}{1}}, want: 1},
-		{name: "3", fields: fields{response: 1}, args: args{v: []interface{}{2, 3, 4}}, want: 2},
+		{name: "参数为空", fields: fields{}, args: args{}, want: nil},
+		{name: "request为空,参数不为空", fields: fields{}, args: args{v: []interface{}{1}}, want: 1},
+		{name: "request不为空,参数不为空", fields: fields{response: 1}, args: args{v: []interface{}{2, 3, 4}}, want: 2},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -52,9 +52,9 @@ func Test_auth_Request(t *testing.T) {
 		args   args
 		want   interface{}
 	}{
-		{name: "1", fields: fields{}, args: args{}, want: nil},
-		{name: "2", fields: fields{}, args: args{v: []interface{}{1}}, want: 1},
-		{name: "3", fields: fields{request: 1}, args: args{v: []interface{}{2, 3, 4}}, want: 2},
+		{name: "参数为空", fields: fields{}, args: args{}, want: nil},
+		{name: "response为空,参数不为空", fields: fields{}, args: args{v: []interface{}{1}}, want: 1},
+		{name: "response不为空,参数不为空", fields: fields{request: 1}, args: args{v: []interface{}{2, 3, 4}}, want: 2},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -70,31 +70,31 @@ func Test_auth_Request(t *testing.T) {
 }
 
 func Test_auth_Bind(t *testing.T) {
+	type result struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}
 	type fields struct {
 		request  interface{}
 		response interface{}
-	}
-	type args struct {
-		out interface{}
 	}
 	tests := []struct {
 		name           string
 		fields         fields
 		want           interface{}
-		args           args
 		wantPanicError bool
+		def            bool
 	}{
-		{name: "request is nil", fields: fields{}, args: args{}, wantPanicError: true},
-		{name: "request return nil", fields: fields{request: func() interface{} {
+		{name: "request为空", fields: fields{}, wantPanicError: true},
+		{name: "request为func返回空值", fields: fields{request: func() interface{} {
 			return nil
-		}}, args: args{}, wantPanicError: true},
-		{name: "request return non-nil value", fields: fields{request: func() interface{} {
-			a := 1
-			return a
-		}}, args: args{out: 2}, want: 1, wantPanicError: false},
-		{name: "request is err string", fields: fields{request: `{"key":"value"}`}, args: args{out: map[string]string{"1": "1"}}, wantPanicError: false},
-		{name: "request is string", fields: fields{request: `{"key":"value"}`}, args: args{out: 1}, want: map[string]string{"key": "value"}, wantPanicError: false},
-		{name: "default", fields: fields{request: map[string]string{"a": "b"}}, args: args{out: map[string]string{}}, want: map[string]string{"a": "b"}, wantPanicError: false},
+		}}, wantPanicError: true},
+		{name: "request为func返回非空值", fields: fields{request: func() interface{} {
+			return result{Key: "1", Value: "1"}
+		}}, want: result{Key: "1", Value: "1"}, wantPanicError: false},
+		{name: "request为错误的json字符串", fields: fields{request: `{"key":"1",v}`}, wantPanicError: true},
+		{name: "request为json字符串", fields: fields{request: `{"key":"1","value":"1"}`}, want: result{Key: "1", Value: "1"}, wantPanicError: false},
+		{name: "默认情况", fields: fields{request: map[string]string{"key": "value"}}, def: true, want: map[string]string{"key": "value"}, wantPanicError: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -115,9 +115,20 @@ func Test_auth_Bind(t *testing.T) {
 					t.Errorf("recover:Bind() = %v", r)
 				}
 			}()
-			c.Bind(&tt.args.out)
-			if !reflect.DeepEqual(tt.args.out, tt.want) {
-				t.Errorf("auth.Bind() out= %v, want %v", tt.args.out, tt.want)
+
+			if !tt.def {
+				out := result{}
+				c.Bind(&out)
+				if !reflect.DeepEqual(out, tt.want) {
+					t.Errorf("auth.Bind() out= %v, want %v", out, tt.want)
+				}
+				return
+			}
+
+			out := map[string]string{}
+			c.Bind(&out)
+			if !reflect.DeepEqual(out, tt.want) {
+				t.Errorf("auth.Bind() out= %v, want %v", out, tt.want)
 			}
 		})
 	}
