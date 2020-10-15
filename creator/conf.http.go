@@ -57,8 +57,8 @@ func (b *httpBuilder) Basic(opts ...basic.Option) *httpBuilder {
 }
 
 //WhiteList 设置白名单
-func (b *httpBuilder) WhiteList(ips ...*whitelist.IPList) *httpBuilder {
-	b.customerBuilder["acl/white.list"] = whitelist.New(ips...)
+func (b *httpBuilder) WhiteList(opts ...whitelist.Option) *httpBuilder {
+	b.customerBuilder["acl/white.list"] = whitelist.New(opts...)
 	return b
 }
 

@@ -22,13 +22,11 @@ type WhiteList struct {
 	IPS     []*IPList `json:"white-list,omitempty" toml:"white-list,omitempty"`
 }
 
-//New 创建固定密钥验证服务
-func New(ips ...*IPList) *WhiteList {
+//New 创建白名单规则服务
+func New(opts ...Option) *WhiteList {
 	f := &WhiteList{IPS: make([]*IPList, 0, 1)}
-	for _, ip := range ips {
-		ip.ipm = conf.NewPathMatch(ip.IPS...)
-		ip.rqm = conf.NewPathMatch(ip.Requests...)
-		f.IPS = append(f.IPS, ip)
+	for idx := range opts {
+		opts[idx](f)
 	}
 	return f
 }
