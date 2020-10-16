@@ -51,8 +51,9 @@ func TestNew(t *testing.T) {
 		want *BlackList
 	}{
 		{name: "初始化空对象", args: args{opts: nil}, want: &BlackList{IPS: []string{}, ipm: conf.NewPathMatch([]string{}...)}},
-		{name: "初始化单ip对象", args: args{opts: []Option{WithIP("19.168.0.101")}}, want: &BlackList{IPS: []string{"19.168.0.101"}, ipm: conf.NewPathMatch([]string{"19.168.0.101"}...)}},
-		{name: "初始化多ip对象", args: args{opts: []Option{WithIP("19.168.0.101"), WithIP("19.168.0.102")}}, want: &BlackList{IPS: []string{"19.168.0.101", "19.168.0.102"}, ipm: conf.NewPathMatch([]string{"19.168.0.101", "19.168.0.102"}...)}},
+		{name: "初始化单ip对象", args: args{opts: []Option{WithIP("19.168.0.101")}}, want: &BlackList{IPS: []string{"19.168.0.101"}, ipm: conf.NewPathMatch("19.168.0.101")}},
+		{name: "初始化多对象Enable", args: args{opts: []Option{WithEnable(), WithIP("19.168.0.101")}}, want: &BlackList{Disable: false, IPS: []string{"19.168.0.101"}, ipm: conf.NewPathMatch("19.168.0.101")}},
+		{name: "初始化多对象Disable", args: args{opts: []Option{WithDisable(), WithIP("19.168.0.101")}}, want: &BlackList{Disable: true, IPS: []string{"19.168.0.101"}, ipm: conf.NewPathMatch("19.168.0.101")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

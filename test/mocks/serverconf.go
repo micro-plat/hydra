@@ -31,9 +31,14 @@ type SConf struct {
 
 //NewConf 构建配置信息
 func NewConf() *SConf {
+	return NewConfBy("hydra", "test")
+}
+
+//NewConfBy 构建配置信息
+func NewConfBy(platName, clusterName string) *SConf {
 	c := &SConf{
-		PlatName:    "hydra",
-		ClusterName: "test",
+		PlatName:    platName,
+		ClusterName: clusterName,
 		Service:     &service{},
 	}
 	//API  路由信息
@@ -53,15 +58,6 @@ func NewConf() *SConf {
 	//处理iconf.load中，服务检查问题
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON}
 	return c
-}
-
-//NewConf 构建配置信息
-func NewConf1(platName, clusterName string) *SConf {
-	return &SConf{
-		IConf:       creator.New(),
-		PlatName:    platName,
-		ClusterName: clusterName,
-	}
 }
 
 //Conf 配置

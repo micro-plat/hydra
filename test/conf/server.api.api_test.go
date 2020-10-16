@@ -9,7 +9,7 @@ import (
 )
 
 func TestAPIGetConf(t *testing.T) {
-	conf := mocks.NewConf1("hydar", "apiconftest") //构建对象
+	conf := mocks.NewConfBy("hydar", "apiconftest") //构建对象
 	wantC := api.New(":8081", api.WithHeaderReadTimeout(30))
 	conf.API(":8081", api.WithHeaderReadTimeout(30))
 	got, err := api.GetConf(conf.GetAPIConf().GetMainConf())
@@ -20,7 +20,7 @@ func TestAPIGetConf(t *testing.T) {
 }
 
 func TestAPIGetConf1(t *testing.T) {
-	conf := mocks.NewConf1("hydar", "apiconftest") //构建对象
+	conf := mocks.NewConfBy("hydar", "apiconftest") //构建对象
 	conf.CRON()
 	_, err := api.GetConf(conf.GetCronConf().GetMainConf())
 	if err == nil {
