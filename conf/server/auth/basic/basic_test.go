@@ -8,37 +8,40 @@ package basic
 import (
 	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/conf"
 )
 
 func TestNewBasic(t *testing.T) {
-	type args struct {
-		opts []Option
-	}
 	tests := []struct {
 		name string
-		args args
+		opts []Option
 		want *BasicAuth
 	}{
 		{name: "添加用户名和密码的对象",
-			args: args{opts: []Option{WithUP("t1", "123"), WithUP("t2", "321")}},
+			opts: []Option{WithUP("t1", "123"), WithUP("t2", "321")},
 			want: &BasicAuth{
-				Excludes: []string{},
-				Members:  map[string]string{"t1": "123", "t2": "321"}},
+				Excludes:      []string{},
+				Members:       map[string]string{"t1": "123", "t2": "321"},
+				PathMatch:     conf.NewPathMatch([]string{}...),
+				authorization: newAuthorization(map[string]string{"t1": "123", "t2": "321"}),
+			},
 		},
 		{name: "添加验证路径的对象",
-			args: args{opts: []Option{WithExcludes("/t1/t2", "/t1/t2/*")}},
+			opts: []Option{WithExcludes("/t1/t2", "/t1/t2/*")},
 			want: &BasicAuth{
-				Excludes: []string{"/t1/t2", "/t1/t2/*"},
-				Members:  map[string]string{}},
+				Excludes:      []string{"/t1/t2", "/t1/t2/*"},
+				Members:       map[string]string{},
+				PathMatch:     conf.NewPathMatch([]string{"/t1/t2", "/t1/t2/*"}...),
+				authorization: newAuthorization(map[string]string{}),
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewBasic(tt.args.opts...)
-			if !reflect.DeepEqual(got.Disable, tt.want.Disable) ||
-				!reflect.DeepEqual(got.Excludes, tt.want.Excludes) ||
-				!reflect.DeepEqual(got.Members, tt.want.Members) {
-				t.Errorf("NewBasic() = %v, want %v", *got.PathMatch, *tt.want.PathMatch)
+			got := NewBasic(tt.opts...)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewBasic() = %v, want %v", got, tt.want)
 			}
 		})
 	}

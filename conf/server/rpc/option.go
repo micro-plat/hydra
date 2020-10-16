@@ -1,7 +1,5 @@
 package rpc
 
-import "strings"
-
 //Option 配置选项
 type Option func(*Server)
 
@@ -24,13 +22,6 @@ func WithTimeout(rtimeout int, wtimout int) Option {
 func WithHeaderReadTimeout(htimeout int) Option {
 	return func(a *Server) {
 		a.RHTimeout = htimeout
-	}
-}
-
-//WithHost 设置host
-func WithHost(host ...string) Option {
-	return func(a *Server) {
-		a.Host = strings.Join(host, ";")
 	}
 }
 
