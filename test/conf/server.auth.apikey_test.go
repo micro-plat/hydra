@@ -1,6 +1,12 @@
+/*
+author:taoshouyin
+time:2020-10-16
+*/
+
 package conf
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -21,6 +27,28 @@ var rawData = "taosy hydra test"
 var md5Sign = md5.Encrypt(rawData + md5secret)
 var sha1Sign = sha1.Encrypt(rawData + sha1secret)
 var sha256Sign = sha256.Encrypt(rawData + sha256secret)
+
+func TestAPIKeyNew(t *testing.T) {
+	tests := []struct {
+		name   string
+		secret string
+		opts   []apikey.Option
+		want   *apikey.APIKeyAuth
+	}{
+		{name: "初始化默认对象", secret: "", opts: []apikey.Option{}, want: &apikey.APIKeyAuth{Mode: "MD5", PathMatch: conf.NewPathMatch()}},
+		{name: "设置密钥和路径", secret: "1111", opts: []apikey.Option{apikey.WithSecret("123456"), apikey.WithExcludes("/t/tw", "/t1/t2")}, want: &apikey.APIKeyAuth{Secret: "123456", Excludes: []string{"/t/tw", "/t1/t2"}, Mode: "MD5", PathMatch: conf.NewPathMatch("/t/tw", "/t1/t2")}},
+		{name: "设置sha1", secret: "1111", opts: []apikey.Option{apikey.WithSHA1Mode(), apikey.WithDisable()}, want: &apikey.APIKeyAuth{Secret: "1111", Mode: "SHA1", Disable: true, PathMatch: conf.NewPathMatch()}},
+		{name: "设置sha256", secret: "", opts: []apikey.Option{apikey.WithSHA256Mode(), apikey.WithEnable()}, want: &apikey.APIKeyAuth{Mode: "SHA256", Disable: false, PathMatch: conf.NewPathMatch()}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := apikey.New(tt.secret, tt.opts...)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func TestAPIKeyAuth_Verify(t *testing.T) {
 

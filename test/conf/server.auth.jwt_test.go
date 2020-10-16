@@ -13,51 +13,35 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/test/mocks"
-	"github.com/micro-plat/lib4go/utility"
 )
 
 func TestNewJWT(t *testing.T) {
-	type args struct {
-		opts []jwt.Option
-	}
 	tests := []struct {
 		name string
-		args args
+		opts []jwt.Option
 		want *jwt.JWTAuth
 	}{
-		{name: "设置默认对象", args: args{opts: []jwt.Option{}}, want: &jwt.JWTAuth{Name: "Authorization-Jwt",
-			Mode:      "HS512",
-			Secret:    utility.GetGUID(),
-			ExpireAt:  86400,
-			Source:    "COOKIE",
-			PathMatch: conf.NewPathMatch()}},
-		{name: "设置自定义对象", args: args{opts: []jwt.Option{
-			jwt.WithHeader(), jwt.WithDisable(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"), jwt.WithSecret("132459678"),
-		}}, want: &jwt.JWTAuth{Name: "test",
-			Redirect:  "1111",
-			Mode:      "ES256",
-			Secret:    "132459678",
-			ExpireAt:  1000,
-			Source:    "HEADER",
-			Disable:   true,
-			Excludes:  []string{"/t1/**"},
-			PathMatch: conf.NewPathMatch("/t1/**")}},
+		{name: "设置secert",
+			opts: []jwt.Option{jwt.WithSecret("12345678")},
+			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
+		},
+		{name: "设置disable",
+			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithDisable()},
+			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: true, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
+		},
+		{name: "设置Enable",
+			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithEnable()},
+			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: false, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
+		},
+		{name: "设置自定义对象",
+			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111")},
+			want: &jwt.JWTAuth{Name: "test", Redirect: "1111", Mode: "ES256", Secret: "12345678", ExpireAt: 1000, Source: "HEADER", Excludes: []string{"/t1/**"}, PathMatch: conf.NewPathMatch("/t1/**")},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := jwt.NewJWT(tt.args.opts...)
-			if !reflect.DeepEqual(got.Mode, tt.want.Mode) ||
-				!reflect.DeepEqual(got.Disable, tt.want.Disable) ||
-				!reflect.DeepEqual(got.Excludes, tt.want.Excludes) ||
-				!reflect.DeepEqual(got.ExpireAt, tt.want.ExpireAt) ||
-				!reflect.DeepEqual(got.Name, tt.want.Name) ||
-				!reflect.DeepEqual(*got.PathMatch, *tt.want.PathMatch) ||
-				!reflect.DeepEqual(got.Redirect, tt.want.Redirect) ||
-				!reflect.DeepEqual(got.Source, tt.want.Source) {
-				t.Errorf("NewJWT() = %v, want %v", got, tt.want)
-			}
-
-			if tt.name == "设置自定义对象" && !reflect.DeepEqual(got.Secret, tt.want.Secret) {
+			got := jwt.NewJWT(tt.opts...)
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewJWT()1 = %v, want %v", got, tt.want)
 			}
 		})

@@ -44,11 +44,10 @@ func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 	default:
 		expireTime := time.Now().Add(time.Duration(time.Duration(jwt.ExpireAt)*time.Second - 8*60*60*time.Second))
 		expireVal := expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
-
-		if jwt.Domain != "" {
-			ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
-			return
-		}
+		// if jwt.Domain != "" {
+		// 	ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
+		// 	return
+		// }
 		ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
 	}
 }
