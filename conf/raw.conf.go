@@ -86,10 +86,6 @@ func (j *RawConf) GetVersion() int32 {
 
 //GetRaw 获取json数据
 func (j *RawConf) GetRaw() []byte {
-	if len(j.raw) > 0 {
-		return j.raw
-	}
-	j.raw, _ = json.Marshal(j.data)
 	return j.raw
 }
 

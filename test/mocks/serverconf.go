@@ -24,9 +24,11 @@ type service struct {
 //SConf 服务器配置
 type SConf struct {
 	creator.IConf
-	PlatName    string
-	ClusterName string
-	Service     *service
+	PlatName     string
+	ClusterName  string
+	Service      *service
+	registryAddr string
+	Registry     registry.IRegistry
 }
 
 //NewConf 构建配置信息
@@ -37,9 +39,10 @@ func NewConf() *SConf {
 //NewConfBy 构建配置信息
 func NewConfBy(platName, clusterName string) *SConf {
 	c := &SConf{
-		PlatName:    platName,
-		ClusterName: clusterName,
-		Service:     &service{},
+		PlatName:     platName,
+		ClusterName:  clusterName,
+		Service:      &service{},
+		registryAddr: "lm://.",
 	}
 	//API  路由信息
 	c.Service.API = services.NewORouter()
@@ -54,6 +57,11 @@ func NewConfBy(platName, clusterName string) *SConf {
 	c.Service.RPC = services.NewORouter()
 
 	c.IConf = creator.NewByLoader(c.getRouter)
+	var err error
+	c.Registry, err = registry.NewRegistry(c.registryAddr, global.Def.Log())
+	if err != nil {
+		panic(err)
+	}
 
 	//处理iconf.load中，服务检查问题
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON}
@@ -98,16 +106,13 @@ func (s *SConf) GetRPCConf() server.IServerConf {
 
 //GetConf 获取配置信息
 func (s *SConf) GetConf(platName string, systemName string, serverType string, clusterName string) server.IServerConf {
-	registryAddr := "lm://."
-	if err := s.IConf.Pub(platName, systemName, clusterName, registryAddr, true); err != nil {
+
+	if err := s.IConf.Pub(platName, systemName, clusterName, s.registryAddr, true); err != nil {
 		panic(err)
 	}
-	r, err := registry.NewRegistry(registryAddr, global.Def.Log())
-	if err != nil {
-		panic(err)
-	}
+
 	path := registry.Join(platName, systemName, serverType, clusterName, "conf")
-	conf, err := server.NewServerConf(path, r)
+	conf, err := server.NewServerConf(path, s.Registry)
 	if err != nil {
 		panic(err)
 	}
