@@ -1,7 +1,5 @@
 package api
 
-import "strings"
-
 //Option 配置选项
 type Option func(*Server)
 
@@ -27,13 +25,6 @@ func WithHeaderReadTimeout(htimeout int) Option {
 	}
 }
 
-//WithHost 设置host
-func WithHost(host ...string) Option {
-	return func(a *Server) {
-		a.Host = strings.Join(host, ";")
-	}
-}
-
 //WithDisable 禁用任务
 func WithDisable() Option {
 	return func(a *Server) {
@@ -51,7 +42,6 @@ func WithEnable() Option {
 //WithDNS 设置请求域名
 func WithDNS(host string, ip ...string) Option {
 	return func(a *Server) {
-		a.Host = host
 		if len(ip) > 0 {
 			a.Domain = ip[0]
 		}
