@@ -34,9 +34,6 @@ func NewBasic(opts ...Option) *BasicAuth {
 
 //Verify 验证用户信息
 func (b *BasicAuth) Verify(authValue string) (string, bool) {
-	if authValue == "" {
-		return "", false
-	}
 	for _, pair := range b.authorization {
 		if pair.auth == authValue {
 			return pair.userName, true
@@ -46,10 +43,7 @@ func (b *BasicAuth) Verify(authValue string) (string, bool) {
 }
 
 //GetRealm 获取认证域
-func (b *BasicAuth) GetRealm(realm string) string {
-	if realm == "" {
-		realm = "Authorization Required"
-	}
+func (b *BasicAuth) GetRealm() string {
 	return "Basic realm=" + strconv.Quote("Authorization Required")
 }
 

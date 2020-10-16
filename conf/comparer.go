@@ -22,6 +22,9 @@ type Comparer struct {
 
 //NewComparer 构建配置比较器
 func NewComparer(oconf IMainConf, valueNames []string, subNames ...string) *Comparer {
+	if oconf == nil {
+		panic("配置不能为空")
+	}
 	return &Comparer{
 		oconf:      oconf,
 		valueNames: valueNames,
@@ -38,6 +41,7 @@ func (s *Comparer) Update(n IMainConf) {
 }
 
 //IsChanged 主配置是否发生变更
+//当新配置nconf为空时，系统认为未发生变化
 func (s *Comparer) IsChanged() bool {
 	if s.nconf == nil || reflect.ValueOf(s.nconf).IsNil() {
 		return false
