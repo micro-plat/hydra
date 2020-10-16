@@ -142,7 +142,7 @@ package ctx
 // 		want   string
 // 		want1  string
 // 	}{
-// 		{name: "content-type为text/plain", fields: fields{ctx: &mocks.TestContxt{
+// 		{name: "状态码非0,content-type为text/plain,返回非错误内容", fields: fields{ctx: &mocks.TestContxt{
 // 			HttpHeader: http.Header{
 // 				"Content-Type": []string{context.PLAINF},
 // 			},
