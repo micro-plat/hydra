@@ -142,17 +142,48 @@ func Test_response_swapByctp(t *testing.T) {
 		want   string
 		want1  string
 	}{
-		{name: "text/plain返回值", fields: fields{ctx: &mocks.TestContxt{
+		{name: "content-type为text/plain", fields: fields{ctx: &mocks.TestContxt{
 			HttpHeader: http.Header{
 				"Content-Type": []string{context.PLAINF},
 			},
 		}}, args: args{content: "content"}, want: context.PLAINF, want1: "content"},
-		{name: "content为空", fields: fields{ctx: &mocks.TestContxt{}}, args: args{content: ""}, want: context.PLAINF, want1: ""},
-		{name: "content为", fields: fields{ctx: &mocks.TestContxt{
+		{name: "content-type非text/plain,content为空", fields: fields{ctx: &mocks.TestContxt{}}, args: args{content: ""}, want: context.PLAINF, want1: ""},
+		{name: "content-type非text/plain,content非字符串/布尔值/整型/浮点型/复数", fields: fields{ctx: &mocks.TestContxt{
 			HttpHeader: http.Header{
 				"Content-Type": []string{context.PLAINF},
 			},
-		}}, args: args{content: "content"}, want: context.PLAINF, want1: "content"},
+		}}, args: args{content: []string{"content1", "content2"}}, want: context.PLAINF, want1: "[content1 content2]"},
+		{name: "content不为空,content-type为空", fields: fields{ctx: &mocks.TestContxt{}},
+			args: args{content: map[string]string{"key": "value"}}, want: context.JSONF, want1: `{"key":"value"}`},
+		{name: "content非json/xml字符串,content-type为空或者text/plain", fields: fields{ctx: &mocks.TestContxt{}},
+			args: args{content: "content"}, want: context.PLAINF, want1: "content"},
+		{name: "content为json字符串", fields: fields{ctx: &mocks.TestContxt{}},
+			args: args{content: `{"key":"value"}`}, want: context.JSONF, want1: `{"key":"value"}`},
+		{name: "content为xml字符串", fields: fields{ctx: &mocks.TestContxt{}},
+			args: args{content: "<?xml><key>value<key/><xml/>"}, want: context.XMLF, want1: "<?xml><key>value<key/><xml/>"},
+		{name: "content为html字符串且content-type为text/html", fields: fields{ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.HTMLF},
+			},
+		}}, args: args{content: "<!DOCTYPE html><html></html>"}, want: context.HTMLF, want1: "<!DOCTYPE html><html></html>"},
+		{name: "content非json/xml/字符串,content-type为text/yaml", fields: fields{ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.YAMLF},
+			},
+		}}, args: args{content: "content"}, want: context.YAMLF, want1: "content"},
+		{name: "content非json/xml/html字符串,content-type非空,text/yaml,text/plain", fields: fields{ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.XMLF},
+			},
+		}}, args: args{content: "content"}, want: context.XMLF, want1: "content"},
+		{name: "content为布尔值,content-type为空", fields: fields{ctx: &mocks.TestContxt{}},
+			args: args{content: false}, want: context.PLAINF, want1: "false"},
+		{name: "content为布尔值,content-type不为空", fields: fields{ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.JSONF},
+			},
+		}},
+			args: args{content: false}, want: context.JSONF, want1: "false"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
