@@ -46,10 +46,7 @@ func (b *BasicAuth) Verify(authValue string) (string, bool) {
 }
 
 //GetRealm 获取认证域
-func (b *BasicAuth) GetRealm(realm string) string {
-	if realm == "" {
-		realm = "Authorization Required"
-	}
+func (b *BasicAuth) GetRealm() string {
 	return "Basic realm=" + strconv.Quote("Authorization Required")
 }
 

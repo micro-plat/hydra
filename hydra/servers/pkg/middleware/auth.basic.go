@@ -9,11 +9,11 @@ const authUserKey = "userName"
 
 //BasicAuth  http basic认证
 func BasicAuth() Handler {
-	return BasicAuthForRealm("")
+	return BasicAuthForRealm()
 }
 
 //BasicAuthForRealm http basic认证
-func BasicAuthForRealm(realm string) Handler {
+func BasicAuthForRealm() Handler {
 	return func(ctx IMiddleContext) {
 
 		basic := ctx.ServerConf().GetBasicConf()
@@ -39,7 +39,7 @@ func BasicAuthForRealm(realm string) Handler {
 			return
 		}
 
-		ctx.Response().Header("WWW-Authenticate", basic.GetRealm(realm))
+		ctx.Response().Header("WWW-Authenticate", basic.GetRealm())
 		ctx.Response().Abort(http.StatusUnauthorized, errors.New("未提供验证信息"))
 		return
 
