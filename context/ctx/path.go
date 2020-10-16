@@ -1,7 +1,6 @@
 package ctx
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -38,7 +37,6 @@ func (c *rpath) GetMethod() string {
 
 //GetRouter 获取路由信息
 func (c *rpath) GetRouter() *router.Router {
-	fmt.Println("xxxxxxx",c.serverConf.GetRouterConf())
 	switch c.serverConf.GetMainConf().GetServerType() {
 	case global.API, global.Web, global.WS:
 		return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
