@@ -51,6 +51,24 @@ func Tf(t *testing.T, result bool, format string, args ...interface{}) {
 	tt(t, result, 1, fmt.Sprintf(format, args...))
 }
 
+func IsNil(t *testing.T, ext bool, got interface{}, args ...interface{}) {
+	fn := func() {
+		if len(args) > 0 {
+			t.Error("!", " -", fmt.Sprint(args...))
+		}
+	}
+	assert(t, (got == nil) == ext, fn, 1)
+}
+
+func IsNilf(t *testing.T, ext bool, got interface{}, format string, args ...interface{}) {
+	fn := func() {
+		if len(args) > 0 {
+			t.Error("!", " -", fmt.Sprint(args...))
+		}
+	}
+	assert(t, (got == nil) == ext, fn, 1)
+}
+
 func Equal(t *testing.T, exp, got interface{}, args ...interface{}) {
 	equal(t, exp, got, 1, args...)
 }
@@ -64,6 +82,16 @@ func NotEqual(t *testing.T, exp, got interface{}, args ...interface{}) {
 		t.Errorf("!  Unexpected: <%#v>", exp)
 		if len(args) > 0 {
 			t.Error("!", " -", fmt.Sprint(args...))
+		}
+	}
+	result := !reflect.DeepEqual(exp, got)
+	assert(t, result, fn, 1)
+}
+func NotEqualf(t *testing.T, exp, got interface{}, format string, args ...interface{}) {
+	fn := func() {
+		t.Errorf("!  Unexpected: <%#v>", exp)
+		if len(args) > 0 {
+			t.Error("!", " -", fmt.Sprintf(format, args...))
 		}
 	}
 	result := !reflect.DeepEqual(exp, got)

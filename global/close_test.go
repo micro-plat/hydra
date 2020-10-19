@@ -3,41 +3,55 @@ package global
 import (
 	"sync"
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func Test_global_Close(t *testing.T) {
-	type fields struct {
-		isClose bool
-		close   chan struct{}
+	Clear := func() {
+		closers = nil
 	}
-	tests := []struct {
-		name   string
-		fields fields
+	testcases := []struct {
+		name      string
+		closer    *mockClose
+		expectLen int
 	}{
-		{
-			name: "test1-重复调用",
-			fields: fields{
-				isClose: true,
-				close:   make(chan struct{}),
-			},
-		},
-		// TODO: Add test cases.
+		{name: "存在closer", closer: &mockClose{}, expectLen: 1},
+		{name: "没有closer", closer: nil, expectLen: 0},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &global{
-				isClose: tt.fields.isClose,
-				close:   tt.fields.close,
-			}
-			m.Close()
-			m.Close()
-		})
+
+	for _, tt := range testcases {
+		Clear()
+		m := &global{
+			isClose: false,
+			close:   make(chan struct{}),
+		}
+		if tt.closer != nil {
+			m.AddCloser(tt.closer)
+		}
+		m.Close()
+
+		assert.Equalf(t, len(closers), tt.expectLen, tt.name)
 	}
+
 }
 
-type mockClose struct{}
+func Test_global_Close_repeat(t *testing.T) {
+	//测试close 重复调用
+	m := &global{
+		isClose: false,
+		close:   make(chan struct{}),
+	}
+	m.Close() //第一次
+	m.Close() //第二次
+}
 
-func (mockClose) Close() error {
+type mockClose struct {
+	isClose bool
+}
+
+func (c *mockClose) Close() error {
+	c.isClose = true
 	return nil
 }
 
@@ -53,51 +67,26 @@ func Test_global_AddCloser(t *testing.T) {
 		closers = nil
 	}
 
-	t.Run("正常的io.Closer", func(t *testing.T) {
+	testcases := []struct {
+		name    string
+		closer  []interface{}
+		wantLen int
+	}{
+		{name: "正常的io.Closer", closer: []interface{}{&mockClose{}}, wantLen: 1},
+		{name: "正常的closeHandle", closer: []interface{}{closeHandle(func() (err error) { return })}, wantLen: 1},
+		{name: "正常的io.Closer+closeHandle", closer: []interface{}{&mockClose{}, closeHandle(func() (err error) { return })}, wantLen: 2},
+		{name: "函数签名不匹配io.Closer", closer: []interface{}{&mockCloseNotMatch{}}, wantLen: 0},
+		{name: "函数签名不匹配closeHandle", closer: []interface{}{func(x int) (err error) { return }}, wantLen: 0},
+	}
+
+	for _, tt := range testcases {
 		lock.Lock()
-		defer lock.Unlock()
 		Clear()
 		m := &global{}
-		m.AddCloser(&mockClose{})
-		t.Log("-----", len(closers))
-		if len(closers) != 1 {
-			t.Errorf("正常的io.Closer未正常添加进去;expect:%d,actual:%d", 1, len(closers))
+		for _, c := range tt.closer {
+			m.AddCloser(c)
 		}
-	})
-
-	t.Run("正常的closeHandle", func(t *testing.T) {
-		lock.Lock()
-		defer lock.Unlock()
-		closers = nil
-		m := &global{}
-		m.AddCloser(closeHandle(func() (err error) { return }))
-		t.Log("-----", len(closers))
-		if len(closers) != 1 {
-			t.Errorf("正常的closeHandle未正常添加进去;expect:%d,actual:%d", 1, len(closers))
-		}
-	})
-	t.Run("正常的io.Closer+closeHandle", func(t *testing.T) {
-		lock.Lock()
-		defer lock.Unlock()
-		closers = nil
-		m := &global{}
-		m.AddCloser(closeHandle(func() (err error) { return }))
-		m.AddCloser(&mockClose{})
-		t.Log("-----", len(closers))
-		if len(closers) != 2 {
-			t.Errorf("正常的io.Closer+closeHandle未正常添加进去;expect:%d,actual:%d", 2, len(closers))
-		}
-	})
-	t.Run("函数签名不匹配io.Closer和closeHandle", func(t *testing.T) {
-		lock.Lock()
-		defer lock.Unlock()
-		closers = nil
-		m := &global{}
-		m.AddCloser(&mockCloseNotMatch{})
-		m.AddCloser(func(x int) (err error) { return })
-		t.Log("-----", len(closers))
-		if len(closers) != 0 {
-			t.Errorf("函数签名不匹配io.Closer和closeHandle;expect:%d,actual:%d", 0, len(closers))
-		}
-	})
+		assert.Equalf(t, tt.wantLen, len(closers), tt.name)
+		lock.Unlock()
+	}
 }
