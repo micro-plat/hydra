@@ -8,13 +8,13 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 )
 
-type auth struct {
+type Auth struct {
 	request  interface{}
 	response interface{}
 }
 
 //Response  用户响应的认证信息
-func (c *auth) Response(v ...interface{}) interface{} {
+func (c *Auth) Response(v ...interface{}) interface{} {
 	if len(v) > 0 {
 		c.response = v[0]
 	}
@@ -22,7 +22,7 @@ func (c *auth) Response(v ...interface{}) interface{} {
 }
 
 //Request  用户请求的认证信息
-func (c *auth) Request(v ...interface{}) interface{} {
+func (c *Auth) Request(v ...interface{}) interface{} {
 	if len(v) > 0 {
 		c.request = v[0]
 	}
@@ -30,7 +30,7 @@ func (c *auth) Request(v ...interface{}) interface{} {
 }
 
 //Bind 绑定用户信息
-func (c *auth) Bind(out interface{}) {
+func (c *Auth) Bind(out interface{}) {
 	if c.request == nil || reflect.ValueOf(c.request).IsNil() {
 		panic(errs.NewError(401, "请求中未包含用户信息,用户未登录"))
 	}

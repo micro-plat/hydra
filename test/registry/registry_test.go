@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/registry"
 	_ "github.com/micro-plat/hydra/registry/registry/etcd"
@@ -13,7 +13,7 @@ import (
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 	"github.com/micro-plat/lib4go/logger"
 
-	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 )
 
@@ -76,25 +76,12 @@ func TestParse(t *testing.T) {
 			wantRaddr: []string{"192.168.0.101:6379"}, wantU: "root", wantP: "123456", wantErr: false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotProto, gotRaddr, gotU, gotP, err := registry.Parse(tt.args.address)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotProto != tt.wantProto {
-				t.Errorf("Parse() gotProto = %v, want %v", gotProto, tt.wantProto)
-			}
-			if !reflect.DeepEqual(gotRaddr, tt.wantRaddr) {
-				t.Errorf("Parse() gotRaddr = %v, want %v", gotRaddr, tt.wantRaddr)
-			}
-			if gotU != tt.wantU {
-				t.Errorf("Parse() gotU = %v, want %v", gotU, tt.wantU)
-			}
-			if gotP != tt.wantP {
-				t.Errorf("Parse() gotP = %v, want %v", gotP, tt.wantP)
-			}
-		})
+		gotProto, gotRaddr, gotU, gotP, err := registry.Parse(tt.args.address)
+		assert.Equal(t, tt.wantErr, err != nil, tt.name)
+		assert.Equal(t, tt.wantProto, gotProto, tt.name)
+		assert.Equal(t, tt.wantRaddr, gotRaddr, tt.name)
+		assert.Equal(t, tt.wantU, gotU, tt.name)
+		assert.Equal(t, tt.wantP, gotP, tt.name)
 	}
 }
 
@@ -114,20 +101,13 @@ func TestJoin(t *testing.T) {
 		{name: "地址拼接", args: args{elem: []string{"..", "", "\\", "c/"}}, want: "/../c"},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := registry.Join(tt.args.elem...); got != tt.want {
-				t.Errorf("Join() = %v, want %v", got, tt.want)
-			}
-		})
+		got := registry.Join(tt.args.elem...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
 func TestNewRegistry(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
-	meta := conf.NewMeta()
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, meta).GetRequestID())
+
 	type args struct {
 		address string
 	}
@@ -142,21 +122,19 @@ func TestNewRegistry(t *testing.T) {
 		{name: "获取lm的注册中心", args: args{address: "lm://."}, wantErr: false},
 		{name: "获取fs的注册中心", args: args{address: "fs://../"}, wantErr: true, err: "配置文件不存在:../registry.test.conf.toml stat ../registry.test.conf.toml: no such file or directory"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
 
-			gotR, err := registry.NewRegistry(tt.args.address, log)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewRegistry() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if err != nil && tt.wantErr && err.Error() != tt.err {
-				t.Errorf("NewRegistry() error = %v, wantErr %v", err.Error(), tt.err)
-				return
-			}
-			if !reflect.DeepEqual(gotR, tt.wantR) {
-				t.Errorf("NewRegistry() = %v, want %v", gotR, tt.wantR)
-			}
-		})
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+	meta := conf.NewMeta()
+	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, meta).GetRequestID())
+
+	for _, tt := range tests {
+		gotR, err := registry.NewRegistry(tt.args.address, log)
+		assert.Equal(t, tt.wantErr, err != nil, tt.name)
+		if err != nil && tt.wantErr {
+			assert.Equal(t, tt.err, err.Error(), tt.name)
+		}
+		assert.Equal(t, tt.wantR, gotR, tt.name)
 	}
 }
