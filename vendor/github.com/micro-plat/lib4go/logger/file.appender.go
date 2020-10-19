@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -19,7 +20,7 @@ func NewFileAppender() *FileAppender {
 	a := &FileAppender{
 		done:    make(chan struct{}),
 		writers: cmap.New(6),
-		ticker:  time.NewTicker(time.Minute * 10),
+		ticker:  time.NewTicker(time.Minute * 1),
 	}
 	go a.clean()
 	return a
@@ -42,6 +43,8 @@ EXIT:
 		case <-a.done:
 			break EXIT
 		case <-a.ticker.C:
+			fmt.Println("ticker.c")
+
 		LOOP:
 			for {
 				select {
@@ -49,8 +52,10 @@ EXIT:
 					break LOOP
 				case v, ok := <-a.writers.IterBuffered():
 					if !ok {
+						fmt.Println("!ok")
 						break LOOP
 					}
+					fmt.Println("ok")
 					w := v.Val.(*writer)
 					if time.Since(w.lastWrite) < 5*time.Minute {
 						w.Write(EndWriteEvent) //向日志发送结速写入事件
