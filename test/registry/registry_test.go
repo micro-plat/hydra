@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/registry"
-	_ "github.com/micro-plat/hydra/registry/registry/etcd"
+	//_ "github.com/micro-plat/hydra/registry/registry/etcd"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	_ "github.com/micro-plat/hydra/registry/registry/redis"
