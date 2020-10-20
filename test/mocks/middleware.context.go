@@ -191,5 +191,23 @@ func (res *MockResponse) GetFinalResponse() (int, string) {
 
 //Flush 将当前内容写入响应流
 func (res *MockResponse) Flush() {
+}
 
+var _ http.ResponseWriter = &MockResponseWriter{}
+
+type MockResponseWriter struct {
+	ResponseHeader http.Header
+	ContentBytes   []byte
+	StatusCode     int
+}
+
+func (w *MockResponseWriter) Header() http.Header {
+	return w.ResponseHeader
+}
+func (w *MockResponseWriter) Write(bytes []byte) (int, error) {
+	w.ContentBytes = bytes
+	return w.StatusCode, nil
+}
+func (w *MockResponseWriter) WriteHeader(statusCode int) {
+	w.StatusCode = statusCode
 }
