@@ -1,9 +1,5 @@
 package global
 
-import (
-	"fmt"
-)
-
 var funcs = make([]func() error, 0, 1)
 
 //OnReady 注册后处理函数，函数将在系统准备好后执行
@@ -22,8 +18,7 @@ func OnReady(fs ...interface{}) {
 			hasMatchType = true
 			nfunc = fx
 		}
- 		if !hasMatchType {
-			fmt.Println("panic:...")
+		if !hasMatchType {
 			panic("函数签名格式不正确，支持的格式有func(){} 或 func()error{}")
 		}
 
