@@ -42,6 +42,7 @@
 
 - 20+线上项目实践经验
 
+
 ### 示例
 
 #### 一. api 示例
@@ -96,10 +97,14 @@ go install hello
 4.  测试服务
 
 ```sh
-curl http://localhost:8090/hello
+curl http://localhost:8090/api
 
 {"data":"hello world"}
 ```
+
+> 设置环境变量 GOPROXY="https://goproxy.cn"  可加快包下载速度 
+
+
 
 #### 二. RPC 示例
 
