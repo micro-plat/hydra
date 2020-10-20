@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/micro-plat/hydra/global"
 )
@@ -12,8 +11,9 @@ func Recovery() Handler {
 	return func(ctx IMiddleContext) {
 		defer func() {
 			if err := recover(); err != nil {
-				ctx.Log().Errorf("[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
-				ctx.Response().Render(http.StatusInternalServerError, fmt.Sprintf("%v", err), "")
+				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
+				ctx.Response().Render(204, fmt.Sprintf("%v", err), "")
+				ctx.Response().Flush()
 			}
 		}()
 		ctx.Next()

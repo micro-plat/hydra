@@ -29,7 +29,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.APIKeyAuth().GinFunc())
 	s.engine.Use(middleware.RASAuth().GinFunc())
 	s.engine.Use(middleware.JwtAuth().GinFunc()) //jwt安全认证
- 
+
 	middleware.AddMiddlewareHook(httpmiddlewares, func(item middleware.Handler) {
 		s.engine.Use(item.GinFunc())
 	})

@@ -74,7 +74,7 @@ func GetConf(cnf conf.IMainConf) *APIKeyAuth {
 		panic(fmt.Errorf("apikey配置有误:%v", err))
 	}
 	if b, err := govalidator.ValidateStruct(&fsa); !b {
-		panic(fmt.Errorf("apikey配置有误:%v", err))
+		panic(fmt.Errorf("apikey配置有误1:%v", err))
 	}
 	fsa.PathMatch = conf.NewPathMatch(fsa.Excludes...)
 	return &fsa

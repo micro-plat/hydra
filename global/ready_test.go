@@ -30,7 +30,7 @@ func TestOnReady_Normal(t *testing.T) {
 					func() {},
 				},
 			},
-			wantLen: 0,
+			wantLen: 1,
 		},
 		{
 			name:    "参数类型为func()-isReady=true,noerror",
@@ -41,7 +41,7 @@ func TestOnReady_Normal(t *testing.T) {
 					func() {},
 				},
 			},
-			wantLen: 1,
+			wantLen: 0,
 		},
 		{
 			name:    "参数类型为func()error-isReady=false,noerror",
@@ -74,17 +74,17 @@ func TestOnReady_Normal(t *testing.T) {
 					func() error { return errors.New("error") },
 				},
 			},
-			wantLen: 0,
+			wantLen: 1,
 		},
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		lock.Lock()
-		defer lock.Unlock()
 		isReady = tt.isReady
 		funcs = tt.funcs
 		OnReady(tt.args.fs...)
 		assert.Equal(t, tt.wantLen, len(funcs), tt.name)
+		lock.Unlock()
 	}
 }
 
@@ -125,10 +125,10 @@ func TestOnReady_Panic(t *testing.T) {
 	for _, tt := range tests {
 		assert.Panic(t, tt.wantPanic, func() {
 			lock.Lock()
-			defer lock.Unlock()
 			isReady = tt.isReady
 			funcs = tt.funcs
 			OnReady(tt.args.fs...)
+			lock.Unlock()
 		}, tt.name)
 	}
 }

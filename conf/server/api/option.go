@@ -40,7 +40,7 @@ func WithEnable() Option {
 }
 
 //WithDNS 设置请求域名
-func WithDNS(host string, ip ...string) Option {
+func WithDNS(ip ...string) Option {
 	return func(a *Server) {
 		if len(ip) > 0 {
 			a.Domain = ip[0]

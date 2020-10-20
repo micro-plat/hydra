@@ -6,7 +6,6 @@ time:2020-10-15
 package conf
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/api"
@@ -14,48 +13,52 @@ import (
 	"github.com/micro-plat/hydra/test/mocks"
 )
 
-func TestNew(t *testing.T) {
-	type args struct {
+func TestAPINew(t *testing.T) {
+	tests := []struct {
+		name    string
 		address string
 		opts    []api.Option
-	}
-	tests := []struct {
-		name string
-		args args
-		want *api.Server
+		want    *api.Server
 	}{
-		{name: "默认初始化", args: args{}, want: &api.Server{}},
-		{name: "设置address初始化", args: args{address: ":8080"}, want: &api.Server{Address: ":8080"}},
-		{name: "设置option初始化", args: args{opts: []api.Option{api.WithTrace(), api.WithDNS("host1", "ip1"), api.WithHeaderReadTimeout(10), api.WithTimeout(11, 12)}},
-			want: &api.Server{RTimeout: 11, WTimeout: 12, RHTimeout: 10, Host: "host1", Domain: "ip1", Trace: true}},
-		{name: "设置disable初始化", args: args{opts: []api.Option{api.WithDisable()}}, want: &api.Server{Status: "stop"}},
-		{name: "设置Enable初始化", args: args{opts: []api.Option{api.WithEnable()}}, want: &api.Server{Status: "start"}},
+		{name: "默认初始化", want: &api.Server{}},
+		{name: "设置address初始化", address: ":8080", want: &api.Server{Address: ":8080"}},
+		{name: "设置option初始化", opts: []api.Option{api.WithTrace(), api.WithDNS("ip1"), api.WithHeaderReadTimeout(10), api.WithTimeout(11, 12)},
+			want: &api.Server{RTimeout: 11, WTimeout: 12, RHTimeout: 10, Domain: "ip1", Trace: true}},
+		{name: "设置disable初始化", opts: []api.Option{api.WithDisable()}, want: &api.Server{Status: "stop"}},
+		{name: "设置Enable初始化", opts: []api.Option{api.WithEnable()}, want: &api.Server{Status: "start"}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := api.New(tt.args.address, tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("New() = %v, want %v", got, tt.want)
-			}
-		})
+		got := api.New(tt.address, tt.opts...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
 func TestAPIGetConf(t *testing.T) {
-	conf := mocks.NewConfBy("hydar", "apiconftest") //构建对象
-	wantC := api.New(":8081", api.WithHeaderReadTimeout(30))
-	conf.API(":8081", api.WithHeaderReadTimeout(30))
-	got, err := api.GetConf(conf.GetAPIConf().GetMainConf())
-	if err != nil {
-		t.Errorf("apiGetConf 获取配置对对象失败,err: %v", err)
+	type test struct {
+		name string
+		opts []api.Option
+		want *api.Server
 	}
-	assert.Equal(t, got, wantC, "检查对象是否满足预期")
-}
 
-func TestAPIGetConf1(t *testing.T) {
-	conf := mocks.NewConfBy("hydar", "apiconftest") //构建对象
-	conf.CRON()
-	_, err := api.GetConf(conf.GetCronConf().GetMainConf())
-	if err == nil {
-		t.Errorf("apiGetConf 获取怕配置不能成功")
+	conf := mocks.NewConf()
+	//getconf的address默认值是8080
+	test1 := test{name: "节点不存在,获取默认对象", opts: []api.Option{}, want: &api.Server{Address: ":8080"}}
+	obj, err := api.GetConf(conf.GetAPIConf().GetMainConf())
+	assert.Equal(t, nil, err, test1.name+",err")
+	assert.Equal(t, test1.want, obj, test1.name)
+
+	tests := []test{
+		{name: "节点为空,获取默认对象", opts: []api.Option{}, want: api.New(":8080")},
+		{name: "正常对象获取",
+			opts: []api.Option{api.WithTrace(), api.WithDNS("ip1"), api.WithHeaderReadTimeout(10), api.WithTimeout(11, 12)},
+			want: api.New(":8080", api.WithTrace(), api.WithDNS("ip1"), api.WithHeaderReadTimeout(10), api.WithTimeout(11, 12))},
 	}
+	for _, tt := range tests {
+		conf.API(":8080", tt.opts...)
+		obj, err := api.GetConf(conf.GetAPIConf().GetMainConf())
+		assert.Equal(t, nil, err, tt.name+",err")
+		assert.Equal(t, tt.want, obj, tt.name)
+	}
+
+	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }
