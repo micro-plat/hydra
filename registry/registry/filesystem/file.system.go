@@ -26,7 +26,8 @@ type fileSystem struct {
 	lock     sync.RWMutex
 }
 
-func newfileSystem(platName string, systemName string, clusterName string, path string) (*fileSystem, error) {
+//NewFileSystem 构建基于文件系统的注册中心
+func NewFileSystem(platName string, systemName string, clusterName string, path string) (*fileSystem, error) {
 	f := &fileSystem{
 		closeCh: make(chan struct{}),
 		nodes:   make(map[string]string),
@@ -188,7 +189,7 @@ func (z *fsFactory) Create(opts ...r.Option) (r.IRegistry, error) {
 		opts[i](z.opts)
 	}
 
-	return newfileSystem(global.Def.PlatName,
+	return NewFileSystem(global.Def.PlatName,
 		global.Def.SysName,
 		global.Def.ClusterName,
 		filepath.Join(z.opts.Addrs[0], global.Def.LocalConfName))
