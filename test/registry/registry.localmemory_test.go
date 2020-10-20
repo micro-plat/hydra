@@ -231,7 +231,6 @@ func TestWatchChildren(t *testing.T) {
 			err := lm.CreateTempNode(registry.Join(c.path, ch), c.value)
 			assert.Equal(t, nil, err, c.name)
 		}
-
 		//应收到值变化通知
 		select {
 		case v := <-notify:
