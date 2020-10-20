@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"strings"
 	"sync/atomic"
-	"time"
 
-	r "github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/hydra/registry"
 )
 
 func (l *localMemory) CreatePersistentNode(path string, data string) (err error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	list := strings.Split(r.Join(path), "/")
+	l.lock.Lock()
+	list := strings.Split(registry.Format(path), "/")
 	for i := range list {
-		path := r.Join(list[:i]...)
+		path := registry.Join(list[:i]...)
 		if _, ok := l.nodes[path]; !ok {
-			l.nodes[path] = &value{data: "{}", version: int32(time.Now().Nanosecond())}
+			l.nodes[path] = newValue("{}")
 		}
 	}
-	l.nodes[r.Join(path)] = &value{data: data, version: int32(time.Now().Nanosecond())}
-	go l.notifyParentChange(path)
+	l.nodes[registry.Format(path)] = newValue(data)
+	l.lock.Unlock()
+
+	l.notifyParentChange(path)
 	return nil
 }
 func (l *localMemory) CreateTempNode(path string, data string) (err error) {

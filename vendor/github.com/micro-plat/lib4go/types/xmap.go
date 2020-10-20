@@ -362,34 +362,26 @@ func (q XMaps) Get(i int) XMap {
 
 //ParseBool 将字符串转换为bool值
 func ParseBool(val interface{}) (value bool, err error) {
-	if val != nil {
-		switch v := val.(type) {
-		case bool:
-			return v, nil
-		case string:
-			switch v {
-			case "1", "t", "T", "true", "TRUE", "True", "YES", "yes", "Yes", "Y", "y", "ON", "on", "On":
-				return true, nil
-			case "0", "f", "F", "false", "FALSE", "False", "NO", "no", "No", "N", "n", "OFF", "off", "Off":
-				return false, nil
-			}
-		case int8, int32, int64:
-			strV := fmt.Sprintf("%s", v)
-			if strV == "1" {
-				return true, nil
-			} else if strV == "0" {
-				return false, nil
-			}
-		case float64:
-			if v == 1 {
-				return true, nil
-			} else if v == 0 {
-				return false, nil
-			}
-		}
-		return false, fmt.Errorf("parsing %q: invalid syntax", val)
+	if val == nil {
+		return false, fmt.Errorf("parsing <nil>: invalid syntax")
 	}
-	return false, fmt.Errorf("parsing <nil>: invalid syntax")
+	switch v := val.(type) {
+	case bool:
+		return v, nil
+	case string:
+		switch strings.ToUpper(v) {
+		case "1", "T", "TRUE", "YES", "Y", "ON":
+			return true, nil
+		case "0", "F", "FALSE", "NO", "N", "OFF":
+			return false, nil
+		}
+	case int8, int32, int64, float32, float64:
+		if v == 0 {
+			return false, nil
+		}
+		return true, nil
+	}
+	return false, fmt.Errorf("parsing %q: invalid syntax", val)
 }
 
 //Copy 拷贝一个新的map,并追加新的键值对

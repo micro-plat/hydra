@@ -16,14 +16,14 @@ type user struct {
 	meta      conf.IMeta
 	ctx       context.IInnerContext
 	requestID string
-	auth      *auth
+	auth      *Auth
 	jwtToken  interface{}
 }
 
 func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 	return &user{
 		ctx:  ctx,
-		auth: &auth{},
+		auth: &Auth{},
 		meta: meta,
 	}
 }
@@ -32,7 +32,9 @@ func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 func (c *user) GetRequestID() string {
 	ids := c.ctx.GetHeaders()[xRequestID]
 	c.requestID = types.GetStringByIndex(ids, 0, c.requestID)
-	c.requestID = types.GetString(c.requestID, utility.GetGUID()[0:9])
+	if c.requestID == "" {
+		c.requestID = utility.GetGUID()[0:9]
+	}
 	return c.requestID
 }
 

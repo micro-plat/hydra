@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	h "github.com/micro-plat/hydra/hydra/servers/http"
+	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 )
 
@@ -21,10 +22,8 @@ func TestNewCtx(t *testing.T) {
 			t.Errorf("recover:NewCtx() = %v", r)
 		}
 	}()
-	if got := ctx.NewCtx(&mocks.TestContxt{}, h.API); got == nil {
-		t.Errorf("NewCtx() got nil")
-		return
-	}
+	got := ctx.NewCtx(&mocks.TestContxt{}, h.API)
+	assert.NotEqual(t, nil, got, "获取ctx对象")
 }
 
 func TestCtx_Close(t *testing.T) {
