@@ -1,4 +1,4 @@
-package hydra
+package mocks
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 )
 
-type mockMiddleContext struct {
+type MiddleContext struct {
 	MockNext       func()
 	MockMeta       conf.IMeta
 	MockUser       *MockUser
@@ -24,58 +24,58 @@ type mockMiddleContext struct {
 	MockServerConf server.IServerConf
 }
 
-func (ctx *mockMiddleContext) Next() {
+func (ctx *MiddleContext) Next() {
 	if ctx.MockNext != nil {
 		ctx.MockNext()
 	}
 }
 
-func (ctx *mockMiddleContext) Meta() conf.IMeta {
+func (ctx *MiddleContext) Meta() conf.IMeta {
 	return ctx.MockMeta
 }
 
 //Request 请求信息
-func (ctx *mockMiddleContext) Request() extcontext.IRequest {
+func (ctx *MiddleContext) Request() extcontext.IRequest {
 	return ctx.MockRequest
 }
 
 //Response 响应信息
-func (ctx *mockMiddleContext) Response() extcontext.IResponse {
+func (ctx *MiddleContext) Response() extcontext.IResponse {
 	return ctx.MockResponse
 }
 
 //Context 控制超时的Context
-func (ctx *mockMiddleContext) Context() context.Context {
+func (ctx *MiddleContext) Context() context.Context {
 	return context.Background()
 }
 
 //ServerConf 服务器配置
-func (ctx *mockMiddleContext) ServerConf() server.IServerConf {
+func (ctx *MiddleContext) ServerConf() server.IServerConf {
 	return ctx.MockServerConf
 }
 
 //TmplFuncs 模板函数列表
-func (ctx *mockMiddleContext) TmplFuncs() extcontext.TFuncs {
+func (ctx *MiddleContext) TmplFuncs() extcontext.TFuncs {
 	return ctx.MockTFuncs
 }
 
 //User 用户信息
-func (ctx *mockMiddleContext) User() extcontext.IUser {
+func (ctx *MiddleContext) User() extcontext.IUser {
 	return ctx.MockUser
 }
 
 //Log 日志组件
-func (ctx *mockMiddleContext) Log() logger.ILogger {
+func (ctx *MiddleContext) Log() logger.ILogger {
 	return logger.Nil()
 }
 
 //Close 关闭并释放资源
-func (ctx *mockMiddleContext) Close() {}
+func (ctx *MiddleContext) Close() {}
 
-func (ctx *mockMiddleContext) Trace(...interface{}) {}
+func (ctx *MiddleContext) Trace(...interface{}) {}
 
 //GetHttpReqResp GetHttpReqResp
-func (ctx *mockMiddleContext) GetHttpReqResp() (*http.Request, http.ResponseWriter) {
+func (ctx *MiddleContext) GetHttpReqResp() (*http.Request, http.ResponseWriter) {
 	return ctx.HttpRequest, ctx.HttpResponse
 }
 

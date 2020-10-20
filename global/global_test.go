@@ -2,8 +2,9 @@ package global
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func Test_global_GetLongAppName(t *testing.T) {
@@ -16,7 +17,20 @@ func Test_global_GetLongAppName(t *testing.T) {
 		args args
 		want string
 	}{
-
+		{
+			name: "测试未传入名称-nil",
+			args: args{
+				n: nil,
+			},
+			want: "ro-plat_hydra_global_global.test",
+		},
+		{
+			name: "测试未传入名称",
+			args: args{
+				n: []string{},
+			},
+			want: "ro-plat_hydra_global_global.test",
+		},
 		{
 			name: "测试有传入名称-短",
 			args: args{
@@ -31,21 +45,10 @@ func Test_global_GetLongAppName(t *testing.T) {
 			},
 			want: "me123456789012345678901234567890",
 		},
-		{
-			name: "测试未传入名称",
-			args: args{
-				n: []string{},
-			},
-			want: "ro-plat_hydra_global_global.test",
-		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &global{}
-			if got := m.GetLongAppName(tt.args.n...); got != tt.want {
-				t.Errorf("global.GetLongAppName() = %v, want %v", got, tt.want)
-			}
-		})
+		m := &global{}
+		assert.Equal(t, tt.want, m.GetLongAppName(tt.args.n...), tt.name)
 	}
 }
 
@@ -96,14 +99,10 @@ func Test_global_HasServerType(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &global{
-				ServerTypes: tt.fields.ServerTypes,
-			}
-			if got := m.HasServerType(tt.args.tp); got != tt.want {
-				t.Errorf("global.HasServerType() = %v, want %v", got, tt.want)
-			}
-		})
+		m := &global{
+			ServerTypes: tt.fields.ServerTypes,
+		}
+		assert.Equal(t, tt.want, m.HasServerType(tt.args.tp), tt.name)
 	}
 }
 
@@ -190,25 +189,13 @@ func Test_parsePath(t *testing.T) {
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotPlatName, gotSystemName, gotServerTypes, gotClusterName, err := parsePath(tt.args.p)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parsePath() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotPlatName != tt.wantPlatName {
-				t.Errorf("parsePath() gotPlatName = %v, want %v", gotPlatName, tt.wantPlatName)
-			}
-			if gotSystemName != tt.wantSystemName {
-				t.Errorf("parsePath() gotSystemName = %v, want %v", gotSystemName, tt.wantSystemName)
-			}
-			if !reflect.DeepEqual(gotServerTypes, tt.wantServerTypes) {
-				t.Errorf("parsePath() gotServerTypes = %v, want %v", gotServerTypes, tt.wantServerTypes)
-			}
-			if gotClusterName != tt.wantClusterName {
-				t.Errorf("parsePath() gotClusterName = %v, want %v", gotClusterName, tt.wantClusterName)
-			}
-		})
+
+		gotPlatName, gotSystemName, gotServerTypes, gotClusterName, err := parsePath(tt.args.p)
+		assert.Equal(t, tt.wantErr, err != nil, tt.name)
+		assert.Equalf(t, tt.wantPlatName, gotPlatName, tt.name+"%s", "PlatName")
+		assert.Equalf(t, tt.wantSystemName, gotSystemName, tt.name+"%s", "SystemName")
+		assert.Equalf(t, tt.wantServerTypes, gotServerTypes, tt.name+"%s", "ServerTypes")
+		assert.Equalf(t, tt.wantClusterName, gotClusterName, tt.name+"%s", "ClusterName")
 	}
 }
 
@@ -228,24 +215,22 @@ func Test_global_check(t *testing.T) {
 		LocalConfName   string
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-		errMsg  string
-		assert  Assert
-		init    Init
+		name         string
+		fields       fields
+		wantErr      bool
+		errMsg       string
+		assertResult Assert
+		initParams   Init
 	}{
 
 		{
 			name:    "RegistryAddr",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.RegistryAddr != FlagVal.RegistryAddr {
-					t.Errorf("RegistryAddr与指定值不相等，expect:%s,actual:%s", FlagVal.RegistryAddr, m.RegistryAddr)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.RegistryAddr, FlagVal.RegistryAddr, "RegistryAddr与指定值不相等，expect:%s,actual:%s", FlagVal.RegistryAddr, m.RegistryAddr)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 			},
 		},
@@ -253,12 +238,10 @@ func Test_global_check(t *testing.T) {
 			name:    "PlatName",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.PlatName != FlagVal.PlatName {
-					t.Errorf("PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.PlatName, FlagVal.PlatName, "PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.PlatName = "PlatName"
 			},
 		},
@@ -266,12 +249,10 @@ func Test_global_check(t *testing.T) {
 			name:    "SysName-不为空",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.SysName != FlagVal.SysName {
-					t.Errorf("SysName与指定值不相等，expect:%s,actual:%s", FlagVal.SysName, m.SysName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.SysName, FlagVal.SysName, "SysName与指定值不相等，expect:%s,actual:%s", FlagVal.SysName, m.SysName)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.SysName = "SysName"
 			},
 		},
@@ -279,12 +260,10 @@ func Test_global_check(t *testing.T) {
 			name:    "SysName-为空",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.SysName != AppName {
-					t.Errorf("SysName与指定值不相等，expect:%s,actual:%s", AppName, m.SysName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.SysName, AppName, "SysName与指定值不相等，expect:%s,actual:%s", AppName, m.SysName)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.SysName = ""
 			},
 		},
@@ -292,16 +271,12 @@ func Test_global_check(t *testing.T) {
 			name:    "ServerTypeNames-单个",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.ServerTypeNames != FlagVal.ServerTypeNames {
-					t.Errorf("ServerTypeNames与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypeNames)
-				}
-				if len(m.ServerTypes) != 1 || m.ServerTypes[0] != "api" {
-					t.Errorf("ServerTypes与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypes[0])
-				}
-
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.ServerTypeNames, FlagVal.ServerTypeNames, "ServerTypeNames与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypeNames)
+				assert.Equalf(t, 1, len(m.ServerTypes), "ServerTypes与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypes[0])
+				assert.Equalf(t, "api", m.ServerTypes[0], "ServerTypes与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypes[0])
 			},
-			init: func() {
+			initParams: func() {
 				ServerTypes = []string{"api"}
 				FlagVal.ServerTypeNames = "api"
 			},
@@ -310,15 +285,11 @@ func Test_global_check(t *testing.T) {
 			name:    "ServerTypeNames-多个",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.ServerTypeNames != FlagVal.ServerTypeNames {
-					t.Errorf("ServerTypeNames与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypeNames)
-				}
-				if len(m.ServerTypes) != 2 {
-					t.Errorf("ServerTypes与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypes)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, m.ServerTypeNames, FlagVal.ServerTypeNames, "ServerTypeNames与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypeNames)
+				assert.Equalf(t, 2, len(m.ServerTypes), "ServerTypes与指定值不相等，expect:%s,actual:%s", FlagVal.ServerTypeNames, m.ServerTypes[0])
 			},
-			init: func() {
+			initParams: func() {
 				ServerTypes = []string{"api", "mqc"}
 				FlagVal.ServerTypeNames = "api-mqc"
 			},
@@ -327,13 +298,13 @@ func Test_global_check(t *testing.T) {
 			name:    "ServerTypeNames-存在不包含",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
+			assertResult: func(t *testing.T, m *global, err error) {
 				expectMsg := fmt.Sprintf("%s不支持，只能是%v", "mqc", ServerTypes)
-				if err == nil || err.Error() != expectMsg {
-					t.Errorf("ServerTypeNames-存在不包含，不包含的用例不通过;expect:%s,actual:%s", expectMsg, err)
-				}
+
+				assert.IsNilf(t, false, err, "ServerTypeNames-存在不包含，不包含的用例不通过;expect:%s,actual:%s", expectMsg, err)
+				assert.Equalf(t, expectMsg, err.Error(), "ServerTypeNames-存在不包含，不包含的用例不通过;expect:%s,actual:%s", expectMsg, err)
 			},
-			init: func() {
+			initParams: func() {
 				ServerTypes = []string{"api"}
 				FlagVal.ServerTypeNames = "api-mqc"
 			},
@@ -349,24 +320,19 @@ func Test_global_check(t *testing.T) {
 				ClusterName:     "ClusterName",
 			},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.RegistryAddr != "RegistryAddr" {
-					t.Errorf("RegistryAddr 与指定值不相等，expect:%s,actual:%s", "RegistryAddr", m.RegistryAddr)
-				}
-				if m.PlatName != "PlatName" {
-					t.Errorf("PlatName 与指定值不相等，expect:%s,actual:%s", "PlatName", m.PlatName)
-				}
-				if m.SysName != "SysName" {
-					t.Errorf("SysName 与指定值不相等，expect:%s,actual:%s", "SysName", m.SysName)
-				}
-				if m.ServerTypeNames != "api-mqc" {
-					t.Errorf("ServerTypeNames 与指定值不相等，expect:%s,actual:%s", "api-mqc", m.ServerTypeNames)
-				}
-				if m.ClusterName != "ClusterName" {
-					t.Errorf("ClusterName 与指定值不相等，expect:%s,actual:%s", "ClusterName", m.ClusterName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+
+				assert.Equalf(t, "RegistryAddr", m.RegistryAddr, "RegistryAddr 与指定值不相等，expect:%s,actual:%s", "RegistryAddr", m.RegistryAddr)
+
+				assert.Equalf(t, "PlatName", m.PlatName, "PlatName 与指定值不相等，expect:%s,actual:%s", "PlatName", m.PlatName)
+
+				assert.Equalf(t, "SysName", m.SysName, "SysName 与指定值不相等，expect:%s,actual:%s", "SysName", m.SysName)
+
+				assert.Equalf(t, "api-mqc", m.ServerTypeNames, "ServerTypeNames 与指定值不相等，expect:%s,actual:%s", "api-mqc", m.ServerTypeNames)
+				assert.Equalf(t, "ClusterName", m.ClusterName, "ClusterName 与指定值不相等，expect:%s,actual:%s", "ClusterName", m.ClusterName)
+
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = ""
 				FlagVal.Name = ""
 				FlagVal.PlatName = ""
@@ -378,27 +344,22 @@ func Test_global_check(t *testing.T) {
 		{
 			name: "Name-不为空",
 			fields: fields{
-				Name: "/platName/sysName/api-mqc/clusterName",
+				Name: "/PlatName/SysName/api-mqc/ClusterName",
 			},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.RegistryAddr != FlagVal.RegistryAddr {
-					t.Errorf("RegistryAddr 与指定值不相等，expect:%s,actual:%s", FlagVal.RegistryAddr, m.RegistryAddr)
-				}
-				if m.PlatName != "platName" {
-					t.Errorf("PlatName 与指定值不相等，expect:%s,actual:%s", "platName", m.PlatName)
-				}
-				if m.SysName != "sysName" {
-					t.Errorf("SysName 与指定值不相等，expect:%s,actual:%s", "sysName", m.SysName)
-				}
-				if len(m.ServerTypes) != 2 {
-					t.Errorf("ServerTypeNames 与指定值不相等，expect:%s,actual:%s", "api-mqc", m.ServerTypeNames)
-				}
-				if m.ClusterName != "clusterName" {
-					t.Errorf("ClusterName 与指定值不相等，expect:%s,actual:%s", "clusterName", m.ClusterName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+
+				assert.Equalf(t, FlagVal.RegistryAddr, m.RegistryAddr, "RegistryAddr 与指定值不相等，expect:%s,actual:%s", FlagVal.RegistryAddr, m.RegistryAddr)
+
+				assert.Equalf(t, "PlatName", m.PlatName, "PlatName 与指定值不相等，expect:%s,actual:%s", "PlatName", m.PlatName)
+
+				assert.Equalf(t, "SysName", m.SysName, "SysName 与指定值不相等，expect:%s,actual:%s", "SysName", m.SysName)
+
+				assert.Equalf(t, []string{"api", "mqc"}, m.ServerTypes, "ServerTypeNames 与指定值不相等，expect:%s,actual:%s", "api-mqc", m.ServerTypeNames)
+				assert.Equalf(t, "ClusterName", m.ClusterName, "ClusterName 与指定值不相等，expect:%s,actual:%s", "ClusterName", m.ClusterName)
+
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 			},
 		},
@@ -408,12 +369,10 @@ func Test_global_check(t *testing.T) {
 				Trace: "cpu",
 			},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if err != nil {
-					t.Errorf("Trace在trace列表内，expect:%s,actual:%s", "nil", err.Error())
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.IsNilf(t, true, err, "Trace在trace列表内，expect:%s,actual:%s", "nil", err)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 				FlagVal.PlatName = "PlatName"
 				FlagVal.SysName = "SysName"
@@ -424,16 +383,16 @@ func Test_global_check(t *testing.T) {
 		{
 			name: "Trace不为空-不在trace列表内",
 			fields: fields{
-				Trace: "xcpu",
+				Trace: "xpu", //不在trace列表
 			},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
+			assertResult: func(t *testing.T, m *global, err error) {
 				expectMsg := fmt.Sprintf("trace名称只能是%v", traces)
-				if err == nil || err.Error() != expectMsg {
-					t.Errorf("Trace不在trace列表内，expect:%s,actual:%s", expectMsg, err.Error())
-				}
+				assert.IsNilf(t, false, err, "Trace不在trace列表内，expect:%s,actual:%s", expectMsg, err.Error())
+				assert.Equalf(t, expectMsg, err.Error(), "Trace不在trace列表内，expect:%s,actual:%s", expectMsg, err.Error())
+
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 				FlagVal.PlatName = "PlatName"
 				FlagVal.SysName = "SysName"
@@ -445,12 +404,10 @@ func Test_global_check(t *testing.T) {
 			name:    "IsDebug=true",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.PlatName == FlagVal.PlatName {
-					t.Errorf("PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.NotEqualf(t, FlagVal.PlatName, m.PlatName, "PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 				FlagVal.PlatName = "PlatName"
 				FlagVal.SysName = "SysName"
@@ -463,12 +420,10 @@ func Test_global_check(t *testing.T) {
 			name:    "IsDebug=false",
 			fields:  fields{},
 			wantErr: false,
-			assert: func(t *testing.T, m *global, err error) {
-				if m.PlatName != FlagVal.PlatName {
-					t.Errorf("PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
-				}
+			assertResult: func(t *testing.T, m *global, err error) {
+				assert.Equalf(t, FlagVal.PlatName, m.PlatName, "PlatName与指定值不相等，expect:%s,actual:%s", FlagVal.PlatName, m.PlatName)
 			},
-			init: func() {
+			initParams: func() {
 				FlagVal.RegistryAddr = "zk://192.168.0.1"
 				FlagVal.PlatName = "PlatName"
 				FlagVal.SysName = "SysName"
@@ -477,25 +432,21 @@ func Test_global_check(t *testing.T) {
 				IsDebug = false
 			},
 		},
-
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &global{
-				RegistryAddr:    tt.fields.RegistryAddr,
-				PlatName:        tt.fields.PlatName,
-				SysName:         tt.fields.SysName,
-				ServerTypes:     tt.fields.ServerTypes,
-				ServerTypeNames: tt.fields.ServerTypeNames,
-				ClusterName:     tt.fields.ClusterName,
-				Name:            tt.fields.Name,
-				Trace:           tt.fields.Trace,
-				LocalConfName:   tt.fields.LocalConfName,
-			}
-			tt.init()
-			err := m.check()
-			tt.assert(t, m, err)
-		})
+		m := &global{
+			RegistryAddr:    tt.fields.RegistryAddr,
+			PlatName:        tt.fields.PlatName,
+			SysName:         tt.fields.SysName,
+			ServerTypes:     tt.fields.ServerTypes,
+			ServerTypeNames: tt.fields.ServerTypeNames,
+			ClusterName:     tt.fields.ClusterName,
+			Name:            tt.fields.Name,
+			Trace:           tt.fields.Trace,
+			LocalConfName:   tt.fields.LocalConfName,
+		}
+		tt.initParams()
+		err := m.check()
+		tt.assertResult(t, m, err)
 	}
 }

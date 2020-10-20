@@ -2,89 +2,59 @@ package global
 
 import (
 	"flag"
-	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 
 	"github.com/urfave/cli"
 )
 
 func Test_newCli(t *testing.T) {
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *ucli
-	}{
-		{
-			name: "创建cli对象",
-			args: args{name: "cli_name"},
-			want: &ucli{
-				Name:  "cli_name",
-				flags: make([]cli.Flag, 0, 1),
-			},
+	assert.Equal(t,
+		&ucli{
+			Name:  "cli_name",
+			flags: make([]cli.Flag, 0, 1),
 		},
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := newCli(tt.args.name); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("newCli() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+		newCli("cli_name"),
+		"创建cli对象",
+	)
 }
 
 func Test_ucli_AddFlag(t *testing.T) {
-	c := newCli("cli_name")
-	if c.Name != "cli_name" {
-		t.Error("newCli name与预期不匹配", c.Name, "cli_name")
-	}
+	expectName := "cli_name"
+	c := newCli(expectName)
 
-	c.AddFlag("Flag_01", "usage1")
+	//测试cli name 与预期是否一致
+	assert.Equal(t, expectName, c.Name, "newCli name与预期不匹配")
 
-	if len(c.flags) != 1 {
-		t.Error("AddFlag 长度与预期不匹配")
-	}
+	//测试添加flag
+	c.AddFlag("-r", "注册中心")
+	assert.Equal(t, 1, len(c.flags), "AddFlag 长度与预期不匹配")
+	assert.Equal(t, "-r", c.flags[0].GetName(), "AddFlag flags.name与预期不匹配")
 
-	if c.flags[0].GetName() != "Flag_01" {
-		t.Error("AddFlag flags.name与预期不匹配", c.flags[0].GetName(), "Flag_01")
-	}
+	//测试重复添加相同的flag
+	c.AddFlag("-r", "注册中心")
+	assert.Equal(t, 1, len(c.flags), "AddFlag 添加重复名称，未去重处理")
 
-	c.AddFlag("Flag_01", "usage1")
-	if len(c.flags) != 1 {
-		t.Error("AddFlag 添加重复名称，未去重处理", len(c.flags), 1)
-	}
 }
 
 func Test_ucli_AddSliceFlag(t *testing.T) {
 	c := newCli("cli_name")
-	if c.Name != "cli_name" {
-		t.Error("newCli name与预期不匹配", c.Name, "cli_name")
-	}
 
-	c.AddSliceFlag("SliceFlag_01", "usage1")
+	//测试添加flag
+	c.AddSliceFlag("-r", "注册中心")
+	assert.Equal(t, 1, len(c.flags), "AddSliceFlag 长度与预期不匹配")
+	assert.Equal(t, "-r", c.flags[0].GetName(), "AddSliceFlag flags.name与预期不匹配")
 
-	if len(c.flags) != 1 {
-		t.Error("AddSliceFlag 长度与预期不匹配")
-	}
-
-	if c.flags[0].GetName() != "SliceFlag_01" {
-		t.Error("AddSliceFlag flags.name与预期不匹配", c.flags[0].GetName(), "SliceFlag_01")
-	}
-
-	c.AddSliceFlag("SliceFlag_01", "usage1")
-	if len(c.flags) != 1 {
-		t.Error("AddSliceFlag 添加重复名称，未去重处理", len(c.flags), 1)
-	}
+	//测试重复添加相同的flag
+	c.AddSliceFlag("-r", "注册中心")
+	assert.Equal(t, 1, len(c.flags), "AddSliceFlag 添加重复名称，未去重处理")
 }
 
 func Test_ucli_GetFlags(t *testing.T) {
 	type fields struct {
-		Name     string
-		flags    []cli.Flag
- 	}
+		flags []cli.Flag
+	}
 	tests := []struct {
 		name   string
 		fields fields
@@ -93,58 +63,51 @@ func Test_ucli_GetFlags(t *testing.T) {
 		{
 			name: "测试GetFlags-相同的Flag类型",
 			fields: fields{
-				Name: "getcliflags1",
 				flags: []cli.Flag{
 					cli.StringFlag{
-						Name: "StringFlag_1",
+						Name: "-r",
 					},
 					cli.StringFlag{
-						Name: "StringFlag_2",
+						Name: "-c",
 					},
 				},
 			},
 			want: []cli.Flag{
 				cli.StringFlag{
-					Name: "StringFlag_1",
+					Name: "-r",
 				},
 				cli.StringFlag{
-					Name: "StringFlag_2",
+					Name: "-c",
 				},
 			},
 		},
 		{
 			name: "测试GetFlags-不同的Flag类型",
 			fields: fields{
-				Name: "getcliflags2",
 				flags: []cli.Flag{
 					cli.StringFlag{
-						Name: "StringFlag_1",
+						Name: "-r",
 					},
 					cli.StringSliceFlag{
-						Name: "StringSliceFlag_1",
+						Name: "-t",
 					},
 				},
 			},
 			want: []cli.Flag{
 				cli.StringFlag{
-					Name: "StringFlag_1",
+					Name: "-r",
 				},
 				cli.StringSliceFlag{
-					Name: "StringSliceFlag_1",
+					Name: "-t",
 				},
 			},
-		}, 
- 	}
+		},
+	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &ucli{
-				Name:     tt.fields.Name,
-				flags:    tt.fields.flags,
- 			}
-			if got := c.GetFlags(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ucli.GetFlags() = %v, want %v", got, tt.want)
-			}
-		})
+		c := &ucli{
+			flags: tt.fields.flags,
+		}
+		assert.Equalf(t, tt.want, c.GetFlags(), tt.name)
 	}
 }
 
@@ -152,24 +115,22 @@ func Test_doCliCallback(t *testing.T) {
 	type args struct {
 		c *cli.Context
 	}
-
+	//构建 cli 的参数
 	app := cli.NewApp()
 	app.Name = "Test_AppName"
 	flags := []cli.Flag{
 		cli.StringFlag{
-			Name: "run",
+			Name: "-r",
 		},
 	}
 	app.Commands = []cli.Command{
 		cli.Command{
-			Name:  "runtest",
+			Name:  "run",
 			Usage: "test RUN command",
 		},
 	}
 
 	app.Flags = flags
-	//app.Commands = append(app.Commands, *app.Command("x")
-
 	set := &flag.FlagSet{}
 
 	tests := []struct {
@@ -180,33 +141,30 @@ func Test_doCliCallback(t *testing.T) {
 		{
 			name: "不存在的command名称-完全包含cmdName",
 			args: args{
-				c: newCtx(app, set, "runtest"),
+				c: newCtx(app, set, "runtest"), //run的完全包含
 			},
 			wantErr: true,
 		},
 		{
 			name: "不存在的command名称-只包含cmdName前缀",
 			args: args{
-				c: newCtx(app, set, "r"),
+				c: newCtx(app, set, "r"), //run的前缀 r
 			},
 			wantErr: false,
 		},
 		{
 			name: "不存在的command名称-完全不包含cmdName",
 			args: args{
-				c: newCtx(app, set, "xxcmd"),
+				c: newCtx(app, set, "nonecmd"),
 			},
 			wantErr: true,
 		},
- 	}
-	t.Log("clis的长度：", len(clis))
+	}
+	//t.Log("clis的长度：", len(clis))
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Log("cmd.Name:", tt.args.c.Command.Name)
-			if err := doCliCallback(tt.args.c); (err != nil) != tt.wantErr {
-				t.Errorf("doCliCallback() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+		//t.Log("cmd.Name:", tt.args.c.Command.Name)
+		err := doCliCallback(tt.args.c)
+		assert.IsNil(t, tt.wantErr, err, tt.name)
 	}
 }
 func newCtx(app *cli.App, set *flag.FlagSet, name string) *cli.Context {
