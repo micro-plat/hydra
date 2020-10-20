@@ -45,7 +45,7 @@ func (c *Client) Get(key string) (string, error) {
 	return string(data.Value), nil
 }
 
-//Decrement 增加变量的值 @bug注释写反
+//Decrement 减少变量的值
 func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 	value, err := strconv.ParseUint(fmt.Sprintf("%d", delta), 10, 64)
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 	return
 }
 
-//Increment 减少变量的值
+//Increment 增加变量的值
 func (c *Client) Increment(key string, delta int64) (n int64, err error) {
 	value, err := strconv.ParseUint(fmt.Sprintf("%d", delta), 10, 64)
 	if err != nil {
@@ -81,13 +81,18 @@ func (c *Client) Increment(key string, delta int64) (n int64, err error) {
 
 //Gets 获取多条数据
 func (c *Client) Gets(key ...string) (r []string, err error) {
+	if len(key) == 0 {
+		return nil, nil
+	}
 	data, err := c.client.GetMulti(key)
 	if err != nil {
 		return nil, err
 	}
-	r = make([]string, len(data))
+	r = make([]string, 0, len(data))
 	for _, v := range key {
-		r = append(r, string(data[v].Value)) //@bug,data返回与key数量不一致,空指针报错
+		if value, ok := data[v]; ok {
+			r = append(r, string(value)) //@bug,data返回与key数量不一致,空指针报错
+		}
 	}
 	return
 }
