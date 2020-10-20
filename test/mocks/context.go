@@ -39,6 +39,12 @@ type TestContxt struct {
 	Routerpath      string
 	Form            url.Values
 	HttpContentType string
+	Doen            bool
+	WrittenStatus   bool
+	StatusCode      int
+	Content         []byte
+	FileStr         string
+	Url             string
 }
 
 func (t *TestContxt) ClientIP() string {
@@ -57,8 +63,9 @@ func (t *TestContxt) GetMethod() string {
 func (t *TestContxt) GetURL() *url.URL {
 	return t.URL
 }
-func (t *TestContxt) Header(string, string) {
-
+func (t *TestContxt) Header(k string, v string) {
+	t.HttpHeader[k] = []string{v}
+	return
 }
 func (t *TestContxt) GetHeaders() http.Header {
 	return t.HttpHeader
@@ -92,16 +99,24 @@ func (t *TestContxt) GetFormValue(k string) (string, bool) {
 	return "", false
 }
 func (t *TestContxt) ContentType() string {
-	return t.HttpContentType
+	if v, ok := t.HttpHeader["Content-Type"]; ok {
+		return v[0]
+	}
+	return ""
 }
-func (t *TestContxt) Abort() {}
+func (t *TestContxt) Abort() {
+	t.Doen = true
+}
 
-func (t *TestContxt) WStatus(int) {}
+func (t *TestContxt) WStatus(s int) {
+	t.StatusCode = s
+	return
+}
 func (t *TestContxt) Status() int {
-	return 0
+	return t.StatusCode
 }
 func (t *TestContxt) Written() bool {
-	return false
+	return t.WrittenStatus
 }
 func (t *TestContxt) WHeader(k string) string {
 	if v, ok := t.HttpHeader[k]; ok {
@@ -109,6 +124,20 @@ func (t *TestContxt) WHeader(k string) string {
 	}
 	return ""
 }
-func (t *TestContxt) File(string)              {}
-func (t *TestContxt) Data(int, string, []byte) {}
-func (t *TestContxt) Redirect(int, string)     {}
+func (t *TestContxt) File(s string) {
+	t.WrittenStatus = true
+	t.FileStr = s
+}
+func (t *TestContxt) Data(s int, ctp string, c []byte) {
+	t.WrittenStatus = true
+	t.StatusCode = s
+	t.HttpHeader["Content-Type"] = []string{ctp}
+	t.Content = c
+	return
+}
+func (t *TestContxt) Redirect(s int, u string) {
+	t.StatusCode = s
+	t.Url = u
+	t.WrittenStatus = true
+	return
+}

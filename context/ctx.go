@@ -141,8 +141,8 @@ type IResponse interface {
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
 
-	//Render 修改最终渲染内容
-	Render(status int, content string, ctp string)
+	//WriteFinal 修改最终渲染内容
+	WriteFinal(status int, content string, ctp string)
 
 	//Write 向响应流中写入状态码与内容(不会立即写入)
 	Write(s int, v interface{}) error
@@ -193,7 +193,6 @@ type IUser interface {
 	//Auth 认证信息
 	Auth() IAuth
 }
- 
 
 //IContext 用于中间件处理的上下文管理
 type IContext interface {
@@ -223,7 +222,7 @@ type IContext interface {
 	Log() logger.ILogger
 
 	//Close 关闭并释放资源
-	Close() 
+	Close()
 }
 
 //TFuncs 用于模板翻译的函数列表

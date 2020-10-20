@@ -63,19 +63,21 @@ func (c *response) ContentType(v string) {
 //Abort 根据错误码与错误消息终止应用
 func (c *response) Abort(s int, err error) {
 	c.Write(s, err)
+	c.Flush()
 	c.ctx.Abort()
 }
 
 //Stop 停止当前服务执行
 func (c *response) Stop(s int) {
-	c.noneedWrite = true
-	c.final.status = s
+	//c.noneedWrite = true
+	c.Write(s, "")
+	c.Flush()
 	c.ctx.Abort()
 }
 
 //StatusCode 设置response状态码
 func (c *response) StatusCode(s int) {
-	c.raw.status = s
+	//c.raw.status = s
 	c.final.status = s
 	c.ctx.WStatus(s)
 }
@@ -89,18 +91,13 @@ func (c *response) File(path string) {
 	c.ctx.Abort()
 }
 
-//WriteAny 将结果写入响应流，并自动处理响应码
-func (c *response) WriteAny(v interface{}) error {
-	return c.Write(http.StatusOK, v)
-}
-
 //NoNeedWrite 无需写入响应数据到缓存
 func (c *response) NoNeedWrite(status int) {
 	c.noneedWrite = true
 	c.final.status = status
 }
 
-//Write 将结果写入响应流，自动检查内容处理状态码
+//Write 检查内容并处理状态码
 func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() {
 		panic(fmt.Sprintf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status))
@@ -129,15 +126,20 @@ func (c *response) Write(status int, content interface{}) error {
 	return nil
 }
 
+//WriteAny 将结果写入响应流，并自动处理响应码
+func (c *response) WriteAny(v interface{}) error {
+	return c.Write(http.StatusOK, v)
+}
+
 //Render 修改实际渲染的内容
-func (c *response) Render(status int, content string, ctp string) {
+func (c *response) WriteFinal(status int, content string, ctp string) {
 	if status != 0 {
 		c.final.status = status
 	}
 	c.final.contentType = types.GetString(ctp, c.final.contentType)
 	c.final.content = content
-
 }
+
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
 	rc = content
@@ -233,7 +235,6 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
-	fmt.Println("write.now", status, ctyp, content)
 	if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
 		c.ctx.Redirect(status, content)
 		return nil
@@ -243,12 +244,10 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
 	}
-	fmt.Println("write.now.encode", status, ctyp, content)
 	buff, err := encoding.Encode(content, c.path.GetRouter().GetEncoding())
 	if err != nil {
 		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", c.path.GetRouter().GetEncoding(), err, content)
 	}
-	fmt.Println("write.now.end")
 	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
@@ -290,16 +289,14 @@ func (c *response) GetFinalResponse() (int, string) {
 }
 
 func (c *response) Flush() {
-	fmt.Println("flush:", c.noneedWrite, c.asyncWrite == nil)
 	if c.noneedWrite || c.asyncWrite == nil {
 		return
 	}
-	c.asyncWrite()
-	// if err := c.asyncWrite(); err != nil {
-	// 	// panic(err)
-	// }
-
+	if err := c.asyncWrite(); err != nil {
+		panic(err)
+	}
 }
+
 func (c *response) getString(ctp string, v interface{}) string {
 	switch {
 	case strings.Contains(ctp, "xml"):
