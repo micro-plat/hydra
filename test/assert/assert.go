@@ -98,9 +98,10 @@ func NotEqualf(t *testing.T, exp, got interface{}, format string, args ...interf
 	assert(t, result, fn, 1)
 }
 
-func Panic(t *testing.T, err interface{}, fn func()) {
+//Panic Panic
+func Panic(t *testing.T, expect interface{}, fn func(), args ...interface{}) {
 	defer func() {
-		equal(t, err, recover(), 3)
+		equal(t, expect, recover(), 3, args...)
 	}()
 	fn()
 }

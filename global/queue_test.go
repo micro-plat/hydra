@@ -1,6 +1,10 @@
 package global
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
+)
 
 func Test_messageQueueConf_GetQueueName(t *testing.T) {
 	Def.PlatName = "test"
@@ -65,14 +69,11 @@ func Test_messageQueueConf_GetQueueName(t *testing.T) {
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &messageQueueConf{
-				platNameAsPrefix: tt.fields.platNameAsPrefix,
-				separate:         tt.fields.separate,
-			}
-			if got := m.GetQueueName(tt.args.n); got != tt.want {
-				t.Errorf("messageQueueConf.GetQueueName() = %v, want %v", got, tt.want)
-			}
-		})
+		m := &messageQueueConf{
+			platNameAsPrefix: tt.fields.platNameAsPrefix,
+			separate:         tt.fields.separate,
+		}
+		got := m.GetQueueName(tt.args.n)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

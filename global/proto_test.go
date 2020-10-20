@@ -2,6 +2,8 @@ package global
 
 import (
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func TestIsLocal(t *testing.T) {
@@ -30,11 +32,8 @@ func TestIsLocal(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := IsLocal(tt.args.proto); got != tt.want {
-				t.Errorf("IsLocal() = %v, want %v", got, tt.want)
-			}
-		})
+		got := IsLocal(tt.args.proto)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
@@ -47,7 +46,7 @@ func TestParseProto(t *testing.T) {
 		args      args
 		wantProto string
 		wantAddr  string
-		wantErr   bool
+		isNilErr  bool
 	}{
 
 		{
@@ -57,7 +56,7 @@ func TestParseProto(t *testing.T) {
 			},
 			wantProto: "zk",
 			wantAddr:  "192.168.0.1",
-			wantErr:   false,
+			isNilErr:  true,
 		},
 		{
 			name: "正常的地址-多个地址",
@@ -66,7 +65,7 @@ func TestParseProto(t *testing.T) {
 			},
 			wantProto: "zk",
 			wantAddr:  "192.168.0.1,192.168.0.2",
-			wantErr:   false,
+			isNilErr:  true,
 		},
 		{
 			name: "错误地址-多个://",
@@ -75,7 +74,7 @@ func TestParseProto(t *testing.T) {
 			},
 			wantProto: "",
 			wantAddr:  "",
-			wantErr:   true,
+			isNilErr:  false,
 		},
 		{
 			name: "错误地址-无协议",
@@ -84,7 +83,7 @@ func TestParseProto(t *testing.T) {
 			},
 			wantProto: "",
 			wantAddr:  "",
-			wantErr:   true,
+			isNilErr:  false,
 		},
 		{
 			name: "错误地址-无地址",
@@ -93,24 +92,16 @@ func TestParseProto(t *testing.T) {
 			},
 			wantProto: "",
 			wantAddr:  "",
-			wantErr:   true,
+			isNilErr:  false,
 		},
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotproto, gotAddr, err := ParseProto(tt.args.address)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseProto() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotproto != tt.wantProto {
-				t.Errorf("ParseProto() gotproto = %v, wantProto %v", gotproto, tt.wantProto)
-			}
-			if gotAddr != tt.wantAddr {
-				t.Errorf("ParseProto() gotAddr = %v, wantAddr %v", gotAddr, tt.wantAddr)
-			}
-		})
+		gotproto, gotAddr, err := ParseProto(tt.args.address)
+
+		assert.Equal(t, tt.wantProto, gotproto, tt.name)
+		assert.Equal(t, tt.wantAddr, gotAddr, tt.name)
+		assert.IsNil(t, tt.isNilErr, err, tt.name)
 	}
 }
 
@@ -143,17 +134,10 @@ func TestIsProto(t *testing.T) {
 			wantAddr: "192.168.0.1",
 			wantIs:   false,
 		},
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotAddr, gotIs := IsProto(tt.args.addr, tt.args.proto)
-			if gotAddr != tt.wantAddr {
-				t.Errorf("IsProto() gotAddr = %v, want %v", gotAddr, tt.wantAddr)
-			}
-			if gotIs != tt.wantIs {
-				t.Errorf("IsProto() gotIs = %v, want %v", gotIs, tt.wantIs)
-			}
-		})
+		gotAddr, gotIs := IsProto(tt.args.addr, tt.args.proto)
+		assert.Equal(t, tt.wantAddr, gotAddr, tt.name)
+		assert.Equal(t, tt.wantIs, gotIs, tt.name)
 	}
 }
