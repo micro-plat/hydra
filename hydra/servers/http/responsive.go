@@ -66,6 +66,11 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.Shutdown()
 
 		server.Cache.Save(c)
+		if !c.GetMainConf().IsStarted() {
+			w.log.Info("服务被禁用，不用重启")
+			w.conf = c
+			return true, nil
+		}
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -107,26 +112,33 @@ func (w *Responsive) publish() (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
+
 	tp := cnf.GetMainConf().GetServerType()
+	rootconf, err := cnf.GetMainConf().GetRootConf()
+	if err != nil {
+		return nil, err
+	}
+	routerconf, err := cnf.GetRouterConf()
+	if err != nil {
+		return nil, err
+	}
 	switch tp {
 	case WS:
 		return NewWSServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetRootConf().GetString("address", ":8070"),
-			cnf.GetRouterConf().Routers,
-			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
+			rootconf.GetString("address", ":8070"),
+			routerconf.Routers,
+			WithServerType(tp),
+			WithTLS(rootconf.GetStrings("tls")),
+			WithTimeout(rootconf.GetInt("rTimeout", 30),
+				rootconf.GetInt("wTimeout", 30),
+				rootconf.GetInt("rhTimeout", 30)))
 	default:
 		return NewServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetRootConf().GetString("address", ":8080"),
-			cnf.GetRouterConf().Routers,
-			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
+			rootconf.GetString("address", ":8080"),
+			routerconf.Routers,
+			WithServerType(tp),
+			WithTLS(rootconf.GetStrings("tls")),
+			WithTimeout(rootconf.GetInt("rTimeout", 30), rootconf.GetInt("wTimeout", 30), rootconf.GetInt("rhTimeout", 30)))
 	}
 
 }

@@ -35,21 +35,15 @@ func New(addr string, opts ...Option) *Server {
 	return s
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Server
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IMainConf) *Server {
+func GetConf(cnf conf.IMainConf) (*Server, error) {
 	s := Server{}
 	_, err := cnf.GetMainObject(&s)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(err)
+		return nil, fmt.Errorf("mqc服务器配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&s); !b {
-		panic(fmt.Errorf("mqc服务器配置有误:%v %v", err, s))
+		return nil, fmt.Errorf("mqc服务器配置数据有误:%v %v", err, s)
 	}
-	return &s
+	return &s, nil
 }

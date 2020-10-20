@@ -9,7 +9,11 @@ import (
 //Static 静态文件处理插件
 func Static() Handler {
 	return func(ctx IMiddleContext) {
-		static := ctx.ServerConf().GetStaticConf()
+		static, err := ctx.ServerConf().GetStaticConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 
 		//检查文件是否需要按静态文件处理
 		var rpath = ctx.Request().Path().GetRequestPath()

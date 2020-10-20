@@ -18,7 +18,11 @@ func JwtAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//1. 获取jwt配置
-		jwtAuth := ctx.ServerConf().GetJWTConf()
+		jwtAuth, err := ctx.ServerConf().GetJWTConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if jwtAuth.Disable {
 			ctx.Next()
 			return

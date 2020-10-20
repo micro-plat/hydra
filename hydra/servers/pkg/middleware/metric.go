@@ -26,7 +26,11 @@ func NewMetric() *Metric {
 }
 func (m *Metric) onceDo(ctx IMiddleContext) {
 	m.once.Do(func() {
-		metric := ctx.ServerConf().GetMetricConf()
+		metric, err := ctx.ServerConf().GetMetricConf()
+		if err != nil {
+			panic(fmt.Errorf("metric配置获取失败:%w", err))
+		}
+
 		if metric.Disable {
 			return
 		}

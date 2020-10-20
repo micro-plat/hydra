@@ -42,30 +42,24 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 	return true
 }
 
-type ConfHandler func(cnf conf.IMainConf) *WhiteList
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取WhiteList
-func GetConf(cnf conf.IMainConf) *WhiteList {
+func GetConf(cnf conf.IMainConf) (*WhiteList, error) {
 	ip := WhiteList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "white.list"), &ip)
 	if err == conf.ErrNoSetting {
-		return &WhiteList{Disable: true}
+		return &WhiteList{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("white list配置有误:%v", err))
+		return nil, fmt.Errorf("white list配置格式有误:%v", err)
 	}
 
 	for _, i := range ip.IPS {
 		i.ipm = conf.NewPathMatch(i.IPS...)
 		i.rqm = conf.NewPathMatch(i.Requests...)
 		if b, err := govalidator.ValidateStruct(i); !b {
-			panic(fmt.Errorf("white list配置有误:%v", err))
+			return nil, fmt.Errorf("white list配置数据有误:%v", err)
 		}
 
 	}
-	return &ip
+	return &ip, nil
 }

@@ -47,12 +47,6 @@ func (l *Layout) ToLoggerLayout() *logger.Layout {
 	}
 }
 
-type ConfHandler func(cnf conf.IVarConf) *Layout
-
-func (h ConfHandler) Handle(cnf conf.IVarConf) interface{} {
-	return h(cnf)
-}
-
 //GetConfByAddr 获取日志配置
 func GetConfByAddr(r registry.IRegistry, platName string) (s *Layout, err error) {
 	path := registry.Join(platName, "var", TypeNodeName, LogName)
@@ -81,18 +75,18 @@ func GetConfByAddr(r registry.IRegistry, platName string) (s *Layout, err error)
 }
 
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IVarConf) (s *Layout) {
+func GetConf(cnf conf.IVarConf) (s *Layout, err error) {
 	s = &Layout{}
-	_, err := cnf.GetObject(TypeNodeName, LogName, s)
+	_, err = cnf.GetObject(TypeNodeName, LogName, s)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("读取./var/%s/%s 配置发生错误 %w", TypeNodeName, LogName, err))
+		return nil, fmt.Errorf("读取./var/%s/%s 配置发生错误 %w", TypeNodeName, LogName, err)
 	}
 	if err == conf.ErrNoSetting {
 		s.Disable = true
-		return s
+		return s, nil
 	}
 	if b, err := govalidator.ValidateStruct(s); !b {
-		panic(fmt.Errorf("./var/%s/%s 配置有误 %w", TypeNodeName, LogName, err))
+		return nil, fmt.Errorf("./var/%s/%s 配置有误 %w", TypeNodeName, LogName, err)
 	}
-	return s
+	return s, nil
 }

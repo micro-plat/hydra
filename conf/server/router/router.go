@@ -112,24 +112,19 @@ func (h *Routers) GetPath() []string {
 	return list
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Routers
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置路由
-func GetConf(cnf conf.IMainConf) (router *Routers) {
+func GetConf(cnf conf.IMainConf) (router *Routers, err error) {
 	router = new(Routers)
-	_, err := cnf.GetSubObject("router", &router)
+	_, err = cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		router = NewRouters()
+		return
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err))
+		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err)
 	}
 	if b, err := govalidator.ValidateStruct(router); !b {
-		panic(fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err))
+		return nil, fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err)
 	}
-	return router
+	return router, nil
 }

@@ -34,30 +34,24 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 	return false, nil
 }
 
-type ConfHandler func(cnf conf.IMainConf) *RASAuth
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (auths *RASAuth) {
+func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
-	_, err := cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
+	_, err = cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("RASAuth配置有误:%v", err))
+		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
 		auths.Disable = true
-		return auths
+		return auths, nil
 	}
 
 	for _, auth := range auths.Auth {
 		if b, err := govalidator.ValidateStruct(&auth); !b {
-			panic(fmt.Errorf("RASAuth配置有误:%v", err))
+			return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 		}
 		auth.PathMatch = conf.NewPathMatch(auth.Requests...)
 	}
-	return auths
+	return auths, nil
 }
