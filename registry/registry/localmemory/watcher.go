@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	r "github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/registry"
 )
 
@@ -41,6 +42,7 @@ func (l *localMemory) WatchChildren(path string) (data chan registry.ChildrenWat
 	if d, ok := l.childrenWatchs[path]; ok {
 		return d, nil
 	}
+
 	watcher := make(chan registry.ChildrenWatcher, 1)
 
 	l.childrenWatchs[path] = watcher
@@ -60,7 +62,6 @@ func (l *localMemory) notifyParentChange(path string) {
 			case v <- &valuesEntity{path: path}:
 			default:
 			}
-
 		}
 		break
 	}
@@ -79,6 +80,6 @@ func (l *localMemory) getParentForNotify(path string) (string, int32, error) {
 			}
 		}
 	}
-	return "", 0, fmt.Errorf("节点[%s]不存在", npath)
+	return "", 0, fmt.Errorf("节点[%s]的父节点%w", path, errs.ErrNotExist)
 
 }

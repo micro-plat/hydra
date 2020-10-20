@@ -25,7 +25,7 @@ func Test_global_GetLongAppName(t *testing.T) {
 			want: "ro-plat_hydra_global_global.test",
 		},
 		{
-			name: "测试未传入名称",
+			name: "测试未传入名称-空数组",
 			args: args{
 				n: []string{},
 			},
@@ -445,8 +445,11 @@ func Test_global_check(t *testing.T) {
 			Trace:           tt.fields.Trace,
 			LocalConfName:   tt.fields.LocalConfName,
 		}
+		//初始化测试用例参数
 		tt.initParams()
+		//执行被测试方法
 		err := m.check()
+		//检查测试结果
 		tt.assertResult(t, m, err)
 	}
 }

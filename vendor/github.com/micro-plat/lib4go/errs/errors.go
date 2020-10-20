@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//ErrNotExist 不存在
+var ErrNotExist = errors.New("不存在")
+
 //IError 包含错误码的error
 type IError interface {
 	GetError() error
