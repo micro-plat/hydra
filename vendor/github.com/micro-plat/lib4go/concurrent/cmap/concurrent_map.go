@@ -2,8 +2,6 @@ package cmap
 
 import (
 	"encoding/json"
-	"fmt"
-	"runtime/debug"
 	"sync"
 )
 
@@ -232,21 +230,17 @@ func (m ConcurrentMap) Iter() <-chan Tuple {
 
 //IterBuffered Returns a buffered iterator which could be used in a for range loop.
 func (m ConcurrentMap) IterBuffered() <-chan Tuple {
-	debug.PrintStack()
 	ch := make(chan Tuple, m.Count())
 	count := len(m)
 	go func() {
 		wg := sync.WaitGroup{}
 		wg.Add(count)
-		fmt.Println("0")
 		// Foreach shard.
 		for _, shard := range m {
-			fmt.Println("1")
 			go func(shard *ConcurrentMapShared) {
 				// Foreach key, value pair.
 				shard.RLock()
 				for key, val := range shard.items {
-					fmt.Println("2")
 					ch <- Tuple{key, val}
 				}
 				shard.RUnlock()

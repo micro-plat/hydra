@@ -162,3 +162,82 @@ func TestChildren(t *testing.T) {
 		assert.Equal(t, paths, c.children, c.name)
 	}
 }
+
+func TestWatchValue(t *testing.T) {
+	lm := localmemory.NewLocalMemory()
+	cases := []struct {
+		name   string
+		path   string
+		value  string
+		nvalue string
+	}{
+		{name: "一个", path: "/hydra1", value: "1", nvalue: "2"},
+		{name: "一个", path: "/hydra2", value: "2", nvalue: "234"},
+	}
+	for _, c := range cases {
+
+		//创建临时节点
+		err := lm.CreateTempNode(c.path, c.value)
+		assert.Equal(t, nil, err, c.name)
+
+		//监控值变化
+		notify, err := lm.WatchValue(c.path)
+		assert.Equal(t, nil, err, c.name)
+
+		//此时值未变化不应收到通知
+		select {
+		case <-notify:
+			t.Error("测试未通过")
+		default:
+		}
+
+		//更新值
+		err = lm.Update(c.path, c.nvalue)
+		assert.Equal(t, nil, err, c.name)
+
+		//应收到值变化通知
+		select {
+		case v := <-notify:
+			value, version := v.GetValue()
+			assert.NotEqual(t, version, int32(0), c.name)
+			assert.Equal(t, c.nvalue, string(value), c.name)
+		default:
+			t.Error("测试未通过")
+		}
+
+	}
+
+}
+func TestWatchChildren(t *testing.T) {
+	lm := localmemory.NewLocalMemory()
+	cases := []struct {
+		name     string
+		path     string
+		children []string
+		value    string
+	}{
+		{name: "一个", path: "/hydra1", value: "1", children: []string{"efg"}},
+		{name: "多个", path: "/hydra2", value: "1", children: []string{"abc", "efg", "efss", "12", "!@#"}},
+	}
+
+	for _, c := range cases {
+
+		//监控父节点
+		notify, err := lm.WatchChildren(c.path)
+		assert.Equal(t, nil, err, c.name)
+
+		//创建节点
+		for _, ch := range c.children {
+			err := lm.CreateTempNode(registry.Join(c.path, ch), c.value)
+			assert.Equal(t, nil, err, c.name)
+		}
+
+		//应收到值变化通知
+		select {
+		case v := <-notify:
+			assert.Equal(t, v.GetPath(), c.path)
+		default:
+			t.Error("测试未通过")
+		}
+	}
+}

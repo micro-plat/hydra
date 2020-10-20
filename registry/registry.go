@@ -123,6 +123,11 @@ func Parse(address string) (proto string, raddr []string, u string, p string, er
 	return
 }
 
+//Format 格式化注册中心地址
+func Format(ele string) string {
+	return Join(ele)
+}
+
 //Join 地址连接
 func Join(elem ...string) string {
 	var builder strings.Builder

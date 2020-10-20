@@ -122,7 +122,7 @@ func MustString(v interface{}) (string, bool) {
 
 //MustInt 获取int，不是有效的数字则返回false
 func MustInt(v interface{}) (int, bool) {
-	if value, err := strconv.Atoi(fmt.Sprintf("%v", v)); err == nil {
+	if value, ok := v.(int); ok {
 		return value, true
 	}
 	return 0, false
@@ -130,15 +130,15 @@ func MustInt(v interface{}) (int, bool) {
 
 //MustFloat32 获取float32，不是有效的数字则返回false
 func MustFloat32(v interface{}) (float32, bool) {
-	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 32); err == nil {
-		return float32(value), true
+	if value, ok := v.(float32); ok {
+		return value, true
 	}
 	return 0, false
 }
 
 //MustFloat64 获取float64，不是有效的数字则返回false
 func MustFloat64(v interface{}) (float64, bool) {
-	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 64); err == nil {
+	if value, ok := v.(float64); ok {
 		return value, true
 	}
 	return 0, false

@@ -48,6 +48,7 @@ func (r *request) Param(key string) string {
 
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
+
 	if err := r.ctx.ShouldBind(&obj); err != nil {
 		return err
 	}

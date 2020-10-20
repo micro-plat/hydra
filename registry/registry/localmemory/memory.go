@@ -15,8 +15,8 @@ type localMemory struct {
 	nodes          map[string]*value
 	seqValue       int32
 	lock           sync.RWMutex
-	vlock          sync.RWMutex
-	clock          sync.RWMutex
+	vlock          sync.Mutex
+	clock          sync.Mutex
 	valueWatchs    map[string]chan registry.ValueWatcher
 	childrenWatchs map[string]chan registry.ChildrenWatcher
 }
