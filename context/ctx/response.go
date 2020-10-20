@@ -136,6 +136,7 @@ func (c *response) Render(status int, content string, ctp string) {
 	}
 	c.final.contentType = types.GetString(ctp, c.final.contentType)
 	c.final.content = content
+
 }
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
@@ -232,6 +233,7 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
+	fmt.Println("write.now", status, ctyp, content)
 	if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
 		c.ctx.Redirect(status, content)
 		return nil
@@ -241,10 +243,12 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
 	}
+	fmt.Println("write.now.encode", status, ctyp, content)
 	buff, err := encoding.Encode(content, c.path.GetRouter().GetEncoding())
 	if err != nil {
 		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", c.path.GetRouter().GetEncoding(), err, content)
 	}
+	fmt.Println("write.now.end")
 	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
@@ -286,12 +290,14 @@ func (c *response) GetFinalResponse() (int, string) {
 }
 
 func (c *response) Flush() {
+	fmt.Println("flush:", c.noneedWrite, c.asyncWrite == nil)
 	if c.noneedWrite || c.asyncWrite == nil {
 		return
 	}
-	if err := c.asyncWrite(); err != nil {
-		panic(err)
-	}
+	c.asyncWrite()
+	// if err := c.asyncWrite(); err != nil {
+	// 	// panic(err)
+	// }
 
 }
 func (c *response) getString(ctp string, v interface{}) string {
