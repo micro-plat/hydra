@@ -44,7 +44,7 @@ func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
 func GetConf(cnf conf.IMainConf) (auths *RASAuth) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
-	_, err := cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
+	_, err := cnf.GetSubObject(registry.Join("auth", "ras"), auths)
 	if err != nil && err != conf.ErrNoSetting {
 		panic(fmt.Errorf("RASAuth配置有误:%v", err))
 	}

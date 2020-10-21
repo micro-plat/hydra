@@ -103,7 +103,7 @@ func TestRASAuth(t *testing.T) {
 		}
 
 		//获取中间件
-		handler := middleware.Limit()
+		handler := middleware.RASAuth()
 
 		//调用中间件
 		handler(ctx)
