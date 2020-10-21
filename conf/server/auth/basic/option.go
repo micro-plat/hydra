@@ -16,3 +16,17 @@ func WithExcludes(p ...string) Option {
 		b.Excludes = p
 	}
 }
+
+//WithDisable 禁用配置
+func WithDisable() Option {
+	return func(b *BasicAuth) {
+		b.Disable = true
+	}
+}
+
+//WithEnable 启用配置
+func WithEnable() Option {
+	return func(b *BasicAuth) {
+		b.Disable = false
+	}
+}
