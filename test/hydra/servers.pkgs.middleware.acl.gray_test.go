@@ -241,6 +241,7 @@ func startUpstreamServer(port string) {
 		hydra.WithSystemName("apiserver"),
 		hydra.WithServerTypes(http.API),
 		hydra.WithClusterName("t"),
+		//hydra.WithRegistry("zk://192.168.0.101"),
 		hydra.WithRegistry("lm://."),
 	)
 	hydra.Conf.API(port)
