@@ -1,6 +1,7 @@
 package global
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -33,34 +34,54 @@ type IUCLI interface {
 }
 
 type ucli struct {
-	Name     string
-	flags    []cli.Flag
-	callBack func(ICli) error
+	Name      string
+	flags     []cli.Flag
+	flagNames map[string]bool
+	callBack  func(ICli) error
 }
 
 func newCli(name string) *ucli {
 	return &ucli{
-		Name:  name,
-		flags: make([]cli.Flag, 0, 1),
+		Name:      name,
+		flags:     make([]cli.Flag, 0, 1),
+		flagNames: map[string]bool{},
 	}
 }
 
+func (c *ucli) hasFlag(name string) bool {
+	if _, ok := c.flagNames[name]; ok {
+		return ok
+	}
+	return false
+}
+
 //AddFlag 添加命令行参数
-func (c *ucli) AddFlag(name string, usage string) {
+func (c *ucli) AddFlag(name string, usage string) error {
+	if c.hasFlag(name) {
+		return fmt.Errorf("flag名称%s已存在", name)
+	}
+
 	flag := cli.StringFlag{
 		Name:  name,
 		Usage: usage,
 	}
 	c.flags = append(c.flags, flag)
+	c.flagNames[name] = true
+	return nil
 }
 
 //AddSliceFlag 添加命令行参数
-func (c *ucli) AddSliceFlag(name string, usage string) {
+func (c *ucli) AddSliceFlag(name string, usage string) error {
+	if c.hasFlag(name) {
+		return fmt.Errorf("flag名称%s已存在", name)
+	}
 	flag := cli.StringSliceFlag{
 		Name:  name,
 		Usage: usage,
 	}
 	c.flags = append(c.flags, flag)
+	c.flagNames[name] = true
+	return nil
 }
 
 //GetFlags 获取可用的flags参数
