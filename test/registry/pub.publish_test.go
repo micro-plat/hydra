@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/pub"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
@@ -179,26 +180,30 @@ func TestPublisher_Publish(t *testing.T) {
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetMainConf()      //获取配置
 	lm := c.GetRegistry()
+
 	p := pub.New(c)
 	err := p.Publish(serverName, serviceAddr, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
 	assert.Equal(t, false, err != nil, "发布api节点和dns节点")
-	_, _, err = lm.GetValue("/hydra/apiserver/api/test/servers/")
+	_, _, err = lm.GetValue(c.GetServerPubPath(c.GetClusterName()))
 	assert.Equal(t, nil, err, "servers服务节点发布验证")
-	_, _, err = lm.GetValue("/hydra/services/api/providers/")
+	_, _, err = lm.GetValue(c.GetServicePubPath())
 	assert.Equal(t, nil, err, "api服务节点发布验证")
-	_, _, err = lm.GetValue("/dns/")
+	_, _, err = lm.GetValue(c.GetDNSPubPath("192.168.0.101"))
 	assert.Equal(t, nil, err, "dns服务节点发布验证")
 
 	//发布rpc节点
 	confObj.Service.API.Add("/api1", "/api1", []string{"GET"})
 	confObj.Service.API.Add("/api2", "/api1", []string{"GET"})
 	rpcconf := confObj.GetRPCConf() //初始化参数
+	s2 := confObj.GetAPIConf()      //初始化参数
 	c2 := rpcconf.GetMainConf()     //获取配置
 	lm2 := c2.GetRegistry()
 	p2 := pub.New(c2)
-	p2.Publish(serverName, serviceAddr, c2.GetServerID(), rpcconf.GetRouterConf().GetPath()...)
+	p2.Publish(serverName, serviceAddr, c2.GetServerID(), s2.GetRouterConf().GetPath()...)
 	assert.Equal(t, false, err != nil, "发布rpc节点")
-	_, _, err = lm2.GetValue("/hydra/rpcserver/rpc/test/servers/")
+	_, _, err = lm2.GetValue(c2.GetRPCServicePubPath("api1"))
+	assert.Equal(t, nil, err, "rpc服务节点发布验证")
+	_, _, err = lm2.GetValue(c2.GetRPCServicePubPath("api2"))
 	assert.Equal(t, nil, err, "rpc服务节点发布验证")
 }
 
@@ -215,35 +220,36 @@ func TestPublisher_Update(t *testing.T) {
 	lm := c.GetRegistry()
 	p := pub.New(c)
 
+	path := c.GetServerPubPath(c.GetClusterName())
 	//更新不存在的API节点的值
 	err := p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1")
 	assert.Equal(t, false, err != nil, "更新不存在的API节点的值")
-	_, _, err = lm.GetValue("/hydra/apiserver/api/test/servers/")
-	assert.Equal(t, "节点[%!w(string=/hydra/apiserver/api/test/servers)]不存在", err.Error(), "servers服务节点发布验证")
+	_, _, err = lm.GetValue(path)
+	assert.Equal(t, true, err != nil, "servers服务节点发布验证")
 
 	//更新已经存在的API节点的不存在值
 	p.Publish(serverName, serviceAddr, c.GetServerID())
 	err = p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1")
-	assert.Equal(t, false, err != nil, "更新存在的API节点的值")
-	paths, _, _ := lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	assert.Equal(t, false, err != nil, "更新已经存在的API节点的不存在值")
+	paths, _, _ := lm.GetChildren(path)
 	for _, v := range paths {
-		ldata, _, err := lm.GetValue("/hydra/apiserver/api/test/servers/" + v)
-		assert.Equal(t, nil, err, "更新存在的API节点的值")
+		ldata, _, err := lm.GetValue(registry.Join(path, v))
+		assert.Equal(t, nil, err, "更新已经存在的API节点的不存在值")
 		value := map[string]string{}
 		json.Unmarshal(ldata, &value)
-		assert.Equal(t, "value1", value["key1"], "更新存在的API节点的值")
+		assert.Equal(t, "value1", value["key1"], "更新已经存在的API节点的不存在值")
 	}
 
 	//更新已经存在的api节点存在的值
 	err = p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1-1")
-	assert.Equal(t, false, err != nil, "更新存在的API节点的值")
-	paths, _, _ = lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	assert.Equal(t, false, err != nil, "更新存在的API节点存在的值")
+	paths, _, _ = lm.GetChildren(path)
 	for _, v := range paths {
-		ldata, _, err := lm.GetValue("/hydra/apiserver/api/test/servers/" + v)
-		assert.Equal(t, nil, err, "更新存在的API节点的值")
+		ldata, _, err := lm.GetValue(registry.Join(path, v))
+		assert.Equal(t, nil, err, "更新存在的API节点存在的值")
 		value := map[string]string{}
 		json.Unmarshal(ldata, &value)
-		assert.Equal(t, "value1-1", value["key1"], "更新存在的API节点的值")
+		assert.Equal(t, "value1-1", value["key1"], "更新存在的API节点存在的值")
 	}
 
 }
@@ -258,28 +264,54 @@ func TestNew(t *testing.T) {
 
 	p := pub.New(c)
 	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
+	pPath := c.GetServerPubPath(c.GetClusterName())
 	//删除节点
-	paths, _, _ := lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	paths, _, _ := lm.GetChildren(pPath)
 	for _, v := range paths {
-		path := "/hydra/apiserver/api/test/servers/" + v
+		path := registry.Join(pPath, v)
 		err := lm.Delete(path)
 		assert.Equal(t, nil, err, "NEW()-测试自动恢复节点")
 		fmt.Printf("节点%s已删除", path)
 	}
 
-	paths, _, _ = lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
 
 	time.Sleep(time.Second * 10)
-	paths, _, _ = lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
 
 	time.Sleep(time.Second * 10)
-	paths, _, _ = lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
 
 	time.Sleep(time.Second * 15)
-	paths, _, _ = lm.GetChildren("/hydra/apiserver/api/test/servers/")
+	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 1, len(paths), "NEW()-测试自动恢复节点")
 
+}
+
+func TestPublisher_WatchClusterChange(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		notify  func(isMaster bool, sharding int, total int)
+		wantErr bool
+	}{
+		{name: "1", notify: func(isMaster bool, sharding int, total int) {
+			fmt.Println(isMaster, sharding, total)
+		}, wantErr: false},
+	}
+
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080")
+	apiconf := confObj.GetAPIConf() //初始化参数
+	c := apiconf.GetMainConf()      //获取配置
+
+	p := pub.New(c)
+	for _, tt := range tests {
+		if err := p.WatchClusterChange(tt.notify); (err != nil) != tt.wantErr {
+			t.Errorf("Publisher.WatchClusterChange() error = %v, wantErr %v", err, tt.wantErr)
+		}
+	}
 }
