@@ -1,6 +1,11 @@
 package ws
 
-import "github.com/micro-plat/hydra/conf"
+import (
+	"fmt"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
+)
 
 //Server api server配置信息
 type Server struct {
@@ -24,6 +29,10 @@ func New(address string, opts ...Option) *Server {
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
 	if _, err := cnf.GetMainObject(&s); err != nil && err != conf.ErrNoSetting {
 		return nil, err
+	}
+
+	if b, err := govalidator.ValidateStruct(s); !b {
+		return nil, fmt.Errorf("websocket主配置数据有误:%v", err)
 	}
 	return s, nil
 }

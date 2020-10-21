@@ -24,7 +24,12 @@ func RASAuth() Handler {
 			return
 		}
 
-		b, auth := ras.Match(ctx.Request().Path().GetRouter().Service)
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		b, auth := ras.Match(routerObj.Service)
 		if !b {
 			ctx.Next()
 			return

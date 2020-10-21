@@ -36,13 +36,19 @@ func JwtAuth() Handler {
 			ctx.Next()
 			return
 		}
-		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRouter().Service); ok {
+
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		if ok, _ := jwtAuth.Match(routerObj.Service); ok {
 			ctx.Next()
 			return
 		}
 
 		//4. 验证jwt
-		_, err := checkJWT(ctx, jwtAuth)
+		_, err = checkJWT(ctx, jwtAuth)
 		if err == nil {
 			ctx.Next()
 			return

@@ -2,6 +2,9 @@ package queue
 
 import "github.com/micro-plat/hydra/conf"
 
+//VarRootName 在var中的跟路径
+const VarRootName = "queue"
+
 //Queue 消息队列配置
 type Queue struct {
 	Proto string `json:"proto,omitempty"`
@@ -22,5 +25,6 @@ func GetConf(cnf conf.IVarConf, tp string, name string) (s *Queue, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return New(jc.GetString("proto"), jc.GetRaw()), nil
 }

@@ -25,7 +25,7 @@ var app = hydra.NewApp(
 func init() {
 	hydra.Conf.API(":8070", api.WithTimeout(10, 10)).BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.101"))
 	hydra.Conf.RPC(":8888", crpc.WithTimeout(10, 10))
-	hydra.Conf.CRON(ccron.WithTimeout(10)).Task(task.NewTask("@ervery 10s", "/taosy/testcron"))
+	hydra.Conf.CRON(ccron.WithTimeout(10)).Task(task.NewTask("@every 10s", "/taosy/testcron"))
 	app.API("/taosy/testapi", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("api 接口服务测试")
 		return "success"

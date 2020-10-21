@@ -7,9 +7,6 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
-//VarRootName 在var中的跟路径
-const VarRootName = "queue"
-
 //Queues queue任务
 type Queues struct {
 	Queues []*Queue `json:"queues" toml:"queues,omitempty"`

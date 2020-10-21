@@ -28,7 +28,7 @@ func New(addr string, opts ...Option) *Server {
 	if _, _, err := global.ParseProto(addr); err != nil {
 		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://addr 格式 %w", err))
 	}
-	s := &Server{Addr: addr}
+	s := &Server{Addr: addr, Status: "start"}
 	for _, opt := range opts {
 		opt(s)
 	}

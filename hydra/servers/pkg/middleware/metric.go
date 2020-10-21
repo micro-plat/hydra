@@ -40,7 +40,6 @@ func (m *Metric) onceDo(ctx IMiddleContext) {
 		m.logger = logger.New("metric")
 
 		//2. 创建上报服务
-		var err error
 		m.reporter, err = metrics.InfluxDB(m.currentRegistry,
 			metric.Cron,
 			metric.Host,

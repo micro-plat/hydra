@@ -172,7 +172,7 @@ func (s *httpSub) GetMetricConf() (*metric.Metric, error) {
 
 //GetStaticConf 获取静态文件配置
 func (s *httpSub) GetStaticConf() (*static.Static, error) {
-	staticObj, err := s.metric.GetConf()
+	staticObj, err := s.static.GetConf()
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (s *httpSub) GetStaticConf() (*static.Static, error) {
 
 //GetRouterConf 获取路由信息
 func (s *httpSub) GetRouterConf() (*router.Routers, error) {
-	routerObj, err := s.metric.GetConf()
+	routerObj, err := s.router.GetConf()
 	if err != nil {
 		return nil, err
 	}

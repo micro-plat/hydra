@@ -38,6 +38,11 @@ func (h *Routers) String() string {
 	return sb.String()
 }
 
+//GetRouters 获取路由列表
+func (h *Routers) GetRouters() []*Router {
+	return h.Routers
+}
+
 //Router 路由信息
 type Router struct {
 	Path     string   `json:"path,omitempty" valid:"ascii,required"`

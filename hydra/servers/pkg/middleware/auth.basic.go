@@ -28,7 +28,12 @@ func BasicAuthForRealm() Handler {
 		}
 
 		//检验当前请求是否被排除
-		if ok, _ := basic.Match(ctx.Request().Path().GetRouter().Path); ok {
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		if ok, _ := basic.Match(routerObj.Path); ok {
 			ctx.Next()
 			return
 		}
