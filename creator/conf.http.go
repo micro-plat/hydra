@@ -94,8 +94,8 @@ func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 }
 
 //Limit 服务器限流配置
-func (b *httpBuilder) Limit(r *limiter.Rule, rules ...*limiter.Rule) *httpBuilder {
-	b.customerBuilder["acl/limit"] = limiter.New(r, rules...)
+func (b *httpBuilder) Limit(opts ...limiter.Option) *httpBuilder {
+	b.customerBuilder["acl/limit"] = limiter.New(opts...)
 	return b
 }
 
