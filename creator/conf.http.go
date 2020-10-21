@@ -70,8 +70,8 @@ func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
 }
 
 //Ras 远程认证服务配置
-func (b *httpBuilder) Ras(service string, opts ...ras.Option) *httpBuilder {
-	b.customerBuilder["auth/ras"] = ras.New(service, opts...)
+func (b *httpBuilder) Ras(opts ...ras.Option) *httpBuilder {
+	b.customerBuilder["auth/ras"] = ras.NewRASAuth(opts...)
 	return b
 }
 

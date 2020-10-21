@@ -15,11 +15,11 @@ type RASAuth struct {
 }
 
 //NewRASAuth 构建RASAuth认证
-func NewRASAuth(auth ...*Auth) *RASAuth {
+func NewRASAuth(opts ...Option) *RASAuth {
 	r := &RASAuth{}
-	for _, a := range auth {
-		a.PathMatch = conf.NewPathMatch(a.Requests...)
-		r.Auth = append(r.Auth, a)
+
+	for i := range opts {
+		opts[i](r)
 	}
 	return r
 }

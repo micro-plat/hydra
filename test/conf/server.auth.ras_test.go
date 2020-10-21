@@ -16,7 +16,7 @@ import (
 func TestNewRASAuth(t *testing.T) {
 	tests := []struct {
 		name string
-		args []*ras.Auth
+		args []ras.Option
 		want *ras.RASAuth
 	}{
 		// TODO: Add test cases.
