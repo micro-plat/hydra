@@ -61,9 +61,9 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 		name       string
 		serverName string
 	}{
-		{name: "api服务发布1", serverName: "192.168.5.115:9999"},
-		{name: "api服务发布2", serverName: "192.168.5.115:8899"},
-		{name: "api服务发布3", serverName: "192.168.5.115:7799"},
+		{name: "api服务首次发布", serverName: "192.168.5.115:9999"},
+		{name: "api服务再次发布", serverName: "192.168.5.115:8899"},
+		{name: "api服务多次发布", serverName: "192.168.5.115:7799"},
 	}
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
@@ -79,14 +79,14 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 		got, err = p.PubAPIServiceNode(tt.serverName, data)
 		assert.Equal(t, false, err != nil, tt.name)
 	}
-	assert.Equal(t, len(tests), len(got), "api服务发布")
+	assert.Equal(t, len(tests), len(got), "api服务发布结果验证")
 
 	//验证节点是否发布成功
 	for path, sdata := range got {
 		ldata, v, err := lm.GetValue(path)
-		assert.Equal(t, nil, err, "api服务节点发布验证")
-		assert.NotEqual(t, v, int32(0), "api服务节点发布验证")
-		assert.Equal(t, string(ldata), sdata, "api服务节点发布验证")
+		assert.Equal(t, nil, err, "api服务节点发布结果获取")
+		assert.NotEqual(t, v, int32(0), "api服务节点结果版本号获取")
+		assert.Equal(t, string(ldata), sdata, "api服务节点发布结果比对")
 	}
 }
 
@@ -95,37 +95,36 @@ func TestPublisher_PubServerNode(t *testing.T) {
 		name       string
 		serverName string
 	}{
-		{name: "server服务发布1", serverName: "192.168.5.115:9999"},
-		{name: "server服务发布2", serverName: "192.168.5.115:8899"},
-		{name: "server服务发布3", serverName: "192.168.5.115:7799"},
+		{name: "server服务首次发布", serverName: "192.168.5.115:9999"},
+		{name: "server服务再次发布", serverName: "192.168.5.115:8899"},
+		{name: "server服务多次发布", serverName: "192.168.5.115:7799"},
 	}
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetMainConf()      //获取配置
-	lm := c.GetRegistry()
 
-	p := pub.New(c)
 	got := map[string]string{}
 	var err error
 	for _, tt := range tests {
 		data := getTestData(tt.serverName, c.GetServerID())
-		got, err = p.PubServerNode(tt.serverName, data)
+		got, err = pub.New(c).PubServerNode(tt.serverName, data)
 		assert.Equal(t, false, err != nil, tt.name)
 	}
-	assert.Equal(t, len(tests), len(got), "server服务发布")
+	assert.Equal(t, len(tests), len(got), "server服务发布验证")
 
 	//验证节点是否发布成功
+	lm := c.GetRegistry()
 	for path, sdata := range got {
 		ldata, v, err := lm.GetValue(path)
-		assert.Equal(t, nil, err, "server服务节点发布验证")
-		assert.NotEqual(t, v, int32(0), "server服务节点发布验证")
-		assert.Equal(t, string(ldata), sdata, "server服务节点发布验证")
+		assert.Equal(t, nil, err, "server服务节点发布结果获取")
+		assert.NotEqual(t, v, int32(0), "server服务节点发布版本获取")
+		assert.Equal(t, string(ldata), sdata, "server服务节点发布结果比对")
 	}
 
 }
 
-func TestPublisher_PubDNSNode(t *testing.T) {
+func TestPublisher_PubDNSNode_WithDomain(t *testing.T) {
 	tests := []struct {
 		name       string
 		serverName string
@@ -133,57 +132,55 @@ func TestPublisher_PubDNSNode(t *testing.T) {
 		{name: "dns发布", serverName: "192.168.5.115:9999"},
 		{name: "dns再次发布", serverName: "192.168.5.115:8899"},
 	}
+
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetMainConf()      //获取配置
-	lm := c.GetRegistry()
 
-	p := pub.New(c)
 	got := map[string]string{}
 	var err error
 	for _, tt := range tests {
-		got, err = p.PubDNSNode(tt.serverName)
+		got, err = pub.New(c).PubDNSNode(tt.serverName)
 		assert.Equal(t, false, err != nil, tt.name)
 	}
 	assert.Equal(t, 1, len(got), "dns服务发布")
 
 	//验证节点是否发布成功
+	lm := c.GetRegistry()
 	for path, sdata := range got {
 		ldata, v, err := lm.GetValue(path)
 		assert.Equal(t, nil, err, "dns服务节点发布验证")
 		assert.NotEqual(t, v, int32(0), "dns服务节点发布验证")
 		assert.Equal(t, string(ldata), sdata, "dns服务节点发布验证")
 	}
-
-	//验证节点未设置Domain
-	confObj2 := mocks.NewConf() //构建对象
-	confObj2.API(":8080")
-	s2 := confObj2.GetAPIConf() //初始化参数
-	c2 := s2.GetMainConf()      //获取配置
-	p2 := pub.New(c2)
-	got2, err2 := p2.PubDNSNode("192.168.5.115")
-	assert.Equal(t, false, err2 != nil, "domain未设置不发布dns")
-	assert.Equal(t, map[string]string{}, got2, "domain未设置不发布dns")
 }
 
-func TestPublisher_Publish(t *testing.T) {
+func TestPublisher_PubDNSNode_NoDomain(t *testing.T) {
+	//验证节点未设置Domain
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080")
+	s := confObj.GetAPIConf() //初始化参数
+	c := s.GetMainConf()      //获取配置
+	got, err := pub.New(c).PubDNSNode("192.168.5.115")
+	assert.Equal(t, false, err != nil, "domain未设置不发布dns")
+	assert.Equal(t, map[string]string{}, got, "domain未设置不发布dns")
+}
+
+func TestPublisher_Publish_API(t *testing.T) {
 
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	confObj.RPC(":9377")
-
-	serverName := "192.168.5.115:9091"
-	serviceAddr := "192.168.5.115:9091"
-
-	//发布api节点和dns节点
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetMainConf()      //获取配置
-	lm := c.GetRegistry()
 
-	p := pub.New(c)
-	err := p.Publish(serverName, serviceAddr, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	//发布api节点和dns节点
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
 	assert.Equal(t, false, err != nil, "发布api节点和dns节点")
+
+	//验证节点发布结果
+	lm := c.GetRegistry()
 	_, _, err = lm.GetValue(c.GetServerPubPath(c.GetClusterName()))
 	assert.Equal(t, nil, err, "servers服务节点发布验证")
 	_, _, err = lm.GetValue(c.GetServicePubPath())
@@ -191,67 +188,73 @@ func TestPublisher_Publish(t *testing.T) {
 	_, _, err = lm.GetValue(c.GetDNSPubPath("192.168.0.101"))
 	assert.Equal(t, nil, err, "dns服务节点发布验证")
 
-	//发布rpc节点
+}
+
+func TestPublisher_Publish_RPC(t *testing.T) {
+
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	confObj.Service.API.Add("/api1", "/api1", []string{"GET"})
 	confObj.Service.API.Add("/api2", "/api1", []string{"GET"})
+	confObj.RPC(":9377")
 	rpcconf := confObj.GetRPCConf() //初始化参数
-	s2 := confObj.GetAPIConf()      //初始化参数
-	c2 := rpcconf.GetMainConf()     //获取配置
-	lm2 := c2.GetRegistry()
-	p2 := pub.New(c2)
-	p2.Publish(serverName, serviceAddr, c2.GetServerID(), s2.GetRouterConf().GetPath()...)
+	s := confObj.GetAPIConf()       //初始化参数
+	c := rpcconf.GetMainConf()      //获取配置
+
+	//发布rpc节点
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), s.GetRouterConf().GetPath()...)
 	assert.Equal(t, false, err != nil, "发布rpc节点")
-	_, _, err = lm2.GetValue(c2.GetRPCServicePubPath("api1"))
+
+	lm := c.GetRegistry()
+	_, _, err = lm.GetValue(c.GetRPCServicePubPath("api1"))
 	assert.Equal(t, nil, err, "rpc服务节点发布验证")
-	_, _, err = lm2.GetValue(c2.GetRPCServicePubPath("api2"))
+	_, _, err = lm.GetValue(c.GetRPCServicePubPath("api2"))
 	assert.Equal(t, nil, err, "rpc服务节点发布验证")
 }
 
 func TestPublisher_Update(t *testing.T) {
+
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	confObj.RPC(":9377")
-
-	serverName := "192.168.5.118:9091"
-	serviceAddr := "192.168.5.118:9091"
-
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetMainConf()      //获取配置
 	lm := c.GetRegistry()
-	p := pub.New(c)
-
 	path := c.GetServerPubPath(c.GetClusterName())
-	//更新不存在的API节点的值
-	err := p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1")
-	assert.Equal(t, false, err != nil, "更新不存在的API节点的值")
-	_, _, err = lm.GetValue(path)
-	assert.Equal(t, true, err != nil, "servers服务节点发布验证")
 
-	//更新已经存在的API节点的不存在值
-	p.Publish(serverName, serviceAddr, c.GetServerID())
-	err = p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1")
-	assert.Equal(t, false, err != nil, "更新已经存在的API节点的不存在值")
-	paths, _, _ := lm.GetChildren(path)
-	for _, v := range paths {
-		ldata, _, err := lm.GetValue(registry.Join(path, v))
-		assert.Equal(t, nil, err, "更新已经存在的API节点的不存在值")
-		value := map[string]string{}
-		json.Unmarshal(ldata, &value)
-		assert.Equal(t, "value1", value["key1"], "更新已经存在的API节点的不存在值")
+	tests := []struct {
+		name            string
+		path            string
+		k               string
+		v               string
+		wantUpdateErr   bool
+		wantChildrenLen int
+		wantValueErr    bool
+	}{
+		{name: "更新已经存在的API节点的不存在值", path: path, k: "key1", v: "value1", wantChildrenLen: 1},
+		{name: "更新已经存在的API节点的存在值", path: path, k: "key1", v: "value1-1", wantChildrenLen: 1},
+		{name: "更新不存在的API节点的值", path: path + "/ss", k: "key1", v: "value1", wantChildrenLen: 0},
 	}
 
-	//更新已经存在的api节点存在的值
-	err = p.Update(serverName, serviceAddr, c.GetServerID(), "key1", "value1-1")
-	assert.Equal(t, false, err != nil, "更新存在的API节点存在的值")
-	paths, _, _ = lm.GetChildren(path)
-	for _, v := range paths {
-		ldata, _, err := lm.GetValue(registry.Join(path, v))
-		assert.Equal(t, nil, err, "更新存在的API节点存在的值")
-		value := map[string]string{}
-		json.Unmarshal(ldata, &value)
-		assert.Equal(t, "value1-1", value["key1"], "更新存在的API节点存在的值")
-	}
+	p := pub.New(c)
+	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
 
+	for _, tt := range tests {
+		//更新节点
+		err := p.Update("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID(), tt.k, tt.v)
+		assert.Equal(t, tt.wantUpdateErr, err != nil, tt.name)
+		//获取更新结果
+		paths, _, _ := lm.GetChildren(tt.path)
+		assert.Equal(t, tt.wantChildrenLen, len(paths), tt.name)
+		//验证
+		for _, v := range paths {
+			ldata, _, err := lm.GetValue(registry.Join(path, v))
+			assert.Equal(t, tt.wantValueErr, err != nil, tt.name)
+			value := map[string]string{}
+			json.Unmarshal(ldata, &value)
+			assert.Equal(t, tt.v, value[tt.k], tt.name)
+		}
+	}
 }
 
 //测试自动恢复节点
@@ -260,12 +263,13 @@ func TestNew(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetMainConf()      //获取配置
-	lm := c.GetRegistry()
 
-	p := pub.New(c)
-	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
-	pPath := c.GetServerPubPath(c.GetClusterName())
+	//发布节点
+	pub.New(c).Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
+
 	//删除节点
+	lm := c.GetRegistry()
+	pPath := c.GetServerPubPath(c.GetClusterName())
 	paths, _, _ := lm.GetChildren(pPath)
 	for _, v := range paths {
 		path := registry.Join(pPath, v)
@@ -274,44 +278,12 @@ func TestNew(t *testing.T) {
 		fmt.Printf("节点%s已删除", path)
 	}
 
+	//自动恢复节点
 	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
 
-	time.Sleep(time.Second * 10)
-	paths, _, _ = lm.GetChildren(pPath)
-	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
-
-	time.Sleep(time.Second * 10)
-	paths, _, _ = lm.GetChildren(pPath)
-	assert.Equal(t, 0, len(paths), "NEW()-测试自动恢复节点")
-
-	time.Sleep(time.Second * 15)
+	time.Sleep(time.Second * 35)
 	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 1, len(paths), "NEW()-测试自动恢复节点")
 
-}
-
-func TestPublisher_WatchClusterChange(t *testing.T) {
-
-	tests := []struct {
-		name    string
-		notify  func(isMaster bool, sharding int, total int)
-		wantErr bool
-	}{
-		{name: "1", notify: func(isMaster bool, sharding int, total int) {
-			fmt.Println(isMaster, sharding, total)
-		}, wantErr: false},
-	}
-
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":8080")
-	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
-
-	p := pub.New(c)
-	for _, tt := range tests {
-		if err := p.WatchClusterChange(tt.notify); (err != nil) != tt.wantErr {
-			t.Errorf("Publisher.WatchClusterChange() error = %v, wantErr %v", err, tt.wantErr)
-		}
-	}
 }

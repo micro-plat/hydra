@@ -6,6 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/registry"
+
 	//_ "github.com/micro-plat/hydra/registry/registry/etcd"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
@@ -94,11 +95,11 @@ func TestJoin(t *testing.T) {
 		args args
 		want string
 	}{
-		{name: "地址拼接", args: args{elem: []string{"", ""}}, want: ""},
-		{name: "地址拼接", args: args{elem: []string{"", "a/"}}, want: "/a"},
-		{name: "地址拼接", args: args{elem: []string{"a", "b", "c"}}, want: "/a/b/c"},
-		{name: "地址拼接", args: args{elem: []string{"..", "a/b", "c/"}}, want: "/../a/b/c"},
-		{name: "地址拼接", args: args{elem: []string{"..", "", "\\", "c/"}}, want: "/../c"},
+		{name: "参数均为空,地址拼接", args: args{elem: []string{"", ""}}, want: ""},
+		{name: "参数第一个为空,地址拼接", args: args{elem: []string{"", "a/"}}, want: "/a"},
+		{name: "参数待有特殊,地址拼接", args: args{elem: []string{"a", "b", "!@#$%^&*c"}}, want: "/a/b/!@#$%^&*c"},
+		{name: "参数带有相对地址,地址拼接", args: args{elem: []string{"..", "a/b", "c/"}}, want: "/../a/b/c"},
+		{name: "参数带有转义符,地址拼接", args: args{elem: []string{"..", "", "\\", "c/"}}, want: "/../c"},
 	}
 	for _, tt := range tests {
 		got := registry.Join(tt.args.elem...)
@@ -114,10 +115,10 @@ func TestNewRegistry(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wantR   registry.IRegistry
 		wantErr bool
 		err     string
 	}{
+		{name: "获取不支持的注册中心", args: args{address: "cloud://../"}, wantErr: true, err: "不支持的协议类型[cloud]"},
 		{name: "获取zk的注册中心", args: args{address: "zk://192.168.0.101"}, wantErr: false},
 		{name: "获取lm的注册中心", args: args{address: "lm://."}, wantErr: false},
 		{name: "获取fs的注册中心", args: args{address: "fs://../"}, wantErr: true, err: "配置文件不存在:../registry.test.conf.toml stat ../registry.test.conf.toml: no such file or directory"},
@@ -135,6 +136,8 @@ func TestNewRegistry(t *testing.T) {
 		if err != nil && tt.wantErr {
 			assert.Equal(t, tt.err, err.Error(), tt.name)
 		}
-		assert.Equal(t, tt.wantR, gotR, tt.name)
+		if !tt.wantErr {
+			assert.IsNil(t, false, gotR, tt.name)
+		}
 	}
 }
