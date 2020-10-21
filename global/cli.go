@@ -28,8 +28,8 @@ var FlagVal = &CliFlagObject{}
 
 //IUCLI 终端命令参数
 type IUCLI interface {
-	AddFlag(name string, usage string)
-	AddSliceFlag(name string, usage string)
+	AddFlag(name string, usage string) error
+	AddSliceFlag(name string, usage string) error
 	OnStarting(callback func(ICli) error)
 }
 
