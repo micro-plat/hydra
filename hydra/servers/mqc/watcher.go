@@ -27,7 +27,11 @@ LOOP:
 			watcher.Close()
 			break LOOP
 		case <-notify:
-			server := w.conf.GetMQCMainConf()
+			server, err := w.conf.GetMQCMainConf()
+			if err != nil {
+				w.log.Error("mqc主配置获取失败:", err)
+				continue
+			}
 			if !cluster.Current().IsAvailable() {
 				w.log.Error("当前集群节点不可用")
 				continue

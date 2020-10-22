@@ -72,6 +72,9 @@ func (c *Cluster) Next() (conf.ICNode, bool) {
 	nid := atomic.AddInt64(&c.index, 1)
 	c.lock.RLock()
 	defer c.lock.RUnlock()
+	if len(c.keyCache) <= 0 {
+		return nil, false
+	}
 	key := c.keyCache[int(nid%int64(len(c.keyCache)))]
 	v, ok := c.nodes.Get(key)
 	if ok {

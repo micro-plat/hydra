@@ -54,6 +54,7 @@ func NewPathMatch(all ...string) *PathMatch {
 
 //Match 是否匹配，支付完全匹配，模糊匹配，分段匹配
 func (a *PathMatch) Match(service string, seq string) (bool, string) {
+	service = strings.Trim(service, seq)
 	if v, ok := a.cache.Get(service); ok {
 		return v != "", v.(string)
 	}
@@ -61,6 +62,7 @@ func (a *PathMatch) Match(service string, seq string) (bool, string) {
 	//排除指定请求
 	for _, u := range a.all {
 		//完全匹配
+		u = strings.Trim(u, seq)
 		if strings.EqualFold(u, service) {
 			a.cache.SetIfAbsent(service, u)
 			return true, u

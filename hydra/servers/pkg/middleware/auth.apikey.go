@@ -27,7 +27,7 @@ func APIKeyAuth() Handler {
 			ctx.Next()
 			return
 		}
-		if ok, _ := auth.Match(ctx.Request().Path().GetRequestPath()); ok {
+		if ok, _ := auth.Match(ctx.Request().Path().GetRequestPath(), "/"); ok {
 			ctx.Next()
 			return
 		}

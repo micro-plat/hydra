@@ -12,7 +12,6 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"golang.org/x/time/rate"
 )
 
 //Limiter 限流器
@@ -24,31 +23,37 @@ type Limiter struct {
 }
 
 //New 构建Limit配置
-func New(rule *Rule, rules ...*Rule) *Limiter {
+func New(auth *Rule, opts ...Option) *Limiter {
 	limiter := &Limiter{
-		Rules:    make([]*Rule, 0, 1),
+		Rules:    []*Rule{auth},
 		limiters: cmap.New(8),
+		Disable:  false,
 	}
-	limiter.Rules = append(limiter.Rules, rule)
-	limiter.Rules = append(limiter.Rules, rules...)
-	paths := make([]string, 0, len(limiter.Rules)+1)
 
+	for _, f := range opts {
+		f(limiter)
+	}
+	paths := make([]string, 0, len(limiter.Rules)+1)
 	for _, v := range limiter.Rules {
-		v.limiter = rate.NewLimiter(rate.Limit(v.MaxAllow), v.MaxAllow)
 		limiter.limiters.Set(v.Path, v)
 		paths = append(paths, v.Path)
 	}
 	limiter.p = conf.NewPathMatch(paths...)
+	fmt.Println("NewPathMatch:", paths)
 	return limiter
 }
 
 //GetLimiter 获取限流器
 func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
-	ok, path := l.p.Match(path)
+	fmt.Println("GetLimiter:", path)
+
+	ok, path := l.p.Match(path, "/")
 	if !ok {
 		return false, nil
 	}
+	fmt.Println(l.limiters.Items())
 	rule, ok := l.limiters.Get(path)
+	fmt.Println("l.limiters.Get:", rule, ok)
 	if !ok {
 		panic("从缓存中未找到limite组件")
 	}
@@ -68,5 +73,5 @@ func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	if b, err := govalidator.ValidateStruct(&limiter); !b {
 		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
-	return New(limiter.Rules[0], limiter.Rules[1:]...), nil
+	return New(limiter.Rules[0], WithRuleList(limiter.Rules[1:]...)), nil
 }

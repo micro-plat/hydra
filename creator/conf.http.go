@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
+	"github.com/micro-plat/hydra/conf/server/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
@@ -70,8 +71,8 @@ func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
 }
 
 //Ras 远程认证服务配置
-func (b *httpBuilder) Ras(service string, opts ...ras.Option) *httpBuilder {
-	b.customerBuilder["auth/ras"] = ras.New(service, opts...)
+func (b *httpBuilder) Ras(opts ...ras.RASOption) *httpBuilder {
+	b.customerBuilder["auth/ras.auth"] = ras.NewRASAuth(opts...)
 	return b
 }
 
@@ -94,14 +95,14 @@ func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 }
 
 //Limit 服务器限流配置
-func (b *httpBuilder) Limit(r *limiter.Rule, rules ...*limiter.Rule) *httpBuilder {
-	b.customerBuilder["acl/limit"] = limiter.New(r, rules...)
+func (b *httpBuilder) Limit(r *limiter.Rule, opts ...limiter.Option) *httpBuilder {
+	b.customerBuilder["acl/limit"] = limiter.New(r, opts...)
 	return b
 }
 
 //Gray 灰度配置
-func (b *httpBuilder) Gray(script string) *httpBuilder {
-	b.customerBuilder["acl/gray"] = script
+func (b *httpBuilder) Gray(opts ...gray.Option) *httpBuilder {
+	b.customerBuilder["acl/gray"] = gray.New(opts...)
 	return b
 }
 

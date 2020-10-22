@@ -15,11 +15,13 @@ type RASAuth struct {
 }
 
 //NewRASAuth 构建RASAuth认证
-func NewRASAuth(auth ...*Auth) *RASAuth {
-	r := &RASAuth{}
-	for _, a := range auth {
-		a.PathMatch = conf.NewPathMatch(a.Requests...)
-		r.Auth = append(r.Auth, a)
+func NewRASAuth(opts ...RASOption) *RASAuth {
+	r := &RASAuth{
+		Disable: false,
+	}
+
+	for _, opt := range opts {
+		opt(r)
 	}
 	return r
 }
@@ -27,7 +29,7 @@ func NewRASAuth(auth ...*Auth) *RASAuth {
 //Match 检查指定的路径是否有对应的认证服务
 func (a RASAuth) Match(p string) (bool, *Auth) {
 	for _, auth := range a.Auth {
-		if ok, _ := auth.Match(p); ok {
+		if ok, _ := auth.Match(p, "/"); ok {
 			return true, auth
 		}
 	}
@@ -37,8 +39,7 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 //GetConf 获取配置信息
 func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
-	//设置Remote安全认证参数
-	_, err = cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
+	_, err = cnf.GetSubObject(registry.Join("auth", "ras.auth"), auths)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 	}
@@ -48,7 +49,7 @@ func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	}
 
 	for _, auth := range auths.Auth {
-		if b, err := govalidator.ValidateStruct(&auth); !b {
+		if b, err := govalidator.ValidateStruct(auth); !b {
 			return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 		}
 		auth.PathMatch = conf.NewPathMatch(auth.Requests...)

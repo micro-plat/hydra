@@ -32,7 +32,7 @@ func JwtAuth() Handler {
 		ctx.Response().AddSpecial("jwt")
 
 		//3.检查是否需要跳过请求
-		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok {
+		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath(), "/"); ok {
 			ctx.Next()
 			return
 		}
@@ -42,7 +42,7 @@ func JwtAuth() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
-		if ok, _ := jwtAuth.Match(routerObj.Service); ok {
+		if ok, _ := jwtAuth.Match(routerObj.Service, "/"); ok {
 			ctx.Next()
 			return
 		}

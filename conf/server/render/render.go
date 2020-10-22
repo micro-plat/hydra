@@ -55,26 +55,26 @@ func GetConf(cnf conf.IMainConf) (rsp *Render, err error) {
 
 //Get 获取转换结果
 func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.PathMatch.Match(path)
+	exists, service := r.PathMatch.Match(path, "/")
 	if !exists {
 		return false, 0, "", "", nil
 	}
 	tmpltStatus, tmpltContentType, tmpltContent := "", "", ""
 	var err error
 	if r.Tmplts[service].Status != "" {
-		tmpltStatus, err = translate(service, r.Tmplts[service].Status, funcs, i)
+		tmpltStatus, err = conf.TmpltTranslate(service, r.Tmplts[service].Status, funcs, i)
 		if err != nil || types.GetInt(tmpltStatus) == 0 {
 			return true, 0, "", "", fmt.Errorf("status模板%s配置有误 %w", r.Tmplts[service].Status, err)
 		}
 	}
 	if r.Tmplts[service].ContentType != "" {
-		tmpltContentType, err = translate(service, r.Tmplts[service].ContentType, funcs, i)
+		tmpltContentType, err = conf.TmpltTranslate(service, r.Tmplts[service].ContentType, funcs, i)
 		if err != nil {
 			return true, 0, "", "", fmt.Errorf("content_type模板%s配置有误 %w", r.Tmplts[service].ContentType, err)
 		}
 	}
 
-	tmpltContent, err = translate(service, r.Tmplts[service].Content, funcs, i)
+	tmpltContent, err = conf.TmpltTranslate(service, r.Tmplts[service].Content, funcs, i)
 	if err != nil {
 		return true, 0, "", "", fmt.Errorf("响应内容模板%s配置有误 %w", r.Tmplts[service].Content, err)
 	}
