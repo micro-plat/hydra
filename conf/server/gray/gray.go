@@ -16,16 +16,21 @@ type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Filter    string `json:"filter" valid:"required" toml:"filter,omitempty"`
 	UPCluster string `json:"upcluster" valid:"required" toml:"upcluster,omitempty"`
-	conf      conf.IMainConf
-	cluster   conf.ICluster
+	//conf      conf.IMainConf
+	cluster conf.ICluster
 }
 
 //New 灰度设置
-func New(filter string, upcluster string) *Gray {
-	return &Gray{
+func New(filter string, upcluster string, opts ...Option) *Gray {
+	gray := &Gray{
 		Filter:    filter,
 		UPCluster: upcluster,
 	}
+
+	for i := range opts {
+		opts[i](gray)
+	}
+	return gray
 }
 
 //Allow 当前服务
@@ -59,10 +64,10 @@ func (g *Gray) checkServers(c conf.IMainConf) error {
 	return nil
 }
 
-//GetConf 获取BlackList
+//GetConf 获取Gray
 func GetConf(cnf conf.IMainConf) (*Gray, error) {
-	gray := Gray{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), &gray)
+	gray := &Gray{}
+	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), gray)
 	if err == conf.ErrNoSetting {
 		return &Gray{Disable: true}, nil
 	}
@@ -71,13 +76,13 @@ func GetConf(cnf conf.IMainConf) (*Gray, error) {
 		return nil, fmt.Errorf("acl.gray配置有误:%v", err)
 	}
 
+	if b, err := govalidator.ValidateStruct(gray); !b {
+		return nil, fmt.Errorf("acl.gray配置数据有误:%v %+v", err, gray)
+	}
+
 	if err := gray.checkServers(cnf); err != nil {
 		return nil, fmt.Errorf("acl.gray服务检查错误:%v", err)
 	}
 
-	if b, err := govalidator.ValidateStruct(&gray); !b {
-		return nil, fmt.Errorf("acl.gray配置数据有误:%v %+v", err, gray)
-	}
-
-	return &gray, nil
+	return gray, nil
 }
