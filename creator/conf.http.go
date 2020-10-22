@@ -72,7 +72,7 @@ func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
 
 //Ras 远程认证服务配置
 func (b *httpBuilder) Ras(opts ...ras.RASOption) *httpBuilder {
-	b.customerBuilder["auth/ras.auth"] = ras.NewRASAuth(opts...)
+	b.customerBuilder["auth/ras"] = ras.NewRASAuth(opts...)
 	return b
 }
 

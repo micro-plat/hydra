@@ -62,16 +62,19 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 
 //GetConf 获取jwt
 func GetConf(cnf conf.IMainConf) (*Limiter, error) {
-	limiter := Limiter{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), &limiter)
+	limiter := &Limiter{}
+	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
-		return &Limiter{Disable: true}, nil
+		limiter.Disable = true
+		return limiter, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
 	}
-	if b, err := govalidator.ValidateStruct(&limiter); !b {
+	if b, err := govalidator.ValidateStruct(limiter); !b {
 		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
-	return New(limiter.Rules[0], WithRuleList(limiter.Rules[1:]...)), nil
+	newLimit := New(limiter.Rules[0], WithRule(limiter.Rules[1:]...))
+	newLimit.Disable = limiter.Disable
+	return newLimit, nil
 }

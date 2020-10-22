@@ -69,12 +69,13 @@ func (c *Cluster) Current() conf.ICNode {
 
 //Next 采用轮循的方式获得下一个节点
 func (c *Cluster) Next() (conf.ICNode, bool) {
-	nid := atomic.AddInt64(&c.index, 1)
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	if len(c.keyCache) <= 0 {
+	if len(c.keyCache) == 0 {
 		return nil, false
 	}
+	nid := atomic.AddInt64(&c.index, 1)
+
 	key := c.keyCache[int(nid%int64(len(c.keyCache)))]
 	v, ok := c.nodes.Get(key)
 	if ok {

@@ -12,6 +12,12 @@ func WithRuleList(list ...*Rule) Option {
 	}
 }
 
+func WithRule(rules ...*Rule) Option {
+	return func(l *Limiter) {
+		l.Rules = append(l.Rules, rules...)
+	}
+}
+
 //WithDisable 关闭
 func WithDisable() Option {
 	return func(a *Limiter) {

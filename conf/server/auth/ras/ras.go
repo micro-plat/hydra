@@ -39,7 +39,8 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 //GetConf 获取配置信息
 func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
-	_, err = cnf.GetSubObject(registry.Join("auth", "ras.auth"), auths)
+	//设置Remote安全认证参数
+	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 	}
