@@ -14,7 +14,6 @@ func Recovery() Handler {
 			if err := recover(); err != nil {
 				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
 				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", err))
-				ctx.Response().Flush()
 			}
 		}()
 		ctx.Next()

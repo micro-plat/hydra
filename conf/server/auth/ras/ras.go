@@ -15,11 +15,11 @@ type RASAuth struct {
 }
 
 //NewRASAuth 构建RASAuth认证
-func NewRASAuth(auth ...*Auth) *RASAuth {
+func NewRASAuth(opts ...Option) *RASAuth {
 	r := &RASAuth{}
-	for _, a := range auth {
-		a.PathMatch = conf.NewPathMatch(a.Requests...)
-		r.Auth = append(r.Auth, a)
+
+	for i := range opts {
+		opts[i](r)
 	}
 	return r
 }
@@ -27,7 +27,7 @@ func NewRASAuth(auth ...*Auth) *RASAuth {
 //Match 检查指定的路径是否有对应的认证服务
 func (a RASAuth) Match(p string) (bool, *Auth) {
 	for _, auth := range a.Auth {
-		if ok, _ := auth.Match(p); ok {
+		if ok, _ := auth.Match(p, "/"); ok {
 			return true, auth
 		}
 	}
@@ -38,7 +38,7 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
-	_, err = cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
+	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 	}

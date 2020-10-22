@@ -55,7 +55,7 @@ func GetConf(cnf conf.IMainConf) (rsp *Render, err error) {
 
 //Get 获取转换结果
 func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.PathMatch.Match(path)
+	exists, service := r.PathMatch.Match(path, "/")
 	if !exists {
 		return false, 0, "", "", nil
 	}

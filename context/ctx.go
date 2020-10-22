@@ -141,8 +141,8 @@ type IResponse interface {
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
 
-	//Render 修改最终渲染内容
-	Render(status int, content string, ctp string)
+	//WriteFinal 修改最终渲染内容
+	WriteFinal(status int, content string, ctp string)
 
 	//Write 向响应流中写入状态码与内容(不会立即写入)
 	Write(s int, v interface{}) error

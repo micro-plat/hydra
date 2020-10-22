@@ -40,7 +40,7 @@ type Auth struct {
 }
 
 //New 创建远程服务验证参数
-func New(service string, opts ...Option) *Auth {
+func New(service string, opts ...AuthOption) *Auth {
 	r := &Auth{
 		Service:  service,
 		Requests: []string{"*"},

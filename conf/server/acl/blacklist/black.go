@@ -27,7 +27,7 @@ func New(opts ...Option) *BlackList {
 
 //IsDeny 验证当前请求是否在黑名单中
 func (w *BlackList) IsDeny(ip string) bool {
-	ok, _ := w.ipm.Match(ip)
+	ok, _ := w.ipm.Match(ip, ".")
 	return ok
 }
 

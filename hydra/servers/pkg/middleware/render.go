@@ -27,6 +27,6 @@ func Render() Handler {
 			ctx.Log().Error("渲染响应结果出错:", err)
 			return
 		}
-		ctx.Response().Render(status, content, ctp)
+		ctx.Response().WriteFinal(status, content, ctp)
 	}
 }

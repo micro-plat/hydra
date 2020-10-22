@@ -25,7 +25,7 @@ type Rule struct {
 }
 
 //NewRule 构建限流规则
-func NewRule(path string, allow int, opts ...Option) *Rule {
+func NewRule(path string, allow int, opts ...RuleOption) *Rule {
 	r := &Rule{
 		Path:     path,
 		MaxAllow: allow,
