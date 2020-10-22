@@ -55,7 +55,7 @@ type IPath interface {
 	GetMethod() string
 
 	//GetRouter 获取当前请求对应的路由信息
-	GetRouter() *router.Router
+	GetRouter() (*router.Router, error)
 
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string

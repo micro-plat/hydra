@@ -6,7 +6,6 @@ time:2020-10-15
 package conf
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/rpc"
@@ -29,30 +28,36 @@ func TestRPCNew(t *testing.T) {
 		{name: "设置Enable初始化", opts: []rpc.Option{rpc.WithEnable()}, want: &rpc.Server{Status: "start"}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := rpc.New(tt.address, tt.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("New() = %v, want %v", got, tt.want)
-			}
-		})
+		got := rpc.New(tt.address, tt.opts...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
-func TestRpcGetConf(t *testing.T) {
-	conf := mocks.NewConf() //构建对象
-	wantC := rpc.New(":8088", rpc.WithTrace())
-	conf.RPC(":8088", rpc.WithTrace())
-	got, err := rpc.GetConf(conf.GetRPCConf().GetMainConf())
-	if err != nil {
-		t.Errorf("rpcGetConf 获取配置对对象失败,err: %v", err)
+func TestRPCGetConf(t *testing.T) {
+	type test struct {
+		name string
+		opts []rpc.Option
+		want *rpc.Server
 	}
-	assert.Equal(t, got, wantC, "检查对象是否满足预期")
-}
 
-func TestRpcGetConf1(t *testing.T) {
-	conf := mocks.NewConf() //构建对象
-	conf.RPC(":8088")
-	_, err := rpc.GetConf(conf.GetRPCConf().GetMainConf())
-	if err == nil {
-		t.Errorf("rpcGetConf 获取怕配置不能成功")
+	conf := mocks.NewConf()
+	test1 := test{name: "节点不存在,获取默认对象", opts: []rpc.Option{}, want: &rpc.Server{Address: ":8090"}}
+	obj, err := rpc.GetConf(conf.GetRPCConf().GetMainConf())
+	assert.Equal(t, nil, err, test1.name+",err")
+	assert.Equal(t, test1.want, obj, test1.name)
+
+	tests := []test{
+		{name: "节点为空,获取默认对象", opts: []rpc.Option{}, want: rpc.New(":8090")},
+		{name: "正常对象获取",
+			opts: []rpc.Option{rpc.WithTrace(), rpc.WithHeaderReadTimeout(10)},
+			want: rpc.New(":8090", rpc.WithTrace(), rpc.WithHeaderReadTimeout(10))},
 	}
+	for _, tt := range tests {
+		conf.RPC(":8090", tt.opts...)
+		obj, err := rpc.GetConf(conf.GetCronConf().GetMainConf())
+		assert.Equal(t, nil, err, tt.name+",err")
+		assert.Equal(t, tt.want, obj, tt.name)
+	}
+
+	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }

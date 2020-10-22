@@ -51,35 +51,29 @@ func (s *Static) AllowRequest(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Static
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置static
-func GetConf(cnf conf.IMainConf) *Static {
+func GetConf(cnf conf.IMainConf) (*Static, error) {
 	//设置静态文件路由
 	static := Static{
 		fileMap: map[string]FileInfo{},
 	}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("static配置有误:%v", err))
+		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
 		static.Disable = true
-		return &static
+		return &static, nil
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
-		panic(fmt.Errorf("static配置有误:%v", err))
+		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
 	if err != nil {
-		panic(fmt.Errorf("%s获取失败:%v", static.Archive, err))
+		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
 	static.RereshData()
-	return &static
+	return &static, nil
 }
 
 var waitRemoveDir = make([]string, 0, 1)

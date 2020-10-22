@@ -12,12 +12,19 @@ type cronSub struct {
 
 func newCronSub(cnf conf.IMainConf) *cronSub {
 	return &cronSub{
-		cnf:  cnf,
-		task: GetLoader(cnf, task.ConfHandler(task.GetConf).Handle),
+		cnf: cnf,
+		task: GetLoader(cnf,
+			func(cnf conf.IMainConf) (interface{}, error) {
+				return task.GetConf(cnf)
+			}),
 	}
 }
 
 //GetCRONTaskConf 获取cron任务配置
-func (s *cronSub) GetCRONTaskConf() *task.Tasks {
-	return s.task.GetConf().(*task.Tasks)
+func (s *cronSub) GetCRONTaskConf() (*task.Tasks, error) {
+	taskObj, err := s.task.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return taskObj.(*task.Tasks), nil
 }

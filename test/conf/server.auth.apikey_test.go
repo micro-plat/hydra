@@ -8,7 +8,6 @@ package conf
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -137,16 +136,19 @@ func TestApikeyGetConf2(t *testing.T) {
 	confB.APIKEY("", test1.opts...)
 	// 修改json数据不合法
 	path := apiConf.GetAPIConf().GetMainConf().GetSubConfPath("auth", "apikey")
-	ch, _ := apiConf.Registry.WatchValue(path)
-	time.Sleep(1 * time.Second)
+	// ch, _ := apiConf.Registry.WatchValue(path)
 	apiConf.Registry.Update(path, "错误的json字符串")
-	select {
-	case <-time.After(3 * time.Second):
-		return
-	case <-ch:
-		ttx, err := apiConf.GetAPIConf().GetMainConf().GetSubConf(registry.Join("auth", "apikey"))
-		t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
-		apikey.GetConf(apiConf.GetAPIConf().GetMainConf())
-		t.Errorf("%s,没有验证参数合法性错误", test1.name)
-	}
+
+	apiConf = mocks.NewConf()
+	ttx, err := apiConf.GetAPIConf().GetMainConf().GetSubConf(registry.Join("auth", "apikey"))
+	t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
+	// select {
+	// case <-time.After(3 * time.Second):
+	// 	return
+	// case <-ch:
+	// 	ttx, err := apiConf.GetAPIConf().GetMainConf().GetSubConf(registry.Join("auth", "apikey"))
+	// 	t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
+	// 	apikey.GetConf(apiConf.GetAPIConf().GetMainConf())
+	// 	t.Errorf("%s,没有验证参数合法性错误", test1.name)
+	// }
 }

@@ -11,11 +11,12 @@ type VarLoader struct {
 	obj  interface{}
 	once sync.Once
 	cnf  conf.IVarConf
-	f    func(cnf conf.IVarConf) interface{}
+	err  error
+	f    func(cnf conf.IVarConf) (interface{}, error)
 }
 
 //GetVarLoader 获取配置加载器
-func GetVarLoader(cnf conf.IVarConf, f func(cnf conf.IVarConf) interface{}) *VarLoader {
+func GetVarLoader(cnf conf.IVarConf, f func(cnf conf.IVarConf) (interface{}, error)) *VarLoader {
 	return &VarLoader{
 		cnf: cnf,
 		f:   f,
@@ -23,9 +24,9 @@ func GetVarLoader(cnf conf.IVarConf, f func(cnf conf.IVarConf) interface{}) *Var
 }
 
 //GetConf 获取配置信息
-func (l *VarLoader) GetConf() interface{} {
+func (l *VarLoader) GetConf() (interface{}, error) {
 	l.once.Do(func() {
-		l.obj = l.f(l.cnf)
+		l.obj, l.err = l.f(l.cnf)
 	})
-	return l.obj
+	return l.obj, l.err
 }

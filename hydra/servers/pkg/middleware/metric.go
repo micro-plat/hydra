@@ -26,7 +26,11 @@ func NewMetric() *Metric {
 }
 func (m *Metric) onceDo(ctx IMiddleContext) {
 	m.once.Do(func() {
-		metric := ctx.ServerConf().GetMetricConf()
+		metric, err := ctx.ServerConf().GetMetricConf()
+		if err != nil {
+			panic(fmt.Errorf("metric配置获取失败:%w", err))
+		}
+
 		if metric.Disable {
 			return
 		}
@@ -36,7 +40,6 @@ func (m *Metric) onceDo(ctx IMiddleContext) {
 		m.logger = logger.New("metric")
 
 		//2. 创建上报服务
-		var err error
 		m.reporter, err = metrics.InfluxDB(m.currentRegistry,
 			metric.Cron,
 			metric.Host,

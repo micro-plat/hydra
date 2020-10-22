@@ -12,7 +12,11 @@ import (
 //Gray 灰度配置
 func Gray() Handler {
 	return func(ctx IMiddleContext) {
-		gray := ctx.ServerConf().GetGray()
+		gray, err := ctx.ServerConf().GetGray()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if gray.Disable {
 			ctx.Next()
 			return

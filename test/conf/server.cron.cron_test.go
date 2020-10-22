@@ -6,7 +6,6 @@ time:2020-10-15
 package conf
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/cron"
@@ -29,30 +28,36 @@ func TestCronNew(t *testing.T) {
 		{name: "初始化Enable参数对象", args: []cron.Option{cron.WithEnable()}, want: &cron.Server{Status: "start"}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := cron.New(tt.args...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("New() = %v, want %v", got, tt.want)
-			}
-		})
+		got := cron.New(tt.args...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
 func TestCronGetConf(t *testing.T) {
-	conf := mocks.NewConf() //构建对象
-	wantC := cron.New(cron.WithTrace())
-	conf.CRON(cron.WithTrace())
-	got, err := cron.GetConf(conf.GetCronConf().GetMainConf())
-	if err != nil {
-		t.Errorf("cronGetConf 获取配置对对象失败,err: %v", err)
+	type test struct {
+		name string
+		opts []cron.Option
+		want *cron.Server
 	}
-	assert.Equal(t, got, wantC, "检查对象是否满足预期")
-}
 
-func TestCronGetConf1(t *testing.T) {
-	conf := mocks.NewConf() //构建对象
-	conf.API(":8000")
-	_, err := cron.GetConf(conf.GetAPIConf().GetMainConf())
-	if err == nil {
-		t.Errorf("cronGetConf 获取怕配置不能成功")
+	conf := mocks.NewConf()
+	test1 := test{name: "节点不存在,获取默认对象", opts: []cron.Option{}, want: &cron.Server{}}
+	obj, err := cron.GetConf(conf.GetCronConf().GetMainConf())
+	assert.Equal(t, nil, err, test1.name+",err")
+	assert.Equal(t, test1.want, obj, test1.name)
+
+	tests := []test{
+		{name: "节点为空,获取默认对象", opts: []cron.Option{}, want: cron.New()},
+		{name: "正常对象获取",
+			opts: []cron.Option{cron.WithTrace(), cron.WithMasterSlave()},
+			want: cron.New(cron.WithTrace(), cron.WithMasterSlave())},
 	}
+	for _, tt := range tests {
+		conf.CRON(tt.opts...)
+		obj, err := cron.GetConf(conf.GetCronConf().GetMainConf())
+		assert.Equal(t, nil, err, tt.name+",err")
+		assert.Equal(t, tt.want, obj, tt.name)
+	}
+
+	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }

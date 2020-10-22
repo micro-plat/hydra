@@ -124,7 +124,12 @@ func (r *request) Get(name string) (result string, ok bool) {
 			if err != nil {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
 			}
-			rx, err := encoding.Decode(u, r.path.GetRouter().GetEncoding())
+
+			routerObj, err := r.path.GetRouter()
+			if err != nil {
+				panic(fmt.Errorf("url.Router配置错误:%w", err))
+			}
+			rx, err := encoding.Decode(u, routerObj.GetEncoding())
 			if err != nil {
 				result = u
 				return

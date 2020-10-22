@@ -57,27 +57,21 @@ func (a *APIKeyAuth) Verify(raw string, sign string) error {
 
 }
 
-type ConfHandler func(cnf conf.IMainConf) *APIKeyAuth
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取APIKeyAuth
-func GetConf(cnf conf.IMainConf) *APIKeyAuth {
+func GetConf(cnf conf.IMainConf) (*APIKeyAuth, error) {
 	fsa := APIKeyAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "apikey"), &fsa)
 	if err == conf.ErrNoSetting {
-		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}
+		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("apikey配置有误:%v", err))
+		return nil, fmt.Errorf("apikey配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&fsa); !b {
-		panic(fmt.Errorf("apikey配置有误1:%v", err))
+		return nil, fmt.Errorf("apikey配置数据有误:%v", err)
 	}
 	fsa.PathMatch = conf.NewPathMatch(fsa.Excludes...)
-	return &fsa
+	return &fsa, nil
 }
 
 //CreateSecret 创建Secret

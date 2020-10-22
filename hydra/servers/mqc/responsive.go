@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
+	varqueue "github.com/micro-plat/hydra/conf/vars/queue"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry/pub"
@@ -44,14 +45,18 @@ func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
+	if !w.conf.GetMainConf().IsStarted() {
+		w.log.Warnf("%s被禁用，未启动", w.conf.GetMainConf().GetServerType())
+		return
+	}
 	if err = w.Server.Start(); err != nil {
-		err = fmt.Errorf("启动失败 %w", err)
+		err = fmt.Errorf("%s启动失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		return
 	}
 
 	//发布集群节点
 	if err = w.publish(); err != nil {
-		err = fmt.Errorf("服务发布失败 %w", err)
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
@@ -62,11 +67,11 @@ func (w *Responsive) Start() (err error) {
 	//动态监听任务
 	services.MQC.Subscribe(func(t *queue.Queue) {
 		if err := w.Server.Add(t); err != nil {
-			w.log.Errorf("服务[%v]添加失败 %w", t, err)
+			w.log.Errorf("[%s]]服务[%v]添加失败 %w", w.conf.GetMainConf().GetServerType(), t, err)
 		}
 	})
 
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetMQCQueueConf().Queues))
+	w.log.Infof("启动成功(%s,%s)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
 	return nil
 }
 
@@ -81,6 +86,11 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.Shutdown()
 
 		server.Cache.Save(c)
+		if !c.GetMainConf().IsStarted() {
+			w.log.Info("mqc服务被禁用，不用重启")
+			w.conf = c
+			return true, nil
+		}
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -132,21 +142,28 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
-	nconf := cnf.GetMQCMainConf()
+	nconf, err := cnf.GetMQCMainConf()
+	if err != nil {
+		return nil, fmt.Errorf("mqc服务器配置获取失败:%v", err)
+	}
 	proto, name, err := global.ParseProto(nconf.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器地址有误:%w", err)
 	}
 	// fmt.Println("proto:", proto)
+	queueObj, err := cnf.GetMQCQueueConf()
+	if err != nil {
+		return nil, fmt.Errorf("mqc服务器监听队列配置有误:%w", err)
+	}
 	if global.IsLocal(proto) {
-		return NewServer(proto, nil, cnf.GetMQCQueueConf().Queues...)
+		return NewServer(proto, nil, queueObj.Queues...)
 	}
 
-	js, err := cnf.GetVarConf().GetConf(queue.VarRootName, name)
+	js, err := cnf.GetVarConf().GetConf(varqueue.VarRootName, name)
 	if err != nil {
-		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", queue.VarRootName, name, err)
+		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.VarRootName, name, err)
 	}
-	return NewServer(proto, js.GetRaw(), cnf.GetMQCQueueConf().Queues...)
+	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
 }
 
 func init() {

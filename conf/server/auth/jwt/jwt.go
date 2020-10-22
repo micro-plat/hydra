@@ -38,27 +38,21 @@ func NewJWT(opts ...Option) *JWTAuth {
 	return jwt
 }
 
-type ConfHandler func(cnf conf.IMainConf) *JWTAuth
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) *JWTAuth {
+func GetConf(cnf conf.IMainConf) (*JWTAuth, error) {
 
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "jwt"), &jwt)
 	if err == conf.ErrNoSetting {
-		return &JWTAuth{Disable: true}
+		return &JWTAuth{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("jwt配置有误:%v", err))
+		return nil, fmt.Errorf("jwt配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&jwt); !b {
-		panic(fmt.Errorf("jwt配置有误:%v", err))
+		return nil, fmt.Errorf("jwt配置数据有误:%v", err)
 	}
 	jwt.PathMatch = conf.NewPathMatch(jwt.Excludes...)
 
-	return &jwt
+	return &jwt, nil
 }

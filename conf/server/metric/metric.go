@@ -40,25 +40,19 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 	return m
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Metric
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置metric
-func GetConf(cnf conf.IMainConf) (metric *Metric) {
+func GetConf(cnf conf.IMainConf) (metric *Metric, err error) {
 	metric = &Metric{}
-	_, err := cnf.GetSubObject("metric", &metric)
+	_, err = cnf.GetSubObject("metric", &metric)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(err)
+		return nil, err
 	}
 	if err == conf.ErrNoSetting {
 		metric.Disable = true
-		return
+		return metric, nil
 	}
 	if b, err := govalidator.ValidateStruct(metric); !b {
-		panic(fmt.Errorf("metric配置有误:%v", err))
+		return nil, fmt.Errorf("metric配置数据有误:%v", err)
 	}
 	return
 }

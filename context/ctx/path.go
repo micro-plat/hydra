@@ -36,12 +36,16 @@ func (c *rpath) GetMethod() string {
 }
 
 //GetRouter 获取路由信息
-func (c *rpath) GetRouter() *router.Router {
+func (c *rpath) GetRouter() (*router.Router, error) {
 	switch c.serverConf.GetMainConf().GetServerType() {
 	case global.API, global.Web, global.WS:
-		return c.serverConf.GetRouterConf().Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		routerObj, err := c.serverConf.GetRouterConf()
+		if err != nil {
+			return nil, err
+		}
+		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod()), nil
 	default:
-		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8"))
+		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8")), nil
 	}
 
 }
