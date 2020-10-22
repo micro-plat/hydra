@@ -9,24 +9,45 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/micro-plat/hydra/test/assert"
+
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 )
 
-func TestNewRASAuth(t *testing.T) {
+func TestNewAuth(t *testing.T) {
 	tests := []struct {
-		name string
-		args []ras.Option
-		want *ras.RASAuth
+		name    string
+		service string
+		opts    []ras.Option
+		want    *ras.Auth
 	}{
-		// TODO: Add test cases.
+		{name: "设置默认对象", service: "", opts: []ras.Option{}, want: &ras.Auth{Service: "", Requests: []string{"*"}, Connect: &ras.Connect{},
+			Params: make(map[string]interface{}), Required: make([]string, 0, 1), Alias: make(map[string]string), Decrypt: make([]string, 0, 1)}},
+		{name: "设置service对象", service: "test-tsy", opts: []ras.Option{}, want: &ras.Auth{Service: "test-tsy", Requests: []string{"*"}, Connect: &ras.Connect{},
+			Params: make(map[string]interface{}), Required: make([]string, 0, 1), Alias: make(map[string]string), Decrypt: make([]string, 0, 1)}},
+		{name: "设置Requests对象", service: "", opts: []ras.Option{ras.WithRequest("/t1/t2")}, want: &ras.Auth{Service: "", Requests: []string{"/t1/t2"}, Connect: &ras.Connect{},
+			Params: make(map[string]interface{}), Required: make([]string, 0, 1), Alias: make(map[string]string), Decrypt: make([]string, 0, 1)}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := ras.NewRASAuth(tt.args...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewRASAuth() = %v, want %v", got, tt.want)
-			}
-		})
+		got := ras.New(tt.service, tt.opts...)
+		assert.Equal(t, tt.want, got, tt.name)
+	}
+}
+
+func TestNewRASAuth(t *testing.T) {
+	tests := []struct {
+		name    string
+		service string
+		opts    []ras.Option
+		want    *ras.Auth
+	}{
+		{name: "设置默认对象", service: "", opts: []ras.Option{}, want: &ras.Auth{Service: "", Requests: []string{"*"}, Connect: &ras.Connect{},
+			Params: make(map[string]interface{}), Required: make([]string, 0, 1), Alias: make(map[string]string), Decrypt: make([]string, 0, 1)}},
+	}
+	for _, tt := range tests {
+		got := ras.New(tt.service, tt.opts...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 

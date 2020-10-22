@@ -48,7 +48,7 @@ func New(opts ...Option) *Limiter {
 
 //GetLimiter 获取限流器
 func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
-	ok, path := l.p.Match(path)
+	ok, path := l.p.Match(path, "/")
 	if !ok {
 		return false, nil
 	}
@@ -59,27 +59,21 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 	return true, rule.(*Rule)
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Limiter
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) *Limiter {
+func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
 		limiter.Disable = true
-		return limiter
+		return limiter, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("绑定limit配置有误:%v", err))
+		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(limiter); !b {
-		panic(fmt.Errorf("limit配置有误:%v %+v", err, limiter))
+		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
 	newLimit := New(WithRule(limiter.Rules...))
 	newLimit.Disable = limiter.Disable
-	return newLimit
+	return newLimit, nil
 }

@@ -9,7 +9,12 @@ import (
 func WhiteList() Handler {
 	return func(ctx IMiddleContext) {
 		//获取FSA配置
-		white := ctx.ServerConf().GetWhiteListConf()
+		white, err := ctx.ServerConf().GetWhiteListConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+
 		if white.Disable {
 			ctx.Next()
 			return

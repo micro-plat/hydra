@@ -43,19 +43,23 @@ func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
+	if !w.conf.GetMainConf().IsStarted() {
+		w.log.Warnf("%s被禁用，未启动", w.conf.GetMainConf().GetServerType())
+		return
+	}
 	if err = w.Server.Start(); err != nil {
-		err = fmt.Errorf("启动失败 %w", err)
+		err = fmt.Errorf("%s启动失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		return
 	}
 
 	//发布集群节点
 	if err = w.publish(); err != nil {
-		err = fmt.Errorf("服务发布失败 %w", err)
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
 
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetRouterConf().Routers))
+	w.log.Infof("启动成功(%s,%s)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
 	return nil
 }
 
@@ -70,6 +74,11 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.Shutdown()
 
 		server.Cache.Save(c)
+		if !c.GetMainConf().IsStarted() {
+			w.log.Info("rpc服务被禁用，不用重启")
+			w.conf = c
+			return true, nil
+		}
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -101,7 +110,12 @@ func (w *Responsive) Shutdown() {
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID(), w.conf.GetRouterConf().GetPath()...); err != nil {
+	routerObj, err := w.conf.GetRouterConf()
+	if err != nil {
+		return err
+	}
+
+	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID(), routerObj.GetPath()...); err != nil {
 		return err
 	}
 
@@ -121,7 +135,16 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
-	return NewServer(cnf.GetMainConf().GetRootConf().GetString("address"), cnf.GetRouterConf().Routers)
+	router, err := cnf.GetRouterConf()
+	if err != nil {
+		return nil, err
+	}
+
+	rpcConf, err := rpc.GetConf(cnf.GetMainConf())
+	if err != nil {
+		return nil, err
+	}
+	return NewServer(rpcConf.Address, router.Routers)
 }
 
 func init() {

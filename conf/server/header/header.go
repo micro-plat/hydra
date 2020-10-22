@@ -78,20 +78,14 @@ func (h Headers) hasCross(origin string) bool {
 	return false
 }
 
-type ConfHandler func(cnf conf.IMainConf) Headers
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置header
-func GetConf(cnf conf.IMainConf) (header Headers) {
-	_, err := cnf.GetSubObject("header", &header)
+func GetConf(cnf conf.IMainConf) (header Headers, err error) {
+	_, err = cnf.GetSubObject("header", &header)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("header配置有误:%v", err))
+		return nil, fmt.Errorf("header配置有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
-		return nil
+		return nil, nil
 	}
 	return
 }

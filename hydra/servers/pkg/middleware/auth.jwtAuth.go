@@ -18,7 +18,11 @@ func JwtAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//1. 获取jwt配置
-		jwtAuth := ctx.ServerConf().GetJWTConf()
+		jwtAuth, err := ctx.ServerConf().GetJWTConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if jwtAuth.Disable {
 			ctx.Next()
 			return
@@ -28,17 +32,23 @@ func JwtAuth() Handler {
 		ctx.Response().AddSpecial("jwt")
 
 		//3.检查是否需要跳过请求
-		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok {
+		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath(), "/"); ok {
 			ctx.Next()
 			return
 		}
-		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRouter().Service); ok {
+
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		if ok, _ := jwtAuth.Match(routerObj.Service, "/"); ok {
 			ctx.Next()
 			return
 		}
 
 		//4. 验证jwt
-		_, err := checkJWT(ctx, jwtAuth)
+		_, err = checkJWT(ctx, jwtAuth)
 		if err == nil {
 			ctx.Next()
 			return

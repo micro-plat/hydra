@@ -47,26 +47,20 @@ func (b *BasicAuth) GetRealm() string {
 	return "Basic realm=" + strconv.Quote("Authorization Required")
 }
 
-type ConfHandler func(cnf conf.IMainConf) *BasicAuth
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取basic
-func GetConf(cnf conf.IMainConf) *BasicAuth {
+func GetConf(cnf conf.IMainConf) (*BasicAuth, error) {
 	basic := BasicAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "basic"), &basic)
 	if err == conf.ErrNoSetting || len(basic.Members) == 0 {
-		return &BasicAuth{Disable: true}
+		return &BasicAuth{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("basic配置有误:%v", err))
+		return nil, fmt.Errorf("basic配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&basic); !b {
-		panic(fmt.Errorf("basic配置有误:%v", err))
+		return nil, fmt.Errorf("basic配置数据有误:%v", err)
 	}
 	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
-	return &basic
+	return &basic, nil
 }

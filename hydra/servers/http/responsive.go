@@ -41,17 +41,23 @@ func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
+
+	if !w.conf.GetMainConf().IsStarted() {
+		w.log.Warnf("%s被禁用，未启动", w.conf.GetMainConf().GetServerType())
+		return
+	}
+
 	if err = w.Server.Start(); err != nil {
-		err = fmt.Errorf("启动失败 %w", err)
+		err = fmt.Errorf("%s启动失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		return
 	}
 
 	if err = w.publish(); err != nil {
-		err = fmt.Errorf("服务发布失败 %w", err)
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetRouterConf().Routers))
+	w.log.Infof("启动成功(%s,%s)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
 	return nil
 }
 
@@ -66,6 +72,11 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.Shutdown()
 
 		server.Cache.Save(c)
+		if !c.GetMainConf().IsStarted() {
+			w.log.Info("api服务被禁用，不用重启")
+			w.conf = c
+			return true, nil
+		}
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -108,27 +119,34 @@ func (w *Responsive) publish() (err error) {
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	tp := cnf.GetMainConf().GetServerType()
+	apiConf, err := api.GetConf(cnf.GetMainConf())
+	if err != nil {
+		return nil, err
+	}
+	routerconf, err := cnf.GetRouterConf()
+	if err != nil {
+		return nil, err
+	}
 	switch tp {
 	case WS:
-		return NewWSServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetRootConf().GetString("address", ":8070"),
-			cnf.GetRouterConf().Routers,
-			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
+		return NewWSServer(tp,
+			apiConf.GetWSAddress(),
+			routerconf.GetRouters(),
+			WithServerType(tp),
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
+	case Web:
+		return NewWSServer(tp,
+			apiConf.GetWEBAddress(),
+			routerconf.GetRouters(),
+			WithServerType(tp),
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
 	default:
-		return NewServer(cnf.GetMainConf().GetServerName(),
-			cnf.GetMainConf().GetRootConf().GetString("address", ":8080"),
-			cnf.GetRouterConf().Routers,
-			WithServerType(cnf.GetMainConf().GetServerType()),
-			WithTLS(cnf.GetMainConf().GetRootConf().GetStrings("tls")),
-			WithTimeout(cnf.GetMainConf().GetRootConf().GetInt("rTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("wTimeout", 30),
-				cnf.GetMainConf().GetRootConf().GetInt("rhTimeout", 30)))
+		return NewServer(tp,
+			apiConf.GetAPIAddress(),
+			routerconf.GetRouters(),
+			WithServerType(tp),
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
 	}
-
 }
 
 func init() {

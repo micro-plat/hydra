@@ -44,14 +44,20 @@ func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
+
+	if !w.conf.GetMainConf().IsStarted() {
+		w.log.Warnf("%s被禁用，未启动", w.conf.GetMainConf().GetServerType())
+		return
+	}
+
 	if err = w.Server.Start(); err != nil {
-		err = fmt.Errorf("启动失败 %w", err)
+		err = fmt.Errorf("%s启动失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		return
 	}
 
 	//发布集群节点
 	if err = w.publish(); err != nil {
-		err = fmt.Errorf("服务发布失败 %w", err)
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetMainConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
@@ -61,7 +67,7 @@ func (w *Responsive) Start() (err error) {
 
 	w.subscribe()
 
-	w.log.Infof("启动成功(%s,%s,%d)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress(), len(w.conf.GetCRONTaskConf().Tasks))
+	w.log.Infof("启动成功(%s,%s)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
 	return nil
 }
 
@@ -76,6 +82,11 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.Shutdown()
 
 		server.Cache.Save(c)
+		if !c.GetMainConf().IsStarted() {
+			w.log.Info("cron服务被禁用，不用重启")
+			w.conf = c
+			return true, nil
+		}
 		w.Server, err = w.getServer(c)
 		if err != nil {
 			return false, err
@@ -135,8 +146,17 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
+	_, err := cron.GetConf(cnf.GetMainConf())
+	if err != nil {
+		return nil, err
+	}
+
+	task, err := cnf.GetCRONTaskConf()
+	if err != nil {
+		return nil, err
+	}
 	//初始化server
-	return NewServer(cnf.GetCRONTaskConf().Tasks...)
+	return NewServer(task.Tasks...)
 }
 
 func init() {

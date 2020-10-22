@@ -15,7 +15,11 @@ import (
 func JwtWriter() Handler {
 	return func(ctx IMiddleContext) {
 		ctx.Next()
-		conf := ctx.ServerConf().GetJWTConf()
+		conf, err := ctx.ServerConf().GetJWTConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 
 		if conf.Disable {
 			return

@@ -6,8 +6,6 @@ time:2020-10-15
 package conf
 
 import (
-	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/mqc"
@@ -32,40 +30,33 @@ func TestMqcNew(t *testing.T) {
 		{name: "初始化Enable参数对象", addr: "redis://11", opts: []mqc.Option{mqc.WithEnable()}, want: &mqc.Server{Addr: "redis://11", Status: "start"}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := mqc.New(tt.addr, tt.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("New() = %v, want %v", got, tt.want)
-			}
-		})
+		got := mqc.New(tt.addr, tt.opts...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
-func TestMqcGetConf(t *testing.T) {
-	defer func() {
-		if err := recover(); err != nil {
-			t.Errorf("MqcGetConf 获取失败,err:%v", err)
-		}
-	}()
-	conf := mocks.NewConf() //构建对象
-	wantC := mqc.New("redis://192.196.0.1", mqc.WithTrace())
-	conf.MQC("redis://192.196.0.1", mqc.WithTrace())
-	got := mqc.GetConf(conf.GetMQCConf().GetMainConf())
-	assert.Equal(t, got, wantC, "检查对象是否满足预期")
-}
+func TestMQCGetConf(t *testing.T) {
+	type test struct {
+		name string
+		opts []mqc.Option
+		want *mqc.Server
+	}
 
-func TestMqcGetConf1(t *testing.T) {
-	defer func() {
-		if err := recover(); err != nil {
-			err1 := err.(error)
-			if !strings.Contains(err1.Error(), "配置有误") {
-				t.Errorf("MqcGetConf 获取怕配置不能成功")
-			} else {
-				t.Errorf("MqcGetConf 配置有误,err:%v", err)
-			}
-		}
-	}()
-	conf := mocks.NewConf() //构建对象
-	conf.API(":8000")
-	mqc.GetConf(conf.GetAPIConf().GetMainConf())
+	conf := mocks.NewConf()
+	//mqc的节点不存在需要报 panic
+	// test1 := test{name: "节点不存在,获取默认对象", opts: []mqc.Option{}, want: &mqc.Server{}}
+	// obj := mqc.GetConf(conf.GetMQCConf().GetMainConf())
+	// assert.Equal(t, test1.want, obj, test1.name)
+	tests := []test{
+		{name: "正常对象获取",
+			opts: []mqc.Option{mqc.WithTrace(), mqc.WithMasterSlave()},
+			want: mqc.New("redis://192.196.0.1", mqc.WithTrace(), mqc.WithMasterSlave())},
+	}
+	for _, tt := range tests {
+		conf.MQC("redis://192.196.0.1", tt.opts...)
+		obj := mqc.GetConf(conf.GetMQCConf().GetMainConf())
+		assert.Equal(t, tt.want, obj, tt.name)
+	}
 
+	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }

@@ -8,7 +8,11 @@ import (
 //BlackList 黑名单
 func BlackList() Handler {
 	return func(ctx IMiddleContext) {
-		white := ctx.ServerConf().GetBlackListConf()
+		white, err := ctx.ServerConf().GetBlackListConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if white.Disable {
 			ctx.Next()
 			return
