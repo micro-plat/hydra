@@ -19,7 +19,6 @@ type Metric struct {
 	UserName string `json:"userName,omitempty" valid:"ascii" toml:"userName,omitempty"`
 	Password string `json:"password,omitempty" valid:"ascii" toml:"password,omitempty"`
 	Disable  bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-	*option
 }
 
 //New 构建api server配置信息
@@ -32,10 +31,9 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 		Host:     host,
 		DataBase: db,
 		Cron:     cron,
-		option:   &option{},
 	}
 	for _, opt := range opts {
-		opt(m.option)
+		opt(m)
 	}
 	return m
 }
