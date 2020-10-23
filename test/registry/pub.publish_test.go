@@ -39,7 +39,8 @@ func TestPublisher_PubRPCServiceNode(t *testing.T) {
 
 	p := pub.New(c)
 	i := 1
-	for _, service := range s.GetRouterConf().GetPath() {
+	router, _ := s.GetRouterConf()
+	for _, service := range router.GetPath() {
 		got, err := p.PubRPCServiceNode("192.168.5.115:9999", service, getTestData("192.168.5.115:9999", c.GetServerID()))
 		assert.Equal(t, false, err != nil, "rpc服务发布")
 		//验证pubs长度
@@ -176,7 +177,8 @@ func TestPublisher_Publish_API(t *testing.T) {
 	c := apiconf.GetMainConf()      //获取配置
 
 	//发布api节点和dns节点
-	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	router, _ := apiconf.GetRouterConf()
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
 	assert.Equal(t, false, err != nil, "发布api节点和dns节点")
 
 	//验证节点发布结果
@@ -202,7 +204,8 @@ func TestPublisher_Publish_RPC(t *testing.T) {
 	c := rpcconf.GetMainConf()      //获取配置
 
 	//发布rpc节点
-	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), s.GetRouterConf().GetPath()...)
+	router, _ := s.GetRouterConf()
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
 	assert.Equal(t, false, err != nil, "发布rpc节点")
 
 	lm := c.GetRegistry()

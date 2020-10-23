@@ -64,7 +64,8 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
 	}
 
-	pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	router, _ := apiconf.GetRouterConf()
+	pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
 	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
@@ -91,7 +92,7 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 					assert.Equal(t, newVersion, c.Version, tt.name)
 					assert.Equal(t, newData, c.Content, tt.name)
 				}
-				
+
 				assert.Equal(t, tt.path, c.Path, tt.name)
 				tt.wantOp = watcher.CHANGE
 			default:

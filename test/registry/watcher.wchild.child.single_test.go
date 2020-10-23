@@ -63,8 +63,9 @@ func TestChildWatcher_Start(t *testing.T) {
 	}
 
 	//发布节点到注册中心
-	pub.New(c).Publish(addr1, addr1, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
-	pub.New(c).Publish(addr2, addr2, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	router, _ := apiconf.GetRouterConf()
+	pub.New(c).Publish(addr1, addr1, c.GetServerID(), router.GetPath()...)
+	pub.New(c).Publish(addr2, addr2, c.GetServerID(), router.GetPath()...)
 	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
@@ -135,8 +136,9 @@ func TestChildWatcher_Start_2(t *testing.T) {
 	}
 
 	//发布节点到注册中心
-	pub.New(c).Publish(addr1, addr1, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
-	pub.New(c).Publish(addr2, addr2, c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	router, _ := apiconf.GetRouterConf()
+	pub.New(c).Publish(addr1, addr1, c.GetServerID(), router.GetPath()...)
+	pub.New(c).Publish(addr2, addr2, c.GetServerID(), router.GetPath()...)
 	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {

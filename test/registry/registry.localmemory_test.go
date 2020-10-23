@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
@@ -232,6 +233,7 @@ func TestWatchValue(t *testing.T) {
 			//应收到值变化通知
 			select {
 			case v := <-notify:
+				fmt.Println("V:", v)
 				value, version := v.GetValue()
 				assert.NotEqual(t, version, int32(0), c.name)
 				assert.Equal(t, c.nvalue, string(value), c.name)
