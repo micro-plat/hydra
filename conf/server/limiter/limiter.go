@@ -16,16 +16,16 @@ import (
 
 //Limiter 限流器
 type Limiter struct {
-	Rules    []*Rule         `json:"rules" toml:"rules,omitempty"`
+	Rules    []*Rule         `json:"rules" valid:"required" toml:"rules,omitempty"`
 	Disable  bool            `json:"disable,omitempty" toml:"disable,omitempty"`
 	p        *conf.PathMatch `json:"-"`
 	limiters cmap.ConcurrentMap
 }
 
 //New 构建Limit配置
-func New(auth *Rule, opts ...Option) *Limiter {
+func New(opts ...Option) *Limiter {
 	limiter := &Limiter{
-		Rules:    []*Rule{auth},
+		Rules:    []*Rule{},
 		limiters: cmap.New(8),
 		Disable:  false,
 	}
@@ -39,21 +39,16 @@ func New(auth *Rule, opts ...Option) *Limiter {
 		paths = append(paths, v.Path)
 	}
 	limiter.p = conf.NewPathMatch(paths...)
-	fmt.Println("NewPathMatch:", paths)
 	return limiter
 }
 
 //GetLimiter 获取限流器
 func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
-	fmt.Println("GetLimiter:", path)
-
 	ok, path := l.p.Match(path, "/")
 	if !ok {
 		return false, nil
 	}
-	fmt.Println(l.limiters.Items())
 	rule, ok := l.limiters.Get(path)
-	fmt.Println("l.limiters.Get:", rule, ok)
 	if !ok {
 		panic("从缓存中未找到limite组件")
 	}
@@ -65,8 +60,7 @@ func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
-		limiter.Disable = true
-		return limiter, nil
+		return &Limiter{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
@@ -74,7 +68,8 @@ func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	if b, err := govalidator.ValidateStruct(limiter); !b {
 		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
-	newLimit := New(limiter.Rules[0], WithRule(limiter.Rules[1:]...))
+
+	newLimit := New(WithRuleList(limiter.Rules...))
 	newLimit.Disable = limiter.Disable
 	return newLimit, nil
 }

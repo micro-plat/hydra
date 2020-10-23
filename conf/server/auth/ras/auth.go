@@ -54,7 +54,7 @@ func New(service string, opts ...AuthOption) *Auth {
 		opt(r)
 	}
 	if len(r.Requests) <= 0 {
-		r.Requests = []string{"*"}
+		r.Requests = []string{"/*"}
 	}
 	r.PathMatch = conf.NewPathMatch(r.Requests...)
 	return r
