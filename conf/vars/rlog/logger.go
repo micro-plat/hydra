@@ -24,11 +24,13 @@ type Layout struct {
 	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
+const DefaultLayout = `{"server-ip":"%ip","time":"%datetime.%ms","level":"%level","session":"%session","content":"%content"}`
+
 //New 初始化远程日志组件
 func New(service string, opts ...Option) *Layout {
 	l := &Layout{
 		Service: service,
-		Layout:  `{"server-ip":"%ip","time":"%datetime.%ms","level":"%level","session":"%session","content":"%content"}`,
+		Layout:  DefaultLayout,
 		Level:   "Info",
 	}
 	for _, opt := range opts {
@@ -76,7 +78,9 @@ func GetConfByAddr(r registry.IRegistry, platName string) (s *Layout, err error)
 
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IVarConf) (s *Layout, err error) {
-	s = &Layout{}
+	s = &Layout{
+		Layout: DefaultLayout,
+	}
 	_, err = cnf.GetObject(TypeNodeName, LogName, s)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("读取./var/%s/%s 配置发生错误 %w", TypeNodeName, LogName, err)
