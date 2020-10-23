@@ -111,7 +111,8 @@ func TestWhiteListGetConf(t *testing.T) {
 		if !strings.EqualFold(tt.name, "节点不存在,获取默认对象") {
 			confB.WhiteList(tt.opts...)
 		}
-		obj := whitelist.GetConf(conf.GetAPIConf().GetMainConf())
+		obj, err := whitelist.GetConf(conf.GetAPIConf().GetMainConf())
+		assert.NotEqual(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
 

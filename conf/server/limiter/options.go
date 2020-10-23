@@ -1,16 +1,14 @@
 package limiter
 
+//Option 配置选项
 type Option func(*Limiter)
 
-func WithEnable() Option {
-	return func(l *Limiter) {
-		l.Disable = false
-	}
-}
-
-func WithDisable() Option {
-	return func(l *Limiter) {
-		l.Disable = true
+// WithRuleList WithRuleList
+func WithRuleList(list ...*Rule) Option {
+	return func(a *Limiter) {
+		for _, rule := range list {
+			a.Rules = append(a.Rules, rule)
+		}
 	}
 }
 
@@ -20,7 +18,21 @@ func WithRule(rules ...*Rule) Option {
 	}
 }
 
-//RuleOption 配置选项
+//WithDisable 关闭
+func WithDisable() Option {
+	return func(a *Limiter) {
+		a.Disable = true
+	}
+}
+
+//WithEnable 开启
+func WithEnable() Option {
+	return func(a *Limiter) {
+		a.Disable = false
+	}
+}
+
+//RuleOption Rule配置选项
 type RuleOption func(*Rule)
 
 //WithAction 设置请求类型
