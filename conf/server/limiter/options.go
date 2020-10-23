@@ -1,5 +1,7 @@
 package limiter
 
+import "golang.org/x/time/rate"
+
 //Option 配置选项
 type Option func(*Limiter)
 
@@ -7,14 +9,9 @@ type Option func(*Limiter)
 func WithRuleList(list ...*Rule) Option {
 	return func(a *Limiter) {
 		for _, rule := range list {
+			rule.limiter = rate.NewLimiter(rate.Limit(rule.MaxAllow), rule.MaxAllow)
 			a.Rules = append(a.Rules, rule)
 		}
-	}
-}
-
-func WithRule(rules ...*Rule) Option {
-	return func(l *Limiter) {
-		l.Rules = append(l.Rules, rules...)
 	}
 }
 

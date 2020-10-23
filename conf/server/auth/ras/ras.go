@@ -15,7 +15,7 @@ type RASAuth struct {
 }
 
 //NewRASAuth 构建RASAuth认证
-func NewRASAuth(opts ...RASOption) *RASAuth {
+func NewRASAuth(opts ...Option) *RASAuth {
 	r := &RASAuth{
 		Disable: false,
 	}

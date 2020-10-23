@@ -72,7 +72,7 @@ func (b *httpBuilder) BlackList(opts ...blacklist.Option) *httpBuilder {
 }
 
 //Ras 远程认证服务配置
-func (b *httpBuilder) Ras(opts ...ras.RASOption) *httpBuilder {
+func (b *httpBuilder) Ras(opts ...ras.Option) *httpBuilder {
 	b.customerBuilder["auth/ras"] = ras.NewRASAuth(opts...)
 	return b
 }
@@ -96,8 +96,8 @@ func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 }
 
 //Limit 服务器限流配置
-func (b *httpBuilder) Limit(r *limiter.Rule, opts ...limiter.Option) *httpBuilder {
-	b.customerBuilder["acl/limit"] = limiter.New(r, opts...)
+func (b *httpBuilder) Limit(opts ...limiter.Option) *httpBuilder {
+	b.customerBuilder["acl/limit"] = limiter.New(opts...)
 	return b
 }
 
