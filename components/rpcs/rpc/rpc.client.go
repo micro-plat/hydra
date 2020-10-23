@@ -253,7 +253,7 @@ func (c *Client) connect() (err error) {
 		grpc.WithResolvers(rb))
 
 	if err != nil {
-		fmt.Println("client.connect.3", err)
+		//fmt.Println("client.connect.3", err)
 		return
 	}
 	c.client = pb.NewRPCClient(c.conn)

@@ -1,26 +1,35 @@
 package limiter
 
+import "golang.org/x/time/rate"
+
+//Option 配置选项
 type Option func(*Limiter)
 
-func WithEnable() Option {
-	return func(l *Limiter) {
-		l.Disable = false
+// WithRuleList WithRuleList
+func WithRuleList(list ...*Rule) Option {
+	return func(a *Limiter) {
+		for _, rule := range list {
+			rule.limiter = rate.NewLimiter(rate.Limit(rule.MaxAllow), rule.MaxAllow)
+			a.Rules = append(a.Rules, rule)
+		}
 	}
 }
 
+//WithDisable 关闭
 func WithDisable() Option {
-	return func(l *Limiter) {
-		l.Disable = true
+	return func(a *Limiter) {
+		a.Disable = true
 	}
 }
 
-func WithRule(rules ...*Rule) Option {
-	return func(l *Limiter) {
-		l.Rules = append(l.Rules, rules...)
+//WithEnable 开启
+func WithEnable() Option {
+	return func(a *Limiter) {
+		a.Disable = false
 	}
 }
 
-//RuleOption 配置选项
+//RuleOption Rule配置选项
 type RuleOption func(*Rule)
 
 //WithAction 设置请求类型

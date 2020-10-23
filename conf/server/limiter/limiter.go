@@ -12,12 +12,11 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"golang.org/x/time/rate"
 )
 
 //Limiter 限流器
 type Limiter struct {
-	Rules    []*Rule         `json:"rules" toml:"rules,omitempty"`
+	Rules    []*Rule         `json:"rules" valid:"required" toml:"rules,omitempty"`
 	Disable  bool            `json:"disable,omitempty" toml:"disable,omitempty"`
 	p        *conf.PathMatch `json:"-"`
 	limiters cmap.ConcurrentMap
@@ -26,19 +25,16 @@ type Limiter struct {
 //New 构建Limit配置
 func New(opts ...Option) *Limiter {
 	limiter := &Limiter{
-		Rules:    make([]*Rule, 0, 1),
+		Rules:    []*Rule{},
 		limiters: cmap.New(8),
-		Disable:  true,
+		Disable:  false,
 	}
 
-	for i := range opts {
-		opts[i](limiter)
+	for _, f := range opts {
+		f(limiter)
 	}
-
 	paths := make([]string, 0, len(limiter.Rules)+1)
-
 	for _, v := range limiter.Rules {
-		v.limiter = rate.NewLimiter(rate.Limit(v.MaxAllow), v.MaxAllow)
 		limiter.limiters.Set(v.Path, v)
 		paths = append(paths, v.Path)
 	}
@@ -64,8 +60,7 @@ func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
-		limiter.Disable = true
-		return limiter, nil
+		return &Limiter{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
@@ -73,7 +68,8 @@ func GetConf(cnf conf.IMainConf) (*Limiter, error) {
 	if b, err := govalidator.ValidateStruct(limiter); !b {
 		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
-	newLimit := New(WithRule(limiter.Rules...))
+
+	newLimit := New(WithRuleList(limiter.Rules...))
 	newLimit.Disable = limiter.Disable
 	return newLimit, nil
 }

@@ -16,10 +16,12 @@ type RASAuth struct {
 
 //NewRASAuth 构建RASAuth认证
 func NewRASAuth(opts ...Option) *RASAuth {
-	r := &RASAuth{}
+	r := &RASAuth{
+		Disable: false,
+	}
 
-	for i := range opts {
-		opts[i](r)
+	for _, opt := range opts {
+		opt(r)
 	}
 	return r
 }
@@ -48,7 +50,7 @@ func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
 	}
 
 	for _, auth := range auths.Auth {
-		if b, err := govalidator.ValidateStruct(&auth); !b {
+		if b, err := govalidator.ValidateStruct(auth); !b {
 			return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 		}
 		auth.PathMatch = conf.NewPathMatch(auth.Requests...)
