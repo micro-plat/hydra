@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -30,34 +31,31 @@ func NewRender(opts ...Option) *Render {
 	return r
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Render
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置GetRender配置
-func GetConf(cnf conf.IMainConf) (rsp *Render) {
+func GetConf(cnf conf.IMainConf) (rsp *Render, err error) {
 	rsp = &Render{}
-	_, err := cnf.GetSubObject("render", rsp)
+	_, err = cnf.GetSubObject("render", rsp)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("render配置有误:%v", err))
+		return nil, fmt.Errorf("render配置格式有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
 		rsp.Disable = true
-		return rsp
+		return rsp, nil
 	}
 	paths := make([]string, 0, len(rsp.Tmplts))
 	for k := range rsp.Tmplts {
+		if b, err := govalidator.ValidateStruct(k); !b {
+			return nil, fmt.Errorf("render Tmplt配置数据有误:%v", err)
+		}
 		paths = append(paths, k)
 	}
 	rsp.PathMatch = conf.NewPathMatch(paths...)
-	return rsp
+	return rsp, nil
 }
 
 //Get 获取转换结果
 func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.PathMatch.Match(path)
+	exists, service := r.PathMatch.Match(path, "/")
 	if !exists {
 		return false, 0, "", "", nil
 	}

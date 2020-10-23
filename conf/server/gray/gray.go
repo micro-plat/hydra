@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -58,26 +59,25 @@ func (g *Gray) checkServers(c conf.IMainConf) error {
 	return nil
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Gray
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取BlackList
-func GetConf(cnf conf.IMainConf) *Gray {
+func GetConf(cnf conf.IMainConf) (*Gray, error) {
 	gray := Gray{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), &gray)
 	if err == conf.ErrNoSetting {
-		return &Gray{Disable: true}
+		return &Gray{Disable: true}, nil
 	}
 
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("acl.gray配置有误:%v", err))
-	}
-	if err := gray.checkServers(cnf); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("acl.gray配置有误:%v", err)
 	}
 
-	return &gray
+	if err := gray.checkServers(cnf); err != nil {
+		return nil, fmt.Errorf("acl.gray服务检查错误:%v", err)
+	}
+
+	if b, err := govalidator.ValidateStruct(&gray); !b {
+		return nil, fmt.Errorf("acl.gray配置数据有误:%v %+v", err, gray)
+	}
+
+	return &gray, nil
 }

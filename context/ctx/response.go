@@ -114,7 +114,11 @@ func (c *response) Write(status int, content interface{}) error {
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 
 	//将编码设置到content type
-	c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetRouter().GetEncoding())
+	routerObj, err := c.path.GetRouter()
+	if err != nil {
+		return err
+	}
+	c.final.contentType = fmt.Sprintf(c.final.contentType, routerObj.GetEncoding())
 
 	//记录为原始状态
 	c.raw.contentType = c.final.contentType
@@ -227,7 +231,11 @@ func (c *response) getContentType() string {
 	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
 		return ctp
 	}
-	if ct, ok := c.conf.GetHeaderConf()["Content-Type"]; ok && ct != "" {
+	headerObj, err := c.conf.GetHeaderConf()
+	if err != nil {
+		return ""
+	}
+	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
 		return ct
 	}
 	return ""
@@ -240,13 +248,17 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 		return nil
 	}
 
-	if c.path.GetRouter().IsUTF8() {
+	routerObj, err := c.path.GetRouter()
+	if err != nil {
+		return err
+	}
+	if routerObj.IsUTF8() {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
 	}
-	buff, err := encoding.Encode(content, c.path.GetRouter().GetEncoding())
+	buff, err := encoding.Encode(content, routerObj.GetEncoding())
 	if err != nil {
-		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", c.path.GetRouter().GetEncoding(), err, content)
+		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", routerObj.GetEncoding(), err, content)
 	}
 	c.ctx.Data(status, ctyp, buff)
 	return nil

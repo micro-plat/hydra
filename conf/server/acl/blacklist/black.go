@@ -27,27 +27,21 @@ func New(opts ...Option) *BlackList {
 
 //IsDeny 验证当前请求是否在黑名单中
 func (w *BlackList) IsDeny(ip string) bool {
-	ok, _ := w.ipm.Match(ip)
+	ok, _ := w.ipm.Match(ip, ".")
 	return ok
 }
 
-type ConfHandler func(cnf conf.IMainConf) *BlackList
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取BlackList
-func GetConf(cnf conf.IMainConf) *BlackList {
+func GetConf(cnf conf.IMainConf) (*BlackList, error) {
 	ip := BlackList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "black.list"), &ip)
 	if err == conf.ErrNoSetting {
-		return &BlackList{Disable: true}
+		return &BlackList{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("black list配置有误:%v", err))
+		return nil, fmt.Errorf("black list配置有误:%v", err)
 	}
 
 	ip.ipm = conf.NewPathMatch(ip.IPS...)
-	return &ip
+	return &ip, nil
 }

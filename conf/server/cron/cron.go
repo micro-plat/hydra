@@ -1,6 +1,11 @@
 package cron
 
-import "github.com/micro-plat/hydra/conf"
+import (
+	"fmt"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
+)
 
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"status", "sharding"}
@@ -18,7 +23,9 @@ type Server struct {
 
 //New 构建cron server配置，默认为对等模式
 func New(opts ...Option) *Server {
-	s := &Server{}
+	s := &Server{
+		Status: "start",
+	}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -31,6 +38,10 @@ func GetConf(cnf conf.IMainConf) (s *Server, err error) {
 	_, err = cnf.GetMainObject(s)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, err
+	}
+
+	if b, err := govalidator.ValidateStruct(s); !b {
+		return nil, fmt.Errorf("cron主配置数据有误:%v", err)
 	}
 	return s, nil
 }

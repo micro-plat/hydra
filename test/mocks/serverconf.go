@@ -42,7 +42,8 @@ func NewConfBy(platName, clusterName string) *SConf {
 		PlatName:     platName,
 		ClusterName:  clusterName,
 		Service:      &service{},
-		registryAddr: "lm://.",
+		//registryAddr: "zk://192.168.0.101",
+		registryAddr: "lm://.",		
 	}
 	//API  路由信息
 	c.Service.API = services.NewORouter()

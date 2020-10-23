@@ -33,26 +33,20 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 	return t
 }
 
-type ConfHandler func(cnf conf.IMainConf) (tasks *Tasks)
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 根据服务嚣配置获取task
-func GetConf(cnf conf.IMainConf) (tasks *Tasks) {
+func GetConf(cnf conf.IMainConf) (tasks *Tasks, err error) {
 	tasks = &Tasks{}
-	_, err := cnf.GetSubObject("task", tasks)
+	_, err = cnf.GetSubObject("task", tasks)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("task:%v", err))
+		return nil, fmt.Errorf("task:%v", err)
 	}
 	if err == conf.ErrNoSetting {
-		return tasks
+		return tasks, nil
 	}
 	if len(tasks.Tasks) > 0 {
 		if b, err := govalidator.ValidateStruct(tasks); !b {
-			panic(fmt.Errorf("task配置有误:%v", err))
+			return nil, fmt.Errorf("task配置有误:%v", err)
 		}
 	}
-	return tasks
+	return tasks, nil
 }

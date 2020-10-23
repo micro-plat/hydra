@@ -26,25 +26,25 @@ import (
 type IServerConf interface {
 	GetMainConf() conf.IMainConf
 	GetVarConf() conf.IVarConf
-	GetJWTConf() *jwt.JWTAuth
-	GetHeaderConf() header.Headers
-	GetMetricConf() *metric.Metric
-	GetStaticConf() *static.Static
-	GetRouterConf() *router.Routers
-	GetCRONTaskConf() *task.Tasks
+	GetJWTConf() (*jwt.JWTAuth, error)
+	GetHeaderConf() (header.Headers, error)
+	GetMetricConf() (*metric.Metric, error)
+	GetStaticConf() (*static.Static, error)
+	GetRouterConf() (*router.Routers, error)
+	GetCRONTaskConf() (*task.Tasks, error)
 
-	GetMQCMainConf() *mqc.Server
-	GetMQCQueueConf() *queue.Queues
-	GetAPIKeyConf() *apikey.APIKeyAuth
-	GetRASConf() *ras.RASAuth
-	GetBasicConf() *basic.BasicAuth
-	GetRenderConf() *render.Render
-	GetWhiteListConf() *whitelist.WhiteList
-	GetBlackListConf() *blacklist.BlackList
-	GetLimiter() *limiter.Limiter
-	GetGray() *gray.Gray
+	GetMQCMainConf() (*mqc.Server, error)
+	GetMQCQueueConf() (*queue.Queues, error)
+	GetAPIKeyConf() (*apikey.APIKeyAuth, error)
+	GetRASConf() (*ras.RASAuth, error)
+	GetBasicConf() (*basic.BasicAuth, error)
+	GetRenderConf() (*render.Render, error)
+	GetWhiteListConf() (*whitelist.WhiteList, error)
+	GetBlackListConf() (*blacklist.BlackList, error)
+	GetLimiter() (*limiter.Limiter, error)
+	GetGray() (*gray.Gray, error)
 	//获取远程日志配置
-	GetRLogConf() *rlog.Layout
+	GetRLogConf() (*rlog.Layout, error)
 	Close() error
 }
 

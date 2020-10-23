@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/micro-plat/hydra/global"
 )
@@ -12,7 +13,7 @@ func Recovery() Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
-				ctx.Response().Abort(204, fmt.Errorf("%v", err))
+				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", err))
 			}
 		}()
 		ctx.Next()

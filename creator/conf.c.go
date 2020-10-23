@@ -138,7 +138,8 @@ func (c *conf) GetAPI() *httpBuilder {
 	if api, ok := c.data[global.API]; ok {
 		return api.(*httpBuilder)
 	}
-	return c.API(":8080")
+
+	return c.API(api.DefaultAPIAddress)
 }
 
 //Web web服务器配置
@@ -154,7 +155,7 @@ func (c *conf) GetWeb() *httpBuilder {
 	if web, ok := c.data[global.Web]; ok {
 		return web.(*httpBuilder)
 	}
-	return c.Web(":8089")
+	return c.Web(api.DefaultWEBAddress)
 }
 
 //Web web服务器配置
@@ -170,7 +171,7 @@ func (c *conf) GetWS() *httpBuilder {
 	if ws, ok := c.data[global.WS]; ok {
 		return ws.(*httpBuilder)
 	}
-	return c.WS(":8070")
+	return c.WS(api.DefaultWSAddress)
 }
 
 //RPC rpc服务器配置
@@ -185,7 +186,7 @@ func (c *conf) GetRPC() *rpcBuilder {
 	if rpc, ok := c.data[global.RPC]; ok {
 		return rpc.(*rpcBuilder)
 	}
-	return c.RPC(":8090")
+	return c.RPC(rpc.DefaultRPCAddress)
 }
 
 //CRON cron服务器配置

@@ -16,14 +16,24 @@ func BasicAuth() Handler {
 func BasicAuthForRealm() Handler {
 	return func(ctx IMiddleContext) {
 
-		basic := ctx.ServerConf().GetBasicConf()
+		basic, err := ctx.ServerConf().GetBasicConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+
 		if basic.Disable {
 			ctx.Next()
 			return
 		}
 
 		//检验当前请求是否被排除
-		if ok, _ := basic.Match(ctx.Request().Path().GetRouter().Path); ok {
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		if ok, _ := basic.Match(routerObj.Path, "/"); ok {
 			ctx.Next()
 			return
 		}
