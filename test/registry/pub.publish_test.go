@@ -287,3 +287,21 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, 1, len(paths), "NEW()-测试自动恢复节点")
 
 }
+
+func TestPublisher_WatchClusterChange(t *testing.T) {
+
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080")
+	apiconf := confObj.GetAPIConf() //初始化参数
+	c := apiconf.GetMainConf()      //获取配置
+
+	//发布节点
+	p := pub.New(c)
+	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
+
+	err := p.WatchClusterChange(func(i bool, s int, t int) {
+		return
+	})
+
+	assert.Equal(t, false, err != nil, "构建集群观察对象")
+}

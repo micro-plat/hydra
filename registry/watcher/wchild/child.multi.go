@@ -8,7 +8,7 @@ import (
 
 //MultiChildWatcher 配置监控服务
 type MultiChildWatcher struct {
-	watchers   []*ChildWatcher
+	Watchers   []*ChildWatcher
 	notifyChan chan *watcher.ChildChangeArgs
 }
 
@@ -17,17 +17,17 @@ func NewMultiChildWatcher(rgst registry.IRegistry, path []string, logger logger.
 	w = &MultiChildWatcher{
 		notifyChan: make(chan *watcher.ChildChangeArgs, 100),
 	}
-	w.watchers = make([]*ChildWatcher, 0, len(path))
+	w.Watchers = make([]*ChildWatcher, 0, len(path))
 	for _, p := range path {
 		watcher := NewChildWatcher(rgst, p, logger)
-		w.watchers = append(w.watchers, watcher)
+		w.Watchers = append(w.Watchers, watcher)
 	}
 	return
 }
 
 //Start 开始监听所有节点变化
 func (c *MultiChildWatcher) Start() (chan *watcher.ChildChangeArgs, error) {
-	for _, watcher := range c.watchers {
+	for _, watcher := range c.Watchers {
 		watcher.notifyChan = c.notifyChan
 		if _, err := watcher.Start(); err != nil {
 			return nil, err
@@ -38,7 +38,7 @@ func (c *MultiChildWatcher) Start() (chan *watcher.ChildChangeArgs, error) {
 
 //Close 关闭监控器
 func (c *MultiChildWatcher) Close() {
-	for _, wacher := range c.watchers {
+	for _, wacher := range c.Watchers {
 		wacher.Close()
 	}
 }
