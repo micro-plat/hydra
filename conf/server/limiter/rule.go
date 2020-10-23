@@ -33,6 +33,8 @@ func NewRule(path string, allow int, opts ...RuleOption) *Rule {
 	for _, opt := range opts {
 		opt(r)
 	}
+
+	r.limiter = rate.NewLimiter(rate.Limit(r.MaxAllow), r.MaxAllow)
 	return r
 }
 

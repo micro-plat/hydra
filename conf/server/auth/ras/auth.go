@@ -43,7 +43,7 @@ type Auth struct {
 func New(service string, opts ...AuthOption) *Auth {
 	r := &Auth{
 		Service:  service,
-		Requests: []string{"*"},
+		Requests: []string{},
 		Connect:  &Connect{},
 		Params:   make(map[string]interface{}),
 		Required: make([]string, 0, 1),
@@ -53,6 +53,10 @@ func New(service string, opts ...AuthOption) *Auth {
 	for _, opt := range opts {
 		opt(r)
 	}
+	if len(r.Requests) <= 0 {
+		r.Requests = []string{"/*"}
+	}
+	r.PathMatch = conf.NewPathMatch(r.Requests...)
 	return r
 }
 

@@ -123,8 +123,8 @@ func (p *MockPath) GetMethod() string {
 }
 
 //GetRouter 获取当前请求对应的路由信息
-func (p *MockPath) GetRouter() *router.Router {
-	return p.MockRouter
+func (p *MockPath) GetRouter() (*router.Router, error) {
+	return p.MockRouter, nil
 }
 
 //GetRequestPath 获取请求路径

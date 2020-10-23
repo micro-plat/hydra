@@ -37,7 +37,7 @@ func (bsd *bsdRecord) isInstalled() bool {
 func (bsd *bsdRecord) isEnabled() (bool, error) {
 	rcConf, err := os.Open("/etc/rc.conf")
 	if err != nil {
-		fmt.Println("Error opening file:", err)
+		//fmt.Println("Error opening file:", err)
 		return false, err
 	}
 	defer rcConf.Close()
@@ -59,7 +59,7 @@ func (bsd *bsdRecord) isEnabled() (bool, error) {
 
 func (bsd *bsdRecord) getCmd(cmd string) string {
 	if ok, err := bsd.isEnabled(); !ok || err != nil {
-		fmt.Println("Service is not enabled, using one" + cmd + " instead")
+		//fmt.Println("Service is not enabled, using one" + cmd + " instead")
 		cmd = "one" + cmd
 	}
 	return cmd
