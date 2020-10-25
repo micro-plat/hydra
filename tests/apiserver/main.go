@@ -1,18 +1,20 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	ccron "github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	crpc "github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/task"
-
-	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/cron"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 var app = hydra.NewApp(
@@ -48,5 +50,11 @@ func init() {
 }
 
 func main() {
-	app.Start()
+	// app.Start()
+
+	serverMaps := cmap.New(1)
+	serverMaps.Set("1", "2")
+	fmt.Println(len(serverMaps))
+	serverMaps.Set("2", "2")
+	fmt.Println(len(serverMaps))
 }

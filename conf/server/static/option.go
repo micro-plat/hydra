@@ -8,7 +8,7 @@ type Option func(*Static)
 //newStatic 构建Web服务静态文件配置
 func newStatic() *Static {
 	a := &Static{
-		fileMap: map[string]FileInfo{},
+		FileMap: map[string]FileInfo{},
 	}
 	a.Dir = "./src"
 	a.FirstPage = "index.html"
@@ -23,6 +23,20 @@ func WithImages() Option {
 	return func(s *Static) {
 		s.Dir = "./src"
 		s.Exts = []string{}
+	}
+}
+
+//WithRewriters 图片服务配置
+func WithRewriters(rewriters ...string) Option {
+	return func(s *Static) {
+		s.Rewriters = rewriters
+	}
+}
+
+//WithExclude 图片服务配置
+func WithExclude(exclude ...string) Option {
+	return func(s *Static) {
+		s.Exclude = exclude
 	}
 }
 
