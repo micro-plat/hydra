@@ -38,6 +38,10 @@ func New(addr string, opts ...Option) *Server {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (*Server, error) {
 	s := Server{}
+	if cnf.GetServerType() != global.CRON {
+		return nil, fmt.Errorf("mqc主配置类型错误:%s != mqc", cnf.GetServerType())
+	}
+
 	_, err := cnf.GetMainObject(&s)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("mqc服务器配置格式有误:%v", err)

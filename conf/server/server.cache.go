@@ -49,7 +49,7 @@ func (c *cache) GetServerConf(serverType string) (IServerConf, error) {
 	defer c.lock.RUnlock()
 	serverVerion, ok := c.currentServerVersion.Get(serverType)
 	if !ok {
-		panic(fmt.Errorf("未找到%s的缓存配置信息", serverType))
+		return nil, fmt.Errorf("未找到%s的缓存配置信息", serverType)
 	}
 	if s, ok := c.serverMaps.Get(getKey(serverType, serverVerion)); ok {
 		return s.(IServerConf), nil
@@ -63,7 +63,7 @@ func (c *cache) GetVarConf() (conf.IVarConf, error) {
 	defer c.lock.RUnlock()
 	varVerion, ok := c.currentVarVersion.Get(varNodeName)
 	if !ok {
-		panic(fmt.Errorf("未找到var缓存配置信息"))
+		return nil, fmt.Errorf("未找到var缓存配置信息")
 	}
 	if s, ok := c.varMaps.Get(getKey(varNodeName, varVerion)); ok {
 		return s.(conf.IVarConf), nil
@@ -71,8 +71,31 @@ func (c *cache) GetVarConf() (conf.IVarConf, error) {
 	return nil, fmt.Errorf("获取var配置失败，缓存中不存在版本[%v]的数据", varVerion)
 }
 
+func (c *cache) GetServerMaps() cmap.ConcurrentMap {
+	return c.serverMaps
+}
+
+func (c *cache) GetVarMaps() cmap.ConcurrentMap {
+	return c.varMaps
+}
+
+func (c *cache) GetServerCuurVerion(tp string) interface{} {
+	verion, ok := c.currentServerVersion.Get(tp)
+	if !ok {
+		return nil
+	}
+	return verion
+}
+
+func (c *cache) GetVarCuurVerion(varNodeName string) interface{} {
+	verion, ok := c.currentVarVersion.Get(varNodeName)
+	if !ok {
+		return nil
+	}
+	return verion.(int32)
+}
 func (c *cache) clear() {
-	tm := time.NewTicker(time.Second * 60)
+	tm := time.NewTicker(time.Second * 50)
 LOOP:
 	for {
 		select {

@@ -28,6 +28,11 @@ func NewRender(opts ...Option) *Render {
 	for _, opt := range opts {
 		opt(r)
 	}
+	paths := make([]string, 0, len(r.Tmplts)+1)
+	for k := range r.Tmplts {
+		paths = append(paths, k)
+	}
+	r.PathMatch = conf.NewPathMatch(paths...)
 	return r
 }
 
@@ -43,8 +48,8 @@ func GetConf(cnf conf.IMainConf) (rsp *Render, err error) {
 		return rsp, nil
 	}
 	paths := make([]string, 0, len(rsp.Tmplts))
-	for k := range rsp.Tmplts {
-		if b, err := govalidator.ValidateStruct(k); !b {
+	for k, v := range rsp.Tmplts {
+		if b, err := govalidator.ValidateStruct(v); !b {
 			return nil, fmt.Errorf("render Tmplt配置数据有误:%v", err)
 		}
 		paths = append(paths, k)
