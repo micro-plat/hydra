@@ -1,4 +1,4 @@
-package fileSystem
+package filesystem
 
 import (
 	"encoding/json"

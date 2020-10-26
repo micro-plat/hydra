@@ -8,7 +8,7 @@ import (
 
 //MultiValueWatcher 配置监控服务
 type MultiValueWatcher struct {
-	watchers   []*SingleValueWatcher
+	Watchers   []*SingleValueWatcher //@fix 方便测试
 	notifyChan chan *watcher.ValueChangeArgs
 }
 
@@ -17,17 +17,17 @@ func NewMultiValueWatcher(rgst registry.IRegistry, path []string, logger logger.
 	w = &MultiValueWatcher{
 		notifyChan: make(chan *watcher.ValueChangeArgs, 10),
 	}
-	w.watchers = make([]*SingleValueWatcher, 0, len(path))
+	w.Watchers = make([]*SingleValueWatcher, 0, len(path))
 	for _, p := range path {
 		watcher := NewSingleValueWatcher(rgst, p, logger)
-		w.watchers = append(w.watchers, watcher)
+		w.Watchers = append(w.Watchers, watcher)
 	}
 	return
 }
 
 //Start 开始监听所有节点变化
 func (c *MultiValueWatcher) Start() (chan *watcher.ValueChangeArgs, error) {
-	for _, watcher := range c.watchers {
+	for _, watcher := range c.Watchers {
 		watcher.notifyChan = c.notifyChan
 		if _, err := watcher.Start(); err != nil {
 			return nil, err
@@ -38,7 +38,7 @@ func (c *MultiValueWatcher) Start() (chan *watcher.ValueChangeArgs, error) {
 
 //Close 关闭监控器
 func (c *MultiValueWatcher) Close() {
-	for _, wacher := range c.watchers {
+	for _, wacher := range c.Watchers {
 		wacher.Close()
 	}
 }
