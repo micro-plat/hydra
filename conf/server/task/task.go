@@ -15,11 +15,16 @@ type Task struct {
 }
 
 //NewTask 创建任务信息
-func NewTask(cron string, service string) *Task {
-	return &Task{
+func NewTask(cron string, service string, opts ...Option) *Task {
+	t := &Task{
 		Cron:    cron,
 		Service: service,
 	}
+
+	for _, f := range opts {
+		f(t)
+	}
+	return t
 }
 
 //GetUNQ 获取任务的唯一标识

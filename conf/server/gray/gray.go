@@ -44,7 +44,7 @@ func (g *Gray) Allow() bool {
 func (g *Gray) Check(funcs map[string]interface{}, i interface{}) (bool, error) {
 	r, err := conf.TmpltTranslate(g.Filter, g.Filter, funcs, i)
 	if err != nil {
-		return false, fmt.Errorf("%s 过滤器转换出错 %w", g.Filter, err)
+		return true, fmt.Errorf("%s 过滤器转换出错 %w", g.Filter, err)
 	}
 	return strings.EqualFold(r, "true"), nil
 }

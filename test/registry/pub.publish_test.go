@@ -39,7 +39,8 @@ func TestPublisher_PubRPCServiceNode(t *testing.T) {
 
 	p := pub.New(c)
 	i := 1
-	for _, service := range s.GetRouterConf().GetPath() {
+	router, _ := s.GetRouterConf()
+	for _, service := range router.GetPath() {
 		got, err := p.PubRPCServiceNode("192.168.5.115:9999", service, getTestData("192.168.5.115:9999", c.GetServerID()))
 		assert.Equal(t, false, err != nil, "rpc服务发布")
 		//验证pubs长度
@@ -176,7 +177,8 @@ func TestPublisher_Publish_API(t *testing.T) {
 	c := apiconf.GetMainConf()      //获取配置
 
 	//发布api节点和dns节点
-	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), apiconf.GetRouterConf().GetPath()...)
+	router, _ := apiconf.GetRouterConf()
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
 	assert.Equal(t, false, err != nil, "发布api节点和dns节点")
 
 	//验证节点发布结果
@@ -202,7 +204,8 @@ func TestPublisher_Publish_RPC(t *testing.T) {
 	c := rpcconf.GetMainConf()      //获取配置
 
 	//发布rpc节点
-	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), s.GetRouterConf().GetPath()...)
+	router, _ := s.GetRouterConf()
+	err := pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
 	assert.Equal(t, false, err != nil, "发布rpc节点")
 
 	lm := c.GetRegistry()
@@ -286,4 +289,22 @@ func TestNew(t *testing.T) {
 	paths, _, _ = lm.GetChildren(pPath)
 	assert.Equal(t, 1, len(paths), "NEW()-测试自动恢复节点")
 
+}
+
+func TestPublisher_WatchClusterChange(t *testing.T) {
+
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080")
+	apiconf := confObj.GetAPIConf() //初始化参数
+	c := apiconf.GetMainConf()      //获取配置
+
+	//发布节点
+	p := pub.New(c)
+	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
+
+	err := p.WatchClusterChange(func(i bool, s int, t int) {
+		return
+	})
+
+	assert.Equal(t, false, err != nil, "构建集群观察对象")
 }

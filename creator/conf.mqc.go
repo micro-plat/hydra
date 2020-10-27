@@ -36,7 +36,7 @@ func (b *mqcBuilder) Queue(mq ...*queue.Queue) *mqcBuilder {
 	f := func() {
 		oqueue, ok := b.customerBuilder["queue"].(*queue.Queues)
 		if !ok {
-			oqueue = queue.NewQueues()
+			oqueue = queue.NewQueues(mq...)
 			b.customerBuilder["queue"] = oqueue
 			return
 		}

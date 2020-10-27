@@ -7,6 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 )
 
 //DefaultAPIAddress api服务默认端口号
@@ -108,6 +109,10 @@ func (s *Server) GetRHTimeout() int {
 
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
+	if cnf.GetServerType() != global.CRON {
+		return nil, fmt.Errorf("api主配置类型错误:%s != api", cnf.GetServerType())
+	}
+
 	if _, err := cnf.GetMainObject(&s); err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}

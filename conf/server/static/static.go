@@ -28,7 +28,7 @@ type Static struct {
 	FirstPage string              `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
 	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
 	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
-	fileMap   map[string]FileInfo `json:"-"`
+	FileMap   map[string]FileInfo `json:"-"`
 }
 
 type FileInfo struct {
@@ -55,7 +55,7 @@ func (s *Static) AllowRequest(m string) bool {
 func GetConf(cnf conf.IMainConf) (*Static, error) {
 	//设置静态文件路由
 	static := Static{
-		fileMap: map[string]FileInfo{},
+		FileMap: map[string]FileInfo{},
 	}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
@@ -64,6 +64,10 @@ func GetConf(cnf conf.IMainConf) (*Static, error) {
 	if err == conf.ErrNoSetting {
 		static.Disable = true
 		return &static, nil
+	}
+
+	if static.Exts == nil {
+		static.Exts = []string{}
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
