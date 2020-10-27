@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/conf/server/gray"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
@@ -22,7 +23,7 @@ func TestGray_Disable(t *testing.T) {
 
 	type testCase struct {
 		name        string
-		opts        string
+		opts        []gray.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -33,15 +34,17 @@ func TestGray_Disable(t *testing.T) {
 	tests := []*testCase{
 		{
 			name:        "灰度-未启用-未配置",
-			opts:        ``,
+			opts:        nil,
 			serviceAddr: "http://localhost:51002",
 			wantStatus:  200,
 			wantContent: "",
 			wantSpecial: "",
 		},
 		{
-			name:        "灰度-未启用-配置为关闭",
-			opts:        `{"disable":true}`,
+			name: "灰度-未启用-配置为关闭",
+			opts: []gray.Option{
+				gray.WithDisable(),
+			},
 			wantStatus:  200,
 			wantContent: "",
 			wantSpecial: "",
@@ -55,7 +58,7 @@ func TestGray_Disable(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -97,7 +100,7 @@ func TestGray_Enable_Has(t *testing.T) {
 
 	type testCase struct {
 		name        string
-		opts        string
+		opts        []gray.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -107,15 +110,19 @@ func TestGray_Enable_Has(t *testing.T) {
 
 	tests := []*testCase{
 		{
-			name:        "灰度-启用-模板匹配=>false",
-			opts:        `{"disable":false,"filter":"false","upcluster":"t"}`,
+			name: "灰度-启用-模板匹配=>false",
+			opts: []gray.Option{
+				gray.WithEnable(), gray.WithFilter("false"), gray.WithUPCluster("t"),
+			},
 			wantStatus:  200,
 			wantContent: "",
 			wantSpecial: "",
 		},
 		{
-			name:        "灰度-启用-模板匹配需要-有地址可用",
-			opts:        `{"disable":false,"filter":"true","upcluster":"t"}`,
+			name: "灰度-启用-模板匹配需要-有地址可用",
+			opts: []gray.Option{
+				gray.WithEnable(), gray.WithFilter("true"), gray.WithUPCluster("t"),
+			},
 			wantStatus:  305,
 			wantContent: "",
 			wantSpecial: "gray",
@@ -129,7 +136,7 @@ func TestGray_Enable_Has(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -169,7 +176,7 @@ func TestGray_Enable_Has(t *testing.T) {
 func TestGray_Enable_None(t *testing.T) {
 	type testCase struct {
 		name        string
-		opts        string
+		opts        []gray.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -179,8 +186,10 @@ func TestGray_Enable_None(t *testing.T) {
 
 	tests := []*testCase{
 		{
-			name:        "灰度-启用-模板匹配需要-无上游地址",
-			opts:        `{"disable":false,"filter":"true","upcluster":"t"}`,
+			name: "灰度-启用-模板匹配需要-无上游地址",
+			opts: []gray.Option{
+				gray.WithEnable(), gray.WithFilter("true"), gray.WithUPCluster("t"),
+			},
 			wantStatus:  502,
 			wantContent: "",
 			wantSpecial: "gray",
@@ -201,7 +210,7 @@ func TestGray_Enable_None(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
