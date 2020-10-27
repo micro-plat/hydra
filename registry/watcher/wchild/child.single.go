@@ -73,7 +73,6 @@ LOOP:
 			exists, err = w.registry.Exists(path)
 			if !exists && err == nil {
 				w.deleted()
-				return //@fix 添加return 方便测试
 			}
 		}
 	}
