@@ -95,6 +95,11 @@ func (c *Cluster) Iter(f func(conf.ICNode) bool) {
 	}
 }
 
+//Len 获取集群节点长度
+func (c *Cluster) Len() int {
+	return len(c.nodes.Items())
+}
+
 //Watch 监控节点变化
 func (c *Cluster) Watch() conf.IWatcher {
 	w := newCWatcher(c)
@@ -158,8 +163,13 @@ func (c *Cluster) getCluster() error {
 		}
 		//移除缓存key
 		if removeNow {
+			node := v.(*CNode)
+			if node.IsCurrent() {
+				c.current = &CNode{}
+			}
 			c.removeKey(key)
 		}
+
 		return removeNow
 	})
 
@@ -205,6 +215,7 @@ LOOP:
 			c.getCluster()
 		}
 	}
+
 	return nil
 }
 

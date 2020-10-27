@@ -114,6 +114,7 @@ func (c *VarConf) GetObject(tp string, name string, v interface{}) (int32, error
 //GetClone 获取配置拷贝
 func (c *VarConf) GetClone() conf.IVarConf {
 	s := &VarConf{
+		varVersion:   c.varVersion,
 		varConfPath:  c.varConfPath,
 		registry:     c.registry,
 		varNodeConfs: make(map[string]conf.RawConf),
