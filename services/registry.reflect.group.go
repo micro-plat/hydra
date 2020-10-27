@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -34,6 +35,7 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		g.Services[service].Handling = h
 		return
 	}
+	fmt.Println("handing:", service)
 	g.Services[service] = &Unit{Group: g, Service: service, Handling: h}
 }
 
@@ -48,6 +50,7 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 		g.Services[service].Handled = h
 		return
 	}
+	fmt.Println("handed:", service)
 	g.Services[service] = &Unit{Group: g, Service: service, Handled: h}
 }
 
@@ -59,6 +62,7 @@ func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
 		g.Services[service].Handle = h
 		return
 	}
+	fmt.Println("AddHandle:", service)
 	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handle: h}
 }
 
@@ -69,8 +73,10 @@ func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
 		g.Services[service].Fallback = h
 		return
 	}
+	fmt.Println("AddFallback:", service)
 	g.Services[service] = &Unit{Group: g, Service: service, Fallback: h}
 }
+
 func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {

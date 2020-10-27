@@ -24,6 +24,7 @@ var _ ICRON = CRON
 //ICRON CRON动态服务
 type ICRON interface {
 	Add(cron string, service string) ICRON
+	Remove(cron string, service string) ICRON //暴露remove方法  @hj
 }
 
 type cron struct {
@@ -62,7 +63,7 @@ func (c *cron) Add(cron string, service string) ICRON {
 }
 
 //Remove 移除任务
-func (c *cron) Remove(cron string, service string) *cron {
+func (c *cron) Remove(cron string, service string) ICRON { //*cron 改为ICRON @hj
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
