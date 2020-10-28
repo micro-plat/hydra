@@ -14,25 +14,25 @@ type IMQC interface {
 	Remove(mqName string, service string) IMQC
 }
 type mqcSubscriber struct {
-	f   func(t *queue.Queue)
-	msg chan *queue.Queue
+	callback  func(t *queue.Queue)
+	queueChan chan *queue.Queue
 }
 
 //MQC mqc消息
 var MQC = newMQC()
 
 type mqc struct {
-	queues *queue.Queues
-	events []*mqcSubscriber
-	lock   sync.Mutex
-	n      chan struct{}
+	queues      *queue.Queues
+	subscribers []*mqcSubscriber
+	lock        sync.Mutex
+	signalChan  chan struct{}
 }
 
 func newMQC() *mqc {
 	c := &mqc{
-		queues: queue.NewEmptyQueues(),
-		events: make([]*mqcSubscriber, 0, 0),
-		n:      make(chan struct{}, 100),
+		queues:      queue.NewEmptyQueues(),
+		subscribers: make([]*mqcSubscriber, 0, 0),
+		signalChan:  make(chan struct{}, 100),
 	}
 	go c.notify()
 	return c
@@ -53,13 +53,13 @@ func (c *mqc) Subscribe(f func(t *queue.Queue)) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	subscriber := &mqcSubscriber{
-		f:   f,
-		msg: make(chan *queue.Queue, len(c.queues.Queues)+100),
+		callback:  f,
+		queueChan: make(chan *queue.Queue, len(c.queues.Queues)+100),
 	}
 	for _, t := range c.queues.Queues {
-		subscriber.msg <- t
+		subscriber.queueChan <- t
 	}
-	c.events = append(c.events, subscriber)
+	c.subscribers = append(c.subscribers, subscriber)
 
 }
 
@@ -70,22 +70,17 @@ func (c *mqc) GetQueues() *queue.Queues {
 
 //notify 通知任务
 func (c *mqc) notify() {
-BREAK:
 	for {
 		select {
 		case <-global.Current().ClosingNotify():
-			break BREAK
-		case <-c.n:
+			return
+		case <-c.signalChan:
 			c.lock.Lock()
-			for _, e := range c.events {
-			LOOP:
-				for {
-					select {
-					case t := <-e.msg:
-						e.f(t)
-					default:
-						break LOOP
-					}
+			for _, e := range c.subscribers {
+				select {
+				case t := <-e.queueChan:
+					e.callback(t)
+				default:
 				}
 			}
 			c.lock.Unlock()
@@ -98,13 +93,13 @@ func (c *mqc) add(mqName string, service string, disable bool, concurrency ...in
 		c.lock.Lock()
 		defer c.lock.Unlock()
 		mqName = global.MQConf.GetQueueName(mqName)
-		task := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
-		task.Disable = disable
-		c.queues.Append(task)
-		for _, s := range c.events {
-			s.msg <- task
+		queue := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
+		queue.Disable = disable
+		c.queues.Append(queue)
+		for _, s := range c.subscribers {
+			s.queueChan <- queue
 		}
-		c.n <- struct{}{}
+		c.signalChan <- struct{}{}
 	}
 	if !global.MQConf.NeedAddPrefix() {
 		f()
