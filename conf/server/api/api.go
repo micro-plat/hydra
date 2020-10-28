@@ -109,7 +109,7 @@ func (s *Server) GetRHTimeout() int {
 
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
-	if cnf.GetServerType() != global.CRON {
+	if cnf.GetServerType() != global.API {
 		return nil, fmt.Errorf("api主配置类型错误:%s != api", cnf.GetServerType())
 	}
 

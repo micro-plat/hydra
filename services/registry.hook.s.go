@@ -32,7 +32,7 @@ func (s *serverHook) AddClosing(h func(server.IServerConf) error) error {
 		return fmt.Errorf("关闭服务不能为空")
 	}
 	if s.closing != nil {
-		return fmt.Errorf("启动服务不能重复注册")
+		return fmt.Errorf("关闭服务不能重复注册")
 	}
 	s.closing = h
 	return nil
