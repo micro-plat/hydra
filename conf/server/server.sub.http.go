@@ -36,108 +36,108 @@ type httpSub struct {
 
 func newhttpSub(cnf conf.IMainConf) *httpSub {
 	s := &httpSub{cnf: cnf}
-	s.header = GetLoader(cnf, s.GetHeaderConfFunc())
-	s.jwt = GetLoader(cnf, s.GetJWTConfFunc())
-	s.metric = GetLoader(cnf, s.GetMetricConfFunc())
-	s.static = GetLoader(cnf, s.GetStaticConfFunc())
-	s.router = GetLoader(cnf, s.GetRouterConfFunc())
-	s.apikey = GetLoader(cnf, s.GetAPIKeyConfFunc())
-	s.ras = GetLoader(cnf, s.GetRasFunc())
-	s.basic = GetLoader(cnf, s.GetBasicFunc())
-	s.render = GetLoader(cnf, s.GetRenderFunc())
-	s.whiteList = GetLoader(cnf, s.GetWhitelistFunc())
-	s.blackList = GetLoader(cnf, s.GetBlacklistFunc())
-	s.limit = GetLoader(cnf, s.GetLimiterFunc())
-	s.gray = GetLoader(cnf, s.GetGrayFunc())
+	s.header = GetLoader(cnf, s.getHeaderConfFunc())
+	s.jwt = GetLoader(cnf, s.getJWTConfFunc())
+	s.metric = GetLoader(cnf, s.getMetricConfFunc())
+	s.static = GetLoader(cnf, s.getStaticConfFunc())
+	s.router = GetLoader(cnf, s.getRouterConfFunc())
+	s.apikey = GetLoader(cnf, s.getAPIKeyConfFunc())
+	s.ras = GetLoader(cnf, s.getRasFunc())
+	s.basic = GetLoader(cnf, s.getBasicFunc())
+	s.render = GetLoader(cnf, s.getRenderFunc())
+	s.whiteList = GetLoader(cnf, s.getWhitelistFunc())
+	s.blackList = GetLoader(cnf, s.getBlacklistFunc())
+	s.limit = GetLoader(cnf, s.getLimiterFunc())
+	s.gray = GetLoader(cnf, s.getGrayFunc())
 	return s
 }
 
-//GetHeaderConfFunc 获取header配置信息
-func (s httpSub) GetHeaderConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getHeaderConfFunc 获取header配置信息
+func (s httpSub) getHeaderConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return header.GetConf(cnf)
 	}
 }
 
-//GetJWTConfFunc 获取jwt配置信息
-func (s httpSub) GetJWTConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getJWTConfFunc 获取jwt配置信息
+func (s httpSub) getJWTConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return jwt.GetConf(cnf)
 	}
 }
 
-//GetMetricConfFunc 获取metric配置信息
-func (s httpSub) GetMetricConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getMetricConfFunc 获取metric配置信息
+func (s httpSub) getMetricConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return metric.GetConf(cnf)
 	}
 }
 
-//GetStaticConfFunc 获取static配置信息
-func (s httpSub) GetStaticConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getStaticConfFunc 获取static配置信息
+func (s httpSub) getStaticConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return static.GetConf(cnf)
 	}
 }
 
-//GetRouterConfFunc 获取router配置信息
-func (s httpSub) GetRouterConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getRouterConfFunc 获取router配置信息
+func (s httpSub) getRouterConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return router.GetConf(cnf)
 	}
 }
 
-//GetAPIKeyConfFunc 获取apikey配置信息
-func (s httpSub) GetAPIKeyConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getAPIKeyConfFunc 获取apikey配置信息
+func (s httpSub) getAPIKeyConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return apikey.GetConf(cnf)
 	}
 }
 
-//GetRasFunc 获取ras配置信息
-func (s httpSub) GetRasFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getRasFunc 获取ras配置信息
+func (s httpSub) getRasFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return ras.GetConf(cnf)
 	}
 }
 
-//GetBasicFunc 获取basic配置信息
-func (s httpSub) GetBasicFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getBasicFunc 获取basic配置信息
+func (s httpSub) getBasicFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return basic.GetConf(cnf)
 	}
 }
 
-//GetRenderFunc 获取render配置信息
-func (s httpSub) GetRenderFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getRenderFunc 获取render配置信息
+func (s httpSub) getRenderFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return render.GetConf(cnf)
 	}
 }
 
-//GetWhitelistFunc 获取whitelist配置信息
-func (s httpSub) GetWhitelistFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getWhitelistFunc 获取whitelist配置信息
+func (s httpSub) getWhitelistFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return whitelist.GetConf(cnf)
 	}
 }
 
-//GetBlacklistFunc 获取blacklist配置信息
-func (s httpSub) GetBlacklistFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getBlacklistFunc 获取blacklist配置信息
+func (s httpSub) getBlacklistFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return blacklist.GetConf(cnf)
 	}
 }
 
-//GetLimiterFunc 获取limiter配置信息
-func (s httpSub) GetLimiterFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getLimiterFunc 获取limiter配置信息
+func (s httpSub) getLimiterFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return limiter.GetConf(cnf)
 	}
 }
 
-//GetGrayFunc 获取gray配置信息
-func (s httpSub) GetGrayFunc() func(cnf conf.IMainConf) (interface{}, error) {
+//getGrayFunc 获取gray配置信息
+func (s httpSub) getGrayFunc() func(cnf conf.IMainConf) (interface{}, error) {
 	return func(cnf conf.IMainConf) (interface{}, error) {
 		return gray.GetConf(cnf)
 	}
@@ -149,6 +149,7 @@ func (s *httpSub) GetHeaderConf() (header.Headers, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return headerObj.(header.Headers), nil
 }
 
@@ -182,9 +183,10 @@ func (s *httpSub) GetStaticConf() (*static.Static, error) {
 //GetRouterConf 获取路由信息
 func (s *httpSub) GetRouterConf() (*router.Routers, error) {
 	routerObj, err := s.router.GetConf()
-	if err != nil {
+	if err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}
+
 	return routerObj.(*router.Routers), nil
 }
 

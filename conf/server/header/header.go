@@ -85,7 +85,7 @@ func GetConf(cnf conf.IMainConf) (header Headers, err error) {
 		return nil, fmt.Errorf("header配置有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
-		return nil, nil
+		return Headers{}, nil
 	}
 	return
 }
