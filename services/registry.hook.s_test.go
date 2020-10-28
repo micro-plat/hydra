@@ -75,21 +75,21 @@ func Test_serverHook_AddHandleExecuting(t *testing.T) {
 		if tt.wantErr {
 			continue
 		}
-		h := s.GetHandleExecutings()
-		assert.Equal(t, tt.wantHandle, h, tt.name)
+		gotHandle := s.GetHandleExecutings()
+		assert.Equal(t, tt.wantHandle, gotHandle, tt.name)
 	}
 }
 
 func Test_serverHook_AddHandleExecuted(t *testing.T) {
 	tests := []struct {
-		name       string
-		h          []context.IHandler
-		wantErr    bool
-		wantHandle []context.IHandler
+		name        string
+		h           []context.IHandler
+		wantErr     bool
+		wantHandled []context.IHandler
 	}{
-		{name: "添加空接口", h: nil, wantHandle: nil},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}}, wantHandle: []context.IHandler{hander1{}}},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandle: []context.IHandler{hander1{}, hander1{}, hander2{}}},
+		{name: "添加空接口", h: nil, wantHandled: nil},
+		{name: "添加单个接口", h: []context.IHandler{hander1{}}, wantHandled: []context.IHandler{hander1{}}},
+		{name: "添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandled: []context.IHandler{hander1{}, hander1{}, hander2{}}},
 	}
 	s := &serverHook{}
 	for _, tt := range tests {
@@ -98,8 +98,8 @@ func Test_serverHook_AddHandleExecuted(t *testing.T) {
 		if tt.wantErr {
 			continue
 		}
-		h := s.GetHandleExecuteds()
-		assert.Equal(t, tt.wantHandle, h, tt.name)
+		gotHandled := s.GetHandleExecuteds()
+		assert.Equal(t, tt.wantHandled, gotHandled, tt.name)
 	}
 }
 
