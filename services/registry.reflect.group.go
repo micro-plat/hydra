@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -30,13 +29,12 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		g.Handling = h
 		return
 	}
-	_, service, _ := g.getPaths(g.Path, name)
+	path, service, actions := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Handling = h
 		return
 	}
-	fmt.Println("handing:", service)
-	g.Services[service] = &Unit{Group: g, Service: service, Handling: h}
+	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handling: h} //将path和actions赋值 @hj
 }
 
 //AddHandled 添加后处理函数
@@ -45,13 +43,12 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 		g.Handled = h
 		return
 	}
-	_, service, _ := g.getPaths(g.Path, name)
+	path, service, actions := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Handled = h
 		return
 	}
-	fmt.Println("handed:", service)
-	g.Services[service] = &Unit{Group: g, Service: service, Handled: h}
+	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handled: h} //将path和actions赋值,h赋值为handled @hj
 }
 
 //AddHandle 添加处理函数
@@ -62,19 +59,17 @@ func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
 		g.Services[service].Handle = h
 		return
 	}
-	fmt.Println("AddHandle:", service)
 	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handle: h}
 }
 
 //AddFallback 添加降级函数
 func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
-	_, service, _ := g.getPaths(g.Path, name)
+	path, service, actions := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Fallback = h
 		return
 	}
-	fmt.Println("AddFallback:", service)
-	g.Services[service] = &Unit{Group: g, Service: service, Fallback: h}
+	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Fallback: h} //将path和actions赋值,赋值为fallback @hj
 }
 
 func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {

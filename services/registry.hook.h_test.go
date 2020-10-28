@@ -7,20 +7,6 @@ import (
 	"github.com/micro-plat/hydra/test/assert"
 )
 
-type hander1 struct {
-}
-
-func (h hander1) Handle(ctx context.IContext) (r interface{}) {
-	return "sucess"
-}
-
-type hander2 struct {
-}
-
-func (h hander2) Handle(ctx context.IContext) (r interface{}) {
-	return "sucess"
-}
-
 func Test_handleHook_AddHandling(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -38,8 +24,8 @@ func Test_handleHook_AddHandling(t *testing.T) {
 	for _, tt := range tests {
 		err := s.AddHandling(tt.service, tt.h...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
-		h := s.GetHandlings(tt.service)
-		assert.Equal(t, tt.wantHanding, h, tt.name)
+		got := s.GetHandlings(tt.service)
+		assert.Equal(t, tt.wantHanding, got, tt.name)
 	}
 }
 
@@ -60,8 +46,8 @@ func Test_handleHook_AddHandled(t *testing.T) {
 	for _, tt := range tests {
 		err := s.AddHandled(tt.service, tt.h...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
-		h := s.GetHandleds(tt.service)
-		assert.Equal(t, tt.wantHandled, h, tt.name)
+		got := s.GetHandleds(tt.service)
+		assert.Equal(t, tt.wantHandled, got, tt.name)
 	}
 }
 
@@ -86,7 +72,7 @@ func Test_handleHook_AddClosingHanle(t *testing.T) {
 		if tt.wantErr {
 			continue
 		}
-		closing := s.GetClosingHandlers()
-		assert.Equal(t, tt.wantClosingLen, len(closing), tt.name)
+		got := s.GetClosingHandlers()
+		assert.Equal(t, tt.wantClosingLen, len(got), tt.name)
 	}
 }

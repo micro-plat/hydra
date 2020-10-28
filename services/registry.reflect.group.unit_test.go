@@ -21,8 +21,7 @@ func TestUnit_GetHandlings(t *testing.T) {
 	g := newUnitGroup("path")
 	for _, tt := range tests {
 		g.AddHandling(tt.mName, tt.h)
-		u := g.Services[tt.wantService]
-		got := u.GetHandlings()
+		got := g.Services[tt.wantService].GetHandlings()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
@@ -41,8 +40,7 @@ func TestUnit_GetHandleds(t *testing.T) {
 	g := newUnitGroup("path")
 	for _, tt := range tests {
 		g.AddHandled(tt.mName, tt.h)
-		u := g.Services[tt.wantService]
-		got := u.GetHandleds()
+		got := g.Services[tt.wantService].GetHandleds()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
