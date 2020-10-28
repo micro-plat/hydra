@@ -53,7 +53,7 @@ func TestLimit(t *testing.T) {
 			requestPath: "/limiter-notin",
 			opts: []limiter.Option{
 				limiter.WithEnable(),
-				limiter.WithRule(&limiter.Rule{
+				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
 					Action:   []string{"GET"},
 					MaxAllow: 1,
@@ -74,7 +74,7 @@ func TestLimit(t *testing.T) {
 			requestPath: "/limiter",
 			opts: []limiter.Option{
 				limiter.WithEnable(),
-				limiter.WithRule(&limiter.Rule{
+				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
 					Action:   []string{"GET"},
 					MaxAllow: 1,
@@ -95,7 +95,7 @@ func TestLimit(t *testing.T) {
 			requestPath: "/limiter",
 			opts: []limiter.Option{
 				limiter.WithEnable(),
-				limiter.WithRule(&limiter.Rule{
+				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
 					Action:   []string{"GET"},
 					MaxAllow: 0,

@@ -1,6 +1,10 @@
 package queue
 
-import "github.com/micro-plat/hydra/conf"
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/conf"
+)
 
 //VarRootName 在var中的跟路径
 const VarRootName = "queue"
@@ -23,6 +27,9 @@ func New(proto string, raw []byte) *Queue {
 func GetConf(cnf conf.IVarConf, tp string, name string) (s *Queue, err error) {
 	jc, err := cnf.GetConf(tp, name)
 	if err != nil {
+		if err == conf.ErrNoSetting {
+			return nil, fmt.Errorf("%s/%s %+v", tp, name, err)
+		}
 		return nil, err
 	}
 

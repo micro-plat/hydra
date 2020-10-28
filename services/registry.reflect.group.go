@@ -29,7 +29,8 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		g.Handling = h
 		return
 	}
-	path, service, actions := g.getPaths(g.Path, name)
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
+	path, service, _ := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Handling = h
 		return
@@ -43,7 +44,8 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 		g.Handled = h
 		return
 	}
-	path, service, actions := g.getPaths(g.Path, name)
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
+	path, service, _ := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Handled = h
 		return
@@ -54,6 +56,7 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 //AddHandle 添加处理函数
 func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
 
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
 	path, service, actions := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Handle = h
@@ -64,7 +67,9 @@ func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
 
 //AddFallback 添加降级函数
 func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
-	path, service, actions := g.getPaths(g.Path, name)
+
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
+	path, service, _ := g.getPaths(g.Path, name)
 	if _, ok := g.Services[service]; ok {
 		g.Services[service].Fallback = h
 		return

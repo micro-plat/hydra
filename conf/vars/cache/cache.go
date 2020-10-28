@@ -1,6 +1,10 @@
 package cache
 
-import "github.com/micro-plat/hydra/conf"
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/conf"
+)
 
 //Cache 消息队列配置
 type Cache struct {
@@ -20,6 +24,9 @@ func New(proto string, raw []byte) *Cache {
 func GetConf(cnf conf.IVarConf, tp string, name string) (s *Cache, err error) {
 	jc, err := cnf.GetConf(tp, name)
 	if err != nil {
+		if err == conf.ErrNoSetting {
+			return nil, fmt.Errorf("%s/%s %+v", tp, name, err)
+		}
 		return nil, err
 	}
 	return New(jc.GetString("proto"), jc.GetRaw()), nil

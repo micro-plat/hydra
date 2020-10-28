@@ -5,6 +5,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 )
 
 //MainConfName 主配置中的关键配置名
@@ -35,6 +36,10 @@ func New(opts ...Option) *Server {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
 	s = &Server{}
+	if cnf.GetServerType() != global.CRON {
+		return nil, fmt.Errorf("cron主配置类型错误:%s != cron", cnf.GetServerType())
+	}
+
 	_, err = cnf.GetMainObject(s)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, err

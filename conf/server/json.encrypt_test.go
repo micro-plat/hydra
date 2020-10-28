@@ -1,9 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func BenchmarkEncrypt(b *testing.B) {
@@ -15,75 +16,54 @@ func BenchmarkEncrypt(b *testing.B) {
 }
 
 func BenchmarkDecrypt(b *testing.B) {
-	// var inputOr = []byte("taosytaosytaosytaosytaosytaosytaosy")
 	var input = []byte("encrypt:cbc/pkcs5:47b17dd320c67986a839e86c4da057a95ff57a008f168817daf12500e475dfccf032844585f9723c")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		decrypt(input)
-		// if err != nil {
-		// 	b.Errorf("性能测试解密错误,err:%+v", err)
-		// 	return
-		// }
-		// if bytes.Compare(inputOr, res) != 0 {
-		// 	b.Error("性能测试解密错误")
-		// 	return
-		// }
 	}
 }
 
-func TestEncrypt(t *testing.T) {
-	var input = []byte("taosytaosytaosytaosytaosytaosytaosy")
-	data := encrypt(input)
-	list := strings.Split(data, ":")
-	if len(list) <= 2 {
-		t.Error("加密结果错误")
-		return
+func Test_encrypt(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []byte
+	}{
+		{name: "空数据加密", input: []byte{}},
+		{name: "数据加密", input: []byte("taosytaosytaosytaosytaosytaosytaosy")},
 	}
-	if hd != list[0] || mode != list[1] {
-		t.Error("加密结果错误1")
-		return
-	}
+	for _, tt := range tests {
+		got := encrypt(tt.input)
+		list := strings.Split(got, ":")
+		assert.Equal(t, len(list), 3, tt.name+",len")
+		if len(list) >= 2 {
+			assert.Equal(t, list[0], hd, tt.name+".hd")
+			assert.Equal(t, list[1], mode, tt.name+",mode")
 
-	//空数据加密
-	input = []byte{}
-	data = encrypt(input)
-	list = strings.Split(data, ":")
-	if len(list) <= 2 {
-		t.Error("加密结果错误")
-		return
+		}
 	}
-	if hd != list[0] || mode != list[1] {
-		t.Error("加密结果错误1")
-		return
-	}
-	return
 }
 
-func TestDecrypt(t *testing.T) {
-	var input = []byte("taosy")
-	data := encrypt(input)
-	res, err := decrypt([]byte(data))
-	if err != nil {
-		t.Error("解密结果错误")
-		return
-	}
+func Test_decrypt(t *testing.T) {
+	input := []byte{}
+	nildata := encrypt(input)
+	input1 := []byte("encryptapsytsetetapsytsetetapsytsetetapsytsete")
+	data1 := encrypt(input1)
 
-	if bytes.Compare(input, res) != 0 {
-		t.Error("解密结果错误1")
-		return
+	tests := []struct {
+		name    string
+		data    []byte
+		want    []byte
+		wantErr bool
+	}{
+		{name: "空数据解密", data: []byte(nildata), want: []byte{}, wantErr: false},
+		{name: "小于加密前后缀的长度的数据解密", data: []byte("nildata"), want: []byte("nildata"), wantErr: false},
+		{name: "不是由hd开头数据解密", data: []byte("nildatanildatanildatanildata"), want: []byte("nildatanildatanildatanildata"), wantErr: false},
+		{name: "错误数据解密", data: []byte("encryptnildatanildatanildatanildata"), want: nil, wantErr: true},
+		{name: "正确数据数据解密", data: []byte(data1), want: []byte("encryptapsytsetetapsytsetetapsytsetetapsytsete"), wantErr: false},
 	}
-
-	//空数据加密
-	input = []byte{}
-	data = encrypt(input)
-	res, err = decrypt([]byte(data))
-	if err != nil {
-		t.Error("解密结果错误2")
-		return
-	}
-
-	if bytes.Compare(input, res) != 0 {
-		t.Error("解密结果错误3")
-		return
+	for _, tt := range tests {
+		got, err := decrypt(tt.data)
+		assert.Equal(t, tt.wantErr, (err != nil), tt.name+".err")
+		assert.Equal(t, tt.want, got, tt.name+",res")
 	}
 }
