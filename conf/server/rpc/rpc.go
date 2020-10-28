@@ -5,6 +5,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 )
 
 //DefaultRPCAddress rpc服务默认地址
@@ -43,6 +44,10 @@ func New(address string, opts ...Option) *Server {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
 	s = &Server{}
+	if cnf.GetServerType() != global.CRON {
+		return nil, fmt.Errorf("rpc主配置类型错误:%s != rpc", cnf.GetServerType())
+	}
+
 	if _, err := cnf.GetMainObject(s); err != nil && err != conf.ErrNoSetting {
 		return nil, err
 	}

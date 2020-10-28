@@ -18,6 +18,20 @@ func WithTmplt(path string, content string, opts ...TmpltOption) Option {
 	}
 }
 
+//WithDisable 禁用配置
+func WithDisable() Option {
+	return func(a *Render) {
+		a.Disable = true
+	}
+}
+
+//WithEnable 启用配置
+func WithEnable() Option {
+	return func(a *Render) {
+		a.Disable = false
+	}
+}
+
 //WithStatus 添加状态码模板
 func WithStatus(templt string) TmpltOption {
 	return func(a *Tmplt) {

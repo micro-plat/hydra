@@ -75,12 +75,13 @@ func (c *MainConf) getSubConf(path string) (map[string]conf.RawConf, error) {
 			values[p] = *value
 		}
 	}
+
 	return values, nil
 }
 
 //IsTrace 是否跟踪请求或响应
 func (c *MainConf) IsTrace() bool {
-	return c.rootConf.GetString("trace", "true") == "true"
+	return c.rootConf.GetBool("trace", false)
 }
 
 //GetRegistry 获取注册中心
@@ -169,6 +170,7 @@ func (c *MainConf) Close() error {
 	close(c.closeCh)
 	return nil
 }
+
 func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	data, version, err := registry.GetValue(path)
 	if err != nil {

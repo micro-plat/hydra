@@ -40,10 +40,12 @@ func GetConf(cnf conf.IMainConf) (queues *Queues, err error) {
 	if _, err := cnf.GetSubObject("queue", queues); err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("queues配置格式有误:%v", err)
 	}
-	if len(queues.Queues) > 0 {
-		if b, err := govalidator.ValidateStruct(queues); !b {
+
+	for _, queue := range queues.Queues {
+		if b, err := govalidator.ValidateStruct(queue); !b {
 			return nil, fmt.Errorf("queue配置数据有误:%v", err)
 		}
 	}
+
 	return queues, nil
 }

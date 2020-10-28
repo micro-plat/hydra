@@ -25,6 +25,11 @@ func (c *varPath) GetVarPath(tp ...string) string {
 	return registry.Join(l...)
 }
 
+//GetPlatName 获取平台名称
+func (c *varPath) GetPlatName() string {
+	return c.platName
+}
+
 //GetRLogPath 获取远程日志配置路径
 func (c *varPath) GetRLogPath() string {
 	return c.GetVarPath("app", "rlog")

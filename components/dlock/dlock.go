@@ -130,9 +130,15 @@ func isMaster(path string, root string, cldrs []string) bool {
 	ncldrs := make([]string, 0, len(cldrs))
 	for _, v := range cldrs {
 		name := strings.Replace(v, root, "", -1)
+		if len(name) <= 0 {
+			continue
+		}
 		ncldrs = append(ncldrs, name)
 	}
 
+	if len(ncldrs) == 0 {
+		return false
+	}
 	sort.Strings(ncldrs)
 	return strings.HasSuffix(path, ncldrs[0])
 }

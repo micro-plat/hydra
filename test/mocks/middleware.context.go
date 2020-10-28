@@ -272,8 +272,8 @@ func (res *MockResponse) NoNeedWrite(status int) {
 	res.MockStatus = status
 }
 
-//Render 修改最终渲染内容
-func (res *MockResponse) Render(status int, content string, ctp string) {
+//WriteFinal 修改最终渲染内容
+func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
 	res.MockStatus = status
 	res.MockContent = content
 	res.MockContentType = ctp

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -76,6 +77,12 @@ func (r *Router) GetEncoding() string {
 //IsUTF8 是否是UTF8编码
 func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
+}
+
+//IsUTF8 是否是UTF8编码
+func (r *Router) String() string {
+	bytes, _ := json.Marshal(r)
+	return string(bytes)
 }
 
 //NewRouters 构建路由
