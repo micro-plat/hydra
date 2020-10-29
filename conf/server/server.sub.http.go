@@ -183,7 +183,7 @@ func (s *httpSub) GetStaticConf() (*static.Static, error) {
 //GetRouterConf 获取路由信息
 func (s *httpSub) GetRouterConf() (*router.Routers, error) {
 	routerObj, err := s.router.GetConf()
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, err
 	}
 

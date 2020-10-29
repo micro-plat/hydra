@@ -129,8 +129,7 @@ func GetConf(cnf conf.IMainConf) (router *Routers, err error) {
 	router = new(Routers)
 	_, err = cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
-		router = NewRouters()
-		return
+		return NewRouters(), nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err)

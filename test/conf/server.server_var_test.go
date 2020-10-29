@@ -14,9 +14,7 @@ import (
 )
 
 func TestNewVarConf(t *testing.T) {
-	systemName := "sys1"
-	platName := "hydra1"
-	clusterName := "cluter1"
+	platName, systemName, clusterName := "hydra1", "sys1", "cluter1"
 	confM := mocks.NewConfBy(platName, clusterName)
 	confM.Vars()
 	confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
@@ -111,36 +109,200 @@ func TestNewVarConf(t *testing.T) {
 }
 
 func TestVarConf_GetVersion(t *testing.T) {
-	systemName := "sys1"
-	platName := "hydra1"
-	clusterName := "cluter1"
-	confM := mocks.NewConfBy(platName, clusterName)
-	confM.Vars()
-	confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+	platName, systemName, clusterName := "hydra2", "sys2", "cluter2"
+	tests := []struct {
+		name    string
+		args    string
+		wantErr bool
+	}{
+		{name: "错误的var路径获取节点版本号", args: "errorPath", wantErr: true},
+		{name: "正确的var路径获取节点版本号", args: server.NewVarPath(platName).GetVarPath(), wantErr: true},
+	}
 
-	//错误的var路径初始化空对象
-	varConf, err := server.NewVarConf("varConfPath", confM.Registry)
-	assert.Equal(t, true, err == nil, "初始化varconf失败")
-	assert.Equal(t, int32(0), varConf.GetVersion(), "初始化varconf失败")
-
+	for _, tt := range tests {
+		confM := mocks.NewConfBy(platName, clusterName)
+		confM.Vars()
+		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+		varConf, err := server.NewVarConf(tt.args, confM.Registry)
+		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
+		_, vsion, err := confM.Registry.GetValue(tt.args)
+		assert.Equal(t, vsion, varConf.GetVersion(), tt.name+",vison")
+	}
 }
 
 func TestVarConf_GetConf(t *testing.T) {
-
+	platName, systemName, clusterName := "hydra3", "sys3", "cluter3"
+	varPath := server.NewVarPath(platName).GetVarPath()
+	type args struct {
+		uName   string
+		pwd     string
+		tnsName string
+		opts    []db.Option
+	}
+	tests := []struct {
+		name    string
+		isSet   bool
+		varPath string
+		tp      string
+		tpname  string
+		args    args
+		want    *conf.RawConf
+		wantErr bool
+	}{
+		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: conf.EmptyJSONConf, wantErr: true},
+		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+			want: nil, wantErr: true},
+	}
+	for _, tt := range tests {
+		confM := mocks.NewConfBy(platName, clusterName)
+		confN := confM.Vars()
+		if tt.isSet {
+			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+		}
+		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+		varConf, err := server.NewVarConf(tt.varPath, confM.Registry)
+		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
+		dbConf, err := varConf.GetConf(tt.tp, tt.tpname)
+		if tt.isSet {
+			assert.Equal(t, true, err == nil, "获取db节点配置异常1")
+			assert.Equal(t, "oracle", dbConf.GetString("provider"), "获取db节点Provider配置数据不正确")
+			assert.Equal(t, "taosy/123456@tnsName", dbConf.GetString("connString"), "获取db节点connString配置数据不正确")
+			assert.Equal(t, 10, dbConf.GetInt("maxOpen"), "获取db节点maxOpen配置数据不正确")
+			assert.Equal(t, 3, dbConf.GetInt("maxIdle"), "获取db节点maxIdle配置数据不正确")
+			assert.Equal(t, 600, dbConf.GetInt("lifeTime"), "获取db节点lifeTime配置数据不正确")
+		} else {
+			assert.Equal(t, conf.ErrNoSetting, err, "获取db节点配置异常1")
+			assert.Equal(t, conf.EmptyJSONConf, dbConf, "获取db节点配置数据不正确1")
+		}
+	}
 }
 
 func TestVarConf_GetConfVersion(t *testing.T) {
+	platName, systemName, clusterName := "hydra4", "sys4", "cluter4"
+	varPath := server.NewVarPath(platName).GetVarPath()
+	type args struct {
+		uName   string
+		pwd     string
+		tnsName string
+		opts    []db.Option
+	}
+	tests := []struct {
+		name    string
+		isSet   bool
+		tp      string
+		tpname  string
+		varPath string
+		args    args
+		wantErr bool
+	}{
+		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
+		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+			wantErr: true},
+	}
 
+	for _, tt := range tests {
+		confM := mocks.NewConfBy(platName, clusterName)
+		confN := confM.Vars()
+		if tt.isSet {
+			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+		}
+		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+		varConf, err := server.NewVarConf(tt.varPath, confM.Registry)
+		assert.Equal(t, true, err == nil, tt.name+",err")
+		vsion1 := int32(0)
+		if tt.isSet {
+			_, vsion1, err = confM.Registry.GetValue(registry.Join(tt.varPath, tt.tp, tt.tpname))
+			assert.Equal(t, true, err == nil, "注册中心获取节点数据异常3")
+		}
+		vsion, err := varConf.GetConfVersion(tt.tp, tt.tpname)
+		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
+		assert.Equal(t, vsion1, vsion, tt.name+",vison")
+	}
 }
 
 func TestVarConf_GetObject(t *testing.T) {
+	platName, systemName, clusterName := "hydra5", "sys5", "cluter5"
+	varPath := server.NewVarPath(platName).GetVarPath()
+	type args struct {
+		uName   string
+		pwd     string
+		tnsName string
+		opts    []db.Option
+	}
+	tests := []struct {
+		name    string
+		isSet   bool
+		tp      string
+		tpname  string
+		varPath string
+		args    args
+		wantErr bool
+	}{
+		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
+		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+			wantErr: true},
+	}
+	for _, tt := range tests {
+		confM := mocks.NewConfBy(platName, clusterName)
+		confN := confM.Vars()
+		if tt.isSet {
+			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+		}
+		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+		varConf, err := server.NewVarConf(tt.varPath, confM.Registry)
+		assert.Equal(t, true, err == nil, tt.name+",err")
 
-}
-
-func TestVarConf_GetClone(t *testing.T) {
-
+		dbObj := db.DB{}
+		vsion, err := varConf.GetObject(tt.tp, tt.tpname, &dbObj)
+		if tt.isSet {
+			assert.Equal(t, true, err == nil, "获取db子节点对象版本号异常2")
+			_, vsion1, err1 := confM.Registry.GetValue(registry.Join(tt.varPath, tt.tp, tt.tpname))
+			assert.Equal(t, true, err1 == nil, "注册中心获取节点数据异常3")
+			assert.Equal(t, vsion1, vsion, "获取db子节点对象版本号不正确2")
+			assert.Equal(t, "oracle", dbObj.Provider, "获取db子节点对象失败,Provider")
+			assert.Equal(t, 10, dbObj.MaxOpen, "获取db子节点对象失败,MaxOpen")
+			assert.Equal(t, 3, dbObj.MaxIdle, "获取db子节点对象失败,MaxIdle")
+			assert.Equal(t, 600, dbObj.LifeTime, "获取db子节点对象失败,LifeTime")
+			assert.Equal(t, "taosy/123456@tnsName", dbObj.ConnString, "获取db子节点对象失败,ConnString")
+		} else {
+			assert.Equal(t, conf.ErrNoSetting, err, "获取db子节点对象版本号异常1")
+			assert.Equal(t, int32(0), vsion, "获取db子节点对象版本号不正确1")
+			assert.Equal(t, db.DB{}, dbObj, "获取db子节点对象失败1")
+		}
+	}
 }
 
 func TestVarConf_Has(t *testing.T) {
-
+	platName, systemName, clusterName := "hydra6", "sys6", "cluter6"
+	varPath := server.NewVarPath(platName).GetVarPath()
+	type args struct {
+		uName   string
+		pwd     string
+		tnsName string
+		opts    []db.Option
+	}
+	tests := []struct {
+		name    string
+		isSet   bool
+		tp      string
+		tpname  string
+		varPath string
+		args    args
+		want    bool
+	}{
+		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: false},
+		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+			want: true},
+	}
+	for _, tt := range tests {
+		confM := mocks.NewConfBy(platName, clusterName)
+		confN := confM.Vars()
+		if tt.isSet {
+			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+		}
+		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+		varConf, err := server.NewVarConf(tt.varPath, confM.Registry)
+		assert.Equal(t, true, err == nil, tt.name+",err")
+		assert.Equal(t, tt.want, varConf.Has(tt.tp, tt.tpname), tt.name+",has")
+	}
 }

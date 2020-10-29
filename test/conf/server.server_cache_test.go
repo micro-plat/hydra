@@ -47,11 +47,6 @@ func Test_cache_GetVarConf(t *testing.T) {
 	obj, err := cacheobjPrt.GetVarConf()
 	assert.Equal(t, true, (err != nil), "获取不存在的配置对象，err")
 	assert.Equal(t, nil, obj, "获取不存在的配置对象，res")
-
-	//却笑var设置的逻辑测试
-	// conf := mocks.NewConf()
-	// conf.API(":8080")
-
 }
 
 func Test_cache_Clear(t *testing.T) {
