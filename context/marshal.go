@@ -8,18 +8,18 @@ import (
 //UnmarshalXML 将xml反序列化为map
 func UnmarshalXML(s string) (map[string]string, error) {
 	output := make(map[string]string)
-	err := xml.Unmarshal([]byte(s), (*xmlMap)(&output))
+	err := xml.Unmarshal([]byte(s), (*XmlMap)(&output))
 	return output, err
 }
 
-type xmlMap map[string]string
+type XmlMap map[string]string
 
-type xmlMapEntry struct {
+type XmlMapEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`
 }
 
-func (m xmlMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (m XmlMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {
 		return nil
 	}
@@ -30,16 +30,16 @@ func (m xmlMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	for k, v := range m {
-		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: v})
+		e.Encode(XmlMapEntry{XMLName: xml.Name{Local: k}, Value: v})
 	}
 
 	return e.EncodeToken(start.End())
 }
 
-func (m *xmlMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	*m = xmlMap{}
+func (m *XmlMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	*m = XmlMap{}
 	for {
-		var e xmlMapEntry
+		var e XmlMapEntry
 
 		err := d.Decode(&e)
 		if err == io.EOF {

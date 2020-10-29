@@ -17,7 +17,6 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
-	"gopkg.in/yaml.v2"
 )
 
 var _ context.IResponse = &response{}
@@ -312,17 +311,23 @@ func (c *response) Flush() {
 func (c *response) getString(ctp string, v interface{}) string {
 	switch {
 	case strings.Contains(ctp, "xml"):
-		buff, err := xml.Marshal(v)
+		tp := reflect.TypeOf(v).Kind()
+		s := v
+		if tp == reflect.Map {
+			s = context.XmlMap(v.(map[string]string))
+		}
+
+		buff, err := xml.Marshal(s)
 		if err != nil {
 			panic(err)
 		}
 		return string(buff)
-	case strings.Contains(ctp, "yaml"):
-		buff, err := yaml.Marshal(v)
-		if err != nil {
-			panic(err)
-		}
-		return string(buff)
+	// case strings.Contains(ctp, "yaml"):
+	// 	buff, err := yaml.Marshal(v)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	return string(buff)
 	case strings.Contains(ctp, "json"):
 		buff, err := json.Marshal(v)
 		if err != nil {

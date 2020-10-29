@@ -26,11 +26,11 @@ func Test_mqc_Subscribe(t *testing.T) {
 	c.Add("mqc", "service")
 	for _, tt := range tests {
 		c.Subscribe(tt.f)
-		l := len(c.events)
+		l := len(c.subscribers)
 		assert.Equal(t, tt.wantEeventsLen, l, tt.name)
 		//assert.Equal(t, tt.f, c.events[l-1].f, tt.name)
 		select {
-		case queue := <-c.events[l-1].msg:
+		case queue := <-c.subscribers[l-1].queueChan:
 			assert.Equal(t, c.queues.Queues[0], queue, tt.name)
 		default:
 		}
