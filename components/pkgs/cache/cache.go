@@ -2,7 +2,6 @@ package cache
 
 import (
 	"fmt"
-	"strings"
 )
 
 type ICacheExt interface {
@@ -26,7 +25,7 @@ type ICache interface {
 
 //Resover 定义配置文件转换方法
 type Resover interface {
-	Resolve(address []string, conf string) (ICache, error)
+	Resolve(conf string) (ICache, error)
 }
 
 var cacheResolvers = make(map[string]Resover)
@@ -43,28 +42,10 @@ func Register(proto string, resolver Resover) {
 }
 
 //New 根据适配器名称及参数返回配置处理器
-func New(address string, conf string) (ICache, error) {
-	proto, addrs, err := getNames(address)
-	if err != nil {
-		return nil, err
-	}
+func New(proto string, conf string) (ICache, error) {
 	resolver, ok := cacheResolvers[proto]
 	if !ok {
 		return nil, fmt.Errorf("cache: unknown adapter name %q (forgotten import?)", proto)
 	}
-	return resolver.Resolve(addrs, conf)
-}
-
-func getNames(address string) (proto string, raddr []string, err error) {
-	addr := strings.SplitN(address, "://", 2)
-	if len(addr[0]) == 0 {
-		return "", nil, fmt.Errorf("cache地址配置错误%s，格式:memcached://192.168.0.1:11211", addr)
-	}
-	proto = addr[0]
-	var rightAddr string
-	if len(addr) > 1 {
-		rightAddr = addr[1]
-	}
-	raddr = strings.Split(rightAddr, ",")
-	return
+	return resolver.Resolve(conf)
 }

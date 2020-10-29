@@ -52,6 +52,7 @@ func TestClient_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			c.Set(tt.args.key, "1", 10)
 			got, err := c.Get(tt.args.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Client.Get() error = %v, wantErr %v", err, tt.wantErr)

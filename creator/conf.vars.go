@@ -1,7 +1,9 @@
 package creator
 
 import (
-	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/hydra/conf/vars/cache/redis"
+	"github.com/micro-plat/hydra/conf/vars/cache/memcache"
+	"github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	"github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/queue"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
@@ -25,18 +27,38 @@ func (v vars) Queue(name string, q *queue.Queue) vars {
 	v["queue"][name] = q
 	return v
 }
-
-func (v vars) Cache(name string, q *cache.Cache) vars {
-	if _, ok := v["cache"]; !ok {
-		v["cache"] = make(map[string]interface{})
-	}
-	v["cache"][name] = q
-	return v
+func (v vars) Cache() *cache {
+	return &cache{vars: v}
 }
+
 func (v vars) RLog(service string, opts ...rlog.Option) vars {
 	if _, ok := v[rlog.TypeNodeName]; !ok {
 		v[rlog.TypeNodeName] = make(map[string]interface{})
 	}
 	v[rlog.TypeNodeName][rlog.LogName] = rlog.New(service, opts...)
 	return v
+}
+
+type cache struct {
+	vars vars
+}
+
+func (c *cache) Redis(name string, q *redis.Options) *cache {
+	return c.Custom(name, q)
+}
+
+func (c *cache) GoCache(name string, q *gocache.Options) *cache {
+	return c.Custom(name, q)
+}
+
+func (c *cache) Memcache(name string, q *memcache.Options) *cache {
+	return c.Custom(name, q)
+}
+
+func (c *cache) Custom(name string, q interface{}) *cache {
+	if _, ok := c.vars["cache"]; !ok {
+		c.vars["cache"] = make(map[string]interface{})
+	}
+	c.vars["cache"][name] = q
+	return c
 }

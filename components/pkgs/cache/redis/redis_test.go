@@ -3,6 +3,8 @@ package redis
 import (
 	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/components/pkgs/redis"
 )
 
 func getTestRaw() string {
@@ -24,7 +26,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(tt.args.addrs, tt.args.raw)
+			_, err := New(redis.WithRaw(tt.args.raw))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -34,7 +36,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestClient_Set(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key       string
 		value     string
@@ -59,7 +61,7 @@ func TestClient_Set(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Get(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key string
 	}
@@ -90,7 +92,7 @@ func TestClient_Get(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Gets(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key []string
 	}
@@ -118,7 +120,7 @@ func TestClient_Gets(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Add(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key       string
 		value     string
@@ -144,7 +146,7 @@ func TestClient_Add(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Decrement(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key   string
 		delta int64
@@ -176,7 +178,7 @@ func TestClient_Decrement(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Increment(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key   string
 		delta int64
@@ -208,7 +210,7 @@ func TestClient_Increment(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Delay(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key       string
 		expiresAt int
@@ -232,7 +234,7 @@ func TestClient_Delay(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Delete(t *testing.T) {
-	c, _ := New([]string{}, getTestRaw())
+	c, _ := New(redis.WithRaw(getTestRaw()))
 	type args struct {
 		key string
 	}

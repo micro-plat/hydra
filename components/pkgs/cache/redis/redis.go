@@ -19,9 +19,9 @@ type Client struct {
 }
 
 // New 根据配置文件创建一个redis连接 @bug addrs没用
-func New(raw string) (m *Client, err error) {
+func New(opts ...redis.Option) (m *Client, err error) {
 	m = &Client{}
-	m.client, err = redis.New(redis.WithRaw(raw))
+	m.client, err = redis.New(opts...)
 	if err != nil {
 		return
 	}
@@ -147,8 +147,8 @@ func (c *Client) Close() error {
 type redisResolver struct {
 }
 
-func (s *redisResolver) Resolve(address []string, conf string) (cache.ICache, error) {
-	return New(conf)
+func (s *redisResolver) Resolve(conf string) (cache.ICache, error) {
+	return New(redis.WithRaw(conf))
 }
 func init() {
 	cache.Register(Proto, &redisResolver{})

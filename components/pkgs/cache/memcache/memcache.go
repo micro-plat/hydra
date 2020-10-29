@@ -19,10 +19,12 @@ type Client struct {
 }
 
 // New 根据配置文件创建一个memcache连接
-func New(addrs []string) (m *Client, err error) {
-	m = &Client{servers: addrs}
-	m.client = memcache.New(addrs...)
-	m.client.Timeout = time.Second
+func New(opts ...Option) (m *Client, err error) {
+	opt := NewOptions(opts...)
+	m = &Client{servers: opt.Address}
+	m.client = memcache.New(opt.Address...)
+	m.client.Timeout = time.Duration(opt.Timeout) * time.Second
+	m.client.MaxIdleConns = opt.MaxIdleConns
 	return
 }
 
@@ -91,7 +93,8 @@ func (c *Client) Gets(key ...string) (r []string, err error) {
 	r = make([]string, 0, len(data))
 	for _, v := range key {
 		if value, ok := data[v]; ok {
-			r = append(r, string(value)) //@bug,data返回与key数量不一致,空指针报错
+
+			r = append(r, string(value.Value)) //@bug,data返回与key数量不一致,空指针报错
 		}
 	}
 	return
@@ -148,8 +151,8 @@ func (c *Client) Close() error {
 type mresolver struct {
 }
 
-func (s *mresolver) Resolve(address []string, c string) (cache.ICache, error) {
-	return New(address)
+func (s *mresolver) Resolve(conf string) (cache.ICache, error) {
+	return New(WithRaw(conf))
 }
 func init() {
 	cache.Register("memcached", &mresolver{})

@@ -6,7 +6,7 @@ import (
 )
 
 func TestClient_Set(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
 	type args struct {
 		key       string
 		value     string
@@ -31,7 +31,7 @@ func TestClient_Set(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Get(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
 	type args struct {
 		key string
 	}
@@ -62,7 +62,8 @@ func TestClient_Get(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Gets(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
+
 	type args struct {
 		key []string
 	}
@@ -90,7 +91,8 @@ func TestClient_Gets(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Add(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
+
 	type args struct {
 		key       string
 		value     string
@@ -116,7 +118,8 @@ func TestClient_Add(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Decrement(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
+
 	type args struct {
 		key   string
 		delta int64
@@ -148,7 +151,8 @@ func TestClient_Decrement(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Increment(t *testing.T) {
-	c, _ := New([]string{"192.168.106.58:11211"})
+	c, _ := New(WithAddress("192.168.106.58:11211"))
+
 	type args struct {
 		key   string
 		delta int64
