@@ -57,11 +57,11 @@ func Test_cron_Subscribe(t *testing.T) {
 	c.Add("cron", "service")
 	for _, tt := range tests {
 		c.Subscribe(tt.f)
-		l := len(c.events)
+		l := len(c.subscribers)
 		assert.Equal(t, tt.wantEeventsLen, l, tt.name)
 		//assert.Equal(t, tt.f, c.events[l-1].f, tt.name)
 		select {
-		case task := <-c.events[l-1].msg:
+		case task := <-c.subscribers[l-1].taskChan:
 			assert.Equal(t, c.tasks.Tasks[0], task, tt.name)
 		default:
 		}

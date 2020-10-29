@@ -3,6 +3,7 @@ package blacklist
 import (
 	"fmt"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 )
@@ -40,6 +41,10 @@ func GetConf(cnf conf.IMainConf) (*BlackList, error) {
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("black list配置有误:%v", err)
+	}
+
+	if b, err := govalidator.ValidateStruct(&ip); !b {
+		return nil, fmt.Errorf("black list配置数据有误:%v", err)
 	}
 
 	ip.ipm = conf.NewPathMatch(ip.IPS...)

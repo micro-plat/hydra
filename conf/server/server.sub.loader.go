@@ -28,5 +28,6 @@ func (l *Loader) GetConf() (interface{}, error) {
 	l.once.Do(func() {
 		l.obj, l.err = l.f(l.cnf)
 	})
+
 	return l.obj, l.err
 }

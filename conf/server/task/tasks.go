@@ -41,7 +41,7 @@ func GetConf(cnf conf.IMainConf) (tasks *Tasks, err error) {
 		return nil, fmt.Errorf("task:%v", err)
 	}
 	if err == conf.ErrNoSetting {
-		return tasks, nil
+		return &Tasks{}, nil
 	}
 
 	for _, task := range tasks.Tasks {

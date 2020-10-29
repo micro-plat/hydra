@@ -109,3 +109,38 @@ func TestNewVarConf(t *testing.T) {
 	assert.Equal(t, true, varConf.Has("db", "newdb"), "var节点是否存在判断错误2")
 
 }
+
+func TestVarConf_GetVersion(t *testing.T) {
+	systemName := "sys1"
+	platName := "hydra1"
+	clusterName := "cluter1"
+	confM := mocks.NewConfBy(platName, clusterName)
+	confM.Vars()
+	confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
+
+	//错误的var路径初始化空对象
+	varConf, err := server.NewVarConf("varConfPath", confM.Registry)
+	assert.Equal(t, true, err == nil, "初始化varconf失败")
+	assert.Equal(t, int32(0), varConf.GetVersion(), "初始化varconf失败")
+
+}
+
+func TestVarConf_GetConf(t *testing.T) {
+
+}
+
+func TestVarConf_GetConfVersion(t *testing.T) {
+
+}
+
+func TestVarConf_GetObject(t *testing.T) {
+
+}
+
+func TestVarConf_GetClone(t *testing.T) {
+
+}
+
+func TestVarConf_Has(t *testing.T) {
+
+}

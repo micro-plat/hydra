@@ -8,6 +8,15 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+type handlerType int
+
+const (
+	handle handlerType = iota + 1
+	handling
+	handled
+	fallback
+)
+
 type UnitGroup struct {
 	Path     string
 	Handling context.IHandler
@@ -30,12 +39,7 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		return
 	}
 	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
-	path, service, actions := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handling = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handling: h} //将path和actions赋值 @hj
+	g.storeService(name, h, handling)
 }
 
 //AddHandled 添加后处理函数
@@ -44,37 +48,39 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 		g.Handled = h
 		return
 	}
-	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
-	path, service, actions := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handled = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handled: h} //将path和actions赋值,h赋值为handled @hj
+	g.storeService(name, h, handled)
 }
 
 //AddHandle 添加处理函数
 func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
-
-	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
-	path, service, actions := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handle = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handle: h}
+	g.storeService(name, h, handle)
 }
 
 //AddFallback 添加降级函数
 func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
+	g.storeService(name, h, fallback)
+}
 
+func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
 	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
 	path, service, actions := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Fallback = h
-		return
+	unit, ok := g.Services[service]
+	if !ok {
+		unit = &Unit{Group: g, Path: path, Service: service, Actions: actions}
+		g.Services[service] = unit
 	}
-	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Fallback: h} //将path和actions赋值,赋值为fallback @hj
+
+	switch htype {
+	case handling:
+		unit.Handling = handler
+	case handle:
+		unit.Handle = handler
+	case handled:
+		unit.Handled = handler
+	case fallback:
+		unit.Fallback = handler
+	default:
+	}
 }
 
 func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {

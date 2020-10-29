@@ -57,7 +57,7 @@ func IsNil(t *testing.T, ext bool, got interface{}, args ...interface{}) {
 			t.Error("!", " -", fmt.Sprint(args...))
 		}
 	}
-	assert(t, (got == nil) == ext, fn, 1)
+	assert(t, reflect.DeepEqual(nil, got) == ext, fn, 1)
 }
 
 func IsNilf(t *testing.T, ext bool, got interface{}, format string, args ...interface{}) {
