@@ -49,13 +49,16 @@ func (r *request) Param(key string) string {
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
 
-	if err := r.ctx.ShouldBind(&obj); err != nil {
+	val := reflect.ValueOf(obj)
+	if val.Kind() != reflect.Ptr {
+		return fmt.Errorf("输入参数非指针 %v", val.Kind())
+	}
+
+	if err := r.ctx.ShouldBind(obj); err != nil {
 		return err
 	}
-	val := reflect.ValueOf(obj)
-	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
+
+	val = val.Elem()
 	if val.Kind() != reflect.Struct {
 		return nil
 	}
