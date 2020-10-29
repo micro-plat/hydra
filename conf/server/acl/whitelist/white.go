@@ -10,8 +10,8 @@ import (
 
 //IPList ip列表
 type IPList struct {
-	Requests []string `json:"requests" valid:"ascii,required" toml:"requests,omitempty"`
-	IPS      []string `json:"ips" valid:"required" toml:"ips,omitempty"`
+	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty"`
+	IPS      []string `json:"ips,omitempty" valid:"ascii,required" toml:"ips,omitempty"`
 	ipm      *conf.PathMatch
 	rqm      *conf.PathMatch
 }

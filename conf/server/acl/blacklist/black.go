@@ -11,7 +11,7 @@ import (
 //BlackList 黑名单配置
 type BlackList struct {
 	Disable bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	IPS     []string `json:"black-list" valid:"required" toml:"black-list,omitempty"`
+	IPS     []string `json:"black-list,omitempty" valid:"required" toml:"black-list,omitempty"`
 	ipm     *conf.PathMatch
 }
 

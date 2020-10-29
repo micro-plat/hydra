@@ -15,8 +15,8 @@ import (
 //Gray 灰度设置
 type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-	Filter    string `json:"filter" valid:"required" toml:"filter,omitempty"`
-	UPCluster string `json:"upcluster" valid:"required" toml:"upcluster,omitempty"`
+	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
+	UPCluster string `json:"upcluster,omitempty" valid:"required" toml:"upcluster,omitempty"`
 	//conf      conf.IMainConf
 	cluster conf.ICluster
 }

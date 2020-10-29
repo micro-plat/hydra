@@ -21,9 +21,9 @@ var SubConfName = []string{"router", "metric"}
 type Server struct {
 	Address   string `json:"address,omitempty" toml:"address,omitempty"`
 	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
-	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
-	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
+	RTimeout  int    `json:"rTimeout,omitzero" toml:"rTimeout,omitzero"`
+	WTimeout  int    `json:"wTimeout,omitzero" toml:"wTimeout,omitzero"`
+	RHTimeout int    `json:"rhTimeout,omitzero" toml:"rhTimeout,omitzero"`
 	Host      string `json:"host,omitempty" toml:"host,omitempty"`
 	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
 	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`

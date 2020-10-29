@@ -9,16 +9,16 @@ import (
 )
 
 type Tmplt struct {
-	ContentType string `json:"content_type,omitempty"`
-	Content     string `json:"content,omitempty"`
-	Status      string `json:"status,omitempty" valid:"required"`
+	ContentType string `json:"content_type,omitempty" toml:"content_type,omitempty"`
+	Content     string `json:"content,omitempty" toml:"content,omitempty"`
+	Status      string `json:"status,omitempty" valid:"required" toml:"status,omitempty"`
 }
 
 //Render 响应模板信息
 type Render struct {
-	Tmplts map[string]*Tmplt `json:"tmplts,omitemptye" toml:"Tmplts,omitempty"`
+	Tmplts map[string]*Tmplt `json:"tmplts,omitempty" toml:"Tmplts,omitempty"`
 	//Disable 禁用
-	Disable bool `json:"disable,omitemptye" toml:"disable,omitempty"`
+	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch
 }
 

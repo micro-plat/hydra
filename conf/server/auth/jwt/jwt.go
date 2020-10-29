@@ -11,10 +11,10 @@ import (
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
-	Name            string   `json:"name" valid:"ascii,required" toml:"name,omitempty"`
-	ExpireAt        int64    `json:"expireAt" valid:"required" toml:"expireAt,omitzero"`
-	Mode            string   `json:"mode" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
-	Secret          string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
+	Name            string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty"`
+	ExpireAt        int64    `json:"expireAt,omitempty" valid:"required" toml:"expireAt,omitzero"`
+	Mode            string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
+	Secret          string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
 	Source          string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
 	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
 	Redirect        string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`

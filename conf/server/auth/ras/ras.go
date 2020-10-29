@@ -11,15 +11,12 @@ import (
 //RASAuth 远程服务验证组
 type RASAuth struct {
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
-	Auth    []*Auth `json:"auth"`
+	Auth    []*Auth `json:"auth" toml:"auth"`
 }
 
 //NewRASAuth 构建RASAuth认证
 func NewRASAuth(opts ...Option) *RASAuth {
-	r := &RASAuth{
-		Disable: false,
-	}
-
+	r := &RASAuth{}
 	for _, opt := range opts {
 		opt(r)
 	}
