@@ -224,6 +224,19 @@ func (c *conf) Vars() vars {
 	return c.vars
 }
 
+//Vars 平台变量配置
+func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
+	tpv, ok := c.vars[tp]
+	if !ok {
+		return
+	}
+	val, ok = tpv[name]
+	if !ok {
+		return
+	}
+	return
+}
+
 //Custome 用户自定义配置服务
 func (c *conf) Custome(tp string, s ...interface{}) customerBuilder {
 	if _, ok := c.data[tp]; ok {

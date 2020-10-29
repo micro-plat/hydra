@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/cache"
+	"github.com/micro-plat/hydra/components/caches/cache"
+	vargocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	"github.com/micro-plat/lib4go/net"
 	gocache "github.com/zkfy/go-cache"
 )
@@ -18,9 +19,14 @@ type Client struct {
 	client  *gocache.Cache
 }
 
-// New 根据配置文件创建一个redis连接
-func New(opts ...Option) (m *Client, err error) {
-	opt := NewOptions(opts...)
+// NewByOpts 根据配置文件创建一个gocache连接
+func NewByOpts(opts ...vargocache.Option) (m *Client, err error) {
+	opt := vargocache.New(opts...)
+	return NewByConfig(opt)
+}
+
+// NewByConfig 根据配置文件创建一个gocache连接
+func NewByConfig(opt *vargocache.GoCache) (m *Client, err error) {
 	m = &Client{}
 	m.client = gocache.New(opt.Expiration, opt.CleanupInterval)
 	m.servers = []string{
@@ -118,7 +124,7 @@ type cacheResolver struct {
 }
 
 func (s *cacheResolver) Resolve(conf string) (cache.ICache, error) {
-	return New(WithRaw(conf))
+	return NewByOpts(vargocache.WithRaw(conf))
 }
 func init() {
 	cache.Register("gocache", &cacheResolver{})

@@ -5,7 +5,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	_, err := New()
+	_, err := NewByOpts()
 	if (err != nil) != false {
 		t.Errorf("New() error = %v, wantErr %v", err, false)
 		return
@@ -13,7 +13,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestClient_Add(t *testing.T) {
-	c, _ := New()
+	c, _ := NewByOpts()
 	type args struct {
 		key       string
 		value     string
@@ -41,7 +41,7 @@ func TestClient_Get(t *testing.T) {
 	type args struct {
 		key string
 	}
-	c, _ := New()
+	c, _ := NewByOpts()
 	tests := []struct {
 		name    string
 		args    args

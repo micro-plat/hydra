@@ -54,8 +54,7 @@ func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf
 	_, obj, err := c.cache.SetIfAbsentCb(key, func(i ...interface{}) (interface{}, error) {
 		v, err := creator(js)
 		if err != nil {
-			return nil,
-				err
+			return nil, err
 		}
 		c.vers.Add(typ, name, key)
 		return v, nil

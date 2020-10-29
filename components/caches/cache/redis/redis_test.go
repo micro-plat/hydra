@@ -1,12 +1,42 @@
-package memcache
+package redis
 
 import (
 	"reflect"
 	"testing"
+
+	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
+func getTestRaw() string {
+	return `{"addrs":["192.168.0.111:6379","192.168.0.112:6379"],"db": 0,"dial_timeout": 10,"pool_size": 10,"proto": "redis","read_timeout": 10,"write_timeout": 10}`
+}
+
+func TestNew(t *testing.T) {
+	type args struct {
+		addrs []string
+		raw   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantM   *Client
+		wantErr bool
+	}{
+		{name: "1", args: args{addrs: []string{}, raw: getTestRaw()}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewByOpts(varredis.WithRaw(tt.args.raw))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
 func TestClient_Set(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key       string
 		value     string
@@ -31,7 +61,7 @@ func TestClient_Set(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Get(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key string
 	}
@@ -42,7 +72,7 @@ func TestClient_Get(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "1", args: args{key: ""}, wantErr: true},
-		{name: "2", args: args{key: "xxxxxx"}, wantErr: true},
+		{name: "2", args: args{key: "xxxxxx"}, want: "", wantErr: false},
 		{name: "3", args: args{key: "hydra_test_key1"}, want: "100", wantErr: false},
 		{name: "4", args: args{key: "hydra_test_key2"}, want: "value", wantErr: false},
 	}
@@ -62,8 +92,7 @@ func TestClient_Get(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Gets(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
-
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key []string
 	}
@@ -73,7 +102,7 @@ func TestClient_Gets(t *testing.T) {
 		wantR   []string
 		wantErr bool
 	}{
-		{name: "1", args: args{key: []string{"a", "", "hydra_test_key1", "hydra_test_key2"}}, wantR: []string{"", "", "100", "value"}, wantErr: false},
+		{name: "1", args: args{key: []string{"a", "b", "hydra_test_key1", "hydra_test_key2"}}, wantR: []string{"", "", "100", "value"}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -91,8 +120,7 @@ func TestClient_Gets(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Add(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
-
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key       string
 		value     string
@@ -118,8 +146,7 @@ func TestClient_Add(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Decrement(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
-
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key   string
 		delta int64
@@ -130,10 +157,10 @@ func TestClient_Decrement(t *testing.T) {
 		wantN   int64
 		wantErr bool
 	}{
-		{name: "1", args: args{key: "hydra_test", delta: 100}, wantErr: true},
-		{name: "2", args: args{key: "hydra_test_key2", delta: 100}, wantErr: true},
+		{name: "1", args: args{key: "hydra_test_key2", delta: 100}, wantErr: true},
+		{name: "2", args: args{key: "hydra_test_key4", delta: 100}, wantN: -100, wantErr: false},
 		{name: "3", args: args{key: "hydra_test_key1", delta: 100}, wantN: 0, wantErr: false},
-		{name: "4", args: args{key: "hydra_test_key1", delta: 100}, wantN: 0, wantErr: false},
+		{name: "4", args: args{key: "hydra_test_key1", delta: 100}, wantN: -100, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -151,8 +178,7 @@ func TestClient_Decrement(t *testing.T) {
 
 //测试用例前.先执行Set的测试用例TestClient_Set
 func TestClient_Increment(t *testing.T) {
-	c, _ := New(WithAddress("192.168.106.58:11211"))
-
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
 	type args struct {
 		key   string
 		delta int64
@@ -163,10 +189,10 @@ func TestClient_Increment(t *testing.T) {
 		wantN   int64
 		wantErr bool
 	}{
-		{name: "1", args: args{key: "hydra_test", delta: 100}, wantErr: true},
+		{name: "1", args: args{key: "hydra_test_key5", delta: 100}, wantN: 100, wantErr: false},
 		{name: "2", args: args{key: "hydra_test_key2", delta: 100}, wantErr: true},
-		{name: "4", args: args{key: "hydra_test_key1", delta: -300}, wantErr: true},
-		{name: "3", args: args{key: "hydra_test_key1", delta: 100}, wantN: 200, wantErr: false},
+		{name: "3", args: args{key: "hydra_test_key1", delta: -300}, wantN: -200, wantErr: false},
+		{name: "4", args: args{key: "hydra_test_key1", delta: 100}, wantN: -100, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -177,6 +203,53 @@ func TestClient_Increment(t *testing.T) {
 			}
 			if gotN != tt.wantN {
 				t.Errorf("Client.Increment() = %v, want %v", gotN, tt.wantN)
+			}
+		})
+	}
+}
+
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Delay(t *testing.T) {
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
+	type args struct {
+		key       string
+		expiresAt int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "1", args: args{key: "hydra_test_key6", expiresAt: 100}, wantErr: false},
+		{name: "2", args: args{key: "hydra_test_key1", expiresAt: 100}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := c.Delay(tt.args.key, tt.args.expiresAt); (err != nil) != tt.wantErr {
+				t.Errorf("Client.Delay() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Delete(t *testing.T) {
+	c, _ := NewByOpts(varredis.WithRaw(getTestRaw()))
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "1", args: args{key: "hydra_test_key1"}, wantErr: false},
+		{name: "2", args: args{key: "hydra_test_*"}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := c.Delete(tt.args.key); (err != nil) != tt.wantErr {
+				t.Errorf("Client.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

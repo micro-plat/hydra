@@ -1,15 +1,25 @@
 package creator
 
 import (
-	"github.com/micro-plat/hydra/conf/vars/cache/redis"
-	"github.com/micro-plat/hydra/conf/vars/cache/memcache"
 	"github.com/micro-plat/hydra/conf/vars/cache/gocache"
+	"github.com/micro-plat/hydra/conf/vars/cache/memcached"
+	"github.com/micro-plat/hydra/conf/vars/cache/redis"
 	"github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/queue"
+	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 )
 
 type vars map[string]map[string]interface{}
+
+//DB 添加db配置
+func (v vars) Redis(name string, redis *varredis.Redis) vars {
+	if _, ok := v["redis"]; !ok {
+		v["redis"] = make(map[string]interface{})
+	}
+	v["redis"][name] = redis
+	return v
+}
 
 //DB 添加db配置
 func (v vars) DB(name string, db *db.DB) vars {
@@ -43,15 +53,15 @@ type cache struct {
 	vars vars
 }
 
-func (c *cache) Redis(name string, q *redis.Options) *cache {
+func (c *cache) Redis(name string, q *redis.Redis) *cache {
 	return c.Custom(name, q)
 }
 
-func (c *cache) GoCache(name string, q *gocache.Options) *cache {
+func (c *cache) GoCache(name string, q *gocache.GoCache) *cache {
 	return c.Custom(name, q)
 }
 
-func (c *cache) Memcache(name string, q *memcache.Options) *cache {
+func (c *cache) Memcache(name string, q *memcached.Memcache) *cache {
 	return c.Custom(name, q)
 }
 

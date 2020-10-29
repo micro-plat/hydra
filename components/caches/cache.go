@@ -2,7 +2,7 @@ package caches
 
 import (
 	"github.com/micro-plat/hydra/components/container"
-	"github.com/micro-plat/hydra/components/pkgs/cache"
+	"github.com/micro-plat/hydra/components/caches/cache"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )

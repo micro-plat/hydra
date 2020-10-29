@@ -1,4 +1,4 @@
-package memcache
+package memcached
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/micro-plat/hydra/components/pkgs/cache"
+	"github.com/micro-plat/hydra/components/caches/cache"
+	"github.com/micro-plat/hydra/conf/vars/cache/memcached"
 )
 
 //Proto Proto
@@ -18,9 +19,15 @@ type Client struct {
 	client  *memcache.Client
 }
 
-// New 根据配置文件创建一个memcache连接
-func New(opts ...Option) (m *Client, err error) {
-	opt := NewOptions(opts...)
+// NewByOpts 根据配置文件创建一个memcache连接
+func NewByOpts(opts ...memcached.Option) (m *Client, err error) {
+	opt := memcached.New(opts...)
+	return NewByConfig(opt)
+}
+
+// NewByConfig 根据配置文件创建一个memcache连接
+func NewByConfig(opt *memcached.Memcache) (m *Client, err error) {
+
 	m = &Client{servers: opt.Address}
 	m.client = memcache.New(opt.Address...)
 	m.client.Timeout = time.Duration(opt.Timeout) * time.Second
@@ -152,7 +159,7 @@ type mresolver struct {
 }
 
 func (s *mresolver) Resolve(conf string) (cache.ICache, error) {
-	return New(WithRaw(conf))
+	return NewByOpts(memcached.WithRaw(conf))
 }
 func init() {
 	cache.Register("memcached", &mresolver{})

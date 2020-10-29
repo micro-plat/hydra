@@ -5,8 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/cache"
+	"github.com/micro-plat/hydra/components/caches/cache"
 	"github.com/micro-plat/hydra/components/pkgs/redis"
+	"github.com/micro-plat/hydra/conf/server"
+	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
+	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
 //Proto Proto
@@ -18,10 +21,21 @@ type Client struct {
 	client  *redis.Client
 }
 
-// New 根据配置文件创建一个redis连接 @bug addrs没用
-func New(opts ...redis.Option) (m *Client, err error) {
+// NewByOpts 根据配置文件创建一个redis连接
+func NewByOpts(opts ...varredis.Option) (m *Client, err error) {
 	m = &Client{}
-	m.client, err = redis.New(opts...)
+	m.client, err = redis.NewByOpts(opts...)
+	if err != nil {
+		return
+	}
+	m.servers = m.client.GetAddrs()
+	return
+}
+
+// NewByConfig 根据配置文件创建一个redis连接
+func NewByConfig(config *varredis.Redis) (m *Client, err error) {
+	m = &Client{}
+	m.client, err = redis.NewByConfig(config)
 	if err != nil {
 		return
 	}
@@ -147,8 +161,17 @@ func (c *Client) Close() error {
 type redisResolver struct {
 }
 
-func (s *redisResolver) Resolve(conf string) (cache.ICache, error) {
-	return New(redis.WithRaw(conf))
+func (s *redisResolver) Resolve(configData string) (cache.ICache, error) {
+	cacheRedis := cacheredis.NewByRaw(configData)
+	vc, err := server.Cache.GetVarConf()
+	if err != nil {
+		return nil, err
+	}
+	js, err := vc.GetConf(Proto, cacheRedis.ConfigName)
+	if err != nil {
+		return nil, err
+	}
+	return NewByOpts(varredis.WithRaw(string(js.GetRaw())))
 }
 func init() {
 	cache.Register(Proto, &redisResolver{})
