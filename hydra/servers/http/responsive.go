@@ -135,7 +135,7 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
 	case Web:
-		return NewWSServer(tp,
+		return NewServer(tp,
 			apiConf.GetWEBAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
