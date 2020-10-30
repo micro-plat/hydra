@@ -9,7 +9,7 @@ import (
 
 //Tasks cron任务的task配置信息
 type Tasks struct {
-	Tasks []*Task `json:"tasks" toml:"tasks,omitempty"`
+	Tasks []*Task `json:"tasks,omitempty" toml:"tasks,omitempty"`
 }
 
 //NewEmptyTasks 构建空的tasks

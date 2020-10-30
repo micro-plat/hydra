@@ -12,7 +12,7 @@ import (
 //BasicAuth http basic 认证配置
 type BasicAuth struct {
 	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	Members         map[string]string `json:"members"`
+	Members         map[string]string `json:"members,omitempty" toml:"members,omitempty"`
 	Disable         bool              `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch `json:"-"`
 	authorization   []*auth `json:"-"`

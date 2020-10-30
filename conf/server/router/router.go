@@ -28,7 +28,7 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers []*Router `json:"routers,omitempty"`
+	Routers []*Router `json:"routers,omitempty" toml:"routers,omitempty"`
 }
 
 func (h *Routers) String() string {
@@ -46,11 +46,11 @@ func (h *Routers) GetRouters() []*Router {
 
 //Router 路由信息
 type Router struct {
-	Path     string   `json:"path,omitempty" valid:"ascii,required"`
-	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
-	Service  string   `json:"service" valid:"ascii,required"`
-	Encoding string   `json:"encoding,omitempty"`
-	Pages    []string `json:"pages,omitempty"`
+	Path     string   `json:"path,omitempty" valid:"ascii,required" toml:"path,omitempty"`
+	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"  toml:"action,omitempty"`
+	Service  string   `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
+	Encoding string   `json:"encoding,omitempty" toml:"encoding,omitempty"`
+	Pages    []string `json:"pages,omitempty" toml:"pages,omitempty"`
 }
 
 //NewRouter 构建路径配置
@@ -129,8 +129,7 @@ func GetConf(cnf conf.IMainConf) (router *Routers, err error) {
 	router = new(Routers)
 	_, err = cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
-		router = NewRouters()
-		return
+		return NewRouters(), nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err)
