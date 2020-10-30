@@ -74,7 +74,11 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	if len(current.Services) == 0 {
 		return nil, fmt.Errorf("%s中，未找到可用于注册的处理函数", path)
 	}
-
+	for _, u := range current.Services {
+		if u.Handle == nil {
+			return nil, fmt.Errorf("%s中,未指定[%s]的Handle函数", path, u.Service)
+		}
+	}
 	return current, nil
 
 }
