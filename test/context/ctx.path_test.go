@@ -61,7 +61,7 @@ func Test_rpath_GetRouter(t *testing.T) {
 				assert.Equal(t, tt.wantError, r, tt.name)
 			}
 		}()
-		got := c.GetRouter()
+		got, _ := c.GetRouter()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

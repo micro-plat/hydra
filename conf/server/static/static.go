@@ -99,7 +99,8 @@ func unarchive(dir string, path string) (string, error) {
 	if archive == nil {
 		return "", fmt.Errorf("指定的文件不是归档文件:%s", path)
 	}
-	tmpDir, err := ioutil.TempDir(os.Args[0], "hydra")
+	rootPath := filepath.Dir(os.Args[0])
+	tmpDir, err := ioutil.TempDir(rootPath, "hydra")
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}

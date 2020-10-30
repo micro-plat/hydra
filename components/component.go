@@ -17,11 +17,15 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 
-	_ "github.com/micro-plat/hydra/components/pkgs/mq/lmq"
+	_ "github.com/micro-plat/hydra/components/queues/mq/lmq"
+	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
+	_ "github.com/micro-plat/hydra/components/queues/mq/mqtt"
+	_ "github.com/micro-plat/hydra/components/queues/mq/xmq"
 )
 
 //IComponent 组件
 type IComponent interface {
+	Container() container.IContainer
 	RPC() rpcs.IComponentRPC
 	Queue() queues.IComponentQueue
 	Cache() caches.IComponentCache
@@ -55,6 +59,11 @@ func NewComponent() *Component {
 	c.db = dbs.NewStandardDB(c.c)
 	c.httpClient = http.NewStandardHTTPClient(c.c)
 	return c
+}
+
+//Container 获取Container容器
+func (c *Component) Container() container.IContainer {
+	return c.c
 }
 
 //RPC 获取rpc组件
