@@ -66,7 +66,7 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 	path, service, actions := g.getPaths(g.Path, name)
 	unit, ok := g.Services[service]
 	if !ok {
-		unit = &Unit{Group: g, Path: path, Service: service, Actions: actions}
+		unit = &Unit{Group: g, Path: path, Service: service}
 		g.Services[service] = unit
 	}
 
@@ -74,6 +74,7 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 	case handling:
 		unit.Handling = handler
 	case handle:
+		unit.Actions = actions
 		unit.Handle = handler
 	case handled:
 		unit.Handled = handler
@@ -84,6 +85,8 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 }
 
 func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {
+
+	//@todo path 路径里面对*进行处理
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {
 		return path, path, []string{}

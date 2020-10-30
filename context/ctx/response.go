@@ -314,7 +314,7 @@ func (c *response) getString(ctp string, v interface{}) string {
 		tp := reflect.TypeOf(v).Kind()
 		s := v
 		if tp == reflect.Map {
-			s = context.XmlMap(v.(map[string]string))
+			s = context.XmlMap(v.(map[string]string)) //@v.转换不了
 		}
 
 		buff, err := xml.Marshal(s)
