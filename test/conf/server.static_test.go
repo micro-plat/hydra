@@ -77,26 +77,26 @@ func TestStatic_AllowRequest(t *testing.T) {
 func TestStaticGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *static.Static
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
-	test1 := test{name: "static节点不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &static.Static{Disable: true, FileMap: map[string]static.FileInfo{}}, wantErr: false}
+	test1 := test{name: "static节点不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &static.Static{Disable: true, FileMap: map[string]static.FileInfo{}}, wantErr: false}
 	staticObj, err := static.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name+",err")
 	assert.Equal(t, test1.want, staticObj, test1.name+",obj")
 
 	confB.Static(static.WithArchive("车uowu"))
-	test2 := test{name: "static节点存在,数据错误", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "static节点存在,数据错误", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	staticObj, err = static.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, staticObj, test2.name+",obj")
 
 	confB.Static(static.WithArchive("dddd"))
-	test3 := test{name: "static节点存在,数据正确", cnf: conf.GetAPIConf().GetMainConf(), want: static.New(static.WithArchive("dddd")), wantErr: false}
+	test3 := test{name: "static节点存在,数据正确", cnf: conf.GetAPIConf().GetServerConf(), want: static.New(static.WithArchive("dddd")), wantErr: false}
 	staticObj, err = static.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, staticObj, test3.name+",obj")

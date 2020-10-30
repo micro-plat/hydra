@@ -1,4 +1,4 @@
-package server
+package vars
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ var _ conf.IVarConf = &VarConf{}
 
 //VarConf 变量信息
 type VarConf struct {
+	conf.IVarPub
 	varConfPath  string
 	varVersion   int32
 	varNodeConfs map[string]conf.RawConf
@@ -18,12 +19,13 @@ type VarConf struct {
 }
 
 //NewVarConf 构建服务器配置缓存
-func NewVarConf(varConfPath string, rgst registry.IRegistry) (s *VarConf, err error) {
+func NewVarConf(platName string, rgst registry.IRegistry) (s *VarConf, err error) {
 	s = &VarConf{
-		varConfPath:  varConfPath,
+		IVarPub:      NewVarPub(platName),
 		registry:     rgst,
 		varNodeConfs: make(map[string]conf.RawConf),
 	}
+	s.varConfPath = s.GetVarPath()
 	if err = s.load(); err != nil {
 		return
 	}
@@ -60,7 +62,7 @@ func (c *VarConf) load() (err error) {
 			if err != nil {
 				return err
 			}
-			rdata, err := decrypt(data)
+			rdata, err := conf.Decrypt(data)
 			if err != nil {
 				return err
 			}

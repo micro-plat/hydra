@@ -1,20 +1,20 @@
-package server
+package vars
 
 import "github.com/micro-plat/hydra/registry"
 
-type varPath struct {
+type varPub struct {
 	platName string
 }
 
-//NewVarPath 构建var路径管理器
-func NewVarPath(platName string) *varPath {
-	return &varPath{
+//NewVarPub 构建var路径管理器
+func NewVarPub(platName string) *varPub {
+	return &varPub{
 		platName: platName,
 	}
 }
 
 //GetVarPath 获取var配置路径
-func (c *varPath) GetVarPath(tp ...string) string {
+func (c *varPub) GetVarPath(tp ...string) string {
 	if len(tp) == 0 {
 		return registry.Join(c.platName, "var")
 	}
@@ -26,11 +26,11 @@ func (c *varPath) GetVarPath(tp ...string) string {
 }
 
 //GetPlatName 获取平台名称
-func (c *varPath) GetPlatName() string {
+func (c *varPub) GetPlatName() string {
 	return c.platName
 }
 
 //GetRLogPath 获取远程日志配置路径
-func (c *varPath) GetRLogPath() string {
+func (c *varPub) GetRLogPath() string {
 	return c.GetVarPath("app", "rlog")
 }

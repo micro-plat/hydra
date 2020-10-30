@@ -1,17 +1,17 @@
-package server
+package vars
 
 import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 )
 
-type varSub struct {
+type VarSub struct {
 	cnf  conf.IVarConf
 	rlog *VarLoader
 }
 
-func newVarSub(cnf conf.IVarConf) *varSub {
-	s := &varSub{cnf: cnf}
+func NewVarSub(cnf conf.IVarConf) *VarSub {
+	s := &VarSub{cnf: cnf}
 	s.rlog = GetVarLoader(cnf, func(cnf conf.IVarConf) (interface{}, error) {
 		return rlog.GetConf(cnf)
 	})
@@ -19,7 +19,7 @@ func newVarSub(cnf conf.IVarConf) *varSub {
 }
 
 //GetRLogConf 获取远程日志配置
-func (s *varSub) GetRLogConf() (*rlog.Layout, error) {
+func (s *VarSub) GetRLogConf() (*rlog.Layout, error) {
 	rlogObj, err := s.rlog.GetConf()
 	if err != nil {
 		return nil, err

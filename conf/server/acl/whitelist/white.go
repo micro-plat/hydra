@@ -43,7 +43,7 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 }
 
 //GetConf 获取WhiteList
-func GetConf(cnf conf.IMainConf) (*WhiteList, error) {
+func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	ip := WhiteList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "white.list"), &ip)
 	if err == conf.ErrNoSetting {

@@ -68,26 +68,26 @@ func TestQueuesGetConf(t *testing.T) {
 
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *queue.Queues
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.MQC("redis://192.168.0.101")
-	test1 := test{name: "queues节点不存在", cnf: conf.GetMQCConf().GetMainConf(), want: queue.NewEmptyQueues(), wantErr: false}
+	test1 := test{name: "queues节点不存在", cnf: conf.GetMQCConf().GetServerConf(), want: queue.NewEmptyQueues(), wantErr: false}
 	queueObj, err := queue.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, queueObj, test1.name)
 
 	confB.Queue(queue.NewQueue("队列", "service1"))
-	test2 := test{name: "queues节点存在,数据错误", cnf: conf.GetMQCConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "queues节点存在,数据错误", cnf: conf.GetMQCConf().GetServerConf(), want: nil, wantErr: true}
 	queueObj, err = queue.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, queueObj, test2.name+",obj")
 
 	confB.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueueByConcurrency("queue1", "service1", 1))
-	test3 := test{name: "queues节点存在", cnf: conf.GetMQCConf().GetMainConf(), want: queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueueByConcurrency("queue1", "service1", 1)), wantErr: false}
+	test3 := test{name: "queues节点存在", cnf: conf.GetMQCConf().GetServerConf(), want: queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueueByConcurrency("queue1", "service1", 1)), wantErr: false}
 	queueObj, err = queue.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, queueObj, test3.name+",obj")

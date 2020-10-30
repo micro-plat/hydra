@@ -39,7 +39,7 @@ func NewJWT(opts ...Option) *JWTAuth {
 }
 
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) (*JWTAuth, error) {
+func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "jwt"), &jwt)

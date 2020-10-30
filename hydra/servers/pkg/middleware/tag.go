@@ -4,6 +4,6 @@ package middleware
 func Tag() Handler {
 	return func(ctx IMiddleContext) {
 		ctx.Next()
-		ctx.Response().AddSpecial(ctx.ServerConf().GetMainConf().GetServerType())
+		ctx.Response().AddSpecial(ctx.ServerConf().GetServerConf().GetServerType())
 	}
 }

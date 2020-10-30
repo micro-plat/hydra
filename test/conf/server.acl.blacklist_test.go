@@ -87,13 +87,13 @@ func TestBlackListGetConf(t *testing.T) {
 		if !strings.EqualFold(tt.name, "节点不存在,获取默认对象") {
 			confB.BlackList(tt.opts...)
 		}
-		obj, err := blacklist.GetConf(conf.GetAPIConf().GetMainConf())
+		obj, err := blacklist.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.NotEqual(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
 
 	// json数据不合法,现在还不能测试   需要等待注册中心监听完善后测试
-	// path := conf.GetAPIConf().GetMainConf().GetSubConfPath("acl", "black.list")
+	// path := conf.GetAPIConf().GetServerConf().GetSubConfPath("acl", "black.list")
 	// defer func() {
 	// 	if e := recover(); e != nil {
 	// 		if !strings.Contains(e.(string), fmt.Sprintf("获取%s配置失败", path)) {
@@ -107,7 +107,7 @@ func TestBlackListGetConf(t *testing.T) {
 	// case <-time.After(3 * time.Second):
 	// 	return
 	// case <-ch:
-	// 	bobj = blacklist.GetConf(conf.GetAPIConf().GetMainConf())
+	// 	bobj = blacklist.GetConf(conf.GetAPIConf().GetServerConf())
 	// 	t.Errorf("%v", bobj)
 	// }
 }

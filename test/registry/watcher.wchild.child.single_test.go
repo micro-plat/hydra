@@ -20,8 +20,8 @@ func TestChildWatcher_Close(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	c := apiconf.GetServerConf()
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 	w := wchild.NewChildWatcher(c.GetRegistry(), c.GetServerPubPath(), log)
 
 	w.Close()
@@ -40,7 +40,7 @@ func TestChildWatcher_Start(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
+	c := apiconf.GetServerConf()
 	addr1 := "192.168.5.115:9091"
 	addr2 := "192.168.5.116:9091"
 
@@ -66,7 +66,7 @@ func TestChildWatcher_Start(t *testing.T) {
 	router, _ := apiconf.GetRouterConf()
 	pub.New(c).Publish(addr1, addr1, c.GetServerID(), router.GetPath()...)
 	pub.New(c).Publish(addr2, addr2, c.GetServerID(), router.GetPath()...)
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
 
@@ -116,7 +116,7 @@ func TestChildWatcher_Start_2(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
+	c := apiconf.GetServerConf()
 	addr1 := "192.168.5.115:9091"
 	addr2 := "192.168.5.116:9091"
 
@@ -139,7 +139,7 @@ func TestChildWatcher_Start_2(t *testing.T) {
 	router, _ := apiconf.GetRouterConf()
 	pub.New(c).Publish(addr1, addr1, c.GetServerID(), router.GetPath()...)
 	pub.New(c).Publish(addr2, addr2, c.GetServerID(), router.GetPath()...)
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
 		tt.r.Deep = tt.deep

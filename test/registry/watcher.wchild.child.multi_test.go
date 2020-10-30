@@ -17,8 +17,8 @@ func TestNewMultiChildWatcher(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	c := apiconf.GetServerConf()
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	w, _ := wchild.NewMultiChildWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
 	assert.Equal(t, 3, len(w.Watchers), "构建节点监控对象")
@@ -29,8 +29,8 @@ func TestMultiChildWatcher_Close(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	c := apiconf.GetServerConf()
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	w, _ := wchild.NewMultiChildWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
 	w.Close()

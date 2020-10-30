@@ -37,7 +37,7 @@ func NewRender(opts ...Option) *Render {
 }
 
 //GetConf 设置GetRender配置
-func GetConf(cnf conf.IMainConf) (rsp *Render, err error) {
+func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 	rsp = &Render{}
 	_, err = cnf.GetSubObject("render", rsp)
 	if err != nil && err != conf.ErrNoSetting {

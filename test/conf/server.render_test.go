@@ -35,26 +35,26 @@ func TestNewRender(t *testing.T) {
 func TestRenderGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *render.Render
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
-	test1 := test{name: "render节点不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &render.Render{Disable: true}, wantErr: false}
+	test1 := test{name: "render节点不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &render.Render{Disable: true}, wantErr: false}
 	renderObj, err := render.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, renderObj, test1.name)
 
 	confB.Render(render.WithTmplt("/p1", "succ", render.WithStatus("")))
-	test2 := test{name: "render节点存在,数据错误", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "render节点存在,数据错误", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	renderObj, err = render.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, renderObj, test2.name+",obj")
 
 	confB.Render(render.WithTmplt("/p1", "succ", render.WithStatus("200")))
-	test3 := test{name: "render节点存在,正确节点", cnf: conf.GetAPIConf().GetMainConf(),
+	test3 := test{name: "render节点存在,正确节点", cnf: conf.GetAPIConf().GetServerConf(),
 		want: render.NewRender(render.WithTmplt("/p1", "succ", render.WithStatus("200"))), wantErr: false}
 	renderObj, err = render.GetConf(test3.cnf)
 	fmt.Println("err:", err)

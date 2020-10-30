@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -49,7 +49,7 @@ func Test_httpSub_GetHeaderConf(t *testing.T) {
 			confN.Header(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		headerConf, err := gotS.GetHeaderConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -80,7 +80,7 @@ func Test_httpSub_GetJWTConf(t *testing.T) {
 			confN.Jwt(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		jwtConf, err := gotS.GetJWTConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -113,7 +113,7 @@ func Test_httpSub_GetMetricConf(t *testing.T) {
 			confN.Metric(tt.host, tt.db, tt.cron, tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		metricConf, err := gotS.GetMetricConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -146,7 +146,7 @@ func Test_httpSub_GetStaticConf(t *testing.T) {
 			confN.Static(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		staticConf, err := gotS.GetStaticConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -168,7 +168,7 @@ func Test_httpSub_GetRouterConf(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confM.API(":8080")
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		routerConf, err := gotS.GetRouterConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -199,7 +199,7 @@ func Test_httpSub_GetAPIKeyConf(t *testing.T) {
 			confN.APIKEY(tt.secert, tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		apikeyConf, err := gotS.GetAPIKeyConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -233,7 +233,7 @@ func Test_httpSub_GetRASConf(t *testing.T) {
 			confN.Ras(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		rasConf, err := gotS.GetRASConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -262,7 +262,7 @@ func Test_httpSub_GetBasicConf(t *testing.T) {
 			confN.Basic(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		basicConf, err := gotS.GetBasicConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -295,7 +295,7 @@ func Test_httpSub_GetRenderConf(t *testing.T) {
 			confN.Render(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		renderConf, err := gotS.GetRenderConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -327,7 +327,7 @@ func Test_httpSub_GetWhiteListConf(t *testing.T) {
 			confN.WhiteList(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		whitelistConf, err := gotS.GetWhiteListConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -358,7 +358,7 @@ func Test_httpSub_GetBlackListConf(t *testing.T) {
 			confN.BlackList(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		blacklistConf, err := gotS.GetBlackListConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -389,7 +389,7 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 			confN.Limit(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		limiterConf, err := gotS.GetLimiter()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -419,7 +419,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 			confN.Gray(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		grayConf, err := gotS.GetGray()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
@@ -434,7 +434,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 	confN := confM.API(":8080")
 	confN.Gray(test1.opts...)
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 	grayConf, err := gotS.GetGray()
 	assert.Equal(t, test1.wantErr, err == nil, test1.name+",err")

@@ -5,7 +5,6 @@ import (
 
 	"fmt"
 
- 
 	"github.com/micro-plat/hydra/components/caches"
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/dbs"
@@ -30,7 +29,7 @@ type IComponent interface {
 	DB() dbs.IComponentDB
 	DLock(name string) (dlock.ILock, error)
 	UUID() uuid.UUID
- }
+}
 
 //Def 默认组件
 var Def IComponent = NewComponent()
@@ -43,7 +42,7 @@ type Component struct {
 	cache      caches.IComponentCache
 	db         dbs.IComponentDB
 	httpClient http.IComponentHTTPClient
- }
+}
 
 //NewComponent 创建组件
 func NewComponent() *Component {
@@ -55,7 +54,7 @@ func NewComponent() *Component {
 	c.cache = caches.NewStandardCache(c.c)
 	c.db = dbs.NewStandardDB(c.c)
 	c.httpClient = http.NewStandardHTTPClient(c.c)
- 	return c
+	return c
 }
 
 //RPC 获取rpc组件
@@ -87,11 +86,10 @@ func (c *Component) HTTP() http.IComponentHTTPClient {
 func (c *Component) DLock(name string) (dlock.ILock, error) {
 	return dlock.NewLock(registry.Join(global.Def.PlatName, "dlock", name), global.Def.RegistryAddr, context.Current().Log())
 }
- 
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
-	cluster, err := context.Current().ServerConf().GetMainConf().GetCluster()
+	cluster, err := context.Current().ServerConf().GetServerConf().GetCluster()
 	if err != nil {
 		panic(fmt.Errorf("获取集群信息失败:%w", err))
 	}

@@ -10,13 +10,13 @@ import (
 type Loader struct {
 	obj  interface{}
 	once sync.Once
-	cnf  conf.IMainConf
+	cnf  conf.IServerConf
 	err  error
-	f    func(cnf conf.IMainConf) (interface{}, error)
+	f    func(cnf conf.IServerConf) (interface{}, error)
 }
 
 //GetLoader 获取配置加载器
-func GetLoader(cnf conf.IMainConf, f func(cnf conf.IMainConf) (interface{}, error)) *Loader {
+func GetLoader(cnf conf.IServerConf, f func(cnf conf.IServerConf) (interface{}, error)) *Loader {
 	return &Loader{
 		cnf: cnf,
 		f:   f,

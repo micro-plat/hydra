@@ -3,7 +3,7 @@ package conf
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -22,7 +22,7 @@ func Test_varSub_GetRLogConf(t *testing.T) {
 	confM := mocks.NewConfBy(platName, clusterName)
 	confM.API(":8080")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
 	//空Rlog获取对象
@@ -35,7 +35,7 @@ func Test_varSub_GetRLogConf(t *testing.T) {
 	//设置正确的task对象
 	confM.Vars().RLog("test1")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点2")
 	rlogConf, err = gotS.GetRLogConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取cron对象失败2")

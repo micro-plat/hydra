@@ -35,7 +35,7 @@ func (t *Queues) Append(queues ...*Queue) *Queues {
 }
 
 //GetConf 设置queue
-func GetConf(cnf conf.IMainConf) (queues *Queues, err error) {
+func GetConf(cnf conf.IServerConf) (queues *Queues, err error) {
 	queues = &Queues{}
 	if _, err := cnf.GetSubObject("queue", queues); err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("queues配置格式有误:%v", err)
