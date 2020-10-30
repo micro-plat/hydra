@@ -36,7 +36,7 @@ func New(addr string, opts ...Option) *Server {
 }
 
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IMainConf) (*Server, error) {
+func GetConf(cnf conf.IServerConf) (*Server, error) {
 	s := Server{}
 	if cnf.GetServerType() != global.MQC {
 		return nil, fmt.Errorf("mqc主配置类型错误:%s != mqc", cnf.GetServerType())

@@ -52,7 +52,7 @@ func (s *Static) AllowRequest(m string) bool {
 }
 
 //GetConf 设置static
-func GetConf(cnf conf.IMainConf) (*Static, error) {
+func GetConf(cnf conf.IServerConf) (*Static, error) {
 	//设置静态文件路由
 	static := Static{
 		FileMap: map[string]FileInfo{},
@@ -73,6 +73,7 @@ func GetConf(cnf conf.IMainConf) (*Static, error) {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
+	fmt.Println("static.Dir:", static.Dir)
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
@@ -86,6 +87,7 @@ func unarchive(dir string, path string) (string, error) {
 	if path == "" {
 		return dir, nil
 	}
+
 	reader, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {

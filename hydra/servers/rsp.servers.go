@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/watcher"
@@ -123,7 +123,7 @@ func (r *RspServers) checkServer(path string) error {
 		}
 	}()
 	//拉取配置信息
-	conf, err := server.NewServerConf(path, r.registry)
+	conf, err := app.NewAPPConf(path, r.registry)
 	if err != nil {
 		r.log.Errorf("获取%s配置发生错误:%v", path, err)
 	}
@@ -136,10 +136,10 @@ func (r *RspServers) checkServer(path string) error {
 	}
 
 	//检查服务器是否已创建
-	srvr, ok := r.servers[conf.GetMainConf().GetServerType()]
+	srvr, ok := r.servers[conf.GetServerConf().GetServerType()]
 	if ok {
 		//通知已创建的服务器
-		r.log.Debugf("配置发生变化%s", conf.GetMainConf().GetMainPath())
+		r.log.Debugf("配置发生变化%s", conf.GetServerConf().GetServerPath())
 		change, err := srvr.Notify(conf)
 		if err != nil {
 			return err
@@ -152,19 +152,19 @@ func (r *RspServers) checkServer(path string) error {
 
 	} else {
 		//创建新服务器
-		if creator, ok := creators[conf.GetMainConf().GetServerType()]; ok {
+		if creator, ok := creators[conf.GetServerConf().GetServerType()]; ok {
 			srvr, err := creator.Create(conf)
 			if err != nil {
 				return fmt.Errorf("服务器构建失败  %w", err)
 			}
-			r.log.Infof("启动[%s]服务...", conf.GetMainConf().GetServerType())
+			r.log.Infof("启动[%s]服务...", conf.GetServerConf().GetServerType())
 			if err := srvr.Start(); err != nil {
 				r.delayPub(path)
 				return fmt.Errorf("服务器启动失败 %w", err)
 			}
-			r.servers[conf.GetMainConf().GetServerType()] = srvr
+			r.servers[conf.GetServerConf().GetServerType()] = srvr
 		} else {
-			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetMainConf().GetMainPath())
+			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
 			return nil
 		}
 	}

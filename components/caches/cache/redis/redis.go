@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/caches/cache"
 	"github.com/micro-plat/hydra/components/pkgs/redis"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
@@ -163,7 +163,7 @@ type redisResolver struct {
 
 func (s *redisResolver) Resolve(configData string) (cache.ICache, error) {
 	cacheRedis := cacheredis.NewByRaw(configData)
-	vc, err := server.Cache.GetVarConf()
+	vc, err := app.Cache.GetVarConf()
 	if err != nil {
 		return nil, err
 	}

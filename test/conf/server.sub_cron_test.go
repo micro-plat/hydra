@@ -3,7 +3,7 @@ package conf
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/global"
@@ -40,7 +40,7 @@ func Test_cronSub_GetCRONTaskConf(t *testing.T) {
 			confN.Task(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 		taskConf, err := gotS.GetCRONTaskConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")

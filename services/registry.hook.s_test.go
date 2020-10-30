@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
 func Test_serverHook_AddStarting(t *testing.T) {
-	h := func(server.IServerConf) error {
+	h := func(app.IAPPConf) error {
 		return nil
 	}
 	tests := []struct {
 		name    string
-		h       func(server.IServerConf) error
+		h       func(app.IAPPConf) error
 		wantErr bool
 		ErrStr  string
 	}{
@@ -34,12 +34,12 @@ func Test_serverHook_AddStarting(t *testing.T) {
 }
 
 func Test_serverHook_AddClosing(t *testing.T) {
-	h := func(server.IServerConf) error {
+	h := func(app.IAPPConf) error {
 		return nil
 	}
 	tests := []struct {
 		name    string
-		h       func(server.IServerConf) error
+		h       func(app.IAPPConf) error
 		wantErr bool
 		ErrStr  string
 	}{
@@ -110,7 +110,7 @@ func Test_serverHook_DoStarting(t *testing.T) {
 	assert.Equal(t, nil, err, "启动空服务")
 
 	//添加关闭服务
-	err = s.AddStarting(func(server.IServerConf) error {
+	err = s.AddStarting(func(app.IAPPConf) error {
 		return fmt.Errorf("test")
 	})
 	assert.Equal(t, false, err != nil, "添加服务")
@@ -124,7 +124,7 @@ func Test_serverHook_DoClosing(t *testing.T) {
 	assert.Equal(t, nil, err, "关闭空服务")
 
 	//添加关闭服务
-	err = s.AddClosing(func(server.IServerConf) error {
+	err = s.AddClosing(func(app.IAPPConf) error {
 		return fmt.Errorf("test")
 	})
 	assert.Equal(t, false, err != nil, "关闭服务")

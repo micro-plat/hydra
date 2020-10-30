@@ -137,28 +137,28 @@ func TestTasks_Append(t *testing.T) {
 func TestTasksGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *task.Tasks
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.CRON(cron.WithTrace())
-	test1 := test{name: "task节点不存在", cnf: conf.GetCronConf().GetMainConf(), want: &task.Tasks{Tasks: []*task.Task{}}, wantErr: false}
+	test1 := test{name: "task节点不存在", cnf: conf.GetCronConf().GetServerConf(), want: &task.Tasks{Tasks: []*task.Task{}}, wantErr: false}
 	queueObj, err := task.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, queueObj, test1.name)
 
 	confB = conf.CRON(cron.WithTrace())
 	confB.Task(task.NewTask("中文错误", "s2"))
-	test2 := test{name: "task节点存在,数据错误", cnf: conf.GetCronConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "task节点存在,数据错误", cnf: conf.GetCronConf().GetServerConf(), want: nil, wantErr: true}
 	queueObj, err = task.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, queueObj, test2.name+",obj")
 
 	confB = conf.CRON(cron.WithTrace())
 	confB.Task(task.NewTask("@once", "s2"))
-	test3 := test{name: "task节点存在,数据正确", cnf: conf.GetCronConf().GetMainConf(), want: task.NewTasks(task.NewTask("@once", "s2")), wantErr: false}
+	test3 := test{name: "task节点存在,数据正确", cnf: conf.GetCronConf().GetServerConf(), want: task.NewTasks(task.NewTask("@once", "s2")), wantErr: false}
 	queueObj, err = task.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, queueObj, test3.name+",obj")

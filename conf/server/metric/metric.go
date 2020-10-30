@@ -39,7 +39,7 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 }
 
 //GetConf 设置metric
-func GetConf(cnf conf.IMainConf) (metric *Metric, err error) {
+func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
 	_, err = cnf.GetSubObject("metric", &metric)
 	if err != nil && err != conf.ErrNoSetting {

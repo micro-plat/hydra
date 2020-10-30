@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/encoding"
@@ -29,7 +29,7 @@ type rspns struct {
 
 type response struct {
 	ctx         context.IInnerContext
-	conf        server.IServerConf
+	conf        app.IAPPConf
 	path        *rpath
 	raw         rspns
 	final       rspns
@@ -39,7 +39,7 @@ type response struct {
 	specials    []string
 }
 
-func NewResponse(ctx context.IInnerContext, conf server.IServerConf, log logger.ILogger, meta conf.IMeta) *response {
+func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
 	return &response{
 		ctx:   ctx,
 		conf:  conf,

@@ -58,7 +58,7 @@ func (a *APIKeyAuth) Verify(raw string, sign string) error {
 }
 
 //GetConf 获取APIKeyAuth
-func GetConf(cnf conf.IMainConf) (*APIKeyAuth, error) {
+func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	fsa := APIKeyAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "apikey"), &fsa)
 	if err == conf.ErrNoSetting {

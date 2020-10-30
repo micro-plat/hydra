@@ -11,7 +11,7 @@ func fallback(ctx IMiddleContext, service string) bool {
 
 	//获取处理服务
 	ctx.Response().AddSpecial("fallback")
-	fallback, ok := services.Def.GetFallback(ctx.ServerConf().GetMainConf().GetServerType(), service)
+	fallback, ok := services.Def.GetFallback(ctx.ServerConf().GetServerConf().GetServerType(), service)
 	if !ok {
 		return false
 	}

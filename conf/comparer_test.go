@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/security/md5"
 )
@@ -17,7 +18,7 @@ type TMainConf struct {
 	IPub
 }
 
-func NewTMainConf(rootVersion int32, data map[string]interface{}) IMainConf {
+func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
 	raw, _ := json.Marshal(data)
 	nRawConf := RawConf{
 		data:      data,
@@ -41,7 +42,7 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) IMainConf {
 	return &TMainConf{rootConf: &nRawConf, rootVersion: rootVersion, subConfs: subm}
 }
 
-func NewTMainConf1(rootVersion int32, keySub map[string]string) IMainConf {
+func NewTMainConf1(rootVersion int32, keySub map[string]string) app.IAPPConf {
 
 	subConf := map[string]RawConf{}
 	for k, v := range keySub {
@@ -132,13 +133,13 @@ func (c *TMainConf) Close() error {
 
 func TestComparer_Update(t *testing.T) {
 	type fields struct {
-		oconf      IMainConf
-		nconf      IMainConf
+		oconf      app.IAPPConf
+		nconf      app.IAPPConf
 		valueNames []string
 		subNames   []string
 	}
 	type args struct {
-		n IMainConf
+		n app.IAPPConf
 	}
 
 	tests := []struct {
@@ -208,8 +209,8 @@ func TestComparer_Update(t *testing.T) {
 func TestComparer_IsChanged(t *testing.T) {
 	//该方法是通过版本号进行比较   所以只需要mock版本号信息
 	type fields struct {
-		oconf      IMainConf
-		nconf      IMainConf
+		oconf      app.IAPPConf
+		nconf      app.IAPPConf
 		valueNames []string
 		subNames   []string
 	}
@@ -270,8 +271,8 @@ func TestComparer_IsChanged(t *testing.T) {
 //都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsSubConfChanged(t *testing.T) {
 	type fields struct {
-		oconf      IMainConf
-		nconf      IMainConf
+		oconf      app.IAPPConf
+		nconf      app.IAPPConf
 		valueNames []string
 		subNames   []string
 	}
@@ -376,8 +377,8 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 //都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsValueChanged(t *testing.T) {
 	type fields struct {
-		oconf      IMainConf
-		nconf      IMainConf
+		oconf      app.IAPPConf
+		nconf      app.IAPPConf
 		valueNames []string
 		subNames   []string
 	}

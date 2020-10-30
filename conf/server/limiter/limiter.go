@@ -56,7 +56,7 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 }
 
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) (*Limiter, error) {
+func GetConf(cnf conf.IServerConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {

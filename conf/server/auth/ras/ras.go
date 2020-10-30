@@ -34,7 +34,7 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 }
 
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
+func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
 	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)

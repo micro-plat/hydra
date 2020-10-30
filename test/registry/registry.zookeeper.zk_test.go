@@ -31,7 +31,7 @@ func Test_zookeeperFactory_Create(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
 		z, err := registry.NewRegistry(tt.addr, log)

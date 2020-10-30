@@ -27,7 +27,7 @@ type IPublisher interface {
 
 //Publisher 服务发布程序
 type Publisher struct {
-	c          conf.IMainConf
+	c          conf.IServerConf
 	log        logger.ILogging
 	serverNode string
 	serverName string
@@ -39,7 +39,7 @@ type Publisher struct {
 }
 
 //New 构建服务发布程序
-func New(c conf.IMainConf) *Publisher {
+func New(c conf.IServerConf) *Publisher {
 	p := &Publisher{
 		c:         c,
 		watchChan: make(chan struct{}),

@@ -6,7 +6,7 @@ import (
 
 //ICompare 配置比较器
 type IComparer interface {
-	Update(n IMainConf)
+	Update(n IServerConf)
 	IsChanged() bool
 	IsValueChanged(names ...string) (isChanged bool)
 	IsSubConfChanged(names ...string) (isChanged bool)
@@ -14,14 +14,14 @@ type IComparer interface {
 
 //Comparer 配置比较器
 type Comparer struct {
-	oconf      IMainConf
-	nconf      IMainConf
+	oconf      IServerConf
+	nconf      IServerConf
 	valueNames []string
 	subNames   []string
 }
 
 //NewComparer 构建配置比较器
-func NewComparer(oconf IMainConf, valueNames []string, subNames ...string) *Comparer {
+func NewComparer(oconf IServerConf, valueNames []string, subNames ...string) *Comparer {
 	if oconf == nil {
 		panic("配置不能为空")
 	}
@@ -33,7 +33,7 @@ func NewComparer(oconf IMainConf, valueNames []string, subNames ...string) *Comp
 }
 
 //Update 更新配置
-func (s *Comparer) Update(n IMainConf) {
+func (s *Comparer) Update(n IServerConf) {
 	if s.nconf != nil {
 		s.oconf = s.nconf
 	}

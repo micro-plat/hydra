@@ -48,7 +48,7 @@ func (b *BasicAuth) GetRealm() string {
 }
 
 //GetConf 获取basic
-func GetConf(cnf conf.IMainConf) (*BasicAuth, error) {
+func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	basic := BasicAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "basic"), &basic)
 	if err == conf.ErrNoSetting || len(basic.Members) == 0 {

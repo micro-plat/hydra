@@ -13,7 +13,7 @@ func TestNewCArgsByChange(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
+	c := apiconf.GetServerConf()    //获取配置
 	r := c.GetRegistry()
 
 	tests := []struct {

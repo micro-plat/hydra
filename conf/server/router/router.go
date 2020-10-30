@@ -125,17 +125,17 @@ func (h *Routers) GetPath() []string {
 }
 
 //GetConf 设置路由
-func GetConf(cnf conf.IMainConf) (router *Routers, err error) {
+func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
 	router = new(Routers)
 	_, err = cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		return NewRouters(), nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err)
+		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetServerPath(), err)
 	}
 	if b, err := govalidator.ValidateStruct(router); !b {
-		return nil, fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err)
+		return nil, fmt.Errorf("路由(%s)配置有误:%w", cnf.GetServerPath(), err)
 	}
 	return router, nil
 }

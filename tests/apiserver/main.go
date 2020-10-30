@@ -11,6 +11,7 @@ import (
 	ccron "github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	crpc "github.com/micro-plat/hydra/conf/server/rpc"
+	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
 	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
@@ -24,7 +25,7 @@ import (
 )
 
 var app = hydra.NewApp(
-	hydra.WithServerTypes(http.API, rpc.RPC, cron.CRON, mqc.MQC),
+	hydra.WithServerTypes(http.API, http.Web, rpc.RPC, cron.CRON, mqc.MQC),
 	hydra.WithPlatName("xxtest"),
 	hydra.WithSystemName("apiserver"),
 	hydra.WithClusterName("c"),
@@ -37,6 +38,7 @@ func init() {
 	hydra.Conf.Vars().Cache().Redis("xxx", cacheredis.New("5.79"))
 	hydra.Conf.Vars().Queue().Redis("xxx", queueredis.New("5.79"))
 
+	hydra.Conf.Web(":8071").Static(static.WithArchive("taosy-test"))
 	hydra.Conf.API(":8070", api.WithTimeout(10, 10)).BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.101"))
 	hydra.Conf.RPC(":8888", crpc.WithTimeout(10, 10))
 	hydra.Conf.CRON(ccron.WithTimeout(10)).Task(task.NewTask("@every 3s", "/taosy/testcron"))

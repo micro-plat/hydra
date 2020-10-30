@@ -96,7 +96,7 @@ func TestBasicGetConf(t *testing.T) {
 		if !strings.EqualFold(tt.name, "basic节点不存在") {
 			confB.Basic(tt.opts...)
 		}
-		got, err := basic.GetConf(conf.GetAPIConf().GetMainConf())
+		got, err := basic.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.NotEqual(t, nil, err, tt.name+",err")
 		assert.Equal(t, got, tt.want, tt.name)
 	}

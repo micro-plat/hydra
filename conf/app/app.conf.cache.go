@@ -1,4 +1,4 @@
-package server
+package app
 
 import (
 	"fmt"
@@ -30,10 +30,10 @@ type cache struct {
 }
 
 //Save 缓存服务器配置信息
-func (c *cache) Save(s IServerConf) {
-	sversion := s.GetMainConf().GetVersion()
+func (c *cache) Save(s IAPPConf) {
+	sversion := s.GetServerConf().GetVersion()
 	vversion := s.GetVarConf().GetVersion()
-	typ := s.GetMainConf().GetServerType()
+	typ := s.GetServerConf().GetServerType()
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.serverMaps.Set(getKey(typ, sversion), s)
@@ -44,7 +44,7 @@ func (c *cache) Save(s IServerConf) {
 }
 
 //Get 从缓存中获取服务器配置
-func (c *cache) GetServerConf(serverType string) (IServerConf, error) {
+func (c *cache) GetAPPConf(serverType string) (IAPPConf, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	serverVerion, ok := c.currentServerVersion.Get(serverType)
@@ -52,7 +52,7 @@ func (c *cache) GetServerConf(serverType string) (IServerConf, error) {
 		return nil, fmt.Errorf("未找到%s的缓存配置信息", serverType)
 	}
 	if s, ok := c.serverMaps.Get(getKey(serverType, serverVerion)); ok {
-		return s.(IServerConf), nil
+		return s.(IAPPConf), nil
 	}
 	return nil, fmt.Errorf("获取服务器配置失败，未找到服务器[%s.%d]的缓存数据", serverType, serverVerion)
 }
@@ -104,14 +104,14 @@ LOOP:
 		case <-tm.C:
 
 			c.serverMaps.RemoveIterCb(func(key string, v interface{}) bool {
-				conf := v.(IServerConf)
-				tp := conf.GetMainConf().GetServerType()
+				conf := v.(IAPPConf)
+				tp := conf.GetServerConf().GetServerType()
 				ver, _ := c.currentServerVersion.Get(tp)
 				currentKey := getKey(tp, ver)
 
 				if key != currentKey {
 					conf.Close()
-					global.Def.Log().Debug("清理缓存配置[%s]", conf.GetMainConf().GetMainPath())
+					global.Def.Log().Debug("清理缓存配置[%s]", conf.GetServerConf().GetServerPath())
 					return true
 				}
 				return false

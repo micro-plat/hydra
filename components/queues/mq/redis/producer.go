@@ -2,7 +2,7 @@ package redis
 
 import (
 	rds "github.com/go-redis/redis"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
@@ -57,7 +57,7 @@ type presolver struct {
 
 func (s *presolver) Resolve(confRaw string) (mq.IMQP, error) {
 	cacheRedis := queueredis.NewByRaw(confRaw)
-	vc, err := server.Cache.GetVarConf()
+	vc, err := app.Cache.GetVarConf()
 	if err != nil {
 		return nil, err
 	}

@@ -37,10 +37,14 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(conf conf.IVarConf) (interface{}, error) {
+
+		js, err := conf.GetConf(cacheNameNode, name)
+		if err != nil {
+			return nil, err
+		}
 
 		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
-
 		return orgCache, err
 	})
 	if err != nil {

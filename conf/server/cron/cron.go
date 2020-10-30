@@ -34,7 +34,7 @@ func New(opts ...Option) *Server {
 }
 
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IMainConf) (s *Server, err error) {
+func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	s = &Server{}
 	if cnf.GetServerType() != global.CRON {
 		return nil, fmt.Errorf("cron主配置类型错误:%s != cron", cnf.GetServerType())

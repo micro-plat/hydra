@@ -42,7 +42,7 @@ func TestCronGetConf(t *testing.T) {
 
 	conf := mocks.NewConf()
 	test1 := test{name: "节点不存在,获取默认对象", opts: []cron.Option{}, want: &cron.Server{}}
-	obj, err := cron.GetConf(conf.GetCronConf().GetMainConf())
+	obj, err := cron.GetConf(conf.GetCronConf().GetServerConf())
 	assert.Equal(t, nil, err, test1.name+",err")
 	assert.Equal(t, test1.want, obj, test1.name)
 
@@ -54,7 +54,7 @@ func TestCronGetConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		conf.CRON(tt.opts...)
-		obj, err := cron.GetConf(conf.GetCronConf().GetMainConf())
+		obj, err := cron.GetConf(conf.GetCronConf().GetServerConf())
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}

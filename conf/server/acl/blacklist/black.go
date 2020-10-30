@@ -33,7 +33,7 @@ func (w *BlackList) IsDeny(ip string) bool {
 }
 
 //GetConf 获取BlackList
-func GetConf(cnf conf.IMainConf) (*BlackList, error) {
+func GetConf(cnf conf.IServerConf) (*BlackList, error) {
 	ip := BlackList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "black.list"), &ip)
 	if err == conf.ErrNoSetting {
