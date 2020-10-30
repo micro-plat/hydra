@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/test/assert"
@@ -180,40 +181,80 @@ func Test_regist_Custome(t *testing.T) {
 		ext  []interface{}
 	}{
 		{name: "注册api类型", tp: global.API, path: "/path", h: &testHandler{}},
-		{name: "注册cron类型", tp: global.CRON, path: "/path1", h: &testHandler{}},
+		{name: "注册cron类型", tp: global.CRON, path: "/path1", h: &testHandler{}, ext: []interface{}{"taks1", "task2"}},
 		{name: "注册web类型", tp: global.Web, path: "/path2", h: &testHandler{}},
 		{name: "注册rpc类型", tp: global.RPC, path: "/path3", h: &testHandler{}},
 		{name: "注册ws类型", tp: global.WS, path: "/path4", h: &testHandler{}},
-		{name: "注册mqc类型", tp: global.MQC, path: "/path5", h: &testHandler{}},
+		{name: "注册mqc类型", tp: global.MQC, path: "/path5", h: &testHandler{}, ext: []interface{}{"queue1", "queue2"}},
 	}
 	s := Def
+	global.MQConf.PlatNameAsPrefix(false)
 	for _, tt := range tests {
 		s.Custome(tt.tp, tt.path, tt.h, tt.ext...)
-		m := s.get(tt.tp).metaServices
-		h := s.get(tt.tp).handleHook
+		checkTestCustomeResult(t, s, tt.tp, tt.name, tt.ext...)
+	}
+}
 
+func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ...interface{}) {
+
+	m := s.get(tp).metaServices
+
+	//cron
+	if tp == global.CRON {
+		assert.Equal(t, len(ext)*len(m.services), len(CRON.tasks.Tasks), testName+" cron")
+		return
+	}
+
+	//mqc
+	if tp == global.MQC {
+		assert.Equal(t, len(ext)*len(m.services), len(MQC.queues.Queues), testName+" mqc")
+		return
+	}
+
+	//api,web,ws,rpc
+	h := s.get(tp).handleHook
+	o := GetRouter(tp)
+
+	routers, err := o.GetRouters()
+	assert.Equal(t, false, err != nil, testName+"getrouters")
+
+	//检查routers
+
+	for _, r := range routers.Routers {
+		exist := false
 		for _, v := range m.services {
-			gotFallback, ok := s.GetFallback(tt.tp, v)
-			if ok {
-				assert.Equal(t, fmt.Sprintf("%+v", m.fallbacks[v]), fmt.Sprintf("%+v", gotFallback), tt.name+"fallback")
-			}
-
-			gotHandler, ok := s.GetHandler(tt.tp, v)
-			if ok {
-				assert.Equal(t, fmt.Sprintf("%+v", m.handlers[v]), fmt.Sprintf("%+v", gotHandler), tt.name+"handler")
-			}
-
-			if handling, ok := h.handlings[v]; ok {
-				gotHandling := s.GetHandlings(tt.tp, v)
-				assert.Equal(t, handling, gotHandling, tt.name+"handling")
-			}
-
-			if handled, ok := h.handleds[v]; ok {
-				gotHandled := s.GetHandleds(tt.tp, v)
-				assert.Equal(t, handled, gotHandled, tt.name+"handled")
+			if r.Service == v {
+				exist = true
 			}
 		}
+		assert.Equal(t, true, exist, testName+r.Service+" not exists")
+	}
 
+	for _, v := range m.services {
+
+		//检查fallback
+		gotFallback, ok := s.GetFallback(tp, v)
+		if ok {
+			assert.Equal(t, fmt.Sprintf("%+v", m.fallbacks[v]), fmt.Sprintf("%+v", gotFallback), testName+"fallback")
+		}
+
+		//检查handler
+		gotHandler, ok := s.GetHandler(tp, v)
+		if ok {
+			assert.Equal(t, fmt.Sprintf("%+v", m.handlers[v]), fmt.Sprintf("%+v", gotHandler), testName+"handler")
+		}
+
+		//检查handling
+		if handling, ok := h.handlings[v]; ok {
+			gotHandling := s.GetHandlings(tp, v)
+			assert.Equal(t, handling, gotHandling, testName+"handling")
+		}
+
+		//检查handled
+		if handled, ok := h.handleds[v]; ok {
+			gotHandled := s.GetHandleds(tp, v)
+			assert.Equal(t, handled, gotHandled, testName+"handled")
+		}
 	}
 }
 
@@ -233,10 +274,112 @@ func Test_regist_Close(t *testing.T) {
 	for _, tt := range tests {
 		s.Custome(global.API, tt.path, tt.h)
 		err := s.Close()
-		fmt.Println(err)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 		}
+	}
+}
+
+func Test_regist_API(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []router.Option
+	}{
+		{name: "注册api服务", path: "/path6", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "同一个handler,注册api服务", path: "/path7", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+	}
+	s := Def
+	for _, tt := range tests {
+		s.API(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.API, tt.name, tt.ext)
+	}
+}
+
+func Test_regist_Web(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []router.Option
+	}{
+		{name: "注册web服务", path: "/path8", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "同一个handler,注册web服务", path: "/path9", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+	}
+	s := Def
+	for _, tt := range tests {
+		s.Web(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.Web, tt.name, tt.ext)
+	}
+}
+
+func Test_regist_RPC(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []router.Option
+	}{
+		{name: "注册rpc服务", path: "/path10", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "同一个handler,注册rpc服务", path: "/path11", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+	}
+	s := Def
+	for _, tt := range tests {
+		s.RPC(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.RPC, tt.name, tt.ext)
+	}
+}
+
+func Test_regist_WS(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []router.Option
+	}{
+		{name: "注册ws服务", path: "/path12", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "同一个handler,注册ws服务", path: "/path13", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+	}
+	s := Def
+	for _, tt := range tests {
+		s.WS(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.WS, tt.name, tt.ext)
+	}
+}
+
+func Test_regist_MQC(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []string
+	}{
+		{name: "注册mqc服务", path: "/path14", h: &testHandler{}, ext: []string{"queue1", "queue2"}},
+		{name: "同一个handler,注册mqc服务", path: "/path15", h: &testHandler{}, ext: []string{"queue1", "queue2"}},
+	}
+	s := Def
+	global.MQConf.PlatNameAsPrefix(false)
+	for _, tt := range tests {
+		s.MQC(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.MQC, tt.name, tt.ext[0], tt.ext[1])
+	}
+}
+
+func Test_regist_CRON(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		h    interface{}
+		ext  []string
+	}{
+		{name: "注册cron服务", path: "/path16", h: &testHandler{}, ext: []string{"task1", "task2"}},
+		{name: "同一个handler,注册cron服务", path: "/path17", h: &testHandler{}, ext: []string{"task1", "task2"}},
+	}
+	s := Def
+	for _, tt := range tests {
+		s.CRON(tt.path, tt.h, tt.ext...)
+		checkTestCustomeResult(t, s, global.CRON, tt.name, tt.ext[0], tt.ext[1])
 	}
 }

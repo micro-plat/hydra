@@ -37,9 +37,7 @@ func (t *testHandler) PostHandle(context.IContext) interface{} {
 func (t *testHandler) Handled(context.IContext) interface{} {
 	return nil
 }
-func (t *testHandler) Handle(context.IContext) interface{} {
-	return nil
-}
+
 func (t *testHandler) OrderHandle(context.IContext) interface{} {
 	return nil
 }

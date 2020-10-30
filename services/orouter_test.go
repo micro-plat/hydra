@@ -6,6 +6,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -33,14 +34,23 @@ func Test_pathRouter_Add_WithPanic(t *testing.T) {
 
 func Test_pathRouter_String(t *testing.T) {
 	tests := []struct {
-		name string
-		want string
+		name    string
+		want    string
+		routers []*router.Router
 	}{
-		// TODO: Add test cases.
-		{name: "1", want: "1"},
+		{name: "routers为空", want: ""},
+		{name: "routers不为空", want: fmt.Sprintf("%-32s %-32s\n", "service", strings.Join([]string{"POST", "GET"}, " ")),
+			routers: []*router.Router{&router.Router{
+				Path:     "path",
+				Service:  "service",
+				Action:   []string{"POST", "GET"},
+				Encoding: "utf-8",
+				Pages:    []string{"pages"},
+			}}},
 	}
 	p := newPathRouter("path")
 	for _, tt := range tests {
+		p.routers = tt.routers
 		got := p.String()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
