@@ -9,7 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
+	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/utility"
@@ -28,16 +29,17 @@ type Producer struct {
 	lk         sync.Mutex
 	connCh     chan int
 	done       bool
-	conf       *mq.ConfOpt
+	confOpts   *queuemqtt.MQTT
 }
 
 //New 创建消息发送器
-func New(addrs []string, opts ...mq.Option) (m *Producer, err error) {
-	m = &Producer{servers: addrs, Logger: logger.GetSession("mqtt", logger.CreateSession()), conf: &mq.ConfOpt{}}
-	m.connCh = make(chan int, 1)
-	for _, opt := range opts {
-		opt(m.conf)
+func NewByConfig(confOpts *queuemqtt.MQTT) (m *Producer, err error) {
+	m = &Producer{
+		Logger:   logger.GetSession("mqtt", logger.CreateSession()),
+		confOpts: confOpts,
 	}
+	m.connCh = make(chan int, 1)
+
 	cc, _, err := m.connect()
 	if err != nil {
 		m.Logger.Fatalf("创建producer连接失败，%v", err)
@@ -80,7 +82,7 @@ func (c *Producer) reconnect() {
 func (c *Producer) connect() (*client.Client, bool, error) {
 	c.lk.Lock()
 	defer c.lk.Unlock()
-	cert, err := c.getCert(c.conf.CertPath)
+	cert, err := c.getCert(c.confOpts.Cert)
 	if err != nil {
 		return nil, false, err
 	}
@@ -92,7 +94,7 @@ func (c *Producer) connect() (*client.Client, bool, error) {
 			}
 		},
 	})
-	host, port, err := xnet.SplitHostPort(c.conf.Address)
+	host, port, err := xnet.SplitHostPort(c.confOpts.Address)
 	if err != nil {
 		return nil, false, err
 	}
@@ -107,19 +109,19 @@ func (c *Producer) connect() (*client.Client, bool, error) {
 		if err = cc.Connect(&client.ConnectOptions{
 			Network:         "tcp",
 			Address:         addr + ":" + port,
-			UserName:        []byte(c.conf.UserName),
-			Password:        []byte(c.conf.Password),
+			UserName:        []byte(c.confOpts.UserName),
+			Password:        []byte(c.confOpts.Password),
 			ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
 			TLSConfig:       cert,
 			PINGRESPTimeout: 3,
 			KeepAlive:       10,
-			DailTimeout:     time.Millisecond * time.Duration(c.conf.DialTimeout),
+			DailTimeout:     time.Millisecond * time.Duration(c.confOpts.DialTimeout),
 		}); err == nil {
 			c.clientOnce = sync.Once{}
 			return cc, true, nil
 		}
 	}
-	return nil, false, fmt.Errorf("连接失败:%v[%v](%s-%s/%s)", err, c.conf.Address, addrs, c.conf.UserName, c.conf.Password)
+	return nil, false, fmt.Errorf("连接失败:%v[%v](%s-%s/%s)", err, c.confOpts.Address, addrs, c.confOpts.UserName, c.confOpts.Password)
 
 }
 func (c *Producer) getCert(path string) (*tls.Config, error) {
@@ -164,7 +166,7 @@ func (c *Producer) Pop(key string) (string, error) {
 
 // Count 移除并且返回 key 对应的 list 的第一个元素。
 func (c *Producer) Count(key string) (int64, error) {
-	return 0, fmt.Errorf("mqtt不支持pop方法")
+	return 0, fmt.Errorf("mqtt不支持Count方法")
 }
 
 // Close 释放资源
@@ -180,8 +182,8 @@ func (c *Producer) Close() error {
 type presolver struct {
 }
 
-func (s *presolver) Resolve(address []string, opts ...mq.Option) (mq.IMQP, error) {
-	return New(address, opts...)
+func (s *presolver) Resolve(confRaw string) (mq.IMQP, error) {
+	return NewByConfig(queuemqtt.NewByRaw(confRaw))
 }
 func init() {
 	mq.RegisterProducer("mqtt", &presolver{})

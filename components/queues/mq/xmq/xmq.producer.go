@@ -7,7 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
+	"github.com/micro-plat/hydra/conf/vars/queue/xmq"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -24,16 +25,17 @@ type Producer struct {
 	lastWrite      time.Time
 	firstConnected bool
 	log            *logger.Logger
-	conf           *mq.ConfOpt
+	confOpts       *xmq.XMQ
 }
 
 //NewProducer 创建新的producer
-func NewProducer(address []string, opts ...mq.Option) (producer *Producer, err error) {
-	producer = &Producer{log: logger.GetSession("xmq", logger.CreateSession()), conf: &mq.ConfOpt{}}
-	producer.closeCh = make(chan struct{})
-	for _, opt := range opts {
-		opt(producer.conf)
+func NewProducer(confOpts *xmq.XMQ) (producer *Producer, err error) {
+	producer = &Producer{
+		log:      logger.GetSession("xmq", logger.CreateSession()),
+		confOpts: confOpts,
 	}
+	producer.closeCh = make(chan struct{})
+
 	return producer, producer.Connect()
 }
 
@@ -55,12 +57,16 @@ func (producer *Producer) Connect() error {
 				}
 				if producer.isConnected {
 					if time.Since(producer.lastWrite).Seconds() > 3 {
-						message, err := newHeartBit().Make()
+						message := newHeartBit()
+						if producer.confOpts.SignKey != "" {
+							message.signKey = producer.confOpts.SignKey
+						}
+						msgVal, err := message.Make()
 						if err != nil {
 							producer.log.Error(err)
 							continue
 						}
-						err = producer.writeMessage(message)
+						err = producer.writeMessage(msgVal)
 						if err == nil {
 							continue
 						}
@@ -137,14 +143,14 @@ func (producer *Producer) connectOnce() (err error) {
 		producer.connecting = false
 	}()
 	producer.isConnected = false
-	producer.conn, err = net.DialTimeout("tcp", producer.conf.Address, time.Second*2)
+	producer.conn, err = net.DialTimeout("tcp", producer.confOpts.Address, time.Second*2)
 	if err != nil {
 		return fmt.Errorf("mq 无法连接到远程服务器:%v", err)
 	}
 	if !producer.firstConnected {
 		producer.firstConnected = true
 	} else {
-		producer.log.Info("恢复连接:", producer.conf.Address)
+		producer.log.Info("恢复连接:", producer.confOpts.Address)
 	}
 	producer.isConnected = true
 	producer.lastWrite = time.Now()
@@ -172,11 +178,11 @@ func (producer *Producer) Send(queue string, msg string, timeout time.Duration) 
 		return errors.New("mq producer 已关闭")
 	}
 	if !producer.isConnected {
-		return fmt.Errorf("producer无法连接到MQ服务器:%s", producer.conf.Address)
+		return fmt.Errorf("producer无法连接到MQ服务器:%s", producer.confOpts.Address)
 	}
 	message := newMessage(queue, msg, int(timeout/time.Second))
-	if producer.conf.Key != "" {
-		message.signKey = producer.conf.Key
+	if producer.confOpts.SignKey != "" {
+		message.signKey = producer.confOpts.SignKey
 	}
 	smessage, err := message.Make()
 	if err != nil {
@@ -195,8 +201,8 @@ func (producer *Producer) Close() error {
 type presolver struct {
 }
 
-func (s *presolver) Resolve(address []string, opts ...mq.Option) (mq.IMQP, error) {
-	return NewProducer(address, opts...)
+func (s *presolver) Resolve(confRaw string) (mq.IMQP, error) {
+	return NewProducer(xmq.NewByRaw(confRaw))
 }
 
 func init() {

@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -41,10 +40,7 @@ func New(address []string, opts ...Option) *Redis {
 //NewByRaw 通过json原串初始化
 func NewByRaw(raw string) *Redis {
 
-	org := New(nil)
-	if err := json.Unmarshal([]byte(raw), org); err != nil {
-		panic(err)
-	}
+	org := New(nil, WithRaw(raw))
 
 	if b, err := govalidator.ValidateStruct(org); !b {
 		panic(fmt.Errorf("redis配置数据有误:%v %+v", err, org))

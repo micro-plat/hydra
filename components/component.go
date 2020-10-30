@@ -17,7 +17,10 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 
-	_ "github.com/micro-plat/hydra/components/pkgs/mq/lmq"
+	_ "github.com/micro-plat/hydra/components/queues/mq/lmq"
+	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
+	_ "github.com/micro-plat/hydra/components/queues/mq/mqtt"
+	_ "github.com/micro-plat/hydra/components/queues/mq/xmq"
 )
 
 //IComponent 组件

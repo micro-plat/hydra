@@ -17,7 +17,7 @@ type IMQP interface {
 
 //imqpResover 定义配置文件转换方法
 type imqpResover interface {
-	Resolve(address []string, opts ...Option) (IMQP, error)
+	Resolve(confRaw string) (IMQP, error)
 }
 
 var mqpResolvers = make(map[string]imqpResover)
@@ -31,14 +31,10 @@ func RegisterProducer(proto string, resolver imqpResover) {
 }
 
 //NewMQP 根据适配器名称及参数返回配置处理器
-func NewMQP(address string, opts ...Option) (IMQP, error) {
-	proto, addrs, err := getNames(address)
-	if err != nil {
-		return nil, err
-	}
+func NewMQP(proto string, confRaw string) (IMQP, error) {
 	resolver, ok := mqpResolvers[proto]
 	if !ok {
 		return nil, fmt.Errorf("mqp: 不支持的消息协议 %s", proto)
 	}
-	return resolver.Resolve(addrs, opts...)
+	return resolver.Resolve(confRaw)
 }

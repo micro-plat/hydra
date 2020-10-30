@@ -1,11 +1,5 @@
 package queue
 
-import (
-	"fmt"
-
-	"github.com/micro-plat/hydra/conf"
-)
-
 //VarRootName 在var中的跟路径
 const VarRootName = "queue"
 
@@ -13,25 +7,4 @@ const VarRootName = "queue"
 type Queue struct {
 	Proto string `json:"proto,omitempty"`
 	Raw   []byte `json:"-"`
-}
-
-//New 构建DB连接信息
-func New(proto string, raw []byte) *Queue {
-	return &Queue{
-		Proto: proto,
-		Raw:   raw,
-	}
-}
-
-//GetConf 获取主配置信息
-func GetConf(cnf conf.IVarConf, tp string, name string) (s *Queue, err error) {
-	jc, err := cnf.GetConf(tp, name)
-	if err != nil {
-		if err == conf.ErrNoSetting {
-			return nil, fmt.Errorf("%s/%s %+v", tp, name, err)
-		}
-		return nil, err
-	}
-
-	return New(jc.GetString("proto"), jc.GetRaw()), nil
 }

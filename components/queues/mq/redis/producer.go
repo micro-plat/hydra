@@ -2,25 +2,25 @@ package redis
 
 import (
 	rds "github.com/go-redis/redis"
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/conf/server"
+
 	"github.com/micro-plat/hydra/components/pkgs/redis"
+	"github.com/micro-plat/hydra/components/queues/mq"
+	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
 // Producer memcache配置文件
 type Producer struct {
-	servers []string
-	client  *redis.Client
-	conf    *mq.ConfOpt
+	servers  []string
+	client   *redis.Client
+	confOpts *varredis.Redis
 }
 
 // New 根据配置文件创建一个redis连接
-func New(addrs []string, opts ...mq.Option) (m *Producer, err error) {
-	m = &Producer{servers: addrs, conf: &mq.ConfOpt{}}
-	for _, opt := range opts {
-		opt(m.conf)
-	}
-
-	m.client, err = redis.New(redis.WithRaw(m.conf.Raw))
+func NewByConfig(confOpts *varredis.Redis) (m *Producer, err error) {
+	m = &Producer{confOpts: confOpts}
+	m.client, err = redis.NewByConfig(m.confOpts)
 	if err != nil {
 		return
 	}
@@ -55,8 +55,17 @@ func (c *Producer) Close() error {
 type presolver struct {
 }
 
-func (s *presolver) Resolve(address []string, opts ...mq.Option) (mq.IMQP, error) {
-	return New(address, opts...)
+func (s *presolver) Resolve(confRaw string) (mq.IMQP, error) {
+	cacheRedis := queueredis.NewByRaw(confRaw)
+	vc, err := server.Cache.GetVarConf()
+	if err != nil {
+		return nil, err
+	}
+	js, err := vc.GetConf(Proto, cacheRedis.ConfigName)
+	if err != nil {
+		return nil, err
+	}
+	return NewByConfig(varredis.NewByRaw(string(js.GetRaw())))
 }
 func init() {
 	mq.RegisterProducer("redis", &presolver{})

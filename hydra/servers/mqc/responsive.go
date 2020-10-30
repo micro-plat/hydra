@@ -146,7 +146,7 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器配置获取失败:%v", err)
 	}
-	proto, name, err := global.ParseProto(nconf.Addr)
+	proto, queuename, err := global.ParseProto(nconf.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器地址有误:%w", err)
 	}
@@ -159,9 +159,9 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 		return NewServer(proto, nil, queueObj.Queues...)
 	}
 
-	js, err := cnf.GetVarConf().GetConf(varqueue.VarRootName, name)
+	js, err := cnf.GetVarConf().GetConf(varqueue.VarRootName, queuename)
 	if err != nil {
-		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.VarRootName, name, err)
+		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.VarRootName, queuename, err)
 	}
 	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
 }

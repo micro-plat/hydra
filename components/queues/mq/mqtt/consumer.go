@@ -11,13 +11,15 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 	"github.com/zkfy/stompngo"
+
+	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
 )
 
 type consumerChan struct {
@@ -40,19 +42,17 @@ type Consumer struct {
 	once       sync.Once
 	clientOnce sync.Once
 	log        logger.ILogger
-	*mq.ConfOpt
+	confOpts   *queuemqtt.MQTT
 }
 
 //NewConsumer 创建新的Consumer
-func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err error) {
+func NewConsumerByConfig(confOpts *queuemqtt.MQTT) (consumer *Consumer, err error) {
 	consumer = &Consumer{uid: utility.GetGUID()[0:6], log: logger.GetSession("mqtt", logger.CreateSession())}
-	consumer.ConfOpt = &mq.ConfOpt{}
+	consumer.confOpts = confOpts
 	consumer.closeCh = make(chan struct{})
 	consumer.connCh = make(chan int, 1)
 	consumer.queues = cmap.New(2)
-	for _, opt := range opts {
-		opt(consumer.ConfOpt)
-	}
+
 	consumer.subChan = make(chan string, 512)
 	if err != nil {
 		return nil, err
@@ -116,14 +116,14 @@ func (consumer *Consumer) connect() (mqtt.Client, bool, error) {
 	if consumer.done || consumer.client != nil && consumer.client.IsConnected() {
 		return consumer.client, false, nil
 	}
-	cert, err := consumer.getCert(consumer.ConfOpt)
+	cert, err := consumer.getCert(consumer.confOpts)
 	if err != nil {
 		return nil, false, err
 	}
 
 	opts := mqtt.NewClientOptions().AddBroker(consumer.getAddr())
-	opts.SetUsername(consumer.ConfOpt.UserName)
-	opts.SetPassword(consumer.ConfOpt.Password)
+	opts.SetUsername(consumer.confOpts.UserName)
+	opts.SetPassword(consumer.confOpts.Password)
 	opts.SetClientID(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), consumer.uid))
 	opts.SetTLSConfig(cert)
 	opts.SetKeepAlive(10)
@@ -135,13 +135,13 @@ func (consumer *Consumer) connect() (mqtt.Client, bool, error) {
 	return cc, true, nil
 }
 
-func (consumer *Consumer) getCert(conf *mq.ConfOpt) (*tls.Config, error) {
-	if conf.CertPath == "" {
+func (consumer *Consumer) getCert(conf *queuemqtt.MQTT) (*tls.Config, error) {
+	if conf.Cert == "" {
 		return nil, nil
 	}
-	b, err := ioutil.ReadFile(conf.CertPath)
+	b, err := ioutil.ReadFile(conf.Cert)
 	if err != nil {
-		return nil, fmt.Errorf("读取证书失败:%s(%v)", conf.CertPath, err)
+		return nil, fmt.Errorf("读取证书失败:%s(%v)", conf.Cert, err)
 	}
 	roots := x509.NewCertPool()
 	if ok := roots.AppendCertsFromPEM(b); !ok {
@@ -237,10 +237,10 @@ func (consumer *Consumer) UnConsume(queue string) {
 	}
 }
 func (consumer *Consumer) getAddr() string {
-	if strings.Contains(consumer.Address, "//") {
-		return consumer.Address
+	if strings.Contains(consumer.confOpts.Address, "://") {
+		return consumer.confOpts.Address
 	}
-	return fmt.Sprintf("ssl://%s", consumer.Address)
+	return fmt.Sprintf("ssl://%s", consumer.confOpts.Address)
 }
 
 //Close 关闭当前连接
@@ -263,8 +263,9 @@ func (consumer *Consumer) Close() {
 type resolver struct {
 }
 
-func (s *resolver) Resolve(address string, opts ...mq.Option) (mq.IMQC, error) {
-	return NewConsumer(address, opts...)
+func (s *resolver) Resolve(confRaw string) (mq.IMQC, error) {
+	confOpts := queuemqtt.NewByRaw(confRaw)
+	return NewConsumerByConfig(confOpts)
 }
 func init() {
 	mq.RegisterConsumer("mqtt", &resolver{})

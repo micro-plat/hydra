@@ -29,6 +29,8 @@ type Message struct {
 	signKey   string
 }
 
+const defaultSignKey = "sdfsdfsdfdsf"
+
 //newHeartBit 构建消息信息
 func newHeartBit() *Message {
 
@@ -36,7 +38,7 @@ func newHeartBit() *Message {
 		CMD:       99,
 		Mode:      1,
 		Timestmap: time.Now().Unix(),
-		signKey:   "sdfsdfsdfdsf",
+		signKey:   defaultSignKey,
 	}
 	id := atomic.AddInt64(&xmqSEQId, 1)
 	r.SEQ, _ = strconv.ParseInt(fmt.Sprintf("%d", id), 10, 0)
@@ -53,7 +55,7 @@ func newMessage(queueName string, msg string, timeout int) *Message {
 		Data:      []string{msg},
 		Timeout:   timeout * 1000,
 		Timestmap: time.Now().Unix(),
-		signKey:   "sdfsdfsdfdsf",
+		signKey:   defaultSignKey,
 	}
 	id := atomic.AddInt64(&xmqSEQId, 1)
 	r.SEQ, _ = strconv.ParseInt(fmt.Sprintf("%d", id), 10, 0)

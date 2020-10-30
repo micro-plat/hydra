@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -19,7 +19,7 @@ type Consumer struct {
 }
 
 //newConsumer 创建新的Consumer
-func newConsumer(address string, opts ...mq.Option) (consumer *Consumer, err error) {
+func newConsumer() (consumer *Consumer, err error) {
 	consumer = &Consumer{
 		queues:  cmap.New(4),
 		closeCh: make(chan struct{})}
@@ -110,8 +110,8 @@ func (consumer *Consumer) Close() {
 type consumerResolver struct {
 }
 
-func (s *consumerResolver) Resolve(address string, opts ...mq.Option) (mq.IMQC, error) {
-	return newConsumer(address, opts...)
+func (s *consumerResolver) Resolve(confRaw string) (mq.IMQC, error) {
+	return newConsumer()
 }
 func init() {
 	mq.RegisterConsumer("lmq", &consumerResolver{})

@@ -12,7 +12,7 @@ import (
 //Memcache memcache客户端配置
 type Memcache struct {
 	*cache.Cache
-	Address      []string `json:"addrs,required"  toml:"addrs,required"`
+	Address      []string `json:"addrs"   toml:"addrs" valid:"required" `
 	Timeout      int      `json:"timeout,omitempty"  toml:"timeout,omitempty"`
 	MaxIdleConns int      `json:"max_idle_conns,omitempty"  toml:"max_idle_conns,omitempty"`
 }

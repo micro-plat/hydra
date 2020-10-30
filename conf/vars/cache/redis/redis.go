@@ -12,7 +12,7 @@ import (
 //Redis redis缓存配置
 type Redis struct {
 	*cache.Cache
-	ConfigName string `json:"config_name,required" toml:"config_name,required"`
+	ConfigName string `json:"config_name" toml:"config_name" valid:"required" `
 }
 
 //New 构建redis消息队列配置

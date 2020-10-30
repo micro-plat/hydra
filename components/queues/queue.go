@@ -35,7 +35,7 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
 	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
-		return newQueue(js.GetString("proto"), js.GetRaw())
+		return newQueue(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err

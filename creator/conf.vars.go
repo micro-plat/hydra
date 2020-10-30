@@ -3,9 +3,11 @@ package creator
 import (
 	"github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	"github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	"github.com/micro-plat/hydra/conf/vars/cache/redis"
+	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
 	"github.com/micro-plat/hydra/conf/vars/db"
-	"github.com/micro-plat/hydra/conf/vars/queue"
+	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
+	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
+	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 )
@@ -30,15 +32,12 @@ func (v vars) DB(name string, db *db.DB) vars {
 	return v
 }
 
-func (v vars) Queue(name string, q *queue.Queue) vars {
-	if _, ok := v["queue"]; !ok {
-		v["queue"] = make(map[string]interface{})
-	}
-	v["queue"][name] = q
-	return v
-}
 func (v vars) Cache() *cache {
 	return &cache{vars: v}
+}
+
+func (v vars) Queue() *varqueue {
+	return &varqueue{vars: v}
 }
 
 func (v vars) RLog(service string, opts ...rlog.Option) vars {
@@ -53,7 +52,7 @@ type cache struct {
 	vars vars
 }
 
-func (c *cache) Redis(name string, q *redis.Redis) *cache {
+func (c *cache) Redis(name string, q *cacheredis.Redis) *cache {
 	return c.Custom(name, q)
 }
 
@@ -70,5 +69,29 @@ func (c *cache) Custom(name string, q interface{}) *cache {
 		c.vars["cache"] = make(map[string]interface{})
 	}
 	c.vars["cache"][name] = q
+	return c
+}
+
+type varqueue struct {
+	vars vars
+}
+
+func (c *varqueue) Redis(name string, q *queueredis.Redis) *varqueue {
+	return c.Custom(name, q)
+}
+
+func (c *varqueue) MQTT(name string, q *queuemqtt.MQTT) *varqueue {
+	return c.Custom(name, q)
+}
+
+func (c *varqueue) LMQ(name string, q *queuelmq.LMQ) *varqueue {
+	return c.Custom(name, q)
+}
+
+func (c *varqueue) Custom(name string, q interface{}) *varqueue {
+	if _, ok := c.vars["queue"]; !ok {
+		c.vars["queue"] = make(map[string]interface{})
+	}
+	c.vars["queue"][name] = q
 	return c
 }

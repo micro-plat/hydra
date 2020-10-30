@@ -3,7 +3,7 @@ package lmq
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -14,7 +14,7 @@ type Producer struct {
 }
 
 // New 创建消息生产者
-func New(addrs []string, opts ...mq.Option) (m *Producer, err error) {
+func New() (m *Producer, err error) {
 	return &Producer{}, nil
 }
 
@@ -71,8 +71,8 @@ func (c *Producer) Close() error {
 type lmqResolver struct {
 }
 
-func (s *lmqResolver) Resolve(address []string, opts ...mq.Option) (mq.IMQP, error) {
-	return New(address, opts...)
+func (s *lmqResolver) Resolve(confRaw string) (mq.IMQP, error) {
+	return New()
 }
 func init() {
 	queues = cmap.New(4)

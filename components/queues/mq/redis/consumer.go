@@ -7,8 +7,13 @@ import (
 
 	"errors"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/conf/server"
+
 	"github.com/micro-plat/hydra/components/pkgs/redis"
+	"github.com/micro-plat/hydra/components/queues/mq"
+	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	varredis "github.com/micro-plat/hydra/conf/vars/redis"
+
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/stompngo"
@@ -31,16 +36,13 @@ type Consumer struct {
 	header     []string
 	once       sync.Once
 	log        logger.ILogger
-	*mq.ConfOpt
+	ConfOpts   *varredis.Redis
 }
 
-//NewConsumer 创建新的Consumer
-func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err error) {
-	consumer = &Consumer{address: address, log: logger.GetSession("mq.redis", logger.CreateSession())}
-	consumer.ConfOpt = &mq.ConfOpt{}
-	for _, opt := range opts {
-		opt(consumer.ConfOpt)
-	}
+//NewConsumerByConfig 创建新的Consumer
+func NewConsumerByConfig(cfg *varredis.Redis) (consumer *Consumer, err error) {
+	consumer = &Consumer{log: logger.GetSession("mq.redis", logger.CreateSession())}
+	consumer.ConfOpts = cfg
 
 	consumer.closeCh = make(chan struct{})
 	consumer.queues = cmap.New(2)
@@ -49,7 +51,7 @@ func NewConsumer(address string, opts ...mq.Option) (consumer *Consumer, err err
 
 //Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
-	consumer.client, err = redis.New(redis.WithRaw(consumer.ConfOpt.Raw))
+	consumer.client, err = redis.NewByConfig(consumer.ConfOpts)
 	return
 }
 
@@ -151,9 +153,23 @@ func (consumer *Consumer) Close() {
 type cresolver struct {
 }
 
-func (s *cresolver) Resolve(address string, opts ...mq.Option) (mq.IMQC, error) {
-	return NewConsumer(address, opts...)
+func (s *cresolver) Resolve(confRaw string) (mq.IMQC, error) {
+
+	cacheRedis := queueredis.NewByRaw(confRaw)
+	vc, err := server.Cache.GetVarConf()
+	if err != nil {
+		return nil, err
+	}
+	js, err := vc.GetConf(Proto, cacheRedis.ConfigName)
+	if err != nil {
+		return nil, err
+	}
+	return NewConsumerByConfig(varredis.NewByRaw(string(js.GetRaw())))
+
 }
 func init() {
-	mq.RegisterConsumer("redis", &cresolver{})
+	mq.RegisterConsumer(Proto, &cresolver{})
 }
+
+//Proto redis
+const Proto = "redis"

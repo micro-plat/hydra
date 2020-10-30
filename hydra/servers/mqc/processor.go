@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
@@ -31,7 +31,7 @@ type Processor struct {
 }
 
 //NewProcessor 创建processor
-func NewProcessor(addr string, raw []byte) (p *Processor, err error) {
+func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	p = &Processor{
 		status:    unstarted,
 		closeChan: make(chan struct{}),
@@ -39,13 +39,9 @@ func NewProcessor(addr string, raw []byte) (p *Processor, err error) {
 		queues:    cmap.New(4),
 	}
 
-	opt, err := mq.WithRaw(raw)
+	p.customer, err = mq.NewMQC(proto, confRaw)
 	if err != nil {
-		return nil, fmt.Errorf("队列配置信息有误:%w", err)
-	}
-	p.customer, err = mq.NewMQC(addr, opt)
-	if err != nil {
-		return nil, fmt.Errorf("构建mqc服务失败 %s %w", addr, err)
+		return nil, fmt.Errorf("构建mqc服务失败(proto:%s,raw:%s) %v", proto, confRaw, err)
 	}
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(MQC))
