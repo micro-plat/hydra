@@ -159,9 +159,9 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 		return NewServer(proto, nil, queueObj.Queues...)
 	}
 
-	js, err := cnf.GetVarConf().GetConf(varqueue.VarRootName, queuename)
+	js, err := cnf.GetVarConf().GetConf(varqueue.TypeNodeName, queuename)
 	if err != nil {
-		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.VarRootName, queuename, err)
+		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.TypeNodeName, queuename, err)
 	}
 	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
 }

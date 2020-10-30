@@ -8,6 +8,9 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/cache"
 )
 
+//TypeNodeName 分类节点名
+const TypeNodeName = "redis"
+
 //Redis redis缓存配置
 type Redis struct {
 	*cache.Cache

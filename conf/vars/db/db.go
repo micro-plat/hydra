@@ -1,5 +1,8 @@
 package db
 
+//TypeNodeName 分类节点名
+const TypeNodeName = "db"
+
 //DB 数据库配置
 type DB struct {
 	Provider   string `json:"provider" valid:"required"`

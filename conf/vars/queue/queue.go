@@ -1,7 +1,7 @@
 package queue
 
-//VarRootName 在var中的跟路径
-const VarRootName = "queue"
+//TypeNodeName 分类节点名
+const TypeNodeName = "queue"
 
 //Queue 消息队列配置
 type Queue struct {
