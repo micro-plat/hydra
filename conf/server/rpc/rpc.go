@@ -44,7 +44,7 @@ func New(address string, opts ...Option) *Server {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IMainConf) (s *Server, err error) {
 	s = &Server{}
-	if cnf.GetServerType() != global.CRON {
+	if cnf.GetServerType() != global.RPC {
 		return nil, fmt.Errorf("rpc主配置类型错误:%s != rpc", cnf.GetServerType())
 	}
 
