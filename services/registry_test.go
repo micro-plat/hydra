@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
@@ -57,12 +57,12 @@ func Test_regist_RegisterServer(t *testing.T) {
 }
 
 func Test_regist_OnStarting(t *testing.T) {
-	h := func(server.IServerConf) error {
+	h := func(app.IAPPConf) error {
 		return fmt.Errorf("test")
 	}
 	tests := []struct {
 		name string
-		h    func(server.IServerConf) error
+		h    func(app.IAPPConf) error
 		tps  []string
 	}{
 		{name: "tps不为空", h: h, tps: []string{global.API}},
@@ -86,12 +86,12 @@ func Test_regist_OnStarting(t *testing.T) {
 }
 
 func Test_regist_OnClosing(t *testing.T) {
-	h := func(server.IServerConf) error {
+	h := func(app.IAPPConf) error {
 		return fmt.Errorf("test")
 	}
 	tests := []struct {
 		name string
-		h    func(server.IServerConf) error
+		h    func(app.IAPPConf) error
 		tps  []string
 	}{
 		{name: "tps不为空", h: h, tps: []string{global.API}},
