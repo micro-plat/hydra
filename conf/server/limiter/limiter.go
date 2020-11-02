@@ -16,7 +16,7 @@ import (
 
 //Limiter 限流器
 type Limiter struct {
-	Rules    []*Rule         `json:"rules" valid:"required" toml:"rules,omitempty"`
+	Rules    []*Rule         `json:"rules,omitempty" valid:"required" toml:"rules,omitempty"`
 	Disable  bool            `json:"disable,omitempty" toml:"disable,omitempty"`
 	p        *conf.PathMatch `json:"-"`
 	limiters cmap.ConcurrentMap
@@ -56,7 +56,7 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 }
 
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) (*Limiter, error) {
+func GetConf(cnf conf.IServerConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {

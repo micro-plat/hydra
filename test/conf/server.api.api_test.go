@@ -43,7 +43,7 @@ func TestAPIGetConf(t *testing.T) {
 	conf := mocks.NewConf()
 	//getconf的address默认值是8080
 	test1 := test{name: "节点不存在,获取默认对象", opts: []api.Option{}, want: &api.Server{Address: ":8080"}}
-	obj, err := api.GetConf(conf.GetAPIConf().GetMainConf())
+	obj, err := api.GetConf(conf.GetAPIConf().GetServerConf())
 	assert.Equal(t, nil, err, test1.name+",err")
 	assert.Equal(t, test1.want, obj, test1.name)
 
@@ -55,7 +55,7 @@ func TestAPIGetConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		conf.API(":8080", tt.opts...)
-		obj, err := api.GetConf(conf.GetAPIConf().GetMainConf())
+		obj, err := api.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}

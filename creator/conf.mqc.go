@@ -36,9 +36,8 @@ func (b *mqcBuilder) Queue(mq ...*queue.Queue) *mqcBuilder {
 	f := func() {
 		oqueue, ok := b.customerBuilder["queue"].(*queue.Queues)
 		if !ok {
-			oqueue = queue.NewQueues(mq...)
+			oqueue = queue.NewQueues()
 			b.customerBuilder["queue"] = oqueue
-			return
 		}
 		for _, m := range mq {
 			m.Queue = global.MQConf.GetQueueName(m.Queue)

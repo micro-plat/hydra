@@ -18,15 +18,15 @@ var SubConfName = []string{"queue"}
 type Server struct {
 	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
-	Addr     string `json:"addr" valid:"required"  toml:"addr"`
+	Addr     string `json:"addr,omitempty" valid:"required"  toml:"addr,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitempty" toml:"timeout,omitzero"`
+	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建mqc server配置，默认为对等模式
 func New(addr string, opts ...Option) *Server {
 	if _, _, err := global.ParseProto(addr); err != nil {
-		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://addr 格式 %w", err))
+		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://queuename 格式 %w", err))
 	}
 	s := &Server{Addr: addr, Status: "start"}
 	for _, opt := range opts {
@@ -36,7 +36,7 @@ func New(addr string, opts ...Option) *Server {
 }
 
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IMainConf) (*Server, error) {
+func GetConf(cnf conf.IServerConf) (*Server, error) {
 	s := Server{}
 	if cnf.GetServerType() != global.MQC {
 		return nil, fmt.Errorf("mqc主配置类型错误:%s != mqc", cnf.GetServerType())

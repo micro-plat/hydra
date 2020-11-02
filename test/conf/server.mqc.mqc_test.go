@@ -45,7 +45,7 @@ func TestMQCGetConf(t *testing.T) {
 	conf := mocks.NewConf()
 	//mqc的节点不存在需要报 panic
 	// test1 := test{name: "节点不存在,获取默认对象", opts: []mqc.Option{}, want: &mqc.Server{}}
-	// obj := mqc.GetConf(conf.GetMQCConf().GetMainConf())
+	// obj := mqc.GetConf(conf.GetMQCConf().GetServerConf())
 	// assert.Equal(t, test1.want, obj, test1.name)
 	tests := []test{
 		{name: "正常对象获取",
@@ -54,7 +54,7 @@ func TestMQCGetConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		conf.MQC("redis://192.196.0.1", tt.opts...)
-		obj, err := mqc.GetConf(conf.GetMQCConf().GetMainConf())
+		obj, err := mqc.GetConf(conf.GetMQCConf().GetServerConf())
 		assert.NotEqual(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}

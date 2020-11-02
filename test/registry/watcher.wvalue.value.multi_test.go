@@ -20,8 +20,8 @@ func TestNewMultiValueWatcher(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	c := apiconf.GetServerConf()
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	w, _ := wvalue.NewMultiValueWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
 	assert.Equal(t, 3, len(w.Watchers), "构建的值监控对象")
@@ -32,8 +32,8 @@ func TestMultiValueWatcher_Close(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	c := apiconf.GetServerConf()
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	w, _ := wvalue.NewMultiValueWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
 	w.Close()
@@ -50,7 +50,7 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 	confObj := mocks.NewConf()
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetMainConf()
+	c := apiconf.GetServerConf()
 
 	tests := []struct {
 		name    string
@@ -66,7 +66,7 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 
 	router, _ := apiconf.GetRouterConf()
 	pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
-	log := logger.GetSession(apiconf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
 

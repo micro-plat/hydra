@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	varqueue "github.com/micro-plat/hydra/conf/vars/queue"
@@ -19,7 +19,7 @@ import (
 //Responsive 响应式服务器
 type Responsive struct {
 	*Server
-	conf     server.IServerConf
+	conf     app.IAPPConf
 	comparer conf.IComparer
 	pub      pub.IPublisher
 	log      logger.ILogger
@@ -27,15 +27,15 @@ type Responsive struct {
 }
 
 //NewResponsive 创建响应式服务器
-func NewResponsive(cnf server.IServerConf) (h *Responsive, err error) {
+func NewResponsive(cnf app.IAPPConf) (h *Responsive, err error) {
 	h = &Responsive{
 		conf:     cnf,
 		first:    true,
-		log:      logger.New(cnf.GetMainConf().GetServerName()),
-		pub:      pub.New(cnf.GetMainConf()),
-		comparer: conf.NewComparer(cnf.GetMainConf(), mqc.MainConfName, mqc.SubConfName...),
+		log:      logger.New(cnf.GetServerConf().GetServerName()),
+		pub:      pub.New(cnf.GetServerConf()),
+		comparer: conf.NewComparer(cnf.GetServerConf(), mqc.MainConfName, mqc.SubConfName...),
 	}
-	server.Cache.Save(cnf)
+	app.Cache.Save(cnf)
 	h.Server, err = h.getServer(cnf)
 	return h, err
 }
@@ -45,18 +45,18 @@ func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
 	}
-	if !w.conf.GetMainConf().IsStarted() {
-		w.log.Warnf("%s被禁用，未启动", w.conf.GetMainConf().GetServerType())
+	if !w.conf.GetServerConf().IsStarted() {
+		w.log.Warnf("%s被禁用，未启动", w.conf.GetServerConf().GetServerType())
 		return
 	}
 	if err = w.Server.Start(); err != nil {
-		err = fmt.Errorf("%s启动失败 %w", w.conf.GetMainConf().GetServerType(), err)
+		err = fmt.Errorf("%s启动失败 %w", w.conf.GetServerConf().GetServerType(), err)
 		return
 	}
 
 	//发布集群节点
 	if err = w.publish(); err != nil {
-		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetMainConf().GetServerType(), err)
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
@@ -67,17 +67,17 @@ func (w *Responsive) Start() (err error) {
 	//动态监听任务
 	services.MQC.Subscribe(func(t *queue.Queue) {
 		if err := w.Server.Add(t); err != nil {
-			w.log.Errorf("[%s]]服务[%v]添加失败 %w", w.conf.GetMainConf().GetServerType(), t, err)
+			w.log.Errorf("[%s]]服务[%v]添加失败 %w", w.conf.GetServerConf().GetServerType(), t, err)
 		}
 	})
 
-	w.log.Infof("启动成功(%s,%s)", w.conf.GetMainConf().GetServerType(), w.Server.GetAddress())
+	w.log.Infof("启动成功(%s,%s)", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress())
 	return nil
 }
 
 //Notify 服务器配置变更通知
-func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
-	w.comparer.Update(c.GetMainConf())
+func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
+	w.comparer.Update(c.GetServerConf())
 	if !w.comparer.IsChanged() {
 		return false, nil
 	}
@@ -85,8 +85,8 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.log.Info("关键配置发生变化，准备重启服务器")
 		w.Shutdown()
 
-		server.Cache.Save(c)
-		if !c.GetMainConf().IsStarted() {
+		app.Cache.Save(c)
+		if !c.GetServerConf().IsStarted() {
 			w.log.Info("mqc服务被禁用，不用重启")
 			w.conf = c
 			return true, nil
@@ -101,14 +101,14 @@ func (w *Responsive) Notify(c server.IServerConf) (change bool, err error) {
 		w.conf = c
 		return true, nil
 	}
-	server.Cache.Save(c)
+	app.Cache.Save(c)
 	w.conf = c
 	return true, nil
 }
 
 //Shutdown 关闭服务器
 func (w *Responsive) Shutdown() {
-	w.log.Infof("关闭[%s]服务...", w.conf.GetMainConf().GetServerType())
+	w.log.Infof("关闭[%s]服务...", w.conf.GetServerConf().GetServerType())
 	w.Server.Shutdown()
 	w.pub.Clear()
 	if err := services.Def.DoClosing(w.conf); err != nil {
@@ -122,7 +122,7 @@ func (w *Responsive) Shutdown() {
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-	if err := w.pub.Publish(serverName, addr, w.conf.GetMainConf().GetServerID()); err != nil {
+	if err := w.pub.Publish(serverName, addr, w.conf.GetServerConf().GetServerID()); err != nil {
 		return err
 	}
 
@@ -133,7 +133,7 @@ func (w *Responsive) publish() (err error) {
 func (w *Responsive) update(kv ...string) (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-	if err := w.pub.Update(serverName, addr, w.conf.GetMainConf().GetServerID(), kv...); err != nil {
+	if err := w.pub.Update(serverName, addr, w.conf.GetServerConf().GetServerID(), kv...); err != nil {
 		return err
 	}
 
@@ -141,12 +141,12 @@ func (w *Responsive) update(kv ...string) (err error) {
 }
 
 //根据main.conf创建服务嚣
-func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
+func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	nconf, err := cnf.GetMQCMainConf()
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器配置获取失败:%v", err)
 	}
-	proto, name, err := global.ParseProto(nconf.Addr)
+	proto, queuename, err := global.ParseProto(nconf.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器地址有误:%w", err)
 	}
@@ -159,15 +159,15 @@ func (w *Responsive) getServer(cnf server.IServerConf) (*Server, error) {
 		return NewServer(proto, nil, queueObj.Queues...)
 	}
 
-	js, err := cnf.GetVarConf().GetConf(varqueue.VarRootName, name)
+	js, err := cnf.GetVarConf().GetConf(varqueue.TypeNodeName, queuename)
 	if err != nil {
-		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.VarRootName, name, err)
+		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.TypeNodeName, queuename, err)
 	}
 	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
 }
 
 func init() {
-	fn := func(c server.IServerConf) (servers.IResponsiveServer, error) {
+	fn := func(c app.IAPPConf) (servers.IResponsiveServer, error) {
 		return NewResponsive(c)
 	}
 	servers.Register(MQC, fn)

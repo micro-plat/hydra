@@ -19,7 +19,7 @@ type Server struct {
 	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitempty" toml:"timeout,omitzero"`
+	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建cron server配置，默认为对等模式
@@ -34,7 +34,7 @@ func New(opts ...Option) *Server {
 }
 
 //GetConf 获取主配置信息
-func GetConf(cnf conf.IMainConf) (s *Server, err error) {
+func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	s = &Server{}
 	if cnf.GetServerType() != global.CRON {
 		return nil, fmt.Errorf("cron主配置类型错误:%s != cron", cnf.GetServerType())

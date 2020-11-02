@@ -39,26 +39,26 @@ func TestMetricNew(t *testing.T) {
 func TestMetricGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *metric.Metric
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
-	test1 := test{name: "metric节点不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &metric.Metric{Disable: true}, wantErr: false}
+	test1 := test{name: "metric节点不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &metric.Metric{Disable: true}, wantErr: false}
 	limiterObj, err := metric.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, limiterObj, test1.name)
 
 	confB.Metric("", "", "", metric.WithDisable())
-	test2 := test{name: "限流节点存在,数据错误", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "限流节点存在,数据错误", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	limiterObj, err = metric.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, limiterObj, test2.name+",obj")
 
 	confB.Metric("http://192.168.0.101", "1", "cron", metric.WithDisable(), metric.WithUPName("upnem", "1223456"))
-	test3 := test{name: "限流节点存在,正确节点", cnf: conf.GetAPIConf().GetMainConf(),
+	test3 := test{name: "限流节点存在,正确节点", cnf: conf.GetAPIConf().GetServerConf(),
 		want: metric.New("http://192.168.0.101", "1", "cron", metric.WithDisable(), metric.WithUPName("upnem", "1223456")), wantErr: false}
 	limiterObj, err = metric.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")

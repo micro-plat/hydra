@@ -9,9 +9,9 @@ import (
 
 //Task cron任务的task明细
 type Task struct {
-	Cron    string `json:"cron" valid:"ascii,required" toml:"cron,omitempty"`
-	Service string `json:"service" valid:"ascii,required" toml:"service,omitempty"`
-	Disable bool   `json:"disable,omitemptye" toml:"disable,omitempty"`
+	Cron    string `json:"cron,omitempty" valid:"ascii,required" toml:"cron,omitempty"`
+	Service string `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
+	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //NewTask 创建任务信息

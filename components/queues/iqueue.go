@@ -1,7 +1,7 @@
 package queues
 
 import (
-	"github.com/micro-plat/hydra/components/pkgs/mq"
+	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/global"
 )
 
@@ -19,13 +19,9 @@ type queue struct {
 	q mq.IMQP
 }
 
-func newQueue(proto string, raw []byte) (*queue, error) {
-	rawOpt, err := mq.WithRaw(raw)
-	if err != nil {
-		return nil, err
-	}
-	q := &queue{}
-	q.q, err = mq.NewMQP(proto, rawOpt)
+func newQueue(proto string, confRaw string) (q *queue, err error) {
+	q = &queue{}
+	q.q, err = mq.NewMQP(proto, confRaw)
 	return q, err
 }
 func (q *queue) Push(key string, value string) error {

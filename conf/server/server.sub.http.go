@@ -17,8 +17,8 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 )
 
-type httpSub struct {
-	cnf       conf.IMainConf
+type HttpSub struct {
+	cnf       conf.IServerConf
 	header    *Loader
 	jwt       *Loader
 	metric    *Loader
@@ -34,8 +34,8 @@ type httpSub struct {
 	gray      *Loader
 }
 
-func newhttpSub(cnf conf.IMainConf) *httpSub {
-	s := &httpSub{cnf: cnf}
+func NewhttpSub(cnf conf.IServerConf) *HttpSub {
+	s := &HttpSub{cnf: cnf}
 	s.header = GetLoader(cnf, s.getHeaderConfFunc())
 	s.jwt = GetLoader(cnf, s.getJWTConfFunc())
 	s.metric = GetLoader(cnf, s.getMetricConfFunc())
@@ -53,98 +53,98 @@ func newhttpSub(cnf conf.IMainConf) *httpSub {
 }
 
 //getHeaderConfFunc 获取header配置信息
-func (s httpSub) getHeaderConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getHeaderConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return header.GetConf(cnf)
 	}
 }
 
 //getJWTConfFunc 获取jwt配置信息
-func (s httpSub) getJWTConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getJWTConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return jwt.GetConf(cnf)
 	}
 }
 
 //getMetricConfFunc 获取metric配置信息
-func (s httpSub) getMetricConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getMetricConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return metric.GetConf(cnf)
 	}
 }
 
 //getStaticConfFunc 获取static配置信息
-func (s httpSub) getStaticConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getStaticConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return static.GetConf(cnf)
 	}
 }
 
 //getRouterConfFunc 获取router配置信息
-func (s httpSub) getRouterConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getRouterConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return router.GetConf(cnf)
 	}
 }
 
 //getAPIKeyConfFunc 获取apikey配置信息
-func (s httpSub) getAPIKeyConfFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getAPIKeyConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return apikey.GetConf(cnf)
 	}
 }
 
 //getRasFunc 获取ras配置信息
-func (s httpSub) getRasFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getRasFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return ras.GetConf(cnf)
 	}
 }
 
 //getBasicFunc 获取basic配置信息
-func (s httpSub) getBasicFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getBasicFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return basic.GetConf(cnf)
 	}
 }
 
 //getRenderFunc 获取render配置信息
-func (s httpSub) getRenderFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getRenderFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return render.GetConf(cnf)
 	}
 }
 
 //getWhitelistFunc 获取whitelist配置信息
-func (s httpSub) getWhitelistFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getWhitelistFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return whitelist.GetConf(cnf)
 	}
 }
 
 //getBlacklistFunc 获取blacklist配置信息
-func (s httpSub) getBlacklistFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getBlacklistFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return blacklist.GetConf(cnf)
 	}
 }
 
 //getLimiterFunc 获取limiter配置信息
-func (s httpSub) getLimiterFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getLimiterFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return limiter.GetConf(cnf)
 	}
 }
 
 //getGrayFunc 获取gray配置信息
-func (s httpSub) getGrayFunc() func(cnf conf.IMainConf) (interface{}, error) {
-	return func(cnf conf.IMainConf) (interface{}, error) {
+func (s HttpSub) getGrayFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
 		return gray.GetConf(cnf)
 	}
 }
 
 //GetHeaderConf 获取响应头配置
-func (s *httpSub) GetHeaderConf() (header.Headers, error) {
+func (s *HttpSub) GetHeaderConf() (header.Headers, error) {
 	headerObj, err := s.header.GetConf()
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (s *httpSub) GetHeaderConf() (header.Headers, error) {
 }
 
 //GetJWTConf 获取jwt配置
-func (s *httpSub) GetJWTConf() (*jwt.JWTAuth, error) {
+func (s *HttpSub) GetJWTConf() (*jwt.JWTAuth, error) {
 	jwtObj, err := s.jwt.GetConf()
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (s *httpSub) GetJWTConf() (*jwt.JWTAuth, error) {
 }
 
 //GetMetricConf 获取metric配置
-func (s *httpSub) GetMetricConf() (*metric.Metric, error) {
+func (s *HttpSub) GetMetricConf() (*metric.Metric, error) {
 	metricObj, err := s.metric.GetConf()
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (s *httpSub) GetMetricConf() (*metric.Metric, error) {
 }
 
 //GetStaticConf 获取静态文件配置
-func (s *httpSub) GetStaticConf() (*static.Static, error) {
+func (s *HttpSub) GetStaticConf() (*static.Static, error) {
 	staticObj, err := s.static.GetConf()
 	if err != nil {
 		return nil, err
@@ -181,9 +181,9 @@ func (s *httpSub) GetStaticConf() (*static.Static, error) {
 }
 
 //GetRouterConf 获取路由信息
-func (s *httpSub) GetRouterConf() (*router.Routers, error) {
+func (s *HttpSub) GetRouterConf() (*router.Routers, error) {
 	routerObj, err := s.router.GetConf()
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, err
 	}
 
@@ -191,7 +191,7 @@ func (s *httpSub) GetRouterConf() (*router.Routers, error) {
 }
 
 //GetAPIKeyConf 获取apikey配置
-func (s *httpSub) GetAPIKeyConf() (*apikey.APIKeyAuth, error) {
+func (s *HttpSub) GetAPIKeyConf() (*apikey.APIKeyAuth, error) {
 	apikeyObj, err := s.apikey.GetConf()
 	if err != nil {
 		return nil, err
@@ -201,7 +201,7 @@ func (s *httpSub) GetAPIKeyConf() (*apikey.APIKeyAuth, error) {
 }
 
 //GetRASConf 获取RAS配置信息
-func (s *httpSub) GetRASConf() (*ras.RASAuth, error) {
+func (s *HttpSub) GetRASConf() (*ras.RASAuth, error) {
 	rasObj, err := s.ras.GetConf()
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (s *httpSub) GetRASConf() (*ras.RASAuth, error) {
 }
 
 //GetBasicConf 获取basic认证配置
-func (s *httpSub) GetBasicConf() (*basic.BasicAuth, error) {
+func (s *HttpSub) GetBasicConf() (*basic.BasicAuth, error) {
 	basicObj, err := s.basic.GetConf()
 	if err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (s *httpSub) GetBasicConf() (*basic.BasicAuth, error) {
 }
 
 //GetRenderConf 获取状态渲染控件
-func (s *httpSub) GetRenderConf() (*render.Render, error) {
+func (s *HttpSub) GetRenderConf() (*render.Render, error) {
 	renderObj, err := s.render.GetConf()
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func (s *httpSub) GetRenderConf() (*render.Render, error) {
 }
 
 //GetWhiteListConf 获取白名单配置
-func (s *httpSub) GetWhiteListConf() (*whitelist.WhiteList, error) {
+func (s *HttpSub) GetWhiteListConf() (*whitelist.WhiteList, error) {
 	whiteListObj, err := s.whiteList.GetConf()
 	if err != nil {
 		return nil, err
@@ -239,7 +239,7 @@ func (s *httpSub) GetWhiteListConf() (*whitelist.WhiteList, error) {
 }
 
 //GetBlackListConf 获取黑名单配置
-func (s *httpSub) GetBlackListConf() (*blacklist.BlackList, error) {
+func (s *HttpSub) GetBlackListConf() (*blacklist.BlackList, error) {
 	blackListObj, err := s.blackList.GetConf()
 	if err != nil {
 		return nil, err
@@ -248,7 +248,7 @@ func (s *httpSub) GetBlackListConf() (*blacklist.BlackList, error) {
 }
 
 //GetLimiter 获取限流配置
-func (s *httpSub) GetLimiter() (*limiter.Limiter, error) {
+func (s *HttpSub) GetLimiter() (*limiter.Limiter, error) {
 	limitObj, err := s.limit.GetConf()
 	if err != nil {
 		return nil, err
@@ -257,7 +257,7 @@ func (s *httpSub) GetLimiter() (*limiter.Limiter, error) {
 }
 
 //GetGray 获取灰度配置
-func (s *httpSub) GetGray() (*gray.Gray, error) {
+func (s *HttpSub) GetGray() (*gray.Gray, error) {
 	grayObj, err := s.gray.GetConf()
 	if err != nil {
 		return nil, err

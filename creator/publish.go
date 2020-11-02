@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf/server"
+	varpub "github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 )
@@ -28,8 +29,8 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 		return err
 	}
 	for tp, subs := range c.data {
-		pub := server.NewPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetMainPath(), subs.Map()["main"], cover); err != nil {
+		pub := server.NewServerPub(platName, systemName, tp, clusterName)
+		if err := publish(r, pub.GetServerPath(), subs.Map()["main"], cover); err != nil {
 			return err
 		}
 		for name, value := range subs.Map() {
@@ -42,7 +43,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 		}
 	}
 	for tp, subs := range c.vars {
-		pub := server.NewPub(platName, systemName, global.API, clusterName)
+		pub := varpub.NewVarPub(platName)
 		for k, v := range subs {
 			if err := publish(r, pub.GetVarPath(tp, k), v, cover); err != nil {
 				return err

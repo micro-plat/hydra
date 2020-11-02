@@ -3,9 +3,11 @@ package conf
 import (
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
+	"github.com/micro-plat/hydra/conf/vars"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
@@ -40,20 +42,20 @@ func TestNewEmptyServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, false, err == nil, "测试conf初始化,没有设置主节点")
 
 	confM.API(":8080")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
-	varPath := server.NewVarPath(platName)
-	varConf, err := server.NewVarConf(varPath.GetVarPath(), rgst)
+	varPath := vars.NewVarPub(platName)
+	varConf, err := vars.NewVarConf(varPath.GetVarPath(), rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
 	assert.Equal(t, varConf, gotS.GetVarConf(), "测试conf初始化,判断Var节点对象")
 
@@ -150,15 +152,15 @@ func TestNewAPIServerConf(t *testing.T) {
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
 	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
-	varPath := server.NewVarPath(platName)
-	varConf, err := server.NewVarConf(varPath.GetVarPath(), rgst)
+	varPath := vars.NewVarPub(platName)
+	varConf, err := vars.NewVarConf(varPath.GetVarPath(), rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
 	assert.Equal(t, varConf, gotS.GetVarConf(), "测试conf初始化,判断Var节点对象")
 
@@ -255,20 +257,20 @@ func TestNewRPCServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, false, err == nil, "测试conf初始化,没有设置主节点")
 
 	confM.RPC(":8081")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
-	varPath := server.NewVarPath(platName)
-	varConf, err := server.NewVarConf(varPath.GetVarPath(), rgst)
+	varPath := vars.NewVarPub(platName)
+	varConf, err := vars.NewVarConf(varPath.GetVarPath(), rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
 	assert.Equal(t, varConf, gotS.GetVarConf(), "测试conf初始化,判断Var节点对象")
 }
@@ -282,18 +284,18 @@ func TestNewMQCServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, false, err == nil, "测试conf初始化,没有设置主节点")
 
 	confN := confM.MQC("redis://11")
 	confN.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")
@@ -315,21 +317,21 @@ func TestNewCRONServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, false, err == nil, "测试conf初始化,没有设置主节点")
 
 	confN := confM.CRON(cron.WithTrace(), cron.WithDisable(), cron.WithSharding(1))
 	confN.Task(task.NewTask("cron1", "service1"), task.NewTask("cron2", "service2", task.WithDisable()))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
-	varPath := server.NewVarPath(platName)
-	varConf, err := server.NewVarConf(varPath.GetVarPath(), rgst)
+	varPath := vars.NewVarPub(platName)
+	varConf, err := vars.NewVarConf(varPath.GetVarPath(), rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
 	assert.Equal(t, varConf, gotS.GetVarConf(), "测试conf初始化,判断Var节点对象")
 
@@ -349,19 +351,19 @@ func TestNewVARServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, false, err == nil, "测试conf初始化,没有设置主节点")
 
 	confM.API(":8080")
 	// confM.Vars().Cache("redis", cache.New("", redis.New("redis://192.168.0.101", redis.WithTimeout(30, 31, 32))))
 
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
-	mainConf, err := server.NewMainConf(platName, sysName, serverType, clusterName, rgst)
+	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetMainConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")

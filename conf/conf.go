@@ -9,9 +9,9 @@ import (
 //ErrNoSetting 未配置
 var ErrNoSetting = errors.New("未配置")
 
-//IMainConf 主配置信息
-type IMainConf interface {
-	IPub
+//IServerConf 主配置信息
+type IServerConf interface {
+	IServerPub
 	IsStarted() bool
 	IsTrace() bool
 	GetRootConf() *RawConf
@@ -50,9 +50,9 @@ type ICluster interface {
 	Close() error
 }
 
-//IPub 发布路径服务
-type IPub interface {
-	GetMainPath() string
+//IServerPub 发布路径服务
+type IServerPub interface {
+	GetServerPath() string
 	GetSubConfPath(name ...string) string
 	GetRPCServicePubPath(svName string) string
 	GetServicePubPath() string
@@ -64,13 +64,12 @@ type IPub interface {
 	GetServerType() string
 	GetClusterName() string
 	GetServerName() string
-	GetVarPath(p ...string) string
-	GetRLogPath() string
 	AllowGray() bool
 }
 
 //IVarConf 变量配置
 type IVarConf interface {
+	IVarPub
 	GetVersion() int32
 	GetConf(tp string, name string) (*RawConf, error)
 	GetConfVersion(tp string, name string) (int32, error)
@@ -78,6 +77,12 @@ type IVarConf interface {
 	GetClone() IVarConf
 	Has(tp string, name string) bool
 	Iter(f func(k string, conf *RawConf) bool)
+}
+
+//IPub 发布路径服务
+type IVarPub interface {
+	GetVarPath(p ...string) string
+	GetRLogPath() string
 }
 
 //IWatcher 集群监控

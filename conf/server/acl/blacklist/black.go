@@ -11,7 +11,7 @@ import (
 //BlackList 黑名单配置
 type BlackList struct {
 	Disable bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	IPS     []string `json:"black-list" valid:"required" toml:"black-list,omitempty"`
+	IPS     []string `json:"black-list,omitempty" valid:"required" toml:"black-list,omitempty"`
 	ipm     *conf.PathMatch
 }
 
@@ -33,7 +33,7 @@ func (w *BlackList) IsDeny(ip string) bool {
 }
 
 //GetConf 获取BlackList
-func GetConf(cnf conf.IMainConf) (*BlackList, error) {
+func GetConf(cnf conf.IServerConf) (*BlackList, error) {
 	ip := BlackList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "black.list"), &ip)
 	if err == conf.ErrNoSetting {

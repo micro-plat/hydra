@@ -9,7 +9,7 @@ import (
 
 //Tasks cron任务的task配置信息
 type Tasks struct {
-	Tasks []*Task `json:"tasks" toml:"tasks,omitempty"`
+	Tasks []*Task `json:"tasks,omitempty" toml:"tasks,omitempty"`
 }
 
 //NewEmptyTasks 构建空的tasks
@@ -34,7 +34,7 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 }
 
 //GetConf 根据服务嚣配置获取task
-func GetConf(cnf conf.IMainConf) (tasks *Tasks, err error) {
+func GetConf(cnf conf.IServerConf) (tasks *Tasks, err error) {
 	tasks = &Tasks{}
 	_, err = cnf.GetSubObject("task", tasks)
 	if err != nil && err != conf.ErrNoSetting {

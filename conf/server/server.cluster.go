@@ -16,7 +16,7 @@ import (
 
 var cluster = cmap.New(2)
 
-func getCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
+func getCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
 	_, c, err := cluster.SetIfAbsentCb(pub.GetServerPubPath(clusterName...), func(...interface{}) (interface{}, error) {
 		return NewCluster(pub, rgst, clusterName...)
 	})
@@ -28,7 +28,7 @@ func getCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (
 
 //Cluster 集群
 type Cluster struct {
-	conf.IPub
+	conf.IServerPub
 	index       int64
 	registry    registry.IRegistry
 	current     conf.ICNode
@@ -41,9 +41,9 @@ type Cluster struct {
 }
 
 //NewCluster 管理服务器的主配置信息
-func NewCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
+func NewCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
 	s = &Cluster{
-		IPub:        pub,
+		IServerPub:  pub,
 		registry:    rgst,
 		nodes:       cmap.New(4),
 		watchers:    cmap.New(2),

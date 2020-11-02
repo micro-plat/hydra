@@ -11,15 +11,12 @@ import (
 //RASAuth 远程服务验证组
 type RASAuth struct {
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
-	Auth    []*Auth `json:"auth"`
+	Auth    []*Auth `json:"auth" toml:"auth"`
 }
 
 //NewRASAuth 构建RASAuth认证
 func NewRASAuth(opts ...Option) *RASAuth {
-	r := &RASAuth{
-		Disable: false,
-	}
-
+	r := &RASAuth{}
 	for _, opt := range opts {
 		opt(r)
 	}
@@ -37,7 +34,7 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 }
 
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (auths *RASAuth, err error) {
+func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
 	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)

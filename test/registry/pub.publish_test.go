@@ -34,7 +34,7 @@ func TestPublisher_PubRPCServiceNode(t *testing.T) {
 	confObj.Service.API.Add("/api4", "/api1", []string{"GET"})
 	confObj.Service.API.Add("/api5", "/api1", []string{"GET"})
 	s := confObj.GetAPIConf() //初始化参数
-	c := s.GetMainConf()      //获取配置
+	c := s.GetServerConf()    //获取配置
 	lm := c.GetRegistry()
 
 	p := pub.New(c)
@@ -69,7 +69,7 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
-	c := s.GetMainConf()      //获取配置
+	c := s.GetServerConf()    //获取配置
 	lm := c.GetRegistry()
 
 	p := pub.New(c)
@@ -103,7 +103,7 @@ func TestPublisher_PubServerNode(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
-	c := s.GetMainConf()      //获取配置
+	c := s.GetServerConf()    //获取配置
 
 	got := map[string]string{}
 	var err error
@@ -137,7 +137,7 @@ func TestPublisher_PubDNSNode_WithDomain(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	s := confObj.GetAPIConf() //初始化参数
-	c := s.GetMainConf()      //获取配置
+	c := s.GetServerConf()    //获取配置
 
 	got := map[string]string{}
 	var err error
@@ -162,7 +162,7 @@ func TestPublisher_PubDNSNode_NoDomain(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
-	c := s.GetMainConf()      //获取配置
+	c := s.GetServerConf()    //获取配置
 	got, err := pub.New(c).PubDNSNode("192.168.5.115")
 	assert.Equal(t, false, err != nil, "domain未设置不发布dns")
 	assert.Equal(t, map[string]string{}, got, "domain未设置不发布dns")
@@ -174,7 +174,7 @@ func TestPublisher_Publish_API(t *testing.T) {
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	confObj.RPC(":9377")
 	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
+	c := apiconf.GetServerConf()    //获取配置
 
 	//发布api节点和dns节点
 	router, _ := apiconf.GetRouterConf()
@@ -201,7 +201,7 @@ func TestPublisher_Publish_RPC(t *testing.T) {
 	confObj.RPC(":9377")
 	rpcconf := confObj.GetRPCConf() //初始化参数
 	s := confObj.GetAPIConf()       //初始化参数
-	c := rpcconf.GetMainConf()      //获取配置
+	c := rpcconf.GetServerConf()    //获取配置
 
 	//发布rpc节点
 	router, _ := s.GetRouterConf()
@@ -221,7 +221,7 @@ func TestPublisher_Update(t *testing.T) {
 	confObj.API(":8080", api.WithDNS("192.168.0.101"))
 	confObj.RPC(":9377")
 	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
+	c := apiconf.GetServerConf()    //获取配置
 	lm := c.GetRegistry()
 	path := c.GetServerPubPath(c.GetClusterName())
 
@@ -265,7 +265,7 @@ func TestNew(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
+	c := apiconf.GetServerConf()    //获取配置
 
 	//发布节点
 	pub.New(c).Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
@@ -296,7 +296,7 @@ func TestPublisher_WatchClusterChange(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetMainConf()      //获取配置
+	c := apiconf.GetServerConf()    //获取配置
 
 	//发布节点
 	p := pub.New(c)

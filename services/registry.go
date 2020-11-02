@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
@@ -49,10 +49,10 @@ type IService interface {
 	RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error)
 
 	//OnStarting 服务器启动勾子，服务器启动完成前执行
-	OnStarting(h func(server.IServerConf) error, tps ...string)
+	OnStarting(h func(app.IAPPConf) error, tps ...string)
 
 	//OnClosing 服务器关闭勾子，服务器关闭后执行
-	OnClosing(h func(server.IServerConf) error, tps ...string)
+	OnClosing(h func(app.IAPPConf) error, tps ...string)
 
 	//OnHandleExecuting Handle勾子，Handle执行前执行
 	OnHandleExecuting(h context.Handler, tps ...string)
@@ -163,7 +163,7 @@ func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}
 }
 
 //OnStarting 处理服务器启动
-func (s *regist) OnStarting(h func(server.IServerConf) error, tps ...string) {
+func (s *regist) OnStarting(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
 	}
@@ -175,7 +175,7 @@ func (s *regist) OnStarting(h func(server.IServerConf) error, tps ...string) {
 }
 
 //OnClosing 处理服务器关闭
-func (s *regist) OnClosing(h func(server.IServerConf) error, tps ...string) {
+func (s *regist) OnClosing(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
 	}
@@ -248,14 +248,14 @@ func (s *regist) get(tp string) *serverServices {
 }
 
 //DoStarting 执行服务启动函数
-func (s *regist) DoStarting(c server.IServerConf) error {
-	return s.get(c.GetMainConf().GetServerType()).DoStarting(c)
+func (s *regist) DoStarting(c app.IAPPConf) error {
+	return s.get(c.GetServerConf().GetServerType()).DoStarting(c)
 
 }
 
 //DoClosing 执行服务关闭函数
-func (s *regist) DoClosing(c server.IServerConf) error {
-	return s.get(c.GetMainConf().GetServerType()).DoClosing(c)
+func (s *regist) DoClosing(c app.IAPPConf) error {
+	return s.get(c.GetServerConf().GetServerType()).DoClosing(c)
 }
 
 //GetClosers 获取资源释放函数

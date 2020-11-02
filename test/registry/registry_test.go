@@ -128,7 +128,7 @@ func TestNewRegistry(t *testing.T) {
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, meta).GetRequestID())
 
 	for _, tt := range tests {
 		gotR, err := registry.NewRegistry(tt.args.address, log)

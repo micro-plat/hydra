@@ -6,7 +6,7 @@ import (
 
 func (w *Responsive) watch() {
 START:
-	cluster, err := w.conf.GetMainConf().GetCluster()
+	cluster, err := w.conf.GetServerConf().GetCluster()
 	if err != nil {
 		w.log.Errorf("无法获取到集群信息：%v", err)
 		tk := time.After(time.Second)

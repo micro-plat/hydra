@@ -1,5 +1,7 @@
 package mqtt
 
+import "encoding/json"
+
 //Option 配置选项
 type Option func(*MQTT)
 
@@ -15,5 +17,14 @@ func WithUP(userName string, password string) Option {
 func WithCert(cert string) Option {
 	return func(a *MQTT) {
 		a.Cert = cert
+	}
+}
+
+//WithRaw 通过json原串初始化
+func WithRaw(raw string) Option {
+	return func(o *MQTT) {
+		if err := json.Unmarshal([]byte(raw), o); err != nil {
+			panic(err)
+		}
 	}
 }
