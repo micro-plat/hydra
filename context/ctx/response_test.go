@@ -46,7 +46,7 @@ package ctx
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			log := logger.GetSession(serverConf.GetMainConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
+// 			log := logger.GetSession(serverConf.GetServerConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
 // 			c := NewResponse(tt.fields.ctx, serverConf, log, meta)
 // 			got := c.getString(tt.args.ctp, tt.args.v)
 // 			if got != tt.want {
@@ -80,7 +80,7 @@ package ctx
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			log := logger.GetSession(serverConf.GetMainConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
+// 			log := logger.GetSession(serverConf.GetServerConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
 // 			c := NewResponse(tt.fields.ctx, serverConf, log, meta)
 // 			if got := c.getContentType(); got != tt.want {
 // 				t.Errorf("response.getContentType() = %v, want %v", got, tt.want)
@@ -94,7 +94,7 @@ package ctx
 // 	confObj.API(":8080")               //初始化参数
 // 	serverConf := confObj.GetAPIConf() //获取配置
 // 	meta := conf.NewMeta()
-// 	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), NewUser(&mocks.TestContxt{}, meta).GetRequestID())
+// 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), NewUser(&mocks.TestContxt{}, meta).GetRequestID())
 // 	c := NewResponse(&mocks.TestContxt{}, serverConf, log, meta)
 // 	type args struct {
 // 		status  int
@@ -187,7 +187,7 @@ package ctx
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			log := logger.GetSession(serverConf.GetMainConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
+// 			log := logger.GetSession(serverConf.GetServerConf().GetServerName(), NewUser(tt.fields.ctx, meta).GetRequestID())
 // 			c := NewResponse(tt.fields.ctx, serverConf, log, meta)
 // 			got, got1 := c.swapByctp(tt.args.content)
 // 			if got != tt.want {

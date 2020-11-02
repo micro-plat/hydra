@@ -1,6 +1,6 @@
 package caches
 
-import "github.com/micro-plat/hydra/components/pkgs/cache"
+import "github.com/micro-plat/hydra/components/caches/cache"
 
 //ICache 缓存接口
 type ICache = cache.ICache

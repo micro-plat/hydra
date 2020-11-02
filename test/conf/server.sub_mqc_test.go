@@ -3,7 +3,7 @@ package conf
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/global"
@@ -24,7 +24,7 @@ func Test_mqcSub_GetMQCMainConf(t *testing.T) {
 	confM := mocks.NewConfBy(platName, clusterName)
 	confM.API(":8080")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, false, err == nil, "测试conf初始化,获取mqc对象失败")
@@ -37,7 +37,7 @@ func Test_mqcSub_GetMQCMainConf(t *testing.T) {
 	confN := confM.MQC("redis://11")
 	confN.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点1")
 	mqcConf, err = gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败1")
@@ -56,7 +56,7 @@ func Test_mqcSub_GetMQCQueueConf(t *testing.T) {
 	confM := mocks.NewConfBy(platName, clusterName)
 	confN := confM.MQC("redis://11")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err := server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
 
 	//不设置queue返回结果
@@ -67,7 +67,7 @@ func Test_mqcSub_GetMQCQueueConf(t *testing.T) {
 	//设置错误的queue返回配置
 	confN.Queue(queue.NewQueue("错误配置", "service1"), queue.NewQueue("错误配置1", "service2"))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点1")
 	queuesObj, err = gotS.GetMQCQueueConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败1")
@@ -79,7 +79,7 @@ func Test_mqcSub_GetMQCQueueConf(t *testing.T) {
 	confN = confM.MQC("redis://11")
 	confN.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-	gotS, err = server.NewServerConfBy(platName, sysName, serverType, clusterName, rgst)
+	gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点2")
 	queuesObj, err = gotS.GetMQCQueueConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败2")

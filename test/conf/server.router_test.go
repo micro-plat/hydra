@@ -200,7 +200,7 @@ func TestRouters_GetPath(t *testing.T) {
 func TestRouterGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *router.Routers
 		wantErr bool
 	}

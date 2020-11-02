@@ -15,9 +15,9 @@ import (
 //Gray 灰度设置
 type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-	Filter    string `json:"filter" valid:"required" toml:"filter,omitempty"`
-	UPCluster string `json:"upcluster" valid:"required" toml:"upcluster,omitempty"`
-	//conf      conf.IMainConf
+	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
+	UPCluster string `json:"upcluster,omitempty" valid:"required" toml:"upcluster,omitempty"`
+	//conf      conf.IServerConf
 	cluster conf.ICluster
 }
 
@@ -66,7 +66,7 @@ func (g *Gray) Next() (u *url.URL, err error) {
 	return url, nil
 }
 
-func (g *Gray) checkServers(c conf.IMainConf) error {
+func (g *Gray) checkServers(c conf.IServerConf) error {
 	cluster, err := c.GetCluster(g.UPCluster)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (g *Gray) checkServers(c conf.IMainConf) error {
 }
 
 //GetConf 获取Gray
-func GetConf(cnf conf.IMainConf) (*Gray, error) {
+func GetConf(cnf conf.IServerConf) (*Gray, error) {
 	gray := &Gray{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), gray)
 	if err == conf.ErrNoSetting {

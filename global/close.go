@@ -39,4 +39,8 @@ func (m *global) AddCloser(f interface{}) {
 		closers = append(closers, v)
 		return
 	}
+	if v, ok := f.(func() error); ok {
+		closers = append(closers, closeHandle(v))
+		return
+	}
 }

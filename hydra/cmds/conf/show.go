@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
@@ -92,13 +92,13 @@ func (s *show) readPrint() error {
 func (s *show) printMainConf() error {
 
 	for _, tp := range s.types {
-		sc, err := server.NewServerConfBy(s.plat, s.sysName, tp, s.cluster, s.rgst)
+		sc, err := app.NewAPPConfBy(s.plat, s.sysName, tp, s.cluster, s.rgst)
 		if err != nil {
 			return err
 		}
-		s.getNodes(sc.GetMainConf().GetSubConfPath("main"), sc.GetMainConf().GetRootConf(), s.subs)
-		sc.GetMainConf().Iter(func(path string, v *conf.RawConf) bool {
-			npath := sc.GetMainConf().GetSubConfPath(path)
+		s.getNodes(sc.GetServerConf().GetSubConfPath("main"), sc.GetServerConf().GetRootConf(), s.subs)
+		sc.GetServerConf().Iter(func(path string, v *conf.RawConf) bool {
+			npath := sc.GetServerConf().GetSubConfPath(path)
 			s.getNodes(npath, v, s.subs)
 			return true
 		})
@@ -110,12 +110,12 @@ func (s *show) printVarConf() error {
 	if len(s.types) == 0 {
 		return nil
 	}
-	sc, err := server.NewServerConfBy(s.plat, s.sysName, s.types[0], s.cluster, s.rgst)
+	sc, err := app.NewAPPConfBy(s.plat, s.sysName, s.types[0], s.cluster, s.rgst)
 	if err != nil {
 		return err
 	}
 	sc.GetVarConf().Iter(func(path string, v *conf.RawConf) bool {
-		npath := sc.GetMainConf().GetVarPath(path)
+		npath := sc.GetVarConf().GetVarPath(path)
 		s.getNodes(npath, v, s.vars)
 		return true
 	})

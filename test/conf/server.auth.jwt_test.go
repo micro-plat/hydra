@@ -63,7 +63,7 @@ func TestJWTGetConf(t *testing.T) {
 		if !strings.EqualFold(tt.name, "未设置jwt节点") {
 			confB.Jwt(tt.opts...)
 		}
-		got, err := jwt.GetConf(conf.GetAPIConf().GetMainConf())
+		got, err := jwt.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.NotEqual(t, nil, err, tt.name+",err")
 		assert.Equal(t, got, tt.want, tt.name)
 	}

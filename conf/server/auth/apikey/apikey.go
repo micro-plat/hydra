@@ -17,9 +17,9 @@ import (
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
-	Secret   string   `json:"secret" valid:"ascii,required" toml:"secret,omitempty"`
-	Mode     string   `json:"mode" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
-	Excludes []string `json:"excludes" toml:"excludes,omitempty"`
+	Secret   string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
+	Mode     string   `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
+	Excludes []string `json:"excludes,omitempty" toml:"excludes,omitempty"`
 	Disable  bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch
 }
@@ -58,7 +58,7 @@ func (a *APIKeyAuth) Verify(raw string, sign string) error {
 }
 
 //GetConf 获取APIKeyAuth
-func GetConf(cnf conf.IMainConf) (*APIKeyAuth, error) {
+func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	fsa := APIKeyAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "apikey"), &fsa)
 	if err == conf.ErrNoSetting {

@@ -10,9 +10,8 @@ import (
 	extcontext "github.com/micro-plat/hydra/context"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
-
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -25,7 +24,7 @@ type MiddleContext struct {
 	MockResponse   extcontext.IResponse
 	HttpRequest    *http.Request
 	HttpResponse   http.ResponseWriter
-	MockServerConf server.IServerConf
+	MockServerConf app.IAPPConf
 }
 
 func (ctx *MiddleContext) Next() {
@@ -54,7 +53,7 @@ func (ctx *MiddleContext) Context() context.Context {
 }
 
 //ServerConf 服务器配置
-func (ctx *MiddleContext) ServerConf() server.IServerConf {
+func (ctx *MiddleContext) ServerConf() app.IAPPConf {
 	return ctx.MockServerConf
 }
 

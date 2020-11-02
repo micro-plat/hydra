@@ -34,7 +34,7 @@ func TestPathSplit(t *testing.T) {
 	}
 }
 
-func TestPub_GetMainPath(t *testing.T) {
+func TestPub_GetServerPath(t *testing.T) {
 	type fields struct {
 		platName    string
 		sysName     string
@@ -51,7 +51,7 @@ func TestPub_GetMainPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		c := server.NewPub(tt.fields.platName, tt.fields.sysName, tt.fields.serverType, tt.fields.clusterName)
-		got := c.GetMainPath()
+		got := c.GetServerPath()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

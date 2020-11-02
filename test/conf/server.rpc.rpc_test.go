@@ -42,7 +42,7 @@ func TestRPCGetConf(t *testing.T) {
 
 	conf := mocks.NewConf()
 	test1 := test{name: "节点不存在,获取默认对象", opts: []rpc.Option{}, want: &rpc.Server{Address: ":8090"}}
-	obj, err := rpc.GetConf(conf.GetRPCConf().GetMainConf())
+	obj, err := rpc.GetConf(conf.GetRPCConf().GetServerConf())
 	assert.Equal(t, nil, err, test1.name+",err")
 	assert.Equal(t, test1.want, obj, test1.name)
 
@@ -54,7 +54,7 @@ func TestRPCGetConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		conf.RPC(":8090", tt.opts...)
-		obj, err := rpc.GetConf(conf.GetCronConf().GetMainConf())
+		obj, err := rpc.GetConf(conf.GetCronConf().GetServerConf())
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}

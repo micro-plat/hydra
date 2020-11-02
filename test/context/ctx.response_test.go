@@ -96,7 +96,7 @@ func Test_response_Write(t *testing.T) {
 	meta := conf.NewMeta()
 
 	for _, tt := range tests {
-		log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(tt.ctx, meta).GetRequestID())
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(tt.ctx, meta).GetRequestID())
 
 		//构建response对象
 		c := ctx.NewResponse(tt.ctx, serverConf, log, meta)
@@ -117,7 +117,7 @@ func Test_response_Header(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(rc, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, meta).GetRequestID())
 	c := ctx.NewResponse(rc, serverConf, log, meta)
 
 	//设置header
@@ -139,7 +139,7 @@ func Test_response_ContentType(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(rc, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, meta).GetRequestID())
 	c := ctx.NewResponse(rc, serverConf, log, meta)
 
 	//设置content-type
@@ -157,7 +157,7 @@ func Test_response_Abort(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	//测试Abort
@@ -177,7 +177,7 @@ func Test_response_Stop(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	//测试Stop
@@ -207,7 +207,7 @@ func Test_response_StatusCode(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 	for _, tt := range tests {
 		c.StatusCode(tt.s)
@@ -223,7 +223,7 @@ func Test_response_File(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	//测试File
@@ -252,7 +252,7 @@ func Test_response_WriteFinal(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	for _, tt := range tests {
@@ -270,7 +270,7 @@ func Test_response_Redirect(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetMainConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
+	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	c.Redirect(200, "url")

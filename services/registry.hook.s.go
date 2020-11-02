@@ -3,19 +3,19 @@ package services
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 )
 
 type serverHook struct {
-	starting  func(server.IServerConf) error
-	closing   func(server.IServerConf) error
+	starting  func(app.IAPPConf) error
+	closing   func(app.IAPPConf) error
 	handlings []context.IHandler
 	handleds  []context.IHandler
 }
 
 //AddStarting 添加服务器启动勾子
-func (s *serverHook) AddStarting(h func(server.IServerConf) error) error {
+func (s *serverHook) AddStarting(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("启动服务不能为空")
 	}
@@ -27,7 +27,7 @@ func (s *serverHook) AddStarting(h func(server.IServerConf) error) error {
 }
 
 //AddClosing 设置关闭器关闭勾子
-func (s *serverHook) AddClosing(h func(server.IServerConf) error) error {
+func (s *serverHook) AddClosing(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("关闭服务不能为空")
 	}
@@ -67,7 +67,7 @@ func (s *serverHook) GetHandleExecuteds() []context.IHandler {
 }
 
 //DoStarting 获取服务器启动预处理函数
-func (s *serverHook) DoStarting(c server.IServerConf) error {
+func (s *serverHook) DoStarting(c app.IAPPConf) error {
 	if s.starting == nil {
 		return nil
 	}
@@ -75,7 +75,7 @@ func (s *serverHook) DoStarting(c server.IServerConf) error {
 }
 
 //DoClosing 获取服务器关闭处理函数
-func (s *serverHook) DoClosing(c server.IServerConf) error {
+func (s *serverHook) DoClosing(c app.IAPPConf) error {
 	if s.closing == nil {
 		return nil
 	}

@@ -90,7 +90,7 @@ func TestAuthRASGetConf(t *testing.T) {
 	conf := mocks.NewConf()
 	confB := conf.API(":8081")
 	test1 := test{name: "未设置ras节点", opts: []ras.Option{}, wantAuths: &ras.RASAuth{Disable: true}, wantErr: false}
-	gotAuths, err := ras.GetConf(conf.GetAPIConf().GetMainConf())
+	gotAuths, err := ras.GetConf(conf.GetAPIConf().GetServerConf())
 	assert.Equal(t, (err != nil), test1.wantErr, test1.name+",err")
 	assert.Equal(t, gotAuths, test1.wantAuths, test1.name)
 
@@ -100,7 +100,7 @@ func TestAuthRASGetConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		confB.Ras(tt.opts...)
-		gotAuths, err = ras.GetConf(conf.GetAPIConf().GetMainConf())
+		gotAuths, err = ras.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.Equal(t, (err != nil), tt.wantErr, tt.name+",err")
 		if err == nil {
 			assert.Equal(t, gotAuths, tt.wantAuths, tt.name)

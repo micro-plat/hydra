@@ -13,9 +13,9 @@ type IMetric interface {
 }
 
 type Metric struct {
-	Host     string `json:"host" valid:"requrl,required" toml:"host,omitempty"`
-	DataBase string `json:"dataBase" valid:"ascii,required" toml:"dataBase,omitempty"`
-	Cron     string `json:"cron" valid:"ascii,required" toml:"cron,omitempty"`
+	Host     string `json:"host,omitempty" valid:"requrl,required" toml:"host,omitempty"`
+	DataBase string `json:"dataBase,omitempty" valid:"ascii,required" toml:"dataBase,omitempty"`
+	Cron     string `json:"cron,omitempty" valid:"ascii,required" toml:"cron,omitempty"`
 	UserName string `json:"userName,omitempty" valid:"ascii" toml:"userName,omitempty"`
 	Password string `json:"password,omitempty" valid:"ascii" toml:"password,omitempty"`
 	Disable  bool   `json:"disable,omitempty" toml:"disable,omitempty"`
@@ -39,7 +39,7 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 }
 
 //GetConf 设置metric
-func GetConf(cnf conf.IMainConf) (metric *Metric, err error) {
+func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
 	_, err = cnf.GetSubObject("metric", &metric)
 	if err != nil && err != conf.ErrNoSetting {

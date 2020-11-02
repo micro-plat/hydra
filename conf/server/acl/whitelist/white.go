@@ -10,8 +10,8 @@ import (
 
 //IPList ip列表
 type IPList struct {
-	Requests []string `json:"requests" valid:"ascii,required" toml:"requests,omitempty"`
-	IPS      []string `json:"ips" valid:"required" toml:"ips,omitempty"`
+	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty"`
+	IPS      []string `json:"ips,omitempty" valid:"ascii,required" toml:"ips,omitempty"`
 	ipm      *conf.PathMatch
 	rqm      *conf.PathMatch
 }
@@ -43,7 +43,7 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 }
 
 //GetConf 获取WhiteList
-func GetConf(cnf conf.IMainConf) (*WhiteList, error) {
+func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	ip := WhiteList{}
 	_, err := cnf.GetSubObject(registry.Join("acl", "white.list"), &ip)
 	if err == conf.ErrNoSetting {

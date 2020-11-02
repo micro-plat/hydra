@@ -94,32 +94,32 @@ func TestLimiter_GetLimiter(t *testing.T) {
 func TestGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *limiter.Limiter
 		wantErr bool
 	}
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
-	test1 := test{name: "限流节点不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &limiter.Limiter{Disable: true}, wantErr: false}
+	test1 := test{name: "限流节点不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &limiter.Limiter{Disable: true}, wantErr: false}
 	limiterObj, err := limiter.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, limiterObj, test1.name)
 
 	confB.Limit(limiter.WithDisable())
-	test2 := test{name: "限流节点存在,auths不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &limiter.Limiter{Disable: true}, wantErr: false}
+	test2 := test{name: "限流节点存在,auths不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &limiter.Limiter{Disable: true}, wantErr: false}
 	limiterObj, err = limiter.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, limiterObj, test2.name+",obj")
 
 	confB.Limit(limiter.WithRuleList(limiter.NewRule("path", 1, limiter.WithAction("sss"))))
-	test3 := test{name: "灰度节点存在,数据不合法", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test3 := test{name: "灰度节点存在,数据不合法", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	limiterObj, err = limiter.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, limiterObj, test3.name+",obj")
 
 	confB.Limit(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success"))))
 	test4 := test{name: "灰度节点存在,正确配置",
-		cnf: conf.GetAPIConf().GetMainConf(), want: limiter.New(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success")))), wantErr: false}
+		cnf: conf.GetAPIConf().GetServerConf(), want: limiter.New(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success")))), wantErr: false}
 	limiterObj, err = limiter.GetConf(test4.cnf)
 	assert.Equal(t, test4.wantErr, (err != nil), test4.name+",err")
 	assert.Equal(t, test4.want, limiterObj, test4.name+",obj")

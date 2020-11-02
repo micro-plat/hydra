@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
@@ -15,18 +15,18 @@ var _ context.IPath = &rpath{}
 
 //rpath 处理请求的路径信息
 type rpath struct {
-	ctx        context.IInnerContext
-	serverConf server.IServerConf
-	meta       conf.IMeta
-	isLimit    bool
-	fallback   bool
+	ctx      context.IInnerContext
+	appConf  app.IAPPConf
+	meta     conf.IMeta
+	isLimit  bool
+	fallback bool
 }
 
-func NewRpath(ctx context.IInnerContext, serverConf server.IServerConf, meta conf.IMeta) *rpath {
+func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) *rpath {
 	return &rpath{
-		ctx:        ctx,
-		serverConf: serverConf,
-		meta:       meta,
+		ctx:     ctx,
+		appConf: appConf,
+		meta:    meta,
 	}
 }
 
@@ -37,9 +37,9 @@ func (c *rpath) GetMethod() string {
 
 //GetRouter 获取路由信息
 func (c *rpath) GetRouter() (*router.Router, error) {
-	switch c.serverConf.GetMainConf().GetServerType() {
+	switch c.appConf.GetServerConf().GetServerType() {
 	case global.API, global.Web, global.WS:
-		routerObj, err := c.serverConf.GetRouterConf()
+		routerObj, err := c.appConf.GetRouterConf()
 		if err != nil {
 			return nil, err
 		}

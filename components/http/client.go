@@ -10,10 +10,10 @@ import (
 
 const (
 	//typeNode DB在var配置中的类型名称
-	dbTypeNode = "http"
+	httpTypeNode = "http"
 
 	//nameNode DB名称在var配置中的末节点名称
-	dbNameNode = "client"
+	httpNameNode = "client"
 )
 
 //StandardHTTPClient db
@@ -37,8 +37,12 @@ func (s *StandardHTTPClient) GetRegularClient(names ...string) (d IClient) {
 
 //GetClient 获取http请求对象
 func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
-	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(js *conf.RawConf) (interface{}, error) {
+	name := types.GetStringByIndex(names, 0, httpNameNode)
+	obj, err := s.c.GetOrCreate(httpTypeNode, name, func(conf conf.IVarConf) (interface{}, error) {
+		js, err := conf.GetConf(httpNameNode, name)
+		if err != nil {
+			return nil, err
+		}
 		ctx := context.Current()
 		opt := []http.Option{
 			http.WithRequestID(ctx.User().GetRequestID()),

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -210,7 +210,7 @@ type IContext interface {
 	Context() context.Context
 
 	//ServerConf 服务器配置
-	ServerConf() server.IServerConf
+	ServerConf() app.IAPPConf
 
 	//TmplFuncs 模板函数列表
 	TmplFuncs() TFuncs

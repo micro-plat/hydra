@@ -65,32 +65,32 @@ func TestGray_Check(t *testing.T) {
 func TestGrayGetConf(t *testing.T) {
 	type test struct {
 		name    string
-		cnf     conf.IMainConf
+		cnf     conf.IServerConf
 		want    *gray.Gray
 		wantErr bool
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
-	test1 := test{name: "灰度节点不存在", cnf: conf.GetAPIConf().GetMainConf(), want: &gray.Gray{Disable: true}, wantErr: false}
+	test1 := test{name: "灰度节点不存在", cnf: conf.GetAPIConf().GetServerConf(), want: &gray.Gray{Disable: true}, wantErr: false}
 	grayObj, err := gray.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
 	assert.Equal(t, test1.want, grayObj, test1.name)
 
 	confB.Gray(gray.WithDisable(), gray.WithUPCluster("graytest"))
-	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	grayObj, err = gray.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, grayObj, test2.name)
 
 	confB.Gray(gray.WithDisable(), gray.WithFilter("tao"))
-	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetMainConf(), want: nil, wantErr: true}
+	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
 	grayObj, err = gray.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, grayObj, test3.name)
 
 	confB.Gray(gray.WithDisable(), gray.WithFilter("tao"), gray.WithUPCluster("graytest"))
-	test4 := test{name: "灰度节点存在", cnf: conf.GetAPIConf().GetMainConf(), want: &gray.Gray{Disable: true, Filter: "tao", UPCluster: "graytest"}, wantErr: false}
+	test4 := test{name: "灰度节点存在", cnf: conf.GetAPIConf().GetServerConf(), want: &gray.Gray{Disable: true, Filter: "tao", UPCluster: "graytest"}, wantErr: false}
 	grayObj, err = gray.GetConf(test4.cnf)
 	assert.Equal(t, test4.wantErr, (err != nil), test4.name+",err")
 	assert.Equal(t, test4.want.Disable, grayObj.Disable, test4.name+",Disable")
@@ -111,28 +111,28 @@ func TestGray_Allow(t *testing.T) {
 
 	conf := mocks.NewConf()
 	conf.API(":8090")
-	grayObj, _ := gray.GetConf(conf.GetAPIConf().GetMainConf())
+	grayObj, _ := gray.GetConf(conf.GetAPIConf().GetServerConf())
 	test2 := test{name: "api服务集群获取", fields: grayObj, want: true}
 	got = test2.fields.Allow()
 	assert.Equal(t, test2.want, got, test2.name)
 
 	conf = mocks.NewConf()
 	conf.RPC(":8090")
-	grayObj, _ = gray.GetConf(conf.GetRPCConf().GetMainConf())
+	grayObj, _ = gray.GetConf(conf.GetRPCConf().GetServerConf())
 	test3 := test{name: "rpc服务集群获取", fields: grayObj, want: true}
 	got = test3.fields.Allow()
 	assert.Equal(t, test3.want, got, test3.name)
 
 	conf = mocks.NewConf()
 	conf.MQC("redis://192.168.0.1")
-	grayObj, _ = gray.GetConf(conf.GetMQCConf().GetMainConf())
+	grayObj, _ = gray.GetConf(conf.GetMQCConf().GetServerConf())
 	test4 := test{name: "mqc服务集群获取", fields: grayObj, want: false}
 	got = test4.fields.Allow()
 	assert.Equal(t, test4.want, got, test4.name)
 
 	conf = mocks.NewConf()
 	conf.CRON(cron.WithTrace())
-	grayObj, _ = gray.GetConf(conf.GetCronConf().GetMainConf())
+	grayObj, _ = gray.GetConf(conf.GetCronConf().GetServerConf())
 	test5 := test{name: "cron服务集群获取", fields: grayObj, want: false}
 	got = test5.fields.Allow()
 	assert.Equal(t, test5.want, got, test5.name)
@@ -153,13 +153,13 @@ func TestGray_Next(t *testing.T) {
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	conf.API(":8090").Gray(gray.WithFilter("tao"), gray.WithUPCluster("graytest"))
-	nomalObj, _ := gray.GetConf(conf.GetAPIConf().GetMainConf())
+	nomalObj, _ := gray.GetConf(conf.GetAPIConf().GetServerConf())
 	test2 := test{name: "无服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true}
 	gotU, err = test2.fields.Next()
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.wantU, gotU, test2.name+",url")
 
-	path := conf.GetAPIConf().GetMainConf().GetServerPubPath("graytest")
+	path := conf.GetAPIConf().GetServerConf().GetServerPubPath("graytest")
 	conf.Registry.CreateTempNode(path+":123456", "错误的服务器地址")
 	time.Sleep(2 * time.Second)
 	test3 := test{name: "错误配置服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true}
