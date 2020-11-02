@@ -35,6 +35,16 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		return nil, fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
 	}
 
+	//path 替换 获取handler的方法[Handle]前缀 @hj
+	hName:=""
+	for i := 0; i < typ.NumMethod(); i++ {
+		mName := typ.Method(i).Name
+		if strings.HasSuffix(mName, defHandler){
+			hName := mName[:len(mName)-len(defHandler)]
+			break
+		}
+	}
+
 	//reflect所有函数，检查函数签名
 	for i := 0; i < typ.NumMethod(); i++ {
 
@@ -59,16 +69,16 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		switch {
 		case strings.HasSuffix(mName, defHandling):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
-			current.AddHandling(endName, nf)
+			current.AddHandling(endName,hName, nf)
 		case strings.HasSuffix(mName, defHandler):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-			current.AddHandle(endName, nf)
+			current.AddHandle(endName,hName, nf)
 		case strings.HasSuffix(mName, defHandled):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandled)])
-			current.AddHandled(endName, nf)
+			current.AddHandled(endName,hName, nf)
 		case strings.HasSuffix(mName, defFallback):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defFallback)])
-			current.AddFallback(endName, nf)
+			current.AddFallback(endName,hName, nf)
 		}
 	}
 	if len(current.Services) == 0 {
