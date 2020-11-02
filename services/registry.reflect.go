@@ -18,7 +18,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	//输入参数为函数
 	current := newUnitGroup(path)
 	if vv, ok := h.(func(context.IContext) interface{}); ok {
-		current.AddHandle("", context.Handler(vv))
+		current.AddHandle("", "", context.Handler(vv))
 		return current, nil
 	}
 
@@ -27,7 +27,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	val := reflect.ValueOf(h)
 	if val.Kind() == reflect.String {
 		if _, ok := global.IsProto(h.(string), global.ProtoRPC); ok {
-			current.AddHandle("", nil)
+			current.AddHandle("", "", nil)
 			return current, nil
 		}
 	}
@@ -36,11 +36,11 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	}
 
 	//path 替换 获取handler的方法[Handle]前缀 @hj
-	hName:=""
+	hName := ""
 	for i := 0; i < typ.NumMethod(); i++ {
 		mName := typ.Method(i).Name
-		if strings.HasSuffix(mName, defHandler){
-			hName := mName[:len(mName)-len(defHandler)]
+		if strings.HasSuffix(mName, defHandler) {
+			hName = mName[:len(mName)-len(defHandler)]
 			break
 		}
 	}
@@ -69,16 +69,16 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		switch {
 		case strings.HasSuffix(mName, defHandling):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
-			current.AddHandling(endName,hName, nf)
+			current.AddHandling(endName, hName, nf)
 		case strings.HasSuffix(mName, defHandler):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandler)])
-			current.AddHandle(endName,hName, nf)
+			current.AddHandle(endName, hName, nf)
 		case strings.HasSuffix(mName, defHandled):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandled)])
-			current.AddHandled(endName,hName, nf)
+			current.AddHandled(endName, hName, nf)
 		case strings.HasSuffix(mName, defFallback):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defFallback)])
-			current.AddFallback(endName,hName, nf)
+			current.AddFallback(endName, hName, nf)
 		}
 	}
 	if len(current.Services) == 0 {
