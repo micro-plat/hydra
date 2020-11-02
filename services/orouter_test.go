@@ -158,7 +158,6 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 		for _, v1 := range routers {
 			for _, v2 := range a.Routers {
 				if v1.Service == v2.Service {
-					fmt.Println(v2.Service)
 					assert.Equal(t, v1.Path, v2.Path, tt.name)
 					assert.Equal(t, v1.Action, v2.Action, tt.name+"1")
 					assert.Equal(t, v1.Encoding, v2.Encoding, tt.name)

@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
@@ -69,20 +70,20 @@ func Test_body_GetBodyMap(t *testing.T) {
 		wantErr  bool
 	}{
 		{name: "读取正确xml格式数据", ctx: &mocks.TestContxt{
-			Body:            `<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`,
-			HttpContentType: context.XMLF,
+			Body:       `<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`,
+			HttpHeader: http.Header{"Content-Type": []string{context.XMLF}},
 		}, encoding: []string{"gbk"}, want: map[string]interface{}{"key1": "1&$", "key2": "value2"}},
 		{name: "读取正确json格式数据", ctx: &mocks.TestContxt{
-			Body:            `{"key1":"value1","key2":"value2"}`,
-			HttpContentType: context.JSONF,
+			Body:       `{"key1":"value1","key2":"value2"}`,
+			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
 		}, want: map[string]interface{}{"key1": "value1", "key2": "value2"}},
 		{name: "读取正确yaml格式数据", ctx: &mocks.TestContxt{
 			Body:            `key1: value1`,
-			HttpContentType: context.YAMLF,
+			HttpHeader:      http.Header{"Content-Type": []string{context.YAMLF}},
 		}, want: map[string]interface{}{"key1": "value1"}},
 		{name: "读取错误的不匹配的格式数据", ctx: &mocks.TestContxt{
 			Body:            `{"key1:"value1"}`,
-			HttpContentType: context.JSONF,
+			HttpHeader:      http.Header{"Content-Type": []string{context.JSONF}},
 		}, wantErr: true},
 	}
 

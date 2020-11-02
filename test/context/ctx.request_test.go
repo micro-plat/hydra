@@ -1,6 +1,7 @@
 package context
 
 import (
+	"net/http"
 	"net/url"
 	"reflect"
 	"testing"
@@ -22,7 +23,7 @@ func Test_request_Bind(t *testing.T) {
 		r := ctx.NewRequest(&mocks.TestContxt{
 			Form: url.Values{"__body_": []string{`9`}},
 		}, serverConf, conf.NewMeta())
-		if err := r.Bind(out); (err != nil) != false {
+		if err := r.Bind(out); (err != nil) != true {
 			t.Errorf("request.Bind() error = %v, wantErr %v", err, false)
 		}
 		if !reflect.DeepEqual(out, 1) {
@@ -94,10 +95,14 @@ func Test_request_Check(t *testing.T) {
 		wantErr    bool
 		wantErrStr string
 	}{
-		{name: "验证非空数据判断", ctx: &mocks.TestContxt{Body: `{"key1":"value1","key2":"value2"}`, HttpContentType: context.JSONF},
-			args: []string{"key1", "key2"}, wantErr: false},
-		{name: "验证空数据判断", ctx: &mocks.TestContxt{Body: `{"key1":"","key2":"value2"}`, HttpContentType: context.JSONF},
-			args: []string{"key1", "key2"}, wantErrStr: "输入参数:key1值不能为空", wantErr: true},
+		{name: "验证非空数据判断", ctx: &mocks.TestContxt{
+			Body:       `{"key1":"value1","key2":"value2"}`,
+			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
+		}, args: []string{"key1", "key2"}, wantErr: false},
+		{name: "验证空数据判断", ctx: &mocks.TestContxt{
+			Body:       `{"key1":"","key2":"value2"}`,
+			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
+		}, args: []string{"key1", "key2"}, wantErrStr: "输入参数:key1值不能为空", wantErr: true},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
@@ -120,9 +125,9 @@ func Test_request_GetKeys(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 
 	r := ctx.NewRequest(&mocks.TestContxt{
-		Form:            url.Values{"key3": []string{}},
-		Body:            `{"key1":"value1","key2":"value2"}`,
-		HttpContentType: context.JSONF,
+		Form:       url.Values{"key3": []string{}},
+		Body:       `{"key1":"value1","key2":"value2"}`,
+		HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
 	}, serverConf, conf.NewMeta())
 
 	//获取所有key
@@ -137,9 +142,9 @@ func Test_request_GetMap(t *testing.T) {
 	serverConf := confObj.GetAPIConf() //获取配置
 
 	r := ctx.NewRequest(&mocks.TestContxt{
-		Form:            url.Values{"key3": []string{"value3"}},
-		Body:            `{"key1":"value1","key2":"value2"}`,
-		HttpContentType: context.JSONF,
+		Form:       url.Values{"key3": []string{"value3"}},
+		Body:       `{"key1":"value1","key2":"value2"}`,
+		HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
 	}, serverConf, conf.NewMeta())
 
 	//获取所有key
@@ -170,9 +175,9 @@ func Test_request_Get(t *testing.T) {
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
 	r := ctx.NewRequest(&mocks.TestContxt{
-		Body:            `{"key1":"value1"}`,
-		Form:            url.Values{"key2": []string{"%20+value2"}},
-		HttpContentType: context.JSONF,
+		Body:       `{"key1":"value1"}`,
+		Form:       url.Values{"key2": []string{"%20+value2"}},
+		HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
 	}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {
