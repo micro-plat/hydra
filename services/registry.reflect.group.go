@@ -33,37 +33,37 @@ func newUnitGroup(path string) *UnitGroup {
 }
 
 //AddHandling 添加预处理函数
-func (g *UnitGroup) AddHandling(name, hName string, h context.IHandler) {
+func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 	if name == "" {
 		g.Handling = h
 		return
 	}
 	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
-	g.storeService(name, hName, h, handling)
+	g.storeService(name, h, handling)
 }
 
 //AddHandled 添加后处理函数
-func (g *UnitGroup) AddHandled(name, hName string, h context.IHandler) {
+func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 	if name == "" {
 		g.Handled = h
 		return
 	}
-	g.storeService(name, hName, h, handled)
+	g.storeService(name, h, handled)
 }
 
 //AddHandle 添加处理函数
-func (g *UnitGroup) AddHandle(name, hName string, h context.IHandler) {
-	g.storeService(name, hName, h, handle)
+func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
+	g.storeService(name, h, handle)
 }
 
 //AddFallback 添加降级函数
-func (g *UnitGroup) AddFallback(name, hName string, h context.IHandler) {
-	g.storeService(name, hName, h, fallback)
+func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
+	g.storeService(name, h, fallback)
 }
 
-func (g *UnitGroup) storeService(name, hName string, handler context.IHandler, htype handlerType) {
+func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
 	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
-	path, service, actions := g.getPaths(g.Path, name, hName)
+	path, service, actions := g.getPaths(g.Path, name)
 	unit, ok := g.Services[service]
 	if !ok {
 		unit = &Unit{Group: g, Path: path, Service: service}
@@ -84,18 +84,9 @@ func (g *UnitGroup) storeService(name, hName string, handler context.IHandler, h
 	}
 }
 
-func (g *UnitGroup) getPaths(path, name, hName string) (rpath string, service string, action []string) {
-
-	//@todo path 路径里面对最后一个*进行处理
-	if hName != "" {
-		lastIndex := strings.LastIndex(path, "*")
-		if lastIndex > -1 {
-			path = path[:lastIndex-1] + hName + path[lastIndex+1:]
-		}
-	}
+func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
 
 	//作为func注册的服务，只支持GET，POST
-	
 	if name == "" {
 		return path, path, []string{}
 	}
@@ -105,6 +96,13 @@ func (g *UnitGroup) getPaths(path, name, hName string) (rpath string, service st
 		if strings.EqualFold(m, name) {
 			return path, registry.Join(path, "$"+name), []string{m}
 		}
+	}
+
+	//@fix 路径里面对最后一个*进行替换 @hj
+	lastIndex := strings.LastIndex(path, "*")
+	if lastIndex > -1 {
+		path = path[:lastIndex] + name + path[lastIndex+1:]
+		return path, path, router.DefMethods
 	}
 
 	//非RESTful
