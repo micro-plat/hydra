@@ -16,9 +16,11 @@ func TestUnitGroup_getPaths(t *testing.T) {
 		wantService string
 		wantAction  []string
 	}{
-		{name: "name为空", path: "path", mName: "", wantRpath: "path", wantService: "path", wantAction: []string{}},
+		{name: "name为空,handleName为空", path: "path", mName: "", wantRpath: "path", wantService: "path", wantAction: []string{}},
 		{name: "name为支持的http请求类型", path: "path", mName: "GET", wantRpath: "path", wantService: "/path/$GET", wantAction: []string{"GET"}},
-		{name: "name为不支持的http请求类型", path: "path", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
+		{name: "name为支持的http请求类型", path: "path", mName: "GET", wantRpath: "path", wantService: "/path/$GET", wantAction: []string{"GET"}},
+		{name: "name为不支持的http请求类型,且HandleName为空", path: "path", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
+		{name: "name为不支持的http请求类型,且HandleName不为空", path: "*/**path/*/*", mName: "FILE", wantRpath: "*/**path/*/FILE", wantService: "*/**path/*/FILE", wantAction: []string{"GET", "POST"}},
 	}
 	g := &UnitGroup{}
 	for _, tt := range tests {

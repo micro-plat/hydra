@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -36,9 +37,15 @@ func Test_reflectHandle(t *testing.T) {
 			wantServicePath:   []string{"path", "path", "/path/order"},
 			wantServiceAction: [][]string{[]string{"GET"}, []string{"POST"}, []string{"GET", "POST"}},
 		},
+		{name: "handler为引用类型,且需要对注册服务进行替换", path: "/path/*/request", h: &testHandler5{},
+			wantService:       []string{"/path/order/request", "/path/*/request/$post"},
+			wantServicePath:   []string{"/path/order/request", "/path/*/request"},
+			wantServiceAction: [][]string{[]string{"GET", "POST"}, []string{"POST"}},
+		},
 	}
 	for _, tt := range tests {
 		gotG, err := reflectHandle(tt.path, tt.h)
+		fmt.Println(gotG)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			continue
@@ -56,6 +63,7 @@ func Test_reflectHandle(t *testing.T) {
 		}
 		for k, v := range tt.wantService {
 			u, ok := gotG.Services[v]
+			fmt.Println(tt.name, ok)
 			assert.Equal(t, true, ok, tt.name)
 			assert.Equal(t, v, u.Service, tt.name)
 			assert.Equal(t, tt.wantServicePath[k], u.Path, tt.name)

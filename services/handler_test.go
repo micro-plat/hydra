@@ -107,3 +107,15 @@ func (t *testHandler4) Handle(context.IContext) interface{} {
 func (t *testHandler4) Close() error {
 	return fmt.Errorf("error")
 }
+
+type testHandler5 struct{}
+
+func (t *testHandler5) PostHandle(context.IContext) interface{} {
+	return nil
+}
+func (t *testHandler5) OrderHandling(context.IContext) interface{} {
+	return nil
+}
+func (t *testHandler5) OrderHandle(context.IContext) interface{} {
+	return nil
+}
