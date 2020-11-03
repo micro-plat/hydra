@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/security/md5"
@@ -12,15 +12,15 @@ import (
 
 //TMainConf 服务器主配置
 type TMainConf struct {
-	rootConf    *RawConf
+	rootConf    *conf.RawConf
 	rootVersion int32
-	subConfs    map[string]RawConf
-	IPub
+	subConfs    map[string]conf.RawConf
+	conf.IPub
 }
 
 func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
 	raw, _ := json.Marshal(data)
-	nRawConf := RawConf{
+	nRawConf := conf.RawConf{
 		data:      data,
 		version:   rootVersion,
 		raw:       raw,
@@ -29,14 +29,14 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
 
 	data["subc"] = "123456"
 	raw1, _ := json.Marshal(data)
-	subRawConf := RawConf{
+	subRawConf := conf.RawConf{
 		data:      data,
 		version:   rootVersion,
 		raw:       raw1,
 		signature: md5.EncryptBytes(raw1),
 	}
 
-	subm := map[string]RawConf{
+	subm := map[string]conf.RawConf{
 		"keysub": subRawConf,
 	}
 	return &TMainConf{rootConf: &nRawConf, rootVersion: rootVersion, subConfs: subm}
@@ -44,11 +44,11 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
 
 func NewTMainConf1(rootVersion int32, keySub map[string]string) app.IAPPConf {
 
-	subConf := map[string]RawConf{}
+	subConf := map[string]conf.RawConf{}
 	for k, v := range keySub {
 		data := map[string]interface{}{"value": v}
 		raw1, _ := json.Marshal(data)
-		subConf[k] = RawConf{
+		subConf[k] = conf.RawConf{
 			data:      data,
 			version:   rootVersion,
 			raw:       raw1,
@@ -80,7 +80,7 @@ func (c *TMainConf) GetVersion() int32 {
 }
 
 //GetRootConf 获取当前主配置
-func (c *TMainConf) GetRootConf() *RawConf {
+func (c *TMainConf) GetRootConf() *conf.RawConf {
 	return c.rootConf
 }
 
@@ -91,7 +91,7 @@ func (c *TMainConf) GetMainObject(v interface{}) (int32, error) {
 }
 
 //GetSubConf 指定子配置
-func (c *TMainConf) GetSubConf(name string) (*RawConf, error) {
+func (c *TMainConf) GetSubConf(name string) (*conf.RawConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
@@ -99,7 +99,7 @@ func (c *TMainConf) GetSubConf(name string) (*RawConf, error) {
 }
 
 //GetCluster 获取集群信息
-func (c *TMainConf) GetCluster(clustName ...string) (ICluster, error) {
+func (c *TMainConf) GetCluster(clustName ...string) (conf.ICluster, error) {
 	return nil, nil
 }
 
@@ -123,7 +123,7 @@ func (c *TMainConf) Has(names ...string) bool {
 }
 
 //Iter 迭代所有配置
-func (c *TMainConf) Iter(f func(path string, conf *RawConf) bool) {
+func (c *TMainConf) Iter(f func(path string, conf *conf.RawConf) bool) {
 }
 
 //Close 关闭清理资源

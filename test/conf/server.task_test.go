@@ -147,8 +147,9 @@ func TestTasksGetConf(t *testing.T) {
 	test1 := test{name: "task节点不存在", cnf: conf.GetCronConf().GetServerConf(), want: &task.Tasks{Tasks: []*task.Task{}}, wantErr: false}
 	queueObj, err := task.GetConf(test1.cnf)
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name)
-	assert.Equal(t, test1.want, queueObj, test1.name)
-
+	if err == nil {
+		assert.Equal(t, len(test1.want.Tasks), len(queueObj.Tasks), test1.name)
+	}
 	confB = conf.CRON(cron.WithTrace())
 	confB.Task(task.NewTask("中文错误", "s2"))
 	test2 := test{name: "task节点存在,数据错误", cnf: conf.GetCronConf().GetServerConf(), want: nil, wantErr: true}

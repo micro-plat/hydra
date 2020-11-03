@@ -103,7 +103,8 @@ func TestAuthRASGetConf(t *testing.T) {
 		gotAuths, err = ras.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.Equal(t, (err != nil), tt.wantErr, tt.name+",err")
 		if err == nil {
-			assert.Equal(t, gotAuths, tt.wantAuths, tt.name)
+			assert.Equal(t, gotAuths.Disable, tt.wantAuths.Disable, tt.name)
+			assert.Equal(t, len(gotAuths.Auth), len(tt.wantAuths.Auth), tt.name)
 		}
 	}
 }

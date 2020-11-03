@@ -69,7 +69,7 @@ func TestNewVarConf(t *testing.T) {
 	platName = "hydra2"
 	clusterName = "cluter2"
 	confN := mocks.NewConfBy(platName, clusterName)
-	confN.Vars().DB("newdb", oracle.NewBy("taosy", "123456", "tnsName"))
+	confN.Vars().DB().Custom("newdb", oracle.NewBy("taosy", "123456", "tnsName"))
 	confN.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 	varConfPath = vars.NewVarPub(platName).GetVarPath()
 	varConf, err = vars.NewVarConf(varConfPath, confN.Registry)
@@ -157,7 +157,7 @@ func TestVarConf_GetConf(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confN := confM.Vars()
 		if tt.isSet {
-			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
@@ -204,7 +204,7 @@ func TestVarConf_GetConfVersion(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confN := confM.Vars()
 		if tt.isSet {
-			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
@@ -246,7 +246,7 @@ func TestVarConf_GetObject(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confN := confM.Vars()
 		if tt.isSet {
-			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
@@ -298,7 +298,7 @@ func TestVarConf_Has(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confN := confM.Vars()
 		if tt.isSet {
-			confN.DB(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
+			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)

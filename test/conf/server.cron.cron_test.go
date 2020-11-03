@@ -19,11 +19,11 @@ func TestCronNew(t *testing.T) {
 		args []cron.Option
 		want *cron.Server
 	}{
-		{name: "默认初始化", args: []cron.Option{}, want: &cron.Server{}},
-		{name: "初始化MasterSlave对象", args: []cron.Option{cron.WithMasterSlave()}, want: &cron.Server{Sharding: 1}},
-		{name: "初始化P2P对等模式对象", args: []cron.Option{cron.WithP2P()}, want: &cron.Server{Sharding: 0}},
-		{name: "初始化分片模式对等模式对象", args: []cron.Option{cron.WithSharding(10)}, want: &cron.Server{Sharding: 10}},
-		{name: "初始化剩余参数对象", args: []cron.Option{cron.WithTrace(), cron.WithTimeout(11)}, want: &cron.Server{Trace: true, Timeout: 11}},
+		{name: "默认初始化", args: []cron.Option{}, want: &cron.Server{Status: "start"}},
+		{name: "初始化MasterSlave对象", args: []cron.Option{cron.WithMasterSlave()}, want: &cron.Server{Sharding: 1, Status: "start"}},
+		{name: "初始化P2P对等模式对象", args: []cron.Option{cron.WithP2P()}, want: &cron.Server{Sharding: 0, Status: "start"}},
+		{name: "初始化分片模式对等模式对象", args: []cron.Option{cron.WithSharding(10)}, want: &cron.Server{Sharding: 10, Status: "start"}},
+		{name: "初始化剩余参数对象", args: []cron.Option{cron.WithTrace(), cron.WithTimeout(11)}, want: &cron.Server{Trace: true, Timeout: 11, Status: "start"}},
 		{name: "初始化Disable参数对象", args: []cron.Option{cron.WithDisable()}, want: &cron.Server{Status: "stop"}},
 		{name: "初始化Enable参数对象", args: []cron.Option{cron.WithEnable()}, want: &cron.Server{Status: "start"}},
 	}

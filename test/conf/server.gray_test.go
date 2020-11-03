@@ -109,28 +109,28 @@ func TestGray_Allow(t *testing.T) {
 	got := test1.fields.Allow()
 	assert.Equal(t, test1.want, got, test1.name)
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("test", "gray1")
 	conf.API(":8090")
 	grayObj, _ := gray.GetConf(conf.GetAPIConf().GetServerConf())
-	test2 := test{name: "api服务集群获取", fields: grayObj, want: true}
+	test2 := test{name: "api服务集群获取", fields: grayObj, want: false}
 	got = test2.fields.Allow()
 	assert.Equal(t, test2.want, got, test2.name)
 
-	conf = mocks.NewConf()
+	conf = mocks.NewConfBy("test", "gray2")
 	conf.RPC(":8090")
 	grayObj, _ = gray.GetConf(conf.GetRPCConf().GetServerConf())
-	test3 := test{name: "rpc服务集群获取", fields: grayObj, want: true}
+	test3 := test{name: "rpc服务集群获取", fields: grayObj, want: false}
 	got = test3.fields.Allow()
 	assert.Equal(t, test3.want, got, test3.name)
 
-	conf = mocks.NewConf()
+	conf = mocks.NewConfBy("test", "gray3")
 	conf.MQC("redis://192.168.0.1")
 	grayObj, _ = gray.GetConf(conf.GetMQCConf().GetServerConf())
 	test4 := test{name: "mqc服务集群获取", fields: grayObj, want: false}
 	got = test4.fields.Allow()
 	assert.Equal(t, test4.want, got, test4.name)
 
-	conf = mocks.NewConf()
+	conf = mocks.NewConfBy("test", "gray4")
 	conf.CRON(cron.WithTrace())
 	grayObj, _ = gray.GetConf(conf.GetCronConf().GetServerConf())
 	test5 := test{name: "cron服务集群获取", fields: grayObj, want: false}

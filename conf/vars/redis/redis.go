@@ -26,7 +26,7 @@ type Redis struct {
 func New(addrs []string, opts ...Option) *Redis {
 	r := &Redis{
 		Addrs:        addrs,
-		DbIndex:      1,
+		DbIndex:      0,
 		DialTimeout:  10,
 		ReadTimeout:  10,
 		WriteTimeout: 10,

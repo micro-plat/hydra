@@ -84,14 +84,14 @@ func TestApikeyGetConf(t *testing.T) {
 	confB := apiConf.API(":8081")
 	test1 := test{name: "未设置apikey节点", want: &apikey.APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}}
 	got, err := apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	assert.NotEqual(t, nil, err, test1.name+",err")
+	assert.Equal(t, nil, err, test1.name+",err")
 	assert.Equal(t, got, test1.want, test1.name)
 
 	test2 := test{name: "配置参数正确", opts: []apikey.Option{apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"), apikey.WithSecret("123456")},
 		want: apikey.New("123456", apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"))}
 	confB.APIKEY("", test2.opts...)
 	got, err = apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	assert.NotEqual(t, nil, err, test2.name+",err")
+	assert.Equal(t, nil, err, test2.name+",err")
 	assert.Equal(t, got, test2.want, test2.name)
 }
 

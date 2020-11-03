@@ -15,7 +15,7 @@ func (l *localMemory) GetValue(path string) (data []byte, version int32, err err
 		return []byte(v.data), v.version, nil
 	}
 
-	return nil, 0, fmt.Errorf("节点[%w]不存在", npath)
+	return nil, 0, fmt.Errorf("节点[%s]不存在", npath)
 
 }
 func (l *localMemory) GetChildren(path string) (paths []string, version int32, err error) {

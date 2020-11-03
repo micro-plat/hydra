@@ -28,7 +28,8 @@ func TestNewRender(t *testing.T) {
 	}
 	for _, tt := range tests {
 		got := render.NewRender(tt.opts...)
-		assert.Equal(t, tt.want, got, tt.name)
+		assert.Equal(t, tt.want.Disable, got.Disable, tt.name)
+		assert.Equal(t, tt.want.Tmplts, got.Tmplts, tt.name)
 	}
 }
 

@@ -28,9 +28,11 @@ func NewRender(opts ...Option) *Render {
 	for _, opt := range opts {
 		opt(r)
 	}
-	paths := make([]string, 0, len(r.Tmplts)+1)
+	paths := make([]string, len(r.Tmplts))
+	idx := 0
 	for k := range r.Tmplts {
-		paths = append(paths, k)
+		paths[idx] = k
+		idx++
 	}
 	r.PathMatch = conf.NewPathMatch(paths...)
 	return r

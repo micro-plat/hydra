@@ -15,7 +15,7 @@ func Test_cache_GetServerConf(t *testing.T) {
 	cacheobj := *app.Cache
 	cacheobjPrt := &cacheobj
 	//在空的缓存对象获取配置
-	obj, err := cacheobjPrt.GetServerConf("api")
+	obj, err := cacheobjPrt.GetAPPConf("api")
 	assert.Equal(t, true, (err != nil), "获取不存在的配置对象，err")
 	assert.Equal(t, nil, obj, "获取不存在的配置对象，res")
 
@@ -23,18 +23,18 @@ func Test_cache_GetServerConf(t *testing.T) {
 	conf.API(":8080")
 	serveC := conf.GetAPIConf()
 	cacheobjPrt.Save(serveC)
-	obj, err = cacheobjPrt.GetServerConf("api")
+	obj, err = cacheobjPrt.GetAPPConf("api")
 	assert.Equal(t, false, (err != nil), "获取api配置对象，err")
 	assert.Equal(t, serveC, obj, "获取api的配置对象，res")
 
-	obj, err = cacheobjPrt.GetServerConf("rpc")
+	obj, err = cacheobjPrt.GetAPPConf("rpc")
 	assert.Equal(t, true, (err != nil), "获取rpc的配置对象，err")
 	assert.Equal(t, nil, obj, "获取rpc的配置对象，res")
 
 	serverMap := cacheobjPrt.GetServerMaps()
 	key := fmt.Sprintf("%s-%v", "api", serveC.GetServerConf().GetVersion())
 	serverMap.Remove(key)
-	obj, err = cacheobjPrt.GetServerConf("api")
+	obj, err = cacheobjPrt.GetAPPConf("api")
 	assert.Equal(t, true, (err != nil), "获取cuur存在的配置不存在，err")
 	assert.Equal(t, nil, obj, "获取cuur存在的配置不存在，res")
 }
@@ -43,6 +43,7 @@ func Test_cache_GetVarConf(t *testing.T) {
 	//复制一个空的chache对象
 	cacheobj := *app.Cache
 	cacheobjPrt := &cacheobj
+	app.Cache.GetVarMaps().Clear()
 	//在空的缓存对象获取配置
 	obj, err := cacheobjPrt.GetVarConf()
 	assert.Equal(t, true, (err != nil), "获取不存在的配置对象，err")

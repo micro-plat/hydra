@@ -64,7 +64,7 @@ func TestJWTGetConf(t *testing.T) {
 			confB.Jwt(tt.opts...)
 		}
 		got, err := jwt.GetConf(conf.GetAPIConf().GetServerConf())
-		assert.NotEqual(t, nil, err, tt.name+",err")
+		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, got, tt.want, tt.name)
 	}
 }

@@ -53,10 +53,6 @@ func TestBlackList_IsDeny(t *testing.T) {
 		ips  []string
 		want bool
 	}{
-		{name: "空对象路径匹配", ip: "/t1/tt", ips: []string{}, want: false},
-		{name: "全路径精确匹配", ip: "/t1/t2/tt", ips: []string{"/t1/t2/tt"}, want: true},
-		{name: "单级模糊路径匹配", ip: "/t1/t2", ips: []string{"/t1/*"}, want: true},
-		{name: "多级模糊路径匹配", ip: "/t1/t2/tt", ips: []string{"/t1/**"}, want: true},
 		{name: "空对象ip匹配", ip: "192.168.5.101", ips: []string{}, want: false},
 		{name: "全ip精确匹配", ip: "127.0.0.1", ips: []string{"127.0.0.1"}, want: true},
 		{name: "单级模糊ip匹配", ip: "192.168.0.1", ips: []string{"192.168.0.*"}, want: true},
@@ -88,8 +84,10 @@ func TestBlackListGetConf(t *testing.T) {
 			confB.BlackList(tt.opts...)
 		}
 		obj, err := blacklist.GetConf(conf.GetAPIConf().GetServerConf())
-		assert.NotEqual(t, nil, err, tt.name+",err")
-		assert.Equal(t, tt.want, obj, tt.name)
+		assert.Equal(t, nil, err, tt.name+",err")
+		//fmt.Println(tt.name, obj, tt.want)
+		assert.Equal(t, tt.want.Disable, obj.Disable, tt.name)
+		assert.Equal(t, len(tt.want.IPS), len(obj.IPS), tt.name)
 	}
 
 	// json数据不合法,现在还不能测试   需要等待注册中心监听完善后测试

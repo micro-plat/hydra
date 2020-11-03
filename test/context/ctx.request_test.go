@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
+	"sort"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -132,7 +133,8 @@ func Test_request_GetKeys(t *testing.T) {
 
 	//获取所有key
 	got := r.GetKeys()
-	assert.Equal(t, []string{"key3", "key1", "key2"}, got, "获取所有key")
+	sort.Strings(got)
+	assert.Equal(t, []string{"key1", "key2", "key3"}, got, "获取所有key")
 
 }
 
