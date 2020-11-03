@@ -14,11 +14,11 @@ type rpcBuilder struct {
 func newRPC(address string, fnGetRouter func(string) *services.ORouter, opts ...rpc.Option) *rpcBuilder {
 	b := &rpcBuilder{
 		httpBuilder: &httpBuilder{
-			customerBuilder: make(map[string]interface{}),
+			CustomerBuilder: make(map[string]interface{}),
 			fnGetRouter:     fnGetRouter,
 		},
 	}
-	b.customerBuilder["main"] = rpc.New(address, opts...)
+	b.CustomerBuilder["main"] = rpc.New(address, opts...)
 	return b
 }
 
@@ -28,6 +28,6 @@ func (b *rpcBuilder) Load() {
 	if err != nil {
 		panic(err)
 	}
-	b.customerBuilder["router"] = routers
+	b.CustomerBuilder["router"] = routers
 	return
 }

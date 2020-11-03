@@ -42,13 +42,14 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
 	_, err = cnf.GetSubObject("metric", &metric)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, err
-	}
 	if err == conf.ErrNoSetting {
 		metric.Disable = true
 		return metric, nil
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	if b, err := govalidator.ValidateStruct(metric); !b {
 		return nil, fmt.Errorf("metric配置数据有误:%v", err)
 	}

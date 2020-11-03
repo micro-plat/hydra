@@ -131,7 +131,7 @@ func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		return NewRouters(), nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetServerPath(), err)
 	}
 	if b, err := govalidator.ValidateStruct(router); !b {

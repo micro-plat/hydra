@@ -46,7 +46,7 @@ func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 	if err == conf.ErrNoSetting {
 		return &JWTAuth{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("jwt配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&jwt); !b {

@@ -83,7 +83,7 @@ func GetConf(cnf conf.IServerConf) (*Gray, error) {
 		return &Gray{Disable: true}, nil
 	}
 
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("acl.gray配置有误:%v", err)
 	}
 

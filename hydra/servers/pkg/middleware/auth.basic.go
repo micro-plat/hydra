@@ -33,7 +33,7 @@ func BasicAuthForRealm() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
-		if ok, _ := basic.Match(routerObj.Path, "/"); ok {
+		if ok, _ := basic.Match(routerObj.Path); ok {
 			ctx.Next()
 			return
 		}

@@ -64,7 +64,7 @@ func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	if err == conf.ErrNoSetting {
 		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("apikey配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&fsa); !b {

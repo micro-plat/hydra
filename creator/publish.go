@@ -3,7 +3,6 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -11,24 +10,37 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
-//Pub 将配置发布到配置中心
-func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
-	if err := c.Load(); err != nil {
-		return err
-	}
+// func (c *conf) PubByData(platName, systemName, clusterName, registryAddr string, cover bool) error {
+// 	if err := c.Load(); err != nil {
+// 		return err
+// 	}
 
-	//本地文件系统则直接使用toml序列化方式进行发布
-	proto := registry.GetProto(registryAddr)
-	if proto == registry.FileSystem {
-		return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], global.Def.LocalConfName), cover)
-	}
+// 	//本地文件系统则直接使用toml序列化方式进行发布
+// 	proto := registry.GetProto(registryAddr)
+// 	if proto == registry.FileSystem {
+// 		return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], global.Def.LocalConfName), cover)
+// 	}
+
+// 	return
+// }
+
+// func (c *conf) PubByFile(fliePath, platName, systemName, clusterName, registryAddr string, cover bool) error {
+// 	//读取文件中的配置信息
+
+// 	//反序列化到data和var中
+
+// 	return
+// }
+
+//Pub 将配置发布到配置中心
+func (c *conf) Pub(data map[string]iCustomerBuilder, platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
 
 	//创建注册中心，根据注册中心提供的接口进行配置发布
 	r, err := registry.NewRegistry(registryAddr, global.Def.Log())
 	if err != nil {
 		return err
 	}
-	for tp, subs := range c.data {
+	for tp, subs := range data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
 		if err := publish(r, pub.GetServerPath(), subs.Map()["main"], cover); err != nil {
 			return err

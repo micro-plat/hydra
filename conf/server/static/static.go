@@ -58,12 +58,12 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		FileMap: map[string]FileInfo{},
 	}
 	_, err := cnf.GetSubObject("static", &static)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("static配置格式有误:%v", err)
-	}
 	if err == conf.ErrNoSetting {
 		static.Disable = true
 		return &static, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 
 	if static.Exts == nil {

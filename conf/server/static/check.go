@@ -15,10 +15,6 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 		return b, filepath.Join(s.Dir, rPath)
 	}
 
-	if s.Disable {
-		return false, ""
-	}
-
 	if !s.AllowRequest(method) {
 		return false, ""
 	}

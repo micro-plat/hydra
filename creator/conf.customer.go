@@ -16,12 +16,12 @@ type iCustomerBuilder interface {
 	Map() map[string]interface{}
 }
 
-var _ iCustomerBuilder = customerBuilder{}
+var _ iCustomerBuilder = CustomerBuilder{}
 
-type customerBuilder map[string]interface{}
+type CustomerBuilder map[string]interface{}
 
 //newHTTP 构建http生成器
-func newCustomerBuilder(s ...interface{}) customerBuilder {
+func newCustomerBuilder(s ...interface{}) CustomerBuilder {
 	b := make(map[string]interface{})
 	if len(s) == 0 {
 		b["main"] = make(map[string]interface{})
@@ -31,7 +31,7 @@ func newCustomerBuilder(s ...interface{}) customerBuilder {
 	return b
 }
 
-func (b customerBuilder) Sub(name string, s ...interface{}) ISUB {
+func (b CustomerBuilder) Sub(name string, s ...interface{}) ISUB {
 	if len(s) == 0 {
 		panic(fmt.Sprintf("配置：%s值不能为空", name))
 	}
@@ -50,8 +50,8 @@ func (b customerBuilder) Sub(name string, s ...interface{}) ISUB {
 	}
 	return b
 }
-func (b customerBuilder) Map() map[string]interface{} {
+func (b CustomerBuilder) Map() map[string]interface{} {
 	return b
 }
-func (b customerBuilder) Load() {
+func (b CustomerBuilder) Load() {
 }

@@ -14,7 +14,10 @@ func Static() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
-
+		if static.Disable {
+			ctx.Next()
+			return
+		}
 		//检查文件是否需要按静态文件处理
 		var rpath = ctx.Request().Path().GetRequestPath()
 		var method = ctx.Request().Path().GetMethod()
