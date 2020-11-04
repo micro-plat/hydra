@@ -43,7 +43,7 @@ type IService interface {
 	CRON(name string, h interface{}, crons ...string)
 
 	//custome 注册为自定义服务器的服务
-	Custome(tp string, name string, h interface{}, ext ...interface{})
+	Custom(tp string, name string, h interface{}, ext ...interface{})
 
 	//RegisterServer 注册新的服务器类型
 	RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error)
@@ -87,8 +87,8 @@ func (s *regist) Micro(name string, h interface{}, r ...router.Option) {
 
 //Flow 注册为流程服务，包括mqc,cron
 func (s *regist) Flow(name string, h interface{}) {
-	s.Custome(global.MQC, name, h)
-	s.Custome(global.CRON, name, h)
+	s.Custom(global.MQC, name, h)
+	s.Custom(global.CRON, name, h)
 }
 
 //API 注册为API服务
@@ -97,7 +97,7 @@ func (s *regist) API(name string, h interface{}, ext ...router.Option) {
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	s.Custome(global.API, name, h, v...)
+	s.Custom(global.API, name, h, v...)
 }
 
 //Web 注册为web服务
@@ -106,7 +106,7 @@ func (s *regist) Web(name string, h interface{}, ext ...router.Option) {
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	s.Custome(global.Web, name, h, v...)
+	s.Custom(global.Web, name, h, v...)
 }
 
 //RPC 注册为rpc服务
@@ -115,7 +115,7 @@ func (s *regist) RPC(name string, h interface{}, ext ...router.Option) {
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	s.Custome(global.RPC, name, h, v...)
+	s.Custom(global.RPC, name, h, v...)
 }
 
 //WS 注册为websocket服务
@@ -124,7 +124,7 @@ func (s *regist) WS(name string, h interface{}, ext ...router.Option) {
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	s.Custome(global.WS, name, h, v...)
+	s.Custom(global.WS, name, h, v...)
 }
 
 //MQC 注册为消息队列服务
@@ -133,7 +133,7 @@ func (s *regist) MQC(name string, h interface{}, queues ...string) {
 	for _, e := range queues {
 		v = append(v, e)
 	}
-	s.Custome(global.MQC, name, h, v...)
+	s.Custom(global.MQC, name, h, v...)
 }
 
 //CRON 注册为定时任务服务
@@ -142,11 +142,11 @@ func (s *regist) CRON(name string, h interface{}, crons ...string) {
 	for _, e := range crons {
 		v = append(v, e)
 	}
-	s.Custome(global.CRON, name, h, v...)
+	s.Custom(global.CRON, name, h, v...)
 }
 
-//Custome 自定义服务注册
-func (s *regist) Custome(tp string, name string, h interface{}, ext ...interface{}) {
+//Custom 自定义服务注册
+func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{}) {
 	s.get(tp).Register(name, h, ext...)
 }
 

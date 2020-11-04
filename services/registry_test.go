@@ -190,7 +190,7 @@ func Test_regist_Custome(t *testing.T) {
 	s := Def
 	global.MQConf.PlatNameAsPrefix(false)
 	for _, tt := range tests {
-		s.Custome(tt.tp, tt.path, tt.h, tt.ext...)
+		s.Custom(tt.tp, tt.path, tt.h, tt.ext...)
 		checkTestCustomeResult(t, s, tt.tp, tt.name, tt.ext...)
 	}
 }
@@ -272,7 +272,7 @@ func Test_regist_Close(t *testing.T) {
 	}
 	s := Def
 	for _, tt := range tests {
-		s.Custome(global.API, tt.path, tt.h)
+		s.Custom(global.API, tt.path, tt.h)
 		err := s.Close()
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
