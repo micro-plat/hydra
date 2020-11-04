@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/vars"
+	"github.com/micro-plat/hydra/conf/vars/cache/redis"
 	"github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/db/oracle"
 	"github.com/micro-plat/hydra/registry"
@@ -118,17 +119,20 @@ func TestVarConf_GetVersion(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "错误的var路径获取节点版本号", args: "errorPath", wantErr: true},
-		{name: "正确的var路径获取节点版本号", args: vars.NewVarPub(platName).GetVarPath(), wantErr: true},
+		{name: "正确的var路径获取节点版本号", args: vars.NewVarPub(platName).GetVarPath(), wantErr: false},
 	}
 
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
-		confM.Vars()
+		confM.Vars().Cache().Redis("redis", redis.New(redis.WithAddrs("192.168.0.1")))
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(platName, confM.Registry)
-		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
+		assert.Equal(t, nil, err, tt.name+",err")
 		_, vsion, err := confM.Registry.GetValue(tt.args)
-		assert.Equal(t, vsion, varConf.GetVersion(), tt.name+",vison")
+		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
+		if err == nil {
+			assert.Equal(t, vsion, varConf.GetVersion(), tt.name+",vison")
+		}
 	}
 }
 
