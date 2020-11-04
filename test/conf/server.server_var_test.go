@@ -74,10 +74,10 @@ func TestNewVarConf(t *testing.T) {
 	confN.Vars().DB().Custom("newdb", oracle.NewBy("taosy", "123456", "tnsName"))
 	confN.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 	varConfPath = vars.NewVarPub(platName).GetVarPath()
-	varConf, err = vars.NewVarConf(varConfPath, confN.Registry)
+	varConf, err = vars.NewVarConf(platName, confN.Registry)
 	assert.Equal(t, true, err == nil, "初始化varconf失败2")
 	dbConf, err = varConf.GetConf("db", "newdb")
-	assert.Equal(t, false, err == nil, "获取db节点配置异常2")
+	assert.Equal(t, true, err == nil, "获取db节点配置异常2")
 	assert.Equal(t, "oracle", dbConf.GetString("provider"), "获取db节点Provider配置数据不正确")
 	assert.Equal(t, "taosy/123456@tnsName", dbConf.GetString("connString"), "获取db节点connString配置数据不正确")
 	assert.Equal(t, 10, dbConf.GetInt("maxOpen"), "获取db节点maxOpen配置数据不正确")
@@ -125,7 +125,7 @@ func TestVarConf_GetVersion(t *testing.T) {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confM.Vars()
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
-		varConf, err := vars.NewVarConf(tt.args, confM.Registry)
+		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		_, vsion, err := confM.Registry.GetValue(tt.args)
 		assert.Equal(t, vsion, varConf.GetVersion(), tt.name+",vison")
@@ -162,7 +162,7 @@ func TestVarConf_GetConf(t *testing.T) {
 			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
-		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
+		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		dbConf, err := varConf.GetConf(tt.tp, tt.tpname)
 		if tt.isSet {
@@ -209,7 +209,7 @@ func TestVarConf_GetConfVersion(t *testing.T) {
 			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
-		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
+		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, true, err == nil, tt.name+",err")
 		vsion1 := int32(0)
 		if tt.isSet {
@@ -251,7 +251,7 @@ func TestVarConf_GetObject(t *testing.T) {
 			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
-		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
+		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, true, err == nil, tt.name+",err")
 
 		dbObj := db.DB{}
@@ -276,7 +276,6 @@ func TestVarConf_GetObject(t *testing.T) {
 
 func TestVarConf_Has(t *testing.T) {
 	platName, systemName, clusterName := "hydra6", "sys6", "cluter6"
-	varPath := vars.NewVarPub(platName).GetVarPath()
 	type args struct {
 		uName   string
 		pwd     string
@@ -284,16 +283,15 @@ func TestVarConf_Has(t *testing.T) {
 		opts    []db.Option
 	}
 	tests := []struct {
-		name    string
-		isSet   bool
-		tp      string
-		tpname  string
-		varPath string
-		args    args
-		want    bool
+		name   string
+		isSet  bool
+		tp     string
+		tpname string
+		args   args
+		want   bool
 	}{
-		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: false},
-		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+		{name: "没有设置节点", isSet: false, tp: "db", tpname: "db", want: false},
+		{name: "设置了db节点", isSet: true, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			want: true},
 	}
 	for _, tt := range tests {
@@ -303,7 +301,7 @@ func TestVarConf_Has(t *testing.T) {
 			confN.DB().Custom(tt.tpname, oracle.NewBy(tt.args.uName, tt.args.pwd, tt.args.tnsName, tt.args.opts...))
 		}
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
-		varConf, err := vars.NewVarConf(tt.varPath, confM.Registry)
+		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, true, err == nil, tt.name+",err")
 		assert.Equal(t, tt.want, varConf.Has(tt.tp, tt.tpname), tt.name+",has")
 	}
