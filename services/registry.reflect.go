@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+var suffixList = []string{defHandling, defHandler, defHandled, defFallback}
+
 func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	//检查参数
 	if path == "" || h == nil {
@@ -48,9 +50,15 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 			continue
 		}
 
+		hasSuffix := checkSuffix(mName)
+
 		//处理handling,handle,handled,fallback
 		nfx, ok := method.Interface().(func(context.IContext) interface{})
 		if !ok {
+			if hasSuffix {
+				err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}", mName, suffixList)
+				return
+			}
 			continue
 		}
 
@@ -81,4 +89,13 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	}
 	return current, nil
 
+}
+
+func checkSuffix(mName string) bool {
+	for i := range suffixList {
+		if strings.HasSuffix(mName, suffixList[i]) {
+			return true
+		}
+	}
+	return false
 }

@@ -24,6 +24,7 @@ func Test_reflectHandle(t *testing.T) {
 		{name: "handler为空", path: "path", wantErr: true},
 		{name: "handler非函数接收类型", path: "path", h: "xxxx", wantErr: true},
 		{name: "handler为引用类型,但没有可用于注册的处理函数", path: "path", h: &testHandler1{}, wantErr: true},
+		{name: "handler含有Suffix但签名不匹配", path: "path", h: &testHandlerSuffix{}, wantErr: true},
 		{name: "handler为func(context.IContext) interface{}", path: "path", h: func(context.IContext) interface{} { return nil },
 			wantService:       []string{"path"},
 			wantServicePath:   []string{"path"},
@@ -45,7 +46,6 @@ func Test_reflectHandle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		gotG, err := reflectHandle(tt.path, tt.h)
-		fmt.Println(gotG)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			continue
@@ -70,5 +70,26 @@ func Test_reflectHandle(t *testing.T) {
 			assert.Equal(t, tt.wantServiceAction[k], u.Actions, tt.name)
 			//assert.Equal(t, tt.wantServiceHandler, u.Handle, tt.name) 地址无法比较
 		}
+	}
+}
+
+func Test_checkSuffix(t *testing.T) {
+	type args struct {
+		mName string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{name: "不包含", args: args{mName: "xxx"}, want: false},
+		{name: "包含Handling", args: args{mName: "xxxHandling"}, want: true},
+		{name: "包含Handle", args: args{mName: "xxxHandle"}, want: true},
+		{name: "包含Handled", args: args{mName: "xxxHandled"}, want: true},
+		{name: "包含Fallback", args: args{mName: "xxxFallback"}, want: true},
+	}
+	for _, tt := range tests {
+		got := checkSuffix(tt.args.mName)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
