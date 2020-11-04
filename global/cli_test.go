@@ -12,8 +12,9 @@ import (
 func Test_newCli(t *testing.T) {
 	assert.Equal(t,
 		&ucli{
-			Name:  "cli_name",
-			flags: make([]cli.Flag, 0, 1),
+			Name:      "cli_name",
+			flags:     make([]cli.Flag, 0, 1),
+			flagNames: map[string]bool{},
 		},
 		newCli("cli_name"),
 		"创建cli对象",
