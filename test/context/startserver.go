@@ -5,36 +5,37 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
-var starting bool
+var oncelock sync.Once
 
 func startServer() {
-	if starting {
-		return
-	}
-	starting = true
-	app := hydra.NewApp(
-		hydra.WithPlatName("test"),
-		hydra.WithSystemName("test"),
-		hydra.WithServerTypes(http.API),
-		hydra.WithDebug(),
-		hydra.WithClusterName("t"),
-		hydra.WithRegistry("lm://."),
-	)
+	oncelock.Do(func() {
 
-	hydra.Conf.API(":9091")
-	app.API("/getbodymap", GetBodyMap)
-	app.API("/form", GetBodyMapFormData)
-	app.API("/upload", UploadFile)
-	app.API("/download", DownloadFile)
-	os.Args = []string{"startserver", "run"}
-	go app.Start()
-	time.Sleep(time.Second * 2)
+		app := hydra.NewApp(
+			hydra.WithPlatName("hydra_test"),
+			hydra.WithSystemName("test"),
+			hydra.WithServerTypes(http.API),
+			hydra.WithDebug(),
+			hydra.WithClusterName("t"),
+			hydra.WithRegistry("lm://."),
+		)
+
+		hydra.Conf.API(":9091")
+		app.API("/getbodymap", GetBodyMap)
+		app.API("/form", GetBodyMapFormData)
+		app.API("/upload", UploadFile)
+		app.API("/download", DownloadFile)
+		os.Args = []string{"startserver", "run"}
+		go app.Start()
+		time.Sleep(time.Second * 2)
+	})
+
 }
 
 func GetBodyMap(ctx hydra.IContext) interface{} {
