@@ -253,6 +253,49 @@ func TestWatchChildren(t *testing.T) {
 			name     string
 			path     string
 			children []string
+			values   []string
+		}{
+			{name: "一个", path: "/hydra1", values: []string{"1", "2"}, children: []string{"efg"}},
+			{name: "多个", path: "/hydra2", values: []string{"1", "3"}, children: []string{"abc", "efg", "efss", "12", "!@#"}},
+		}
+
+		for _, c := range cases {
+
+			for _, value := range c.values {
+
+				//监控父节点
+				notify, err := lm.WatchChildren(c.path)
+				assert.Equal(t, nil, err, c.name)
+
+				//创建节点
+				for _, ch := range c.children {
+					err := lm.CreateTempNode(registry.Join(c.path, ch), value)
+					assert.Equal(t, nil, err, c.name)
+				}
+
+				//应收到值变化通知
+				select {
+				case v := <-notify:
+					assert.Equal(t, v.GetPath(), c.path)
+				default:
+					t.Error("测试未通过")
+				}
+
+			}
+
+		}
+	}
+}
+func TestWatchChildrenForDelete(t *testing.T) {
+	//构建所有注册中心
+	rgs := createRegistry()
+
+	//按注册中心进行测试
+	for _, lm := range rgs {
+		cases := []struct {
+			name     string
+			path     string
+			children []string
 			value    string
 		}{
 			{name: "一个", path: "/hydra1", value: "1", children: []string{"efg"}},
@@ -261,13 +304,19 @@ func TestWatchChildren(t *testing.T) {
 
 		for _, c := range cases {
 
+			//创建节点
+			for _, ch := range c.children {
+				err := lm.CreateTempNode(registry.Join(c.path, ch), c.value)
+				assert.Equal(t, nil, err, c.name)
+			}
+
 			//监控父节点
 			notify, err := lm.WatchChildren(c.path)
 			assert.Equal(t, nil, err, c.name)
 
-			//创建节点
+			//删除
 			for _, ch := range c.children {
-				err := lm.CreateTempNode(registry.Join(c.path, ch), c.value)
+				err := lm.Delete(registry.Join(c.path, ch))
 				assert.Equal(t, nil, err, c.name)
 			}
 
