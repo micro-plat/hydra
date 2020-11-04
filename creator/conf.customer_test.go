@@ -1,27 +1,24 @@
 package creator
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func Test_newCustomerBuilder(t *testing.T) {
-	type args struct {
-		s []interface{}
-	}
 	tests := []struct {
 		name string
-		args args
+		args []interface{}
 		want CustomerBuilder
 	}{
-		// TODO: Add test cases.
+		{name: "参数为空", args: []interface{}{}, want: CustomerBuilder{"main": make(map[string]interface{})}},
+		{name: "单入参", args: []interface{}{"参数1"}, want: CustomerBuilder{"main": "参数1"}},
+		{name: "多入参", args: []interface{}{"参数1", "参数2"}, want: CustomerBuilder{"main": "参数1"}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := newCustomerBuilder(tt.args.s...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("newCustomerBuilder() = %v, want %v", got, tt.want)
-			}
-		})
+		got := newCustomerBuilder(tt.args...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
@@ -39,10 +36,7 @@ func TestCustomerBuilder_Sub(t *testing.T) {
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.b.Sub(tt.args.name, tt.args.s...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CustomerBuilder.Sub() = %v, want %v", got, tt.want)
-			}
-		})
+		got := tt.b.Sub(tt.args.name, tt.args.s...)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
