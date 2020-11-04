@@ -27,7 +27,7 @@ func TestQueueRedisNew(t *testing.T) {
 				Queue: &queue.Queue{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
-					DbIndex:      1,
+					DbIndex:      0,
 					DialTimeout:  10,
 					ReadTimeout:  10,
 					WriteTimeout: 10,

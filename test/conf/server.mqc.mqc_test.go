@@ -55,7 +55,7 @@ func TestMQCGetConf(t *testing.T) {
 	for _, tt := range tests {
 		conf.MQC("redis://192.196.0.1", tt.opts...)
 		obj, err := mqc.GetConf(conf.GetMQCConf().GetServerConf())
-		assert.NotEqual(t, nil, err, tt.name+",err")
+		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
 

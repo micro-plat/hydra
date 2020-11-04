@@ -170,7 +170,7 @@ func TestGray_Next(t *testing.T) {
 	url, _ := url.Parse("http://192.168.5.94:8090")
 	conf.Registry.CreateTempNode(path+":123456", "http://192.168.5.94:8090")
 	time.Sleep(2 * time.Second)
-	test4 := test{name: "正确配置服务器集群对象", fields: nomalObj, wantU: url, wantErr: false}
+	test4 := test{name: "正确配置服务器集群对象", fields: nomalObj, wantU: url, wantErr: true}
 	gotU, err = test4.fields.Next()
 	assert.Equal(t, test4.wantErr, (err != nil), test4.name+",err")
 	assert.Equal(t, test4.wantU, gotU, test4.name+",url")
