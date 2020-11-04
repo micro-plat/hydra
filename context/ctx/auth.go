@@ -30,34 +30,42 @@ func (c *Auth) Request(v ...interface{}) interface{} {
 }
 
 //Bind 绑定用户信息
-func (c *Auth) Bind(out interface{}) {
-	if c.request == nil || reflect.ValueOf(c.request).IsNil() {
-		panic(errs.NewError(401, "请求中未包含用户信息,用户未登录"))
+func (c *Auth) Bind(out interface{}) error {
+
+	val := reflect.ValueOf(out)
+	if val.Kind() != reflect.Ptr {
+		return fmt.Errorf("输入参数非指针 %v", val.Kind())
 	}
+
+	if c.request == nil {
+		return errs.NewError(401, "请求中未包含用户信息,用户未登录")
+	}
+
 	switch v := c.request.(type) {
 	case func() interface{}:
 		r := v()
 		if r == nil {
-			panic(errs.NewError(401, "请求中未包含用户信息,用户未登录"))
+			return errs.NewError(401, "请求中未包含用户信息,用户未登录")
 		}
 		buff, err := json.Marshal(r)
 		if err != nil {
-			panic(fmt.Errorf("将用户信息转换为json失败:%w", err))
+			return fmt.Errorf("将用户信息转换为json失败:%w", err)
 		}
 		if err := json.Unmarshal(buff, &out); err != nil {
-			panic(fmt.Errorf("将用户信息反序化为对象时失败:%w", err))
+			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	case string:
 		if err := json.Unmarshal([]byte(v), &out); err != nil {
-			panic(fmt.Errorf("将用户信息反序化为对象时失败:%w", err))
+			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	default:
 		buff, err := json.Marshal(v)
 		if err != nil {
-			panic(fmt.Errorf("将用户信息转换为json失败:%w", err))
+			return fmt.Errorf("将用户信息转换为json失败:%w", err)
 		}
 		if err := json.Unmarshal(buff, &out); err != nil {
-			panic(fmt.Errorf("将用户信息反序化为对象时失败:%w", err))
+			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	}
+	return nil
 }

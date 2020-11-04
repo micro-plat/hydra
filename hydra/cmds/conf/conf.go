@@ -1,6 +1,8 @@
 package conf
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
@@ -48,6 +50,7 @@ func showNow(c *cli.Context) (err error) {
 	}
 
 	//3. 显示配置
+	fmt.Println(global.Current())
 	return showConf(global.Current().GetRegistryAddr(),
 		global.Current().GetPlatName(),
 		global.Current().GetSysName(),

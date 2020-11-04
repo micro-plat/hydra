@@ -12,6 +12,13 @@ type MockVarConf struct {
 	ConfData map[string]map[string]*conf.RawConf
 }
 
+func (v *MockVarConf) GetVarPath(p ...string) string {
+	return ""
+}
+
+func (v *MockVarConf) GetRLogPath() string {
+	return ""
+}
 func (v *MockVarConf) GetVersion() int32 {
 	return v.Version
 }

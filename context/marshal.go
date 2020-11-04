@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-//UnmarshalXML 将xml反序列化为map
+//UnmarshalXML 将xml反序列化为map 只能解析xml第一层的数据
 func UnmarshalXML(s string) (map[string]string, error) {
 	output := make(map[string]string)
 	err := xml.Unmarshal([]byte(s), (*XmlMap)(&output))

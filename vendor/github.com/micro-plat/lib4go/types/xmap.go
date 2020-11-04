@@ -375,7 +375,7 @@ func ParseBool(val interface{}) (value bool, err error) {
 		case "0", "F", "FALSE", "NO", "N", "OFF":
 			return false, nil
 		}
-	case int, int8, int16, int32, int64, float32, float64:
+	case int8, int32, int64, float32, float64:
 		if v == 0 {
 			return false, nil
 		}

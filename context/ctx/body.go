@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/types"
@@ -26,9 +27,9 @@ func NewBody(c context.IInnerContext, path *rpath) *body {
 	return &body{ctx: c, path: path}
 }
 
-//GetBodyMap 读取body并返回map
-func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
-	body, err := w.GetBody(encoding...)
+//GetRawBodyMap 读取body原串并返回map
+func (w *body) GetRawBodyMap(encoding ...string) (map[string]interface{}, error) {
+	body, err := w.GetRawBody(encoding...)
 	if err != nil || body == "" {
 		return nil, err
 	}
@@ -36,8 +37,10 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 	ctp := w.ctx.ContentType()
 	switch {
 	case strings.Contains(ctp, "xml"):
-		var m map[string]string
-		m, err = context.UnmarshalXML(body)
+		mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
+		var m map[string]interface{}
+		m, err = mxj.NewMapXml([]byte(body))
+		//	m, err := context.UnmarshalXML(body)
 		if err == nil {
 			for k, v := range m {
 				data[k] = v
@@ -57,8 +60,20 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 	return data, nil
 }
 
-//GetBody 读取body返回body原字符串
+//GetBody 读取body
 func (w *body) GetBody(e ...string) (s string, err error) {
+	body, err := w.GetRawBody(e...)
+	if err != nil {
+		return "", err
+	}
+	if body != "" {
+		return body, nil
+	}
+	return w.ctx.GetForm().Encode(), nil
+}
+
+//GetRawBody 返回body原字符串
+func (w *body) GetRawBody(e ...string) (s string, err error) {
 	routerObj, err := w.path.GetRouter()
 	if err != nil {
 		return "", err

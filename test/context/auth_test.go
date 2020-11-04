@@ -50,45 +50,40 @@ func Test_Auth_Bind(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		request        interface{}
-		want           interface{}
-		wantPanicError bool
-		def            bool
+		name      string
+		request   interface{}
+		out       interface{}
+		want      interface{}
+		wantError bool
+		errCode   int
+		errStr    string
 	}{
-		{name: "request为空", wantPanicError: true},
-		{name: "request为func返回空值", request: func() interface{} {
-			return nil
-		}, wantPanicError: true},
-		{name: "request为func返回非空值", request: func() interface{} {
-			return result{Key: "1", Value: "1"}
-		}, want: result{Key: "1", Value: "1"}, wantPanicError: false},
-		{name: "request为错误的json字符串", request: `{"key":"1",v}`, wantPanicError: true},
-		{name: "request为json字符串", request: `{"key":"1","value":"1"}`, want: result{Key: "1", Value: "1"}, wantPanicError: false},
-		{name: "默认情况", request: map[string]string{"key": "value"}, def: true, want: map[string]string{"key": "value"}, wantPanicError: false},
+		{name: "参数非地址", out: map[string]string{}, wantError: true, errStr: "输入参数非指针 map"},
+		{name: "request为空", out: &map[string]string{}, wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
+		{name: "request为func返回空值", request: func() interface{} { return nil }, wantError: true, out: &map[string]string{},
+			errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
+		{name: "request为func返回非空值", request: func() interface{} { return result{Key: "1", Value: "1"} },
+			out: &result{}, want: &result{Key: "1", Value: "1"}},
+		{name: "request非json字符串", request: `str`, out: &map[string]string{}, wantError: true,
+			errStr: "将用户信息反序化为对象时失败:invalid character 's' looking for beginning of value"},
+		{name: "request为json字符串", request: `{"key":"1","value":"1"}`, out: &result{}, want: &result{Key: "1", Value: "1"}},
+		{name: "默认情况", request: map[string]string{"key": "value"}, out: &map[string]string{}, want: &map[string]string{"key": "value"}},
 	}
 	for _, tt := range tests {
 		c := &ctx.Auth{}
 		c.Request(tt.request)
-		defer func() {
-			if r := recover(); r != nil {
-				if e, ok := r.(*errs.Error); ok {
-					assert.Equal(t, 401, e.GetCode(), tt.name)
-					assert.Equal(t, "请求中未包含用户信息,用户未登录", e.Error(), tt.name)
-				}
-				assert.Equal(t, tt.wantPanicError, r != nil, tt.name)
+
+		err := c.Bind(tt.out)
+		assert.Equal(t, tt.wantError, err != nil, tt.name)
+		if tt.wantError {
+			if e, ok := err.(*errs.Error); ok {
+				assert.Equal(t, tt.errCode, e.GetCode(), tt.name)
+				assert.Equal(t, tt.errStr, e.Error(), tt.name)
+			} else {
+				assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			}
-		}()
-
-		if !tt.def {
-			out := result{}
-			c.Bind(&out)
-			assert.Equal(t, tt.want, out, tt.name)
-			return
+			continue
 		}
-
-		out := map[string]string{}
-		c.Bind(&out)
-		assert.Equal(t, tt.want, out, tt.name)
+		assert.Equal(t, tt.want, tt.out, tt.name)
 	}
 }

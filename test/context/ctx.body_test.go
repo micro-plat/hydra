@@ -1,8 +1,16 @@
 package context
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
@@ -19,6 +27,175 @@ type testBody struct {
 	err     error
 }
 
+func Test_body_GetBody_MIMEXML(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "application/xml", contentType: "application/xml",
+			body: `<?xml version="1.0"?><methodCall><methodName>examples.getStateName</methodName><params><param><i4>41</i4></param></params></methodCall>`,
+			want: `<methodCall><methodName>examples.getStateName</methodName><params><param><i4>41</i4></param></params></methodCall>`},
+		{name: "text/xml", contentType: "text/xml", body: "<xml><sub>1</sub></xml>", want: "<xml><sub>1</sub></xml>"},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbodymap", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, false, err != nil, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
+	}
+}
+
+func Test_body_GetBody_MIMEJSON(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "application/json", contentType: "application/json",
+			body: `{"name":"BeJson","page":88,"isNonProfit":true,"address":{"street":"科技园路.","city":"江苏苏州","country":"中国"}}`,
+			want: `{"name":"BeJson","page":88,"isNonProfit":true,"address":{"street":"科技园路.","city":"江苏苏州","country":"中国"}}`},
+		{name: "text/json", contentType: "text/json",
+			body: `{"name":"BeJson","page":88,"isNonProfit":true,"address":{"street":"科技园路.","city":"江苏苏州","country":"中国"}}`,
+			want: `{"name":"BeJson","page":88,"isNonProfit":true,"address":{"street":"科技园路.","city":"江苏苏州","country":"中国"}}`},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbodymap", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, false, err != nil, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		want := map[string]interface{}{}
+		json.Unmarshal([]byte(tt.want), &want)
+
+		got := map[string]interface{}{}
+		json.Unmarshal(body, &got)
+		assert.Equal(t, want, got, tt.name)
+	}
+}
+
+func Test_body_GetBody_MIMEYAML(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "text/yaml", contentType: "text/yaml; charset=utf-8", body: `animal: pets`, want: "animal: pets\n"},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbodymap", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, nil, err, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
+	}
+}
+func Test_body_GetBody_MIMEPlain(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "text/plain", contentType: "text/plain; charset=utf-8", body: `body`, want: "map[__body_:body]"},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbodymap", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, nil, err, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
+	}
+}
+func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "application/x-www-form-urlencoded", contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			body: `a=1&b=2&c=3`, want: "a=1&b=2&c=3"},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/form", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, nil, err, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, "text/plain", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
+	}
+}
+
+func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
+	tests := []struct {
+		name string
+		url  string
+		path string
+		want string
+	}{
+		{name: "multipart/form-data", url: "http://localhost:9091/upload", path: "upload.test.txt",
+			want: `{"fileName":"upload.test.txt","size":25,"body":"ADASDASDASFHNOJM~!@#$%^&*"}`},
+	}
+	startServer()
+	for _, tt := range tests {
+		file, _ := os.Open(tt.path)
+		defer file.Close()
+		body := &bytes.Buffer{}
+		// 文件写入 body
+		writer := multipart.NewWriter(body)
+		part, err := writer.CreateFormFile("upload", filepath.Base(tt.path))
+		assert.Equal(t, nil, err, "文件写入 body1")
+		_, err = io.Copy(part, file)
+		assert.Equal(t, nil, err, "文件写入 body2")
+		err = writer.Close()
+		assert.Equal(t, nil, err, "文件写入 body3")
+		req, err := http.NewRequest(http.MethodPost, tt.url, body)
+		assert.Equal(t, nil, err, "创建请求1")
+		req.Header.Add("Content-Type", writer.FormDataContentType())
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.Equal(t, nil, err, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, "application/json", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		rbody, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		w := map[string]interface{}{}
+		json.Unmarshal([]byte(tt.want), &w)
+		r := map[string]interface{}{}
+		json.Unmarshal(rbody, &r)
+		assert.Equal(t, w, r, tt.name)
+	}
+}
 func Test_body_GetBody(t *testing.T) {
 	//测试读取body正确
 	tests := []testBody{
@@ -60,31 +237,27 @@ func testGetBody(t *testing.T, body string, tests []testBody) {
 	}
 }
 
-func Test_body_GetBodyMap(t *testing.T) {
-
+func Test_body_GetBodyMap_WithPanic(t *testing.T) {
 	tests := []struct {
 		name     string
 		ctx      context.IInnerContext
 		encoding []string
 		want     map[string]interface{}
-		wantErr  bool
+		err      string
 	}{
-		{name: "读取正确xml格式数据", ctx: &mocks.TestContxt{
-			Body:       `<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`,
+		{name: "解析yaml数据错误", ctx: &mocks.TestContxt{
+			Body:       `body`,
+			HttpHeader: http.Header{"Content-Type": []string{context.YAMLF}},
+		},
+			err: "将body转换为map失败:yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `body` into map[string]interface {}"},
+		{name: "解析xml数据错误", ctx: &mocks.TestContxt{
+			Body:       `body`,
 			HttpHeader: http.Header{"Content-Type": []string{context.XMLF}},
-		}, encoding: []string{"gbk"}, want: map[string]interface{}{"key1": "1&$", "key2": "value2"}},
-		{name: "读取正确json格式数据", ctx: &mocks.TestContxt{
-			Body:       `{"key1":"value1","key2":"value2"}`,
+		}, err: "将body转换为map失败:EOF"},
+		{name: "解析json数据错误", ctx: &mocks.TestContxt{
+			Body:       `body`,
 			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
-		}, want: map[string]interface{}{"key1": "value1", "key2": "value2"}},
-		{name: "读取正确yaml格式数据", ctx: &mocks.TestContxt{
-			Body:            `key1: value1`,
-			HttpHeader:      http.Header{"Content-Type": []string{context.YAMLF}},
-		}, want: map[string]interface{}{"key1": "value1"}},
-		{name: "读取错误的不匹配的格式数据", ctx: &mocks.TestContxt{
-			Body:            `{"key1:"value1"}`,
-			HttpHeader:      http.Header{"Content-Type": []string{context.JSONF}},
-		}, wantErr: true},
+		}, err: "将body转换为map失败:invalid character 'b' looking for beginning of value"},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
@@ -94,12 +267,65 @@ func Test_body_GetBodyMap(t *testing.T) {
 
 	for _, tt := range tests {
 		w := ctx.NewBody(tt.ctx, rpath)
-		defer func() {
-			if r := recover(); r != nil {
-				assert.Equal(t, tt.wantErr, true, tt.name)
-			}
-		}()
-		got, err := w.GetBodyMap(tt.encoding...)
+		assert.PanicError(t, tt.err, func() {
+			w.GetRawBodyMap(tt.encoding...)
+		}, tt.name)
+	}
+}
+
+func Test_body_GetBodyMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		ctx      context.IInnerContext
+		encoding []string
+		want     map[string]interface{}
+		wantErr  bool
+	}{
+		{name: "getBody报错", ctx: &mocks.TestContxt{
+			Body:       `"%-+body"`,
+			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
+		}, wantErr: true},
+		{name: "content-type为application/xml", ctx: &mocks.TestContxt{
+			Body:       `<xml><sub z="3"><sg a="1" b="2">12</sg></sub></xml>`,
+			HttpHeader: http.Header{"Content-Type": []string{context.XMLF}},
+		}, encoding: []string{"gbk"}, want: map[string]interface{}{
+			"xml": map[string]interface{}{
+				"sub": map[string]interface{}{
+					"z": "3",
+					"sg": map[string]interface{}{
+						"a":     "1",
+						"b":     "2",
+						"#text": "12",
+					}}}}},
+		{name: "content-type为text/xml", ctx: &mocks.TestContxt{
+			Body:       `<xml><key1>1&amp;$</key1><key2>value2</key2></xml>`,
+			HttpHeader: http.Header{"Content-Type": []string{"text/xml"}},
+		}, encoding: []string{}, want: map[string]interface{}{
+			"xml": map[string]interface{}{
+				"key1": "1&$", "key2": "value2",
+			}}},
+		{name: "content-type为application/json", ctx: &mocks.TestContxt{
+			Body:       `{"key1":"value1","key2":"value2"}`,
+			HttpHeader: http.Header{"Content-Type": []string{context.JSONF}},
+		}, want: map[string]interface{}{"key1": "value1", "key2": "value2"}},
+		{name: "content-type为text/json", ctx: &mocks.TestContxt{
+			Body:       `{"key1":"value1","key2":"value2"}`,
+			HttpHeader: http.Header{"Content-Type": []string{"text/json"}},
+		}, want: map[string]interface{}{"key1": "value1", "key2": "value2"}},
+		{name: "content-type为text/yaml", ctx: &mocks.TestContxt{
+			Body:       `key1: value1`,
+			HttpHeader: http.Header{"Content-Type": []string{context.YAMLF}},
+		}, want: map[string]interface{}{"key1": "value1"}},
+	}
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
+
+	for _, tt := range tests {
+		w := ctx.NewBody(tt.ctx, rpath)
+		got, err := w.GetRawBodyMap(tt.encoding...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		assert.Equal(t, tt.want, got, tt.name)
 	}

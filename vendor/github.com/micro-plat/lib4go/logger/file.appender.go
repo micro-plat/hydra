@@ -36,20 +36,27 @@ func (a *FileAppender) Write(layout *Layout, event *LogEvent) error {
 	return nil
 }
 func (a *FileAppender) clean() {
+EXIT:
 	for {
 		select {
 		case <-a.done:
-			return
+			break EXIT
 		case <-a.ticker.C:
-			//modify by liujinyin at 20201027 for dead loop.
-			//@bugfix 处理日志写入cpu 占用彪高问题
-			writerChan := a.writers.IterBuffered()
-			for v := range writerChan {
-				w := v.Val.(*writer)
-				if time.Since(w.lastWrite) < 5*time.Minute {
-					w.Write(EndWriteEvent) //向日志发送结速写入事件
-					w.Close()              //等待所有日志被写入文件
-					a.writers.Remove(v.Key)
+		LOOP:
+			for {
+				select {
+				case <-a.done:
+					break LOOP
+				case v, ok := <-a.writers.IterBuffered():
+					if !ok {
+						break LOOP
+					}
+					w := v.Val.(*writer)
+					if time.Since(w.lastWrite) < 5*time.Minute {
+						w.Write(EndWriteEvent) //向日志发送结速写入事件
+						w.Close()              //等待所有日志被写入文件
+						a.writers.Remove(v.Key)
+					}
 				}
 			}
 		}

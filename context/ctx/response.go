@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
@@ -17,6 +18,7 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
+	"gopkg.in/yaml.v2"
 )
 
 var _ context.IResponse = &response{}
@@ -59,14 +61,14 @@ func (c *response) ContentType(v string) {
 	c.ctx.Header("Content-Type", v)
 }
 
-//Abort 根据错误码与错误消息终止应用
+//Abort 设置错误码与错误消息,并将数据写入响应流,并终止应用
 func (c *response) Abort(s int, err error) {
 	c.Write(s, err)
 	c.Flush()
 	c.ctx.Abort()
 }
 
-//Stop 停止当前服务执行
+//Stop 设置错误码,并将数据写入响应流,并终止应用
 func (c *response) Stop(s int) {
 	//c.noneedWrite = true
 	c.Write(s, "")
@@ -74,14 +76,14 @@ func (c *response) Stop(s int) {
 	c.ctx.Abort()
 }
 
-//StatusCode 设置response状态码
+//StatusCode 设置response头部状态码
 func (c *response) StatusCode(s int) {
 	//c.raw.status = s
 	c.final.status = s
 	c.ctx.WStatus(s)
 }
 
-//File 输入文件
+//File 将指定的文件的返回,文件数据写入响应流,并终止应用
 func (c *response) File(path string) {
 	if c.ctx.Written() {
 		panic(fmt.Sprint("不能重复写入到响应流::", path))
@@ -96,7 +98,7 @@ func (c *response) NoNeedWrite(status int) {
 	c.final.status = status
 }
 
-//Write 检查内容并处理状态码
+//Write 检查内容并处理状态码,数据未写入响应流
 func (c *response) Write(status int, content interface{}) error {
 	if c.ctx.Written() {
 		panic(fmt.Sprintf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status))
@@ -129,12 +131,12 @@ func (c *response) Write(status int, content interface{}) error {
 	return nil
 }
 
-//WriteAny 将结果写入响应流，并自动处理响应码
+//WriteAny 处理结果并处理响应码为200,数据未写入响应流
 func (c *response) WriteAny(v interface{}) error {
 	return c.Write(http.StatusOK, v)
 }
 
-//Render 修改实际渲染的内容
+//WriteFinal 设置的返回结果,状态码和contentType,数据未写入响应流
 func (c *response) WriteFinal(status int, content string, ctp string) {
 	if status != 0 {
 		c.final.status = status
@@ -157,7 +159,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		rs = v.GetCode()
 		rc = v.GetError().Error()
 		c.log.Error(content)
-		if global.IsDebug {
+		if !global.IsDebug {
 			rc = "Internal Server Error"
 		}
 	case error:
@@ -166,7 +168,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		}
 		c.log.Error(content)
 		rc = v.Error()
-		if global.IsDebug {
+		if !global.IsDebug {
 			rc = "Internal Server Error"
 		}
 	default:
@@ -226,6 +228,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 
 	}
 }
+
 func (c *response) getContentType() string {
 	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
 		return ctp
@@ -299,6 +302,7 @@ func (c *response) GetFinalResponse() (int, string) {
 	return c.final.status, c.final.content.(string)
 }
 
+//Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
 	if c.noneedWrite || c.asyncWrite == nil {
 		return
@@ -312,22 +316,29 @@ func (c *response) getString(ctp string, v interface{}) string {
 	switch {
 	case strings.Contains(ctp, "xml"):
 		tp := reflect.TypeOf(v).Kind()
-		s := v
 		if tp == reflect.Map {
-			s = context.XmlMap(v.(map[string]string)) //@v.转换不了
+			if s, ok := v.(map[string]interface{}); ok { //@fix 修改成的xml转为多层的map
+				m := mxj.New()
+				m = s
+				str, err := m.Xml()
+				if err != nil {
+					panic(err)
+				}
+				return string(str)
+			}
 		}
 
-		buff, err := xml.Marshal(s)
+		buff, err := xml.Marshal(v)
 		if err != nil {
 			panic(err)
 		}
 		return string(buff)
-	// case strings.Contains(ctp, "yaml"):
-	// 	buff, err := yaml.Marshal(v)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	return string(buff)
+	case strings.Contains(ctp, "yaml"):
+		buff, err := yaml.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return string(buff)
 	case strings.Contains(ctp, "json"):
 		buff, err := json.Marshal(v)
 		if err != nil {
