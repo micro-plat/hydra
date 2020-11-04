@@ -12,6 +12,13 @@ func WithDbIndex(i int) Option {
 	}
 }
 
+//WithAddrs 设置Addrs
+func WithAddrs(addrs ...string) Option {
+	return func(a *Redis) {
+		a.Addrs = addrs
+	}
+}
+
 //WithTimeout 设置数据库连接超时，读写超时时间
 func WithTimeout(dialTimeout int, readTimeout int, writeTimeout int) Option {
 	return func(a *Redis) {

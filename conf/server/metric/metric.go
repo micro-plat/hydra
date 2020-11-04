@@ -2,7 +2,6 @@ package metric
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -12,6 +11,7 @@ type IMetric interface {
 	GetConf() (*Metric, bool)
 }
 
+//Metric Metric
 type Metric struct {
 	Host     string `json:"host,omitempty" valid:"requrl,required" toml:"host,omitempty"`
 	DataBase string `json:"dataBase,omitempty" valid:"ascii,required" toml:"dataBase,omitempty"`
@@ -23,10 +23,11 @@ type Metric struct {
 
 //New 构建api server配置信息
 func New(host string, db string, cron string, opts ...Option) *Metric {
-	port := ":8086"
-	if !strings.Contains(host, ":") {
-		host = host + port
-	}
+	//@ljy 2020-11-03 地址+端口由配置决定，避免配置域名的时候加上端口导致错误
+	// port := ":8086"
+	// if !strings.Contains(host, ":") {
+	// 	host = host + port
+	// }
 	m := &Metric{
 		Host:     host,
 		DataBase: db,

@@ -1,43 +1,42 @@
 package redis
 
 import (
-	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/asaskevich/govalidator"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/hydra/conf/vars/redis"
 )
 
 //Redis redis缓存配置
 type Redis struct {
 	*cache.Cache
-	ConfigName string `json:"config_name" toml:"config_name" valid:"required" `
+	*redis.Redis
+	ConfigName string `json:"config_name,omitempty" toml:"config_name,omitempty" valid:"ascii"`
 }
 
 //New 构建redis消息队列配置
-func New(configName string, opts ...Option) *Redis {
-	r := &Redis{
-		ConfigName: configName,
-		Cache:      &cache.Cache{Proto: "redis"},
+func New(opts ...Option) (org *Redis) {
+	org = &Redis{
+		Cache: &cache.Cache{Proto: "redis"},
 	}
 	for _, opt := range opts {
-		opt(r)
+		opt(org)
 	}
-	return r
-}
-
-//NewByRaw 通过json原串初始化
-func NewByRaw(raw string) *Redis {
-
-	org := New("")
-	if err := json.Unmarshal([]byte(raw), org); err != nil {
-		panic(err)
-	}
-
-	if b, err := govalidator.ValidateStruct(org); !b {
+	b, err := govalidator.ValidateStruct(org)
+	if !b {
 		panic(fmt.Errorf("redis配置数据有误:%v %+v", err, org))
 	}
 
+	if org.ConfigName == "" && (reflect.ValueOf(org.Redis).IsNil() || len(org.Addrs) == 0) {
+		panic(fmt.Errorf("redis配置数据有误:至少存在Addrs或ConfigName,%+v", org))
+	}
 	return org
+}
+
+//NewByRaw 通过json原串初始化
+func NewByRaw(raw string) (org *Redis) {
+	return New(WithRaw(raw))
 }

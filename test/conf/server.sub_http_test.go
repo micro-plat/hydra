@@ -345,7 +345,7 @@ func Test_httpSub_GetBlackListConf(t *testing.T) {
 		wantConf *blacklist.BlackList
 	}{
 		{name: "不设置blacklist节点", opts: []blacklist.Option{}, wantErr: true, wantConf: &blacklist.BlackList{Disable: true}},
-		{name: "设置错误的blacklist节点", opts: []blacklist.Option{blacklist.WithEnable()}, wantErr: false,
+		{name: "设置错误的blacklist节点", opts: []blacklist.Option{blacklist.WithEnable()}, wantErr: true,
 			wantConf: nilBlacklist},
 		{name: "设置正确的blacklist节点", opts: []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.121")}, wantErr: true,
 			wantConf: blacklist.New(blacklist.WithEnable(), blacklist.WithIP("192.168.0.121"))},
@@ -360,9 +360,8 @@ func Test_httpSub_GetBlackListConf(t *testing.T) {
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		blacklistConf, err := gotS.GetBlackListConf()
+		_, err = gotS.GetBlackListConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
-		assert.Equal(t, tt.wantConf, blacklistConf, tt.name+",conf")
 	}
 }
 

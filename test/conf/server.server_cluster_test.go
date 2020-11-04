@@ -20,7 +20,7 @@ func Test_NewCluster(t *testing.T) {
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	clusterName := "cluster1"
-	pub := server.NewPub("platName", "sysName", "serverType", "cluster1")
+	pub := server.NewServerPub("platName", "sysName", "serverType", "cluster1")
 	rootPath := pub.GetServerPubPath(clusterName)
 	gotS, err := server.NewCluster(pub, rgt, clusterName)
 	assert.Equal(t, true, err == nil, "初始化集群对象失败")
@@ -88,7 +88,7 @@ func TestCluster_Current(t *testing.T) {
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	clusterName := "cluster2"
-	pub := server.NewPub("platName", "sysName", "serverType", clusterName)
+	pub := server.NewServerPub("platName", "sysName", "serverType", clusterName)
 	rootPath := pub.GetServerPubPath(clusterName)
 	gotS, err := server.NewCluster(pub, rgt, clusterName)
 	assert.Equal(t, true, err == nil, "初始化集群对象失败")
@@ -111,11 +111,11 @@ func TestCluster_GetType(t *testing.T) {
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
-	pub := server.NewPub("platName", "sysName", "serverType", clusterName)
+	pub := server.NewServerPub("platName", "sysName", "serverType", clusterName)
 	obj1, err := server.NewCluster(pub, rgt, clusterName)
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
-	pub1 := server.NewPub("platName", "sysName", "xxxx", clusterName)
+	pub1 := server.NewServerPub("platName", "sysName", "xxxx", clusterName)
 	obj2, err := server.NewCluster(pub1, rgt, clusterName)
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
@@ -139,7 +139,7 @@ func TestCluster_Next(t *testing.T) {
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
-	pub := server.NewPub("platName", "sysName", "serverType", clusterName)
+	pub := server.NewServerPub("platName", "sysName", "serverType", clusterName)
 	obj1, err := server.NewCluster(pub, rgt, clusterName)
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 	got, got1 := obj1.Next()
@@ -173,7 +173,6 @@ func TestCluster_Next(t *testing.T) {
 		}
 	}
 
-	fmt.Println("resMap:", resMap)
 	assert.Equal(t, len(resMap), len(nodeMap), "数据异常")
 	for _, str := range resMap {
 		_, ok := nodeMap[str]

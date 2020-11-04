@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -421,13 +420,13 @@ func Test_conf_Custome(t *testing.T) {
 
 func Test_conf_Encode(t *testing.T) {
 
-	//空对象序列化为toml格式
-	cuurConf := New()
-	cuurConf.GetAPI()
+	// //空对象序列化为toml格式
+	// cuurConf := New()
+	// cuurConf.GetAPI()
 
-	sss, err := cuurConf.Encode()
-	fmt.Println("sss:", sss)
-	fmt.Println("err:", err)
+	// sss, err := cuurConf.Encode()
+	// fmt.Println("sss:", sss)
+	// fmt.Println("err:", err)
 	// sss := make(map[string]CustomerBuilder)
 	// sss["api"] = CustomerBuilder{}
 	// sss["api"]["xxx"] = api.Server{Address: "ssssssss", Status: "start",

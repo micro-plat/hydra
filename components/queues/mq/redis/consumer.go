@@ -7,8 +7,6 @@ import (
 
 	"errors"
 
-	"github.com/micro-plat/hydra/conf/app"
-
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
 	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
@@ -154,18 +152,7 @@ type cresolver struct {
 }
 
 func (s *cresolver) Resolve(confRaw string) (mq.IMQC, error) {
-
-	cacheRedis := queueredis.NewByRaw(confRaw)
-	vc, err := app.Cache.GetVarConf()
-	if err != nil {
-		return nil, err
-	}
-	js, err := vc.GetConf(Proto, cacheRedis.ConfigName)
-	if err != nil {
-		return nil, err
-	}
-	return NewConsumerByConfig(varredis.NewByRaw(string(js.GetRaw())))
-
+	return NewConsumerByConfig(queueredis.NewByRaw(confRaw).Redis)
 }
 func init() {
 	mq.RegisterConsumer(Proto, &cresolver{})

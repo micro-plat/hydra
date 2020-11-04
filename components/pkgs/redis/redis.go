@@ -34,7 +34,7 @@ func NewByConfig(config *varredis.Redis) (r *Client, err error) {
 	r.opt.WriteTimeout = types.DecodeInt(r.opt.WriteTimeout, 0, 3, r.opt.WriteTimeout)
 	r.opt.PoolSize = types.DecodeInt(r.opt.PoolSize, 0, 3, r.opt.PoolSize)
 	ropts := &redis.UniversalOptions{
-		Addrs:        r.opt.Address,
+		Addrs:        r.opt.Addrs,
 		Password:     r.opt.Password,
 		DB:           r.opt.DbIndex,
 		DialTimeout:  time.Duration(r.opt.DialTimeout) * time.Second,
@@ -49,5 +49,5 @@ func NewByConfig(config *varredis.Redis) (r *Client, err error) {
 
 //GetAddrs GetAddrs
 func (c *Client) GetAddrs() []string {
-	return c.opt.Address
+	return c.opt.Addrs
 }
