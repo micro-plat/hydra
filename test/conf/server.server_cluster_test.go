@@ -173,7 +173,6 @@ func TestCluster_Next(t *testing.T) {
 		}
 	}
 
-	fmt.Println("resMap:", resMap)
 	assert.Equal(t, len(resMap), len(nodeMap), "数据异常")
 	for _, str := range resMap {
 		_, ok := nodeMap[str]
