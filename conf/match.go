@@ -53,11 +53,11 @@ func NewPathMatch(all ...string) *PathMatch {
 }
 
 //Match 是否匹配，支付完全匹配，模糊匹配，分段匹配
-func (a *PathMatch) Match(service string) (bool, string) {
+func (a *PathMatch) Match(service string, seq string) (bool, string) {
 	if v, ok := a.cache.Get(service); ok {
 		return v != "", v.(string)
 	}
-	sparties := strings.Split(service, "/")
+	sparties := strings.Split(service, seq)
 	//排除指定请求
 	for _, u := range a.all {
 		//完全匹配
@@ -66,15 +66,20 @@ func (a *PathMatch) Match(service string) (bool, string) {
 			return true, u
 		}
 		//分段模糊
-		uparties := strings.Split(u, "/")
+		uparties := strings.Split(u, seq)
 		//取较少的数组长度
 		uc := len(uparties)
 		sc := len(sparties)
 		/*
-			处理模式：
+			路径处理模式：
 			1. /a/b/ *
 			2. /a/ **
 			3. /a/ * /d
+
+			ip处理模式：
+			1. 192.168.0.*
+			2. 192.168.**
+			3. 192.*.0.1
 		**/
 
 		//长度不匹配，且未包含**,跳过

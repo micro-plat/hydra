@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -18,7 +18,7 @@ type ICloser interface {
 
 //IContainer 组件容器
 type IContainer interface {
-	GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error)
+	GetOrCreate(typ string, name string, creator func(conf conf.IVarConf) (interface{}, error)) (interface{}, error)
 	ICloser
 }
 
@@ -40,10 +40,9 @@ func NewContainer() *Container {
 }
 
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
-func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error) {
+func (c *Container) GetOrCreate(typ string, name string, creator func(conf conf.IVarConf) (interface{}, error)) (interface{}, error) {
 
-	//参数获取依赖强,不便于测试
-	vc, err := server.Cache.GetVarConf()
+	vc, err := app.Cache.GetVarConf()
 	if err != nil {
 		return nil, err
 	}
@@ -53,10 +52,9 @@ func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf
 	}
 	key := fmt.Sprintf("%s_%s_%d", typ, name, js.GetVersion())
 	_, obj, err := c.cache.SetIfAbsentCb(key, func(i ...interface{}) (interface{}, error) {
-		v, err := creator(js)
+		v, err := creator(vc)
 		if err != nil {
-			return nil,
-				err
+			return nil, err
 		}
 		c.vers.Add(typ, name, key)
 		return v, nil

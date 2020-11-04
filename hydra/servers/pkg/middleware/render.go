@@ -1,5 +1,7 @@
 package middleware
 
+import "net/http"
+
 //Render 响应结果输出组件
 func Render() Handler {
 	return func(ctx IMiddleContext) {
@@ -7,7 +9,11 @@ func Render() Handler {
 		ctx.Next()
 
 		//加载渲染配置
-		render := ctx.ServerConf().GetRenderConf()
+		render, err := ctx.ServerConf().GetRenderConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if render.Disable {
 			return
 		}
@@ -21,6 +27,6 @@ func Render() Handler {
 			ctx.Log().Error("渲染响应结果出错:", err)
 			return
 		}
-		ctx.Response().Render(status, content, ctp)
+		ctx.Response().WriteFinal(status, content, ctp)
 	}
 }

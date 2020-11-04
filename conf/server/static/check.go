@@ -101,7 +101,7 @@ func (s *Static) NeedRewrite(p string) bool {
 //GetGzFile 获取gz 压缩包
 func (s *Static) GetGzFile(rPath string) string {
 
-	fi, ok := s.fileMap[rPath]
+	fi, ok := s.FileMap[rPath]
 	if !ok {
 		return ""
 	}
@@ -117,7 +117,7 @@ func (s *Static) RereshData() {
 }
 
 func (s *Static) GetFileMap() map[string]FileInfo {
-	return s.fileMap
+	return s.FileMap
 }
 
 func (s *Static) recursiveDir(dir string) {
@@ -133,7 +133,7 @@ func (s *Static) recursiveDir(dir string) {
 		if !cur.IsDir() {
 			if strings.HasSuffix(cur.Name(), suffix) {
 				fpath := fmt.Sprintf("%s/%s", dir, strings.TrimSuffix(cur.Name(), suffix))
-				s.fileMap[fpath] = FileInfo{
+				s.FileMap[fpath] = FileInfo{
 					HasGz:  true,
 					GzFile: fpath + suffix,
 				}

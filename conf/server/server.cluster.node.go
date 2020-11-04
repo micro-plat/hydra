@@ -45,6 +45,21 @@ func (c *CNode) GetHost() string {
 	return c.host
 }
 
+//GetMid 获取服务器信息
+func (c *CNode) GetMid() string {
+	return c.mid
+}
+
+//GetPath 获取服务器信息
+func (c *CNode) GetPath() string {
+	return c.path
+}
+
+//GetHost 获取服务器信息
+func (c *CNode) GetRoot() string {
+	return c.root
+}
+
 //GetPort 获取端口信息
 func (c *CNode) GetPort() string {
 	return c.port

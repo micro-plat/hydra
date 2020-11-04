@@ -59,7 +59,11 @@ func (w *body) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
 
 //GetBody 读取body返回body原字符串
 func (w *body) GetBody(e ...string) (s string, err error) {
-	encode := types.GetStringByIndex(e, 0, w.path.GetRouter().GetEncoding())
+	routerObj, err := w.path.GetRouter()
+	if err != nil {
+		return "", err
+	}
+	encode := types.GetStringByIndex(e, 0, routerObj.GetEncoding())
 	if w.hasReadBody {
 		if w.bodyReadErr != nil {
 			return "", w.bodyReadErr

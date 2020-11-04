@@ -19,10 +19,10 @@ type ChildWatcher struct {
 	notifyChan chan *watcher.ChildChangeArgs
 	logger     logger.ILogging
 	registry   registry.IRegistry
-	watchers   map[string]*ChildWatcher
+	Watchers   map[string]*ChildWatcher
 	mu         sync.Mutex
-	done       bool
-	closeChan  chan struct{}
+	Done       bool
+	CloseChan  chan struct{}
 	once       sync.Once
 }
 
@@ -39,9 +39,9 @@ func NewChildWatcherByDeep(path string, deep int, r registry.IRegistry, logger l
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		watchers:   make(map[string]*ChildWatcher),
-		notifyChan: make(chan *watcher.ChildChangeArgs, 1),
-		closeChan:  make(chan struct{}),
+		Watchers:   make(map[string]*ChildWatcher),          //@fix 方便测试
+		notifyChan: make(chan *watcher.ChildChangeArgs, 10), //@fix 1改为10方便测试
+		CloseChan:  make(chan struct{}),                     //@fix 方便测试
 	}
 }
 
@@ -67,7 +67,7 @@ LOOP:
 	for !exists {
 		select {
 		case <-time.After(w.timeSpan):
-			if w.done {
+			if w.Done {
 				return nil
 			}
 			exists, err = w.registry.Exists(path)
@@ -91,10 +91,10 @@ LOOP:
 
 	for {
 		select {
-		case <-w.closeChan:
+		case <-w.CloseChan:
 			return nil
-		case content, ok := <-dataChan:
-			if w.done || !ok {
+		case content, ok := <-dataChan: //@fix 程序会阻塞
+			if w.Done || !ok {
 				return nil
 			}
 			if err = content.GetError(); err != nil {
@@ -118,16 +118,14 @@ LOOP:
 //Close 关闭监控
 func (w *ChildWatcher) Close() {
 	w.once.Do(func() {
-		for _, watcher := range w.watchers {
+		for _, watcher := range w.Watchers {
 			watcher.Close()
 		}
-		if !w.done {
-			w.done = true
-			close(w.closeChan)
+		if !w.Done {
+			w.Done = true
+			close(w.CloseChan)
 		}
-
 	})
-
 }
 
 //deleted 节点删除
@@ -165,7 +163,7 @@ func (w *ChildWatcher) notify(a *watcher.ChildChangeArgs) {
 	for _, path := range a.Children {
 		switch a.OP {
 		case watcher.ADD, watcher.CHANGE:
-			w.changeChilrenWatcher(path)
+			w.changeChilrenWatcher(a.Parent, path, a.Deep)
 		case watcher.DEL:
 			w.delChilrenWatcher(path)
 		}
@@ -173,31 +171,32 @@ func (w *ChildWatcher) notify(a *watcher.ChildChangeArgs) {
 }
 
 func (w *ChildWatcher) delChilrenWatcher(path string) {
-	if w, ok := w.watchers[path]; ok {
+	if w, ok := w.Watchers[path]; ok {
 		w.Close()
-		delete(w.watchers, path)
+		delete(w.Watchers, path)
 	}
 
 }
 
-func (w *ChildWatcher) changeChilrenWatcher(path string) {
-	if _, ok := w.watchers[path]; ok {
+func (w *ChildWatcher) changeChilrenWatcher(ppath, path string, deep int) {
+	if _, ok := w.Watchers[path]; ok {
 		return
 	}
-	watcher := NewChildWatcherByDeep(registry.Join(w.path, path), w.deep-1, w.registry, w.logger)
+	//watcher := NewChildWatcherByDeep(registry.Join(w.path, path), w.deep-1, w.registry, w.logger)
+	watcher := NewChildWatcherByDeep(registry.Join(ppath, path), deep-1, w.registry, w.logger) // @fix
 	ch, err := watcher.Start()
 	if err != nil {
 		w.logger.Error(err)
 		return
 	}
-	w.watchers[path] = watcher
+	w.Watchers[path] = watcher //@fix 存在并发锁的问题
 	go func() {
 		for {
 			select {
-			case <-w.closeChan:
+			case <-w.CloseChan:
 				return
 			case arg, ok := <-ch:
-				if w.done || !ok {
+				if w.Done || !ok {
 					return
 				}
 				w.notify(arg)

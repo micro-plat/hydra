@@ -1,31 +1,41 @@
 package redis
 
-import "github.com/micro-plat/hydra/conf/vars/queue"
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/asaskevich/govalidator"
+
+	"github.com/micro-plat/hydra/conf/vars/queue"
+	"github.com/micro-plat/hydra/conf/vars/redis"
+)
 
 //Redis redis缓存配置
 type Redis struct {
 	*queue.Queue
-	Address      string `json:"addrs,omitempty"`
-	DbIndex      int    `json:"db,omitempty"`
-	DialTimeout  int    `json:"dial_timeout,omitempty"`
-	ReadTimeout  int    `json:"read_timeout,omitempty"`
-	WriteTimeout int    `json:"write_timeout,omitempty"`
-	PoolSize     int    `json:"pool_size,omitempty"`
+	*redis.Redis
+	ConfigName string `json:"config_name,omitempty"  toml:"config_name,omitempty" valid:"ascii"`
 }
 
 //New 构建redis消息队列配置
-func New(address string, opts ...Option) *Redis {
-	r := &Redis{
-		Address:      address,
-		Queue:        &queue.Queue{Proto: "redis"},
-		DbIndex:      1,
-		DialTimeout:  10,
-		ReadTimeout:  10,
-		WriteTimeout: 10,
-		PoolSize:     10,
+func New(opts ...Option) (org *Redis) {
+	org = &Redis{
+		Queue: &queue.Queue{Proto: "redis"},
 	}
 	for _, opt := range opts {
-		opt(r)
+		opt(org)
 	}
-	return r
+	b, err := govalidator.ValidateStruct(org)
+	if !b {
+		panic(fmt.Errorf("redis配置数据有误:%v %+v", err, org))
+	}
+	if org.ConfigName == "" && (reflect.ValueOf(org.Redis).IsNil() || len(org.Addrs) == 0) {
+		panic(fmt.Errorf("redis配置数据有误:至少存在Addrs或ConfigName,%+v", org))
+	}
+	return org
+}
+
+//NewByRaw 通过json原串初始化
+func NewByRaw(raw string) (org *Redis) {
+	return New(WithRaw(raw))
 }

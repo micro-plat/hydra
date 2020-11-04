@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -31,7 +31,7 @@ type Ctx struct {
 	request    *request
 	response   *response
 	user       *user
-	serverConf server.IServerConf
+	appConf    app.IAPPConf
 	cancelFunc func()
 	funs       *funcs
 	tid        uint64
@@ -43,16 +43,16 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.meta = conf.NewMeta()
 	ctx.context = c
 	var err error
-	ctx.serverConf, err = server.Cache.GetServerConf(tp)
+	ctx.appConf, err = app.Cache.GetAPPConf(tp)
 	if err != nil {
 		panic(err)
 	}
 	ctx.user = NewUser(c, ctx.meta)
-	ctx.request = NewRequest(c, ctx.serverConf, ctx.meta)
-	ctx.log = logger.GetSession(ctx.serverConf.GetMainConf().GetServerName(), ctx.User().GetRequestID())
-	ctx.response = NewResponse(c, ctx.serverConf, ctx.log, ctx.meta)
+	ctx.request = NewRequest(c, ctx.appConf, ctx.meta)
+	ctx.log = logger.GetSession(ctx.appConf.GetServerConf().GetServerName(), ctx.User().GetRequestID())
+	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	ctx.tid = context.Cache(ctx) //保存到缓存中
-	timeout := time.Duration(ctx.serverConf.GetMainConf().GetRootConf().GetInt("", 30))
+	timeout := time.Duration(ctx.appConf.GetServerConf().GetRootConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
 	ctx.funs = newFunc(ctx)
 	return ctx
@@ -99,15 +99,15 @@ func (c *Ctx) Log() logger.ILogger {
 }
 
 //ServerConf 获取服务器配置
-func (c *Ctx) ServerConf() server.IServerConf {
-	return c.serverConf
+func (c *Ctx) ServerConf() app.IAPPConf {
+	return c.appConf
 }
 
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
 	context.Del(c.tid) //从当前请求上下文中删除
 	c.context = nil
-	c.serverConf = nil
+	c.appConf = nil
 	c.user = nil
 	c.response = nil
 	c.request = nil

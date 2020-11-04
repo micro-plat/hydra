@@ -12,29 +12,29 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"golang.org/x/time/rate"
 )
 
 //Limiter 限流器
 type Limiter struct {
-	Rules    []*Rule         `json:"rules" toml:"rules,omitempty"`
+	Rules    []*Rule         `json:"rules,omitempty" valid:"required" toml:"rules,omitempty"`
 	Disable  bool            `json:"disable,omitempty" toml:"disable,omitempty"`
 	p        *conf.PathMatch `json:"-"`
 	limiters cmap.ConcurrentMap
 }
 
 //New 构建Limit配置
-func New(rule *Rule, rules ...*Rule) *Limiter {
+func New(opts ...Option) *Limiter {
 	limiter := &Limiter{
-		Rules:    make([]*Rule, 0, 1),
+		Rules:    []*Rule{},
 		limiters: cmap.New(8),
+		Disable:  false,
 	}
-	limiter.Rules = append(limiter.Rules, rule)
-	limiter.Rules = append(limiter.Rules, rules...)
-	paths := make([]string, 0, len(limiter.Rules)+1)
 
+	for _, f := range opts {
+		f(limiter)
+	}
+	paths := make([]string, 0, len(limiter.Rules)+1)
 	for _, v := range limiter.Rules {
-		v.limiter = rate.NewLimiter(rate.Limit(v.MaxAllow), v.MaxAllow)
 		limiter.limiters.Set(v.Path, v)
 		paths = append(paths, v.Path)
 	}
@@ -44,7 +44,7 @@ func New(rule *Rule, rules ...*Rule) *Limiter {
 
 //GetLimiter 获取限流器
 func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
-	ok, path := l.p.Match(path)
+	ok, path := l.p.Match(path, "/")
 	if !ok {
 		return false, nil
 	}
@@ -55,24 +55,21 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 	return true, rule.(*Rule)
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Limiter
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取jwt
-func GetConf(cnf conf.IMainConf) *Limiter {
-	limiter := Limiter{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), &limiter)
+func GetConf(cnf conf.IServerConf) (*Limiter, error) {
+	limiter := &Limiter{}
+	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
-		return &Limiter{Disable: true}
+		return &Limiter{Disable: true}, nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("绑定limit配置有误:%v", err))
+		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
 	}
-	if b, err := govalidator.ValidateStruct(&limiter); !b {
-		panic(fmt.Errorf("limit配置有误:%v %+v", err, limiter))
+	if b, err := govalidator.ValidateStruct(limiter); !b {
+		return nil, fmt.Errorf("limit配置数据有误:%v %+v", err, limiter)
 	}
-	return New(limiter.Rules[0], limiter.Rules[1:]...)
+
+	newLimit := New(WithRuleList(limiter.Rules...))
+	newLimit.Disable = limiter.Disable
+	return newLimit, nil
 }

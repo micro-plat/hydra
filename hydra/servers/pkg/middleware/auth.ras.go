@@ -13,13 +13,23 @@ func RASAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
-		ras := ctx.ServerConf().GetRASConf()
+		ras, err := ctx.ServerConf().GetRASConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+
 		if ras.Disable {
 			ctx.Next()
 			return
 		}
 
-		b, auth := ras.Match(ctx.Request().Path().GetRouter().Service)
+		routerObj, err := ctx.Request().Path().GetRouter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+		b, auth := ras.Match(routerObj.Service)
 		if !b {
 			ctx.Next()
 			return

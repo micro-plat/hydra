@@ -1,6 +1,7 @@
 package db
 
-import "github.com/micro-plat/hydra/conf"
+//TypeNodeName 分类节点名
+const TypeNodeName = "db"
 
 //DB 数据库配置
 type DB struct {
@@ -24,12 +25,4 @@ func New(provider string, connString string, opts ...Option) *DB {
 		opt(db)
 	}
 	return db
-}
-
-//GetConf 获取主配置信息
-func GetConf(cnf conf.IVarConf, tp string, name string) (s *DB, err error) {
-	if _, err = cnf.GetObject(tp, name, &s); err != nil && err != conf.ErrNoSetting {
-		return nil, err
-	}
-	return s, nil
 }

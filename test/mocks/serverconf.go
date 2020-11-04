@@ -3,7 +3,7 @@ package mocks
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/cron"
@@ -39,9 +39,10 @@ func NewConf() *SConf {
 //NewConfBy 构建配置信息
 func NewConfBy(platName, clusterName string) *SConf {
 	c := &SConf{
-		PlatName:     platName,
-		ClusterName:  clusterName,
-		Service:      &service{},
+		PlatName:    platName,
+		ClusterName: clusterName,
+		Service:     &service{},
+		//registryAddr: "zk://192.168.0.101",
 		registryAddr: "lm://.",
 	}
 	//API  路由信息
@@ -74,45 +75,45 @@ func (s *SConf) Conf() creator.IConf {
 }
 
 //GetAPIConf 获取API服务器配置
-func (s *SConf) GetAPIConf() server.IServerConf {
+func (s *SConf) GetAPIConf() app.IAPPConf {
 	return s.GetConf(s.PlatName, "apiserver", "api", s.ClusterName)
 }
 
 //GetWebConf 获取web服务器配置
-func (s *SConf) GetWebConf() server.IServerConf {
+func (s *SConf) GetWebConf() app.IAPPConf {
 	return s.GetConf(s.PlatName, "webserver", "web", s.ClusterName)
 }
 
 //GetWSConf 获取API服务器配置
-func (s *SConf) GetWSConf() server.IServerConf {
+func (s *SConf) GetWSConf() app.IAPPConf {
 	return s.GetConf(s.PlatName, "wsserver", "ws", s.ClusterName)
 }
 
 //GetCronConf 获取cron服务器配置
-func (s *SConf) GetCronConf() server.IServerConf {
+func (s *SConf) GetCronConf() app.IAPPConf {
 	return s.GetConf(s.PlatName, "cronserver", "cron", s.ClusterName)
 }
 
 //GetMQCConf 获取mqc服务器配置
-func (s *SConf) GetMQCConf() server.IServerConf {
+func (s *SConf) GetMQCConf() app.IAPPConf {
 	global.Def.ServerTypes = []string{http.API, http.Web, http.WS, cron.CRON, mqc.MQC}
 	return s.GetConf(s.PlatName, "mqcserver", "mqc", s.ClusterName)
 }
 
 //GetRPCConf 获取rpc服务器配置
-func (s *SConf) GetRPCConf() server.IServerConf {
+func (s *SConf) GetRPCConf() app.IAPPConf {
 	return s.GetConf(s.PlatName, "rpcserver", "rpc", s.ClusterName)
 }
 
 //GetConf 获取配置信息
-func (s *SConf) GetConf(platName string, systemName string, serverType string, clusterName string) server.IServerConf {
+func (s *SConf) GetConf(platName string, systemName string, serverType string, clusterName string) app.IAPPConf {
 
 	if err := s.IConf.Pub(platName, systemName, clusterName, s.registryAddr, true); err != nil {
 		panic(err)
 	}
 
 	path := registry.Join(platName, systemName, serverType, clusterName, "conf")
-	conf, err := server.NewServerConf(path, s.Registry)
+	conf, err := app.NewAPPConf(path, s.Registry)
 	if err != nil {
 		panic(err)
 	}

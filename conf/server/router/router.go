@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -27,7 +28,7 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers []*Router `json:"routers,omitempty"`
+	Routers []*Router `json:"routers,omitempty" toml:"routers,omitempty"`
 }
 
 func (h *Routers) String() string {
@@ -38,13 +39,18 @@ func (h *Routers) String() string {
 	return sb.String()
 }
 
+//GetRouters 获取路由列表
+func (h *Routers) GetRouters() []*Router {
+	return h.Routers
+}
+
 //Router 路由信息
 type Router struct {
-	Path     string   `json:"path,omitempty" valid:"ascii,required"`
-	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"`
-	Service  string   `json:"service" valid:"ascii,required"`
-	Encoding string   `json:"encoding,omitempty"`
-	Pages    []string `json:"pages,omitempty"`
+	Path     string   `json:"path,omitempty" valid:"ascii,required" toml:"path,omitempty"`
+	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE|HEAD|TRACE|OPTIONS)"  toml:"action,omitempty"`
+	Service  string   `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
+	Encoding string   `json:"encoding,omitempty" toml:"encoding,omitempty"`
+	Pages    []string `json:"pages,omitempty" toml:"pages,omitempty"`
 }
 
 //NewRouter 构建路径配置
@@ -71,6 +77,12 @@ func (r *Router) GetEncoding() string {
 //IsUTF8 是否是UTF8编码
 func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
+}
+
+//IsUTF8 是否是UTF8编码
+func (r *Router) String() string {
+	bytes, _ := json.Marshal(r)
+	return string(bytes)
 }
 
 //NewRouters 构建路由
@@ -112,24 +124,18 @@ func (h *Routers) GetPath() []string {
 	return list
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Routers
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置路由
-func GetConf(cnf conf.IMainConf) (router *Routers) {
+func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
 	router = new(Routers)
-	_, err := cnf.GetSubObject("router", &router)
+	_, err = cnf.GetSubObject("router", &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
-		router = NewRouters()
+		return NewRouters(), nil
 	}
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("获取路由(%s)失败:%w", cnf.GetMainPath(), err))
+		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetServerPath(), err)
 	}
 	if b, err := govalidator.ValidateStruct(router); !b {
-		panic(fmt.Errorf("路由(%s)配置有误:%w", cnf.GetMainPath(), err))
+		return nil, fmt.Errorf("路由(%s)配置有误:%w", cnf.GetServerPath(), err)
 	}
-	return router
+	return router, nil
 }

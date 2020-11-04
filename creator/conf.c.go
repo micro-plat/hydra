@@ -46,8 +46,8 @@ type IConf interface {
 	//GetRPC() 获取rpc服务器配置
 	GetRPC() *rpcBuilder
 
-	//Custome 自定义服务器配置
-	Custome(tp string, s ...interface{}) customerBuilder
+	//Custom 自定义服务器配置
+	Custom(tp string, s ...interface{}) customerBuilder
 
 	//CRON 构建cron服务器配置
 	CRON(opts ...cron.Option) *cronBuilder
@@ -138,7 +138,8 @@ func (c *conf) GetAPI() *httpBuilder {
 	if api, ok := c.data[global.API]; ok {
 		return api.(*httpBuilder)
 	}
-	return c.API(":8080")
+
+	return c.API(api.DefaultAPIAddress)
 }
 
 //Web web服务器配置
@@ -154,7 +155,7 @@ func (c *conf) GetWeb() *httpBuilder {
 	if web, ok := c.data[global.Web]; ok {
 		return web.(*httpBuilder)
 	}
-	return c.Web(":8089")
+	return c.Web(api.DefaultWEBAddress)
 }
 
 //Web web服务器配置
@@ -170,7 +171,7 @@ func (c *conf) GetWS() *httpBuilder {
 	if ws, ok := c.data[global.WS]; ok {
 		return ws.(*httpBuilder)
 	}
-	return c.WS(":8070")
+	return c.WS(api.DefaultWSAddress)
 }
 
 //RPC rpc服务器配置
@@ -185,7 +186,7 @@ func (c *conf) GetRPC() *rpcBuilder {
 	if rpc, ok := c.data[global.RPC]; ok {
 		return rpc.(*rpcBuilder)
 	}
-	return c.RPC(":8090")
+	return c.RPC(rpc.DefaultRPCAddress)
 }
 
 //CRON cron服务器配置
@@ -223,8 +224,21 @@ func (c *conf) Vars() vars {
 	return c.vars
 }
 
-//Custome 用户自定义配置服务
-func (c *conf) Custome(tp string, s ...interface{}) customerBuilder {
+//Vars 平台变量配置
+func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
+	tpv, ok := c.vars[tp]
+	if !ok {
+		return
+	}
+	val, ok = tpv[name]
+	if !ok {
+		return
+	}
+	return
+}
+
+//Custom 用户自定义配置服务
+func (c *conf) Custom(tp string, s ...interface{}) customerBuilder {
 	if _, ok := c.data[tp]; ok {
 		panic(fmt.Sprintf("不能重复注册%s", tp))
 	}

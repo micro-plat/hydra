@@ -9,17 +9,22 @@ import (
 
 //Task cron任务的task明细
 type Task struct {
-	Cron    string `json:"cron" valid:"ascii,required" toml:"cron,omitempty"`
-	Service string `json:"service" valid:"ascii,required" toml:"service,omitempty"`
-	Disable bool   `json:"disable,omitemptye" toml:"disable,omitempty"`
+	Cron    string `json:"cron,omitempty" valid:"ascii,required" toml:"cron,omitempty"`
+	Service string `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
+	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //NewTask 创建任务信息
-func NewTask(cron string, service string) *Task {
-	return &Task{
+func NewTask(cron string, service string, opts ...Option) *Task {
+	t := &Task{
 		Cron:    cron,
 		Service: service,
 	}
+
+	for _, f := range opts {
+		f(t)
+	}
+	return t
 }
 
 //GetUNQ 获取任务的唯一标识

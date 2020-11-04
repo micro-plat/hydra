@@ -40,10 +40,10 @@ type Auth struct {
 }
 
 //New 创建远程服务验证参数
-func New(service string, opts ...Option) *Auth {
+func New(service string, opts ...AuthOption) *Auth {
 	r := &Auth{
 		Service:  service,
-		Requests: []string{"*"},
+		Requests: []string{},
 		Connect:  &Connect{},
 		Params:   make(map[string]interface{}),
 		Required: make([]string, 0, 1),
@@ -53,6 +53,10 @@ func New(service string, opts ...Option) *Auth {
 	for _, opt := range opts {
 		opt(r)
 	}
+	if len(r.Requests) <= 0 {
+		r.Requests = []string{"/*"}
+	}
+	r.PathMatch = conf.NewPathMatch(r.Requests...)
 	return r
 }
 

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -9,7 +10,11 @@ func Limit() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取限流器
-		limiter := ctx.ServerConf().GetLimiter()
+		limiter, err := ctx.ServerConf().GetLimiter()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if limiter.Disable {
 			ctx.Next()
 			return

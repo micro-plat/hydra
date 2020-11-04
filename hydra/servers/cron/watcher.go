@@ -10,7 +10,7 @@ func (w *Responsive) watch() {
 
 	//监控集群信息
 START:
-	cluster, err := w.conf.GetMainConf().GetCluster()
+	cluster, err := w.conf.GetServerConf().GetCluster()
 	if err != nil {
 		w.log.Error("获取集群信息失败", err)
 		select {
@@ -32,7 +32,7 @@ LOOP:
 			watcher.Close()
 			break LOOP
 		case <-notify:
-			server, err := cron.GetConf(w.conf.GetMainConf())
+			server, err := cron.GetConf(w.conf.GetServerConf())
 			if err != nil {
 				w.log.Errorf("加载cron配置失败：%w", err)
 				continue

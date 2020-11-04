@@ -1,0 +1,171 @@
+package memcached
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/micro-plat/hydra/conf/vars/cache/memcached"
+)
+
+func TestClient_Set(t *testing.T) {
+	c, _ := NewByOpts(memcached.WithAddress("192.168.106.58:11211"))
+	type args struct {
+		key       string
+		value     string
+		expiresAt int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "1", args: args{key: "hydra_test_set_key1", value: "100", expiresAt: 300}, wantErr: false},
+		{name: "2", args: args{key: "hydra_test_set_key2", value: "value", expiresAt: 300}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := c.Set(tt.args.key, tt.args.value, tt.args.expiresAt); (err != nil) != tt.wantErr {
+				t.Errorf("Client.Set() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			got, err := c.Get(tt.args.key)
+			if err != nil {
+				t.Errorf("Client.Get() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got != tt.args.value {
+				t.Errorf("Client.Get() = %v, want %v", got, tt.args.value)
+			}
+ 		})
+	}
+}
+ 
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Gets(t *testing.T) {
+	c, _ := NewByOpts(memcached.WithAddress("192.168.106.58:11211"))
+
+	type args struct {
+		key []string
+		vals []string 
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantR   []string
+		wantErr bool
+	}{
+		{name: "1", args: args{key: []string{"a", "b", "hydra_test_key1", "hydra_test_key2"},vals:[]string{"0","a","100","value"}}, wantR: []string{"0", "a", "100", "value"}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			for i:= range tt.args.key{
+				 c.Set(tt.args.key[i], tt.args.vals[i], 500)
+			}
+ 
+			gotR, err := c.Gets(tt.args.key...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.Gets() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("Client.Gets() = %v, want %v", gotR, tt.wantR)
+			}
+		})
+	}
+}
+
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Add(t *testing.T) {
+	c, _ := NewByOpts(memcached.WithAddress("192.168.106.58:11211"))
+
+	type args struct {
+		key       string
+		value     string
+		expiresAt int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "1", args: args{key: "", value: "", expiresAt: 60}, wantErr: true},
+		{name: "1", args: args{key: "hydra_test_key1", value: "value", expiresAt: 60}, wantErr: true},
+		{name: "1", args: args{key: "hydra_test_key3", value: "value", expiresAt: 60}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := c.Add(tt.args.key, tt.args.value, tt.args.expiresAt); (err != nil) != tt.wantErr {
+				t.Errorf("Client.Add() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Decrement(t *testing.T) {
+	c, _ := NewByOpts(memcached.WithAddress("192.168.106.58:11211"))
+
+	type args struct {
+		key   string
+		orgval string 
+		delta int64
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantN   int64
+		wantErr bool
+	}{
+ 
+		{name: "3", args: args{key: "hydra_Decrementtest_key1",orgval:"400", delta: 100}, wantN: 300, wantErr: false},
+		{name: "4", args: args{key: "hydra_Decrementtest_key1",orgval:"500", delta: 100}, wantN: 400, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.Set(tt.args.key, tt.args.orgval,500)
+			gotN, err := c.Decrement(tt.args.key, tt.args.delta)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.Decrement() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotN != tt.wantN {
+				t.Errorf("Client.Decrement() = %v, want %v", gotN, tt.wantN)
+			}
+		})
+	}
+}
+
+//测试用例前.先执行Set的测试用例TestClient_Set
+func TestClient_Increment(t *testing.T) {
+	c, _ := NewByOpts(memcached.WithAddress("192.168.106.58:11211"))
+
+	type args struct {
+		key   string
+		orgval string  
+		delta int64
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantN   int64
+		wantErr bool
+	}{
+		{name: "1", args: args{key: "hydra_Incrementtest", delta: 100}, wantErr: true},
+ 		{name: "4", args: args{key: "hydra_Incrementtest_key1",  delta: -300}, wantErr: true},
+		{name: "3", args: args{key: "hydra_Incrementtest_key3",orgval:"100" ,delta: 100}, wantN: 200, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.args.orgval != ""{
+				c.Set(tt.args.key, tt.args.orgval,500)
+			}
+			gotN, err := c.Increment(tt.args.key, tt.args.delta)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.Increment() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotN != tt.wantN {
+				t.Errorf("Client.Increment() = %v, want %v", gotN, tt.wantN)
+			}
+		})
+	}
+}

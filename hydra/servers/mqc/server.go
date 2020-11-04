@@ -3,11 +3,11 @@ package mqc
 import (
 	"fmt"
 	"time"
+
 	"github.com/micro-plat/hydra/global"
 
-
 	"github.com/micro-plat/hydra/conf/server/queue"
-  )
+)
 
 //Server cron服务器
 type Server struct {
@@ -17,8 +17,8 @@ type Server struct {
 }
 
 //NewServer 创建mqc服务器
-func NewServer(addr string, raw []byte, tasks ...*queue.Queue) (t *Server, err error) {
-	p, err := NewProcessor(addr, raw)
+func NewServer(proto string, raw []byte, tasks ...*queue.Queue) (t *Server, err error) {
+	p, err := NewProcessor(proto, string(raw))
 	if err != nil {
 		return nil, err
 	}
@@ -77,5 +77,8 @@ func (s *Server) Resume() (bool, error) {
 
 //GetAddress 获取当前服务地址
 func (s *Server) GetAddress() string {
-	return fmt.Sprintf("mqc://%s",global.LocalIP())
+	if s.addr == "" {
+		s.addr = fmt.Sprintf("mqc://%s", global.LocalIP())
+	}
+	return s.addr
 }

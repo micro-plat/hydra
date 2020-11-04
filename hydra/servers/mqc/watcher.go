@@ -6,7 +6,7 @@ import (
 
 func (w *Responsive) watch() {
 START:
-	cluster, err := w.conf.GetMainConf().GetCluster()
+	cluster, err := w.conf.GetServerConf().GetCluster()
 	if err != nil {
 		w.log.Errorf("无法获取到集群信息：%v", err)
 		tk := time.After(time.Second)
@@ -27,7 +27,11 @@ LOOP:
 			watcher.Close()
 			break LOOP
 		case <-notify:
-			server := w.conf.GetMQCMainConf()
+			server, err := w.conf.GetMQCMainConf()
+			if err != nil {
+				w.log.Error("mqc主配置获取失败:", err)
+				continue
+			}
 			if !cluster.Current().IsAvailable() {
 				w.log.Error("当前集群节点不可用")
 				continue

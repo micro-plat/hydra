@@ -6,26 +6,38 @@ import (
 	"github.com/micro-plat/hydra/conf/server/queue"
 )
 
-type mqcSub struct {
-	cnf    conf.IMainConf
+type MQCSub struct {
+	cnf    conf.IServerConf
 	queues *Loader
 	server *Loader
 }
 
-func newMQCSub(cnf conf.IMainConf) *mqcSub {
-	return &mqcSub{
-		cnf:    cnf,
-		queues: GetLoader(cnf, queue.ConfHandler(queue.GetConf).Handle),
-		server: GetLoader(cnf, mqc.ConfHandler(mqc.GetConf).Handle),
+func NewMQCSub(cnf conf.IServerConf) *MQCSub {
+	return &MQCSub{
+		cnf: cnf,
+		queues: GetLoader(cnf, func(cnf conf.IServerConf) (interface{}, error) {
+			return queue.GetConf(cnf)
+		}),
+		server: GetLoader(cnf, func(cnf conf.IServerConf) (interface{}, error) {
+			return mqc.GetConf(cnf)
+		}),
 	}
 }
 
 //GetMQCMainConf MQC 服务器配置
-func (s *mqcSub) GetMQCMainConf() *mqc.Server {
-	return s.server.GetConf().(*mqc.Server)
+func (s *MQCSub) GetMQCMainConf() (*mqc.Server, error) {
+	mqcObj, err := s.server.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return mqcObj.(*mqc.Server), nil
 }
 
 //GetMQCQueueConf 获取MQC服务器的队列配置
-func (s *mqcSub) GetMQCQueueConf() *queue.Queues {
-	return s.queues.GetConf().(*queue.Queues)
+func (s *MQCSub) GetMQCQueueConf() (*queue.Queues, error) {
+	queuesObj, err := s.queues.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return queuesObj.(*queue.Queues), nil
 }

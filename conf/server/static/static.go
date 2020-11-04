@@ -28,7 +28,7 @@ type Static struct {
 	FirstPage string              `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
 	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
 	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
-	fileMap   map[string]FileInfo `json:"-"`
+	FileMap   map[string]FileInfo `json:"-"`
 }
 
 type FileInfo struct {
@@ -51,35 +51,34 @@ func (s *Static) AllowRequest(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead
 }
 
-type ConfHandler func(cnf conf.IMainConf) *Static
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 设置static
-func GetConf(cnf conf.IMainConf) *Static {
+func GetConf(cnf conf.IServerConf) (*Static, error) {
 	//设置静态文件路由
 	static := Static{
-		fileMap: map[string]FileInfo{},
+		FileMap: map[string]FileInfo{},
 	}
 	_, err := cnf.GetSubObject("static", &static)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("static配置有误:%v", err))
+		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
 		static.Disable = true
-		return &static
+		return &static, nil
+	}
+
+	if static.Exts == nil {
+		static.Exts = []string{}
 	}
 	if b, err := govalidator.ValidateStruct(&static); !b {
-		panic(fmt.Errorf("static配置有误:%v", err))
+		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
+	fmt.Println("static.Dir:", static.Dir)
 	if err != nil {
-		panic(fmt.Errorf("%s获取失败:%v", static.Archive, err))
+		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
 	static.RereshData()
-	return &static
+	return &static, nil
 }
 
 var waitRemoveDir = make([]string, 0, 1)
@@ -88,6 +87,7 @@ func unarchive(dir string, path string) (string, error) {
 	if path == "" {
 		return dir, nil
 	}
+
 	reader, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -99,7 +99,8 @@ func unarchive(dir string, path string) (string, error) {
 	if archive == nil {
 		return "", fmt.Errorf("指定的文件不是归档文件:%s", path)
 	}
-	tmpDir, err := ioutil.TempDir("", "hydra")
+	rootPath := filepath.Dir(os.Args[0])
+	tmpDir, err := ioutil.TempDir(rootPath, "hydra")
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}

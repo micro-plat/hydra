@@ -21,7 +21,7 @@ func newHandleHook() *handleHook {
 	}
 }
 
-//AddHandling 添加handle预处理勾子
+//AddHandling 添加handle预处理钩子
 func (s *handleHook) AddHandling(service string, h ...context.IHandler) error {
 	if len(h) == 0 {
 		return nil
@@ -30,7 +30,7 @@ func (s *handleHook) AddHandling(service string, h ...context.IHandler) error {
 	return nil
 }
 
-//AddHandled 添加handle后处理勾子
+//AddHandled 添加handle后处理钩子
 func (s *handleHook) AddHandled(service string, h ...context.IHandler) error {
 	if len(h) == 0 {
 		return nil
@@ -39,7 +39,7 @@ func (s *handleHook) AddHandled(service string, h ...context.IHandler) error {
 	return nil
 }
 
-//AddClosingHanle 添加服务关闭勾子
+//AddClosingHanle 添加服务关闭钩子
 func (s *handleHook) AddClosingHanle(c ...interface{}) error {
 	if len(c) == 0 {
 		return nil
@@ -50,14 +50,14 @@ func (s *handleHook) AddClosingHanle(c ...interface{}) error {
 		}
 		if vv, ok := h.(func() error); ok {
 			s.closings = append(s.closings, vv)
-			return nil
+			//return nil  //此时不该return  @hujun
 		} else if vv, ok := h.(func()); ok {
 			s.closings = append(s.closings, func() error {
 				vv()
 				return nil
 			})
 		} else {
-			return fmt.Errorf("勾子函数签名不支持 %v", reflect.TypeOf(h))
+			return fmt.Errorf("钩子函数签名不支持 %v", reflect.TypeOf(h))
 		}
 	}
 	return nil

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
@@ -36,8 +36,8 @@ var C = components.Def
 var OnReady = global.OnReady
 
 //Server 通过服务类型从全局缓存中获取服务配置
-func Server(tp string) server.IServerConf {
-	s, err := server.Cache.GetServerConf(tp)
+func Server(tp string) app.IAPPConf {
+	s, err := app.Cache.GetAPPConf(tp)
 	if err == nil {
 		return s
 	}

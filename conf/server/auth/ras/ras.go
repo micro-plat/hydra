@@ -11,15 +11,14 @@ import (
 //RASAuth 远程服务验证组
 type RASAuth struct {
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
-	Auth    []*Auth `json:"auth"`
+	Auth    []*Auth `json:"auth" toml:"auth"`
 }
 
 //NewRASAuth 构建RASAuth认证
-func NewRASAuth(auth ...*Auth) *RASAuth {
+func NewRASAuth(opts ...Option) *RASAuth {
 	r := &RASAuth{}
-	for _, a := range auth {
-		a.PathMatch = conf.NewPathMatch(a.Requests...)
-		r.Auth = append(r.Auth, a)
+	for _, opt := range opts {
+		opt(r)
 	}
 	return r
 }
@@ -27,37 +26,31 @@ func NewRASAuth(auth ...*Auth) *RASAuth {
 //Match 检查指定的路径是否有对应的认证服务
 func (a RASAuth) Match(p string) (bool, *Auth) {
 	for _, auth := range a.Auth {
-		if ok, _ := auth.Match(p); ok {
+		if ok, _ := auth.Match(p, "/"); ok {
 			return true, auth
 		}
 	}
 	return false, nil
 }
 
-type ConfHandler func(cnf conf.IMainConf) *RASAuth
-
-func (h ConfHandler) Handle(cnf conf.IMainConf) interface{} {
-	return h(cnf)
-}
-
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (auths *RASAuth) {
+func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
-	_, err := cnf.GetSubObject(registry.Join("auth", "RASAuth"), auths)
+	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)
 	if err != nil && err != conf.ErrNoSetting {
-		panic(fmt.Errorf("RASAuth配置有误:%v", err))
+		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 	}
 	if err == conf.ErrNoSetting {
 		auths.Disable = true
-		return auths
+		return auths, nil
 	}
 
 	for _, auth := range auths.Auth {
-		if b, err := govalidator.ValidateStruct(&auth); !b {
-			panic(fmt.Errorf("RASAuth配置有误:%v", err))
+		if b, err := govalidator.ValidateStruct(auth); !b {
+			return nil, fmt.Errorf("RASAuth配置有误:%v", err)
 		}
 		auth.PathMatch = conf.NewPathMatch(auth.Requests...)
 	}
-	return auths
+	return auths, nil
 }

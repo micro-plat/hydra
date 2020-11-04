@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server"
+	"github.com/micro-plat/hydra/conf/app"
 	c "github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
@@ -26,7 +26,7 @@ func Test_rpath_GetRouter(t *testing.T) {
 	tests := []struct {
 		name       string
 		ctx        context.IInnerContext
-		serverConf server.IServerConf
+		serverConf app.IAPPConf
 		meta       conf.IMeta
 		want       *router.Router
 		wantError  string
@@ -61,7 +61,7 @@ func Test_rpath_GetRouter(t *testing.T) {
 				assert.Equal(t, tt.wantError, r, tt.name)
 			}
 		}()
-		got := c.GetRouter()
+		got, _ := c.GetRouter()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

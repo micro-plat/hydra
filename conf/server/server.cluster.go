@@ -16,7 +16,7 @@ import (
 
 var cluster = cmap.New(2)
 
-func getCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
+func getCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
 	_, c, err := cluster.SetIfAbsentCb(pub.GetServerPubPath(clusterName...), func(...interface{}) (interface{}, error) {
 		return NewCluster(pub, rgst, clusterName...)
 	})
@@ -28,7 +28,7 @@ func getCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (
 
 //Cluster 集群
 type Cluster struct {
-	conf.IPub
+	conf.IServerPub
 	index       int64
 	registry    registry.IRegistry
 	current     conf.ICNode
@@ -41,9 +41,9 @@ type Cluster struct {
 }
 
 //NewCluster 管理服务器的主配置信息
-func NewCluster(pub conf.IPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
+func NewCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
 	s = &Cluster{
-		IPub:        pub,
+		IServerPub:  pub,
 		registry:    rgst,
 		nodes:       cmap.New(4),
 		watchers:    cmap.New(2),
@@ -69,9 +69,13 @@ func (c *Cluster) Current() conf.ICNode {
 
 //Next 采用轮循的方式获得下一个节点
 func (c *Cluster) Next() (conf.ICNode, bool) {
-	nid := atomic.AddInt64(&c.index, 1)
 	c.lock.RLock()
 	defer c.lock.RUnlock()
+	if len(c.keyCache) == 0 {
+		return nil, false
+	}
+	nid := atomic.AddInt64(&c.index, 1)
+
 	key := c.keyCache[int(nid%int64(len(c.keyCache)))]
 	v, ok := c.nodes.Get(key)
 	if ok {
@@ -89,6 +93,11 @@ func (c *Cluster) Iter(f func(conf.ICNode) bool) {
 			return
 		}
 	}
+}
+
+//Len 获取集群节点长度
+func (c *Cluster) Len() int {
+	return len(c.nodes.Items())
 }
 
 //Watch 监控节点变化
@@ -154,8 +163,13 @@ func (c *Cluster) getCluster() error {
 		}
 		//移除缓存key
 		if removeNow {
+			node := v.(*CNode)
+			if node.IsCurrent() {
+				c.current = &CNode{}
+			}
 			c.removeKey(key)
 		}
+
 		return removeNow
 	})
 
@@ -201,6 +215,7 @@ LOOP:
 			c.getCluster()
 		}
 	}
+
 	return nil
 }
 

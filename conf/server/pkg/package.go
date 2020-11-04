@@ -22,7 +22,7 @@ func NewPackage(url string, version string, crc32 uint32) *Package {
 }
 
 //GetConf 获取配置信息
-func GetConf(cnf conf.IMainConf) (pkg *Package, err error) {
+func GetConf(cnf conf.IServerConf) (pkg *Package, err error) {
 	_, err = cnf.GetSubObject("package", &pkg)
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("package配置有误:%v", err)

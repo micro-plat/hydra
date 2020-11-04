@@ -27,7 +27,7 @@ type IPublisher interface {
 
 //Publisher 服务发布程序
 type Publisher struct {
-	c          conf.IMainConf
+	c          conf.IServerConf
 	log        logger.ILogging
 	serverNode string
 	serverName string
@@ -39,7 +39,7 @@ type Publisher struct {
 }
 
 //New 构建服务发布程序
-func New(c conf.IMainConf) *Publisher {
+func New(c conf.IServerConf) *Publisher {
 	p := &Publisher{
 		c:         c,
 		watchChan: make(chan struct{}),
@@ -97,18 +97,19 @@ func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID str
 		return fmt.Errorf("服务器发布数据转换为json失败:%w", err)
 	}
 	data := string(buff)
-	if err := p.pubServerNode(serverName, data); err != nil {
+	if _, err := p.PubServerNode(serverName, data); err != nil {
 		return err
 	}
 	switch p.c.GetServerType() {
 	case global.API, global.Web:
-		if err := p.pubDNSNode(serverName); err != nil {
+		if _, err := p.PubDNSNode(serverName); err != nil {
 			return err
 		}
-		return p.pubAPIServiceNode(serverName, data)
+		_, err := p.PubAPIServiceNode(serverName, data)
+		return err
 	case global.RPC:
 		for _, srv := range service {
-			if err := p.pubRPCServiceNode(serverName, srv, data); err != nil {
+			if _, err := p.PubRPCServiceNode(serverName, srv, data); err != nil {
 				return err
 			}
 		}
@@ -152,66 +153,68 @@ func (p *Publisher) Update(serverName string, serviceAddr string, clusterID stri
 	return nil
 }
 
-//pubRPCServiceNode 发布RPC服务节点
-func (p *Publisher) pubRPCServiceNode(serverName string, service string, data string) error {
+//PubRPCServiceNode 发布RPC服务节点
+func (p *Publisher) PubRPCServiceNode(serverName string, service string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetRPCServicePubPath(service), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
-		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
+		return nil, fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
 	}
 	p.appendPub(npath, data)
-	return nil
+	return p.pubs, nil
 }
 
-//pubAPIServiceNode 发布API服务节点
-func (p *Publisher) pubAPIServiceNode(serverName string, data string) error {
+//PubAPIServiceNode 发布API服务节点
+func (p *Publisher) PubAPIServiceNode(serverName string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetServicePubPath(), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
-		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
+		return nil, fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
 	}
 	p.appendPub(npath, data)
-	return nil
+	return p.pubs, nil
 }
 
-//pubDNSNode 发布DNS服务节点
-func (p *Publisher) pubDNSNode(serverName string) error {
+//PubDNSNode 发布DNS服务节点
+func (p *Publisher) PubDNSNode(serverName string) (map[string]string, error) {
 	//获取服务嚣配置
 	server, err := api.GetConf(p.c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if server.Domain == "" {
-		return nil
+		return p.pubs, nil
 	}
 
 	//创建DNS节点
 	ip, _, err := net.SplitHostPort(serverName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	path := registry.Join(p.c.GetDNSPubPath(server.Domain), ip)
+	fmt.Println("path:", path)
 	err = p.c.GetRegistry().CreateTempNode(path, "")
 	if err != nil {
 		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
-		return err
+		return nil, err
 	}
 	p.appendPub(path, "")
-	return nil
+	return p.pubs, nil
 }
 
-//pubServerNode 发布集群节点，用于服务监控
-func (p *Publisher) pubServerNode(serverName string, data string) error {
+//PubServerNode 发布集群节点，用于服务监控
+func (p *Publisher) PubServerNode(serverName string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", serverName, p.c.GetServerID()))
 
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
-		return fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
+		return nil, fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
 	}
 	p.serverNode = npath
 	p.appendPub(npath, data)
-	return nil
+	return p.pubs, nil
 }
+
 func (p *Publisher) appendPub(path string, data string) {
 	p.lock.Lock()
 	defer p.lock.Unlock()

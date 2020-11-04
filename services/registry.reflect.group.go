@@ -8,6 +8,15 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+type handlerType int
+
+const (
+	handle handlerType = iota + 1
+	handling
+	handled
+	fallback
+)
+
 type UnitGroup struct {
 	Path     string
 	Handling context.IHandler
@@ -29,12 +38,8 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		g.Handling = h
 		return
 	}
-	_, service, _ := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handling = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Service: service, Handling: h}
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
+	g.storeService(name, h, handling)
 }
 
 //AddHandled 添加后处理函数
@@ -43,35 +48,44 @@ func (g *UnitGroup) AddHandled(name string, h context.IHandler) {
 		g.Handled = h
 		return
 	}
-	_, service, _ := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handled = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Service: service, Handled: h}
+	g.storeService(name, h, handled)
 }
 
 //AddHandle 添加处理函数
 func (g *UnitGroup) AddHandle(name string, h context.IHandler) {
-
-	path, service, actions := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Handle = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Path: path, Service: service, Actions: actions, Handle: h}
+	g.storeService(name, h, handle)
 }
 
 //AddFallback 添加降级函数
 func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
-	_, service, _ := g.getPaths(g.Path, name)
-	if _, ok := g.Services[service]; ok {
-		g.Services[service].Fallback = h
-		return
-	}
-	g.Services[service] = &Unit{Group: g, Service: service, Fallback: h}
+	g.storeService(name, h, fallback)
 }
-func (g *UnitGroup) getPaths(path string, name string) (rpath string, service string, action []string) {
+
+func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
+	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
+	path, service, actions := g.getPaths(g.Path, name)
+	unit, ok := g.Services[service]
+	if !ok {
+		unit = &Unit{Group: g, Path: path, Service: service}
+		g.Services[service] = unit
+	}
+
+	switch htype {
+	case handling:
+		unit.Handling = handler
+	case handle:
+		unit.Actions = actions
+		unit.Handle = handler
+	case handled:
+		unit.Handled = handler
+	case fallback:
+		unit.Fallback = handler
+	default:
+	}
+}
+
+func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
+
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {
 		return path, path, []string{}
@@ -82,6 +96,13 @@ func (g *UnitGroup) getPaths(path string, name string) (rpath string, service st
 		if strings.EqualFold(m, name) {
 			return path, registry.Join(path, "$"+name), []string{m}
 		}
+	}
+
+	//@fix 路径里面对最后一个*进行替换 @hj
+	lastIndex := strings.LastIndex(path, "*")
+	if lastIndex > -1 {
+		path = path[:lastIndex] + name + path[lastIndex+1:]
+		return path, path, router.DefMethods
 	}
 
 	//非RESTful

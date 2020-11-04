@@ -16,14 +16,16 @@ var closerLock sync.Mutex
 
 //Close 关闭全局应用
 func (m *global) Close() {
-	m.isClose = true
-	close(m.close)
 	closerLock.Lock()
 	defer closerLock.Unlock()
+	if m.isClose {
+		return
+	}
+	m.isClose = true
+	close(m.close)
 	for _, c := range closers {
 		c.Close()
 	}
-
 }
 func (m *global) AddCloser(f interface{}) {
 	closerLock.Lock()
@@ -35,6 +37,10 @@ func (m *global) AddCloser(f interface{}) {
 	}
 	if v, ok := f.(closeHandle); ok {
 		closers = append(closers, v)
+		return
+	}
+	if v, ok := f.(func() error); ok {
+		closers = append(closers, closeHandle(v))
 		return
 	}
 }

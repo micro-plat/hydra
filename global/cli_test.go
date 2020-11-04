@@ -12,8 +12,9 @@ import (
 func Test_newCli(t *testing.T) {
 	assert.Equal(t,
 		&ucli{
-			Name:  "cli_name",
-			flags: make([]cli.Flag, 0, 1),
+			Name:      "cli_name",
+			flags:     make([]cli.Flag, 0, 1),
+			flagNames: map[string]bool{},
 		},
 		newCli("cli_name"),
 		"创建cli对象",
@@ -134,37 +135,37 @@ func Test_doCliCallback(t *testing.T) {
 	set := &flag.FlagSet{}
 
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name        string
+		args        args
+		isNillError bool
 	}{
 		{
 			name: "不存在的command名称-完全包含cmdName",
 			args: args{
 				c: newCtx(app, set, "runtest"), //run的完全包含
 			},
-			wantErr: true,
+			isNillError: true,
 		},
 		{
 			name: "不存在的command名称-只包含cmdName前缀",
 			args: args{
 				c: newCtx(app, set, "r"), //run的前缀 r
 			},
-			wantErr: false,
+			isNillError: true,
 		},
 		{
 			name: "不存在的command名称-完全不包含cmdName",
 			args: args{
 				c: newCtx(app, set, "nonecmd"),
 			},
-			wantErr: true,
+			isNillError: true,
 		},
 	}
 	//t.Log("clis的长度：", len(clis))
 	for _, tt := range tests {
 		//t.Log("cmd.Name:", tt.args.c.Command.Name)
 		err := doCliCallback(tt.args.c)
-		assert.IsNil(t, tt.wantErr, err, tt.name)
+		assert.IsNil(t, tt.isNillError, err, tt.name)
 	}
 }
 func newCtx(app *cli.App, set *flag.FlagSet, name string) *cli.Context {

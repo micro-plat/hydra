@@ -17,12 +17,17 @@ func APIKeyAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取apikey配置
-		auth := ctx.ServerConf().GetAPIKeyConf()
+		auth, err := ctx.ServerConf().GetAPIKeyConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
+
 		if auth.Disable {
 			ctx.Next()
 			return
 		}
-		if ok, _ := auth.Match(ctx.Request().Path().GetRequestPath()); ok {
+		if ok, _ := auth.Match(ctx.Request().Path().GetRequestPath(), "/"); ok {
 			ctx.Next()
 			return
 		}

@@ -1,5 +1,7 @@
 package middleware
 
+import "net/http"
+
 var originName = "Origin"
 
 //Header 响应头设置
@@ -8,7 +10,11 @@ func Header() Handler {
 	return func(ctx IMiddleContext) {
 
 		//1. 获取header配置
-		headers := ctx.ServerConf().GetHeaderConf()
+		headers, err := ctx.ServerConf().GetHeaderConf()
+		if err != nil {
+			ctx.Response().Abort(http.StatusNotExtended, err)
+			return
+		}
 		if len(headers) > 0 {
 			ctx.Response().AddSpecial("hdr")
 		}

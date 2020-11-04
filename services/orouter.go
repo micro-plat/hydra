@@ -96,6 +96,7 @@ func newPathRouter(path string) *pathRouter {
 	}
 	return r
 }
+
 func (p *pathRouter) Add(service string, action []string, opts ...interface{}) error {
 	for _, a := range action {
 		if _, ok := p.action[a]; !ok {

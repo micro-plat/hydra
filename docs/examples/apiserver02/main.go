@@ -8,7 +8,9 @@ import (
 
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/conf/server"
+	 
+	cfapp "github.com/micro-plat/hydra/conf/app"
+
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
@@ -26,12 +28,12 @@ func main() {
 	app.API("/order/request", request)
 	app.API("/order", &OrderService{})
 
-	app.OnStarting(func(server.IServerConf) error {
+	app.OnStarting(func(cfapp.IAPPConf) error {
 		hydra.G.Log().Info("server.OnServerStarting")
 		return nil
 	})
 
-	app.OnClosing(func(server.IServerConf) error {
+	app.OnClosing(func(cfapp.IAPPConf) error {
 		hydra.G.Log().Info("server.OnServerClosing")
 		return nil
 	})

@@ -12,8 +12,8 @@ import (
 )
 
 type subscriber struct {
-	f   func(t *task.Task)
-	msg chan *task.Task
+	callback func(t *task.Task)
+	taskChan chan *task.Task
 }
 
 //CRON cron消息
@@ -24,20 +24,21 @@ var _ ICRON = CRON
 //ICRON CRON动态服务
 type ICRON interface {
 	Add(cron string, service string) ICRON
+	Remove(cron string, service string) ICRON //暴露remove方法  @hj
 }
 
 type cron struct {
-	tasks  *task.Tasks
-	events []*subscriber
-	lock   sync.Mutex
-	n      chan struct{}
+	tasks       *task.Tasks
+	subscribers []*subscriber
+	lock        sync.Mutex
+	signalChan  chan struct{}
 }
 
 func newCron() *cron {
 	c := &cron{
-		tasks:  task.NewEmptyTasks(),
-		events: make([]*subscriber, 0, 0),
-		n:      make(chan struct{}, 100),
+		tasks:       task.NewEmptyTasks(),
+		subscribers: make([]*subscriber, 0, 0),
+		signalChan:  make(chan struct{}, 100),
 	}
 	go c.notify()
 	return c
@@ -54,59 +55,54 @@ func (c *cron) Add(cron string, service string) ICRON {
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
 	c.tasks.Append(task)
-	for _, s := range c.events {
-		s.msg <- task
+	for _, s := range c.subscribers {
+		s.taskChan <- task
 	}
-	c.n <- struct{}{}
+	c.signalChan <- struct{}{}
 	return c
 }
 
 //Remove 移除任务
-func (c *cron) Remove(cron string, service string) *cron {
+func (c *cron) Remove(cron string, service string) ICRON { //*cron 改为ICRON @hj
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
 	task.Disable = true
 	c.tasks.Append(task)
-	for _, s := range c.events {
-		s.msg <- task
+	for _, s := range c.subscribers {
+		s.taskChan <- task
 	}
-	c.n <- struct{}{}
+	c.signalChan <- struct{}{}
 	return c
 }
 
 //Subscribe 订阅任务
-func (c *cron) Subscribe(f func(t *task.Task)) {
+func (c *cron) Subscribe(callback func(t *task.Task)) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	subscriber := &subscriber{
-		f:   f,
-		msg: make(chan *task.Task, 255),
+		callback: callback,
+		taskChan: make(chan *task.Task, 255),
 	}
 	for _, t := range c.tasks.Tasks {
-		subscriber.msg <- t
+		subscriber.taskChan <- t
 	}
-	c.events = append(c.events, subscriber)
+	c.subscribers = append(c.subscribers, subscriber)
 }
 
 //notify 通知任务
 func (c *cron) notify() {
-BREAK:
 	for {
 		select {
 		case <-global.Current().ClosingNotify():
-			break BREAK
-		case <-c.n:
+			return
+		case <-c.signalChan:
 			c.lock.Lock()
-			for _, e := range c.events {
-			LOOP:
-				for {
-					select {
-					case t := <-e.msg:
-						e.f(t)
-					default:
-						break LOOP
-					}
+			for _, e := range c.subscribers {
+				select {
+				case t := <-e.taskChan:
+					e.callback(t)
+				default:
 				}
 			}
 			c.lock.Unlock()

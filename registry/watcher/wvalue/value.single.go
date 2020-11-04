@@ -19,8 +19,8 @@ type SingleValueWatcher struct {
 	logger     logger.ILogging
 	registry   registry.IRegistry
 	mu         sync.Mutex
-	done       bool
-	closeChan  chan struct{}
+	Done       bool          //@fix 方便测试
+	CloseChan  chan struct{} //@fix 方便测试
 }
 
 //NewSingleValueWatcher 监控节点值发生变化
@@ -30,8 +30,8 @@ func NewSingleValueWatcher(r registry.IRegistry, path string, logger logger.ILog
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		notifyChan: make(chan *watcher.ValueChangeArgs, 1),
-		closeChan:  make(chan struct{}),
+		notifyChan: make(chan *watcher.ValueChangeArgs, 10), //@fix 1改为10方便测试
+		CloseChan:  make(chan struct{}),                     //@fix 方便测试
 	}
 }
 
@@ -58,7 +58,7 @@ LOOP:
 	for !exists {
 		select {
 		case <-time.After(w.timeSpan):
-			if w.done {
+			if w.Done {
 				return nil
 			}
 			exists, err = w.registry.Exists(w.path)
@@ -83,10 +83,10 @@ LOOP:
 
 	for {
 		select {
-		case <-w.closeChan:
+		case <-w.CloseChan:
 			return nil
-		case content, ok := <-dataChan:
-			if w.done || !ok {
+		case content, ok := <-dataChan: //@bug 程序会阻塞
+			if w.Done || !ok {
 				return nil
 			}
 			if err = content.GetError(); err != nil {
@@ -104,8 +104,8 @@ LOOP:
 
 //Close 关闭监控
 func (w *SingleValueWatcher) Close() {
-	w.done = true
-	close(w.closeChan)
+	w.Done = true
+	close(w.CloseChan)
 }
 func (w *SingleValueWatcher) notifyDeleted() {
 	w.mu.Lock()
