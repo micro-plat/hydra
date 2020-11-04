@@ -15,6 +15,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/task"
 	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
 	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 
 	"github.com/micro-plat/hydra/context"
@@ -35,8 +36,9 @@ var app = hydra.NewApp(
 
 func init() {
 	hydra.Conf.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
-	hydra.Conf.Vars().Cache().Redis("xxx", cacheredis.New("5.79"))
-	hydra.Conf.Vars().Queue().Redis("xxx", queueredis.New("5.79"))
+	hydra.Conf.Vars().Cache().Redis("xxx", cacheredis.New(cacheredis.WithConfigName("5.79")))
+	//hydra.Conf.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithAddrs("192.168.5.79:6379")))
+	hydra.Conf.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
 
 	hydra.Conf.Web(":8071").Static(static.WithArchive("taosy-test"))
 	hydra.Conf.API(":8070", api.WithTimeout(10, 10)).BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.101"))
@@ -73,6 +75,7 @@ func init() {
 		ctx.Log().Info("mqc 接口服务测试,", ctx.Request().GetString("mqcv"))
 		return "success"
 	})
+	app.RPC("/rpcs/sss", &sss{})
 }
 
 func main() {
@@ -84,4 +87,16 @@ func main() {
 	// fmt.Println(len(serverMaps))
 	// serverMaps.Set("2", "2")
 	// fmt.Println(len(serverMaps))
+}
+
+type sss struct{}
+
+func (s *sss) Handle(ctx context.IContext) (r interface{}) {
+	ctx.Log().Info("mqc 接口服务测试,", ctx.Request().GetString("mqcv"))
+	return "success"
+}
+
+func (s *sss) QueryHandle(ctx context.IContext) (r interface{}) {
+	ctx.Log().Info("mqc 接口服务测试,", ctx.Request().GetString("mqcv"))
+	return "success"
 }

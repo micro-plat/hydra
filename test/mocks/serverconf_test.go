@@ -20,7 +20,7 @@ func TestGetConf(t *testing.T) {
 	assert.Equal(t, server.GetServerConf().GetServerPath(), "/hydra/apiserver/api/test/conf", "地址")
 }
 func TestRouters(t *testing.T) {
-	conf := NewConf() //构建对象
+	conf := NewConfBy("test", "testrouters") //构建对象
 
 	// conf.API(":8082")
 
@@ -28,8 +28,9 @@ func TestRouters(t *testing.T) {
 
 	server := conf.GetAPIConf()
 
-	rconf := server.GetRouterConf()
+	rconf, err := server.GetRouterConf()
 
-	assert.Equal(t, len(rconf.Routers), 1)
+	assert.Equal(t, nil, err, "TestRouters")
+	assert.Equal(t, 1, len(rconf.Routers), "TestRouters")
 
 }

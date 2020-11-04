@@ -3,9 +3,9 @@ package redis
 import (
 	"fmt"
 
-	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/conf"
 
-	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/asaskevich/govalidator"
 )
 
 //TypeNodeName 分类节点名
@@ -13,8 +13,7 @@ const TypeNodeName = "redis"
 
 //Redis redis缓存配置
 type Redis struct {
-	*cache.Cache
-	Address      []string `json:"addrs,required" toml:"addrs,required"`
+	Addrs        []string `json:"addrs" toml:"addrs"`
 	Password     string   `json:"password,omitempty" toml:"password,omitempty"`
 	DbIndex      int      `json:"db,omitempty" toml:"db,omitempty"`
 	DialTimeout  int      `json:"dial_timeout,omitempty" toml:"dial_timeout,omitempty"`
@@ -24,11 +23,10 @@ type Redis struct {
 }
 
 //New 构建redis消息队列配置
-func New(address []string, opts ...Option) *Redis {
+func New(addrs []string, opts ...Option) *Redis {
 	r := &Redis{
-		Address:      address,
-		Cache:        &cache.Cache{Proto: "redis"},
-		DbIndex:      1,
+		Addrs:        addrs,
+		DbIndex:      0,
 		DialTimeout:  10,
 		ReadTimeout:  10,
 		WriteTimeout: 10,
@@ -50,4 +48,16 @@ func NewByRaw(raw string) *Redis {
 	}
 
 	return org
+}
+
+//GetConf GetConf
+func GetConf(varConf conf.IVarConf, name string) (redis *Redis, err error) {
+	js, err := varConf.GetConf("redis", name)
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("未配置：/var/redis/%s", name)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return NewByRaw(string(js.GetRaw())), nil
 }

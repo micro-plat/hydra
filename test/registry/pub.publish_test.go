@@ -66,7 +66,7 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 		{name: "api服务再次发布", serverName: "192.168.5.115:8899"},
 		{name: "api服务多次发布", serverName: "192.168.5.115:7799"},
 	}
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("hydra", "test1") //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetServerConf()    //获取配置
@@ -89,6 +89,7 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 		assert.NotEqual(t, v, int32(0), "api服务节点结果版本号获取")
 		assert.Equal(t, string(ldata), sdata, "api服务节点发布结果比对")
 	}
+
 }
 
 func TestPublisher_PubServerNode(t *testing.T) {
@@ -100,16 +101,17 @@ func TestPublisher_PubServerNode(t *testing.T) {
 		{name: "server服务再次发布", serverName: "192.168.5.115:8899"},
 		{name: "server服务多次发布", serverName: "192.168.5.115:7799"},
 	}
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("hydra", "test2") //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetServerConf()    //获取配置
 
 	got := map[string]string{}
 	var err error
+	p := pub.New(c)
 	for _, tt := range tests {
 		data := getTestData(tt.serverName, c.GetServerID())
-		got, err = pub.New(c).PubServerNode(tt.serverName, data)
+		got, err = p.PubServerNode(tt.serverName, data)
 		assert.Equal(t, false, err != nil, tt.name)
 	}
 	assert.Equal(t, len(tests), len(got), "server服务发布验证")
@@ -217,9 +219,9 @@ func TestPublisher_Publish_RPC(t *testing.T) {
 
 func TestPublisher_Update(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":8080", api.WithDNS("192.168.0.101"))
-	confObj.RPC(":9377")
+	confObj := mocks.NewConfBy("hydra", "test3") //构建对象
+	confObj.API(":8089", api.WithDNS("192.168.0.101"))
+	confObj.RPC(":9378")
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetServerConf()    //获取配置
 	lm := c.GetRegistry()
@@ -262,13 +264,14 @@ func TestPublisher_Update(t *testing.T) {
 
 //测试自动恢复节点
 func TestNew(t *testing.T) {
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":8080")
+	confObj := mocks.NewConfBy("hydra", "test4") //构建对象
+	confObj.API(":8090")
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetServerConf()    //获取配置
 
 	//发布节点
-	pub.New(c).Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
+	p := pub.New(c)
+	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
 
 	//删除节点
 	lm := c.GetRegistry()

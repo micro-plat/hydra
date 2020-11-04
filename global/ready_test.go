@@ -124,11 +124,9 @@ func TestOnReady_Panic(t *testing.T) {
 	}
 	for _, tt := range tests {
 		assert.Panic(t, tt.wantPanic, func() {
-			lock.Lock()
 			isReady = tt.isReady
 			funcs = tt.funcs
 			OnReady(tt.args.fs...)
-			lock.Unlock()
 		}, tt.name)
 	}
 }

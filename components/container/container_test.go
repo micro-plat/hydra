@@ -6,6 +6,8 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/hydra/test/assert"
+
 )
 
 func TestNewContainer(t *testing.T) {
@@ -24,9 +26,9 @@ func TestContainer_GetOrCreate(t *testing.T) {
 	type args struct {
 		typ     string
 		name    string
-		creator func(conf *conf.RawConf) (interface{}, error)
+		creator func(conf conf.IVarConf) (interface{}, error)
 	}
-	creator := func(conf *conf.RawConf) (interface{}, error) {
+	creator := func(conf conf.IVarConf) (interface{}, error) {
 		return nil, nil
 	}
 	tests := []struct {
@@ -36,18 +38,13 @@ func TestContainer_GetOrCreate(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: "xxxx", wantErr: false},
+		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: nil , wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := c.GetOrCreate(tt.args.typ, tt.args.name, tt.args.creator)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Container.GetOrCreate() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Container.GetOrCreate() = %v, want %v", got, tt.want)
-			}
+			assert.IsNil(t, tt.wantErr, err, tt.name)
+			assert.Equal(t, tt.want, got, tt.name) 
 		})
 	}
 }

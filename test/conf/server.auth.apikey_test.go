@@ -11,7 +11,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
-	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 	"github.com/micro-plat/lib4go/security/md5"
@@ -84,14 +83,14 @@ func TestApikeyGetConf(t *testing.T) {
 	confB := apiConf.API(":8081")
 	test1 := test{name: "未设置apikey节点", want: &apikey.APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}}
 	got, err := apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	assert.NotEqual(t, nil, err, test1.name+",err")
+	assert.Equal(t, nil, err, test1.name+",err")
 	assert.Equal(t, got, test1.want, test1.name)
 
 	test2 := test{name: "配置参数正确", opts: []apikey.Option{apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"), apikey.WithSecret("123456")},
 		want: apikey.New("123456", apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"))}
 	confB.APIKEY("", test2.opts...)
 	got, err = apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	assert.NotEqual(t, nil, err, test2.name+",err")
+	assert.Equal(t, nil, err, test2.name+",err")
 	assert.Equal(t, got, test2.want, test2.name)
 }
 
@@ -102,21 +101,15 @@ func TestApikeyGetConf1(t *testing.T) {
 		want *apikey.APIKeyAuth
 	}
 
-	defer func() {
-		e := recover()
-		if e != nil && strings.Contains(e.(error).Error(), "apikey配置有误1") {
-			return
-		}
-		t.Errorf("节点密钥不存在,验证异常,%v", e)
-	}()
 	apiConf := mocks.NewConf()
 	confB := apiConf.API(":8081")
-	test1 := test{name: "节点密钥不存在,验证异常", opts: []apikey.Option{apikey.WithMD5Mode()}, want: apikey.New("", apikey.WithMD5Mode())}
+	test1 := test{name: "节点密钥不存在,验证异常", opts: []apikey.Option{apikey.WithMD5Mode()}, want: nil}
 	confB.APIKEY("", test1.opts...)
-	apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	t.Errorf("%s,没有验证参数合法性错误", test1.name)
+	got, err := apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
+	assert.Equal(t, true, strings.Contains(err.Error(), "apikey配置数据有误"), test1.name)
+	assert.Equal(t, test1.want, got, test1.name)
+	// t.Errorf("%s,没有验证参数合法性错误", test1.name)
 }
-
 func TestApikeyGetConf2(t *testing.T) {
 	type test struct {
 		name string
@@ -124,13 +117,6 @@ func TestApikeyGetConf2(t *testing.T) {
 		want *apikey.APIKeyAuth
 	}
 
-	defer func() {
-		e := recover()
-		if e != nil && strings.Contains(e.(error).Error(), "apikey配置有误") {
-			return
-		}
-		t.Errorf("apikey修改为错误json串,%v", e)
-	}()
 	apiConf := mocks.NewConf()
 	confB := apiConf.API(":8081")
 	test1 := test{name: "apikey修改为错误json串", opts: []apikey.Option{apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"), apikey.WithSecret("123456")},
@@ -142,8 +128,8 @@ func TestApikeyGetConf2(t *testing.T) {
 	apiConf.Registry.Update(path, "错误的json字符串")
 
 	apiConf = mocks.NewConf()
-	ttx, err := apiConf.GetAPIConf().GetServerConf().GetSubConf(registry.Join("auth", "apikey"))
-	t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
+	// ttx, err := apiConf.GetAPIConf().GetServerConf().GetSubConf(registry.Join("auth", "apikey"))
+	// t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
 	// select {
 	// case <-time.After(3 * time.Second):
 	// 	return

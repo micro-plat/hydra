@@ -65,7 +65,7 @@ func TestBasicAuth_Verify(t *testing.T) {
 		want   string
 		want1  bool
 	}{
-		{name: "空数据认证", fields: basic.NewBasic(basic.WithUP("", "")), args: createAuth("", ""), want: "", want1: false},
+		{name: "空数据认证", fields: basic.NewBasic(basic.WithUP("", "")), args: createAuth("", ""), want: "", want1: true},
 		{name: "空数据认证1", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("", ""), want: "", want1: false},
 		{name: "数据认证通过", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("t1", "123"), want: "t1", want1: true},
 	}
@@ -97,7 +97,7 @@ func TestBasicGetConf(t *testing.T) {
 			confB.Basic(tt.opts...)
 		}
 		got, err := basic.GetConf(conf.GetAPIConf().GetServerConf())
-		assert.NotEqual(t, nil, err, tt.name+",err")
+		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, got, tt.want, tt.name)
 	}
 }

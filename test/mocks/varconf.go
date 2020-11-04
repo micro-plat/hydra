@@ -8,6 +8,7 @@ import (
 var _ conf.IVarConf = &MockVarConf{}
 
 type MockVarConf struct {
+	PlatName string 
 	Version  int32
 	ConfData map[string]map[string]*conf.RawConf
 }
@@ -58,4 +59,21 @@ func (v *MockVarConf) Iter(f func(k string, conf *conf.RawConf) bool) {
 		}
 	}
 
+}
+
+//GetRLogPath 获取远程日志配置路径
+func (c *MockVarConf) GetRLogPath() string {
+	return c.GetVarPath("app", "rlog")
+}
+
+//GetVarPath 获取var配置路径
+func (c *MockVarConf) GetVarPath(tp ...string) string {
+	if len(tp) == 0 {
+		return registry.Join(c.PlatName, "var")
+	}
+	l := make([]string, 0, len(tp)+2)
+	l = append(l, c.PlatName)
+	l = append(l, "var")
+	l = append(l, tp...)
+	return registry.Join(l...)
 }

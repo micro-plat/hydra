@@ -413,18 +413,18 @@ func Test_conf_Custome(t *testing.T) {
 				assert.Equal(t, true, e == nil, name+",panic1")
 			}
 		}(tt.name, tt.key)
-		obj := tt.fields.Custome(tt.key, tt.args)
+		obj := tt.fields.Custom(tt.key, tt.args)
 		assert.Equal(t, tt.want[tt.key], obj, tt.name)
 	}
 }
 
 func Test_conf_Encode(t *testing.T) {
 
-	//空对象序列化为toml格式
-	cuurConf := New()
-	cuurConf.GetAPI()
+	// //空对象序列化为toml格式
+	// cuurConf := New()
+	// cuurConf.GetAPI()
 
-	cuurConf.Encode()
+	// cuurConf.Encode()
 
 	// sss := make(map[string]customerBuilder)
 	// sss["api"] = customerBuilder{}
