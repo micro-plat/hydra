@@ -52,7 +52,7 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.log = logger.GetSession(ctx.appConf.GetServerConf().GetServerName(), ctx.User().GetRequestID())
 	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	ctx.tid = context.Cache(ctx) //保存到缓存中
-	timeout := time.Duration(ctx.appConf.GetServerConf().GetRootConf().GetInt("", 30))
+	timeout := time.Duration(ctx.appConf.GetServerConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
 	ctx.funs = newFunc(ctx)
 	return ctx

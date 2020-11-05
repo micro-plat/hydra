@@ -23,7 +23,7 @@ const (
 type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
-	UPCluster string `json:"upcluster,omitempty" valid:"required" toml:"upcluster,omitempty"`
+	UPCluster string `json:"upCluster,omitempty" valid:"required" toml:"upCluster,omitempty"`
 	//conf      conf.IServerConf
 	cluster conf.ICluster
 }
@@ -44,7 +44,7 @@ func (g *Gray) Allow() bool {
 	if g.cluster == nil {
 		return false
 	}
-	return g.cluster.GetType() == global.API || g.cluster.GetType() == global.Web
+	return g.cluster.GetServerType() == global.API || g.cluster.GetServerType() == global.Web
 }
 
 //Check 检查当前是否需要转到上游服务器处理

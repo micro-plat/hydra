@@ -76,7 +76,7 @@ func (p *Publisher) WatchClusterChange(notify func(isMaster bool, sharding int, 
 				watcher.Close()
 				break LOOP
 			case c := <-ch:
-				total := p.c.GetRootConf().GetInt("sharding", 0)
+				total := p.c.GetMainConf().GetInt("sharding", 0)
 				sharding, isMaster := GetSharding(true, total, p.serverNode, c.Children)
 				notify(isMaster, sharding, total)
 			}

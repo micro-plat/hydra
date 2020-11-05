@@ -39,7 +39,7 @@ func xTest_NewCluster(t *testing.T) {
 	err = rgt.CreateTempNode(path1, "2")
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, true, err == nil, "创建临时节点异常")
-	assert.Equal(t, pub.GetServerID(), gotS.Current().GetServerID(), "不能存在当前配置节点1")
+	assert.Equal(t, pub.GetServerID(), gotS.Current().GetNodeID(), "不能存在当前配置节点1")
 	assert.Equal(t, 2, gotS.Len(), "集群数量不正确2")
 
 	err = rgt.Delete(path1)
@@ -100,7 +100,7 @@ func xTestCluster_Current(t *testing.T) {
 	err = rgt.CreateTempNode(path1, "2")
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, true, err == nil, "创建临时节点异常")
-	assert.Equal(t, pub.GetServerID(), gotS.Current().GetServerID(), "不能存在当前配置节点1")
+	assert.Equal(t, pub.GetServerID(), gotS.Current().GetNodeID(), "不能存在当前配置节点1")
 
 	err = rgt.Delete(path1)
 	assert.Equal(t, true, err == nil, "删除节点异常")
@@ -130,7 +130,7 @@ func TestCluster_GetType(t *testing.T) {
 		{name: "实体对象1", fields: obj2, want: "xxxx"},
 	}
 	for _, tt := range tests {
-		got := tt.fields.GetType()
+		got := tt.fields.GetServerType()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

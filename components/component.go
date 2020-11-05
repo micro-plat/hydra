@@ -18,8 +18,8 @@ import (
 	"github.com/micro-plat/hydra/registry"
 
 	_ "github.com/micro-plat/hydra/components/queues/mq/lmq"
-	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
 	_ "github.com/micro-plat/hydra/components/queues/mq/mqtt"
+	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
 	_ "github.com/micro-plat/hydra/components/queues/mq/xmq"
 )
 
@@ -102,6 +102,6 @@ func (c *Component) UUID() uuid.UUID {
 	if err != nil {
 		panic(fmt.Errorf("获取集群信息失败:%w", err))
 	}
-	id := cluster.Current().GetServerID()
+	id := cluster.Current().GetNodeID()
 	return uuid.Get(id)
 }

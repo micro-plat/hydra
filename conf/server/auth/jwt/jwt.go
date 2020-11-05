@@ -55,7 +55,7 @@ type JWTAuth struct {
 	Source   string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
 	Excludes []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
 	//Redirect        string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
-	AuthURL         string `json:"auth_url,omitempty" valid:"ascii" toml:"auth_url,omitempty"`
+	AuthURL         string `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty"`
 	Disable         bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch `json:"-"`
 }

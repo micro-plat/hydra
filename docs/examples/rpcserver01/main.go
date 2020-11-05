@@ -13,9 +13,9 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"
 
-	_ "runtime/pprof"
 	_ "net/http/pprof"
-	)
+	_ "runtime/pprof"
+)
 
 var buff []byte
 var err error
@@ -27,13 +27,12 @@ type logstruct struct {
 	Session  string `json:"session"`
 }
 
-
 //服务器各种返回结果
 func main() {
 
-go func() {
-	nethttp.ListenAndServe("localhost:6060", nil)
-}()
+	go func() {
+		nethttp.ListenAndServe("localhost:6060", nil)
+	}()
 	app := hydra.NewApp(
 		//hydra.WithPlatName("taobao"),
 		//hydra.WithSystemName("apiserver"),
@@ -67,7 +66,7 @@ func request(ctx hydra.IContext) (r interface{}) {
 	return response.Result
 }
 func log(ctx hydra.IContext) (r interface{}) {
-	fmt.Println(ctx.Request().GetBodyMap())
+	fmt.Println(ctx.Request().GetRawBodyMap())
 	fmt.Println(ctx.Request().GetBody())
 	fmt.Println("content:", ctx.Request().GetString("server-ip"))
 	// list := make([]*logstruct, 0, 1)
@@ -79,7 +78,7 @@ func rpcRequest(ctx hydra.IContext) (r interface{}) {
 	ctx.Log().Info("------request------")
 	ctx.Log().Info(ctx.Request().GetMap())
 	var bdmp types.XMap
-	bdmp, err := ctx.Request().GetBodyMap()
+	bdmp, err := ctx.Request().GetRawBodyMap()
 	ctx.Log().Info(ctx.Request().GetBody())
 
 	ctx.Log().Error(err)
