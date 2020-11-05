@@ -49,21 +49,21 @@ func (l *localMemory) WatchChildren(path string) (data chan registry.ChildrenWat
 	return watcher, nil
 }
 
-func (l *localMemory) notifyParentChange(path string) {
+func (l *localMemory) notifyParentChange(cpath string) {
 	l.clock.Lock()
 	defer l.clock.Unlock()
-	path, _, err := l.getParentForNotify(path)
+	path, _, err := l.getParentForNotify(cpath)
 	if err != nil { //未找到父节点，无需通知
 		return
 	}
 	for k, v := range l.childrenWatchs {
 		if k == path {
 			select {
-			case v <- &valuesEntity{path: path}:
+			case v <- &valuesEntity{path: path, values: []string{cpath}}:
 			default:
 			}
+			break
 		}
-		break
 	}
 	delete(l.childrenWatchs, path)
 }

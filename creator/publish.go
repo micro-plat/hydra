@@ -3,6 +3,7 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -11,14 +12,23 @@ import (
 )
 
 //Pub 将配置发布到配置中心
-func (c *conf) Pub(data map[string]iCustomerBuilder, platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+	if err := c.Load(); err != nil {
+		return err
+	}
+
+	//本地文件系统则直接使用toml序列化方式进行发布
+	proto := registry.GetProto(registryAddr)
+	if proto == registry.FileSystem {
+		return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], global.Def.LocalConfName), cover)
+	}
 
 	//创建注册中心，根据注册中心提供的接口进行配置发布
 	r, err := registry.NewRegistry(registryAddr, global.Def.Log())
 	if err != nil {
 		return err
 	}
-	for tp, subs := range data {
+	for tp, subs := range c.data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
 		if err := publish(r, pub.GetServerPath(), subs.Map()["main"], cover); err != nil {
 			return err
@@ -84,7 +94,7 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]string, 0, 1+len(child))
+	list := make([]string, 0, len(child))
 	for _, c := range child {
 		npath := registry.Join(path, c)
 		nlist, err := getAllPath(r, npath)
