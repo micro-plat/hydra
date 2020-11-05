@@ -31,7 +31,7 @@ type Auth struct {
 	Decrypt []string `json:"decrypt,omitempty" toml:"decrypt,omitempty"`
 
 	//是否需要检查时间戳
-	CheckTS bool `json:"check-timestamp,omitempty" toml:"check-timestamp,omitempty"`
+	CheckTS bool `json:"checkTimestamp,omitempty" toml:"checkTimestamp,omitempty"`
 
 	//配置是否禁用
 	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`

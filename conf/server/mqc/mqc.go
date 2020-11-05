@@ -43,9 +43,14 @@ func GetConf(cnf conf.IServerConf) (*Server, error) {
 	}
 
 	_, err := cnf.GetMainObject(&s)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("mqc服务器配置格式有误:%v", err)
+
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	if b, err := govalidator.ValidateStruct(&s); !b {
 		return nil, fmt.Errorf("mqc服务器配置数据有误:%v %v", err, s)
 	}

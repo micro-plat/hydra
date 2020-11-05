@@ -16,7 +16,7 @@ import (
 type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
-	UPCluster string `json:"upcluster,omitempty" valid:"required" toml:"upcluster,omitempty"`
+	UPCluster string `json:"upCluster,omitempty" valid:"required" toml:"upCluster,omitempty"`
 	//conf      conf.IServerConf
 	cluster conf.ICluster
 }
