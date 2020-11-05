@@ -51,13 +51,13 @@ func NewCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...str
 		keyCache:    make([]string, 0, 1),
 		closeCh:     make(chan struct{}),
 	}
-	if err = s.load(); err != nil {
+	if err = s.getAndWatch(); err != nil {
 		return
 	}
 	return s, nil
 }
 
-//Current 获取当前节点
+//Current 获取当前服务器的集群节点
 func (c *Cluster) Current() conf.ICNode {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -75,8 +75,8 @@ func (c *Cluster) Next() (conf.ICNode, bool) {
 		return nil, false
 	}
 	nid := atomic.AddInt64(&c.index, 1)
-
 	key := c.keyCache[int(nid%int64(len(c.keyCache)))]
+
 	v, ok := c.nodes.Get(key)
 	if ok {
 		return v.(conf.ICNode), true
@@ -95,7 +95,7 @@ func (c *Cluster) Iter(f func(conf.ICNode) bool) {
 	}
 }
 
-//Len 获取集群节点长度
+//Len 获取集群节点个数
 func (c *Cluster) Len() int {
 	return len(c.nodes.Items())
 }
@@ -108,8 +108,8 @@ func (c *Cluster) Watch() conf.IWatcher {
 	return w
 }
 
-//GetType 获取集群类型
-func (c *Cluster) GetType() string {
+//GetServerType 获取集群类型
+func (c *Cluster) GetServerType() string {
 	return c.GetServerType()
 }
 
@@ -125,14 +125,10 @@ func (c *Cluster) removeWatcher(id string) {
 }
 
 //-------------------------------------内部处理-----------------------------------
-func (c *Cluster) load() error {
-	if err := c.getCluster(); err != nil {
-		return err
-	}
+func (c *Cluster) getAndWatch() error {
 	errs := make(chan error, 1)
 	go func() {
-		err := c.watchCluster()
-		if err != nil {
+		if err := c.watchCluster(); err != nil {
 			errs <- err
 		}
 	}()
@@ -144,16 +140,21 @@ func (c *Cluster) load() error {
 	}
 }
 func (c *Cluster) getCluster() error {
-	path := c.GetServerPubPath(c.clusterName...)
+
+	//重新拉取所有节点
 	current := c.current
+	path := c.GetServerPubPath(c.clusterName...)
 	children, _, err := c.registry.GetChildren(path)
 	if err != nil {
 		return err
 	}
+
+	//对节点进行排序
 	sort.Strings(children)
 
 	//移除所有已下线的节点
 	c.nodes.RemoveIterCb(func(key string, v interface{}) bool {
+		//判断当前节点是否需要移除
 		removeNow := true
 		for _, name := range children {
 			if name == key {
@@ -161,11 +162,12 @@ func (c *Cluster) getCluster() error {
 				break
 			}
 		}
-		//移除缓存key
+
+		//移除已下线节点
 		if removeNow {
 			node := v.(*CNode)
 			if node.IsCurrent() {
-				c.current = &CNode{}
+				current = &CNode{}
 			}
 			c.removeKey(key)
 		}
@@ -173,7 +175,7 @@ func (c *Cluster) getCluster() error {
 		return removeNow
 	})
 
-	//设置或添加在线节点
+	//修改或添加在线节点
 	for i, name := range children {
 		node := NewCNode(name, c.GetServerID(), i)
 		if ok, _ := c.nodes.SetIfAbsent(name, node); ok {
@@ -183,11 +185,13 @@ func (c *Cluster) getCluster() error {
 			current = node
 		}
 	}
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.current = current
 
-	//通知所有订阅者
+	//更新当前节点
+	c.lock.Lock()
+	c.current = current
+	defer c.lock.Unlock()
+
+	//每次节点变化都通知所有订阅者
 	c.watchers.IterCb(func(key string, v interface{}) bool {
 		watcher := v.(*cwatcher)
 		watcher.notify(c.current)
@@ -195,6 +199,8 @@ func (c *Cluster) getCluster() error {
 	})
 	return nil
 }
+
+//watchCluster 监听集群变化
 func (c *Cluster) watchCluster() error {
 	wc, err := watcher.NewChildWatcherByRegistry(c.registry, []string{c.GetServerPubPath(c.clusterName...)}, logger.New("watch.server"))
 	if err != nil {
@@ -215,7 +221,6 @@ LOOP:
 			c.getCluster()
 		}
 	}
-
 	return nil
 }
 
@@ -235,4 +240,13 @@ func (c *Cluster) removeKey(name string) {
 			c.keyCache = append(c.keyCache[:i], c.keyCache[i+1:]...)
 		}
 	}
+}
+func init() {
+	global.Def.AddCloser(func() {
+		cluster.RemoveIterCb(func(k string, v interface{}) bool {
+			c := v.(*Cluster)
+			c.Close()
+			return true
+		})
+	})
 }

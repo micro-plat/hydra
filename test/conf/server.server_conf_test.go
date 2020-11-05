@@ -52,7 +52,7 @@ func TestNewEmptyServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -156,7 +156,7 @@ func TestNewAPIServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -265,7 +265,7 @@ func TestNewRPCServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -292,7 +292,7 @@ func TestNewMQCServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")
@@ -326,7 +326,7 @@ func TestNewCRONServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -359,7 +359,7 @@ func TestNewVARServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")

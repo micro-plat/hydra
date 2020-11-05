@@ -148,10 +148,12 @@ LOOP:
 	}
 }
 
+//getKey 获取缓存key
 func getKey(tp string, version interface{}) string {
 	return fmt.Sprintf("%s-%v", tp, version)
 }
 
+//定时清理缓存
 func init() {
 	go Cache.clear()
 }
