@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"fmt"
-	"runtime/debug"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -42,7 +41,6 @@ func NewJWT(opts ...Option) *JWTAuth {
 
 //GetConf 获取jwt
 func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
-	debug.PrintStack()
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join("auth", "jwt"), &jwt)
 	if err == conf.ErrNoSetting {
