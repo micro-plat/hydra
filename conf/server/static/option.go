@@ -8,11 +8,11 @@ const DefaultSataticDir = "./src"
 //DefaultFirstPage 默认首页文件名
 const DefaultFirstPage = "index.html"
 
-//defaultRewriters 默认需要重写的路径
-var defaultRewriters = []string{"/", "index.htm", "default.html", "default.htm"}
+//DefaultRewriters 默认需要重写的路径
+var DefaultRewriters = []string{"/", "index.htm", "default.html", "default.htm"}
 
-//defaultExclude 默认需要排除的文件,扩展名,路径
-var defaultExclude = []string{"/view/", "/views/", "/web/", ".exe", ".so"}
+//DefaultExclude 默认需要排除的文件,扩展名,路径
+var DefaultExclude = []string{"/view/", "/views/", "/web/", ".exe", ".so"}
 
 //Option jwt配置选项
 type Option func(*Static)
@@ -24,8 +24,8 @@ func newStatic() *Static {
 	}
 	a.Dir = DefaultSataticDir
 	a.FirstPage = DefaultFirstPage
-	a.Rewriters = defaultRewriters
-	a.Exclude = defaultExclude
+	a.Rewriters = DefaultRewriters
+	a.Exclude = DefaultExclude
 	a.Exts = []string{}
 	return a
 }

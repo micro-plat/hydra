@@ -55,10 +55,15 @@ func (s *Static) IsExclude(rPath string) bool {
 	if len(s.Exclude) == 0 {
 		return false
 	}
+
+	name := filepath.Base(rPath)
+	pExt := filepath.Ext(name)
+	hasExt := strings.Contains(pExt, ".")
 	for _, v := range s.Exclude {
-		if strings.Contains(rPath, v) {
-			return true
+		if hasExt {
+			return strings.EqualFold(pExt, v)
 		}
+		return strings.EqualFold(rPath, v)
 	}
 	return false
 }
