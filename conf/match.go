@@ -53,11 +53,15 @@ func NewPathMatch(all ...string) *PathMatch {
 }
 
 //Match 是否匹配，支付完全匹配，模糊匹配，分段匹配
-func (a *PathMatch) Match(service string, seq string) (bool, string) {
+func (a *PathMatch) Match(service string, seq ...string) (bool, string) {
 	if v, ok := a.cache.Get(service); ok {
 		return v != "", v.(string)
 	}
-	sparties := strings.Split(service, seq)
+	nseq := "/"
+	if len(seq) > 0 {
+		nseq = seq[0]
+	}
+	sparties := strings.Split(service, nseq)
 	//排除指定请求
 	for _, u := range a.all {
 		//完全匹配
@@ -66,7 +70,7 @@ func (a *PathMatch) Match(service string, seq string) (bool, string) {
 			return true, u
 		}
 		//分段模糊
-		uparties := strings.Split(u, seq)
+		uparties := strings.Split(u, nseq)
 		//取较少的数组长度
 		uc := len(uparties)
 		sc := len(sparties)

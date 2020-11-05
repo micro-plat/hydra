@@ -48,11 +48,10 @@ func (l *localMemory) WatchChildren(path string) (data chan registry.ChildrenWat
 	return watcher, nil
 }
 
-func (l *localMemory) notifyParentChange(path string, version int32) {
+func (l *localMemory) notifyParentChange(cPath string, version int32) {
 	l.clock.Lock()
 	defer l.clock.Unlock()
-	cPath := path
-	path, _, err := l.getParentForNotify(path)
+	path, _, err := l.getParentForNotify(cPath)
 	if err != nil { //未找到父节点，无需通知
 		return
 	}

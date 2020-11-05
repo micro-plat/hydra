@@ -54,7 +54,7 @@ func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	if err == conf.ErrNoSetting || len(basic.Members) == 0 {
 		return &BasicAuth{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("basic配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&basic); !b {

@@ -37,11 +37,11 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 func GetConf(cnf conf.IServerConf) (tasks *Tasks, err error) {
 	tasks = &Tasks{}
 	_, err = cnf.GetSubObject("task", tasks)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("task:%v", err)
-	}
 	if err == conf.ErrNoSetting {
 		return &Tasks{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("task:%v", err)
 	}
 
 	for _, task := range tasks.Tasks {

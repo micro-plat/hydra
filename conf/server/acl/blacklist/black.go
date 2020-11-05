@@ -39,7 +39,7 @@ func GetConf(cnf conf.IServerConf) (*BlackList, error) {
 	if err == conf.ErrNoSetting {
 		return &BlackList{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("black list配置有误:%v", err)
 	}
 

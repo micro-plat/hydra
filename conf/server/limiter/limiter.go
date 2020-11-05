@@ -44,7 +44,7 @@ func New(opts ...Option) *Limiter {
 
 //GetLimiter 获取限流器
 func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
-	ok, path := l.p.Match(path, "/")
+	ok, path := l.p.Match(path)
 	if !ok {
 		return false, nil
 	}
@@ -62,7 +62,7 @@ func GetConf(cnf conf.IServerConf) (*Limiter, error) {
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
 		return &Limiter{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("绑定limit配置有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(limiter); !b {

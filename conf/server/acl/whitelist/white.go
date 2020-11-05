@@ -35,7 +35,7 @@ func New(opts ...Option) *WhiteList {
 func (w *WhiteList) IsAllow(path string, ip string) bool {
 	for _, cur := range w.IPS {
 		if ok, _ := cur.ipm.Match(ip, "."); ok {
-			ok, _ := cur.rqm.Match(path, "/")
+			ok, _ := cur.rqm.Match(path)
 			return ok
 		}
 	}
@@ -49,7 +49,7 @@ func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	if err == conf.ErrNoSetting {
 		return &WhiteList{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("white list配置格式有误:%v", err)
 	}
 

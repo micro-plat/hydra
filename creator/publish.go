@@ -94,7 +94,7 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]string, 0, 1+len(child))
+	list := make([]string, 0, len(child))
 	for _, c := range child {
 		npath := registry.Join(path, c)
 		nlist, err := getAllPath(r, npath)
