@@ -90,7 +90,7 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 		{name: "注册对象为空", pName: "", wantErr: true, errStr: "注册对象不能为空"},
 		{name: "handleExt报错", pName: "name", h: &testHandler{},
 			f: func(g *Unit, ext ...interface{}) error { return fmt.Errorf("error") }, wantErr: true, errStr: "error"},
-		{name: "AddClosingHanle报错", pName: "name", h: "123456", f: nil, wantErr: true, errStr: "只能接收引用类型; 实际是 string"},
+		{name: "AddClosingHanle报错", pName: "name", h: "123456", f: nil, wantErr: true, errStr: "只能接收引用类型或struct; 实际是 string"},
 	}
 
 	for _, tt := range tests {

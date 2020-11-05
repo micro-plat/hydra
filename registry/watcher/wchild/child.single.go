@@ -39,9 +39,9 @@ func NewChildWatcherByDeep(path string, deep int, r registry.IRegistry, logger l
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		Watchers:   make(map[string]*ChildWatcher),          //@fix 方便测试
-		notifyChan: make(chan *watcher.ChildChangeArgs, 10), //@fix 1改为10方便测试
-		CloseChan:  make(chan struct{}),                     //@fix 方便测试
+		Watchers:   make(map[string]*ChildWatcher),         //@fix 方便测试
+		notifyChan: make(chan *watcher.ChildChangeArgs, 1), //1改为10 方便测试
+		CloseChan:  make(chan struct{}),                    //@fix 方便测试
 	}
 }
 
@@ -88,12 +88,11 @@ LOOP:
 	if err != nil {
 		goto LOOP
 	}
-
 	for {
 		select {
 		case <-w.CloseChan:
 			return nil
-		case content, ok := <-dataChan: //@fix 程序会阻塞
+		case content, ok := <-dataChan: //程序阻塞,等待节点变动消息
 			if w.Done || !ok {
 				return nil
 			}

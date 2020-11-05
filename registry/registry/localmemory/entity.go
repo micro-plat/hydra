@@ -26,11 +26,11 @@ type valueEntity struct {
 	path    string
 	Err     error
 }
-type valuesEntity struct {
-	values  []string
-	version int32
-	path    string
-	Err     error
+type childrenEntity struct {
+	children []string
+	version  int32
+	path     string
+	Err      error
 }
 
 func (v *valueEntity) GetPath() string {
@@ -43,12 +43,12 @@ func (v *valueEntity) GetError() error {
 	return v.Err
 }
 
-func (v *valuesEntity) GetValue() ([]string, int32) {
-	return v.values, v.version
+func (v *childrenEntity) GetValue() ([]string, int32) {
+	return v.children, v.version
 }
-func (v *valuesEntity) GetError() error {
+func (v *childrenEntity) GetError() error {
 	return v.Err
 }
-func (v *valuesEntity) GetPath() string {
+func (v *childrenEntity) GetPath() string {
 	return v.path
 }

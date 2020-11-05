@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/registry/registry/localmemory"
 	"github.com/micro-plat/hydra/test/assert"
+	r "github.com/micro-plat/lib4go/registry"
 )
 
 var cases = []struct {
@@ -207,6 +209,7 @@ func TestWatchValue(t *testing.T) {
 			nvalue string
 		}{
 			{name: "一个", path: "/hydra1", value: "1", nvalue: "2"},
+			{name: "一个", path: "/hydra1/hydra1-1", value: "1", nvalue: "2"},
 			{name: "一个", path: "/hydra2", value: "2", nvalue: "234"},
 		}
 		for _, c := range cases {
@@ -218,33 +221,30 @@ func TestWatchValue(t *testing.T) {
 			//监控值变化
 			notify, err := lm.WatchValue(c.path)
 			assert.Equal(t, nil, err, c.name)
-
 			//此时值未变化不应收到通知
-			select {
-			case <-notify:
-				t.Error("测试未通过")
-			default:
-			}
-
-			//更新值
-			err = lm.Update(c.path, c.nvalue)
-			assert.Equal(t, nil, err, c.name)
-
-			//应收到值变化通知
-			select {
-			case v := <-notify:
-				fmt.Println("V:", v)
-				value, version := v.GetValue()
-				assert.NotEqual(t, version, int32(0), c.name)
-				assert.Equal(t, c.nvalue, string(value), c.name)
-			default:
-				t.Error("测试未通过")
-			}
-
+			go func(c chan r.ValueWatcher, name, nvalue string) {
+				select {
+				case v := <-c:
+					fmt.Println("V:", v)
+					value, version := v.GetValue()
+					assert.NotEqual(t, version, int32(0), name)
+					assert.Equal(t, nvalue, string(value), name)
+				case <-time.After(time.Second):
+					t.Error("测试未通过")
+				}
+			}(notify, c.name, c.nvalue)
 		}
-	}
 
+		//更新值
+		for _, c := range cases {
+			err := lm.Update(c.path, c.nvalue)
+			assert.Equal(t, nil, err, c.name)
+		}
+
+		time.Sleep(time.Second)
+	}
 }
+
 func TestWatchChildren(t *testing.T) {
 	//构建所有注册中心
 	rgs := createRegistry()
@@ -320,14 +320,18 @@ func TestWatchChildrenForDelete(t *testing.T) {
 			for _, ch := range c.children {
 				err := lm.Delete(registry.Join(c.path, ch))
 				assert.Equal(t, nil, err, c.name)
-			}
-
-			//应收到值变化通知
-			select {
-			case v := <-notify:
-				assert.Equal(t, v.GetPath(), c.path)
-			default:
-				t.Error("测试未通过")
+				//应收到值变化通知
+				select {
+				case v := <-notify:
+					assert.Equal(t, c.path, v.GetPath(), c.name)
+					cPath, cVersion := v.GetValue()
+					assert.NotEqual(t, int32(0), cVersion, c.name)
+					assert.Equal(t, []string{registry.Join(c.path, ch)}, cPath, c.name)
+					notify, err = lm.WatchChildren(c.path)
+					assert.Equal(t, nil, err, c.name)
+				default:
+					t.Error("测试未通过", c.name)
+				}
 			}
 		}
 	}

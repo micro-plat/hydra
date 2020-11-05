@@ -128,3 +128,7 @@ func (g *dispCtx) ShouldBind(v interface{}) error {
 	}
 	return json.Unmarshal(js, v)
 }
+
+func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
+	return "", nil, 0, nil
+}

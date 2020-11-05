@@ -24,6 +24,7 @@ func Test_reflectHandle(t *testing.T) {
 		{name: "handler为空", path: "path", wantErr: true},
 		{name: "handler非函数接收类型", path: "path", h: "xxxx", wantErr: true},
 		{name: "handler为引用类型,但没有可用于注册的处理函数", path: "path", h: &testHandler1{}, wantErr: true},
+		{name: "handler为引用类型,无Handle函数", path: "path", h: &testHandler6{}, wantErr: true},
 		{name: "handler含有Suffix但签名不匹配", path: "path", h: &testHandlerSuffix{}, wantErr: true},
 		{name: "handler为func(context.IContext) interface{}", path: "path", h: func(context.IContext) interface{} { return nil },
 			wantService:       []string{"path"},
@@ -63,7 +64,6 @@ func Test_reflectHandle(t *testing.T) {
 		}
 		for k, v := range tt.wantService {
 			u, ok := gotG.Services[v]
-			fmt.Println(tt.name, ok)
 			assert.Equal(t, true, ok, tt.name)
 			assert.Equal(t, v, u.Service, tt.name)
 			assert.Equal(t, tt.wantServicePath[k], u.Path, tt.name)

@@ -9,14 +9,45 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 )
 
-func Test_response_Write(t *testing.T) {
+func Test_response_Write_WithPanic(t *testing.T) {
+	tests := []struct {
+		name    string
+		ctx     context.IInnerContext
+		status  int
+		content interface{}
+		err     string
+	}{
+		{name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.XMLF},
+			},
+		}, status: 200, content: map[string]string{"key": "value"}, err: "xml: unsupported type: map[string]string"},
+	}
 
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+	meta := conf.NewMeta()
+
+	for _, tt := range tests {
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(tt.ctx, meta).GetRequestID())
+		//构建response对象
+		c := ctx.NewResponse(tt.ctx, serverConf, log, meta)
+
+		assert.PanicError(t, tt.err, func() {
+			c.Write(tt.status, tt.content)
+		}, tt.name)
+
+	}
+}
+func Test_response_Write(t *testing.T) {
 	tests := []struct {
 		name    string
 		ctx     context.IInnerContext
@@ -59,12 +90,11 @@ func Test_response_Write(t *testing.T) {
 				"Content-Type": []string{context.JSONF},
 			},
 		}, status: 200, content: "{key:value", wantRs: 200, wantRc: `{"data":"{key:value"}`},
-		// 用例引起panic
-		// {name: "状态码非0,content-type为application/xml,且返回内容非正确xml字符串", ctx:&mocks.TestContxt{
-		// 	HttpHeader: http.Header{
-		// 		"Content-Type": []string{context.XMLF},
-		// 	},
-		// },status: 200, content: "<key>value<key/>", wantRs: 200, wantRc: ``},
+		{name: "状态码非0,content-type为application/xml,且返回内容非正确xml字符串", ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.XMLF},
+			},
+		}, status: 200, content: "<key>value<key/>", wantRs: 200, wantRc: `<data><key>value<key/></data>`},
 		{name: "状态码非0,content-type为空,返回布尔值/整型/浮点型/复数", ctx: &mocks.TestContxt{
 			HttpHeader: http.Header{},
 		}, status: 200, content: false, wantRs: 200, wantRc: `false`},
@@ -73,28 +103,21 @@ func Test_response_Write(t *testing.T) {
 				"Content-Type": []string{context.JSONF},
 			},
 		}, status: 200, content: 1, wantRs: 200, wantRc: `{"data":1}`},
-		// 用例引起panic
-		// {name: "状态码非0,content-type为application/xml,返回布尔值/整型/浮点型/复数", ctx:&mocks.TestContxt{
-		// 	HttpHeader: http.Header{
-		// 		"Content-Type": []string{context.XMLF},
-		// 	},
-		// }},status: 200, content: 1, wantRs: 200, wantRc: `{"data":1}`},
+		{name: "状态码非0,content-type为application/xml,返回布尔值/整型/浮点型/复数", ctx: &mocks.TestContxt{
+			HttpHeader: http.Header{
+				"Content-Type": []string{context.XMLF},
+			},
+		}, status: 200, content: 1, wantRs: 200, wantRc: `<data>1</data>`},
 		{name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", ctx: &mocks.TestContxt{
 			HttpHeader: http.Header{},
 		}, status: 200, content: map[string]string{"key": "value"}, wantRs: 200, wantRc: `{"key":"value"}`},
-		// 用例引起panic
-		// {name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", ctx:&mocks.TestContxt{
-		// 	HttpHeader: http.Header{
-		// 		"Content-Type": []string{context.XMLF},
-		// 	},
-		// }},status: 200, content: map[string]string{"key": "value"}, wantRs: 200, wantRc: ``},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
-
+	global.IsDebug = true
 	for _, tt := range tests {
 		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(tt.ctx, meta).GetRequestID())
 
@@ -278,3 +301,15 @@ func Test_response_Redirect(t *testing.T) {
 	assert.Equal(t, "url", context.Url, "验证上下文中的url")
 	assert.Equal(t, 200, context.StatusCode, "验证上下文中的状态码")
 }
+
+// func Test_response_Download(t *testing.T) {
+// 	startServer()
+// 	resp, err := http.Get("http://localhost:9091/download")
+// 	assert.Equal(t, false, err != nil, "文件下载")
+// 	defer resp.Body.Close()
+// 	assert.Equal(t, "text/plain", resp.Header["Content-Type"][0], "响应头比较")
+// 	assert.Equal(t, "200 OK", resp.Status, "响应状态比较")
+// 	assert.Equal(t, 200, resp.StatusCode, "响应状态码比较")
+// 	body, err := ioutil.ReadAll(resp.Body)
+// 	assert.Equal(t, "ADASDASDASFHNOJM~!@#$%^&*", string(body), "内容")
+// }
