@@ -33,8 +33,21 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 			return current, nil
 		}
 	}
-	if val.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
+
+	//检查传入的是构建函数
+	if val.Kind() == reflect.Func {
+		nval, err := createObject(h)
+		if err != nil {
+			return nil, err
+		}
+		typ = reflect.TypeOf(nval)
+		val = reflect.ValueOf(nval)
+
+	}
+
+	//检查对象类型
+	if val.Kind() != reflect.Ptr && val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("只能接收引用类型或struct; 实际是 %s", val.Kind())
 	}
 
 	//reflect所有函数，检查函数签名

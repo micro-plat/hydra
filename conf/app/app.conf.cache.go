@@ -14,86 +14,102 @@ const varNodeName = "var"
 
 //Cache 服务器缓存信息
 var Cache = &cache{
-	serverMaps:           cmap.New(4),
-	varMaps:              cmap.New(4),
+	serverConfHistory:    cmap.New(4),
+	varConfHistory:       cmap.New(4),
 	currentServerVersion: cmap.New(2),
 	currentVarVersion:    cmap.New(2),
 }
 
 //cache通过版本号控制更新配置时引起的冲突并减少对象的拷贝
 type cache struct {
-	serverMaps           cmap.ConcurrentMap
-	varMaps              cmap.ConcurrentMap
+	serverConfHistory    cmap.ConcurrentMap
+	varConfHistory       cmap.ConcurrentMap
 	currentServerVersion cmap.ConcurrentMap
 	currentVarVersion    cmap.ConcurrentMap
-	lock                 sync.RWMutex
+	lock                 sync.Mutex
 }
 
-//Save 缓存服务器配置信息
+//Save 将应用配置信息存入缓存
 func (c *cache) Save(s IAPPConf) {
-	sversion := s.GetServerConf().GetVersion()
-	vversion := s.GetVarConf().GetVersion()
+
+	//获取版本号
+	sVersion := s.GetServerConf().GetVersion()
+	vVersion := s.GetVarConf().GetVersion()
 	typ := s.GetServerConf().GetServerType()
+
+	//控制数据不一致
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.serverMaps.Set(getKey(typ, sversion), s)
-	c.varMaps.Set(getKey(varNodeName, vversion), s.GetVarConf())
-	c.currentServerVersion.Set(typ, sversion)
-	c.currentVarVersion.Set(varNodeName, vversion)
 
+	//保存最新版本号
+	c.currentServerVersion.Set(typ, sVersion)
+	c.currentVarVersion.Set(varNodeName, vVersion)
+
+	//保存配置信息
+	c.serverConfHistory.Set(getKey(typ, sVersion), s)
+	c.varConfHistory.Set(getKey(varNodeName, vVersion), s.GetVarConf())
 }
 
-//Get 从缓存中获取服务器配置
+//GetAPPConf 根据服务器类型获取配置
 func (c *cache) GetAPPConf(serverType string) (IAPPConf, error) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+
+	//获取配置版本号
 	serverVerion, ok := c.currentServerVersion.Get(serverType)
 	if !ok {
 		return nil, fmt.Errorf("未找到%s的缓存配置信息", serverType)
 	}
-	if s, ok := c.serverMaps.Get(getKey(serverType, serverVerion)); ok {
+
+	//获取配置信息
+	if s, ok := c.serverConfHistory.Get(getKey(serverType, serverVerion)); ok {
 		return s.(IAPPConf), nil
 	}
 	return nil, fmt.Errorf("获取服务器配置失败，未找到服务器[%s.%d]的缓存数据", serverType, serverVerion)
 }
 
-//Get 从缓存中获取服务器配置
+//GetVarConf 从缓存中获取var配置
 func (c *cache) GetVarConf() (conf.IVarConf, error) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+
+	//获取配置版本号
 	varVerion, ok := c.currentVarVersion.Get(varNodeName)
 	if !ok {
 		return nil, fmt.Errorf("未找到var缓存配置信息")
 	}
-	if s, ok := c.varMaps.Get(getKey(varNodeName, varVerion)); ok {
+
+	//获取配置信息
+	if s, ok := c.varConfHistory.Get(getKey(varNodeName, varVerion)); ok {
 		return s.(conf.IVarConf), nil
 	}
 	return nil, fmt.Errorf("获取var配置失败，缓存中不存在版本[%v]的数据", varVerion)
 }
 
-func (c *cache) GetServerMaps() cmap.ConcurrentMap {
-	return c.serverMaps
+//GetServerConfHistory 获取服务器配置历史
+func (c *cache) GetServerConfHistory() cmap.ConcurrentMap {
+	return c.serverConfHistory
 }
 
-func (c *cache) GetVarMaps() cmap.ConcurrentMap {
-	return c.varMaps
+//GetVarConfHistory 获取var服务器配置历史
+func (c *cache) GetVarConfHistory() cmap.ConcurrentMap {
+	return c.varConfHistory
 }
 
-func (c *cache) GetServerCuurVerion(tp string) interface{} {
+//GetServeCurrentVerion 服务器可用版本号
+func (c *cache) GetServerCurrentVerion(tp string) int32 {
 	verion, ok := c.currentServerVersion.Get(tp)
 	if !ok {
-		return nil
-	}
-	return verion
-}
-
-func (c *cache) GetVarCuurVerion(varNodeName string) interface{} {
-	verion, ok := c.currentVarVersion.Get(varNodeName)
-	if !ok {
-		return nil
+		return 0
 	}
 	return verion.(int32)
 }
+
+//GetVarCurrentVerion 获取var版本号
+func (c *cache) GetVarCurrentVerion(varNodeName string) int32 {
+	verion, ok := c.currentVarVersion.Get(varNodeName)
+	if !ok {
+		return 0
+	}
+	return verion.(int32)
+}
+
 func (c *cache) clear() {
 	tm := time.NewTicker(time.Second * 50)
 LOOP:
@@ -103,7 +119,7 @@ LOOP:
 			break LOOP
 		case <-tm.C:
 
-			c.serverMaps.RemoveIterCb(func(key string, v interface{}) bool {
+			c.serverConfHistory.RemoveIterCb(func(key string, v interface{}) bool {
 				conf := v.(IAPPConf)
 				tp := conf.GetServerConf().GetServerType()
 				ver, _ := c.currentServerVersion.Get(tp)
@@ -116,7 +132,7 @@ LOOP:
 				}
 				return false
 			})
-			c.varMaps.RemoveIterCb(func(key string, v interface{}) bool {
+			c.varConfHistory.RemoveIterCb(func(key string, v interface{}) bool {
 				currentVer, _ := c.currentVarVersion.Get(varNodeName)
 				currentKey := getKey(varNodeName, currentVer)
 				if key != currentKey {
