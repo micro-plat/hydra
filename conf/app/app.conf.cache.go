@@ -26,7 +26,7 @@ type cache struct {
 	varConfHistory       cmap.ConcurrentMap
 	currentServerVersion cmap.ConcurrentMap
 	currentVarVersion    cmap.ConcurrentMap
-	lock                 sync.RWMutex
+	lock                 sync.Mutex
 }
 
 //Save 将应用配置信息存入缓存
@@ -52,6 +52,7 @@ func (c *cache) Save(s IAPPConf) {
 
 //GetAPPConf 根据服务器类型获取配置
 func (c *cache) GetAPPConf(serverType string) (IAPPConf, error) {
+
 	//获取配置版本号
 	serverVerion, ok := c.currentServerVersion.Get(serverType)
 	if !ok {
@@ -95,7 +96,7 @@ func (c *cache) GetVarConfHistory() cmap.ConcurrentMap {
 func (c *cache) GetServerCurrentVerion(tp string) int32 {
 	verion, ok := c.currentServerVersion.Get(tp)
 	if !ok {
-		return nil
+		return 0
 	}
 	return verion.(int32)
 }
@@ -104,7 +105,7 @@ func (c *cache) GetServerCurrentVerion(tp string) int32 {
 func (c *cache) GetVarCurrentVerion(varNodeName string) int32 {
 	verion, ok := c.currentVarVersion.Get(varNodeName)
 	if !ok {
-		return nil
+		return 0
 	}
 	return verion.(int32)
 }
