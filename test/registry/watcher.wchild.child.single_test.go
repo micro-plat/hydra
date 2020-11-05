@@ -113,7 +113,7 @@ func TestChildWatcher_Start(t *testing.T) {
 func TestChildWatcher_Start_2(t *testing.T) {
 
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("TestChildWatcher_Start_2", "TestChildWatcher_Start_2Clu")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()

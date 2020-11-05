@@ -15,10 +15,10 @@ import (
 func TestStaticNew(t *testing.T) {
 	defaultObj := &static.Static{
 		FileMap:   map[string]static.FileInfo{},
-		Dir:       "./src",
-		FirstPage: "index.html",
-		Rewriters: []string{"/", "index.htm", "default.html"},
-		Exclude:   []string{"/views/", ".exe", ".so"},
+		Dir:       static.DefaultSataticDir,
+		FirstPage: static.DefaultFirstPage,
+		Rewriters: static.DefaultRewriters,
+		Exclude:   static.DefaultExclude,
 		Exts:      []string{},
 	}
 	enObj := &static.Static{
@@ -131,10 +131,10 @@ func TestStatic_IsExclude(t *testing.T) {
 		want   bool
 	}{
 		{name: "空Exclude对象", fields: static.New(), rPath: "/test", want: false},
-		{name: "Exclude对象,匹配成功", fields: static.New(static.WithExclude("/test")), rPath: "/test", want: true},
-		{name: "Exclude对象，被包含匹配成功", fields: static.New(static.WithExclude("/test")), rPath: "/test1", want: true},
-		{name: "Exclude对象，被包含匹配失败", fields: static.New(static.WithExclude("/test11")), rPath: "/test1", want: false},
-		{name: "Exclude对象，相等匹配失败", fields: static.New(static.WithExclude("/test11")), rPath: "/test11", want: true},
+		{name: "Exclude对象,路径匹配成功", fields: static.New(static.WithExclude("/test")), rPath: "/test", want: true},
+		{name: "Exclude对象，扩展名匹配成功", fields: static.New(static.WithExclude(".so")), rPath: "/test1.so", want: true},
+		{name: "Exclude对象，路径匹配失败", fields: static.New(static.WithExclude("/test11")), rPath: "/test1", want: false},
+		{name: "Exclude对象，扩展名匹配失败", fields: static.New(static.WithExclude(".so")), rPath: "/test11.txt", want: false},
 	}
 	for _, tt := range tests {
 		got := tt.fields.IsExclude(tt.rPath)
