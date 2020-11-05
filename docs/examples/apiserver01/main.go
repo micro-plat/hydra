@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-oci8"
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/conf/server/router"
+ 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"

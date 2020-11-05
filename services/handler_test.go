@@ -20,6 +20,12 @@ func (h hander2) Handle(ctx context.IContext) (r interface{}) {
 	return "sucess"
 }
 
+type testHandlerSuffix struct{}
+
+func (h testHandlerSuffix) XxxHandle(ctx string) (r interface{}) {
+	return "sucess"
+}
+
 type testHandler1 struct{}
 
 type testHandler struct{}

@@ -163,6 +163,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 			rc = "Internal Server Error"
 		}
 	case error:
+		//@todo: 这里如果状态是302 等，会被强制转换为400（是否为error必须转换状态码）
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}
@@ -245,10 +246,11 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
-	if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
-		c.ctx.Redirect(status, content)
-		return nil
-	}
+	//@todo 这个地方会强制跳转到content 的路径。
+	// if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
+	// 	c.ctx.Redirect(status, content)
+	// 	return nil
+	// }
 
 	routerObj, err := c.path.GetRouter()
 	if err != nil {
