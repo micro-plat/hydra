@@ -82,18 +82,18 @@ func (c *cache) GetVarConf() (conf.IVarConf, error) {
 	return nil, fmt.Errorf("获取var配置失败，缓存中不存在版本[%v]的数据", varVerion)
 }
 
-//GetServerConfHistory 获取服务器配置历史
-func (c *cache) GetServerConfHistory() cmap.ConcurrentMap {
+//GetServerHistory 获取服务器配置历史
+func (c *cache) GetServerHistory() cmap.ConcurrentMap {
 	return c.serverConfHistory
 }
 
-//GetVarConfHistory 获取var服务器配置历史
-func (c *cache) GetVarConfHistory() cmap.ConcurrentMap {
+//GetVarHistory 获取var服务器配置历史
+func (c *cache) GetVarHistory() cmap.ConcurrentMap {
 	return c.varConfHistory
 }
 
-//GetServeCurrentVerion 服务器可用版本号
-func (c *cache) GetServerCurrentVerion(tp string) int32 {
+//GetCurrentServerVerion 服务器可用版本号
+func (c *cache) GetCurrentServerVerion(tp string) int32 {
 	verion, ok := c.currentServerVersion.Get(tp)
 	if !ok {
 		return 0
@@ -101,8 +101,8 @@ func (c *cache) GetServerCurrentVerion(tp string) int32 {
 	return verion.(int32)
 }
 
-//GetVarCurrentVerion 获取var版本号
-func (c *cache) GetVarCurrentVerion(varNodeName string) int32 {
+//GetCurrentVarVerion 获取var版本号
+func (c *cache) GetCurrentVarVerion(varNodeName string) int32 {
 	verion, ok := c.currentVarVersion.Get(varNodeName)
 	if !ok {
 		return 0
@@ -110,8 +110,9 @@ func (c *cache) GetVarCurrentVerion(varNodeName string) int32 {
 	return verion.(int32)
 }
 
+//clear 定时清理历史配置
 func (c *cache) clear() {
-	tm := time.NewTicker(time.Second * 50)
+	tm := time.NewTicker(time.Minute * 5)
 LOOP:
 	for {
 		select {
@@ -119,12 +120,12 @@ LOOP:
 			break LOOP
 		case <-tm.C:
 
+			//清理服务器配置
 			c.serverConfHistory.RemoveIterCb(func(key string, v interface{}) bool {
 				conf := v.(IAPPConf)
 				tp := conf.GetServerConf().GetServerType()
 				ver, _ := c.currentServerVersion.Get(tp)
 				currentKey := getKey(tp, ver)
-
 				if key != currentKey {
 					conf.Close()
 					global.Def.Log().Debug("清理缓存配置[%s]", conf.GetServerConf().GetServerPath())
@@ -132,6 +133,8 @@ LOOP:
 				}
 				return false
 			})
+
+			//清理var配置
 			c.varConfHistory.RemoveIterCb(func(key string, v interface{}) bool {
 				currentVer, _ := c.currentVarVersion.Get(varNodeName)
 				currentKey := getKey(varNodeName, currentVer)
@@ -144,9 +147,11 @@ LOOP:
 		}
 	}
 }
+
 func getKey(tp string, version interface{}) string {
 	return fmt.Sprintf("%s-%v", tp, version)
 }
+
 func init() {
 	go Cache.clear()
 }
