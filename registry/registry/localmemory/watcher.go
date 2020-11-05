@@ -30,9 +30,8 @@ func (l *localMemory) notifyValueChange(path string, value *value) {
 			case v <- &valueEntity{path: path, version: value.version, Value: []byte(value.data)}:
 			default:
 			}
-
+			break
 		}
-		break
 	}
 	delete(l.valueWatchs, path)
 }
@@ -49,21 +48,23 @@ func (l *localMemory) WatchChildren(path string) (data chan registry.ChildrenWat
 	return watcher, nil
 }
 
-func (l *localMemory) notifyParentChange(path string) {
+func (l *localMemory) notifyParentChange(path string, version int32) {
 	l.clock.Lock()
 	defer l.clock.Unlock()
+	cPath := path
 	path, _, err := l.getParentForNotify(path)
 	if err != nil { //未找到父节点，无需通知
 		return
 	}
+	//@fix 修复节点变动未进行通知的bug
 	for k, v := range l.childrenWatchs {
 		if k == path {
 			select {
-			case v <- &valuesEntity{path: path}:
+			case v <- &childrenEntity{path: path, children: []string{cPath}, version: version}:
 			default:
 			}
+			break
 		}
-		break
 	}
 	delete(l.childrenWatchs, path)
 }

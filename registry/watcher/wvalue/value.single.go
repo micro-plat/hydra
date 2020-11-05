@@ -30,8 +30,8 @@ func NewSingleValueWatcher(r registry.IRegistry, path string, logger logger.ILog
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		notifyChan: make(chan *watcher.ValueChangeArgs, 10), //@fix 1改为10方便测试
-		CloseChan:  make(chan struct{}),                     //@fix 方便测试
+		notifyChan: make(chan *watcher.ValueChangeArgs, 1),
+		CloseChan:  make(chan struct{}), //@fix 方便测试
 	}
 }
 
@@ -85,7 +85,7 @@ LOOP:
 		select {
 		case <-w.CloseChan:
 			return nil
-		case content, ok := <-dataChan: //@bug 程序会阻塞
+		case content, ok := <-dataChan: //程序阻塞,等待节点值变动通知
 			if w.Done || !ok {
 				return nil
 			}
