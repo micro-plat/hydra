@@ -68,6 +68,9 @@ type IConf interface {
 	Load() error
 }
 
+//ServerMainNodeName 服务主节点名称
+const ServerMainNodeName = "main"
+
 //Conf 配置服务
 var Conf = New()
 

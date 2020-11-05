@@ -15,6 +15,22 @@ import (
 	"github.com/micro-plat/lib4go/security/sha256"
 )
 
+const (
+	//ParNodeName auth-apikey配置父节点名
+	ParNodeName = "auth"
+	//SubNodeName auth-apikey配置子节点名
+	SubNodeName = "apikey"
+)
+
+const (
+	//ModeMD5 md5加密模式
+	ModeMD5 = "MD5"
+	//ModeSHA1 SHA1加密模式
+	ModeSHA1 = "SHA1"
+	//ModeSHA256 SHA256加密模式
+	ModeSHA256 = "SHA256"
+)
+
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
 	Secret   string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
@@ -25,10 +41,11 @@ type APIKeyAuth struct {
 }
 
 //New 创建固定密钥验证服务
+//该对象支持的加密模式:MD5|SHA1|SHA256
 func New(secret string, opts ...Option) *APIKeyAuth {
 	f := &APIKeyAuth{
 		Secret: secret,
-		Mode:   "MD5",
+		Mode:   ModeMD5,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -41,11 +58,11 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 func (a *APIKeyAuth) Verify(raw string, sign string) error {
 	var expect string
 	switch strings.ToUpper(a.Mode) {
-	case "MD5":
+	case ModeMD5:
 		expect = md5.Encrypt(raw + a.Secret)
-	case "SHA1":
+	case ModeSHA1:
 		expect = sha1.Encrypt(raw + a.Secret)
-	case "SHA256":
+	case ModeSHA256:
 		expect = sha256.Encrypt(raw + a.Secret)
 	default:
 		return fmt.Errorf("不支持的签名验证方式:%v", a.Mode)
@@ -60,7 +77,7 @@ func (a *APIKeyAuth) Verify(raw string, sign string) error {
 //GetConf 获取APIKeyAuth
 func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	fsa := APIKeyAuth{}
-	_, err := cnf.GetSubObject(registry.Join("auth", "apikey"), &fsa)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &fsa)
 	if err == conf.ErrNoSetting {
 		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}, nil
 	}

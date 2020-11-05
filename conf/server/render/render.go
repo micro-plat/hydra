@@ -8,6 +8,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//TypeNodeName render配置节点名
+const TypeNodeName = "render"
+
 type Tmplt struct {
 	ContentType string `json:"content_type,omitempty" toml:"content_type,omitempty"`
 	Content     string `json:"content,omitempty" toml:"content,omitempty"`
@@ -41,7 +44,7 @@ func NewRender(opts ...Option) *Render {
 //GetConf 设置GetRender配置
 func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 	rsp = &Render{}
-	_, err = cnf.GetSubObject("render", rsp)
+	_, err = cnf.GetSubObject(TypeNodeName, rsp)
 	if err == conf.ErrNoSetting {
 		rsp.Disable = true
 		return rsp, nil

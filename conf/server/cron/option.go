@@ -41,13 +41,13 @@ func WithTimeout(timeout int) Option {
 //WithDisable 禁用任务
 func WithDisable() Option {
 	return func(a *Server) {
-		a.Status = "stop"
+		a.Status = StartStop
 	}
 }
 
 //WithEnable 启用任务
 func WithEnable() Option {
 	return func(a *Server) {
-		a.Status = "start"
+		a.Status = StartStatus
 	}
 }

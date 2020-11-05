@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"status", "sharding"}
 
@@ -25,7 +32,7 @@ type Server struct {
 //New 构建cron server配置，默认为对等模式
 func New(opts ...Option) *Server {
 	s := &Server{
-		Status: "start",
+		Status: StartStatus,
 	}
 	for _, opt := range opts {
 		opt(s)

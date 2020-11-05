@@ -93,8 +93,8 @@ func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst regist
 
 //NewAPPConf 构建服务器配置
 func NewAPPConf(mainConfpath string, rgst registry.IRegistry) (s *APPConf, err error) {
-	platName, sysName, serverType, clusterName := Split(mainConfpath)
-	return NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
+	sections := strings.Split(strings.Trim(mainConfpath, "/"), "/")
+	return NewAPPConfBy(sections[0], sections[1], sections[2], sections[3], rgst)
 
 }
 
@@ -111,10 +111,4 @@ func (s *APPConf) GetServerConf() conf.IServerConf {
 //GetVarConf 获取var配置
 func (s *APPConf) GetVarConf() conf.IVarConf {
 	return s.varConf
-}
-
-//Split 根据主配置获取平台名称、系统名称、服务类型、集群名
-func Split(mainConfPath string) (platName string, sysName string, serverType string, clusterName string) {
-	sections := strings.Split(strings.Trim(mainConfPath, "/"), "/")
-	return sections[0], sections[1], sections[2], sections[3]
 }

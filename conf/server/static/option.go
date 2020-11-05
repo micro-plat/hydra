@@ -2,6 +2,18 @@ package static
 
 import "strings"
 
+//DefaultSataticDir 默认静态文件存放路径
+const DefaultSataticDir = "./src"
+
+//DefaultFirstPage 默认首页文件名
+const DefaultFirstPage = "index.html"
+
+//defaultRewriters 默认需要重写的路径
+var defaultRewriters = []string{"/", "index.htm", "default.html", "default.htm"}
+
+//defaultExclude 默认需要排除的文件,扩展名,路径
+var defaultExclude = []string{"/view/", "/views/", "/web/", ".exe", ".so"}
+
 //Option jwt配置选项
 type Option func(*Static)
 
@@ -10,10 +22,10 @@ func newStatic() *Static {
 	a := &Static{
 		FileMap: map[string]FileInfo{},
 	}
-	a.Dir = "./src"
-	a.FirstPage = "index.html"
-	a.Rewriters = []string{"/", "index.htm", "default.html"}
-	a.Exclude = []string{"/views/", ".exe", ".so"}
+	a.Dir = DefaultSataticDir
+	a.FirstPage = DefaultFirstPage
+	a.Rewriters = defaultRewriters
+	a.Exclude = defaultExclude
 	a.Exts = []string{}
 	return a
 }
@@ -21,7 +33,7 @@ func newStatic() *Static {
 //WithImages 图片服务配置
 func WithImages() Option {
 	return func(s *Static) {
-		s.Dir = "./src"
+		s.Dir = DefaultSataticDir
 		s.Exts = []string{}
 	}
 }

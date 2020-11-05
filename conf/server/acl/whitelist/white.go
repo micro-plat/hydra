@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName 白名单配置父节点名
+	ParNodeName = "acl"
+	//SubNodeName 白名单配置子节点名
+	SubNodeName = "white.list"
+)
+
 //IPList ip列表
 type IPList struct {
 	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty"`
@@ -45,7 +52,7 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 //GetConf 获取WhiteList
 func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	ip := WhiteList{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "white.list"), &ip)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &ip)
 	if err == conf.ErrNoSetting {
 		return &WhiteList{Disable: true}, nil
 	}

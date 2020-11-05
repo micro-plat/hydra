@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //DefaultRPCAddress rpc服务默认地址
 const DefaultRPCAddress = ":8090"
 
@@ -33,7 +40,7 @@ type Server struct {
 func New(address string, opts ...Option) *Server {
 	a := &Server{
 		Address: address,
-		Status:  "start",
+		Status:  StartStatus,
 	}
 	for _, opt := range opts {
 		opt(a)

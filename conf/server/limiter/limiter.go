@@ -14,6 +14,13 @@ import (
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
+const (
+	//ParNodeName limit配置父节点名
+	ParNodeName = "acl"
+	//SubNodeName limit配置子节点名
+	SubNodeName = "limit"
+)
+
 //Limiter 限流器
 type Limiter struct {
 	Rules    []*Rule         `json:"rules,omitempty" valid:"required" toml:"rules,omitempty"`
@@ -58,7 +65,7 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 //GetConf 获取jwt
 func GetConf(cnf conf.IServerConf) (*Limiter, error) {
 	limiter := &Limiter{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "limit"), limiter)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), limiter)
 	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
 		return &Limiter{Disable: true}, nil
 	}

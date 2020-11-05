@@ -9,6 +9,43 @@ import (
 	"github.com/micro-plat/lib4go/utility"
 )
 
+const (
+	//ParNodeName auth-jwt配置父节点名
+	ParNodeName = "auth"
+	//SubNodeName auth-jwt配置子节点名
+	SubNodeName = "jwt"
+)
+
+const (
+	//ModeHS256 加密模式HS256
+	ModeHS256 = "HS256"
+	//ModeHS384 加密模式HS384
+	ModeHS384 = "HS384"
+	//ModeHS512 加密模式HS512
+	ModeHS512 = "HS512"
+	//ModeRS256 加密模式RS256
+	ModeRS256 = "RS256"
+	//ModeES256 加密模式ES256
+	ModeES256 = "ES256"
+	//ModeES384 加密模式ES384
+	ModeES384 = "ES384"
+	//ModeES512 加密模式ES512
+	ModeES512 = "ES512"
+	//ModeRS384 加密模式RS384
+	ModeRS384 = "RS384"
+	//ModeRS512 加密模式RS512
+	ModeRS512 = "RS512"
+	//ModePS256 加密模式PS256
+	ModePS256 = "PS256"
+	//ModePS384 加密模式PS384
+	ModePS384 = "PS384"
+	//ModePS512 加密模式PS512
+	ModePS512 = "PS512"
+)
+
+//JWTName 节点标识名
+const JWTName = "Authorization-Jwt"
+
 //JWTAuth jwt配置信息
 type JWTAuth struct {
 	Name     string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty"`
@@ -23,11 +60,11 @@ type JWTAuth struct {
 	*conf.PathMatch `json:"-"`
 }
 
-//NewJWT 构建JWT配置参数发
+//NewJWT 构建JWT配置参数
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
-		Name:     "Authorization-Jwt",
-		Mode:     "HS512",
+		Name:     JWTName,
+		Mode:     ModeHS512,
 		Secret:   utility.GetGUID(),
 		ExpireAt: 86400,
 		Source:   SourceCookie,
@@ -39,10 +76,10 @@ func NewJWT(opts ...Option) *JWTAuth {
 	return jwt
 }
 
-//GetConf 获取jwt
+//GetConf 获取jwt配置
 func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 	jwt := JWTAuth{}
-	_, err := cnf.GetSubObject(registry.Join("auth", "jwt"), &jwt)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &jwt)
 	if err == conf.ErrNoSetting {
 		return &JWTAuth{Disable: true}, nil
 	}

@@ -16,28 +16,28 @@ func newMQC(addr string, opts ...mqc.Option) *mqcBuilder {
 	b := &mqcBuilder{
 		CustomerBuilder: make(map[string]interface{}),
 	}
-	b.CustomerBuilder["main"] = mqc.New(addr, opts...)
+	b.CustomerBuilder[ServerMainNodeName] = mqc.New(addr, opts...)
 	return b
 }
 
 //Load 加载配置信息
 func (b *mqcBuilder) Load() {
 	queues := services.MQC.GetQueues()
-	if q, ok := b.CustomerBuilder["queue"].(*queue.Queues); ok {
+	if q, ok := b.CustomerBuilder[queue.TypeNodeName].(*queue.Queues); ok {
 		q.Append(queues.Queues...)
 		return
 	}
-	b.CustomerBuilder["queue"] = queues
+	b.CustomerBuilder[queue.TypeNodeName] = queues
 	return
 }
 
 //Queue 添加队列配置
 func (b *mqcBuilder) Queue(mq ...*queue.Queue) *mqcBuilder {
 	f := func() {
-		oqueue, ok := b.CustomerBuilder["queue"].(*queue.Queues)
+		oqueue, ok := b.CustomerBuilder[queue.TypeNodeName].(*queue.Queues)
 		if !ok {
 			oqueue = queue.NewQueues()
-			b.CustomerBuilder["queue"] = oqueue
+			b.CustomerBuilder[queue.TypeNodeName] = oqueue
 		}
 		for _, m := range mq {
 			m.Queue = global.MQConf.GetQueueName(m.Queue)
