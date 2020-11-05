@@ -49,6 +49,9 @@ func Test_Auth_Bind(t *testing.T) {
 		Value string `json:"value"`
 	}
 
+	type obj struct{}
+	var r *obj
+
 	tests := []struct {
 		name      string
 		request   interface{}
@@ -59,7 +62,9 @@ func Test_Auth_Bind(t *testing.T) {
 		errStr    string
 	}{
 		{name: "参数非地址", out: map[string]string{}, wantError: true, errStr: "输入参数非指针 map"},
+		{name: "request为空指针", out: &map[string]string{}, request: r, wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
 		{name: "request为空", out: &map[string]string{}, wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
+		{name: "request为空字符串", out: &map[string]string{}, request: "", wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
 		{name: "request为func返回空值", request: func() interface{} { return nil }, wantError: true, out: &map[string]string{},
 			errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
 		{name: "request为func返回非空值", request: func() interface{} { return result{Key: "1", Value: "1"} },

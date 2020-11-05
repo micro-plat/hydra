@@ -28,6 +28,10 @@ func (h testHandlerSuffix) XxxHandle(ctx string) (r interface{}) {
 
 type testHandler1 struct{}
 
+func newTestHandler() (*testHandler, error) {
+	return &testHandler{}, nil
+}
+
 type testHandler struct{}
 
 func (t *testHandler) GetHandling(context.IContext) interface{} {

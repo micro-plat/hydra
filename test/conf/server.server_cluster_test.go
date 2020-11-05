@@ -16,7 +16,7 @@ import (
 
 //@todo 注册中心的cluster的需要验证通知功能
 
-func xTest_NewCluster(t *testing.T) {
+func Test_NewCluster(t *testing.T) {
 	//初始化注册中心
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")

@@ -16,6 +16,9 @@ const (
 	handled
 	fallback
 )
+const (
+	defaultReplaceMent = "handle"
+)
 
 type UnitGroup struct {
 	Path     string
@@ -86,6 +89,16 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 
 func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
 
+	//@fix 路径里面对最后一个*进行替换 @hj
+	lastIndex := strings.LastIndex(path, "*")
+	if lastIndex > -1 {
+		replacement := defaultReplaceMent
+		if name != "" {
+			replacement = name
+		}
+		path = path[:lastIndex] + replacement + path[lastIndex+1:]
+	}
+
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {
 		return path, path, []string{}
@@ -98,13 +111,9 @@ func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, a
 		}
 	}
 
-	//@fix 路径里面对最后一个*进行替换 @hj
-	lastIndex := strings.LastIndex(path, "*")
+	//非RESTful
 	if lastIndex > -1 {
-		path = path[:lastIndex] + name + path[lastIndex+1:]
 		return path, path, router.DefMethods
 	}
-
-	//非RESTful
 	return registry.Join(path, name), registry.Join(path, name), router.DefMethods
 }
