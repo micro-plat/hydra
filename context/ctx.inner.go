@@ -33,4 +33,6 @@ type IInnerContext interface {
 	// YAML(int, interface{})
 	// JSON(int, interface{})
 	Redirect(int, string)
+
+	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 }

@@ -46,8 +46,8 @@ type IConf interface {
 	//GetRPC() 获取rpc服务器配置
 	GetRPC() *rpcBuilder
 
-	//Custome 自定义服务器配置
-	Custome(tp string, s ...interface{}) CustomerBuilder
+	//Custom 自定义服务器配置
+	Custom(tp string, s ...interface{}) CustomerBuilder
 
 	//CRON 构建cron服务器配置
 	CRON(opts ...cron.Option) *cronBuilder
@@ -237,8 +237,8 @@ func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
 	return
 }
 
-//Custome 用户自定义配置服务
-func (c *conf) Custome(tp string, s ...interface{}) CustomerBuilder {
+//Custom 用户自定义配置服务
+func (c *conf) Custom(tp string, s ...interface{}) CustomerBuilder {
 	if _, ok := c.data[tp]; ok {
 		panic(fmt.Sprintf("不能重复注册%s", tp))
 	}

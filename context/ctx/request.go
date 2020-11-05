@@ -3,8 +3,10 @@ package ctx
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"time"
 
@@ -71,7 +73,7 @@ func (r *request) Bind(obj interface{}) error {
 
 //Check 检查输入参数和配置参数是否为空
 func (r *request) Check(field ...string) error {
-	data, _ := r.body.GetBodyMap()
+	data, _ := r.body.GetRawBodyMap()
 	for _, key := range field {
 		if _, ok := r.ctx.GetFormValue(key); ok {
 			continue
@@ -92,7 +94,7 @@ func (r *request) GetKeys() []string {
 	for k := range r.ctx.GetForm() {
 		keys = append(keys, k)
 	}
-	data, _ := r.body.GetBodyMap()
+	data, _ := r.body.GetRawBodyMap()
 	for k := range data {
 		keys = append(keys, k)
 	}
@@ -102,7 +104,7 @@ func (r *request) GetKeys() []string {
 //GetMap 获取请求的参数信息
 func (r *request) GetMap() (map[string]interface{}, error) {
 	forms := r.ctx.GetForm()
-	body, err := r.body.GetBodyMap()
+	body, err := r.body.GetRawBodyMap()
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +147,7 @@ func (r *request) Get(name string) (result string, ok bool) {
 		return
 	}
 	fromBody = true
-	m, err := r.body.GetBodyMap()
+	m, err := r.body.GetRawBodyMap()
 	if err != nil {
 		return "", false
 	}
@@ -214,4 +216,44 @@ func (r *request) GetTrace() string {
 	}
 	return ""
 
+}
+
+//SaveFile 保存上传文件到指定路径
+func (r *request) SaveFile(fileKey, dst string) error {
+	_, reader, _, err := r.ctx.GetFile(fileKey)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, reader)
+	return err
+}
+
+//GetFileSize 获取上传文件大小
+func (r *request) GetFileSize(fileKey string) (int64, error) {
+	_, _, size, err := r.ctx.GetFile(fileKey)
+	if err != nil {
+		return 0, err
+	}
+	return size, nil
+}
+
+//GetFileName 获取上传文件名称
+func (r *request) GetFileName(fileKey string) (string, error) {
+	fileName, _, _, err := r.ctx.GetFile(fileKey)
+	if err != nil {
+		return "", err
+	}
+	return fileName, nil
+}
+
+//GetFileBody 获取上传文件内容
+func (r *request) GetFileBody(fileKey string) (io.ReadCloser, error) {
+	_, reader, _, err := r.ctx.GetFile(fileKey)
+	return reader, err
 }

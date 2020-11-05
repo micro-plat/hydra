@@ -56,6 +56,11 @@ func JwtAuth() Handler {
 
 		//5.jwt验证失败后返回错误
 		ctx.Log().Error(err)
+		if jwtAuth.AuthURL != "" {
+			ctx.Response().Header("Location", jwtAuth.AuthURL)
+			ctx.Response().Stop(http.StatusFound)
+			return
+		}
 		ctx.Response().Abort(errs.GetCode(err, http.StatusForbidden), errors.New("jwt验证串错误，禁止访问"))
 		return
 
@@ -87,7 +92,7 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 //getToken 从请求头或cookie中获取cookie
 func getToken(ctx context.IContext, jwt *xjwt.JWTAuth) string {
 	switch strings.ToUpper(jwt.Source) {
-	case "HEADER", "H":
+	case xjwt.SourceHeader, xjwt.SourceHeaderShort: // "HEADER", "H":
 		return ctx.Request().Path().GetHeader(jwt.Name)
 	default:
 		cookie, _ := ctx.Request().Path().GetCookie(jwt.Name)

@@ -71,3 +71,17 @@ func (g *ginCtx) Written() bool {
 func (g *ginCtx) WHeader(k string) string {
 	return g.Writer.Header().Get(k)
 }
+
+//GetUploadFile 获取上传文件
+func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
+	g.load()
+	header, err := g.FormFile(fileKey)
+	if err != nil {
+		return "", nil, 0, err
+	}
+	f, err := header.Open()
+	if err != nil {
+		return "", nil, 0, err
+	}
+	return header.Filename, f, header.Size, nil
+}

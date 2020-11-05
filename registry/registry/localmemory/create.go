@@ -17,10 +17,10 @@ func (l *localMemory) CreatePersistentNode(path string, data string) (err error)
 			l.nodes[path] = newValue("{}")
 		}
 	}
-	l.nodes[registry.Format(path)] = newValue(data)
+	nvalue := newValue(data)
+	l.nodes[registry.Format(path)] = nvalue
 	l.lock.Unlock()
-
-	l.notifyParentChange(path)
+	l.notifyParentChange(path, nvalue.version)
 	return nil
 }
 func (l *localMemory) CreateTempNode(path string, data string) (err error) {

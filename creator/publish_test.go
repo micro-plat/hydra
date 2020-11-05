@@ -2,6 +2,7 @@ package creator
 
 import (
 	"encoding/json"
+	"sort"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server"
@@ -56,6 +57,8 @@ func Test_conf_Pub(t *testing.T) {
 			args:    args{registryAddr: "lm://.", platName: "platName3", systemName: "systemName3", clusterName: "clusterName3", cover: true},
 			isExsit: true, wantErr: false},
 	}
+
+	global.Def.ServerTypes = []string{}
 	for _, tt := range tests {
 		c := &conf{}
 		if tt.isExsit {
@@ -215,7 +218,11 @@ func Test_getAllPath(t *testing.T) {
 			rgt.CreatePersistentNode(str, "{}")
 		}
 		got, err := getAllPath(rgt, tt.path)
+
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
+
+		sort.Strings(tt.want)
+		sort.Strings(got)
 		assert.Equal(t, tt.want, got, tt.name+",value")
 	}
 }

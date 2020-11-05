@@ -56,7 +56,7 @@ type IAPPConf interface {
 
 var _ IAPPConf = &APPConf{}
 
-//APPConf 服务器配置信息
+//APPConf 应用配置信息
 type APPConf struct {
 	serverConf conf.IServerConf
 	varConf    conf.IVarConf
@@ -69,14 +69,20 @@ type APPConf struct {
 //NewAPPConfBy 构建服务器配置缓存
 func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst registry.IRegistry) (s *APPConf, err error) {
 	s = &APPConf{}
+
+	//构建server配置
 	s.serverConf, err = server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	if err != nil {
 		return nil, err
 	}
+
+	//构建var配置
 	s.varConf, err = vars.NewVarConf(platName, rgst)
 	if err != nil {
 		return nil, err
 	}
+
+	//构建server的组件配置(todo:移到server配置内)
 	s.HttpSub = server.NewhttpSub(s.serverConf)
 	s.CronSub = server.NewCronSub(s.serverConf)
 	s.MQCSub = server.NewMQCSub(s.serverConf)
@@ -85,10 +91,10 @@ func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst regist
 
 }
 
-//NewAPPConf 构建服务器配置缓存
+//NewAPPConf 构建服务器配置
 func NewAPPConf(mainConfpath string, rgst registry.IRegistry) (s *APPConf, err error) {
-	sections := strings.Split(strings.Trim(mainConfpath, "/"), "/")
-	return NewAPPConfBy(sections[0], sections[1], sections[2], sections[3], rgst)
+	platName, sysName, serverType, clusterName := Split(mainConfpath)
+	return NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 
 }
 
@@ -97,12 +103,18 @@ func (s *APPConf) Close() error {
 	return s.serverConf.Close()
 }
 
-//GetServerConf 获取服务器主配置
+//GetServerConf 获取server配置
 func (s *APPConf) GetServerConf() conf.IServerConf {
 	return s.serverConf
 }
 
-//GetVarConf 获取变量配置
+//GetVarConf 获取var配置
 func (s *APPConf) GetVarConf() conf.IVarConf {
 	return s.varConf
+}
+
+//Split 根据主配置获取平台名称、系统名称、服务类型、集群名
+func Split(mainConfPath string) (platName string, sysName string, serverType string, clusterName string) {
+	sections := strings.Split(strings.Trim(mainConfPath, "/"), "/")
+	return sections[0], sections[1], sections[2], sections[3]
 }

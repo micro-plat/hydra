@@ -141,7 +141,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.121"))
 	confN.Gray(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
-	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	confN.Metric("http://192.168.0.111:8080", "1", "cron1", metric.WithEnable(), metric.WithUPName("upnem", "1223456"))
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
@@ -172,7 +172,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, headerC, headerConf, "测试conf初始化,判断header节点对象")
 
 	jwtConf, err := gotS.GetJWTConf()
-	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取jwt对象失败")
 	assert.Equal(t, jwtC, jwtConf, "测试conf初始化,判断jwt节点对象")
 
@@ -299,10 +299,11 @@ func TestNewMQCServerConf(t *testing.T) {
 	mqcC := mqc.New("redis://11")
 	assert.Equal(t, mqcC, mqcConf, "测试conf初始化,判断mqc节点对象")
 
-	queuesObj, err := gotS.GetMQCQueueConf()
-	queueC := queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
-	assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败")
-	assert.Equal(t, queueC, queuesObj, "测试conf初始化,判断queues节点对象")
+	//@todo queue 需要在应用启动后才会发布到注册中心
+	// queuesObj, err := gotS.GetMQCQueueConf()
+	// queueC := queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
+	// assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败")
+	// assert.Equal(t, queueC, queuesObj, "测试conf初始化,判断queues节点对象")
 }
 
 func TestNewCRONServerConf(t *testing.T) {

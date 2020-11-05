@@ -8,7 +8,7 @@ import (
 var _ conf.IVarConf = &MockVarConf{}
 
 type MockVarConf struct {
-	PlatName string 
+	PlatName string
 	Version  int32
 	ConfData map[string]map[string]*conf.RawConf
 }

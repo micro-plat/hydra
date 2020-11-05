@@ -43,7 +43,7 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 //setToken 设置jwt到响应头或cookie中
 func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 	switch strings.ToUpper(jwt.Source) {
-	case "HEADER", "H":
+	case xjwt.SourceHeader, xjwt.SourceHeaderShort: //"HEADER", "H":
 		ctx.Response().Header(jwt.Name, token)
 	default:
 		expireTime := time.Now().Add(time.Duration(time.Duration(jwt.ExpireAt)*time.Second - 8*60*60*time.Second))

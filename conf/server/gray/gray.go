@@ -37,7 +37,7 @@ func (g *Gray) Allow() bool {
 	if g.cluster == nil {
 		return false
 	}
-	return g.cluster.GetType() == global.API || g.cluster.GetType() == global.RPC
+	return g.cluster.GetType() == global.API || g.cluster.GetType() == global.Web
 }
 
 //Check 检查当前是否需要转到上游服务器处理

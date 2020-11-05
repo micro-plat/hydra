@@ -413,7 +413,7 @@ func Test_conf_Custome(t *testing.T) {
 				assert.Equal(t, true, e == nil, name+",panic1")
 			}
 		}(tt.name, tt.key)
-		obj := tt.fields.Custome(tt.key, tt.args)
+		obj := tt.fields.Custom(tt.key, tt.args)
 		assert.Equal(t, tt.want[tt.key], obj, tt.name)
 	}
 }

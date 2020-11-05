@@ -141,3 +141,7 @@ func (t *TestContxt) Redirect(s int, u string) {
 	t.WrittenStatus = true
 	return
 }
+
+func (t *TestContxt) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
+	return "", nil, 0, nil
+}

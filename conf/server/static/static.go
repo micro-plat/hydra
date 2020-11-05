@@ -73,7 +73,6 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
-	fmt.Println("static.Dir:", static.Dir)
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}

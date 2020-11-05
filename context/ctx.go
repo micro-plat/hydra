@@ -2,6 +2,7 @@ package context
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"time"
 
@@ -89,6 +90,14 @@ type IVariable interface {
 	IGetter
 }
 
+//@fix 提供上传文件的处理 @hj
+type IUploadFile interface {
+	SaveFile(fileKey, dst string) error
+	GetFileSize(fileKey string) (int64, error)
+	GetFileName(fileKey string) (string, error)
+	GetFileBody(fileKey string) (io.ReadCloser, error)
+}
+
 //IRequest 请求信息
 type IRequest interface {
 	//Path 地址、头、cookie相关信息
@@ -106,15 +115,19 @@ type IRequest interface {
 	//GetMap 将当前请求转换为map并返回
 	GetMap() (map[string]interface{}, error)
 
-	//GetBody 获取请求的body参数
+	//GetRawBody 获取请求的body参数
+	GetRawBody(encoding ...string) (string, error)
+
+	//GetBody 获取请求的参数
 	GetBody(encoding ...string) (string, error)
 
 	//GetBodyMap 将body转换为map
-	GetBodyMap(encoding ...string) (map[string]interface{}, error)
+	GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 
 	//GetTrace 获取请求的trace信息
 	GetTrace() string
 	IGetter
+	IUploadFile
 }
 
 //IResponse 响应信息
@@ -141,7 +154,7 @@ type IResponse interface {
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
 
-	//WriteFinal 修改最终渲染内容
+	//WriteFinal 修改最终渲染内容(不会立即写入)
 	WriteFinal(status int, content string, ctp string)
 
 	//Write 向响应流中写入状态码与内容(不会立即写入)
@@ -153,10 +166,10 @@ type IResponse interface {
 	//File 向响应流中写入文件(立即写入)
 	File(path string)
 
-	//Abort 终止当前请求继续执行
+	//Abort 终止当前请求继续执行(立即写入)
 	Abort(int, error)
 
-	//Stop 停止当前服务执行
+	//Stop 停止当前服务执行(立即写入)
 	Stop(int)
 
 	//GetRawResponse 获取原始响应状态码与内容
@@ -165,7 +178,7 @@ type IResponse interface {
 	//GetFinalResponse 获取最终渲染的响应状态码与内容
 	GetFinalResponse() (int, string)
 
-	//Flush 将当前内容写入响应流
+	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
 }
 
@@ -178,7 +191,7 @@ type IAuth interface {
 	Response(...interface{}) interface{}
 
 	//Bind 将请求的认证对象绑定为特定的结构体
-	Bind(out interface{})
+	Bind(out interface{}) error
 }
 
 //IUser 用户相关信息

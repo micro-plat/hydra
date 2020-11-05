@@ -20,6 +20,12 @@ func (h hander2) Handle(ctx context.IContext) (r interface{}) {
 	return "sucess"
 }
 
+type testHandlerSuffix struct{}
+
+func (h testHandlerSuffix) XxxHandle(ctx string) (r interface{}) {
+	return "sucess"
+}
+
 type testHandler1 struct{}
 
 type testHandler struct{}
@@ -42,6 +48,9 @@ func (t *testHandler) OrderHandle(context.IContext) interface{} {
 	return nil
 }
 func (t *testHandler) OrderFallback(context.IContext) interface{} {
+	return nil
+}
+func (t *testHandler) Order(string) interface{} {
 	return nil
 }
 
@@ -117,5 +126,11 @@ func (t *testHandler5) OrderHandling(context.IContext) interface{} {
 	return nil
 }
 func (t *testHandler5) OrderHandle(context.IContext) interface{} {
+	return nil
+}
+
+type testHandler6 struct{}
+
+func (t *testHandler6) OrderHandling(context.IContext) interface{} {
 	return nil
 }

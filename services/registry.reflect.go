@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+var suffixList = []string{defHandling, defHandler, defHandled, defFallback}
+
 func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	//检查参数
 	if path == "" || h == nil {
@@ -31,8 +33,21 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 			return current, nil
 		}
 	}
-	if val.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("只能接收引用类型; 实际是 %s", val.Kind())
+
+	//检查传入的是构建函数
+	if val.Kind() == reflect.Func {
+		nval, err := createObject(h)
+		if err != nil {
+			return nil, err
+		}
+		typ = reflect.TypeOf(nval)
+		val = reflect.ValueOf(nval)
+
+	}
+
+	//检查对象类型
+	if val.Kind() != reflect.Ptr && val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("只能接收引用类型或struct; 实际是 %s", val.Kind())
 	}
 
 	//reflect所有函数，检查函数签名
@@ -48,9 +63,15 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 			continue
 		}
 
+		hasSuffix := checkSuffix(mName)
+
 		//处理handling,handle,handled,fallback
 		nfx, ok := method.Interface().(func(context.IContext) interface{})
 		if !ok {
+			if hasSuffix {
+				err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}", mName, suffixList)
+				return
+			}
 			continue
 		}
 
@@ -81,4 +102,13 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	}
 	return current, nil
 
+}
+
+func checkSuffix(mName string) bool {
+	for i := range suffixList {
+		if strings.HasSuffix(mName, suffixList[i]) {
+			return true
+		}
+	}
+	return false
 }

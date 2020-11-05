@@ -31,6 +31,6 @@ func TestRouters(t *testing.T) {
 	rconf, err := server.GetRouterConf()
 
 	assert.Equal(t, nil, err, "TestRouters")
-	assert.Equal(t, len(rconf.Routers), "TestRouters")
+	assert.Equal(t, 1, len(rconf.Routers), "TestRouters")
 
 }

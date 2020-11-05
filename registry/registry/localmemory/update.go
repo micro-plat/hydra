@@ -20,6 +20,10 @@ func (l *localMemory) Update(path string, data string) (err error) {
 }
 
 func (l *localMemory) Delete(path string) error {
+	_, version, err := l.GetValue(registry.Format(path))
+	if err != nil {
+		return err
+	}
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	np := registry.Format(path)
@@ -27,7 +31,7 @@ func (l *localMemory) Delete(path string) error {
 		if strings.HasPrefix(k, np) {
 			delete(l.nodes, k)
 			l.notifyValueChange(path, nv)
-			l.notifyParentChange(path)
+			l.notifyParentChange(path, version)
 		}
 	}
 	return nil

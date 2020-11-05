@@ -37,7 +37,7 @@ func TestChildWatcher_Close(t *testing.T) {
 func TestChildWatcher_Start(t *testing.T) {
 
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("TestChildWatcher", "start")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()

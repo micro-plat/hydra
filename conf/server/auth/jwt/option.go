@@ -3,6 +3,10 @@ package jwt
 //Option jwt配置选项
 type Option func(*JWTAuth)
 
+const SourceHeader = "HEADER"
+const SourceHeaderShort = "H"
+const SourceCookie = "COOKIE"
+
 //WithName jwt设置到cookie中或header中的名称
 func WithName(name string) Option {
 	return func(a *JWTAuth) {
@@ -34,14 +38,14 @@ func WithSecret(secret string) Option {
 //WithHeader 将jwt存储到http头中
 func WithHeader() Option {
 	return func(a *JWTAuth) {
-		a.Source = "HEADER"
+		a.Source = SourceHeader
 	}
 }
 
 //WithCookie 将jwt存储到cookie中
 func WithCookie() Option {
 	return func(a *JWTAuth) {
-		a.Source = "COOKIE"
+		a.Source = SourceCookie
 	}
 }
 
@@ -52,10 +56,10 @@ func WithExcludes(p ...string) Option {
 	}
 }
 
-//WithRedirect 设置转跳URL
-func WithRedirect(url string) Option {
+//WithAuthURL 设置转跳URL
+func WithAuthURL(url string) Option {
 	return func(a *JWTAuth) {
-		a.Redirect = url
+		a.AuthURL = url
 	}
 }
 
