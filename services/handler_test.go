@@ -44,6 +44,9 @@ func (t *testHandler) OrderHandle(context.IContext) interface{} {
 func (t *testHandler) OrderFallback(context.IContext) interface{} {
 	return nil
 }
+func (t *testHandler) Order(string) interface{} {
+	return nil
+}
 
 func (t *testHandler) Close() error {
 	return nil
@@ -117,5 +120,11 @@ func (t *testHandler5) OrderHandling(context.IContext) interface{} {
 	return nil
 }
 func (t *testHandler5) OrderHandle(context.IContext) interface{} {
+	return nil
+}
+
+type testHandler6 struct{}
+
+func (t *testHandler6) OrderHandling(context.IContext) interface{} {
 	return nil
 }
