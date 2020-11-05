@@ -141,7 +141,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.121"))
 	confN.Gray(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
-	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	confN.Metric("http://192.168.0.111:8080", "1", "cron1", metric.WithEnable(), metric.WithUPName("upnem", "1223456"))
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
@@ -172,7 +172,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, headerC, headerConf, "测试conf初始化,判断header节点对象")
 
 	jwtConf, err := gotS.GetJWTConf()
-	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取jwt对象失败")
 	assert.Equal(t, jwtC, jwtConf, "测试conf初始化,判断jwt节点对象")
 
