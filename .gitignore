@@ -1,4 +1,6 @@
 logs
+!*.go
+
 launch.json
 apiserver*
 rpcserver*
@@ -7,5 +9,7 @@ cronserver*
 flowserver*
 webserver*
 wsserver*
+jwtserver*
+
 examples/conf
 logger.toml
