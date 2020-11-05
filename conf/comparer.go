@@ -21,6 +21,7 @@ type Comparer struct {
 }
 
 //NewComparer 构建配置比较器
+//初始配置不能为空，新配置为空时认为没有变更
 func NewComparer(oconf IServerConf, valueNames []string, subNames ...string) *Comparer {
 	if oconf == nil {
 		panic("配置不能为空")
@@ -40,7 +41,7 @@ func (s *Comparer) Update(n IServerConf) {
 	s.nconf = n
 }
 
-//IsChanged 主配置是否发生变更
+//IsChanged 检查版本号是否发生变化
 //当新配置nconf为空时，系统认为未发生变化
 func (s *Comparer) IsChanged() bool {
 	if s.nconf == nil || reflect.ValueOf(s.nconf).IsNil() {
@@ -56,14 +57,14 @@ func (s *Comparer) IsValueChanged(names ...string) (isChanged bool) {
 	}
 	knames := append(s.valueNames, names...)
 	for _, name := range knames {
-		if s.nconf.GetRootConf().GetString(name) != s.oconf.GetRootConf().GetString(name) {
+		if s.nconf.GetMainConf().GetString(name) != s.oconf.GetMainConf().GetString(name) {
 			return true
 		}
 	}
 	return false
 }
 
-//IsSubConfChanged 子配置是否发生变化
+//IsSubConfChanged 子配置项目是否发生变化
 func (s *Comparer) IsSubConfChanged(names ...string) (isChanged bool) {
 	if !s.IsChanged() {
 		return false

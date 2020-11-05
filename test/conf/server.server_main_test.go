@@ -33,7 +33,7 @@ func TestNewMainConf(t *testing.T) {
 	data, vsion, err := confM.Registry.GetValue(mainPath)
 	assert.Equal(t, true, err == nil, "注册中心获取主配置信息异常")
 	assert.Equal(t, vsion, mainConf.GetVersion(), "mainPath版本号不匹配")
-	assert.Equal(t, data, mainConf.GetRootConf().GetRaw(), "主配置数据信息不匹配")
+	assert.Equal(t, data, mainConf.GetMainConf().GetRaw(), "主配置数据信息不匹配")
 
 	apiObj := api.Server{}
 	vsion, err = mainConf.GetMainObject(&apiObj)
@@ -71,7 +71,7 @@ func TestNewMainConf(t *testing.T) {
 	data, vsion, err = confN.Registry.GetValue(mainPath)
 	assert.Equal(t, true, err == nil, "注册中心获取主配置信息异常1")
 	assert.Equal(t, vsion, mainConf.GetVersion(), "mainPath版本号不匹配1")
-	assert.Equal(t, data, mainConf.GetRootConf().GetRaw(), "主配置数据信息不匹配1")
+	assert.Equal(t, data, mainConf.GetMainConf().GetRaw(), "主配置数据信息不匹配1")
 
 	apiObj = api.Server{}
 	vsion, err = mainConf.GetMainObject(&apiObj)
@@ -185,7 +185,7 @@ func TestMainConf_GetVersion(t *testing.T) {
 	}
 }
 
-func TestMainConf_GetRootConf(t *testing.T) {
+func TestMainConf_GetMainConf(t *testing.T) {
 	platName, systemName, clusterName := "hydra5", "sys5", "cluter5"
 	tests := []struct {
 		name    string
@@ -205,7 +205,7 @@ func TestMainConf_GetRootConf(t *testing.T) {
 		mainPath := pubObj.GetServerPath()
 		data, _, err := confM.Registry.GetValue(mainPath)
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err1")
-		assert.Equal(t, data, mainConf.GetRootConf().GetRaw(), tt.name+",data")
+		assert.Equal(t, data, mainConf.GetMainConf().GetRaw(), tt.name+",data")
 	}
 }
 
