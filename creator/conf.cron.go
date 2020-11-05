@@ -15,27 +15,27 @@ func newCron(opts ...cron.Option) *cronBuilder {
 	b := &cronBuilder{
 		CustomerBuilder: make(map[string]interface{}),
 	}
-	b.CustomerBuilder["main"] = cron.New(opts...)
+	b.CustomerBuilder[ServerMainNodeName] = cron.New(opts...)
 	return b
 }
 
 //Load 加载路由
 func (b *cronBuilder) Load() {
 	tasks := services.CRON.GetTasks()
-	if q, ok := b.CustomerBuilder["task"].(*task.Tasks); ok {
+	if q, ok := b.CustomerBuilder[task.TypeNodeName].(*task.Tasks); ok {
 		q.Append(tasks.Tasks...)
 		return
 	}
-	b.CustomerBuilder["task"] = tasks
+	b.CustomerBuilder[task.TypeNodeName] = tasks
 	return
 }
 
 //Queue 添加队列配置
 func (b *cronBuilder) Task(tks ...*task.Task) *cronBuilder {
-	otask, ok := b.CustomerBuilder["task"].(*task.Tasks)
+	otask, ok := b.CustomerBuilder[task.TypeNodeName].(*task.Tasks)
 	if !ok {
 		otask = task.NewTasks()
-		b.CustomerBuilder["task"] = otask
+		b.CustomerBuilder[task.TypeNodeName] = otask
 	}
 	otask.Append(tks...)
 	return b

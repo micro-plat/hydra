@@ -27,6 +27,13 @@ const DefaultWTimeOut = 30
 //DefaultRHTimeOut 默认头读取超时时间
 const DefaultRHTimeOut = 30
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "dn"}
 
@@ -48,10 +55,9 @@ type Server struct {
 
 //New 构建api server配置信息
 func New(address string, opts ...Option) *Server {
-
 	a := &Server{
 		Address: address,
-		Status:  "start",
+		Status:  StartStatus,
 	}
 	for _, opt := range opts {
 		opt(a)

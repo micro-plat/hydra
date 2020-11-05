@@ -54,7 +54,8 @@ func New(service string, opts ...AuthOption) *Auth {
 		opt(r)
 	}
 	if len(r.Requests) <= 0 {
-		r.Requests = []string{"/*"}
+		//默认通配 所有路径都要验证
+		r.Requests = []string{"/**"}
 	}
 	r.PathMatch = conf.NewPathMatch(r.Requests...)
 	return r

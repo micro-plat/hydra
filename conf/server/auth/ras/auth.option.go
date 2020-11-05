@@ -23,7 +23,7 @@ func WithRequired(fieldName ...string) AuthOption {
 	}
 }
 
-//WithUIDAlias 设置用户id的字段名
+//WithUIDAlias 设置用户euid的字段名
 func WithUIDAlias(name string) AuthOption {
 	return func(a *Auth) {
 		a.Alias["euid"] = name

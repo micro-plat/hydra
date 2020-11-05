@@ -7,6 +7,7 @@ type auth struct {
 	auth     string
 }
 
+//初始化认证对象列表
 func newAuthorization(m map[string]string) []*auth {
 	pairs := make([]*auth, 0, len(m))
 	for user, password := range m {
@@ -18,6 +19,8 @@ func newAuthorization(m map[string]string) []*auth {
 	}
 	return pairs
 }
+
+//创建认证关键值
 func createAuth(user, password string) string {
 	base := user + ":" + password
 	return "Basic " + base64.Encode(base)

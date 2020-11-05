@@ -12,6 +12,13 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName gray配置父节点名
+	ParNodeName = "acl"
+	//SubNodeName gray配置子节点名
+	SubNodeName = "gray"
+)
+
 //Gray 灰度设置
 type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
@@ -78,7 +85,7 @@ func (g *Gray) checkServers(c conf.IServerConf) error {
 //GetConf 获取Gray
 func GetConf(cnf conf.IServerConf) (*Gray, error) {
 	gray := &Gray{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "gray"), gray)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), gray)
 	if err == conf.ErrNoSetting {
 		return &Gray{Disable: true}, nil
 	}

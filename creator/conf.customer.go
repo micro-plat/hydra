@@ -24,10 +24,10 @@ type CustomerBuilder map[string]interface{}
 func newCustomerBuilder(s ...interface{}) CustomerBuilder {
 	b := make(map[string]interface{})
 	if len(s) == 0 {
-		b["main"] = make(map[string]interface{})
+		b[ServerMainNodeName] = make(map[string]interface{})
 		return b
 	}
-	b["main"] = s[0]
+	b[ServerMainNodeName] = s[0]
 	return b
 }
 

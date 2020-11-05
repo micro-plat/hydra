@@ -1,6 +1,7 @@
 package creator
 
 import (
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -18,7 +19,7 @@ func newRPC(address string, fnGetRouter func(string) *services.ORouter, opts ...
 			fnGetRouter:     fnGetRouter,
 		},
 	}
-	b.CustomerBuilder["main"] = rpc.New(address, opts...)
+	b.CustomerBuilder[ServerMainNodeName] = rpc.New(address, opts...)
 	return b
 }
 
@@ -28,6 +29,6 @@ func (b *rpcBuilder) Load() {
 	if err != nil {
 		panic(err)
 	}
-	b.CustomerBuilder["router"] = routers
+	b.CustomerBuilder[router.TypeNodeName] = routers
 	return
 }

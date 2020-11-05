@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName auth-ras配置父节点名
+	ParNodeName = "auth"
+	//SubNodeName auth-ras配置子节点名
+	SubNodeName = "ras"
+)
+
 //RASAuth 远程服务验证组
 type RASAuth struct {
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
@@ -37,7 +44,7 @@ func (a RASAuth) Match(p string) (bool, *Auth) {
 func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
-	_, err = cnf.GetSubObject(registry.Join("auth", "ras"), auths)
+	_, err = cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), auths)
 	if err == conf.ErrNoSetting {
 		auths.Disable = true
 		return auths, nil

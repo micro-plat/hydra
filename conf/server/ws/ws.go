@@ -7,6 +7,13 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //Server api server配置信息
 type Server struct {
 	Address string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty"`

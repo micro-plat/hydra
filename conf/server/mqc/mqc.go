@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"status", "sharding"}
 
@@ -28,7 +35,7 @@ func New(addr string, opts ...Option) *Server {
 	if _, _, err := global.ParseProto(addr); err != nil {
 		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://queuename 格式 %w", err))
 	}
-	s := &Server{Addr: addr, Status: "start"}
+	s := &Server{Addr: addr, Status: StartStatus}
 	for _, opt := range opts {
 		opt(s)
 	}

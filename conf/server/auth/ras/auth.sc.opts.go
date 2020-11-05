@@ -2,6 +2,15 @@ package ras
 
 import "strings"
 
+const (
+	//FiledSortAll 字段排序模式,排序所有字段，包括数据，secrect
+	FiledSortAll = "all"
+	//FiledSortData 密钥拼接模式,只排序数据字段，不排序secrect
+	FiledSortData = "data"
+	//FiledSortStatic 密钥拼接模式,使用指定的字段进行排序
+	FiledSortStatic = "static"
+)
+
 type connectOption struct {
 
 	//键值连接符
@@ -34,21 +43,21 @@ func WithConnectChar(kv string, chain string) ConnectOption {
 //WithConnectSortByData 只排序数据字段，不排序secrect
 func WithConnectSortByData() ConnectOption {
 	return func(c *connectOption) {
-		c.Sort = "data"
+		c.Sort = FiledSortData
 	}
 }
 
 //WithConnectSortAll 排序所有字段，包括数据，secrect
 func WithConnectSortAll() ConnectOption {
 	return func(c *connectOption) {
-		c.Sort = "all"
+		c.Sort = FiledSortAll
 	}
 }
 
 //WithConnectSortStatic 使用指定的字段进行排序
 func WithConnectSortStatic(fields ...string) ConnectOption {
 	return func(c *connectOption) {
-		c.Sort = "static"
+		c.Sort = FiledSortStatic
 		c.Fields = strings.Join(fields, "|")
 	}
 }

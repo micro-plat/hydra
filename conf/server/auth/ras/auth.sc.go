@@ -5,6 +5,15 @@ type Connect struct {
 	*connectOption
 }
 
+const (
+	//SecretConnectModeHead 密钥拼接模式,将secret串拼接到数据串的头部
+	SecretConnectModeHead = "head"
+	//SecretConnectModeTail 密钥拼接模式,将secret串拼接到数据串的尾部
+	SecretConnectModeTail = "tail"
+	//SecretConnectModeHeadTail 密钥拼接模式,将secret串拼接到数据串的头部和尾部
+	SecretConnectModeHeadTail = "headTail"
+)
+
 //SecretConnect secret拼接串
 type SecretConnect struct {
 
@@ -31,20 +40,20 @@ func (c *SecretConnect) WithSecretName(name string, kv string) *SecretConnect {
 //WithSecretHeadMode 设置secrect与数据串之间的拼接方式,并将secret串拼接到数据串的头部
 func (c *SecretConnect) WithSecretHeadMode(chain string) *SecretConnect {
 	c.Chain = chain
-	c.Mode = "head"
+	c.Mode = SecretConnectModeHead
 	return c
 }
 
 //WithSecretTailMode 设置secrect与数据串之间的拼接方式，并将secret串拼接到数据串的尾部
 func (c *SecretConnect) WithSecretTailMode(chain string) *SecretConnect {
 	c.Chain = chain
-	c.Mode = "tail"
+	c.Mode = SecretConnectModeTail
 	return c
 }
 
 //WithSecretHeadAndTailMode 设置secrect与数据串之间的拼接方式，并将secret串拼接到数据串的头部和尾部
 func (c *SecretConnect) WithSecretHeadAndTailMode(chain string) *SecretConnect {
 	c.Chain = chain
-	c.Mode = "headTail"
+	c.Mode = SecretConnectModeHeadTail
 	return c
 }

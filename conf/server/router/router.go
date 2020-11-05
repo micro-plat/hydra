@@ -11,6 +11,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//TypeNodeName 分类节点名
+const TypeNodeName = "router"
+
 //Methods 支持的http请求类型
 var Methods = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodHead}
 
@@ -127,7 +130,7 @@ func (h *Routers) GetPath() []string {
 //GetConf 设置路由
 func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
 	router = new(Routers)
-	_, err = cnf.GetSubObject("router", &router)
+	_, err = cnf.GetSubObject(TypeNodeName, &router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		return NewRouters(), nil
 	}

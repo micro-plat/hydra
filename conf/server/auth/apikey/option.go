@@ -13,21 +13,21 @@ func WithSecret(secret string) Option {
 //WithMD5Mode 设置为MD5验证模式
 func WithMD5Mode() Option {
 	return func(a *APIKeyAuth) {
-		a.Mode = "MD5"
+		a.Mode = ModeMD5
 	}
 }
 
 //WithSHA1Mode 设置为SHA1验证模式
 func WithSHA1Mode() Option {
 	return func(a *APIKeyAuth) {
-		a.Mode = "SHA1"
+		a.Mode = ModeSHA1
 	}
 }
 
 //WithSHA256Mode 设置为SHA256验证模式
 func WithSHA256Mode() Option {
 	return func(a *APIKeyAuth) {
-		a.Mode = "SHA256"
+		a.Mode = ModeSHA256
 	}
 }
 
