@@ -43,7 +43,7 @@ func init() {
 	hydra.Conf.Web(":8071").Static(static.WithArchive("taosy-test"))
 	hydra.Conf.API(":8070", api.WithTimeout(10, 10)).BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.101"))
 	hydra.Conf.RPC(":8888", crpc.WithTimeout(10, 10))
-	hydra.Conf.CRON(ccron.WithTimeout(10)).Task(task.NewTask("@every 3s", "/taosy/testcron"))
+	hydra.Conf.CRON(ccron.WithSharding(1)).Task(task.NewTask("@every 3s", "/taosy/testcron"))
 	hydra.Conf.MQC("redis://xxx").Queue(queue.NewQueue("queue1", "/service1")).Queue(queue.NewQueue("queue2", "/service1"))
 	app.API("/taosy/testapi", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("api 接口服务测试")

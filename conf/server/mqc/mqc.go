@@ -27,7 +27,6 @@ type Server struct {
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Addr     string `json:"addr,omitempty" valid:"required"  toml:"addr,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建mqc server配置，默认为对等模式

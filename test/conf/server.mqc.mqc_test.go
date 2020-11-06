@@ -25,7 +25,7 @@ func TestMqcNew(t *testing.T) {
 		{name: "初始化MasterSlave对象", addr: "redis://11", opts: []mqc.Option{mqc.WithMasterSlave()}, want: &mqc.Server{Addr: "redis://11", Sharding: 1, Status: "start"}},
 		{name: "初始化P2P对等模式对象", addr: "redis://11", opts: []mqc.Option{mqc.WithP2P()}, want: &mqc.Server{Addr: "redis://11", Sharding: 0, Status: "start"}},
 		{name: "初始化分片模式对等模式对象", addr: "redis://11", opts: []mqc.Option{mqc.WithSharding(10)}, want: &mqc.Server{Addr: "redis://11", Sharding: 10, Status: "start"}},
-		{name: "初始化剩余参数对象", addr: "redis://11", opts: []mqc.Option{mqc.WithTrace(), mqc.WithTimeout(11)}, want: &mqc.Server{Addr: "redis://11", Trace: true, Timeout: 11, Status: "start"}},
+		{name: "初始化剩余参数对象", addr: "redis://11", opts: []mqc.Option{mqc.WithTrace()}, want: &mqc.Server{Addr: "redis://11", Trace: true, Status: "start"}},
 		{name: "初始化Disable参数对象", addr: "redis://11", opts: []mqc.Option{mqc.WithDisable()}, want: &mqc.Server{Addr: "redis://11", Status: "stop"}},
 		{name: "初始化Enable参数对象", addr: "redis://11", opts: []mqc.Option{mqc.WithEnable()}, want: &mqc.Server{Addr: "redis://11", Status: "start"}},
 	}

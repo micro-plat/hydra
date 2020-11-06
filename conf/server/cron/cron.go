@@ -26,7 +26,6 @@ type Server struct {
 	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建cron server配置，默认为对等模式
