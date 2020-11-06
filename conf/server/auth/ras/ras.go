@@ -50,12 +50,12 @@ func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 		return auths, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("RASAuth配置有误:%v", err)
+		return nil, fmt.Errorf("RASAuth配置格式有误:%v", err)
 	}
 
 	for _, auth := range auths.Auth {
 		if b, err := govalidator.ValidateStruct(auth); !b {
-			return nil, fmt.Errorf("RASAuth配置有误:%v", err)
+			return nil, fmt.Errorf("RASAuth配置数据有误:%v", err)
 		}
 		auth.PathMatch = conf.NewPathMatch(auth.Requests...)
 	}

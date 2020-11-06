@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 )
@@ -64,10 +64,11 @@ func TestGray_Check(t *testing.T) {
 
 func TestGrayGetConf(t *testing.T) {
 	type test struct {
-		name    string
-		cnf     conf.IServerConf
-		want    *gray.Gray
-		wantErr bool
+		name       string
+		cnf        conf.IServerConf
+		want       *gray.Gray
+		wantErr    bool
+		wantErrStr string
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
@@ -78,16 +79,22 @@ func TestGrayGetConf(t *testing.T) {
 	assert.Equal(t, test1.want, grayObj, test1.name)
 
 	confB.Gray(gray.WithDisable(), gray.WithUPCluster("graytest"))
-	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
+	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.gray配置数据有误"}
 	grayObj, err = gray.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, grayObj, test2.name)
+	if test2.wantErr {
+		assert.Equal(t, test2.wantErrStr, err.Error()[:len(test2.wantErrStr)], test2.name+",err")
+	}
 
 	confB.Gray(gray.WithDisable(), gray.WithFilter("tao"))
-	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
+	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.gray配置数据有误"}
 	grayObj, err = gray.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, grayObj, test3.name)
+	if test3.wantErr {
+		assert.Equal(t, test3.wantErrStr, err.Error()[:len(test3.wantErrStr)], test3.name+",err")
+	}
 
 	confB.Gray(gray.WithDisable(), gray.WithFilter("tao"), gray.WithUPCluster("graytest"))
 	test4 := test{name: "灰度节点存在", cnf: conf.GetAPIConf().GetServerConf(), want: &gray.Gray{Disable: true, Filter: "tao", UPCluster: "graytest"}, wantErr: false}
@@ -140,35 +147,39 @@ func TestGray_Allow(t *testing.T) {
 
 func TestGray_Next(t *testing.T) {
 	type test struct {
-		name    string
-		fields  *gray.Gray
-		wantU   *url.URL
-		wantErr bool
+		name       string
+		fields     *gray.Gray
+		wantU      *url.URL
+		wantErr    bool
+		wantErrStr string
 	}
 
 	conf := mocks.NewConfBy("hydra", "graytest")
 	conf.API(":8090")
 	grayObj, err := gray.GetConf(conf.GetAPIConf().GetServerConf())
 	assert.Equal(t, true, (err == nil), "获取灰度对象失败")
-	test1 := test{name: "nil集群对象", fields: grayObj, wantU: nil, wantErr: true}
+	test1 := test{name: "nil集群对象", fields: grayObj, wantU: nil, wantErr: true, wantErrStr: "当前配置不可用"}
 	gotU, err := test1.fields.Next()
 	assert.Equal(t, test1.wantErr, (err != nil), test1.name+",err")
+	assert.Equal(t, test1.wantErrStr, err.Error(), test1.name+",err1")
 	assert.Equal(t, test1.wantU, gotU, test1.name+",url")
 
 	conf = mocks.NewConfBy("hydra", "graytest")
 	conf.API(":8090").Gray(gray.WithFilter("tao"), gray.WithUPCluster("graytest"))
 	nomalObj, _ := gray.GetConf(conf.GetAPIConf().GetServerConf())
-	test2 := test{name: "无服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true}
+	test2 := test{name: "无服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true, wantErrStr: "无法获取到集群的下一个服务器"}
 	gotU, err = test2.fields.Next()
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
+	assert.Equal(t, test2.wantErrStr, err.Error(), test2.name+",err1")
 	assert.Equal(t, test2.wantU, gotU, test2.name+",url")
 
 	path := conf.GetAPIConf().GetServerConf().GetServerPubPath("graytest")
-	conf.Registry.CreateTempNode(path+":123456", "错误的服务器地址")
+	conf.Registry.CreateSeqNode(path, "错误的服务器地址")
 	time.Sleep(2 * time.Second)
-	test3 := test{name: "错误配置服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true}
+	test3 := test{name: "错误配置服务器集群对象", fields: nomalObj, wantU: nil, wantErr: true, wantErrStr: "集群的服务器地址不合法"}
 	gotU, err = test3.fields.Next()
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
+	// assert.Equal(t, test3.wantErrStr, err.Error()[:len(test3.wantErrStr)], test3.name+",err1")
 	assert.Equal(t, test3.wantU, gotU, test3.name+",url")
 
 	//@todo 该用例失败,集群节点变更后,集群对象可能没有实时更新

@@ -17,6 +17,7 @@ type TMainConf struct {
 	rootVersion int32
 	subConfs    map[string]RawConf
 	IServerPub
+	registry registry.IRegistry
 }
 
 func NewTMainConf(rootVersion int32, data map[string]interface{}) IServerConf {
@@ -81,7 +82,7 @@ func (c *TMainConf) GetVersion() int32 {
 }
 
 //GetRootConf 获取当前主配置
-func (c *TMainConf) GetRootConf() *RawConf {
+func (c *TMainConf) GetMainConf() *RawConf {
 	return c.rootConf
 }
 
