@@ -55,7 +55,11 @@ func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 		return nil, fmt.Errorf("rpc主配置类型错误:%s != rpc", cnf.GetServerType())
 	}
 
-	if _, err := cnf.GetMainObject(s); err != nil && err != conf.ErrNoSetting {
+	_, err = cnf.GetMainObject(s)
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
+	}
+	if err != nil {
 		return nil, err
 	}
 

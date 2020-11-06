@@ -26,7 +26,7 @@ type IPList struct {
 //WhiteList 白名单配置
 type WhiteList struct {
 	Disable bool      `json:"disable,omitempty" toml:"disable,omitempty"`
-	IPS     []*IPList `json:"white-list,omitempty" toml:"white-list,omitempty"`
+	IPS     []*IPList `json:"whiteList,omitempty" toml:"whiteList,omitempty"`
 }
 
 //New 创建白名单规则服务

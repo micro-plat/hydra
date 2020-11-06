@@ -55,10 +55,16 @@ func (c *Auth) Bind(out interface{}) error {
 			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	case string:
+		if c.request == "" {
+			return errs.NewError(401, "请求中未包含用户信息,用户未登录")
+		}
 		if err := json.Unmarshal([]byte(v), &out); err != nil {
 			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	default:
+		if reflect.ValueOf(c.request).IsNil() {
+			return errs.NewError(401, "请求中未包含用户信息,用户未登录")
+		}
 		buff, err := json.Marshal(v)
 		if err != nil {
 			return fmt.Errorf("将用户信息转换为json失败:%w", err)

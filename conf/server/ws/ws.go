@@ -34,7 +34,11 @@ func New(address string, opts ...Option) *Server {
 
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IServerConf) (s *Server, err error) {
-	if _, err := cnf.GetMainObject(&s); err != nil && err != conf.ErrNoSetting {
+	_, err = cnf.GetMainObject(&s)
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
+	}
+	if err != nil {
 		return nil, err
 	}
 

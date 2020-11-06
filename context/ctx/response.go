@@ -312,6 +312,7 @@ func (c *response) Flush() {
 	if err := c.asyncWrite(); err != nil {
 		panic(err)
 	}
+	c.noneedWrite = true
 }
 
 func (c *response) getString(ctp string, v interface{}) string {

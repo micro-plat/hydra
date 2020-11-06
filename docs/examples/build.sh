@@ -1,26 +1,33 @@
+#!/bin/bash
+DIR=.
+
+exist_file()
+{
+    if [ -e "$1" ]
+    then
+        return 1
+    else
+        return 2
+    fi
+}
+
+for k in $(ls $DIR)
+do
+  echo $k
+  [ -d $k ] && cd $k 
+
+  exist_file *.go
+  value=$?
+  if [ $value -eq 1 ]
+  then
+    echo "build:$k"
+    go build
+  fi
+ 
+  cd ..
+done
 
 
-cd ./apiserver01
-echo "go build apiserver01"
-go build -tags "oci"
-cd ../
 
-cd ./apiserver02
-echo "go build apiserver02"
-go build 
-cd ../
 
-cd ./apiserver03
-echo "go build apiserver03"
-go build 
-cd ../
 
-cd ./apiserver04
-echo "go build apiserver04"
-go build 
-cd ../
-
-cd ./rpcserver01
-echo "go build rpcserver01"
-go build 
-cd ../
