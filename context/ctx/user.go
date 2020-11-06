@@ -42,7 +42,7 @@ func (c *user) GetRequestID() string {
 func (c *user) GetClientIP() string {
 	ip := c.ctx.ClientIP()
 	if ip == "::1" || ip == "127.0.0.1" {
-		return net.GetLocalIPAddress()
+		return net.GetLocalIPAddress() //@todo 从global取
 	}
 	return ip
 }

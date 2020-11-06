@@ -48,7 +48,7 @@ func (r *request) Param(key string) string {
 	return r.ctx.Param(key)
 }
 
-//Bind 根据输入参数绑定对象
+//Bind 根据输入参数绑定对象 @todo struct限制 test
 func (r *request) Bind(obj interface{}) error {
 
 	val := reflect.ValueOf(obj)
@@ -71,7 +71,7 @@ func (r *request) Bind(obj interface{}) error {
 	return nil
 }
 
-//Check 检查输入参数和配置参数是否为空
+//Check 检查输入参数和配置参数是否为空 @todo 各类请求的测试
 func (r *request) Check(field ...string) error {
 	data, _ := r.body.GetRawBodyMap()
 	for _, key := range field {
@@ -130,7 +130,7 @@ func (r *request) Get(name string) (result string, ok bool) {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
 			}
 
-			routerObj, err := r.path.GetRouter()
+			routerObj, err := r.path.GetRouter() //@todo path只取encoding
 			if err != nil {
 				panic(fmt.Errorf("url.Router配置错误:%w", err))
 			}
@@ -205,7 +205,7 @@ func (r *request) IsEmpty(name string) bool {
 	return ok
 }
 
-//GetTrace 获取trace信息
+//GetTrace 获取trace信息 @todo
 func (r *request) GetTrace() string {
 	data, err := r.GetMap()
 	if err != nil {
@@ -218,7 +218,7 @@ func (r *request) GetTrace() string {
 
 }
 
-//SaveFile 保存上传文件到指定路径
+//SaveFile 保存上传文件到指定路径 @todo
 func (r *request) SaveFile(fileKey, dst string) error {
 	_, reader, _, err := r.ctx.GetFile(fileKey)
 	if err != nil {

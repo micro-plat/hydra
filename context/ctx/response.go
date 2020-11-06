@@ -251,7 +251,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 	// 	c.ctx.Redirect(status, content)
 	// 	return nil
 	// }
-
+	//@todo encoding的测试
 	routerObj, err := c.path.GetRouter()
 	if err != nil {
 		return err
@@ -309,10 +309,10 @@ func (c *response) Flush() {
 	if c.noneedWrite || c.asyncWrite == nil {
 		return
 	}
+	c.noneedWrite = true
 	if err := c.asyncWrite(); err != nil {
 		panic(err)
 	}
-	c.noneedWrite = true
 }
 
 func (c *response) getString(ctp string, v interface{}) string {

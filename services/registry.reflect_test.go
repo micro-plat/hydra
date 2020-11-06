@@ -54,7 +54,7 @@ func Test_reflectHandle(t *testing.T) {
 			wantService:       []string{"/path/$get", "/path/$post", "/path/order"},
 			wantServicePath:   []string{"/path", "/path", "/path/order"},
 			wantServiceAction: [][]string{[]string{"GET"}, []string{"POST"}, []string{"GET", "POST"}},
-		},
+		}, //@todo
 	}
 	for _, tt := range tests {
 		gotG, err := reflectHandle(tt.path, tt.h)

@@ -127,7 +127,7 @@ func (w *ChildWatcher) Close() {
 	})
 }
 
-//deleted 节点删除
+//deleted 节点删除 @todo主节点删除未进行处理
 func (w *ChildWatcher) deleted() {
 	w.mu.Lock()
 	defer w.mu.Unlock()

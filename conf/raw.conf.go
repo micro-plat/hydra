@@ -39,7 +39,7 @@ type RawConf struct {
 	raw       json.RawMessage
 	version   int32
 	signature string
-	data      map[string]interface{}
+	data      map[string]interface{} //todo  使用meta进行处理
 }
 
 //NewRawConfByMap 根据map初始化对象

@@ -51,7 +51,7 @@ func New(c conf.IServerConf) *Publisher {
 	return p
 }
 
-//WatchClusterChange 监控集群服务节点变化
+//WatchClusterChange 监控集群服务节点变化  @todo //
 func (p *Publisher) WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error {
 	watcher, err := watcher.NewChildWatcherByRegistry(p.c.GetRegistry(), []string{p.c.GetServerPubPath()}, p.log)
 	if err != nil {
@@ -153,7 +153,7 @@ func (p *Publisher) Update(serverName string, serviceAddr string, clusterID stri
 	return nil
 }
 
-//PubRPCServiceNode 发布RPC服务节点
+//PubRPCServiceNode 发布RPC服务节点@todo
 func (p *Publisher) PubRPCServiceNode(serverName string, service string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetRPCServicePubPath(service), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
