@@ -51,24 +51,28 @@ func TestAPIKeyAuth_Verify(t *testing.T) {
 		sign string
 	}
 	tests := []struct {
-		name    string
-		mode    string
-		secret  string
-		args    args
-		wantErr bool
+		name       string
+		mode       string
+		secret     string
+		args       args
+		wantErr    bool
+		wantErrStr string
 	}{
-		{name: "不支持的签名方式", mode: "md4", secret: md5secret, args: args{raw: rawData, sign: md5Sign}, wantErr: true},
-		{name: "签名方式不正确", mode: "md5", secret: sha1secret, args: args{raw: rawData, sign: sha1Sign}, wantErr: true},
-		{name: "签名数据错误", mode: "md5", secret: md5secret, args: args{raw: "rawData", sign: md5Sign}, wantErr: true},
-		{name: "密钥错误", mode: "md5", secret: "md5secret", args: args{raw: rawData, sign: md5Sign}, wantErr: true},
-		{name: "md5签名成功", mode: "md5", secret: md5secret, args: args{raw: rawData, sign: md5Sign}, wantErr: false},
-		{name: "sha1签名成功", mode: "sha1", secret: sha1secret, args: args{raw: rawData, sign: sha1Sign}, wantErr: false},
-		{name: "sha256签名成功", mode: "sha256", secret: sha256secret, args: args{raw: rawData, sign: sha256Sign}, wantErr: false},
+		{name: "不支持的签名方式", mode: "md4", secret: md5secret, args: args{raw: rawData, sign: md5Sign}, wantErr: true, wantErrStr: "不支持的签名验证方式:md4"},
+		{name: "签名方式不正确", mode: "md5", secret: sha1secret, args: args{raw: rawData, sign: sha1Sign}, wantErr: true, wantErrStr: "签名错误:raw:"},
+		{name: "签名数据错误", mode: "md5", secret: md5secret, args: args{raw: "rawData", sign: md5Sign}, wantErr: true, wantErrStr: "签名错误:raw:"},
+		{name: "密钥错误", mode: "md5", secret: "md5secret", args: args{raw: rawData, sign: md5Sign}, wantErr: true, wantErrStr: "签名错误:raw:"},
+		{name: "md5签名成功", mode: "md5", secret: md5secret, args: args{raw: rawData, sign: md5Sign}, wantErr: false, wantErrStr: ""},
+		{name: "sha1签名成功", mode: "sha1", secret: sha1secret, args: args{raw: rawData, sign: sha1Sign}, wantErr: false, wantErrStr: ""},
+		{name: "sha256签名成功", mode: "sha256", secret: sha256secret, args: args{raw: rawData, sign: sha256Sign}, wantErr: false, wantErrStr: ""},
 	}
 	for _, tt := range tests {
 		a := &apikey.APIKeyAuth{Mode: tt.mode, Secret: tt.secret}
 		err := a.Verify(tt.args.raw, tt.args.sign)
 		assert.Equal(t, tt.wantErr, (err != nil), tt.name)
+		if tt.wantErr {
+			assert.Equal(t, tt.wantErrStr, err.Error()[:len(tt.wantErrStr)], tt.name)
+		}
 	}
 }
 
