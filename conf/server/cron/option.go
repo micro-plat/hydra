@@ -31,13 +31,6 @@ func WithP2P() Option {
 	}
 }
 
-//WithTimeout 构建api server配置信息
-func WithTimeout(timeout int) Option {
-	return func(a *Server) {
-		a.Timeout = timeout
-	}
-}
-
 //WithDisable 禁用任务
 func WithDisable() Option {
 	return func(a *Server) {

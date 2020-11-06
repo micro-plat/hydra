@@ -4,23 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/app"
+
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/lib4go/security/md5"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //TMainConf 服务器主配置
 type TMainConf struct {
-	rootConf    *conf.RawConf
+	rootConf    *RawConf
 	rootVersion int32
-	subConfs    map[string]conf.RawConf
-	conf.IPub
+	subConfs    map[string]RawConf
+	IServerPub
+	registry registry.IRegistry
 }
 
-func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
+func NewTMainConf(rootVersion int32, data map[string]interface{}) IServerConf {
 	raw, _ := json.Marshal(data)
-	nRawConf := conf.RawConf{
+	nRawConf := RawConf{
 		data:      data,
 		version:   rootVersion,
 		raw:       raw,
@@ -29,26 +31,26 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) app.IAPPConf {
 
 	data["subc"] = "123456"
 	raw1, _ := json.Marshal(data)
-	subRawConf := conf.RawConf{
+	subRawConf := RawConf{
 		data:      data,
 		version:   rootVersion,
 		raw:       raw1,
 		signature: md5.EncryptBytes(raw1),
 	}
 
-	subm := map[string]conf.RawConf{
+	subm := map[string]RawConf{
 		"keysub": subRawConf,
 	}
 	return &TMainConf{rootConf: &nRawConf, rootVersion: rootVersion, subConfs: subm}
 }
 
-func NewTMainConf1(rootVersion int32, keySub map[string]string) app.IAPPConf {
+func NewTMainConf1(rootVersion int32, keySub map[string]string) IServerConf {
 
-	subConf := map[string]conf.RawConf{}
+	subConf := map[string]RawConf{}
 	for k, v := range keySub {
 		data := map[string]interface{}{"value": v}
 		raw1, _ := json.Marshal(data)
-		subConf[k] = conf.RawConf{
+		subConf[k] = RawConf{
 			data:      data,
 			version:   rootVersion,
 			raw:       raw1,
@@ -80,7 +82,7 @@ func (c *TMainConf) GetVersion() int32 {
 }
 
 //GetRootConf 获取当前主配置
-func (c *TMainConf) GetRootConf() *conf.RawConf {
+func (c *TMainConf) GetMainConf() *RawConf {
 	return c.rootConf
 }
 
@@ -91,7 +93,7 @@ func (c *TMainConf) GetMainObject(v interface{}) (int32, error) {
 }
 
 //GetSubConf 指定子配置
-func (c *TMainConf) GetSubConf(name string) (*conf.RawConf, error) {
+func (c *TMainConf) GetSubConf(name string) (*RawConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
@@ -99,7 +101,7 @@ func (c *TMainConf) GetSubConf(name string) (*conf.RawConf, error) {
 }
 
 //GetCluster 获取集群信息
-func (c *TMainConf) GetCluster(clustName ...string) (conf.ICluster, error) {
+func (c *TMainConf) GetCluster(clustName ...string) (ICluster, error) {
 	return nil, nil
 }
 
@@ -123,7 +125,7 @@ func (c *TMainConf) Has(names ...string) bool {
 }
 
 //Iter 迭代所有配置
-func (c *TMainConf) Iter(f func(path string, conf *conf.RawConf) bool) {
+func (c *TMainConf) Iter(f func(path string, conf *RawConf) bool) {
 }
 
 //Close 关闭清理资源
@@ -133,13 +135,13 @@ func (c *TMainConf) Close() error {
 
 func TestComparer_Update(t *testing.T) {
 	type fields struct {
-		oconf      app.IAPPConf
-		nconf      app.IAPPConf
+		oconf      IServerConf
+		nconf      IServerConf
 		valueNames []string
 		subNames   []string
 	}
 	type args struct {
-		n app.IAPPConf
+		n IServerConf
 	}
 
 	tests := []struct {
@@ -209,8 +211,8 @@ func TestComparer_Update(t *testing.T) {
 func TestComparer_IsChanged(t *testing.T) {
 	//该方法是通过版本号进行比较   所以只需要mock版本号信息
 	type fields struct {
-		oconf      app.IAPPConf
-		nconf      app.IAPPConf
+		oconf      IServerConf
+		nconf      IServerConf
 		valueNames []string
 		subNames   []string
 	}
@@ -226,7 +228,7 @@ func TestComparer_IsChanged(t *testing.T) {
 		}, {
 			name:   "new配置不存在",
 			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"}), nconf: nil},
-			want:   true,
+			want:   false,
 		}, {
 			name: "版本号相同,内容不同",
 			fields: fields{oconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"}),
@@ -247,10 +249,6 @@ func TestComparer_IsChanged(t *testing.T) {
 			fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xxx": "ww11"}),
 				nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})},
 			want: true,
-		}, {
-			name:   "old配置不存在",
-			fields: fields{oconf: nil, nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww"})},
-			want:   true,
 		},
 	}
 	for _, tt := range tests {
@@ -271,8 +269,8 @@ func TestComparer_IsChanged(t *testing.T) {
 //都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsSubConfChanged(t *testing.T) {
 	type fields struct {
-		oconf      app.IAPPConf
-		nconf      app.IAPPConf
+		oconf      IServerConf
+		nconf      IServerConf
 		valueNames []string
 		subNames   []string
 	}
@@ -377,8 +375,8 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 //都是要比较所有的监控数组的值是否发生变化
 func TestComparer_IsValueChanged(t *testing.T) {
 	type fields struct {
-		oconf      app.IAPPConf
-		nconf      app.IAPPConf
+		oconf      IServerConf
+		nconf      IServerConf
 		valueNames []string
 		subNames   []string
 	}
@@ -477,5 +475,35 @@ func TestComparer_IsValueChanged(t *testing.T) {
 				t.Errorf("Comparer.IsValueChanged() = %v, want %v", gotIsChanged, tt.wantIsChanged)
 			}
 		})
+	}
+}
+
+func TestNewComparer(t *testing.T) {
+	type args struct {
+		oconf      IServerConf
+		valueNames []string
+		subNames   []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Comparer
+		wantErr string
+	}{
+		{name: "oldconf为空", args: args{oconf: nil, valueNames: []string{"valueNames1"}, subNames: []string{"subNames1"}}, want: nil, wantErr: "配置不能为空"},
+		{name: "实体对象初始化", args: args{oconf: NewTMainConf(0, map[string]interface{}{"xx": "123455"}), valueNames: []string{"valueNames1"}, subNames: []string{"subNames1"}},
+			want: &Comparer{oconf: NewTMainConf(0, map[string]interface{}{"xx": "123455"}), valueNames: []string{"valueNames1"}, subNames: []string{"subNames1"}}, wantErr: "配置不能为空"},
+	}
+	for _, tt := range tests {
+		func() {
+			defer func() {
+				e := recover()
+				if e != nil {
+					assert.Equal(t, tt.wantErr, types.GetString(e), tt.name+",pinic")
+				}
+			}()
+			got := NewComparer(tt.args.oconf, tt.args.valueNames, tt.args.subNames...)
+			assert.Equal(t, tt.want, got, tt.name)
+		}()
 	}
 }

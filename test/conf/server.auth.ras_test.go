@@ -82,10 +82,11 @@ func TestRASAuth_Match(t *testing.T) {
 
 func TestAuthRASGetConf(t *testing.T) {
 	type test struct {
-		name      string
-		opts      []ras.Option
-		wantAuths *ras.RASAuth
-		wantErr   bool
+		name       string
+		opts       []ras.Option
+		wantAuths  *ras.RASAuth
+		wantErr    bool
+		wantErrStr string
 	}
 
 	conf := mocks.NewConf()
@@ -96,16 +97,19 @@ func TestAuthRASGetConf(t *testing.T) {
 	assert.Equal(t, gotAuths, test1.wantAuths, test1.name)
 
 	tests := []test{
-		{name: "设置ras数据格式错误节点", opts: []ras.Option{ras.WithAuths(ras.New(""))}, wantAuths: ras.NewRASAuth(ras.WithAuths(ras.New(""))), wantErr: true},
-		{name: "设置正确的配置数据", opts: []ras.Option{ras.WithAuths(ras.New("taosy", ras.WithRequest("/t1/t2")))}, wantAuths: ras.NewRASAuth(ras.WithAuths(ras.New("taosy", ras.WithRequest("/t1/t2")))), wantErr: false},
+		{name: "设置ras数据格式错误节点", opts: []ras.Option{ras.WithAuths(ras.New(""))}, wantAuths: ras.NewRASAuth(ras.WithAuths(ras.New(""))), wantErr: true, wantErrStr: "RASAuth配置数据有误"},
+		{name: "设置正确的配置数据", opts: []ras.Option{ras.WithAuths(ras.New("taosy", ras.WithRequest("/t1/t2")))},
+			wantAuths: ras.NewRASAuth(ras.WithAuths(ras.New("taosy", ras.WithRequest("/t1/t2")))), wantErr: false, wantErrStr: ""},
 	}
 	for _, tt := range tests {
 		confB.Ras(tt.opts...)
 		gotAuths, err = ras.GetConf(conf.GetAPIConf().GetServerConf())
 		assert.Equal(t, (err != nil), tt.wantErr, tt.name+",err")
-		if err == nil {
+		if !tt.wantErr {
 			assert.Equal(t, gotAuths.Disable, tt.wantAuths.Disable, tt.name)
 			assert.Equal(t, len(gotAuths.Auth), len(tt.wantAuths.Auth), tt.name)
+		} else {
+			assert.Equal(t, tt.wantErrStr, err.Error()[:len(tt.wantErrStr)], tt.name+",err")
 		}
 	}
 }
