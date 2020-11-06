@@ -21,10 +21,10 @@ import (
 	_ "github.com/micro-plat/hydra/hydra/cmds/status"
 	_ "github.com/micro-plat/hydra/hydra/cmds/stop"
 
-	_ "github.com/micro-plat/hydra/hydra/cmds/pub/backup"
-	_ "github.com/micro-plat/hydra/hydra/cmds/pub/rollback"
+	//_ "github.com/micro-plat/hydra/hydra/cmds/pub/backup"
+	//_ "github.com/micro-plat/hydra/hydra/cmds/pub/rollback"
 
-	_ "github.com/micro-plat/hydra/hydra/cmds/pub"
+	//_ "github.com/micro-plat/hydra/hydra/cmds/pub"
 
 	//_ "github.com/micro-plat/hydra/registry/registry/etcd"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
