@@ -16,10 +16,12 @@ import (
 
 //@todo 注册中心的cluster的需要验证通知功能
 
-func xTest_NewCluster(t *testing.T) {
+func Test_NewCluster(t *testing.T) {
+
 	//初始化注册中心
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
+  
 
 	clusterName := "cluster1"
 	pub := server.NewServerPub("platName", "sysName", "serverType", "cluster1")
@@ -66,26 +68,30 @@ func xTest_NewCluster(t *testing.T) {
 		}
 		time.Sleep(1 * time.Second)
 	}
-
-	fmt.Println("len(reduceCh):", len(reduceCh))
-	lenCount := len(reduceCh)
-	for x := 0; x < lenCount; x++ {
-		if len(reduceCh) == 0 {
-			break
-		}
-		v := <-reduceCh
-		go func() {
-			err = rgt.Delete(v)
+	close(reduceCh)
+	fmt.Println("len1:",gotS.Len()) 
+	fmt.Println("len(reduceCh):", len(reduceCh)) 
+	reduceCount+= int64(len(reduceCh))
+	//lenCount := len(reduceCh)
+	idx:= 0 
+	for val := range reduceCh {
+		go func(val string){
+			idx++
+			//fmt.Println("delete:",val)
+			err = rgt.Delete(val)
 			assert.Equal(t, true, err == nil, "删除节点异常")
-			atomic.AddInt64(&reduceCount, 1)
-		}()
+		}(val)
 	}
+	//atomic.AddInt64(&reduceCount, 1)
 
 	time.Sleep(10 * time.Second)
+	fmt.Println("idx:",idx )
+	fmt.Println("len2:",gotS.Len()) 
+
 	assert.Equal(t, addCount-reduceCount+1, int64(gotS.Len()), "集群数量不正确n")
 }
 
-func xTestCluster_Current(t *testing.T) {
+func TestCluster_Current(t *testing.T) {
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
@@ -108,7 +114,7 @@ func xTestCluster_Current(t *testing.T) {
 	assert.Equal(t, &server.CNode{}, gotS.Current(), "不能存在当前配置节点2")
 }
 
-func TestCluster_GetType(t *testing.T) {
+func TestCluster_GetServerType(t *testing.T) {
 	clusterName := "cluster3"
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")

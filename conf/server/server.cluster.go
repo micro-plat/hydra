@@ -108,11 +108,6 @@ func (c *Cluster) Watch() conf.IWatcher {
 	return w
 }
 
-//GetServerType 获取集群类型
-func (c *Cluster) GetServerType() string {
-	return c.GetServerType()
-}
-
 //Close 关闭当前集群管理
 func (c *Cluster) Close() error {
 	close(c.closeCh)
@@ -210,6 +205,9 @@ func (c *Cluster) watchCluster() error {
 	if err != nil {
 		return err
 	}
+	interval := time.Second * 5
+	loopPull := time.NewTicker(interval)
+	loopPull.Stop()
 LOOP:
 	for {
 		select {
@@ -219,6 +217,10 @@ LOOP:
 			break LOOP
 		case <-notify:
 			c.getCluster()
+			loopPull.Reset(interval)
+		case <-loopPull.C:
+			c.getCluster()
+			loopPull.Stop()
 		}
 	}
 	return nil

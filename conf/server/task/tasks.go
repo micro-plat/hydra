@@ -28,11 +28,21 @@ func NewTasks(tasks ...*Task) *Tasks {
 	return t.Append(tasks...)
 }
 
-//Append 增加任务列表
+//Append 增加任务列表 @fix:存在的数据进行修改,不存在则添加 @hj
 func (t *Tasks) Append(tasks ...*Task) *Tasks {
-	for _, task := range tasks {
-		t.Tasks = append(t.Tasks, task)
+	keyMap := map[string]*Task{}
+	for _, v := range t.Tasks {
+		keyMap[v.GetUNQ()] = v
 	}
+	nonExistTask := []*Task{}
+	for _, v := range tasks {
+		if task, ok := keyMap[v.GetUNQ()]; ok {
+			task.Disable = v.Disable
+			continue
+		}
+		nonExistTask = append(nonExistTask, v)
+	}
+	t.Tasks = append(t.Tasks, nonExistTask...)
 	return t
 }
 

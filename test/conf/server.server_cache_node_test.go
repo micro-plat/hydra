@@ -66,7 +66,7 @@ func TestNewCNode(t *testing.T) {
 		assert.Equal(t, tt.want.path, got.GetPath(), tt.name+",path")
 		assert.Equal(t, tt.want.port, got.GetPort(), tt.name+",port")
 		assert.Equal(t, tt.want.index, got.GetIndex(), tt.name+",index")
-		assert.Equal(t, tt.want.serverID, got.GetServerID(), tt.name+",serverID")
+		assert.Equal(t, tt.want.serverID, got.GetNodeID(), tt.name+",serverID")
 		assert.Equal(t, tt.want.mid, got.GetMid(), tt.name+",mid")
 	}
 }
@@ -176,7 +176,7 @@ func TestCNode_GetServerID(t *testing.T) {
 		{name: "设置ServerID3", fields: server.NewCNode("11_22cc", "", 2), want: "22cc"},
 	}
 	for _, tt := range tests {
-		got := tt.fields.GetServerID()
+		got := tt.fields.GetNodeID()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

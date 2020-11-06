@@ -207,7 +207,7 @@ func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ..
 
 	//mqc
 	if tp == global.MQC {
-		assert.Equal(t, len(ext)*len(m.services), len(MQC.queues.Queues), testName+" mqc")
+		assert.Equal(t, len(ext), len(MQC.queues.Queues), testName+" mqc")
 		return
 	}
 
