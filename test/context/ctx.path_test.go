@@ -14,6 +14,36 @@ import (
 	"github.com/micro-plat/hydra/test/mocks"
 )
 
+func Test_rpath_GetRouter_WithPanic(t *testing.T) {
+
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":8080")       //初始化参数
+	confObj.CRON(c.WithMasterSlave(), c.WithTrace())
+	confObj.Service.API.Add("/api", "/api", []string{"GET"})
+	httpConf := confObj.GetAPIConf() //获取配置
+
+	tests := []struct {
+		name       string
+		ctx        context.IInnerContext
+		serverConf app.IAPPConf
+		meta       conf.IMeta
+		want       *router.Router
+		wantError  string
+	}{
+		{name: "http非正确路径和方法", ctx: &mocks.TestContxt{
+			Routerpath: "/api",
+			Method:     "DELETE",
+		}, serverConf: httpConf, meta: conf.NewMeta(), wantError: "未找到与[/api][DELETE]匹配的路由"},
+	}
+
+	for _, tt := range tests {
+		c := ctx.NewRpath(tt.ctx, tt.serverConf, tt.meta)
+		assert.PanicError(t, tt.wantError, func() {
+			c.GetRouter()
+		}, tt.name)
+	}
+}
+
 func Test_rpath_GetRouter(t *testing.T) {
 
 	confObj := mocks.NewConf() //构建对象
@@ -55,13 +85,8 @@ func Test_rpath_GetRouter(t *testing.T) {
 
 	for _, tt := range tests {
 		c := ctx.NewRpath(tt.ctx, tt.serverConf, tt.meta)
-
-		defer func() {
-			if r := recover(); r != nil {
-				assert.Equal(t, tt.wantError, r, tt.name)
-			}
-		}()
-		got, _ := c.GetRouter()
+		got, err := c.GetRouter()
+		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
