@@ -29,11 +29,22 @@ func NewQueues(queue ...*Queue) *Queues {
 	return q
 }
 
-//Append 增加任务列表
+//Append 增加任务列表  @fix:存在的数据进行修改,不存在则添加 @hj
 func (t *Queues) Append(queues ...*Queue) *Queues {
-	for _, q := range queues {
-		t.Queues = append(t.Queues, q)
+	keyMap := map[string]*Queue{}
+	for _, v := range t.Queues {
+		keyMap[v.Queue] = v
 	}
+	nonExistQueue := []*Queue{}
+	for _, v := range queues {
+		if queue, ok := keyMap[v.Queue]; ok {
+			queue.Disable = v.Disable
+			queue.Concurrency = v.Concurrency
+			continue
+		}
+		nonExistQueue = append(nonExistQueue, v)
+	}
+	t.Queues = append(t.Queues, nonExistQueue...)
 	return t
 }
 

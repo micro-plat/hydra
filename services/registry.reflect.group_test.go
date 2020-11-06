@@ -16,11 +16,14 @@ func TestUnitGroup_getPaths(t *testing.T) {
 		wantService string
 		wantAction  []string
 	}{
-		{name: "name为空,handleName为空", path: "path", mName: "", wantRpath: "path", wantService: "path", wantAction: []string{}},
-		{name: "name为支持的http请求类型", path: "path", mName: "GET", wantRpath: "path", wantService: "/path/$GET", wantAction: []string{"GET"}},
-		{name: "name为支持的http请求类型", path: "path", mName: "GET", wantRpath: "path", wantService: "/path/$GET", wantAction: []string{"GET"}},
-		{name: "name为不支持的http请求类型,且HandleName为空", path: "path", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
-		{name: "name为不支持的http请求类型,且HandleName不为空", path: "*/**path/*/*", mName: "FILE", wantRpath: "*/**path/*/FILE", wantService: "*/**path/*/FILE", wantAction: []string{"GET", "POST"}},
+		{name: "handleName为空", path: "/path", mName: "", wantRpath: "/path", wantService: "/path", wantAction: []string{}},
+		{name: "handleName为支持的http请求类型[GET]", path: "/path", mName: "GET", wantRpath: "/path", wantService: "/path/$GET", wantAction: []string{"GET"}},
+		{name: "handleName为支持的http请求类型[POST]", path: "/path", mName: "POST", wantRpath: "/path", wantService: "/path/$POST", wantAction: []string{"POST"}},
+		{name: "HandleName为不支持的http请求类型", path: "/path", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
+		{name: "HandleName为空,需要对path进行替换", path: "/*/**path/*/*", mName: "", wantRpath: "/*/**path/*/handle", wantService: "/*/**path/*/handle", wantAction: []string{}},
+		{name: "HandleName为支持的http请求类型,需要对path进行替换", path: "/*/**path/*/*", mName: "GET",
+			wantRpath: "/*/**path/*/GET", wantService: "/*/**path/*/GET/$GET", wantAction: []string{"GET"}},
+		{name: "HandleName为不支持的http请求类型,需要对path进行替换", path: "/*/path", mName: "FILE", wantRpath: "/FILE/path", wantService: "/FILE/path", wantAction: []string{"GET", "POST"}},
 	}
 	g := &UnitGroup{}
 	for _, tt := range tests {
