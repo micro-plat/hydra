@@ -302,14 +302,3 @@ func Test_response_Redirect(t *testing.T) {
 	assert.Equal(t, 200, context.StatusCode, "验证上下文中的状态码")
 }
 
-// func Test_response_Download(t *testing.T) {
-// 	startServer()
-// 	resp, err := http.Get("http://localhost:9091/download")
-// 	assert.Equal(t, false, err != nil, "文件下载")
-// 	defer resp.Body.Close()
-// 	assert.Equal(t, "text/plain", resp.Header["Content-Type"][0], "响应头比较")
-// 	assert.Equal(t, "200 OK", resp.Status, "响应状态比较")
-// 	assert.Equal(t, 200, resp.StatusCode, "响应状态码比较")
-// 	body, err := ioutil.ReadAll(resp.Body)
-// 	assert.Equal(t, "ADASDASDASFHNOJM~!@#$%^&*", string(body), "内容")
-// }
