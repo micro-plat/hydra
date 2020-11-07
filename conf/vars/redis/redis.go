@@ -59,5 +59,5 @@ func GetConf(varConf conf.IVarConf, name string) (redis *Redis, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewByRaw(string(js.GetRaw())), nil
+	return NewByRaw(string(js.Marshal())), nil
 }

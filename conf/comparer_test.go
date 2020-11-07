@@ -23,7 +23,7 @@ type TMainConf struct {
 func NewTMainConf(rootVersion int32, data map[string]interface{}) IServerConf {
 	raw, _ := json.Marshal(data)
 	nRawConf := RawConf{
-		data:      data,
+		XMap:      data,
 		version:   rootVersion,
 		raw:       raw,
 		signature: md5.EncryptBytes(raw),
@@ -32,7 +32,7 @@ func NewTMainConf(rootVersion int32, data map[string]interface{}) IServerConf {
 	data["subc"] = "123456"
 	raw1, _ := json.Marshal(data)
 	subRawConf := RawConf{
-		data:      data,
+		XMap:      data,
 		version:   rootVersion,
 		raw:       raw1,
 		signature: md5.EncryptBytes(raw1),
@@ -51,7 +51,7 @@ func NewTMainConf1(rootVersion int32, keySub map[string]string) IServerConf {
 		data := map[string]interface{}{"value": v}
 		raw1, _ := json.Marshal(data)
 		subConf[k] = RawConf{
-			data:      data,
+			XMap:      data,
 			version:   rootVersion,
 			raw:       raw1,
 			signature: md5.EncryptBytes(raw1),
@@ -112,7 +112,7 @@ func (c *TMainConf) GetSubObject(name string, v interface{}) (int32, error) {
 		return 0, err
 	}
 
-	if err := conf.Unmarshal(&v); err != nil {
+	if err := conf.ToStruct(&v); err != nil {
 		err = fmt.Errorf("获取%s配置失败:%v", name, err)
 		return 0, err
 	}

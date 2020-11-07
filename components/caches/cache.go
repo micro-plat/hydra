@@ -1,8 +1,8 @@
 package caches
 
 import (
-	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/caches/cache"
+	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -44,7 +44,7 @@ func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 			return nil, err
 		}
 
-		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
+		orgCache, err := cache.New(js.GetString("proto"), string(js.Marshal()))
 		return orgCache, err
 	})
 	if err != nil {

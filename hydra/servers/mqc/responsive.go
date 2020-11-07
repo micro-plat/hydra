@@ -163,7 +163,7 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.TypeNodeName, queuename, err)
 	}
-	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
+	return NewServer(proto, js.Marshal(), queueObj.Queues...)
 }
 
 func init() {

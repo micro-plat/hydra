@@ -42,12 +42,12 @@ func GetPackage(url string) (*Package, error) {
 		return nil, fmt.Errorf("下载package更新包出错:%w", err)
 	}
 
-	cnf, err := conf.NewRawConfByJson(buffer, 0)
+	cnf, err := conf.NewByJSON(buffer, 0)
 	if err != nil {
 		return nil, fmt.Errorf("package更新包必须是有效的json格式:%w", err)
 	}
 	var pkg Package
-	if err = cnf.Unmarshal(&pkg); err != nil {
+	if err = cnf.ToStruct(&pkg); err != nil {
 		return nil, errs.NewError(406, err)
 	}
 	if b, err := govalidator.ValidateStruct(&pkg); !b {

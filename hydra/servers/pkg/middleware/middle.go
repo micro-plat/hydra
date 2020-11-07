@@ -57,7 +57,7 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
 			nctx := ctx.NewCtx(&ginCtx{Context: c}, tps[0])
-			nctx.Meta().Set("__context_", c)
+			nctx.Meta().SetValue("__context_", c)
 			v = newMiddleContext(nctx, c, c.Request, c.Writer)
 			c.Set("__middle_context__", v)
 
@@ -73,7 +73,7 @@ func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
 			nctx := ctx.NewCtx(&dispCtx{Context: c}, tps[0])
-			nctx.Meta().Set("__context_", c)
+			nctx.Meta().SetValue("__context_", c)
 			v = newMiddleContext(nctx, c, nil, nil)
 			c.Set("__middle_context__", v)
 		}

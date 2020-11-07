@@ -54,7 +54,7 @@ func (c *ServerConf) GetMainConf() *conf.RawConf {
 //GetMainObject 获取主配置信息
 func (c *ServerConf) GetMainObject(v interface{}) (int32, error) {
 	conf := c.GetMainConf()
-	if err := conf.Unmarshal(&v); err != nil {
+	if err := conf.ToStruct(&v); err != nil {
 		err = fmt.Errorf("获取主配置失败:%v", err)
 		return 0, err
 	}
@@ -81,7 +81,7 @@ func (c *ServerConf) GetSubObject(name string, v interface{}) (int32, error) {
 		return 0, err
 	}
 
-	if err := conf.Unmarshal(&v); err != nil {
+	if err := conf.ToStruct(&v); err != nil {
 		err = fmt.Errorf("获取%s配置失败:%v", name, err)
 		return 0, err
 	}
@@ -180,7 +180,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	if len(rdata) == 0 {
 		rdata = []byte("{}")
 	}
-	childConf, err := conf.NewRawConfByJson(rdata, version)
+	childConf, err := conf.NewByJSON(rdata, version)
 	if err != nil {
 		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
 		return nil, err
