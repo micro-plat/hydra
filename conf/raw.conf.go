@@ -16,6 +16,7 @@ type IConf interface {
 
 //EmptyJSONConf 空的jsonconf
 var EmptyJSONConf = &RawConf{
+	version:   0,
 	raw:       []byte("{}"),
 	signature: md5.EncryptBytes([]byte("{}")),
 	XMap:      types.NewXMap(),
@@ -23,7 +24,7 @@ var EmptyJSONConf = &RawConf{
 
 //RawConf json配置文件
 type RawConf struct {
-	raw       json.RawMessage
+	raw       []byte
 	version   int32
 	signature string
 	types.XMap
@@ -53,6 +54,11 @@ func NewByJSON(message []byte, version int32) (c *RawConf, err error) {
 	}
 	c.XMap, err = types.NewXMapByJSON(string(message))
 	return c, err
+}
+
+//GetRaw 获取原串
+func (j *RawConf) GetRaw() []byte {
+	return j.raw
 }
 
 //GetVersion 获取当前配置的版本号

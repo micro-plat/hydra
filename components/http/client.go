@@ -50,7 +50,7 @@ func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 		if js == nil {
 			return http.NewClient(opt...)
 		}
-		raw, err := http.WithRaw(js.Marshal())
+		raw, err := http.WithRaw(js.GetRaw())
 		if err != nil {
 			return nil, err
 		}

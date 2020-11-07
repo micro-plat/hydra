@@ -44,7 +44,7 @@ func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 			return nil, err
 		}
 
-		orgCache, err := cache.New(js.GetString("proto"), string(js.Marshal()))
+		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
 		return orgCache, err
 	})
 	if err != nil {

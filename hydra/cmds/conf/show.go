@@ -126,7 +126,7 @@ func (s *show) printVarConf() error {
 func (s *show) getNodes(path string, v *conf.RawConf, input map[string]interface{}) {
 	li := strings.SplitN(strings.Trim(path, "/"), "/", 2)
 	if len(li) == 1 {
-		input[li[0]] = v.Marshal()
+		input[li[0]] = v.GetRaw()
 		return
 	}
 	if len(li) > 1 {

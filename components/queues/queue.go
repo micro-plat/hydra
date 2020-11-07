@@ -40,7 +40,7 @@ func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 			return nil, err
 		}
 
-		return newQueue(js.GetString("proto"), string(js.Marshal()))
+		return newQueue(js.GetString("proto"), string(js.GetRaw()))
 	})
 	if err != nil {
 		return nil, err
