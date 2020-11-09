@@ -16,8 +16,6 @@ var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}
 //startTrace 启用项目性能跟踪
 func startTrace(trace string) error {
 	switch trace {
-	case "":
-		return nil
 	case "cpu":
 		defer profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
 	case "mem":
@@ -28,6 +26,8 @@ func startTrace(trace string) error {
 		defer profile.Start(profile.MutexProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
 	case "web":
 		go startTraceServer()
+	case "":
+		fallthrough
 	default:
 		return fmt.Errorf("不支持trace命令:%v", trace)
 	}
