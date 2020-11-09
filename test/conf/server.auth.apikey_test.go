@@ -128,19 +128,6 @@ func TestApikeyGetConf2(t *testing.T) {
 	confB.APIKEY("", test1.opts...)
 	// 修改json数据不合法
 	path := apiConf.GetAPIConf().GetServerConf().GetSubConfPath("auth", "apikey")
-	// ch, _ := apiConf.Registry.WatchValue(path)
 	apiConf.Registry.Update(path, "错误的json字符串")
-
 	apiConf = mocks.NewConf()
-	// ttx, err := apiConf.GetAPIConf().GetServerConf().GetSubConf(registry.Join("auth", "apikey"))
-	// t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
-	// select {
-	// case <-time.After(3 * time.Second):
-	// 	return
-	// case <-ch:
-	// 	ttx, err := apiConf.GetAPIConf().GetServerConf().GetSubConf(registry.Join("auth", "apikey"))
-	// 	t.Errorf("111111111111:%v,err:%v", string(ttx.GetRaw()), err)
-	// 	apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
-	// 	t.Errorf("%s,没有验证参数合法性错误", test1.name)
-	// }
 }

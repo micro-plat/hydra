@@ -2,14 +2,12 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/errs"
-	"github.com/micro-plat/lib4go/security/jwt"
 )
 
 //JwtAuth jwt
@@ -20,7 +18,7 @@ func JwtAuth() Handler {
 		//1. 获取jwt配置
 		jwtAuth, err := ctx.ServerConf().GetJWTConf()
 		if err != nil {
-			ctx.Response().Abort(http.StatusNotExtended, err)
+			ctx.Response().Abort(xjwt.JWTStatusConfError, err)
 			return
 		}
 		if jwtAuth.Disable {
@@ -58,10 +56,10 @@ func JwtAuth() Handler {
 		ctx.Log().Error(err)
 		if jwtAuth.AuthURL != "" {
 			ctx.Response().Header("Location", jwtAuth.AuthURL)
-			ctx.Response().Stop(http.StatusFound)
+			ctx.Response().Stop(xjwt.JWTStatusRedirect)
 			return
 		}
-		ctx.Response().Abort(errs.GetCode(err, http.StatusForbidden), errors.New("jwt验证串错误，禁止访问"))
+		ctx.Response().Abort(errs.GetCode(err, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))
 		return
 
 	}
@@ -72,16 +70,9 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 
 	//1. 从请求中获取jwt信息
 	token := getToken(ctx, j)
-	if token == "" {
-		return nil, errs.NewError(http.StatusUnauthorized, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
-	}
-	//2. 解密jwt判断是否有效，是否过期
-	data, er := jwt.Decrypt(token, j.Secret)
-	if er != nil {
-		if strings.Contains(er.Error(), "Token is expired") {
-			return nil, errs.NewError(http.StatusForbidden, er)
-		}
-		return data, errs.NewError(http.StatusForbidden, fmt.Errorf("jwt.token值(%s)有误 %w", token, er))
+	data, err = j.CheckJWT(token)
+	if err != nil {
+		return nil, err
 	}
 
 	//保存到Context中

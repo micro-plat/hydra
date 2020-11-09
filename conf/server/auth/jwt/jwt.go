@@ -2,11 +2,31 @@ package jwt
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/security/jwt"
 	"github.com/micro-plat/lib4go/utility"
+)
+
+const (
+	//JWTStatusTokenNotExsit jwt token 不存在
+	JWTStatusTokenNotExsit = http.StatusUnauthorized
+	//JWTStatusTokenExpired jwt token过期
+	JWTStatusTokenExpired = http.StatusForbidden
+	//JWTStatusTokenError  jwt token错误
+	JWTStatusTokenError = http.StatusForbidden
+	//JWTStatusConfError jwt配置错误
+	JWTStatusConfError = http.StatusNotExtended
+	//JWTStatusConfDataError jwt配置数据错误
+	JWTStatusConfDataError = http.StatusInternalServerError
+	//JWTStatusRedirect jwt跳转
+	JWTStatusRedirect = http.StatusFound
 )
 
 const (
@@ -55,6 +75,7 @@ type JWTAuth struct {
 	Source   string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
 	Excludes []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
 	//Redirect        string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
+	Domain          string `json:"domain,omitempty" toml:"domain,omitempty"`
 	AuthURL         string `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty"`
 	Disable         bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch `json:"-"`
@@ -74,6 +95,29 @@ func NewJWT(opts ...Option) *JWTAuth {
 	}
 	jwt.PathMatch = conf.NewPathMatch(jwt.Excludes...)
 	return jwt
+}
+
+//CheckJWT 检查jwt合法性
+func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
+	if token == "" {
+		return nil, errs.NewError(JWTStatusTokenNotExsit, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
+	}
+	//2. 解密jwt判断是否有效，是否过期
+	data, er := jwt.Decrypt(token, j.Secret)
+	if er != nil {
+		if strings.Contains(er.Error(), "Token is expired") {
+			return nil, errs.NewError(JWTStatusTokenExpired, er)
+		}
+		return data, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt.token值(%s)有误 %w", token, er))
+	}
+
+	return data, nil
+}
+
+//GetExpireTime 获取jwt的超时时间
+func (j *JWTAuth) GetExpireTime() string {
+	expireTime := time.Now().Add(time.Duration(time.Duration(j.ExpireAt)*time.Second - 8*60*60*time.Second))
+	return expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
 }
 
 //GetConf 获取jwt配置

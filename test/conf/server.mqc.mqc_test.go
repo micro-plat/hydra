@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
+	"github.com/micro-plat/lib4go/types"
 )
 
 func TestMqcNew(t *testing.T) {
@@ -43,10 +44,16 @@ func TestMQCGetConf(t *testing.T) {
 	}
 
 	conf := mocks.NewConf()
-	//mqc的节点不存在需要报 panic
-	// test1 := test{name: "节点不存在,获取默认对象", opts: []mqc.Option{}, want: &mqc.Server{}}
-	// obj := mqc.GetConf(conf.GetMQCConf().GetServerConf())
-	// assert.Equal(t, test1.want, obj, test1.name)
+	defer func() {
+		e := recover()
+		if e != nil {
+			assert.Equal(t, "未指定mqc服务器配置", types.GetString(e), "节点不存在,获取默认对象")
+		}
+	}()
+	test1 := test{name: "节点不存在,获取默认对象", opts: []mqc.Option{}, want: &mqc.Server{}}
+	obj, err := mqc.GetConf(conf.GetMQCConf().GetServerConf())
+	assert.Equal(t, nil, err, test1.name+",err")
+	assert.Equal(t, test1.want, obj, test1.name)
 	tests := []test{
 		{name: "正常对象获取",
 			opts: []mqc.Option{mqc.WithTrace(), mqc.WithMasterSlave()},
@@ -58,6 +65,4 @@ func TestMQCGetConf(t *testing.T) {
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
-
-	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }

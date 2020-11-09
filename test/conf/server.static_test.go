@@ -101,7 +101,7 @@ func TestStaticGetConf(t *testing.T) {
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, staticObj, test3.name+",obj")
 
-	//处理归档文件和json异常没有测试
+	//处理归档文件
 }
 
 func TestStatic_IsFavRobot(t *testing.T) {

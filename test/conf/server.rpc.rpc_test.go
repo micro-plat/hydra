@@ -64,6 +64,4 @@ func xTestRPCGetConf(t *testing.T) {
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
-
-	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }
