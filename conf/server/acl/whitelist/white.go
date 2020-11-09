@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName 白名单配置父节点名
+	ParNodeName = "acl"
+	//SubNodeName 白名单配置子节点名
+	SubNodeName = "white.list"
+)
+
 //IPList ip列表
 type IPList struct {
 	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty"`
@@ -19,7 +26,7 @@ type IPList struct {
 //WhiteList 白名单配置
 type WhiteList struct {
 	Disable bool      `json:"disable,omitempty" toml:"disable,omitempty"`
-	IPS     []*IPList `json:"white-list,omitempty" toml:"white-list,omitempty"`
+	IPS     []*IPList `json:"whiteList,omitempty" toml:"whiteList,omitempty"`
 }
 
 //New 创建白名单规则服务
@@ -35,7 +42,7 @@ func New(opts ...Option) *WhiteList {
 func (w *WhiteList) IsAllow(path string, ip string) bool {
 	for _, cur := range w.IPS {
 		if ok, _ := cur.ipm.Match(ip, "."); ok {
-			ok, _ := cur.rqm.Match(path, "/")
+			ok, _ := cur.rqm.Match(path)
 			return ok
 		}
 	}
@@ -45,11 +52,11 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 //GetConf 获取WhiteList
 func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	ip := WhiteList{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "white.list"), &ip)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &ip)
 	if err == conf.ErrNoSetting {
 		return &WhiteList{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("white list配置格式有误:%v", err)
 	}
 

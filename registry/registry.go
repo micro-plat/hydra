@@ -102,7 +102,7 @@ func GetAddrs(addr string) []string {
 	return addrs
 }
 
-//Parse 解析地址
+//Parse 解析地址 @todo
 //如:zk://192.168.0.155:2181 或 fs://../
 func Parse(address string) (proto string, raddr []string, u string, p string, err error) {
 	addr := strings.SplitN(address, "://", 2)

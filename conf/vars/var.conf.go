@@ -66,7 +66,7 @@ func (c *VarConf) load() (err error) {
 			if err != nil {
 				return err
 			}
-			varConf, err := conf.NewRawConfByJson(rdata, version)
+			varConf, err := conf.NewByJSON(rdata, version)
 			if err != nil {
 				err = fmt.Errorf("%s配置有误:%v", nodePath, err)
 				return err
@@ -106,7 +106,7 @@ func (c *VarConf) GetObject(tp string, name string, v interface{}) (int32, error
 		return 0, err
 	}
 
-	if err := conf.Unmarshal(&v); err != nil {
+	if err := conf.ToStruct(&v); err != nil {
 		err = fmt.Errorf("获取%s/%s配置失败:%v", tp, name, err)
 		return 0, err
 	}

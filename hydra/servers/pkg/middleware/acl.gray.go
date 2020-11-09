@@ -6,7 +6,7 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/micro-plat/hydra/conf/server/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
 )
 
 //Gray 灰度配置

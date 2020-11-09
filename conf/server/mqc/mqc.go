@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"status", "sharding"}
 
@@ -20,7 +27,6 @@ type Server struct {
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Addr     string `json:"addr,omitempty" valid:"required"  toml:"addr,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建mqc server配置，默认为对等模式
@@ -28,7 +34,7 @@ func New(addr string, opts ...Option) *Server {
 	if _, _, err := global.ParseProto(addr); err != nil {
 		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://queuename 格式 %w", err))
 	}
-	s := &Server{Addr: addr, Status: "start"}
+	s := &Server{Addr: addr, Status: StartStatus}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -43,9 +49,14 @@ func GetConf(cnf conf.IServerConf) (*Server, error) {
 	}
 
 	_, err := cnf.GetMainObject(&s)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("mqc服务器配置格式有误:%v", err)
+
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	if b, err := govalidator.ValidateStruct(&s); !b {
 		return nil, fmt.Errorf("mqc服务器配置数据有误:%v %v", err, s)
 	}

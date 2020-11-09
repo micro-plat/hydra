@@ -30,11 +30,11 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	}
 	for tp, subs := range c.data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetServerPath(), subs.Map()["main"], cover); err != nil {
+		if err := publish(r, pub.GetServerPath(), subs.Map()[ServerMainNodeName], cover); err != nil {
 			return err
 		}
 		for name, value := range subs.Map() {
-			if name == "main" {
+			if name == ServerMainNodeName {
 				continue
 			}
 			if err := publish(r, pub.GetSubConfPath(name), value, cover); err != nil {
@@ -94,7 +94,7 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]string, 0, 1+len(child))
+	list := make([]string, 0, len(child))
 	for _, c := range child {
 		npath := registry.Join(path, c)
 		nlist, err := getAllPath(r, npath)

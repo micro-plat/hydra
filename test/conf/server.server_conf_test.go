@@ -14,9 +14,9 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/cron"
-	"github.com/micro-plat/hydra/conf/server/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -52,7 +52,7 @@ func TestNewEmptyServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -141,7 +141,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.121"))
 	confN.Gray(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
-	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	confN.Metric("http://192.168.0.111:8080", "1", "cron1", metric.WithEnable(), metric.WithUPName("upnem", "1223456"))
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
@@ -156,7 +156,7 @@ func TestNewAPIServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -172,7 +172,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, headerC, headerConf, "测试conf初始化,判断header节点对象")
 
 	jwtConf, err := gotS.GetJWTConf()
-	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))
+	jwtC := jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取jwt对象失败")
 	assert.Equal(t, jwtC, jwtConf, "测试conf初始化,判断jwt节点对象")
 
@@ -265,7 +265,7 @@ func TestNewRPCServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -292,7 +292,7 @@ func TestNewMQCServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")
@@ -326,7 +326,7 @@ func TestNewCRONServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	varConf, err := vars.NewVarConf(platName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建var节点对象")
@@ -359,7 +359,7 @@ func TestNewVARServerConf(t *testing.T) {
 
 	mainConf, err := server.NewServerConf(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,新建主节点对象")
-	assert.Equal(t, mainConf.GetRootConf(), gotS.GetServerConf().GetRootConf(), "测试conf初始化,判断主节点对象")
+	assert.Equal(t, mainConf.GetMainConf(), gotS.GetServerConf().GetMainConf(), "测试conf初始化,判断主节点对象")
 
 	mqcConf, err := gotS.GetMQCMainConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取mqc对象失败")

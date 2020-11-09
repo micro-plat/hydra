@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/server/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 )
@@ -93,10 +93,11 @@ func TestLimiter_GetLimiter(t *testing.T) {
 
 func TestGetConf(t *testing.T) {
 	type test struct {
-		name    string
-		cnf     conf.IServerConf
-		want    *limiter.Limiter
-		wantErr bool
+		name       string
+		cnf        conf.IServerConf
+		want       *limiter.Limiter
+		wantErr    bool
+		wantErrStr string
 	}
 	conf := mocks.NewConfBy("hydra", "graytest")
 	confB := conf.API(":8090")
@@ -112,9 +113,10 @@ func TestGetConf(t *testing.T) {
 	assert.Equal(t, test2.want, limiterObj, test2.name+",obj")
 
 	confB.Limit(limiter.WithRuleList(limiter.NewRule("path", 1, limiter.WithAction("sss"))))
-	test3 := test{name: "灰度节点存在,数据不合法", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true}
+	test3 := test{name: "灰度节点存在,数据不合法", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "limit配置数据有误"}
 	limiterObj, err = limiter.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
+	assert.Equal(t, test3.wantErrStr, err.Error()[:len(test3.wantErrStr)], test3.name+",err1")
 	assert.Equal(t, test3.want, limiterObj, test3.name+",obj")
 
 	confB.Limit(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success"))))

@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //MainConfName 主配置中的关键配置名
 var MainConfName = []string{"status", "sharding"}
 
@@ -19,13 +26,12 @@ type Server struct {
 	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-	Timeout  int    `json:"timeout,omitzero" toml:"timeout,omitzero"`
 }
 
 //New 构建cron server配置，默认为对等模式
 func New(opts ...Option) *Server {
 	s := &Server{
-		Status: "start",
+		Status: StartStatus,
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -41,7 +47,11 @@ func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	}
 
 	_, err = cnf.GetMainObject(s)
-	if err != nil && err != conf.ErrNoSetting {
+
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
+	}
+	if err != nil {
 		return nil, err
 	}
 

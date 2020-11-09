@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+const (
+	HeadeAllowCredentials = "Access-Control-Allow-Credentials"
+	HeadeAllowMethods     = "Access-Control-Allow-Methods"
+	HeadeAllowOrigin      = "Access-Control-Allow-Origin"
+	HeadeAllowHeaders     = "Access-Control-Allow-Headers"
+	HeadeExposeHeaders    = "Access-Control-Expose-Headers"
+)
+
 var allowHeader = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "Authorization", "Authorization-Jwt", "Origin", "Accept"}
 var exposeHeader = []string{"Authorization-Jwt", "WWW-Authenticate", "Authorization"}
 var allMethods = []string{http.MethodHead, http.MethodOptions, http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}
@@ -19,32 +27,32 @@ func WithCrossDomain(host ...string) Option {
 		if len(host) > 0 {
 			origin = strings.Join(host, ",")
 		}
-		a["Access-Control-Allow-Credentials"] = "true"
-		a["Access-Control-Allow-Origin"] = origin
-		a["Access-Control-Allow-Methods"] = strings.Join(allMethods, ",")
-		a["Access-Control-Allow-Headers"] = strings.Join(allowHeader, ",")
-		a["Access-Control-Expose-Headers"] = strings.Join(exposeHeader, ",")
+		a[HeadeAllowCredentials] = "true"
+		a[HeadeAllowOrigin] = origin
+		a[HeadeAllowMethods] = strings.Join(allMethods, ",")
+		a[HeadeAllowHeaders] = strings.Join(allowHeader, ",")
+		a[HeadeExposeHeaders] = strings.Join(exposeHeader, ",")
 	}
 }
 
 //WithAllowMethods 设置允许的请求类型
 func WithAllowMethods(method ...string) Option {
 	return func(a Headers) {
-		a["Access-Control-Allow-Methods"] = strings.ToUpper(strings.Join(method, ","))
+		a[HeadeAllowMethods] = strings.ToUpper(strings.Join(method, ","))
 	}
 }
 
 //WithAllowHeaders 设置允许请求的头信息
 func WithAllowHeaders(header ...string) Option {
 	return func(a Headers) {
-		a["Access-Control-Allow-Headers"] = strings.Join(append(allowHeader, header...), ",")
+		a[HeadeAllowHeaders] = strings.Join(append(allowHeader, header...), ",")
 	}
 }
 
 //WithExposeHeaders 设置允许导出的头信息
 func WithExposeHeaders(header ...string) Option {
 	return func(a Headers) {
-		a["Access-Control-Expose-Headers"] = strings.Join(append(exposeHeader, header...), ",")
+		a[HeadeExposeHeaders] = strings.Join(append(exposeHeader, header...), ",")
 	}
 }
 

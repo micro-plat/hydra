@@ -47,14 +47,14 @@ func WithHost(host ...string) Option {
 //WithDisable 禁用任务
 func WithDisable() Option {
 	return func(a *option) {
-		a.Status = "stop"
+		a.Status = StartStop
 	}
 }
 
 //WithEnable 启用任务
 func WithEnable() Option {
 	return func(a *option) {
-		a.Status = "start"
+		a.Status = StartStatus
 	}
 }
 

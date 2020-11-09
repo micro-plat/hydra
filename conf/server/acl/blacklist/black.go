@@ -8,10 +8,17 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName 黑名单配置父节点名
+	ParNodeName = "acl"
+	//SubNodeName 黑名单配置子节点名
+	SubNodeName = "black.list"
+)
+
 //BlackList 黑名单配置
 type BlackList struct {
 	Disable bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	IPS     []string `json:"black-list,omitempty" toml:"black-list,omitempty"`
+	IPS     []string `json:"blackList,omitempty" toml:"blackList,omitempty"`
 	ipm     *conf.PathMatch
 }
 
@@ -35,11 +42,11 @@ func (w *BlackList) IsDeny(ip string) bool {
 //GetConf 获取BlackList
 func GetConf(cnf conf.IServerConf) (*BlackList, error) {
 	ip := BlackList{}
-	_, err := cnf.GetSubObject(registry.Join("acl", "black.list"), &ip)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &ip)
 	if err == conf.ErrNoSetting {
 		return &BlackList{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("black list配置有误:%v", err)
 	}
 

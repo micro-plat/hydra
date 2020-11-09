@@ -14,26 +14,37 @@ import (
 
 var _ IXMap = XMap{}
 
+//IXMap 扩展map
 type IXMap interface {
 	Keys() []string
 	Get(name string) (interface{}, bool)
 	GetValue(name string) interface{}
-	GetString(name string) string
+	GetString(name string, def ...string) string
 	GetInt(name string, def ...int) int
 	GetInt64(name string, def ...int64) int64
 	GetFloat32(name string, def ...float32) float32
 	GetFloat64(name string, def ...float64) float64
+	GetStrings(name string, def ...string) (r []string)
+	GetArray(name string, def ...interface{}) (r []interface{})
+	GetDatetime(name string, format ...string) (time.Time, error)
 	SetValue(name string, value interface{})
 	Has(name string) bool
-	GetMustString(name string) (string, bool)
-	GetMustInt(name string) (int, bool)
-	GetMustFloat32(name string) (float32, bool)
-	GetMustFloat64(name string) (float64, bool)
-	GetDatetime(name string, format ...string) (time.Time, error)
+	MustString(name string) (string, bool)
+	MustInt(name string) (int, bool)
+	MustFloat32(name string) (float32, bool)
+	MustFloat64(name string) (float64, bool)
+
+	Marshal() []byte
+	GetJSON(name string) (r []byte, err error)
+	IsXMap(name string) bool
+	GetXMap(name string) (c XMap, err error)
+
 	IsEmpty() bool
 	Len() int
 	ToStruct(o interface{}) error
 	ToMap() map[string]interface{}
+	ToSMap() map[string]string
+
 	Cascade(m IXMap)
 	Merge(m IXMap)
 	MergeMap(anr map[string]interface{})
@@ -80,7 +91,7 @@ func (q XMap) Cascade(m IXMap) {
 	keys := m.Keys()
 	for _, key := range keys {
 		m := GetCascade(key, m.GetValue(key))
-		q.Merge(NewXMapByMap(m))
+		q.Merge(XMap(m))
 	}
 }
 
@@ -117,10 +128,10 @@ func (q XMap) GetValue(name string) interface{} {
 }
 
 //GetString 从对象中获取数据值，如果不是字符串则返回空
-func (q XMap) GetString(name string) string {
+func (q XMap) GetString(name string, def ...string) string {
 	parties := strings.Split(name, ":")
 	if len(parties) == 1 {
-		return GetString(q[name])
+		return GetString(q[name], def...)
 	}
 	tmpv := q[parties[0]]
 	for i, cnt := 1, len(parties); i < cnt; i++ {
@@ -143,7 +154,7 @@ func (q XMap) GetString(name string) string {
 			continue
 		}
 	}
-	return GetString(tmpv)
+	return GetString(tmpv, def...)
 }
 
 //GetInt 从对象中获取数据值，如果不是字符串则返回0
@@ -176,6 +187,74 @@ func (q XMap) GetDatetime(name string, format ...string) (time.Time, error) {
 	return GetDatetime(q[name], format...)
 }
 
+//GetStrings 获取字符串数组
+func (q XMap) GetStrings(name string, def ...string) (r []string) {
+	if v := q.GetString(name); v != "" {
+		if r = strings.Split(v, ";"); len(r) > 0 {
+			return r
+		}
+	}
+	if len(def) > 0 {
+		return def
+	}
+	return nil
+}
+
+//GetArray 获取数组对象
+func (q XMap) GetArray(name string, def ...interface{}) (r []interface{}) {
+	v, ok := q.Get(name)
+	if !ok && len(def) > 0 {
+		return def
+	}
+	if r, ok := v.([]interface{}); ok {
+		return r
+	}
+	return nil
+}
+
+//Marshal 转换为json数据
+func (q XMap) Marshal() []byte {
+	r, _ := json.Marshal(q)
+	return r
+}
+
+//GetJSON 获取JSON串
+func (q XMap) GetJSON(name string) (r []byte, err error) {
+	v, ok := q.Get(name)
+	if !ok {
+		return nil, fmt.Errorf("%s不存在或值为空", name)
+	}
+
+	buffer, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return buffer, nil
+}
+
+//IsXMap 是否存在节点
+func (q XMap) IsXMap(name string) bool {
+	v, ok := q.Get(name)
+	if !ok {
+		return false
+	}
+	_, ok = v.(map[string]interface{})
+	return ok
+}
+
+//GetXMap 指定节点名称获取JSONConf
+func (q XMap) GetXMap(name string) (c XMap, err error) {
+	v, ok := q.Get(name)
+	if !ok {
+		err = fmt.Errorf("%s不存在或值为空", name)
+		return
+	}
+	if data, ok := v.(map[string]interface{}); ok {
+		return data, nil
+	}
+	return nil, fmt.Errorf("%s不是有效的map", name)
+}
+
 //SetValue 获取时间字段
 func (q XMap) SetValue(name string, value interface{}) {
 	q[name] = value
@@ -183,37 +262,40 @@ func (q XMap) SetValue(name string, value interface{}) {
 
 //Has 检查对象中是否存在某个值
 func (q XMap) Has(name string) bool {
-	_, ok := q[name]
+	_, ok := q.Get(name)
 	return ok
 }
 
-//GetMustString 从对象中获取数据值，如果不是字符串则返回空
-func (q XMap) GetMustString(name string) (string, bool) {
+//MustString 从对象中获取数据值，如果不是字符串则返回空
+func (q XMap) MustString(name string) (string, bool) {
 	return MustString(q[name])
 }
 
-//GetMustInt 从对象中获取数据值，如果不是字符串则返回0
-func (q XMap) GetMustInt(name string) (int, bool) {
+//MustInt 从对象中获取数据值，如果不是字符串则返回0
+func (q XMap) MustInt(name string) (int, bool) {
 	return MustInt(q[name])
 }
 
-//GetMustFloat32 从对象中获取数据值，如果不是字符串则返回0
-func (q XMap) GetMustFloat32(name string) (float32, bool) {
+//MustFloat32 从对象中获取数据值，如果不是字符串则返回0
+func (q XMap) MustFloat32(name string) (float32, bool) {
 	return MustFloat32(q[name])
 }
 
-//GetMustFloat64 从对象中获取数据值，如果不是字符串则返回0
-func (q XMap) GetMustFloat64(name string) (float64, bool) {
+//MustFloat64 从对象中获取数据值，如果不是字符串则返回0
+func (q XMap) MustFloat64(name string) (float64, bool) {
 	return MustFloat64(q[name])
 }
 
 //ToStruct 将当前对象转换为指定的struct
-func (q XMap) ToStruct(o interface{}) error {
-	fval := reflect.ValueOf(o)
-	if fval.Kind() != reflect.Ptr {
-		return fmt.Errorf("输入参数必须是指针:%v", fval.Kind())
+func (q XMap) ToStruct(out interface{}) error {
+	buff, err := json.Marshal(q)
+	if err != nil {
+		return err
 	}
-	return Map2Struct(q, o)
+	if err := json.Unmarshal(buff, &out); err != nil {
+		return err
+	}
+	return nil
 }
 
 //ToMap 转换为map[string]interface{}

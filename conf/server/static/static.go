@@ -13,6 +13,12 @@ import (
 	"github.com/micro-plat/lib4go/archiver"
 )
 
+//TempDirName 临时目录创建名
+const TempDirName = "hydra"
+
+//TypeNodeName static分类节点名
+const TypeNodeName = "static"
+
 //IStatic 静态文件接口
 type IStatic interface {
 	GetConf() (*Static, bool)
@@ -57,13 +63,13 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	static := Static{
 		FileMap: map[string]FileInfo{},
 	}
-	_, err := cnf.GetSubObject("static", &static)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("static配置格式有误:%v", err)
-	}
+	_, err := cnf.GetSubObject(TypeNodeName, &static)
 	if err == conf.ErrNoSetting {
 		static.Disable = true
 		return &static, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 
 	if static.Exts == nil {
@@ -99,7 +105,7 @@ func unarchive(dir string, path string) (string, error) {
 		return "", fmt.Errorf("指定的文件不是归档文件:%s", path)
 	}
 	rootPath := filepath.Dir(os.Args[0])
-	tmpDir, err := ioutil.TempDir(rootPath, "hydra")
+	tmpDir, err := ioutil.TempDir(rootPath, TempDirName)
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}

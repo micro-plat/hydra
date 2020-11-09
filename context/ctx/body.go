@@ -60,7 +60,7 @@ func (w *body) GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 	return data, nil
 }
 
-//GetBody 读取body
+//GetBody 读取body @todo 【test】 特殊字符，中文,gbk
 func (w *body) GetBody(e ...string) (s string, err error) {
 	body, err := w.GetRawBody(e...)
 	if err != nil {

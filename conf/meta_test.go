@@ -86,12 +86,12 @@ func TestMeta_GetInt(t *testing.T) {
 		{name: "数据存在,类型是string数字,有默认", q: Meta{"yy": "12"}, args: args{name: "yy", def: []int{1}}, want: 12},
 		{name: "数据存在,类型是string大数字,无默认", q: Meta{"yy": "1212222222222222222222222222222222"}, args: args{name: "yy", def: []int{}}, want: 0},
 		{name: "数据存在,类型是string大数字,有默认", q: Meta{"yy": "1212222222222222222222222222222222"}, args: args{name: "yy", def: []int{1}}, want: 1},
-	
+
 		{name: "数据存在,类型是float整数,无默认", q: Meta{"yy": float32(12)}, args: args{name: "yy", def: []int{}}, want: 12},
 		{name: "数据存在,类型是float整数,有默认", q: Meta{"yy": float32(12)}, args: args{name: "yy", def: []int{1}}, want: 12},
 		{name: "数据存在,类型是float小数,无默认", q: Meta{"yy": float32(12.1)}, args: args{name: "yy", def: []int{}}, want: 0},
 		{name: "数据存在,类型是float小数,有默认", q: Meta{"yy": float32(12.1)}, args: args{name: "yy", def: []int{1}}, want: 1},
-			//@todo 待讨论
+		//@todo 待讨论
 		//{name: "数据存在,类型是float大数,无默认", q: Meta{"yy": float64(1212222222222222222222222222222222)}, args: args{name: "yy", def: []int{}}, want: 0},
 		//{name: "数据存在,类型是float大数,有默认", q: Meta{"yy": float64(1212222222222222222222222222222222)}, args: args{name: "yy", def: []int{1}}, want: 1},
 		{name: "数据存在,类型是int,无默认", q: Meta{"yy": 12}, args: args{name: "yy", def: []int{}}, want: 12},
@@ -353,7 +353,7 @@ func TestMeta_Set(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.q.Set(tt.args.name, tt.args.value)
+			tt.q.SetValue(tt.args.name, tt.args.value)
 			if !reflect.DeepEqual(tt.q[tt.args.name], tt.args.value) {
 				t.Errorf("Meta.Set() fail")
 			}
@@ -512,9 +512,9 @@ func TestMeta_GetMustFloat64(t *testing.T) {
 		{name: "数据存在,值不为空-float", q: Meta{"test1": float32(2)}, args: args{name: "test1"}, want: 0, want1: false},
 		{name: "数据存在,值不为空-float.0", q: Meta{"test1": float32(2.0)}, args: args{name: "test1"}, want: 0, want1: false},
 		{name: "数据存在,值不为空-float.1", q: Meta{"test1": float32(2.1)}, args: args{name: "test1"}, want: 0, want1: false},
-		{name: "数据存在,值不为空-float32", q: Meta{"test1": float32(22222222222222222222222222222)}, args: args{name: "test1"}, want: 0 , want1: false},
+		{name: "数据存在,值不为空-float32", q: Meta{"test1": float32(22222222222222222222222222222)}, args: args{name: "test1"}, want: 0, want1: false},
 		{name: "数据存在,值不为空-float64", q: Meta{"test1": float64(22222222222222222222222222222222222222222222)}, args: args{name: "test1"}, want: 22222222222222222222222222222222222222222222, want1: true},
-		//@todo 
+		//@todo
 		//{name: "数据存在,值不为空-rune", q: Meta{"test1": rune("2")}, args: args{name: "test1"}, want: 2, want1: true},
 		//{name: "数据存在,值不为空-byte", q: Meta{"test1": byte("1")}, args: args{name: "test1"}, want: 1, want1: true},
 		//{name: "数据存在,值不为空-string", q: Meta{"test1": "1.32"}, args: args{name: "test1"}, want: 1.32, want1: true},

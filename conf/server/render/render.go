@@ -8,6 +8,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//TypeNodeName render配置节点名
+const TypeNodeName = "render"
+
 type Tmplt struct {
 	ContentType string `json:"content_type,omitempty" toml:"content_type,omitempty"`
 	Content     string `json:"content,omitempty" toml:"content,omitempty"`
@@ -41,14 +44,15 @@ func NewRender(opts ...Option) *Render {
 //GetConf 设置GetRender配置
 func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 	rsp = &Render{}
-	_, err = cnf.GetSubObject("render", rsp)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("render配置格式有误:%v", err)
-	}
+	_, err = cnf.GetSubObject(TypeNodeName, rsp)
 	if err == conf.ErrNoSetting {
 		rsp.Disable = true
 		return rsp, nil
 	}
+	if err != nil {
+		return nil, fmt.Errorf("render配置格式有误:%v", err)
+	}
+
 	paths := make([]string, 0, len(rsp.Tmplts))
 	for k, v := range rsp.Tmplts {
 		if b, err := govalidator.ValidateStruct(v); !b {
@@ -62,7 +66,7 @@ func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 
 //Get 获取转换结果
 func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.PathMatch.Match(path, "/")
+	exists, service := r.PathMatch.Match(path)
 	if !exists {
 		return false, 0, "", "", nil
 	}

@@ -8,6 +8,13 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
+const (
+	//StartStatus 开启服务
+	StartStatus = "start"
+	//StartStop 停止服务
+	StartStop = "stop"
+)
+
 //DefaultRPCAddress rpc服务默认地址
 const DefaultRPCAddress = ":8090"
 
@@ -33,7 +40,7 @@ type Server struct {
 func New(address string, opts ...Option) *Server {
 	a := &Server{
 		Address: address,
-		Status:  "start",
+		Status:  StartStatus,
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -48,7 +55,11 @@ func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 		return nil, fmt.Errorf("rpc主配置类型错误:%s != rpc", cnf.GetServerType())
 	}
 
-	if _, err := cnf.GetMainObject(s); err != nil && err != conf.ErrNoSetting {
+	_, err = cnf.GetMainObject(s)
+	if err == conf.ErrNoSetting {
+		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
+	}
+	if err != nil {
 		return nil, err
 	}
 

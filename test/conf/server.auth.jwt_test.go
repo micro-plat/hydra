@@ -34,8 +34,8 @@ func TestNewJWT(t *testing.T) {
 			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: false, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
 		},
 		{name: "设置自定义对象",
-			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111")},
-			want: &jwt.JWTAuth{Name: "test", Redirect: "1111", Mode: "ES256", Secret: "12345678", ExpireAt: 1000, Source: "HEADER", Excludes: []string{"/t1/**"}, PathMatch: conf.NewPathMatch("/t1/**")},
+			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111")},
+			want: &jwt.JWTAuth{Name: "test", AuthURL: "1111", Mode: "ES256", Secret: "12345678", ExpireAt: 1000, Source: "HEADER", Excludes: []string{"/t1/**"}, PathMatch: conf.NewPathMatch("/t1/**")},
 		},
 	}
 	for _, tt := range tests {

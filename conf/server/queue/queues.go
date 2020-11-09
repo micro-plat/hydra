@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+//TypeNodeName 分类节点名
+const TypeNodeName = "queue"
+
 //Queues queue任务
 type Queues struct {
 	Queues []*Queue `json:"queues" toml:"queues,omitempty"`
@@ -48,7 +51,7 @@ func (t *Queues) Append(queues ...*Queue) *Queues {
 //GetConf 设置queue
 func GetConf(cnf conf.IServerConf) (queues *Queues, err error) {
 	queues = &Queues{}
-	if _, err := cnf.GetSubObject("queue", queues); err != nil && err != conf.ErrNoSetting {
+	if _, err := cnf.GetSubObject(TypeNodeName, queues); err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("queues配置格式有误:%v", err)
 	}
 

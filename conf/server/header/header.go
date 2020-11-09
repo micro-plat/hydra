@@ -8,6 +8,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+//TypeNodeName header配置节点名
+const TypeNodeName = "header"
+
 //IHeader 获取header
 type IHeader interface {
 	GetConf() (Headers, bool)
@@ -27,7 +30,7 @@ func New(opts ...Option) Headers {
 
 //IsAccessControlAllowOrigin 是否是Access-Control-Allow-Origin
 func (h Headers) IsAccessControlAllowOrigin(k string) bool {
-	return strings.EqualFold(k, "Access-Control-Allow-Origin")
+	return strings.EqualFold(k, HeadeAllowOrigin)
 }
 
 //GetHTTPHeaderByOrigin 根据请求origin获取http请求头
@@ -62,7 +65,7 @@ func (h Headers) GetHeaderByOrigin(origin string) Headers {
 
 //hasCross 是否允许跨域访问
 func (h Headers) hasCross(origin string) bool {
-	value, ok := h["Access-Control-Allow-Origin"]
+	value, ok := h[HeadeAllowOrigin]
 	if !ok {
 		return false
 	}
@@ -80,12 +83,13 @@ func (h Headers) hasCross(origin string) bool {
 
 //GetConf 设置header
 func GetConf(cnf conf.IServerConf) (header Headers, err error) {
-	_, err = cnf.GetSubObject("header", &header)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("header配置有误:%v", err)
-	}
+	_, err = cnf.GetSubObject(TypeNodeName, &header)
 	if err == conf.ErrNoSetting {
 		return Headers{}, nil
 	}
+	if err != nil {
+		return nil, fmt.Errorf("header配置有误:%v", err)
+	}
+
 	return
 }

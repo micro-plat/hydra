@@ -54,7 +54,7 @@ func (c *cron) Add(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
-	c.tasks.Append(task)
+	c.tasks.Append(task) //@todo 状态未变化的是否要进行通知
 	for _, s := range c.subscribers {
 		s.taskChan <- task
 	}

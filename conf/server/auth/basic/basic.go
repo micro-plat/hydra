@@ -9,6 +9,13 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+const (
+	//ParNodeName auth-basic配置父节点名
+	ParNodeName = "auth"
+	//SubNodeName auth-basic配置子节点名
+	SubNodeName = "basic"
+)
+
 //BasicAuth http basic 认证配置
 type BasicAuth struct {
 	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
@@ -50,11 +57,11 @@ func (b *BasicAuth) GetRealm() string {
 //GetConf 获取basic
 func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	basic := BasicAuth{}
-	_, err := cnf.GetSubObject(registry.Join("auth", "basic"), &basic)
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &basic)
 	if err == conf.ErrNoSetting || len(basic.Members) == 0 {
 		return &BasicAuth{Disable: true}, nil
 	}
-	if err != nil && err != conf.ErrNoSetting {
+	if err != nil {
 		return nil, fmt.Errorf("basic配置格式有误:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&basic); !b {

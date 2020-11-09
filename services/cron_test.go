@@ -14,6 +14,7 @@ import (
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
+//@todo 多线程测试订阅
 func Test_cron_Add(t *testing.T) {
 
 	tests := []struct {

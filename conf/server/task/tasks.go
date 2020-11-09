@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+//TypeNodeName 分类节点名
+const TypeNodeName = "task"
+
 //Tasks cron任务的task配置信息
 type Tasks struct {
 	Tasks []*Task `json:"tasks,omitempty" toml:"tasks,omitempty"`
@@ -46,12 +49,12 @@ func (t *Tasks) Append(tasks ...*Task) *Tasks {
 //GetConf 根据服务嚣配置获取task
 func GetConf(cnf conf.IServerConf) (tasks *Tasks, err error) {
 	tasks = &Tasks{}
-	_, err = cnf.GetSubObject("task", tasks)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, fmt.Errorf("task:%v", err)
-	}
+	_, err = cnf.GetSubObject(TypeNodeName, tasks)
 	if err == conf.ErrNoSetting {
 		return &Tasks{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("task:%v", err)
 	}
 
 	for _, task := range tasks.Tasks {

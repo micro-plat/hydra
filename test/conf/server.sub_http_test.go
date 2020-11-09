@@ -11,9 +11,9 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -69,8 +69,8 @@ func Test_httpSub_GetJWTConf(t *testing.T) {
 	}{
 		{name: "不设置jwt节点", opts: []jwt.Option{}, wantErr: true, wantConf: &jwt.JWTAuth{Disable: true}},
 		{name: "设置错误jwt数据", opts: []jwt.Option{jwt.WithMode("错误数据")}, wantErr: false, wantConf: nilJwt},
-		{name: "设置正确的jwt对象", opts: []jwt.Option{jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111")}, wantErr: true,
-			wantConf: jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithRedirect("1111"))},
+		{name: "设置正确的jwt对象", opts: []jwt.Option{jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111")}, wantErr: true,
+			wantConf: jwt.NewJWT(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))},
 	}
 
 	for _, tt := range tests {

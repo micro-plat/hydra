@@ -7,6 +7,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
+//TypeNodeName metric配置节点名
+const TypeNodeName = "metric"
+
 type IMetric interface {
 	GetConf() (*Metric, bool)
 }
@@ -42,14 +45,15 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 //GetConf 设置metric
 func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
-	_, err = cnf.GetSubObject("metric", &metric)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, err
-	}
+	_, err = cnf.GetSubObject(TypeNodeName, &metric)
 	if err == conf.ErrNoSetting {
 		metric.Disable = true
 		return metric, nil
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	if b, err := govalidator.ValidateStruct(metric); !b {
 		return nil, fmt.Errorf("metric配置数据有误:%v", err)
 	}

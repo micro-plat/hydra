@@ -65,8 +65,8 @@ func (c *CNode) GetPort() string {
 	return c.port
 }
 
-//GetServerID 获取节点编号
-func (c *CNode) GetServerID() string {
+//GetNodeID 获取节点编号
+func (c *CNode) GetNodeID() string {
 	return c.serverID
 }
 

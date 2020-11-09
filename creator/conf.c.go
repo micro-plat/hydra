@@ -47,7 +47,7 @@ type IConf interface {
 	GetRPC() *rpcBuilder
 
 	//Custom 自定义服务器配置
-	Custom(tp string, s ...interface{}) customerBuilder
+	Custom(tp string, s ...interface{}) CustomerBuilder
 
 	//CRON 构建cron服务器配置
 	CRON(opts ...cron.Option) *cronBuilder
@@ -67,6 +67,9 @@ type IConf interface {
 	//Load 加载所有配置
 	Load() error
 }
+
+//ServerMainNodeName 服务主节点名称
+const ServerMainNodeName = "main"
 
 //Conf 配置服务
 var Conf = New()
@@ -238,7 +241,7 @@ func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
 }
 
 //Custom 用户自定义配置服务
-func (c *conf) Custom(tp string, s ...interface{}) customerBuilder {
+func (c *conf) Custom(tp string, s ...interface{}) CustomerBuilder {
 	if _, ok := c.data[tp]; ok {
 		panic(fmt.Sprintf("不能重复注册%s", tp))
 	}
@@ -279,6 +282,13 @@ func (c *conf) Encode2File(path string, cover bool) error {
 
 //Decode 从配置文件中读取配置信息
 func (c *conf) Decode(f string) error {
+	_, err := toml.DecodeFile(f, &c.data)
+	return err
+}
+
+//Decode 从配置文件中读取配置信息
+func (c *conf) Decode1(f string) error {
+
 	_, err := toml.DecodeFile(f, &c.data)
 	return err
 }
