@@ -8,15 +8,15 @@ import (
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -285,22 +285,22 @@ func Test_httpBuilder_Limit(t *testing.T) {
 	}
 }
 
-func Test_httpBuilder_Gray(t *testing.T) {
+func Test_httpBuilder_Proxy(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *httpBuilder
-		args   []gray.Option
+		args   []proxy.Option
 		want   CustomerBuilder
 	}{
 		{name: " 初始化默认对象", fields: &httpBuilder{tp: "x1", fnGetRouter: nil, CustomerBuilder: make(map[string]interface{})},
-			args: []gray.Option{},
-			want: CustomerBuilder{"acl/gray": gray.New()}},
+			args: []proxy.Option{},
+			want: CustomerBuilder{"acl/proxy": proxy.New()}},
 		{name: " 初始化实体对象", fields: &httpBuilder{tp: "x1", fnGetRouter: nil, CustomerBuilder: make(map[string]interface{})},
-			args: []gray.Option{gray.WithDisable(), gray.WithFilter("sss")},
-			want: CustomerBuilder{"acl/gray": gray.New(gray.WithDisable(), gray.WithFilter("sss"))}},
+			args: []proxy.Option{proxy.WithDisable(), proxy.WithFilter("sss")},
+			want: CustomerBuilder{"acl/proxy": proxy.New(proxy.WithDisable(), proxy.WithFilter("sss"))}},
 	}
 	for _, tt := range tests {
-		got := tt.fields.Gray(tt.args...)
+		got := tt.fields.Proxy(tt.args...)
 		assert.Equal(t, tt.want, got.CustomerBuilder, tt.name)
 	}
 }

@@ -409,7 +409,7 @@ func TestMeta_GetMustString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := tt.q.GetMustString(tt.args.name)
+			got, got1 := tt.q.MustString(tt.args.name)
 			if !(got1 == tt.want1 && got == tt.want) {
 				t.Errorf("Meta.GetMustString() got  = %v got1 = %v, want %v,want1%v", got, got1, tt.want, tt.want1)
 			}
@@ -445,7 +445,7 @@ func TestMeta_GetMustInt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := tt.q.GetMustInt(tt.args.name)
+			got, got1 := tt.q.MustInt(tt.args.name)
 			if !(got1 == tt.want1 && got == tt.want) {
 				t.Errorf("Meta.GetMustInt() got  = %v got1 = %v, want %v,want1%v", got, got1, tt.want, tt.want1)
 			}
@@ -483,7 +483,7 @@ func TestMeta_GetMustFloat32(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := tt.q.GetMustFloat32(tt.args.name)
+			got, got1 := tt.q.MustFloat32(tt.args.name)
 			if !(got1 == tt.want1 && got == tt.want) {
 				t.Errorf("Meta.GetMustFloat32() got  = %v got1 = %v, want %v,want1%v", got, got1, tt.want, tt.want1)
 			}
@@ -521,7 +521,7 @@ func TestMeta_GetMustFloat64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := tt.q.GetMustFloat64(tt.args.name)
+			got, got1 := tt.q.MustFloat64(tt.args.name)
 			if !(got1 == tt.want1 && got == tt.want) {
 				t.Errorf("Meta.GetMustFloat64() got  = %v got1 = %v, want %v,want1%v", got, got1, tt.want, tt.want1)
 			}

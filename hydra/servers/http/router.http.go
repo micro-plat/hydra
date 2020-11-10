@@ -19,7 +19,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Trace().GinFunc())     //跟踪信息
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
 	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
-	s.engine.Use(middleware.Gray().GinFunc())      //灰度配置
+	s.engine.Use(middleware.Proxy().GinFunc())     //灰度配置
 	s.engine.Use(middleware.Delay().GinFunc())     //
 	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
 	s.engine.Use(middleware.Limit().GinFunc())     //限流处理
