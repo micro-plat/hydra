@@ -13,7 +13,7 @@ import (
 	"github.com/kr/pretty"
 )
 
-func assert(t *testing.T, result bool, f func(), cd int) {
+func assert(t testing.TB, result bool, f func(), cd int) {
 	if !result {
 		_, file, line, _ := runtime.Caller(cd + 1)
 		t.Errorf("%s:%d", file, line)
@@ -22,7 +22,7 @@ func assert(t *testing.T, result bool, f func(), cd int) {
 	}
 }
 
-func equal(t *testing.T, exp, got interface{}, cd int, args ...interface{}) {
+func equal(t testing.TB, exp, got interface{}, cd int, args ...interface{}) {
 	fn := func() {
 		for _, desc := range pretty.Diff(exp, got) {
 			t.Error("!", desc)
@@ -35,7 +35,7 @@ func equal(t *testing.T, exp, got interface{}, cd int, args ...interface{}) {
 	assert(t, result, fn, cd+1)
 }
 
-func tt(t *testing.T, result bool, cd int, args ...interface{}) {
+func tt(t testing.TB, result bool, cd int, args ...interface{}) {
 	fn := func() {
 		t.Errorf("!  Failure")
 		if len(args) > 0 {
@@ -45,15 +45,15 @@ func tt(t *testing.T, result bool, cd int, args ...interface{}) {
 	assert(t, result, fn, cd+1)
 }
 
-func T(t *testing.T, result bool, args ...interface{}) {
+func T(t testing.TB, result bool, args ...interface{}) {
 	tt(t, result, 1, args...)
 }
 
-func Tf(t *testing.T, result bool, format string, args ...interface{}) {
+func Tf(t testing.TB, result bool, format string, args ...interface{}) {
 	tt(t, result, 1, fmt.Sprintf(format, args...))
 }
 
-func IsNil(t *testing.T, ext bool, got interface{}, args ...interface{}) {
+func IsNil(t testing.TB, ext bool, got interface{}, args ...interface{}) {
 	fn := func() {
 		if len(args) > 0 {
 			t.Error("!", " -", fmt.Sprint(args...))
@@ -62,7 +62,7 @@ func IsNil(t *testing.T, ext bool, got interface{}, args ...interface{}) {
 	assert(t, reflect.DeepEqual(nil, got) == ext, fn, 1)
 }
 
-func IsNilf(t *testing.T, ext bool, got interface{}, format string, args ...interface{}) {
+func IsNilf(t testing.TB, ext bool, got interface{}, format string, args ...interface{}) {
 	fn := func() {
 		if len(args) > 0 {
 			t.Error("!", " -", fmt.Sprint(args...))
@@ -71,15 +71,15 @@ func IsNilf(t *testing.T, ext bool, got interface{}, format string, args ...inte
 	assert(t, (got == nil) == ext, fn, 1)
 }
 
-func Equal(t *testing.T, exp, got interface{}, args ...interface{}) {
+func Equal(t testing.TB, exp, got interface{}, args ...interface{}) {
 	equal(t, exp, got, 1, args...)
 }
 
-func Equalf(t *testing.T, exp, got interface{}, format string, args ...interface{}) {
+func Equalf(t testing.TB, exp, got interface{}, format string, args ...interface{}) {
 	equal(t, exp, got, 1, fmt.Sprintf(format, args...))
 }
 
-func NotEqual(t *testing.T, exp, got interface{}, args ...interface{}) {
+func NotEqual(t testing.TB, exp, got interface{}, args ...interface{}) {
 	fn := func() {
 		t.Errorf("!  Unexpected: <%#v>", exp)
 		if len(args) > 0 {
@@ -89,7 +89,7 @@ func NotEqual(t *testing.T, exp, got interface{}, args ...interface{}) {
 	result := !reflect.DeepEqual(exp, got)
 	assert(t, result, fn, 1)
 }
-func NotEqualf(t *testing.T, exp, got interface{}, format string, args ...interface{}) {
+func NotEqualf(t testing.TB, exp, got interface{}, format string, args ...interface{}) {
 	fn := func() {
 		t.Errorf("!  Unexpected: <%#v>", exp)
 		if len(args) > 0 {
@@ -101,14 +101,14 @@ func NotEqualf(t *testing.T, exp, got interface{}, format string, args ...interf
 }
 
 //Panic Panic
-func Panic(t *testing.T, expect interface{}, fn func(), args ...interface{}) {
+func Panic(t testing.TB, expect interface{}, fn func(), args ...interface{}) {
 	defer func() {
 		equal(t, expect, recover(), 3, args...)
 	}()
 	fn()
 }
 
-func PanicError(t *testing.T, expect interface{}, fn func(), args ...interface{}) {
+func PanicError(t testing.TB, expect interface{}, fn func(), args ...interface{}) {
 	defer func() {
 		equal(t, expect, fmt.Sprintf("%s", recover()), 3, args...)
 	}()
@@ -119,7 +119,7 @@ var (
 	wd, _ = os.Getwd()
 )
 
-func Expect(t *testing.T, a interface{}, b interface{}) {
+func Expect(t testing.TB, a interface{}, b interface{}) {
 	_, fn, line, _ := runtime.Caller(1)
 	fn = strings.Replace(fn, wd+"/", "", -1)
 
@@ -128,7 +128,7 @@ func Expect(t *testing.T, a interface{}, b interface{}) {
 	}
 }
 
-func Refute(t *testing.T, a interface{}, b interface{}) {
+func Refute(t testing.TB, a interface{}, b interface{}) {
 	if a == b {
 		t.Errorf("Did not expect %v (type %v) - Got %v (type %v)", b, reflect.TypeOf(b), a, reflect.TypeOf(a))
 	}
