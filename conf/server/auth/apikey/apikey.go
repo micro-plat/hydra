@@ -35,7 +35,7 @@ const (
 type APIKeyAuth struct {
 	Secret   string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
 	Mode     string   `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
-	Excludes []string `json:"excludes,omitempty" toml:"excludes,omitempty"`
+	Excludes []string `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
 	Disable  bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch
 }

@@ -3,14 +3,14 @@ package server
 import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -247,8 +247,8 @@ func (s *HttpSub) GetBlackListConf() (*blacklist.BlackList, error) {
 	return blackListObj.(*blacklist.BlackList), nil
 }
 
-//GetLimiter 获取限流配置
-func (s *HttpSub) GetLimiter() (*limiter.Limiter, error) {
+//GetLimiterConf 获取限流配置
+func (s *HttpSub) GetLimiterConf() (*limiter.Limiter, error) {
 	limitObj, err := s.limit.GetConf()
 	if err != nil {
 		return nil, err
@@ -256,8 +256,8 @@ func (s *HttpSub) GetLimiter() (*limiter.Limiter, error) {
 	return limitObj.(*limiter.Limiter), nil
 }
 
-//GetGray 获取灰度配置
-func (s *HttpSub) GetGray() (*gray.Gray, error) {
+//GetGrayConf 获取灰度配置
+func (s *HttpSub) GetGrayConf() (*gray.Gray, error) {
 	grayObj, err := s.gray.GetConf()
 	if err != nil {
 		return nil, err

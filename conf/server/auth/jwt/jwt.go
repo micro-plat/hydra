@@ -68,16 +68,15 @@ const JWTName = "Authorization-Jwt"
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
-	Name     string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty"`
-	ExpireAt int64    `json:"expireAt,omitempty" valid:"required" toml:"expireAt,omitzero"`
-	Mode     string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
-	Secret   string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
-	Source   string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
-	Excludes []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	//Redirect        string   `json:"redirect,omitempty" valid:"ascii" toml:"redirect,omitempty"`
-	Domain          string `json:"domain,omitempty" toml:"domain,omitempty"`
-	AuthURL         string `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty"`
-	Disable         bool   `json:"disable,omitempty" toml:"disable,omitempty"`
+	Name            string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty"`
+	ExpireAt        int64    `json:"expireAt,omitzero" valid:"required" toml:"expireAt,omitzero"`
+	Mode            string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty"`
+	Secret          string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
+	Source          string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty"`
+	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Domain          string   `json:"domain,omitempty" toml:"domain,omitempty"`
+	AuthURL         string   `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty"`
+	Disable         bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	*conf.PathMatch `json:"-"`
 }
 

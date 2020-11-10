@@ -144,7 +144,7 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewServer(rpcConf.Address, router.Routers)
+	return NewServer(rpcConf.Address, router.Routers, rpcConf.GetMaxRecvMsgSize(), rpcConf.GetMaxSendMsgSize())
 }
 
 func init() {

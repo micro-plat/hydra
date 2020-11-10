@@ -71,7 +71,7 @@ func (client *ZookeeperClient) GetChildren(path string) (paths []string, version
 		return
 	}
 	if b, err := client.Exists(path); !b || err != nil {
-		return nil, 0, fmt.Errorf("node(%s) is not exist", path)
+		return nil, 0, fmt.Errorf("node(%s) is not exist,%+v", path, err)
 	}
 
 	// 起一个协程，获取子节点

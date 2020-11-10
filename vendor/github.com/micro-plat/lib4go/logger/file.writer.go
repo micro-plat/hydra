@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"bytes"
+	"bufio"
 	"io"
 	"sync"
 	"time"
@@ -12,7 +12,7 @@ import (
 //writer 文件输出器
 type writer struct {
 	name       string
-	buffer     *bytes.Buffer
+	writer     *bufio.Writer
 	lastWrite  time.Time
 	layout     *Layout
 	interval   time.Duration
@@ -24,16 +24,17 @@ type writer struct {
 	Level      int
 }
 
-//newwriter 构建基于文件流的日志输出对象
+//newwriter 构建基于文件流的日志输出对象,使用带缓冲区的文件写入，缓存区达到4K或每隔3秒写入一次文件。
 func newWriter(path string, layout *Layout) (fa *writer, err error) {
-	fa = &writer{layout: layout, interval: time.Second, notifyChan: make(chan struct{})}
-	fa.Level = GetLevel(layout.Level)
-	fa.buffer = bytes.NewBufferString("\n--------------------begin------------------------\n\n")
-	fa.ticker = time.NewTicker(fa.interval)
+	fa = &writer{layout: layout, interval: time.Second * 3, notifyChan: make(chan struct{})}
 	fa.file, err = file.CreateFile(path)
 	if err != nil {
 		return
 	}
+	fa.Level = GetLevel(layout.Level)
+	fa.ticker = time.NewTicker(fa.interval)
+	fa.writer = bufio.NewWriterSize(fa.file, 4096)
+	fa.writer.WriteString("\n--------------------begin------------------------\n\n")
 	go fa.writeTo()
 	return
 }
@@ -52,7 +53,7 @@ func (f *writer) Write(event *LogEvent) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	f.buffer.WriteString(event.Output)
+	f.writer.WriteString(event.Output)
 	f.lastWrite = time.Now()
 }
 
@@ -67,10 +68,8 @@ func (f *writer) Close() {
 
 	f.lock.Lock()
 	defer f.lock.Unlock()
+	f.writer.WriteString("\n---------------------end-------------------------\n")
 	f.ticker.Stop()
-	f.buffer.WriteString("\n---------------------end-------------------------\n")
-	f.buffer.WriteTo(f.file)
-	f.file.Close()
 }
 
 //writeTo 定时写入文件
@@ -79,12 +78,13 @@ START:
 	for {
 		select {
 		case _, ok := <-f.ticker.C:
-			if ok {
-				f.lock.Lock()
-				f.buffer.WriteTo(f.file)
-				f.buffer.Reset()
-				f.lock.Unlock()
-			} else {
+			f.lock.Lock()
+			if err := f.writer.Flush(); err != nil {
+				SysLog.Error("file.write.err:", err)
+			}
+			f.lock.Unlock()
+			if !ok {
+				f.file.Close()
 				break START
 			}
 		}
