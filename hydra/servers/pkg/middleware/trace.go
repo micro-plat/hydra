@@ -4,7 +4,7 @@ package middleware
 func Trace() Handler {
 	return func(ctx IMiddleContext) {
 
-		enable := ctx.ServerConf().GetServerConf().GetMainConf().GetBool("trace")
+		enable := ctx.APPConf().GetServerConf().GetMainConf().GetBool("trace")
 		if !enable {
 			ctx.Next()
 			return

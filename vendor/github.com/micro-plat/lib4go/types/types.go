@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 //GetString 获取字符串
@@ -40,55 +41,64 @@ func GetMin(v interface{}, o ...int) int {
 //GetInt 获取int数据，不是有效的数字则返回默然值或0
 func GetInt(v interface{}, def ...int) int {
 	value := fmt.Sprintf("%v", v)
-	if strings.Contains(strings.ToUpper(value), "E+") {
-		var n float64
-		_, err := fmt.Sscanf(value, "%e", &n)
-		if err == nil {
-			return int(n)
-		}
-		if len(def) > 0 {
-			return def[0]
-		}
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return GetIntByIndex(def, 0)
 	}
-	if value, err := strconv.Atoi(value); err == nil {
-		return value
+	return int(d.BigInt().Int64())
+}
+
+//GetInt32 获取int32数据，不是有效的数字则返回默然值或0
+func GetInt32(v interface{}, def ...int32) int32 {
+	value := fmt.Sprintf("%v", v)
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return GetInt32ByIndex(def, 0)
 	}
-	return GetIntByIndex(def, 0)
+	if d.BigInt().IsInt64() {
+		return 0
+	}
+	return int32(d.BigInt().Int64())
 }
 
 //GetInt64 获取int64数据，不是有效的数字则返回默然值或0
 func GetInt64(v interface{}, def ...int64) int64 {
 	value := fmt.Sprintf("%v", v)
-	if strings.Contains(strings.ToUpper(value), "E+") {
-		var n float64
-		_, err := fmt.Sscanf(value, "%e", &n)
-		if err == nil {
-			return int64(n)
-		}
-		if len(def) > 0 {
-			return def[0]
-		}
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return GetInt64ByIndex(def, 0)
 	}
-	if value, err := strconv.ParseInt(value, 10, 64); err == nil {
-		return value
-	}
-	return GetInt64ByIndex(def, 0)
+	return d.BigInt().Int64()
 }
 
 //GetFloat32 获取float32数据，不是有效的数字则返回默然值或0
 func GetFloat32(v interface{}, def ...float32) float32 {
-	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 32); err == nil {
-		return float32(value)
+	value := fmt.Sprintf("%v", v)
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return GetFloat32(def, 0)
 	}
-	return GetFloat32ByIndex(def, 0)
+	nv, _ := d.BigFloat().Float32()
+	return nv
 }
 
 //GetFloat64 获取float64数据，不是有效的数字则返回默然值或0
 func GetFloat64(v interface{}, def ...float64) float64 {
-	if value, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 64); err == nil {
+	value := fmt.Sprintf("%v", v)
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return GetFloat64ByIndex(def, 0)
+	}
+	nv, _ := d.BigFloat().Float64()
+	return nv
+}
+
+//GetDecimal 获取float64数据，不是有效的数字则返回默然值或0
+func GetDecimal(v interface{}, def ...Decimal) Decimal {
+	if value, err := decimal.NewFromString(fmt.Sprintf("%v", v)); err == nil {
 		return value
 	}
-	return GetFloat64ByIndex(def, 0)
+	return GetDecimalByIndex(def, 0)
 }
 
 //GetBool 获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
@@ -128,10 +138,27 @@ func MustInt(v interface{}) (int, bool) {
 	return 0, false
 }
 
+//MustInt32 获取int32，不是有效的数字则返回false
+func MustInt32(v interface{}) (int32, bool) {
+	if value, ok := v.(int32); ok {
+		return value, true
+	}
+	return 0, false
+}
+
+//MustInt64 获取int64，不是有效的数字则返回false
+func MustInt64(v interface{}) (int64, bool) {
+	if value, ok := v.(int64); ok {
+		return value, true
+	}
+	return 0, false
+}
+
 //MustFloat32 获取float32，不是有效的数字则返回false
 func MustFloat32(v interface{}) (float32, bool) {
 	if value, ok := v.(float32); ok {
-		return value, true
+		vn, _ := decimal.NewFromFloat32(value).Abs().BigFloat().Float32()
+		return vn, true
 	}
 	return 0, false
 }
@@ -139,7 +166,8 @@ func MustFloat32(v interface{}) (float32, bool) {
 //MustFloat64 获取float64，不是有效的数字则返回false
 func MustFloat64(v interface{}) (float64, bool) {
 	if value, ok := v.(float64); ok {
-		return value, true
+		vn, _ := decimal.NewFromFloat(value).Abs().BigFloat().Float64()
+		return vn, true
 	}
 	return 0, false
 }
@@ -222,6 +250,17 @@ func GetBoolByIndex(v []bool, index int, def ...bool) bool {
 	return false
 }
 
+//GetInt32ByIndex 获取数组中的指定元素
+func GetInt32ByIndex(v []int32, index int, def ...int32) int32 {
+	if len(v) > index {
+		return v[index]
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return 0
+}
+
 //GetInt64ByIndex 获取数组中的指定元素
 func GetInt64ByIndex(v []int64, index int, def ...int64) int64 {
 	if len(v) > index {
@@ -253,4 +292,39 @@ func GetFloat64ByIndex(v []float64, index int, def ...float64) float64 {
 		return def[0]
 	}
 	return 0
+}
+
+//GetDecimalByIndex 获取数组中的指定元素
+func GetDecimalByIndex(v []Decimal, index int, def ...Decimal) Decimal {
+	if len(v) > index {
+		return v[index]
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return decimal.Zero
+}
+
+//ParseBool 将字符串转换为bool值
+func ParseBool(val interface{}) (value bool, err error) {
+	if val == nil {
+		return false, fmt.Errorf("parsing <nil>: invalid syntax")
+	}
+	switch v := val.(type) {
+	case bool:
+		return v, nil
+	case string:
+		switch strings.ToUpper(v) {
+		case "1", "T", "TRUE", "YES", "Y", "ON":
+			return true, nil
+		case "0", "F", "FALSE", "NO", "N", "OFF":
+			return false, nil
+		}
+	case int, int8, int16, int32, int64, float32, float64:
+		if v == 0 {
+			return false, nil
+		}
+		return true, nil
+	}
+	return false, fmt.Errorf("parsing %q: invalid syntax", val)
 }

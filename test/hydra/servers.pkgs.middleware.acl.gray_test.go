@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
@@ -23,7 +23,7 @@ func TestGray_Disable(t *testing.T) {
 
 	type testCase struct {
 		name        string
-		opts        []gray.Option
+		opts        []proxy.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -42,8 +42,8 @@ func TestGray_Disable(t *testing.T) {
 		},
 		{
 			name: "灰度-未启用-配置为关闭",
-			opts: []gray.Option{
-				gray.WithDisable(),
+			opts: []proxy.Option{
+				proxy.WithDisable(),
 			},
 			wantStatus:  200,
 			wantContent: "",
@@ -58,7 +58,7 @@ func TestGray_Disable(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts...)
+		mockConf.GetAPI().Proxy(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -71,12 +71,12 @@ func TestGray_Disable(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Gray()
+		handler := middleware.Proxy()
 
 		//调用中间件
 		handler(ctx)
@@ -100,7 +100,7 @@ func TestGray_Enable_Has(t *testing.T) {
 
 	type testCase struct {
 		name        string
-		opts        []gray.Option
+		opts        []proxy.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -111,8 +111,8 @@ func TestGray_Enable_Has(t *testing.T) {
 	tests := []*testCase{
 		{
 			name: "灰度-启用-模板匹配=>false",
-			opts: []gray.Option{
-				gray.WithEnable(), gray.WithFilter("false"), gray.WithUPCluster("t"),
+			opts: []proxy.Option{
+				proxy.WithEnable(), proxy.WithFilter("false"), proxy.WithUPCluster("t"),
 			},
 			wantStatus:  200,
 			wantContent: "",
@@ -120,8 +120,8 @@ func TestGray_Enable_Has(t *testing.T) {
 		},
 		{
 			name: "灰度-启用-模板匹配需要-有地址可用",
-			opts: []gray.Option{
-				gray.WithEnable(), gray.WithFilter("true"), gray.WithUPCluster("t"),
+			opts: []proxy.Option{
+				proxy.WithEnable(), proxy.WithFilter("true"), proxy.WithUPCluster("t"),
 			},
 			wantStatus:  305,
 			wantContent: "",
@@ -136,7 +136,7 @@ func TestGray_Enable_Has(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts...)
+		mockConf.GetAPI().Proxy(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -149,12 +149,12 @@ func TestGray_Enable_Has(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Gray()
+		handler := middleware.Proxy()
 
 		//调用中间件
 		handler(ctx)
@@ -176,7 +176,7 @@ func TestGray_Enable_Has(t *testing.T) {
 func TestGray_Enable_None(t *testing.T) {
 	type testCase struct {
 		name        string
-		opts        []gray.Option
+		opts        []proxy.Option
 		upservers   []string
 		serviceAddr string
 		wantStatus  int
@@ -187,8 +187,8 @@ func TestGray_Enable_None(t *testing.T) {
 	tests := []*testCase{
 		{
 			name: "灰度-启用-模板匹配需要-无上游地址",
-			opts: []gray.Option{
-				gray.WithEnable(), gray.WithFilter("true"), gray.WithUPCluster("t"),
+			opts: []proxy.Option{
+				proxy.WithEnable(), proxy.WithFilter("true"), proxy.WithUPCluster("t"),
 			},
 			wantStatus:  502,
 			wantContent: "",
@@ -210,7 +210,7 @@ func TestGray_Enable_None(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Gray(tt.opts...)
+		mockConf.GetAPI().Proxy(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -223,12 +223,12 @@ func TestGray_Enable_None(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Gray()
+		handler := middleware.Proxy()
 
 		//调用中间件
 		handler(ctx)

@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/api"
 	ccron "github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/queue"
-	crpc "github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
@@ -42,7 +41,7 @@ func init() {
 
 	hydra.Conf.Web(":8071").Static(static.WithArchive("taosy-test"))
 	hydra.Conf.API(":8070", api.WithTimeout(10, 10)).BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.101"))
-	hydra.Conf.RPC(":8888", crpc.WithTimeout(10, 10))
+	hydra.Conf.RPC(":8888")
 	hydra.Conf.CRON(ccron.WithSharding(1)).Task(task.NewTask("@every 3s", "/taosy/testcron"))
 	hydra.Conf.MQC("redis://xxx").Queue(queue.NewQueue("queue1", "/service1")).Queue(queue.NewQueue("queue2", "/service1"))
 	app.API("/taosy/testapi", func(ctx context.IContext) (r interface{}) {
@@ -57,15 +56,15 @@ func init() {
 		fmt.Println(val, err2)
 		return "success"
 	})
-	app.RPC("/taosy/testrpc", func(ctx context.IContext) (r interface{}) {
-		ctx.Log().Info("rpc 接口服务测试")
-		return "success"
-	})
+
 	app.CRON("/taosy/testcron", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("cron 接口服务测试")
 
 		q, err := hydra.C.Queue().GetQueue("xxx")
-		ctx.Log().Error("C.Queue().GetQueue:", err)
+		if err != nil {
+			ctx.Log().Error("C.Queue().GetQueue:", err)
+			return
+		}
 		q.Push("queue1", fmt.Sprintf(`{"mqcv":"%s"}`, time.Now().Format("20060102150405")))
 
 		return "success"
@@ -75,7 +74,12 @@ func init() {
 		ctx.Log().Info("mqc 接口服务测试,", ctx.Request().GetString("mqcv"))
 		return "success"
 	})
+
 	app.RPC("/rpcs/sss", &sss{})
+	app.RPC("/taosy/testrpc", func(ctx context.IContext) (r interface{}) {
+		ctx.Log().Info("rpc 接口服务测试")
+		return "success"
+	})
 }
 
 func main() {

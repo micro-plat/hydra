@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -217,7 +216,6 @@ LOOP:
 		case <-c.closeCh:
 			break LOOP
 		case <-notify:
-			fmt.Println("111111111111")
 			c.getCluster()
 			loopPull.Reset(interval)
 		case <-loopPull.C:

@@ -59,7 +59,7 @@ func (w *Responsive) Start() (err error) {
 		return err
 	}
 
-	w.log.Infof("启动成功(%s,%s)", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress())
+	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), len(w.Server.Routes()))
 	return nil
 }
 
@@ -144,7 +144,7 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewServer(rpcConf.Address, router.Routers)
+	return NewServer(rpcConf.Address, router.Routers, rpcConf.GetMaxRecvMsgSize(), rpcConf.GetMaxSendMsgSize())
 }
 
 func init() {

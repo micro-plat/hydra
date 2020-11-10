@@ -12,7 +12,7 @@ func Logging() Handler {
 		//1. 整个服务的开始,记录请求时间与日志
 		start := time.Now()
 		path := ctx.Request().Path().GetURL()
-		ctx.Log().Info(ctx.ServerConf().GetServerConf().GetServerType()+".request:", ctx.Request().Path().GetMethod(), path, "from", ctx.User().GetClientIP())
+		ctx.Log().Info(ctx.APPConf().GetServerConf().GetServerType()+".request:", ctx.Request().Path().GetMethod(), path, "from", ctx.User().GetClientIP())
 
 		//2. 处理业务
 		ctx.Next()
@@ -23,9 +23,9 @@ func Logging() Handler {
 		//4. 处理响应日志
 		code, _ := ctx.Response().GetFinalResponse()
 		if code >= http.StatusOK && code < http.StatusBadRequest {
-			ctx.Log().Info(ctx.ServerConf().GetServerConf().GetServerType()+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
+			ctx.Log().Info(ctx.APPConf().GetServerConf().GetServerType()+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
 		} else {
-			ctx.Log().Error(ctx.ServerConf().GetServerConf().GetServerType()+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
+			ctx.Log().Error(ctx.APPConf().GetServerConf().GetServerType()+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
 		}
 
 		//5.释放资源

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -12,19 +13,22 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/logger"
 )
 
+var _ middleware.IMiddleContext = &MiddleContext{}
+
 type MiddleContext struct {
-	MockNext       func()
-	MockMeta       conf.IMeta
-	MockUser       *MockUser
-	MockTFuncs     extcontext.TFuncs
-	MockRequest    extcontext.IRequest
-	MockResponse   extcontext.IResponse
-	HttpRequest    *http.Request
-	HttpResponse   http.ResponseWriter
-	MockServerConf app.IAPPConf
+	MockNext     func()
+	MockMeta     conf.IMeta
+	MockUser     *MockUser
+	MockTFuncs   extcontext.TFuncs
+	MockRequest  extcontext.IRequest
+	MockResponse extcontext.IResponse
+	HttpRequest  *http.Request
+	HttpResponse http.ResponseWriter
+	MockAPPConf  app.IAPPConf
 }
 
 func (ctx *MiddleContext) Next() {
@@ -52,9 +56,9 @@ func (ctx *MiddleContext) Context() context.Context {
 	return context.Background()
 }
 
-//ServerConf 服务器配置
-func (ctx *MiddleContext) ServerConf() app.IAPPConf {
-	return ctx.MockServerConf
+//APPConf 服务器配置
+func (ctx *MiddleContext) APPConf() app.IAPPConf {
+	return ctx.MockAPPConf
 }
 
 //TmplFuncs 模板函数列表
@@ -173,6 +177,8 @@ func (p *MockPath) AllowFallback() bool {
 	return p.MockAllowFallback
 }
 
+var _ extcontext.IRequest = &MockRequest{}
+
 type MockRequest struct {
 	SpecialList  []string
 	MockPath     extcontext.IPath
@@ -208,6 +214,29 @@ func (r *MockRequest) Check(field ...string) error {
 //GetMap 将当前请求转换为map并返回
 func (r *MockRequest) GetMap() (map[string]interface{}, error) {
 	return r.MockQueryMap, nil
+}
+
+func (r *MockRequest) SaveFile(fileKey, dst string) error {
+	return nil
+}
+func (r *MockRequest) GetFileSize(fileKey string) (int64, error) {
+	return 0, nil
+}
+func (r *MockRequest) GetFileName(fileKey string) (string, error) {
+	return "", nil
+}
+func (r *MockRequest) GetFileBody(fileKey string) (io.ReadCloser, error) {
+	return nil, nil
+}
+
+//GetRawBody 获取请求的body参数
+func (r *MockRequest) GetRawBody(encoding ...string) (string, error) {
+	return "", nil
+}
+
+//GetBodyMap 将body转换为map
+func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{}, error) {
+	return nil, nil
 }
 
 //GetBody 获取请求的body参数

@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -111,10 +111,10 @@ func (b *httpBuilder) Limit(opts ...limiter.Option) *httpBuilder {
 	return b
 }
 
-//Gray 灰度配置
-func (b *httpBuilder) Gray(opts ...gray.Option) *httpBuilder {
-	path := fmt.Sprintf("%s/%s", gray.ParNodeName, gray.SubNodeName)
-	b.CustomerBuilder[path] = gray.New(opts...)
+//Proxy 代理配置
+func (b *httpBuilder) Proxy(opts ...proxy.Option) *httpBuilder {
+	path := fmt.Sprintf("%s/%s", proxy.ParNodeName, proxy.SubNodeName)
+	b.CustomerBuilder[path] = proxy.New(opts...)
 	return b
 }
 

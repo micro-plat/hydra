@@ -79,16 +79,6 @@ func TestLimiter_GetLimiter(t *testing.T) {
 		assert.Equal(t, tt.want, got, tt.name+",bool")
 		assert.Equal(t, tt.want1, got1, tt.name+",Path")
 	}
-
-	defer func() {
-		e := recover()
-		if e != nil {
-			assert.Equal(t, "从缓存中未找到limite组件", e.(error).Error(), "从缓存中未找到limite组件")
-		}
-	}()
-
-	//limiter是私有变脸不能测试分支panic
-	tests = []test{}
 }
 
 func TestGetConf(t *testing.T) {

@@ -33,7 +33,7 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//获取处理服务
-		h, ok := services.Def.GetHandler(ctx.ServerConf().GetServerConf().GetServerType(), service)
+		h, ok := services.Def.GetHandler(ctx.APPConf().GetServerConf().GetServerType(), service)
 		if !ok {
 			ctx.Response().AddSpecial("handler")
 			ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到服务%s", service))
@@ -41,7 +41,7 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//预处理,用户资源检查，发生错误后不再执行业务处理-------
-		globalHandlings := services.Def.GetHandleExecutings(ctx.ServerConf().GetServerConf().GetServerType())
+		globalHandlings := services.Def.GetHandleExecutings(ctx.APPConf().GetServerConf().GetServerType())
 		for _, h := range globalHandlings {
 			result := h.Handle(ctx)
 			if err := errs.GetError(result); err != nil {
@@ -51,7 +51,7 @@ func ExecuteHandler(service string) Handler {
 			}
 		}
 
-		handlings := services.Def.GetHandlings(ctx.ServerConf().GetServerConf().GetServerType(), service)
+		handlings := services.Def.GetHandlings(ctx.APPConf().GetServerConf().GetServerType(), service)
 		for _, h := range handlings {
 			result := h.Handle(ctx)
 			if err := errs.GetError(result); err != nil {
@@ -65,7 +65,7 @@ func ExecuteHandler(service string) Handler {
 		result := h.Handle(ctx)
 
 		//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
-		handleds := services.Def.GetHandleds(ctx.ServerConf().GetServerConf().GetServerType(), service)
+		handleds := services.Def.GetHandleds(ctx.APPConf().GetServerConf().GetServerType(), service)
 		for _, h := range handleds {
 			hresult := h.Handle(ctx)
 			if err := errs.GetError(hresult); err != nil {
@@ -74,7 +74,7 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
-		globalHandleds := services.Def.GetHandleExecuted(ctx.ServerConf().GetServerConf().GetServerType())
+		globalHandleds := services.Def.GetHandleExecuted(ctx.APPConf().GetServerConf().GetServerType())
 		for _, h := range globalHandleds {
 			hresult := h.Handle(ctx)
 			if err := errs.GetError(hresult); err != nil {

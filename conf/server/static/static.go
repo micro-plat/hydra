@@ -37,6 +37,7 @@ type Static struct {
 	FileMap   map[string]FileInfo `json:"-"`
 }
 
+//FileInfo 压缩文件保存
 type FileInfo struct {
 	GzFile string
 	HasGz  bool

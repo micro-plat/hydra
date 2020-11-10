@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
@@ -27,8 +26,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  rlog.DefaultLayout,
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithLayout",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -40,8 +38,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithDisable",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -54,8 +51,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: true,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithEnable",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -68,8 +64,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithInfo",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -83,8 +78,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithOff",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -98,8 +92,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithWarn",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -113,8 +106,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithError",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -128,8 +120,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithFatal",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -143,8 +134,7 @@ func TestRLogNew(t *testing.T) {
 				Layout:  "customerlayout",
 				Disable: false,
 			},
-		},
-		{
+		}, {
 			name:    "新增-WithAll",
 			service: "/rlog",
 			opts: []rlog.Option{
@@ -190,9 +180,7 @@ func TestRLogGetConf(t *testing.T) {
 				Disable: true,
 			},
 			IsNilErr: true,
-		},
-
-		{
+		}, {
 			name: "测试-var中有配置-不满足规则",
 			args: args{
 				logName: "rlog",
@@ -200,8 +188,7 @@ func TestRLogGetConf(t *testing.T) {
 			},
 			want:     nil,
 			IsNilErr: false,
-		},
-		{
+		}, {
 			name: "测试-var中有配置-正确",
 			args: args{
 				logName: "rlog",
@@ -215,13 +202,9 @@ func TestRLogGetConf(t *testing.T) {
 			},
 			IsNilErr: true,
 		},
-
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-
-		rawCnf, err := conf.NewRawConfByJson(tt.args.cnfData, tt.args.version)
-		fmt.Println(tt.name)
+		rawCnf, err := conf.NewByJSON(tt.args.cnfData, tt.args.version)
 		cnf := &mocks.MockVarConf{
 			Version: tt.args.version,
 			ConfData: map[string]map[string]*conf.RawConf{
@@ -232,9 +215,7 @@ func TestRLogGetConf(t *testing.T) {
 		}
 
 		got, err := rlog.GetConf(cnf)
-		//fmt.Println("rlog.GetConf:", got, err)
 		assert.IsNil(t, tt.IsNilErr, err, tt.name)
-
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

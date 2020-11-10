@@ -1,6 +1,10 @@
 package types
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/gob"
+	"fmt"
+)
 
 //DecodeString 判断变量的值与指定相等时设置为另一个值，否则使用原值
 func DecodeString(def interface{}, a interface{}, b interface{}, e ...interface{}) string {
@@ -48,4 +52,13 @@ func DecodeInt(def interface{}, a interface{}, b interface{}, e ...interface{}) 
 		return r
 	}
 	return 0
+}
+
+//DeepCopy 深拷贝
+func DeepCopy(dst, src interface{}) error {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(src); err != nil {
+		return err
+	}
+	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
 }

@@ -18,6 +18,7 @@ const (
 
 //BasicAuth http basic 认证配置
 type BasicAuth struct {
+	//Excludes 排除路径列表
 	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
 	Members         map[string]string `json:"members,omitempty" toml:"members,omitempty"`
 	Disable         bool              `json:"disable,omitempty" toml:"disable,omitempty"`

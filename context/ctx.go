@@ -226,8 +226,8 @@ type IContext interface {
 	//Context 控制超时的Context
 	Context() context.Context
 
-	//ServerConf 服务器配置
-	ServerConf() app.IAPPConf
+	//APPConf 服务器配置
+	APPConf() app.IAPPConf
 
 	//TmplFuncs 模板函数列表
 	TmplFuncs() TFuncs

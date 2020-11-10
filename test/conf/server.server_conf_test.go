@@ -7,6 +7,8 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -14,9 +16,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/cron"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -106,13 +106,13 @@ func TestNewEmptyServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, &blacklist.BlackList{Disable: true}, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
+	limiterConf, err := gotS.GetLimiterConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, &limiter.Limiter{Disable: true}, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetGray()
+	garyConf, err := gotS.GetProxyConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
-	assert.Equal(t, &gray.Gray{Disable: true}, garyConf, "测试conf初始化,判断gary节点对象")
+	assert.Equal(t, &proxy.Proxy{Disable: true}, garyConf, "测试conf初始化,判断gary节点对象")
 
 	_, err = gotS.GetMQCMainConf()
 	assert.Equal(t, false, err == nil, "测试conf初始化,获取mqc对象失败")
@@ -139,7 +139,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.APIKEY("123456", apikey.WithDisable(), apikey.WithSHA256Mode(), apikey.WithExcludes("/p1/p2"))
 	confN.Basic(basic.WithDisable(), basic.WithUP("basicName", "basicPwd"), basic.WithExcludes("/basic/basic1"))
 	confN.BlackList(blacklist.WithEnable(), blacklist.WithIP("192.168.0.121"))
-	confN.Gray(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))
+	confN.Proxy(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
 	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
 	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
@@ -149,7 +149,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.Render(render.WithDisable(), render.WithTmplt("/path1", "success", render.WithStatus("500"), render.WithContentType("tpltm1")))
 	confN.Static(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
-	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
@@ -213,7 +213,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, renderC, renderConf, "测试conf初始化,判断render节点对象")
 
 	whiteListConf, err := gotS.GetWhiteListConf()
-	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取whiteList对象失败")
 	assert.Equal(t, whiteC, whiteListConf, "测试conf初始化,判断whiteList节点对象")
 
@@ -222,13 +222,13 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, blackC, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
+	limiterConf, err := gotS.GetLimiterConf()
 	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, limiterC, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetGray()
-	garyC := gray.New(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))
+	garyConf, err := gotS.GetProxyConf()
+	garyC := proxy.New(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
 	assert.Equal(t, garyC.Disable, garyConf.Disable, "测试conf初始化,判断gary.Disable节点对象")
 	assert.Equal(t, garyC.Filter, garyConf.Filter, "测试conf初始化,判断gary.Filter节点对象")

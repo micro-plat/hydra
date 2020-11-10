@@ -6,14 +6,14 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -47,8 +47,8 @@ type IAPPConf interface {
 	GetRenderConf() (*render.Render, error)
 	GetWhiteListConf() (*whitelist.WhiteList, error)
 	GetBlackListConf() (*blacklist.BlackList, error)
-	GetLimiter() (*limiter.Limiter, error)
-	GetGray() (*gray.Gray, error)
+	GetLimiterConf() (*limiter.Limiter, error)
+	GetProxyConf() (*proxy.Proxy, error)
 	//获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
 	Close() error

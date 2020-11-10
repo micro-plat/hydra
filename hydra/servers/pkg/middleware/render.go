@@ -9,7 +9,7 @@ func Render() Handler {
 		ctx.Next()
 
 		//加载渲染配置
-		render, err := ctx.ServerConf().GetRenderConf()
+		render, err := ctx.APPConf().GetRenderConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

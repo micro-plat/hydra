@@ -16,7 +16,7 @@ func BasicAuth() Handler {
 func BasicAuthForRealm() Handler {
 	return func(ctx IMiddleContext) {
 
-		basic, err := ctx.ServerConf().GetBasicConf()
+		basic, err := ctx.APPConf().GetBasicConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
