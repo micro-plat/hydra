@@ -251,7 +251,7 @@ func (r *MockRequest) GetBodyMap(encoding ...string) (map[string]interface{}, er
 }
 
 //GetTrace 获取请求的trace信息
-func (r *MockRequest) GetTrace() string {
+func (r *MockRequest) GetPlayload() string {
 	return ""
 }
 
