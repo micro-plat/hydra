@@ -41,8 +41,8 @@ func TestCtx_Close(t *testing.T) {
 		t.Errorf("Close():c.response is not nil")
 		return
 	}
-	if c.ServerConf() != nil {
-		t.Errorf("Close():c.serverconf is not nil")
+	if c.APPConf() != nil {
+		t.Errorf("Close():c.APPConf is not nil")
 		return
 	}
 	if !reflect.ValueOf(c.User()).IsNil() {

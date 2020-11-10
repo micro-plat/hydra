@@ -66,6 +66,7 @@ func (c *ServerConf) GetSubConf(name string) (*conf.RawConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
+
 	return nil, conf.ErrNoSetting
 }
 

@@ -39,13 +39,6 @@ func APIKeyAuth() Handler {
 			return
 		}
 
-		//获取secret   密钥已经在配置中  不用再获取
-		// secret, err := getSecret(ctx, auth)
-		// if err != nil {
-		// 	ctx.Response().Abort(http.StatusForbidden, err)
-		// 	return
-		// }
-
 		//验证签名
 		sign, raw := getSignRaw(ctx.Request(), "", "")
 		if err := auth.Verify(raw, sign); err != nil {

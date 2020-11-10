@@ -47,8 +47,8 @@ type IAPPConf interface {
 	GetRenderConf() (*render.Render, error)
 	GetWhiteListConf() (*whitelist.WhiteList, error)
 	GetBlackListConf() (*blacklist.BlackList, error)
-	GetLimiter() (*limiter.Limiter, error)
-	GetProxy() (*proxy.Proxy, error)
+	GetLimiterConf() (*limiter.Limiter, error)
+	GetProxyConf() (*proxy.Proxy, error)
 	//获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
 	Close() error

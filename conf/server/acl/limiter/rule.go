@@ -10,7 +10,7 @@ import (
 //Resp 限流器
 type Resp struct {
 	Status  int    `json:"status" valid:"required" toml:"status,omitempty"`
-	Content string `json:"content" valid:"ascii,required" toml:"content,omitempty"`
+	Content string `json:"content" valid:"required" toml:"content,omitempty"`
 }
 
 //Rule 按请求设定的限流器

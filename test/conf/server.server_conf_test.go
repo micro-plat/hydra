@@ -106,11 +106,11 @@ func TestNewEmptyServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, &blacklist.BlackList{Disable: true}, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
+	limiterConf, err := gotS.GetLimiterConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, &limiter.Limiter{Disable: true}, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetProxy()
+	garyConf, err := gotS.GetProxyConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
 	assert.Equal(t, &proxy.Proxy{Disable: true}, garyConf, "测试conf初始化,判断gary节点对象")
 
@@ -222,12 +222,12 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, blackC, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
+	limiterConf, err := gotS.GetLimiterConf()
 	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, limiterC, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetProxy()
+	garyConf, err := gotS.GetProxyConf()
 	garyC := proxy.New(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
 	assert.Equal(t, garyC.Disable, garyConf.Disable, "测试conf初始化,判断gary.Disable节点对象")

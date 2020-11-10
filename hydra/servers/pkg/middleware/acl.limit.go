@@ -10,7 +10,7 @@ func Limit() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取限流器
-		limiter, err := ctx.APPConf().GetLimiter()
+		limiter, err := ctx.APPConf().GetLimiterConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

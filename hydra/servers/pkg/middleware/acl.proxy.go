@@ -12,7 +12,7 @@ import (
 //Proxy 代理配置
 func Proxy() Handler {
 	return func(ctx IMiddleContext) {
-		proxy, err := ctx.APPConf().GetProxy()
+		proxy, err := ctx.APPConf().GetProxyConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

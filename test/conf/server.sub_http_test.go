@@ -390,7 +390,7 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		limiterConf, err := gotS.GetLimiter()
+		limiterConf, err := gotS.GetLimiterConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		assert.Equal(t, tt.wantConf, limiterConf, tt.name+",conf")
 	}
@@ -420,7 +420,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		grayConf, err := gotS.GetProxy()
+		grayConf, err := gotS.GetProxyConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		assert.Equal(t, tt.wantConf.Disable, grayConf.Disable, "测试conf初始化,判断gary.Disable节点对象")
 		assert.Equal(t, tt.wantConf.Filter, grayConf.Filter, "测试conf初始化,判断gary.Filter节点对象")
@@ -435,7 +435,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-	grayConf, err := gotS.GetProxy()
+	grayConf, err := gotS.GetProxyConf()
 	assert.Equal(t, test1.wantErr, err == nil, test1.name+",err")
 	assert.Equal(t, test1.wantConf, grayConf, test1.name+",conf")
 }
