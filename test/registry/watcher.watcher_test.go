@@ -54,36 +54,36 @@ func TestNewCArgsByChange(t *testing.T) {
 	}
 }
 
-func TestValueChangeArgs_IsConf(t *testing.T) {
-	tests := []struct {
-		name string
-		n    *watcher.ValueChangeArgs
-		want bool
-	}{
-		{name: "conf根节点", n: &watcher.ValueChangeArgs{Path: "/conf"}, want: true},
-		{name: "非conf根节点", n: &watcher.ValueChangeArgs{Path: "conf/"}, want: false},
-		{name: "conf子节点", n: &watcher.ValueChangeArgs{Path: "/conf/!@#%%^&*"}, want: true},
-		{name: "非conf子根节点", n: &watcher.ValueChangeArgs{Path: "conf/a/b"}, want: false},
-	}
-	for _, tt := range tests {
-		got := tt.n.IsConf()
-		assert.Equal(t, tt.want, got, tt.name)
-	}
-}
+// func TestValueChangeArgs_IsConf(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		n    *watcher.ValueChangeArgs
+// 		want bool
+// 	}{
+// 		{name: "conf根节点", n: &watcher.ValueChangeArgs{Path: "/conf"}, want: true},
+// 		{name: "非conf根节点", n: &watcher.ValueChangeArgs{Path: "conf/"}, want: false},
+// 		{name: "conf子节点", n: &watcher.ValueChangeArgs{Path: "/conf/!@#%%^&*"}, want: true},
+// 		{name: "非conf子根节点", n: &watcher.ValueChangeArgs{Path: "conf/a/b"}, want: false},
+// 	}
+// 	for _, tt := range tests {
+// 		got := tt.n.IsConf()
+// 		assert.Equal(t, tt.want, got, tt.name)
+// 	}
+// }
 
-func TestValueChangeArgs_IsVarRoot(t *testing.T) {
-	tests := []struct {
-		name string
-		n    *watcher.ValueChangeArgs
-		want bool
-	}{
-		{name: "var根节点", n: &watcher.ValueChangeArgs{Path: "/var"}, want: true},
-		{name: "非var根节点", n: &watcher.ValueChangeArgs{Path: "var/"}, want: false},
-		{name: "var子节点", n: &watcher.ValueChangeArgs{Path: "/var/!@#%%^&*"}, want: true},
-		{name: "非var子根节点", n: &watcher.ValueChangeArgs{Path: "var/a/b"}, want: false},
-	}
-	for _, tt := range tests {
-		got := tt.n.IsVarRoot()
-		assert.Equal(t, tt.want, got, tt.name)
-	}
-}
+// func TestValueChangeArgs_IsVarRoot(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		n    *watcher.ValueChangeArgs
+// 		want bool
+// 	}{
+// 		{name: "var根节点", n: &watcher.ValueChangeArgs{Path: "/var"}, want: true},
+// 		{name: "非var根节点", n: &watcher.ValueChangeArgs{Path: "var/"}, want: false},
+// 		{name: "var子节点", n: &watcher.ValueChangeArgs{Path: "/var/!@#%%^&*"}, want: true},
+// 		{name: "非var子根节点", n: &watcher.ValueChangeArgs{Path: "var/a/b"}, want: false},
+// 	}
+// 	for _, tt := range tests {
+// 		got := tt.n.IsVarRoot()
+// 		assert.Equal(t, tt.want, got, tt.name)
+// 	}
+// }

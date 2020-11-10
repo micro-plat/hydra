@@ -28,7 +28,7 @@ func NewTasks(tasks ...*Task) *Tasks {
 	return t.Append(tasks...)
 }
 
-//Append 增加任务列表 @fix:存在的数据进行修改,不存在则添加 @hj
+//Append 增加任务列表
 func (t *Tasks) Append(tasks ...*Task) *Tasks {
 	keyMap := map[string]*Task{}
 	for _, v := range t.Tasks {

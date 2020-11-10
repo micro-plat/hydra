@@ -18,7 +18,7 @@ import (
 
 //IPublisher 服务发布程序
 type IPublisher interface {
-	WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error
+	//WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error
 	Publish(serverName string, serviceAddr string, clusterID string, service ...string) error
 	Update(serverName string, serviceAddr string, clusterID string, kv ...string) error
 	Clear()
@@ -36,10 +36,11 @@ type Publisher struct {
 	watchChan  chan struct{}
 	pubs       map[string]string
 	done       bool
+	checkTime  time.Duration
 }
 
 //New 构建服务发布程序
-func New(c conf.IServerConf) *Publisher {
+func New(c conf.IServerConf, checkTime ...time.Duration) *Publisher {
 	p := &Publisher{
 		c:         c,
 		watchChan: make(chan struct{}),
@@ -47,11 +48,14 @@ func New(c conf.IServerConf) *Publisher {
 		pubs:      make(map[string]string),
 		log:       logger.New("publisher"),
 	}
+	if len(checkTime) > 0 {
+		p.checkTime = checkTime[0]
+	}
 	go p.loopCheck()
 	return p
 }
 
-//WatchClusterChange 监控集群服务节点变化  @todo //
+//WatchClusterChange 监控集群服务节点变化
 func (p *Publisher) WatchClusterChange(notify func(isMaster bool, sharding int, total int)) error {
 	watcher, err := watcher.NewChildWatcherByRegistry(p.c.GetRegistry(), []string{p.c.GetServerPubPath()}, p.log)
 	if err != nil {
@@ -77,7 +81,7 @@ func (p *Publisher) WatchClusterChange(notify func(isMaster bool, sharding int, 
 				break LOOP
 			case c := <-ch:
 				total := p.c.GetMainConf().GetInt("sharding", 0)
-				sharding, isMaster := GetSharding(true, total, p.serverNode, c.Children)
+				sharding, isMaster := global.IsMaster(true, total, p.serverNode, c.Children)
 				notify(isMaster, sharding, total)
 			}
 		}
@@ -223,12 +227,16 @@ func (p *Publisher) appendPub(path string, data string) {
 
 //publishCheck 定时检查节点数据是否存在
 func (p *Publisher) loopCheck() {
+	checkTime := time.Second * 30
+	if p.checkTime > 0 {
+		checkTime = p.checkTime
+	}
 LOOP:
 	for {
 		select {
 		case <-p.closeChan:
 			break LOOP
-		case <-time.After(time.Second * 30):
+		case <-time.After(checkTime):
 			if p.done {
 				break LOOP
 			}

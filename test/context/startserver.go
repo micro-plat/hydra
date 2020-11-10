@@ -31,6 +31,8 @@ func startServer() {
 		app.API("/form", GetBodyMapFormData)
 		app.API("/upload", UploadFile)
 		app.API("/download", DownloadFile)
+		app.API("/request/bind", Bind)
+		app.API("/request/check", Check)
 		os.Args = []string{"startserver", "run"}
 		go app.Start()
 		time.Sleep(time.Second * 2)
@@ -102,4 +104,29 @@ func DownloadFile(ctx hydra.IContext) (r interface{}) {
 
 	ctx.Log().Info("返回数据")
 	return buffer.String()
+}
+
+func Bind(ctx hydra.IContext) interface{} {
+	type result struct {
+		Key   string `json:"key" valid:"required" yaml:"key" xml:"key" form:"key"`
+		Value string `json:"value" valid:"required" yaml:"value"  xml:"value" form:"value"`
+	}
+	s := &result{}
+	err := ctx.Request().Bind(s)
+	if err != nil {
+		fmt.Println(err)
+		return fmt.Errorf("Bind出错 %+v", err)
+	}
+	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
+	return s
+}
+
+func Check(ctx hydra.IContext) interface{} {
+	err := ctx.Request().Check("key", "value")
+	if err != nil {
+		fmt.Println("err:", err)
+		return fmt.Errorf("Check出错 %+v", err)
+	}
+	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
+	return "success"
 }

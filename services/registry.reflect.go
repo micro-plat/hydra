@@ -24,7 +24,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		return current, nil
 	}
 
-	//检查输入的注册服务必须为struct
+	//检查传入的是rpc协议
 	typ := reflect.TypeOf(h)
 	val := reflect.ValueOf(h)
 	if val.Kind() == reflect.String {
@@ -56,7 +56,6 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		//检查函数参数是否符合接口要求
 		mName := typ.Method(i).Name
 		method := val.MethodByName(mName)
-
 		//处理服务关闭函数
 		if mName == defClose {
 			current.Closing = method.Interface()

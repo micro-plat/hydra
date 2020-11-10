@@ -60,7 +60,7 @@ func (c *mqc) Subscribe(f func(t *queue.Queue)) {
 		subscriber.queueChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
-
+	c.signalChan <- struct{}{}
 }
 
 //GetTasks 获取任务列表
@@ -77,10 +77,14 @@ func (c *mqc) notify() {
 		case <-c.signalChan:
 			c.lock.Lock()
 			for _, e := range c.subscribers {
-				select {
-				case t := <-e.queueChan:
-					e.callback(t)
-				default:
+			SUBFOR:
+				for {
+					select {
+					case t := <-e.queueChan:
+						e.callback(t)
+					default:
+						break SUBFOR
+					}
 				}
 			}
 			c.lock.Unlock()
