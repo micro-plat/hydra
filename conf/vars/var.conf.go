@@ -106,7 +106,7 @@ func (c *VarConf) GetObject(tp string, name string, v interface{}) (int32, error
 		return 0, err
 	}
 
-	if err := conf.ToStruct(&v); err != nil {
+	if err := conf.ToStruct(v); err != nil {
 		err = fmt.Errorf("获取%s/%s配置失败:%v", tp, name, err)
 		return 0, err
 	}

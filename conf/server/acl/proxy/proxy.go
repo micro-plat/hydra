@@ -1,4 +1,4 @@
-package gray
+package proxy
 
 import (
 	"errors"
@@ -13,23 +13,23 @@ import (
 )
 
 const (
-	//ParNodeName gray配置父节点名
+	//ParNodeName proxy配置父节点名
 	ParNodeName = "acl"
-	//SubNodeName gray配置子节点名
-	SubNodeName = "gray"
+	//SubNodeName proxy配置子节点名
+	SubNodeName = "proxy"
 )
 
-//Gray 灰度设置
-type Gray struct {
+//Proxy 代理设置
+type Proxy struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
 	UPCluster string `json:"upCluster,omitempty" valid:"required" toml:"upCluster,omitempty"`
 	cluster   conf.ICluster
 }
 
-//New 灰度设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
-func New(opts ...Option) *Gray {
-	r := &Gray{
+//New 代理设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
+func New(opts ...Option) *Proxy {
+	r := &Proxy{
 		Disable: false,
 	}
 	for _, f := range opts {
@@ -38,8 +38,8 @@ func New(opts ...Option) *Gray {
 	return r
 }
 
-//Allow 当前服务是否允许使用灰度
-func (g *Gray) Allow() bool {
+//Allow 当前服务是否允许使用代理
+func (g *Proxy) Allow() bool {
 	if g.cluster == nil {
 		return false
 	}
@@ -47,7 +47,10 @@ func (g *Gray) Allow() bool {
 }
 
 //Check 检查当前是否需要转到上游服务器处理
-func (g *Gray) Check(funcs map[string]interface{}, i interface{}) (bool, error) {
+func (g *Proxy) Check(funcs map[string]interface{}, i interface{}) (bool, error) {
+	if g.Filter == "" {
+		return true, nil
+	}
 	r, err := conf.TmpltTranslate(g.Filter, g.Filter, funcs, i)
 	if err != nil {
 		return true, fmt.Errorf("%s 过滤器转换出错 %w", g.Filter, err)
@@ -56,7 +59,7 @@ func (g *Gray) Check(funcs map[string]interface{}, i interface{}) (bool, error) 
 }
 
 //Next 获取下一个可用的上游地址
-func (g *Gray) Next() (u *url.URL, err error) {
+func (g *Proxy) Next() (u *url.URL, err error) {
 	if g.cluster == nil {
 		return nil, errors.New("当前配置不可用")
 	}
@@ -72,7 +75,7 @@ func (g *Gray) Next() (u *url.URL, err error) {
 	return url, nil
 }
 
-func (g *Gray) checkServers(c conf.IServerConf) error {
+func (g *Proxy) checkServers(c conf.IServerConf) error {
 	cluster, err := c.GetCluster(g.UPCluster)
 	if err != nil {
 		return err
@@ -81,25 +84,25 @@ func (g *Gray) checkServers(c conf.IServerConf) error {
 	return nil
 }
 
-//GetConf 获取Gray
-func GetConf(cnf conf.IServerConf) (*Gray, error) {
-	gray := &Gray{}
-	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), gray)
+//GetConf 获取Proxy
+func GetConf(cnf conf.IServerConf) (*Proxy, error) {
+	proxy := &Proxy{}
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), proxy)
 	if err == conf.ErrNoSetting {
-		return &Gray{Disable: true}, nil
+		return &Proxy{Disable: true}, nil
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("acl.gray配置有误:%v", err)
+		return nil, fmt.Errorf("acl.proxy配置有误:%v", err)
 	}
 
-	if b, err := govalidator.ValidateStruct(gray); !b {
-		return nil, fmt.Errorf("acl.gray配置数据有误:%v %+v", err, gray)
+	if b, err := govalidator.ValidateStruct(proxy); !b {
+		return nil, fmt.Errorf("acl.proxy配置数据有误:%v %+v", err, proxy)
 	}
 
-	if err := gray.checkServers(cnf); err != nil {
-		return nil, fmt.Errorf("acl.gray服务检查错误:%v", err)
+	if err := proxy.checkServers(cnf); err != nil {
+		return nil, fmt.Errorf("acl.proxy服务检查错误:%v", err)
 	}
 
-	return gray, nil
+	return proxy, nil
 }

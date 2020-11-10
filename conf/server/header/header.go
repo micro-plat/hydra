@@ -83,7 +83,7 @@ func (h Headers) hasCross(origin string) bool {
 
 //GetConf 设置header
 func GetConf(cnf conf.IServerConf) (header Headers, err error) {
-	_, err = cnf.GetSubObject(TypeNodeName, &header)
+	rawConf, err := cnf.GetSubConf(TypeNodeName)
 	if err == conf.ErrNoSetting {
 		return Headers{}, nil
 	}
@@ -91,5 +91,6 @@ func GetConf(cnf conf.IServerConf) (header Headers, err error) {
 		return nil, fmt.Errorf("header配置有误:%v", err)
 	}
 
+	header = rawConf.ToSMap()
 	return
 }
