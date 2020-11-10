@@ -152,17 +152,18 @@ func (r *RspServers) checkServer(path string) error {
 
 	} else {
 		//创建新服务器
-		if creator, ok := creators[conf.GetServerConf().GetServerType()]; ok {
+		serverType := conf.GetServerConf().GetServerType()
+		if creator, ok := creators[serverType]; ok {
 			srvr, err := creator.Create(conf)
 			if err != nil {
-				return fmt.Errorf("服务器构建失败  %w", err)
+				return fmt.Errorf("[%s]服务器构建失败:%w", serverType, err)
 			}
-			r.log.Infof("启动[%s]服务...", conf.GetServerConf().GetServerType())
+			r.log.Infof("启动[%s]服务...", serverType)
 			if err := srvr.Start(); err != nil {
 				r.delayPub(path)
-				return fmt.Errorf("服务器启动失败 %w", err)
+				return fmt.Errorf("[%s]服务器启动失败:%w", serverType, err)
 			}
-			r.servers[conf.GetServerConf().GetServerType()] = srvr
+			r.servers[serverType] = srvr
 		} else {
 			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
 			return nil

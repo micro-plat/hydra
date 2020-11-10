@@ -27,7 +27,7 @@ func startTrace(trace string) error {
 	case "web":
 		go startTraceServer()
 	case "":
-		fallthrough
+		return nil
 	default:
 		return fmt.Errorf("不支持trace命令:%v", trace)
 	}
