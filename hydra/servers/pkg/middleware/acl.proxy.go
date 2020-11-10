@@ -6,26 +6,26 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 )
 
-//Gray 灰度配置
-func Gray() Handler {
+//Proxy 代理配置
+func Proxy() Handler {
 	return func(ctx IMiddleContext) {
-		gray, err := ctx.APPConf().GetGray()
+		proxy, err := ctx.ServerConf().GetProxy()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
-		if gray.Disable {
+		if proxy.Disable {
 			ctx.Next()
 			return
 		}
 
-		//检查当前请求是否需要进行灰度
-		need, err := gray.Check(ctx.TmplFuncs(), nil)
+		//检查当前请求是否需要进行代理
+		need, err := proxy.Check(ctx.TmplFuncs(), nil)
 		if err != nil {
-			ctx.Response().AddSpecial("gray")
+			ctx.Response().AddSpecial("proxy")
 			ctx.Response().Abort(http.StatusBadGateway, err)
 			return
 		}
@@ -35,17 +35,17 @@ func Gray() Handler {
 		}
 
 		//获取当前http信息
-		ctx.Response().AddSpecial("gray")
-		useProxy(ctx, gray)
+		ctx.Response().AddSpecial("proxy")
+		useProxy(ctx, proxy)
 
 	}
 }
-func useProxy(ctx IMiddleContext, gray *gray.Gray) {
+func useProxy(ctx IMiddleContext, proxy *proxy.Proxy) {
 
 	//检查当前请求
 	req, resp := ctx.GetHttpReqResp()
 	if req == nil || resp == nil {
-		panic(fmt.Errorf("只有api,web服务器支持灰度配置"))
+		panic(fmt.Errorf("只有api,web服务器支持代理配置"))
 	}
 
 	//处理重试问题
@@ -56,15 +56,15 @@ RETRY:
 	num++
 
 	//获取服务器列表
-	url, err := gray.Next()
+	url, err := proxy.Next()
 	if err != nil {
 		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("无法获取上游服务器地址:%w", err))
-		return
+		goto RETRY
 	}
 
 	//转到上游
-	proxy := httputil.NewSingleHostReverseProxy(url)
-	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+	rproxy := httputil.NewSingleHostReverseProxy(url)
+	rproxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
 		proxyError = fmt.Errorf("远程请求出错[%d]%v %v", num, url, err)
 		if strings.Contains(err.Error(), "connect: connection refused") && num <= max {
 			canRetry = true
@@ -72,7 +72,7 @@ RETRY:
 	}
 
 	//处理代理服务
-	proxy.ServeHTTP(resp, req)
+	rproxy.ServeHTTP(resp, req)
 
 	//处理重试问题
 	if canRetry {

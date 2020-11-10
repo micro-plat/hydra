@@ -6,8 +6,8 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/acl/limiter"
+	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
@@ -399,43 +399,43 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 func Test_httpSub_GetGray(t *testing.T) {
 	type test struct {
 		name     string
-		opts     []gray.Option
+		opts     []proxy.Option
 		wantErr  bool
-		wantConf *gray.Gray
+		wantConf *proxy.Proxy
 	}
 	platName, sysName, serverType, clusterName, rgst := newReady(t, "platName13", "sysName13", global.API, "cluster13")
-	var nilgray *gray.Gray
+	var nilgray *proxy.Proxy
 	tests := []test{
-		{name: "不设置gray节点", opts: []gray.Option{}, wantErr: true, wantConf: &gray.Gray{Disable: true}},
-		{name: "设置正确的gray节点", opts: []gray.Option{gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster")}, wantErr: true,
-			wantConf: gray.New(gray.WithDisable(), gray.WithFilter("Filter"), gray.WithUPCluster("UPCluster"))},
+		{name: "不设置gray节点", opts: []proxy.Option{}, wantErr: true, wantConf: &proxy.Proxy{Disable: true}},
+		{name: "设置正确的gray节点", opts: []proxy.Option{proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster")}, wantErr: true,
+			wantConf: proxy.New(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))},
 	}
 
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
 		confN := confM.API(":8080")
 		if len(tt.opts) > 0 {
-			confN.Gray(tt.opts...)
+			confN.Proxy(tt.opts...)
 		}
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		grayConf, err := gotS.GetGray()
+		grayConf, err := gotS.GetProxy()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		assert.Equal(t, tt.wantConf.Disable, grayConf.Disable, "测试conf初始化,判断gary.Disable节点对象")
 		assert.Equal(t, tt.wantConf.Filter, grayConf.Filter, "测试conf初始化,判断gary.Filter节点对象")
 		assert.Equal(t, tt.wantConf.UPCluster, grayConf.UPCluster, "测试conf初始化,判断gary.UPCluster节点对象")
 	}
 
-	test1 := test{name: "设置错误的gray节点", opts: []gray.Option{gray.WithDisable()}, wantErr: false,
+	test1 := test{name: "设置错误的gray节点", opts: []proxy.Option{proxy.WithDisable()}, wantErr: false,
 		wantConf: nilgray}
 	confM := mocks.NewConfBy(platName, clusterName)
 	confN := confM.API(":8080")
-	confN.Gray(test1.opts...)
+	confN.Proxy(test1.opts...)
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-	grayConf, err := gotS.GetGray()
+	grayConf, err := gotS.GetProxy()
 	assert.Equal(t, test1.wantErr, err == nil, test1.name+",err")
 	assert.Equal(t, test1.wantConf, grayConf, test1.name+",conf")
 }
