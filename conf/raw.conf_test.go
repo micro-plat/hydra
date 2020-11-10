@@ -119,3 +119,152 @@ func TestRawConf_GetRaw(t *testing.T) {
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
+
+func TestRawConf_GetArray(t *testing.T) {
+	type fields struct {
+		raw       json.RawMessage
+		version   int32
+		signature string
+		data      map[string]interface{}
+	}
+	type args struct {
+		key string
+		def []interface{}
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		wantR  []interface{}
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := &RawConf{
+				raw:       tt.fields.raw,
+				version:   tt.fields.version,
+				signature: tt.fields.signature,
+				XMap:      tt.fields.data,
+			}
+			if gotR := j.GetArray(tt.args.key, tt.args.def...); !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("RawConf.GetArray() = %v, want %v", gotR, tt.wantR)
+			}
+		})
+	}
+}
+
+func TestRawConf_GetJSON(t *testing.T) {
+	type fields struct {
+		raw       json.RawMessage
+		version   int32
+		signature string
+		data      map[string]interface{}
+	}
+	type args struct {
+		section string
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantR       []byte
+		wantVersion int32
+		wantErr     bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := &RawConf{
+				raw:       tt.fields.raw,
+				version:   tt.fields.version,
+				signature: tt.fields.signature,
+				XMap:      tt.fields.data,
+			}
+			gotR, err := j.GetJSON(tt.args.section)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("RawConf.GetJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("RawConf.GetJSON() gotR = %v, want %v", gotR, tt.wantR)
+			}
+			// if gotVersion != tt.wantVersion {
+			// 	t.Errorf("RawConf.GetJSON() gotVersion = %v, want %v", gotVersion, tt.wantVersion)
+			// }
+		})
+	}
+}
+
+func TestRawConf_HasSection(t *testing.T) {
+	type fields struct {
+		raw       json.RawMessage
+		version   int32
+		signature string
+		data      map[string]interface{}
+	}
+	type args struct {
+		section string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := &RawConf{
+				raw:       tt.fields.raw,
+				version:   tt.fields.version,
+				signature: tt.fields.signature,
+				XMap:      tt.fields.data,
+			}
+			if got := j.Has(tt.args.section); got != tt.want {
+				t.Errorf("RawConf.HasSection() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRawConf_GetSection(t *testing.T) {
+	type fields struct {
+		raw       json.RawMessage
+		version   int32
+		signature string
+		data      map[string]interface{}
+	}
+	type args struct {
+		section string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantC   *RawConf
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := &RawConf{
+				raw:       tt.fields.raw,
+				version:   tt.fields.version,
+				signature: tt.fields.signature,
+				XMap:      tt.fields.data,
+			}
+			gotC, err := j.GetXMap(tt.args.section)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("RawConf.GetSection() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotC, tt.wantC) {
+				t.Errorf("RawConf.GetSection() = %v, want %v", gotC, tt.wantC)
+			}
+		})
+	}
+}
