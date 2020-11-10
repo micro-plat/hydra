@@ -59,9 +59,9 @@ func TestBlackList(t *testing.T) {
 		mockConf.GetAPI().BlackList(tt.blackOpts...)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockUser:       &mocks.MockUser{MockClientIP: "192.168.0.1"},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件

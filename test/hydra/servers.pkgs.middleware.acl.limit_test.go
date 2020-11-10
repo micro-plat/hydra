@@ -130,8 +130,8 @@ func TestLimit(t *testing.T) {
 					MockRequestPath: tt.requestPath,
 				},
 			},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
