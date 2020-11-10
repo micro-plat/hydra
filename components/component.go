@@ -98,7 +98,7 @@ func (c *Component) DLock(name string) (dlock.ILock, error) {
 
 //UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
-	cluster, err := context.Current().ServerConf().GetServerConf().GetCluster()
+	cluster, err := context.Current().APPConf().GetServerConf().GetCluster()
 	if err != nil {
 		panic(fmt.Errorf("获取集群信息失败:%w", err))
 	}

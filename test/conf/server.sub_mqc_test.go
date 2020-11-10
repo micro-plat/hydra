@@ -74,20 +74,16 @@ func Test_mqcSub_GetMQCQueueConf(t *testing.T) {
 	//var nilQueue *queue.Queues
 	assert.Equal(t, &queue.Queues{}, queuesObj, "测试conf初始化,判断queues节点对象1")
 
-	/*
-
-		@todo lm://. 注册中心问题
-
-		//设置正确的queue返回配置
-		confM = mocks.NewConfBy(platName, clusterName)
-		confN = confM.MQC("redis://11")
-		confN.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
-		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
-		gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
-		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点2")
-		queuesObj, err = gotS.GetMQCQueueConf()
-		assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败2")
-		queueC := queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
-		assert.Equal(t, queueC, queuesObj, "测试conf初始化,判断queues节点对象2")
-	*/
+	// @todo lm://. 因为没有ready调用   所以注册中心没有数据
+	//设置正确的queue返回配置
+	// confM = mocks.NewConfBy(platName, clusterName)
+	// confN = confM.MQC("redis://11")
+	// confN.Queue(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
+	// confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
+	// gotS, err = app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
+	// assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点2")
+	// queuesObj, err = gotS.GetMQCQueueConf()
+	// assert.Equal(t, true, err == nil, "测试conf初始化,获取queues对象失败2")
+	// queueC := queue.NewQueues(queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2"))
+	// assert.Equal(t, queueC, queuesObj, "测试conf初始化,判断queues节点对象2")
 }

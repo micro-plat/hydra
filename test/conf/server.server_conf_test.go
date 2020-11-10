@@ -7,6 +7,8 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -14,9 +16,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/cron"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -149,7 +149,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.Render(render.WithDisable(), render.WithTmplt("/path1", "success", render.WithStatus("500"), render.WithContentType("tpltm1")))
 	confN.Static(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
-	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
@@ -213,7 +213,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, renderC, renderConf, "测试conf初始化,判断render节点对象")
 
 	whiteListConf, err := gotS.GetWhiteListConf()
-	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取whiteList对象失败")
 	assert.Equal(t, whiteC, whiteListConf, "测试conf初始化,判断whiteList节点对象")
 

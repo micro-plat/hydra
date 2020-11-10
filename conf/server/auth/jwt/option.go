@@ -76,3 +76,10 @@ func WithEnable() Option {
 		a.Disable = false
 	}
 }
+
+//WithDomain 启用配置
+func WithDomain(domain string) Option {
+	return func(a *JWTAuth) {
+		a.Domain = domain
+	}
+}

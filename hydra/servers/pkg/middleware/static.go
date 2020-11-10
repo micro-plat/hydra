@@ -9,7 +9,7 @@ import (
 //Static 静态文件处理插件
 func Static() Handler {
 	return func(ctx IMiddleContext) {
-		static, err := ctx.ServerConf().GetStaticConf()
+		static, err := ctx.APPConf().GetStaticConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

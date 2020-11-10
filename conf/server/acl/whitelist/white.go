@@ -41,8 +41,8 @@ func New(opts ...Option) *WhiteList {
 //IsAllow 验证当前请求是否在白名单中
 func (w *WhiteList) IsAllow(path string, ip string) bool {
 	for _, cur := range w.IPS {
-		if ok, _ := cur.ipm.Match(ip, "."); ok {
-			ok, _ := cur.rqm.Match(path)
+		if ok, _ := cur.rqm.Match(path); ok {
+			ok, _ := cur.ipm.Match(ip, ".")
 			return ok
 		}
 	}

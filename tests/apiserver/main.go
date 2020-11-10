@@ -57,15 +57,15 @@ func init() {
 		fmt.Println(val, err2)
 		return "success"
 	})
-	app.RPC("/taosy/testrpc", func(ctx context.IContext) (r interface{}) {
-		ctx.Log().Info("rpc 接口服务测试")
-		return "success"
-	})
+
 	app.CRON("/taosy/testcron", func(ctx context.IContext) (r interface{}) {
 		ctx.Log().Info("cron 接口服务测试")
 
 		q, err := hydra.C.Queue().GetQueue("xxx")
-		ctx.Log().Error("C.Queue().GetQueue:", err)
+		if err != nil {
+			ctx.Log().Error("C.Queue().GetQueue:", err)
+			return
+		}
 		q.Push("queue1", fmt.Sprintf(`{"mqcv":"%s"}`, time.Now().Format("20060102150405")))
 
 		return "success"
@@ -75,7 +75,12 @@ func init() {
 		ctx.Log().Info("mqc 接口服务测试,", ctx.Request().GetString("mqcv"))
 		return "success"
 	})
+
 	app.RPC("/rpcs/sss", &sss{})
+	app.RPC("/taosy/testrpc", func(ctx context.IContext) (r interface{}) {
+		ctx.Log().Info("rpc 接口服务测试")
+		return "success"
+	})
 }
 
 func main() {

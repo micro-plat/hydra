@@ -17,7 +17,7 @@ func APIKeyAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取apikey配置
-		auth, err := ctx.ServerConf().GetAPIKeyConf()
+		auth, err := ctx.APPConf().GetAPIKeyConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

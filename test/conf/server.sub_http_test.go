@@ -6,14 +6,14 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
+	"github.com/micro-plat/hydra/conf/server/acl/gray"
+	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
-	"github.com/micro-plat/hydra/conf/server/acl/gray"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -314,10 +314,10 @@ func Test_httpSub_GetWhiteListConf(t *testing.T) {
 		wantConf *whitelist.WhiteList
 	}{
 		{name: "不设置whitelist节点", opts: []whitelist.Option{}, wantErr: true, wantConf: &whitelist.WhiteList{Disable: true}},
-		{name: "设置错误的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("", []string{"192.168.0.101"}...))}, wantErr: false,
+		{name: "设置错误的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{""}, []string{"192.168.0.101"}...))}, wantErr: false,
 			wantConf: nilWhitelist},
-		{name: "设置正确的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...))}, wantErr: true,
-			wantConf: whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))},
+		{name: "设置正确的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))}, wantErr: true,
+			wantConf: whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))},
 	}
 
 	for _, tt := range tests {

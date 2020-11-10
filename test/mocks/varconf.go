@@ -35,7 +35,7 @@ func (v *MockVarConf) GetObject(tp string, name string, res interface{}) (int32,
 	if !ok {
 		return 0, conf.ErrNoSetting
 	}
-	return data.GetVersion(), data.Unmarshal(res)
+	return data.GetVersion(), data.ToStruct(res)
 }
 func (v *MockVarConf) GetClone() conf.IVarConf {
 	return conf.IVarConf(v)
