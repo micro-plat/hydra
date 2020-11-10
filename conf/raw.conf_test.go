@@ -239,7 +239,7 @@ func TestRawConf_GetJSON(t *testing.T) {
 				signature: tt.fields.signature,
 				XMap:      tt.fields.data,
 			}
-			gotR, gotVersion, err := j.GetJSON(tt.args.section)
+			gotR, err := j.GetJSON(tt.args.section)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RawConf.GetJSON() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -247,9 +247,9 @@ func TestRawConf_GetJSON(t *testing.T) {
 			if !reflect.DeepEqual(gotR, tt.wantR) {
 				t.Errorf("RawConf.GetJSON() gotR = %v, want %v", gotR, tt.wantR)
 			}
-			if gotVersion != tt.wantVersion {
-				t.Errorf("RawConf.GetJSON() gotVersion = %v, want %v", gotVersion, tt.wantVersion)
-			}
+			// if gotVersion != tt.wantVersion {
+			// 	t.Errorf("RawConf.GetJSON() gotVersion = %v, want %v", gotVersion, tt.wantVersion)
+			// }
 		})
 	}
 }
