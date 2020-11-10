@@ -145,8 +145,10 @@ func (s *regist) CRON(name string, h interface{}, crons ...string) {
 	s.Custom(global.CRON, name, h, v...)
 }
 
-//Custom 自定义服务注册@todo
+//Custom 自定义服务注册
 func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{}) {
+	//去掉两头'/'
+	name = fmt.Sprintf("/%s", strings.Trim(name, "/"))
 	s.get(tp).Register(name, h, ext...)
 }
 

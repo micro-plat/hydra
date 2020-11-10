@@ -48,71 +48,30 @@ func Test_response_Write_WithPanic(t *testing.T) {
 	}
 }
 
-//@todo
 func Test_response_Write(t *testing.T) {
 	tests := []struct {
 		name    string
-		ctx     context.IInnerContext
 		status  int
 		content interface{}
 		wantRs  int
 		wantRc  string
+		header  http.Header
 	}{
-		{name: "状态码非0,返回包含错误码的错误", ctx: &mocks.TestContxt{}, status: 0, content: errs.NewError(999, "错误"), wantRs: 999, wantRc: "错误"},
-		{name: "状态码在200到400,返回错误", ctx: &mocks.TestContxt{}, status: 300, content: errors.New("err"), wantRs: 400, wantRc: "err"},
-		{name: "状态码为0,返回非错误内容", ctx: &mocks.TestContxt{}, status: 0, content: nil, wantRs: 200, wantRc: ""},
-		{name: "状态码非0,返回非错误内容", ctx: &mocks.TestContxt{}, status: 500, content: "content", wantRs: 500, wantRc: "content"},
-		{name: "状态码非0,content-type为text/plain,返回非错误内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.PLAINF},
-			},
-		}, status: 200, content: "content", wantRs: 200, wantRc: "content"},
-		{name: "状态码非0,content-type为application/json,返回json内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.JSONF},
-			},
-		}, status: 200, content: `{"key":"value"}`, wantRs: 200, wantRc: `{"key":"value"}`},
-		{name: "状态码非0,content-type为application/xml,返回xml内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.XMLF},
-			},
-		}, status: 200, content: "<?xml><key>value<key/><xml/>", wantRs: 200, wantRc: `<?xml><key>value<key/><xml/>`},
-		{name: "状态码非0,content-type为text/html,返回html内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.HTMLF},
-			},
-		}, status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, wantRc: `<!DOCTYPE html><html></html>`},
-		{name: "状态码非0,content-type为text/yaml,返回内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.YAMLF},
-			},
-		}, status: 200, content: "key:value", wantRs: 200, wantRc: `key:value`},
-		{name: "状态码非0,content-type为application/json,且返回内容非正确json字符串", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.JSONF},
-			},
-		}, status: 200, content: "{key:value", wantRs: 200, wantRc: `{"data":"{key:value"}`},
-		{name: "状态码非0,content-type为application/xml,且返回内容非正确xml字符串", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.XMLF},
-			},
-		}, status: 200, content: "<key>value<key/>", wantRs: 200, wantRc: `<data><key>value<key/></data>`},
-		{name: "状态码非0,content-type为空,返回布尔值/整型/浮点型/复数", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{},
-		}, status: 200, content: false, wantRs: 200, wantRc: `false`},
-		{name: "状态码非0,content-type为application/json,返回布尔值/整型/浮点型/复数", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.JSONF},
-			},
-		}, status: 200, content: 1, wantRs: 200, wantRc: `{"data":1}`},
-		{name: "状态码非0,content-type为application/xml,返回布尔值/整型/浮点型/复数", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{
-				"Content-Type": []string{context.XMLF},
-			},
-		}, status: 200, content: 1, wantRs: 200, wantRc: `<data>1</data>`},
-		{name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", ctx: &mocks.TestContxt{
-			HttpHeader: http.Header{},
-		}, status: 200, content: map[string]string{"key": "value"}, wantRs: 200, wantRc: `{"key":"value"}`},
+		{name: "状态码非0,返回包含错误码的错误", status: 0, content: errs.NewError(999, "错误"), wantRs: 999, wantRc: "错误"},
+		{name: "状态码在200到400,返回错误", status: 300, content: errors.New("err"), wantRs: 400, wantRc: "err"},
+		{name: "状态码为0,返回非错误内容", status: 0, content: nil, wantRs: 200, wantRc: ""},
+		{name: "状态码非0,返回非错误内容", status: 500, content: "content", wantRs: 500, wantRc: "content"},
+		{name: "状态码非0,content-type为text/plain,返回非错误内容", header: http.Header{"Content-Type": []string{context.PLAINF}}, status: 200, content: "content", wantRs: 200, wantRc: "content"},
+		{name: "状态码非0,content-type为application/json,返回json内容", header: http.Header{"Content-Type": []string{context.JSONF}}, status: 200, content: `{"key":"value"}`, wantRs: 200, wantRc: `{"key":"value"}`},
+		{name: "状态码非0,content-type为application/xml,返回xml内容", header: http.Header{"Content-Type": []string{context.XMLF}}, status: 200, content: "<?xml><key>value<key/><xml/>", wantRs: 200, wantRc: `<?xml><key>value<key/><xml/>`},
+		{name: "状态码非0,content-type为text/html,返回html内容", header: http.Header{"Content-Type": []string{context.HTMLF}}, status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, wantRc: `<!DOCTYPE html><html></html>`},
+		{name: "状态码非0,content-type为text/yaml,返回内容", header: http.Header{"Content-Type": []string{context.YAMLF}}, status: 200, content: "key:value", wantRs: 200, wantRc: `key:value`},
+		{name: "状态码非0,content-type为application/json,且返回内容非正确json字符串", header: http.Header{"Content-Type": []string{context.JSONF}}, status: 200, content: "{key:value", wantRs: 200, wantRc: `{"data":"{key:value"}`},
+		{name: "状态码非0,content-type为application/xml,且返回内容非正确xml字符串", header: http.Header{"Content-Type": []string{context.XMLF}}, status: 200, content: "<key>value<key/>", wantRs: 200, wantRc: `<data><key>value<key/></data>`},
+		{name: "状态码非0,content-type为空,返回布尔值/整型/浮点型/复数", header: http.Header{}, status: 200, content: false, wantRs: 200, wantRc: `false`},
+		{name: "状态码非0,content-type为application/json,返回布尔值/整型/浮点型/复数", header: http.Header{"Content-Type": []string{context.JSONF}}, status: 200, content: 1, wantRs: 200, wantRc: `{"data":1}`},
+		{name: "状态码非0,content-type为application/xml,返回布尔值/整型/浮点型/复数", header: http.Header{"Content-Type": []string{context.XMLF}}, status: 200, content: 1, wantRs: 200, wantRc: `<data>1</data>`},
+		{name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", header: http.Header{}, status: 200, content: map[string]string{"key": "value"}, wantRs: 200, wantRc: `{"key":"value"}`},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
@@ -121,10 +80,12 @@ func Test_response_Write(t *testing.T) {
 	meta := conf.NewMeta()
 	global.IsDebug = true
 	for _, tt := range tests {
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(tt.ctx, meta).GetRequestID())
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, meta).GetRequestID())
 
 		//构建response对象
-		c := ctx.NewResponse(tt.ctx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, log, meta)
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 

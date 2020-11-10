@@ -1,4 +1,4 @@
-package sharding
+package global
 
 import "testing"
 

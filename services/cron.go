@@ -63,7 +63,7 @@ func (c *cron) Add(cron string, service string) ICRON {
 }
 
 //Remove 移除任务
-func (c *cron) Remove(cron string, service string) ICRON { //*cron 改为ICRON @hj
+func (c *cron) Remove(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
@@ -88,6 +88,7 @@ func (c *cron) Subscribe(callback func(t *task.Task)) {
 		subscriber.taskChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
+	c.signalChan <- struct{}{}
 }
 
 //notify 通知任务
@@ -99,10 +100,14 @@ func (c *cron) notify() {
 		case <-c.signalChan:
 			c.lock.Lock()
 			for _, e := range c.subscribers {
-				select {
-				case t := <-e.taskChan:
-					e.callback(t)
-				default:
+			SUBFOR:
+				for {
+					select {
+					case t := <-e.taskChan:
+						e.callback(t)
+					default:
+						break SUBFOR
+					}
 				}
 			}
 			c.lock.Unlock()

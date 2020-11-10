@@ -1,14 +1,13 @@
-package pub
+package global
 
 import (
 	"sort"
 	"strings"
 )
 
-//GetSharding 获取当前服务的任务分片数及是否是master
-func GetSharding(def bool, scount int, path string, cldrs []string) (int, bool) {
+func IsMaster(master bool, scount int, path string, cldrs []string) (int, bool) {
 	if len(cldrs) == 0 {
-		return 0, def
+		return 0, master
 	}
 	ncldrs := make([]string, 0, len(cldrs))
 	for _, v := range cldrs {

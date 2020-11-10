@@ -59,15 +59,3 @@ type ValueChangeArgs struct {
 	Version  int32
 	OP       int
 }
-
-//IsConf 是否是conf根节点或conf的子节点
-func (n *ValueChangeArgs) IsConf() bool {
-	return strings.HasSuffix(n.Path, registry.Join("/", "conf")) ||
-		strings.Contains(n.Path, registry.Join("/", "conf", "/"))
-}
-
-//IsVarRoot 是否是var根节点或var的子节点
-func (n *ValueChangeArgs) IsVarRoot() bool {
-	return strings.HasSuffix(n.Path, registry.Join("/", "var")) ||
-		strings.Contains(n.Path, registry.Join("/", "var", "/"))
-}
