@@ -98,8 +98,8 @@ func (c *Ctx) Log() logger.ILogger {
 	return c.log
 }
 
-//ServerConf 获取服务器配置
-func (c *Ctx) ServerConf() app.IAPPConf {
+//APPConf 获取服务器配置
+func (c *Ctx) APPConf() app.IAPPConf {
 	return c.appConf
 }
 

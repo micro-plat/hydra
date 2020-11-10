@@ -13,7 +13,7 @@ import (
 func JwtWriter() Handler {
 	return func(ctx IMiddleContext) {
 		ctx.Next()
-		conf, err := ctx.ServerConf().GetJWTConf()
+		conf, err := ctx.APPConf().GetJWTConf()
 		if err != nil {
 			ctx.Response().Abort(xjwt.JWTStatusConfError, err)
 			return

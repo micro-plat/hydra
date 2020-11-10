@@ -13,7 +13,7 @@ func RASAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
-		ras, err := ctx.ServerConf().GetRASConf()
+		ras, err := ctx.APPConf().GetRASConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return

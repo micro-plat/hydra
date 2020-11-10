@@ -24,8 +24,7 @@ type Gray struct {
 	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
 	UPCluster string `json:"upCluster,omitempty" valid:"required" toml:"upCluster,omitempty"`
-	//conf      conf.IServerConf
-	cluster conf.ICluster
+	cluster   conf.ICluster
 }
 
 //New 灰度设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
