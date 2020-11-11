@@ -144,6 +144,7 @@ func Test_cron_Remove(t *testing.T) {
 
 	var lock3 sync.Mutex
 	all := map[string]bool{}
+	noNotify := 0
 	coroutine := 100
 	for i := 0; i < coroutine; i++ {
 		go func() {
@@ -153,11 +154,14 @@ func Test_cron_Remove(t *testing.T) {
 			assert.Equal(t, true, got != nil, "移除任务")
 			lock3.Lock()
 			defer lock3.Unlock()
+			if _, ok := all[fmt.Sprint(s)]; ok {
+				noNotify++
+			}
 			all[fmt.Sprint(s)] = true
 		}()
 	}
 
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 
 	nonExist := 0
 	for k := range all {
@@ -179,6 +183,6 @@ func Test_cron_Remove(t *testing.T) {
 		assert.Equal(t, false, v.Disable, "任务状态2")
 	}
 	//订阅者长度
-	assert.Equal(t, coroutine+addTasksLen, subscriber1, "订阅者接收任务通知数量1")
-	assert.Equal(t, coroutine+addTasksLen, subscriber2, "订阅者接收任务通知数量2")
+	assert.Equal(t, coroutine+addTasksLen-noNotify, subscriber1, "订阅者接收任务通知数量1")
+	assert.Equal(t, coroutine+addTasksLen-noNotify, subscriber2, "订阅者接收任务通知数量2")
 }

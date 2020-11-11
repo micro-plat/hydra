@@ -30,22 +30,25 @@ func NewQueues(queue ...*Queue) *Queues {
 }
 
 //Append 增加任务列表  @fix:存在的数据进行修改,不存在则添加 @hj
-func (t *Queues) Append(queues ...*Queue) *Queues {
+func (q *Queues) Append(queues ...*Queue) (*Queues, []*Queue) {
 	keyMap := map[string]*Queue{}
-	for _, v := range t.Queues {
+	for _, v := range q.Queues {
 		keyMap[v.Queue] = v
 	}
-	nonExistQueue := []*Queue{}
+	notifyQueues := []*Queue{}
 	for _, v := range queues {
 		if queue, ok := keyMap[v.Queue]; ok {
-			queue.Disable = v.Disable
-			queue.Concurrency = v.Concurrency
+			if queue.Disable != v.Disable || queue.Concurrency != v.Concurrency {
+				notifyQueues = append(notifyQueues, v)
+				queue.Disable = v.Disable
+				queue.Concurrency = v.Concurrency
+			}
 			continue
 		}
-		nonExistQueue = append(nonExistQueue, v)
+		notifyQueues = append(notifyQueues, v)
+		q.Queues = append(q.Queues, v)
 	}
-	t.Queues = append(t.Queues, nonExistQueue...)
-	return t
+	return q, notifyQueues
 }
 
 //GetConf 设置queue

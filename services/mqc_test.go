@@ -140,6 +140,7 @@ func Test_mqc_Remove(t *testing.T) {
 	var lock3 sync.Mutex
 	all := map[string]bool{}
 	coroutine := 100
+	noNotify := 0
 	for i := 0; i < coroutine; i++ {
 		go func() {
 			//移除存在的队列或者不存在的队列
@@ -148,6 +149,9 @@ func Test_mqc_Remove(t *testing.T) {
 			assert.Equal(t, true, got != nil, "移除队列")
 			lock3.Lock()
 			defer lock3.Unlock()
+			if _, ok := all[fmt.Sprint(s)]; ok {
+				noNotify++
+			}
 			all[fmt.Sprint(s)] = true
 		}()
 	}
@@ -175,6 +179,6 @@ func Test_mqc_Remove(t *testing.T) {
 		assert.Equal(t, false, v.Disable, "队列状态2")
 	}
 	//订阅者长度
-	assert.Equal(t, coroutine+addQueuesLen, subscriber1, "订阅者接收队列通知数量1")
-	assert.Equal(t, coroutine+addQueuesLen, subscriber2, "订阅者接收队列通知数量2")
+	assert.Equal(t, coroutine+addQueuesLen-noNotify, subscriber1, "订阅者接收队列通知数量1")
+	assert.Equal(t, coroutine+addQueuesLen-noNotify, subscriber2, "订阅者接收队列通知数量2")
 }

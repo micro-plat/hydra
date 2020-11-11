@@ -39,9 +39,9 @@ func NewChildWatcherByDeep(path string, deep int, r registry.IRegistry, logger l
 		timeSpan:   time.Second,
 		registry:   r,
 		logger:     logger,
-		Watchers:   make(map[string]*ChildWatcher),         //@fix 方便测试
-		notifyChan: make(chan *watcher.ChildChangeArgs, 1), //1改为10 方便测试
-		CloseChan:  make(chan struct{}),                    //@fix 方便测试
+		Watchers:   make(map[string]*ChildWatcher),
+		notifyChan: make(chan *watcher.ChildChangeArgs, 1),
+		CloseChan:  make(chan struct{}),
 	}
 }
 
@@ -127,7 +127,7 @@ func (w *ChildWatcher) Close() {
 	})
 }
 
-//deleted 节点删除 @todo主节点删除未进行处理
+//deleted 节点删除
 func (w *ChildWatcher) deleted() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -151,7 +151,7 @@ func (w *ChildWatcher) changed(children []string, version int32) {
 	return
 }
 func (w *ChildWatcher) notify(a *watcher.ChildChangeArgs) {
-	if len(a.Children) == 0 {
+	if len(a.Children) == 0 && a.OP != watcher.DEL {
 		return
 	}
 	if a.Deep == 1 && a.OP != watcher.DEL {
@@ -182,7 +182,7 @@ func (w *ChildWatcher) changeChilrenWatcher(ppath, path string, deep int) {
 		return
 	}
 	//watcher := NewChildWatcherByDeep(registry.Join(w.path, path), w.deep-1, w.registry, w.logger)
-	watcher := NewChildWatcherByDeep(registry.Join(ppath, path), deep-1, w.registry, w.logger) // @fix
+	watcher := NewChildWatcherByDeep(registry.Join(ppath, path), deep-1, w.registry, w.logger)
 	ch, err := watcher.Start()
 	if err != nil {
 		w.logger.Error(err)

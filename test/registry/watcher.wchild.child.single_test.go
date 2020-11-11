@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -186,6 +187,79 @@ func TestChildWatcher_Start_2(t *testing.T) {
 	}
 }
 
-//节点删除时未进行处理 暂不测试
+//节点删除时进行处理
 func TestChildWatcher_deleted(t *testing.T) {
+	//构建配置对象
+	confObj := mocks.NewConfBy("TestChildWatcher_Deleted", "TestChildWatcher_Deleted_Clu")
+	confObj.API(":8080")
+	apiconf := confObj.GetAPIConf()
+	c := apiconf.GetServerConf()
+	addr1 := "192.168.5.115:9091"
+	addr2 := "192.168.5.116:9091"
+
+	tests := []struct {
+		name    string
+		path    string
+		deep    int
+		r       *mocks.TestRegistry
+		wantErr bool
+	}{
+		{name: "深度为2,监控过程中,注册中心删除了当前节点的子节点", path: "/platname/apiserver/api/test/hosts_delete",
+			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 2, wantErr: false},
+	}
+
+	//发布节点到注册中心
+	router, _ := apiconf.GetRouterConf()
+	pub.New(c).Publish(addr1, addr1, c.GetServerID(), router.GetPath()...)
+	pub.New(c).Publish(addr2, addr2, c.GetServerID(), router.GetPath()...)
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+
+	for _, tt := range tests {
+		tt.r.Deep = tt.deep
+
+		//获取当前子节点
+		beforeChildren, _, _ := tt.r.GetChildren(tt.path)
+
+		//启动子节点监控
+		w := wchild.NewChildWatcherByDeep(tt.path, tt.deep, tt.r, log)
+		gotC, err := w.Start()
+
+		//保证测试退出前 线程执行完
+		time.Sleep(time.Second * 2)
+		assert.Equal(t, tt.wantErr, err != nil, tt.name)
+
+		if tt.wantErr {
+			continue
+		}
+
+		//获取子节点,监控结果验证
+	LOOP:
+		for {
+			select {
+			case c := <-gotC:
+				//对返回的节点进行验证
+				fmt.Println("c:", c)
+				//children, _, _ := tt.r.GetChildren(c.Parent)
+
+				if c.OP == watcher.ADD && tt.path == c.Parent { //未删除节点前的返回值
+					assert.Equal(t, len(beforeChildren), len(c.Children), tt.name)
+				} else { //删除节点后的返回值
+					assert.Equal(t, len(beforeChildren)-1, len(c.Children), tt.name)
+				}
+				var version int32
+				version = 0
+				assert.Equal(t, version, c.Version, tt.name)
+
+				lk := c.Parent[len(tt.path):]
+				d := strings.Split(lk, "/")
+				assert.Equal(t, tt.deep-len(d)+1, c.Deep, tt.name)
+
+				names := strings.Split(strings.Trim(c.Parent, "/"), "/")
+				assert.Equal(t, names[len(names)-1], c.Name, tt.name)
+
+			default:
+				break LOOP
+			}
+		}
+	}
 }
