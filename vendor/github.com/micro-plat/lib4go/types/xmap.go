@@ -25,7 +25,7 @@ type IXMap interface {
 	GetValue(name string) interface{}
 
 	//Append 添加键值对，输入参数以:键，值，键，值...的顺序传入
-	Append(kv ...string)
+	Append(kv ...interface{})
 
 	//SetValue 设置值
 	SetValue(name string, value interface{})
@@ -198,12 +198,12 @@ func (q XMap) Cascade(m IXMap) {
 }
 
 //Append 追加键值对
-func (q XMap) Append(kv ...string) {
+func (q XMap) Append(kv ...interface{}) {
 	if len(kv) == 0 || len(kv)%2 != 0 {
 		return
 	}
 	for i := 0; i < len(kv)/2; i++ {
-		q.SetValue(kv[i], kv[i+1])
+		q.SetValue(fmt.Sprint(kv[i]), kv[i+1])
 	}
 	return
 }
@@ -420,12 +420,9 @@ func (q XMap) MustFloat64(name string) (float64, bool) {
 //ToStruct 将当前对象转换为指定的struct
 func (q XMap) ToStruct(out interface{}) error {
 	val := reflect.ValueOf(out)
-	if val.Kind() != reflect.Ptr {
-		return fmt.Errorf("输入参数非指针 %v", val.Kind())
-	}
-	val = val.Elem()
-	if val.Kind() != reflect.Struct {
-		return fmt.Errorf("输入参数非struct:%v", val.Kind())
+
+	if val.Kind() != reflect.Interface && val.Kind() != reflect.Ptr {
+		return fmt.Errorf("function only accepts structs; got %s", val.Kind())
 	}
 
 	buff, err := json.Marshal(q)

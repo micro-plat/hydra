@@ -25,7 +25,7 @@ var ctxMap sync.Map
 //Cache 将当前上下文配置保存到当前线程编号对应的缓存
 func Cache(s IContext) uint64 {
 	tid := getGID()
-	ctxMap.Store(tid, s)
+	ctxMap.LoadOrStore(tid, s)
 	return tid
 }
 
