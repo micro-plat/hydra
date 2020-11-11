@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/micro-plat/hydra/compatible"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/hydra/conf/server/router"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/net"
 	"google.golang.org/grpc"
 )
@@ -107,7 +108,7 @@ func getAddress(addr string) (string, error) {
 		return "", fmt.Errorf("%s端口不合法", addr)
 	}
 	if port == "80" {
-		if err := global.CheckPrivileges(); err != nil {
+		if err := compatible.CheckPrivileges(); err != nil {
 			return "", err
 		}
 	}

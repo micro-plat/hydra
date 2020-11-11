@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
+	"github.com/micro-plat/hydra/compatible"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/daemon"
 	"github.com/micro-plat/lib4go/errs"
@@ -26,7 +27,7 @@ func doInstall(c *cli.Context) (err error) {
 
 	//1.检查是否有管理员权限
 	global.Current().Log().Pause()
-	if err = global.CheckPrivileges(); err != nil {
+	if err = compatible.CheckPrivileges(); err != nil {
 		return err
 	}
 
