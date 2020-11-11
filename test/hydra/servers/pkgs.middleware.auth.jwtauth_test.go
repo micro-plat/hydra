@@ -16,10 +16,13 @@ import (
 //time:2020-11-11
 //desc:测试basic验证中间件逻辑
 func TestJWTAuth(t *testing.T) {
+	requestPath := "/jwt/test"
+	// routerObj := router.NewRouter(requestPath, "service", []string{"GET"})
 	type testCase struct {
-		name        string
-		jwtOpts     []jwt.Option
-		requestPath string
+		name    string
+		jwtOpts []jwt.Option
+		// router      *router.Router
+		token       string
 		isSet       bool
 		wantStatus  int
 		wantSpecial string
@@ -28,15 +31,15 @@ func TestJWTAuth(t *testing.T) {
 	tests := []*testCase{
 		{name: "jwt-未配置", isSet: false, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{}},
 		{name: "jwt-配置未启动", isSet: true, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{jwt.WithDisable()}},
-		{name: "jwt-配置启动-路由不存在", isSet: true, wantStatus: 510, wantSpecial: "",
-			jwtOpts: []jwt.Option{}},
-		{name: "jwt-配置启动-路由存在,被排除", isSet: true, wantStatus: 200, wantSpecial: "",
+		{name: "jwt-配置启动-被排除", isSet: true, wantStatus: 200, wantSpecial: "jwt", jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test")}},
+		{name: "jwt-配置启动-token不存在", isSet: true, wantStatus: 510, wantSpecial: "jwt", jwtOpts: []jwt.Option{}},
+		{name: "jwt-配置启动-token在header中,失败", isSet: true, wantStatus: 200, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test")}},
-		{name: "jwt-配置启动-不排除,认证信息为空", isSet: true, wantStatus: 200, wantSpecial: "",
+		{name: "jwt-配置启动-token在cookie中,失败", isSet: true, wantStatus: 200, wantSpecial: "",
 			jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwt-配置启动-不排除,认证失败", isSet: true, wantStatus: 401, wantSpecial: "jwt",
+		{name: "jwt-配置启动-token在header中,成功", isSet: true, wantStatus: 401, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwt-配置启动-不排除,认证成功", isSet: true, wantStatus: 200, wantSpecial: "jwt",
+		{name: "jwt-配置启动-token在cookie中,失败", isSet: true, wantStatus: 200, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test1")}},
 	}
 
@@ -54,8 +57,9 @@ func TestJWTAuth(t *testing.T) {
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
 				MockPath: &mocks.MockPath{
-					MockHeader:      nil,
-					MockRequestPath: tt.requestPath,
+					MockHeader: nil,
+					// MockRouter:      tt.router,
+					MockRequestPath: requestPath,
 				},
 			},
 			MockServerConf: serverConf,
