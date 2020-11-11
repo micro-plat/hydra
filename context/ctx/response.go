@@ -56,6 +56,11 @@ func (c *response) Header(k string, v string) {
 	c.ctx.Header(k, v)
 }
 
+//Header 设置头信息到response里
+func (c *response) GetHeaders() map[string][]string {
+	return c.ctx.GetHeaders()
+}
+
 //ContentType 设置contentType
 func (c *response) ContentType(v string) {
 	c.ctx.Header("Content-Type", v)
