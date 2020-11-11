@@ -29,6 +29,7 @@ func startServer() {
 
 		hydra.Conf.API(":9091")
 		app.API("/getbodymap", GetBodyMap)
+		app.API("/getbody/encoding", GetBodyEncoding)
 		app.API("/form", GetBodyMapFormData)
 		app.API("/upload", UploadFile)
 		app.API("/download", DownloadFile)
@@ -45,6 +46,16 @@ func startServer() {
 
 func GetBodyMap(ctx hydra.IContext) interface{} {
 	raw, err := ctx.Request().GetRawBodyMap()
+	if err != nil {
+		return fmt.Errorf("getBody出错")
+	}
+	header := ctx.Request().Path().GetHeader("Content-Type")
+	ctx.Response().Header("Content-Type", header)
+	return raw
+}
+
+func GetBodyEncoding(ctx hydra.IContext) interface{} {
+	raw, err := ctx.Request().GetBody()
 	if err != nil {
 		return fmt.Errorf("getBody出错")
 	}

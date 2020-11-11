@@ -272,7 +272,6 @@ func Test_response_Redirect_WithHttp(t *testing.T) {
 
 	startServer()
 	resp, err := http.Post("http://localhost:9091/response/redirect", "application/json", strings.NewReader(""))
-	fmt.Println(resp, err)
 	assert.Equal(t, false, err != nil, "重定向请求错误")
 	defer resp.Body.Close()
 	assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], "重定向响应头错误")
