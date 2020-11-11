@@ -99,7 +99,7 @@ func TestRASAuth(t *testing.T) {
 			},
 
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

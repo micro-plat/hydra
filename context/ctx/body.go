@@ -38,15 +38,7 @@ func (w *body) GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 	switch {
 	case strings.Contains(ctp, "xml"):
 		mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
-		var m map[string]interface{}
-		m, err = mxj.NewMapXml([]byte(body))
-		//	m, err := context.UnmarshalXML(body)
-		if err == nil {
-			for k, v := range m {
-				data[k] = v
-			}
-		}
-
+		data, err = mxj.NewMapXml([]byte(body))
 	case strings.Contains(ctp, "yaml"):
 		err = yaml.Unmarshal([]byte(body), &data)
 	case strings.Contains(ctp, "json"):
@@ -74,11 +66,11 @@ func (w *body) GetBody(e ...string) (s string, err error) {
 
 //GetRawBody 返回body原字符串
 func (w *body) GetRawBody(e ...string) (s string, err error) {
-	routerObj, err := w.path.GetRouter()
-	if err != nil {
-		return "", err
-	}
-	encode := types.GetStringByIndex(e, 0, routerObj.GetEncoding())
+	// routerObj, err := w.path.GetRouter()
+	// if err != nil {
+	// 	return "", err
+	// }
+	encode := types.GetStringByIndex(e, 0, w.path.GetEncoding())
 	if w.hasReadBody {
 		if w.bodyReadErr != nil {
 			return "", w.bodyReadErr

@@ -1,11 +1,13 @@
 package context
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
-	"testing"
 	"sort"
+	"strings"
+	"testing"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
@@ -15,76 +17,74 @@ import (
 )
 
 func Test_request_Bind(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
-
-	t.Run("非指针传递,无法进行数据绑定", func(t *testing.T) {
-		out := 1
-		r := ctx.NewRequest(&mocks.TestContxt{
-			Form: url.Values{"__body_": []string{`9`}},
-		}, serverConf, conf.NewMeta())
-		if err := r.Bind(out); (err != nil) != true {
-			t.Errorf("request.Bind() error = %v, wantErr %v", err, false)
-		}
-		if !reflect.DeepEqual(out, 1) {
-			t.Errorf("request.Bind() out= %v, want %v", out, 1)
-		}
-	})
-
-	t.Run("参数类型与数据的类型不一致", func(t *testing.T) {
-		out := 1
-		r := ctx.NewRequest(&mocks.TestContxt{
-			Form: url.Values{"__body_": []string{`{"key":"value"}`}},
-		}, serverConf, conf.NewMeta())
-		if err := r.Bind(&out); (err != nil) != true {
-			t.Errorf("request.Bind() error = %v, wantErr %v", err, false)
-		}
-	})
-
-	t.Run("参数数据绑定", func(t *testing.T) {
-		out := 1
-		r := ctx.NewRequest(&mocks.TestContxt{
-			Form: url.Values{"__body_": []string{`9`}},
-		}, serverConf, conf.NewMeta())
-		if err := r.Bind(&out); (err != nil) != false {
-			t.Errorf("request.Bind() error = %v, wantErr %v", err, false)
-		}
-		if !reflect.DeepEqual(out, 9) {
-			t.Errorf("request.Bind() out= %v, want %v", out, 9)
-		}
-	})
-
-	t.Run("参数类型为interface{}", func(t *testing.T) {
-		var out interface{}
-		out = 1
-		r := ctx.NewRequest(&mocks.TestContxt{
-			Form: url.Values{"__body_": []string{`9`}},
-		}, serverConf, conf.NewMeta())
-		if err := r.Bind(&out); (err != nil) != false {
-			t.Errorf("request.Bind() error = %v, wantErr %v", err, false)
-		}
-		var want float64
-		want = 9
-		if !reflect.DeepEqual(out, want) {
-			t.Errorf("request.Bind() out= %v, want %v", out, 9)
-		}
-	})
-
 	type result struct {
 		Key   string `json:"key" valid:"required"`
 		Value string `json:"value" valid:"required"`
 	}
+	tests := []struct {
+		name       string
+		body       string
+		out        interface{}
+		wantErrStr string
+		want       interface{}
+	}{
+		{name: "参数非指针,无法进行数据绑定", out: map[string]string{}, wantErrStr: "输入参数非指针 map"},
+		{name: "参数类型非struct,无法进行数据绑定", out: &map[string]string{}, wantErrStr: "输入参数非struct map"},
+		{name: "绑定数据为空", body: "", out: &result{}, wantErrStr: "unexpected end of JSON input"},
+		{name: "绑定数据验证错误", body: `{"key":"","value":"2"}`, out: &result{}, wantErrStr: "输入参数有误 key: non zero value required"},
+		{name: "正确绑定", body: `{"key":"1","value":"2"}`, out: &result{}, want: &result{Key: "1", Value: "2"}},
+	}
 
-	t.Run("参数类型为结构体,绑定数据非空验证", func(t *testing.T) {
-		out := result{}
-		r := ctx.NewRequest(&mocks.TestContxt{
-			Form: url.Values{"__body_": []string{`{"key":"","value":"2"}`}},
-		}, serverConf, conf.NewMeta())
-		if err := r.Bind(&out); err.Error() != "输入参数有误 key: non zero value required" {
-			t.Errorf("request.Bind() error = %v, wantErr 输入参数有误 key: non zero value required", err)
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
+	for _, tt := range tests {
+		r := ctx.NewRequest(&mocks.TestContxt{Form: url.Values{"__body_": []string{tt.body}}}, serverConf, conf.NewMeta())
+
+		err := r.Bind(tt.out)
+		if tt.wantErrStr != "" {
+			assert.Equal(t, tt.wantErrStr, err.Error(), tt.name)
+			continue
 		}
-	})
+		assert.Equal(t, tt.want, tt.out, tt.name)
+	}
+}
+
+func Test_request_Bind_WithHttp(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "绑定xml数据", contentType: "application/xml;charset=UTF-8", //gin 不支持gbk编码的xml绑定
+			body: `<?xml version="1.0" encoding="utf-8" ?><data><key>数据绑定bind!@#$%^&amp;*()_+</key><value>12</value></data>`,
+			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
+		{name: "绑定json数据", contentType: "application/json;charset=utf-8",
+			body: `{"key":"数据绑定bind!@#$%^&*()_+","value":"12"}`,
+			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
+		{name: "绑定yaml数据", contentType: "application/x-yaml; charset=utf-8",
+			body: "key: 数据绑定bind!@#$%^&*()_+ \nvalue: 12",
+			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
+		{name: "绑定form数据", contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			body: `key=%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9Abind!%40%23%24%25%5E%26*()_%2B&value=12`,
+			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
+	}
+
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/request/bind", tt.contentType, strings.NewReader(tt.body))
+		fmt.Println(err)
+		assert.Equal(t, false, err != nil, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
+	}
 }
 
 func Test_request_Check(t *testing.T) {
@@ -117,6 +117,42 @@ func Test_request_Check(t *testing.T) {
 			assert.Equal(t, tt.wantErr, err != nil, tt.name)
 			assert.Equal(t, tt.wantErrStr, err.Error(), tt.name)
 		}
+	}
+}
+
+func Test_request_Check_WithHttp(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		// {name: "检查xml数据", contentType: "application/xml;charset=UTF-8", //只能验证根节点
+		// 	body: `<?xml version="1.0" encoding="utf-8" ?><data><key>12</key><value>12</value></data>`,
+		// 	want: `{"data":"success"}`},
+		{name: "检查json数据", contentType: "application/json;charset=utf-8",
+			body: `{"key":"12","value":"12"}`,
+			want: `{"data":"success"}`},
+		{name: "检查form数据", contentType: "application/x-www-form-urlencoded; charset=utf-8",
+			body: `key=12&value=12`,
+			want: `{"data":"success"}`},
+		{name: "检查yaml数据", contentType: "application/x-yaml;charset=utf-8",
+			body: "key: key \nvalue: value",
+			want: `{"data":"success"}`},
+	}
+
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/request/check", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, false, err != nil, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		//fmt.Println(string(body))
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
 	}
 }
 

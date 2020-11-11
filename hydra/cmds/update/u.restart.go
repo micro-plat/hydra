@@ -3,8 +3,8 @@ package update
 import (
 	"os"
 	"strings"
-	"syscall"
 
+	"github.com/micro-plat/hydra/compatible"
 	"github.com/micro-plat/lib4go/ps"
 )
 
@@ -35,7 +35,7 @@ func killProcess(pid int) error {
 	if err != nil {
 		return err
 	}
-	process.Signal(syscall.SIGUSR2)
+	process.Signal(compatible.CmdsUpdateProcessSignal)
 	_, err = process.Wait()
 	if err != nil {
 		return err

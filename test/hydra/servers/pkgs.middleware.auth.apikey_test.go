@@ -60,7 +60,7 @@ func TestAuthAPIKey(t *testing.T) {
 					MockRequestPath: "/apikey/test",
 				},
 			},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

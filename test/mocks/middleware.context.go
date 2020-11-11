@@ -14,20 +14,23 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 )
 
+var _ middleware.IMiddleContext = &MiddleContext{}
+
 type MiddleContext struct {
-	MockNext       func()
-	MockMeta       conf.IMeta
-	MockUser       *MockUser
-	MockTFuncs     extcontext.TFuncs
-	MockRequest    extcontext.IRequest
-	MockResponse   extcontext.IResponse
-	HttpRequest    *http.Request
-	HttpResponse   http.ResponseWriter
-	MockServerConf app.IAPPConf
+	MockNext     func()
+	MockMeta     conf.IMeta
+	MockUser     *MockUser
+	MockTFuncs   extcontext.TFuncs
+	MockRequest  extcontext.IRequest
+	MockResponse extcontext.IResponse
+	HttpRequest  *http.Request
+	HttpResponse http.ResponseWriter
+	MockAPPConf  app.IAPPConf
 }
 
 func (ctx *MiddleContext) Next() {
@@ -57,7 +60,7 @@ func (ctx *MiddleContext) Context() context.Context {
 
 //APPConf 服务器配置
 func (ctx *MiddleContext) APPConf() app.IAPPConf {
-	return ctx.MockServerConf
+	return ctx.MockAPPConf
 }
 
 //TmplFuncs 模板函数列表
@@ -179,6 +182,8 @@ func (p *MockPath) AllowFallback() bool {
 	return p.MockAllowFallback
 }
 
+var _ extcontext.IRequest = &MockRequest{}
+
 type MockRequest struct {
 	SpecialList  []string
 	MockPath     extcontext.IPath
@@ -187,7 +192,7 @@ type MockRequest struct {
 	MockQueryMap map[string]interface{}
 	MockBodyMap  map[string]interface{}
 	extcontext.IGetter
-	extcontext.IUploadFile
+	extcontext.IFile
 }
 
 //Path 地址、头、cookie相关信息
@@ -247,7 +252,7 @@ func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{},
 }
 
 //GetTrace 获取请求的trace信息
-func (r *MockRequest) GetTrace() string {
+func (r *MockRequest) GetPlayload() string {
 	return ""
 }
 

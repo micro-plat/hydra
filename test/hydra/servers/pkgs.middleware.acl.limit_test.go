@@ -81,7 +81,7 @@ func TestLimit(t *testing.T) {
 				},
 			},
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
@@ -142,7 +142,7 @@ func TestLimit1(t *testing.T) {
 			},
 		},
 		MockResponse:   &mocks.MockResponse{MockStatus: 200},
-		MockServerConf: serverConf,
+		MockAPPConf: serverConf,
 	}
 	//调用中间件
 	handler(ctx)
@@ -162,7 +162,7 @@ func TestLimit1(t *testing.T) {
 						},
 					},
 					MockResponse:   &mocks.MockResponse{MockStatus: 200},
-					MockServerConf: serverConf,
+					MockAPPConf: serverConf,
 				}
 				//调用中间件
 				handler(ctx)

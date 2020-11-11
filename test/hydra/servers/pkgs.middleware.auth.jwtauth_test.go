@@ -62,7 +62,7 @@ func TestJWTAuth(t *testing.T) {
 					MockRequestPath: requestPath,
 				},
 			},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

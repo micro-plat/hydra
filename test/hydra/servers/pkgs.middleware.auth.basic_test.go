@@ -68,7 +68,7 @@ func TestAuthBasic(t *testing.T) {
 					MockRouter: tt.router,
 				},
 			},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

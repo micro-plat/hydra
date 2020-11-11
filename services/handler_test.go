@@ -138,3 +138,45 @@ type testHandler6 struct{}
 func (t *testHandler6) OrderHandling(context.IContext) interface{} {
 	return nil
 }
+
+type testHandler7 struct{}
+
+func (t testHandler7) PostHandle(context.IContext) interface{} {
+	return nil
+}
+func (t testHandler7) OrderHandle(context.IContext) interface{} {
+	return nil
+}
+func (t testHandler7) Handle(context.IContext) interface{} {
+	return nil
+}
+
+type testHandler8 struct{}
+
+func (t testHandler8) QueryHandling(context.IContext) interface{} {
+	return nil
+}
+func (t testHandler8) QueryHandle(context.IContext) interface{} {
+	return nil
+}
+
+func newTestHandler9() (*testHandler9, error) {
+	return &testHandler9{}, nil
+}
+
+type testHandler9 struct{}
+
+func (t *testHandler9) FileHandling(context.IContext) interface{} {
+	return nil
+}
+
+func (t *testHandler9) FileHandle(context.IContext) interface{} {
+	return nil
+}
+
+func SamePahtTestHandle(ctx context.IContext) interface{} {
+	return nil
+}
+func SamePahtTestHandling(ctx context.IContext) interface{} {
+	return nil
+}

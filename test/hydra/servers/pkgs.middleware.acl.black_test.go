@@ -61,7 +61,7 @@ func TestBlackList(t *testing.T) {
 		ctx := &mocks.MiddleContext{
 			MockUser:       &mocks.MockUser{MockClientIP: "192.168.0.1"},
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

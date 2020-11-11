@@ -383,3 +383,23 @@ func Test_regist_CRON(t *testing.T) {
 		checkTestCustomeResult(t, s, global.CRON, tt.name, tt.ext[0], tt.ext[1])
 	}
 }
+
+func Test_regist_Custome_TheSamePath(t *testing.T) {
+	tests := []struct {
+		name string
+		tp   string
+		path string
+		h    []interface{}
+	}{
+		{name: "注册api为多个签名互不冲突struct", tp: global.API, path: "/path_s_api1", h: []interface{}{testHandler7{}, testHandler8{}}},
+		{name: "注册api为多个签名互不冲突的数据", tp: global.API, path: "/path_s_api3", h: []interface{}{testHandler7{}, newTestHandler9}},
+	}
+	s := Def
+	global.MQConf.PlatNameAsPrefix(false)
+	for _, tt := range tests {
+		for _, v := range tt.h {
+			s.Custom(tt.tp, tt.path, v, router.WithEncoding("UTF-8"), router.WithPages())
+		}
+		checkTestCustomeResult(t, s, tt.tp, tt.name, router.WithEncoding("UTF-8"), router.WithPages())
+	}
+}

@@ -54,7 +54,7 @@ func TestWhiteList(t *testing.T) {
 					MockRequestPath: "/whitelist/test",
 				},
 			},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
