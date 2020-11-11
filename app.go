@@ -1,9 +1,8 @@
 package hydra
 
 import (
-	"syscall"
-
 	"github.com/micro-plat/cli"
+	"github.com/micro-plat/hydra/compatible"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
@@ -61,6 +60,5 @@ func (m *MicroApp) Start() {
 
 //Close 关闭服务器
 func (m *MicroApp) Close() {
-	parent := syscall.Getppid()
-	syscall.Kill(parent, syscall.SIGUSR2)
+	compatible.AppClose()
 }
