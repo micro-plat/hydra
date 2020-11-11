@@ -160,6 +160,10 @@ func (t testHandler8) QueryHandle(context.IContext) interface{} {
 	return nil
 }
 
+func newTestHandler9() (*testHandler9, error) {
+	return &testHandler9{}, nil
+}
+
 type testHandler9 struct{}
 
 func (t *testHandler9) FileHandling(context.IContext) interface{} {
