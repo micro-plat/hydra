@@ -56,9 +56,9 @@ func Test_reflectHandle(t *testing.T) {
 			wantServiceAction: [][]string{[]string{"GET"}, []string{"POST"}, []string{"GET", "POST"}},
 		},
 		{name: "handler为正确的对象", path: "/path", h: testHandler7{},
-			wantService:       []string{"/path/$get", "/path/$post", "/path"},
-			wantServicePath:   []string{"/path", "/path", "/path"},
-			wantServiceAction: [][]string{[]string{"GET"}, []string{"POST"}, []string{}},
+			wantService:       []string{"/path", "/path/$post", "/path/order"},
+			wantServicePath:   []string{"/path", "/path", "/path/order"},
+			wantServiceAction: [][]string{[]string{}, []string{"POST"}, []string{"GET", "POST"}},
 		},
 	}
 	for _, tt := range tests {
