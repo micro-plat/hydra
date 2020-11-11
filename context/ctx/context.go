@@ -34,7 +34,7 @@ type Ctx struct {
 	appConf    app.IAPPConf
 	cancelFunc func()
 	funs       *funcs
-	tid        uint64
+	tid        string
 }
 
 //NewCtx 构建基于gin.Context的上下文
@@ -116,7 +116,7 @@ func (c *Ctx) Close() {
 	c.meta = nil
 	c.request = nil
 	c.response = nil
-	c.tid = 0
+	c.tid = ""
 	c.user = nil
 
 	contextPool.Put(c)
