@@ -82,7 +82,8 @@ func Test_sortString_Less(t *testing.T) {
 		{name: "t10", s: sortString{"192.168.*.*", "192.168.5.94"}, args: args{i: 0, j: 1}, want: false}, //ip中.的判断
 		{name: "t11", s: sortString{"192.168.*.94", "192.168.**"}, args: args{i: 0, j: 1}, want: true},   //ip中.的判断
 		{name: "t12", s: sortString{"192.168.*.*", "192.168.**"}, args: args{i: 0, j: 1}, want: true},    //ip中.的判断
-		{name: "t13", s: sortString{"/t1/t2", "/t1/t2/t3"}, args: args{i: 0, j: 1}, want: true},          //i的字符串被j包含时,数组超过限制崩溃
+		{name: "t13", s: sortString{"/t1/t2", "**"}, args: args{i: 0, j: 1}, want: true},
+		{name: "t14", s: sortString{"/t1/t2", "*"}, args: args{i: 0, j: 1}, want: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
