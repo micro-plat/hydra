@@ -26,7 +26,6 @@ func BasicAuthForRealm() Handler {
 			ctx.Next()
 			return
 		}
-
 		//检验当前请求是否被排除
 		routerObj, err := ctx.Request().Path().GetRouter()
 		if err != nil {
