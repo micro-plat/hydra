@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -74,6 +75,7 @@ func Test_request_Bind_WithHttp(t *testing.T) {
 	startServer()
 	for _, tt := range tests {
 		resp, err := http.Post("http://localhost:9091/request/bind", tt.contentType, strings.NewReader(tt.body))
+		fmt.Println(err)
 		assert.Equal(t, false, err != nil, tt.name)
 		defer resp.Body.Close()
 		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)

@@ -246,11 +246,17 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
-	//@todo 这个地方会强制跳转到content 的路径。
-	// if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
-	// 	c.ctx.Redirect(status, content)
-	// 	return nil
-	// }
+	//301 302 303 307 308 这个地方会强制跳转到content 的路径。
+	if status == http.StatusMovedPermanently || status == http.StatusFound || status == http.StatusSeeOther ||
+		status == http.StatusTemporaryRedirect || status == http.StatusPermanentRedirect {
+		//从header里面获取的Location
+		location := content
+		if l := c.ctx.WHeader("Location"); l != "" {
+			location = l
+		}
+		c.ctx.Redirect(status, location)
+		return nil
+	}
 	//@todo encoding的测试
 	routerObj, err := c.path.GetRouter()
 	if err != nil {

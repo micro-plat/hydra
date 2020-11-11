@@ -392,7 +392,7 @@ func Test_regist_Custome_TheSamePath(t *testing.T) {
 		h    []interface{}
 	}{
 		{name: "注册api为多个签名互不冲突struct", tp: global.API, path: "/path_s_api1", h: []interface{}{testHandler7{}, testHandler8{}}},
-		{name: "注册api为多个签名互不冲突的数据", tp: global.API, path: "/path_s_api3", h: []interface{}{testHandler7{}, &testHandler9{}}},
+		{name: "注册api为多个签名互不冲突的数据", tp: global.API, path: "/path_s_api3", h: []interface{}{testHandler7{}, newTestHandler9}},
 	}
 	s := Def
 	global.MQConf.PlatNameAsPrefix(false)

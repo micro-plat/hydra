@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/hydra/servers/http"
@@ -13,10 +14,12 @@ import (
 )
 
 func TestNewCtx(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
-	_, _ = http.NewResponsive(serverConf)
+	if _, err := app.Cache.GetAPPConf(h.API); err != nil {
+		confObj := mocks.NewConf()         //构建对象
+		confObj.API(":8080")               //初始化参数
+		serverConf := confObj.GetAPIConf() //获取配置
+		_, _ = http.NewResponsive(serverConf)
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("recover:NewCtx() = %v", r)
@@ -27,10 +30,12 @@ func TestNewCtx(t *testing.T) {
 }
 
 func TestCtx_Close(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
-	_, _ = http.NewResponsive(serverConf)
+	if _, err := app.Cache.GetAPPConf(h.API); err != nil {
+		confObj := mocks.NewConf()         //构建对象
+		confObj.API(":8080")               //初始化参数
+		serverConf := confObj.GetAPIConf() //获取配置
+		_, _ = http.NewResponsive(serverConf)
+	}
 
 	c := ctx.NewCtx(&mocks.TestContxt{}, h.API)
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	ghttp "net/http"
 	"os"
 	"sync"
 	"time"
@@ -18,7 +19,7 @@ func startServer() {
 	oncelock.Do(func() {
 
 		app := hydra.NewApp(
-			hydra.WithPlatName("hydra_test"),
+			hydra.WithPlatName("hydra_context"),
 			hydra.WithSystemName("test"),
 			hydra.WithServerTypes(http.API),
 			hydra.WithDebug(),
@@ -33,6 +34,8 @@ func startServer() {
 		app.API("/download", DownloadFile)
 		app.API("/request/bind", Bind)
 		app.API("/request/check", Check)
+		app.API("/response/redirect", Redirect)
+		app.API("/response/redirect/dst", RedirectDst)
 		os.Args = []string{"startserver", "run"}
 		go app.Start()
 		time.Sleep(time.Second * 2)
@@ -127,6 +130,16 @@ func Check(ctx hydra.IContext) interface{} {
 		fmt.Println("err:", err)
 		return fmt.Errorf("Check出错 %+v", err)
 	}
+	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
+	return "success"
+}
+
+func Redirect(ctx hydra.IContext) interface{} {
+	ctx.Response().Header("Location", "http://localhost:9091/response/redirect/dst")
+	ctx.Response().Stop(ghttp.StatusFound)
+	return nil
+}
+func RedirectDst(ctx hydra.IContext) interface{} {
 	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
 	return "success"
 }

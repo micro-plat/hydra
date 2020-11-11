@@ -1,9 +1,12 @@
 package context
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
@@ -263,4 +266,25 @@ func Test_response_Redirect(t *testing.T) {
 	assert.Equal(t, true, context.WrittenStatus, "验证上下文中的写入状态")
 	assert.Equal(t, "url", context.Url, "验证上下文中的url")
 	assert.Equal(t, 200, context.StatusCode, "验证上下文中的状态码")
+}
+
+func Test_response_Redirect_WithHttp(t *testing.T) {
+
+	startServer()
+	resp, err := http.Post("http://localhost:9091/response/redirect", "application/json", strings.NewReader(""))
+	fmt.Println(resp, err)
+	assert.Equal(t, false, err != nil, "重定向请求错误")
+	defer resp.Body.Close()
+	assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], "重定向响应头错误")
+	assert.Equal(t, "200 OK", resp.Status, "重定向响应状态错误")
+	assert.Equal(t, 200, resp.StatusCode, "重定向响应码错误")
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.Equal(t, false, err != nil, "重定向响应体读取错误")
+	want := map[string]interface{}{}
+	json.Unmarshal([]byte(`{"data":"success"}`), &want)
+
+	got := map[string]interface{}{}
+	json.Unmarshal(body, &got)
+	assert.Equal(t, want, got, "重定向响应返回错误")
+
 }
