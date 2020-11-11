@@ -54,9 +54,11 @@ func (c *cron) Add(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
-	c.tasks.Append(task) //@todo 状态未变化的是否要进行通知
-	for _, s := range c.subscribers {
-		s.taskChan <- task
+	_, notifyTasks := c.tasks.Append(task)
+	for _, t := range notifyTasks {
+		for _, s := range c.subscribers {
+			s.taskChan <- t
+		}
 	}
 	c.signalChan <- struct{}{}
 	return c
@@ -68,9 +70,11 @@ func (c *cron) Remove(cron string, service string) ICRON {
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
 	task.Disable = true
-	c.tasks.Append(task)
-	for _, s := range c.subscribers {
-		s.taskChan <- task
+	_, notifyTasks := c.tasks.Append(task)
+	for _, t := range notifyTasks {
+		for _, s := range c.subscribers {
+			s.taskChan <- t
+		}
 	}
 	c.signalChan <- struct{}{}
 	return c

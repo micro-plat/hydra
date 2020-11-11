@@ -115,11 +115,11 @@ func (c *response) Write(status int, content interface{}) error {
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 
 	//将编码设置到content type
-	routerObj, err := c.path.GetRouter()
-	if err != nil {
-		return err
-	}
-	c.final.contentType = fmt.Sprintf(c.final.contentType, routerObj.GetEncoding())
+	// routerObj, err := c.path.GetRouter()
+	// if err != nil {
+	// 	return err
+	// }
+	c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
 
 	//记录为原始状态
 	c.raw.contentType = c.final.contentType
@@ -258,17 +258,23 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 		return nil
 	}
 	//@todo encoding的测试
-	routerObj, err := c.path.GetRouter()
-	if err != nil {
-		return err
-	}
-	if routerObj.IsUTF8() {
+	// routerObj, err := c.path.GetRouter()
+	// if err != nil {
+	// 	return err
+	// }
+	// if routerObj.IsUTF8() {
+	// 	c.ctx.Data(status, ctyp, []byte(content))
+	// 	return nil
+	// }
+
+	e := c.path.GetEncoding()
+	if e == "utf-8" {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
 	}
-	buff, err := encoding.Encode(content, routerObj.GetEncoding())
+	buff, err := encoding.Encode(content, e)
 	if err != nil {
-		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", routerObj.GetEncoding(), err, content)
+		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
 	}
 	c.ctx.Data(status, ctyp, buff)
 	return nil

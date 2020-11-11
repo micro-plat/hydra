@@ -131,11 +131,11 @@ func (r *request) Get(name string) (result string, ok bool) {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
 			}
 
-			routerObj, err := r.path.GetRouter() //@todo path只取encoding
-			if err != nil {
-				panic(fmt.Errorf("url.Router配置错误:%w", err))
-			}
-			rx, err := encoding.Decode(u, routerObj.GetEncoding())
+			// routerObj, err := r.path.GetRouter() //@todo path只取encoding
+			// if err != nil {
+			// 	panic(fmt.Errorf("url.Router配置错误:%w", err))
+			// }
+			rx, err := encoding.Decode(u, r.path.GetEncoding())
 			if err != nil {
 				result = u
 				return

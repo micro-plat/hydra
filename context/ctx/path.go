@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,6 +21,7 @@ type rpath struct {
 	meta     conf.IMeta
 	isLimit  bool
 	fallback bool
+	encoding string
 }
 
 func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) *rpath {
@@ -33,6 +35,32 @@ func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) 
 //GetMethod 获取服务请求方式
 func (c *rpath) GetMethod() string {
 	return c.ctx.GetMethod()
+}
+
+func (c *rpath) GetEncoding() string {
+	if c.encoding != "" {
+		return c.encoding
+	}
+
+	//从请求header中获取
+	if ctp, ok := c.ctx.GetHeaders()["Content-Type"]; ok {
+		for _, params := range strings.Split(ctp[0], ";") {
+			if strings.HasPrefix(params, "charset=") {
+				c.encoding = strings.TrimPrefix(params, "charset=")
+			}
+		}
+	}
+	if c.encoding != "" {
+		return c.encoding
+	}
+
+	//从router配置获取
+	routerObj, err := c.GetRouter()
+	if err != nil {
+		panic(fmt.Errorf("url.Router配置错误:%w", err))
+	}
+	c.encoding = routerObj.GetEncoding()
+	return c.encoding
 }
 
 //GetRouter 获取路由信息
