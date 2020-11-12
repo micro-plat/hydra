@@ -143,7 +143,7 @@ func Test_ginCtx_Get_WithForm(t *testing.T) {
 // 	})
 
 // 	//构建请求 方法要与注册方法一致
-// 	fileName := "servers.pkgs.middleware.middle.test.txt"
+// 	fileName := "pkgs.middleware.middle.test.txt"
 // 	file, _ := os.Open(fileName)
 // 	defer file.Close()
 // 	body := &bytes.Buffer{}
