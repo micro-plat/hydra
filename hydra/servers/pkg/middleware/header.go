@@ -28,6 +28,5 @@ func Header() Handler {
 
 		//2. 业务处理
 		ctx.Next()
-
 	}
 }

@@ -227,6 +227,9 @@ func (r *MockRequest) Check(field ...string) error {
 
 //GetMap 将当前请求转换为map并返回
 func (r *MockRequest) GetMap() (map[string]interface{}, error) {
+	if r.MockQueryMap == nil {
+		return nil, fmt.Errorf("人工制造错误")
+	}
 	return r.MockQueryMap, nil
 }
 
@@ -350,7 +353,7 @@ func (r *MockRequest) IsEmpty(name string) bool {
 	return ok
 }
 
-//SaveFile 保存上传文件到指定路径 @todo
+//SaveFile 保存上传文件到指定路径
 func (r *MockRequest) SaveFile(fileKey, dst string) error {
 	return nil
 }

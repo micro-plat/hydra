@@ -16,7 +16,7 @@ import (
 
 //author:taoshouyin
 //time:2020-11-11
-//desc:测试basic验证中间件逻辑
+//desc:测试jwt验证中间件逻辑
 func TestJWTAuth(t *testing.T) {
 	secert := utility.GetGUID()
 	requestPath := "/jwt/test"

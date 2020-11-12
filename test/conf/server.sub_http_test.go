@@ -375,10 +375,10 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 		wantConf *limiter.Limiter
 	}{
 		{name: "不设置limiter节点", opts: []limiter.Option{}, wantErr: true, wantConf: &limiter.Limiter{Disable: true}},
-		{name: "设置错误的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("错误数据1", "错误数据"), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: false,
+		{name: "设置错误的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("错误数据", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: false,
 			wantConf: nilLImiter},
-		{name: "设置正确的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: true,
-			wantConf: limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))},
+		{name: "设置正确的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: true,
+			wantConf: limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))},
 	}
 
 	for _, tt := range tests {

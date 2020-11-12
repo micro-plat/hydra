@@ -8,6 +8,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/app"
 	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -57,16 +58,31 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	if err != nil {
 		return
 	}
+
+	//获取rpc所有的注册服务路由
+	// matchPath := conf.PathMatch
+	rpcConf, _ := app.Cache.GetAPPConf("rpc")
+	routerObj, _ := rpcConf.GetRouterConf()
+	paths := []string{}
+	for _, r := range routerObj.GetRouters() {
+		paths = append(paths, r.Path)
+	}
+
+	matchPath := conf.NewPathMatch(paths...)
+	matchPath.Match(rservice)
+
 	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
 		if isip {
 			return rpc.NewClient(platName)
 		}
 		//return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, pkgs.LocalIP()))
+
 		return rpc.NewClient(global.Def.RegistryAddr, rpc.WithRoundRobinBalancer(platName, rservice))
 	})
 	if err != nil {
 		return nil, err
 	}
+
 	client := c.(*rpc.Client)
 	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
 	nopts = append(nopts, opts...)

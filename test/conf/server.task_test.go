@@ -129,7 +129,7 @@ func TestTasks_Append(t *testing.T) {
 		{name: "实体对象累加单个对象", fields: task.NewTasks(task.NewTask("xxx", "yyy")), args: []*task.Task{task.NewTask("xxx1", "yyy1"), task.NewTask("xxx2", "yyy2")}, want: task.NewTasks(task.NewTask("xxx", "yyy"), task.NewTask("xxx1", "yyy1"), task.NewTask("xxx2", "yyy2"))},
 	}
 	for _, tt := range tests {
-		got := tt.fields.Append(tt.args...)
+		got, _ := tt.fields.Append(tt.args...)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
