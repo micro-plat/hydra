@@ -184,6 +184,9 @@ type IResponse interface {
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
+
+	//GetHeaders 获取返回数据
+	GetHeaders() map[string][]string
 }
 
 //IAuth 认证信息

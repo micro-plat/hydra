@@ -46,7 +46,6 @@ func APIKeyAuth() Handler {
 			return
 		}
 		ctx.Next()
-
 	}
 }
 
@@ -82,5 +81,4 @@ func getSignRaw(r context.IRequest, a string, b string) (string, string) {
 	}
 	values.Sort()
 	return sign, values.Join(a, b)
-
 }

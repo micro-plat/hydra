@@ -58,6 +58,9 @@ type IGlobal interface {
 	//GetTrace 显示请求与响应信息
 	GetTrace() string
 
+	//GetTracePort 当Trace为web时候，需要设置TracePort
+	GetTracePort() string
+
 	//Log 获取日志组件
 	Log() logger.ILogger
 

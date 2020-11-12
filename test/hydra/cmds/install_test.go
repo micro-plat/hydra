@@ -1,8 +1,6 @@
 package cmds
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -17,14 +15,10 @@ import (
 const installRegistryAddr = "lm://."
 
 func Test_install_Normal(t *testing.T) {
-	//正常的安装
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
-	//正常的安装
-	args := []string{"xxtest", "install", "-r", installRegistryAddr, "-c", "c"}
+	resetServiceName(t.Name())
+	execPrint(t)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	var app = hydra.NewApp(
 		hydra.WithServerTypes(http.API),
@@ -32,19 +26,28 @@ func Test_install_Normal(t *testing.T) {
 		hydra.WithSystemName("apiserver"),
 		hydra.WithClusterName("c"),
 	)
-	os.Args = args
+
+	//2. 清除服务(保证没有服务安装)
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
+
+	//正常的安装
+	os.Args = []string{"xxtest", "install", "-r", installRegistryAddr, "-c", "c"}
 	app.Start()
 	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
+	//3. 清除服务
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
 
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {
@@ -61,37 +64,44 @@ func Test_install_Normal(t *testing.T) {
 		}
 		return
 	}
+	t.Error("未找到安装的输出信息")
 }
 
 func Test_install_Less_param(t *testing.T) {
-	//缺少参数的安装 -c
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
-	//缺少参数的安装 -c
-	args := []string{"xxtest", "install", "-r", installRegistryAddr}
+	resetServiceName(t.Name())
+	execPrint(t)
+
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	var app = hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithPlatName("xxtest"),
 		hydra.WithSystemName("apiserver"),
-		hydra.WithClusterName("c"),
+		//hydra.WithClusterName("c"),
 	)
-	os.Args = args
+
+	//2. 清除服务(保证没有服务安装)
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
+
+	//缺少参数的安装 -c
+	os.Args = []string{"xxtest", "install", "-r", installRegistryAddr}
 	app.Start()
 	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
+	//2. 删除服务
+	os.Args = []string{"xxtest", "remove"}
+	app.Start()
 
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {
@@ -99,11 +109,11 @@ func Test_install_Less_param(t *testing.T) {
 		}
 		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			//unbuntu/centos
-			result := strings.Contains(row, "sudo") || strings.Contains(row, "FAILED")
+			result := strings.Contains(row, "sudo") || strings.Contains(row, "集群名不能为空称")
 			assert.Equal(t, true, result, "缺少参数的安装 -c")
 		}
 		if runtime.GOOS == "windows" {
-			result := strings.Contains(row, "FAILED")
+			result := strings.Contains(row, "集群名不能为空称")
 			assert.Equal(t, true, result, "缺少参数的安装 -c")
 		}
 		return
@@ -111,12 +121,12 @@ func Test_install_Less_param(t *testing.T) {
 }
 
 func Test_install_Cover(t *testing.T) {
-	//覆盖安装 -c
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
+	resetServiceName(t.Name())
+	execPrint(t)
+
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
+
 	//覆盖安装 -c
 	args := []string{"xxtest", "install", "-r", installRegistryAddr, "-c", "c", "-cover", "true"}
 
@@ -128,17 +138,14 @@ func Test_install_Cover(t *testing.T) {
 	)
 	os.Args = args
 	app.Start()
-	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
-
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {

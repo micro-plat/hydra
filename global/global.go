@@ -49,6 +49,9 @@ type global struct {
 	//Trace 显示请求与响应信息
 	Trace string
 
+	//TracePort 当Trace为web时候，需要设置
+	TracePort string
+
 	//isClose 是否关闭当前应用程序
 	isClose bool
 
@@ -131,6 +134,11 @@ func (m *global) GetClusterName() string {
 //GetTrace 获取当前启动的pprof类型
 func (m *global) GetTrace() string {
 	return m.Trace
+}
+
+//GetTracePort 当Trace为web时候，需要设置TracePort
+func (m *global) GetTracePort() string {
+	return m.TracePort
 }
 
 //ClosingNotify 获取系统关闭通知

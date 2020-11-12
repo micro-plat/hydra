@@ -59,7 +59,7 @@ func TestQueues_Append(t *testing.T) {
 		{name: "添加多个个队列对象", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueue("queue2", "service2")}, want: queue.NewQueues(queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueue("queue2", "service2"))},
 	}
 	for _, tt := range tests {
-		got := tt.fields.Append(tt.args...)
+		got, _ := tt.fields.Append(tt.args...)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

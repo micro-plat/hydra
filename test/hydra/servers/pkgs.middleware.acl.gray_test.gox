@@ -58,7 +58,7 @@ func TestGray_Disable(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Proxy(tt.opts...)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -71,12 +71,12 @@ func TestGray_Disable(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse: &mocks.MockResponse{MockStatus: 200},
-			MockAPPConf:  serverConf,
+			MockResponse:   &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Proxy()
+		handler := middleware.Gray()
 
 		//调用中间件
 		handler(ctx)
@@ -136,7 +136,7 @@ func TestGray_Enable_Has(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Proxy(tt.opts...)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -149,12 +149,12 @@ func TestGray_Enable_Has(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse: &mocks.MockResponse{MockStatus: 200},
-			MockAPPConf:  serverConf,
+			MockResponse:   &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Proxy()
+		handler := middleware.Gray()
 
 		//调用中间件
 		handler(ctx)
@@ -210,7 +210,7 @@ func TestGray_Enable_None(t *testing.T) {
 		mockConf.API(":51001")
 		//mockConf.Service.API.Add()
 		//初始化测试用例参数
-		mockConf.GetAPI().Proxy(tt.opts...)
+		mockConf.GetAPI().Gray(tt.opts...)
 		serverConf := mockConf.GetAPIConf()
 
 		request, _ := xhttp.NewRequest(xhttp.MethodGet, "http://localhost:51001/upcluster", nil)
@@ -223,12 +223,12 @@ func TestGray_Enable_None(t *testing.T) {
 			HttpResponse: &mocks.MockResponseWriter{
 				ResponseHeader: xhttp.Header{},
 			},
-			MockResponse: &mocks.MockResponse{MockStatus: 200},
-			MockAPPConf:  serverConf,
+			MockResponse:   &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
-		handler := middleware.Proxy()
+		handler := middleware.Gray()
 
 		//调用中间件
 		handler(ctx)
