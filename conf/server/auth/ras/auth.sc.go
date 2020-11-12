@@ -14,6 +14,9 @@ const (
 	SecretConnectModeHeadTail = "headTail"
 )
 
+//SecretOption 配置选项
+type SecretOption func(*SecretConnect)
+
 //SecretConnect secret拼接串
 type SecretConnect struct {
 
@@ -31,29 +34,33 @@ type SecretConnect struct {
 }
 
 //WithSecretName 设置secrect的键名称
-func (c *SecretConnect) WithSecretName(name string, kv string) *SecretConnect {
-	c.Name = name
-	c.KeyValue = kv
-	return c
+func WithSecretName(name string, kv string) SecretOption {
+	return func(c *SecretConnect) {
+		c.Name = name
+		c.KeyValue = kv
+	}
 }
 
 //WithSecretHeadMode 设置secrect与数据串之间的拼接方式,并将secret串拼接到数据串的头部
-func (c *SecretConnect) WithSecretHeadMode(chain string) *SecretConnect {
-	c.Chain = chain
-	c.Mode = SecretConnectModeHead
-	return c
+func WithSecretHeadMode(chain string) SecretOption {
+	return func(c *SecretConnect) {
+		c.Chain = chain
+		c.Mode = SecretConnectModeHead
+	}
 }
 
 //WithSecretTailMode 设置secrect与数据串之间的拼接方式，并将secret串拼接到数据串的尾部
-func (c *SecretConnect) WithSecretTailMode(chain string) *SecretConnect {
-	c.Chain = chain
-	c.Mode = SecretConnectModeTail
-	return c
+func WithSecretTailMode(chain string) SecretOption {
+	return func(c *SecretConnect) {
+		c.Chain = chain
+		c.Mode = SecretConnectModeTail
+	}
 }
 
 //WithSecretHeadAndTailMode 设置secrect与数据串之间的拼接方式，并将secret串拼接到数据串的头部和尾部
-func (c *SecretConnect) WithSecretHeadAndTailMode(chain string) *SecretConnect {
-	c.Chain = chain
-	c.Mode = SecretConnectModeHeadTail
-	return c
+func WithSecretHeadAndTailMode(chain string) SecretOption {
+	return func(c *SecretConnect) {
+		c.Chain = chain
+		c.Mode = SecretConnectModeHeadTail
+	}
 }

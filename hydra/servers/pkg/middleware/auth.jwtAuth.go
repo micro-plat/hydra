@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"net/http"
 	"strings"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -31,16 +30,6 @@ func JwtAuth() Handler {
 
 		//3.检查是否需要跳过请求
 		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok {
-			ctx.Next()
-			return
-		}
-
-		routerObj, err := ctx.Request().Path().GetRouter()
-		if err != nil {
-			ctx.Response().Abort(http.StatusNotExtended, err)
-			return
-		}
-		if ok, _ := jwtAuth.Match(routerObj.Service); ok {
 			ctx.Next()
 			return
 		}

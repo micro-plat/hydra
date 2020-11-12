@@ -19,7 +19,7 @@ func TmpltTranslate(name string, tmplt string, funcs map[string]interface{}, inp
 	return buff.String(), nil
 }
 
-//getTmplt 获取模板信息   @todo   可能需要缓存模板
+//getTmplt 获取模板信息
 func getTmplt(name string, tmpl string, funcs map[string]interface{}) (*template.Template, error) {
 	return template.New(name).Funcs(funcs).Parse(tmpl)
 }

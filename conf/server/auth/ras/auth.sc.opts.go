@@ -61,3 +61,13 @@ func WithConnectSortStatic(fields ...string) ConnectOption {
 		c.Fields = strings.Join(fields, "|")
 	}
 }
+
+//WithSecretConnect 启用配置
+func WithSecretConnect(opts ...SecretOption) ConnectOption {
+	return func(a *connectOption) {
+		a.Secret = &SecretConnect{}
+		for _, opt := range opts {
+			opt(a.Secret)
+		}
+	}
+}
