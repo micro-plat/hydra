@@ -22,6 +22,10 @@ func (b *buffer) Close() error {
 	return nil
 }
 
+func NewDispCtx() *dispCtx {
+	return &dispCtx{Context: &dispatcher.Context{}}
+}
+
 type dispCtx struct {
 	*dispatcher.Context
 }
@@ -112,7 +116,8 @@ func (g *dispCtx) File(name string) {
 	})
 }
 func (g *dispCtx) ShouldBind(v interface{}) error {
-	if body, ok := g.Context.Request.GetForm()["__body_"]; ok && len(g.Context.Request.GetForm()) == 1 {
+	f := g.Context.Request.GetForm()
+	if body, ok := f["__body_"]; ok && len(f) == 1 {
 		switch msg := body.(type) {
 		case json.RawMessage:
 			return json.Unmarshal(msg, v)
@@ -122,7 +127,7 @@ func (g *dispCtx) ShouldBind(v interface{}) error {
 			return json.Unmarshal([]byte(fmt.Sprint(msg)), v)
 		}
 	}
-	js, err := json.Marshal(g.Context.Request.GetForm)
+	js, err := json.Marshal(f)
 	if err != nil {
 		return fmt.Errorf("ShouldBind将输入的信息转换为JSON时失败 %w", err)
 	}
