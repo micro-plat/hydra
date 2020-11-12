@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -17,15 +16,11 @@ import (
 func Test_start_Normal(t *testing.T) {
 	resetServiceName(t.Name())
 	execPrint(t)
-	//正常的开启
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
+
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	//1. 安装服务
-	args := []string{"xxtest", "install", "-r", runRegistryAddr, "-c", "c"}
 	var app = hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithPlatName("xxtest"),
@@ -33,29 +28,29 @@ func Test_start_Normal(t *testing.T) {
 		hydra.WithClusterName("c"),
 	)
 	hydra.Conf.API(":19010")
-	os.Args = args
+	fmt.Println("安装")
+	os.Args = []string{"xxtest", "install", "-r", runRegistryAddr, "-c", "c"}
 	go app.Start()
+	time.Sleep(time.Second * 4)
+	fmt.Println("启动")
+	//2. 启动服务
+	os.Args = []string{"xxtest", "start"}
+	app.Start()
+
 	time.Sleep(time.Second * 2)
 
-	//2. 启动服务
-	args = []string{"xxtest", "start"}
-	os.Args = args
-	go app.Start()
-
-	time.Sleep(time.Second * 10)
-
+	fmt.Println("停止")
 	//3. 清除服务
-	args = []string{"xxtest", "remove"}
-	os.Args = args
-	go app.Start()
+	os.Args = []string{"xxtest", "stop"}
+	app.Start()
 
-	//还原std
-	*os.Stdout = orgStd
+	fmt.Println("删除")
+	//3. 清除服务
+	os.Args = []string{"xxtest", "remove"}
+	app.Start()
 
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
-
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 	if err != nil {
 		t.Error(err)
 		return
@@ -63,7 +58,7 @@ func Test_start_Normal(t *testing.T) {
 	line := string(bytes)
 	//启动 + 成功
 	result := strings.Contains(line, "Starting") && strings.Contains(line, "OK")
-	assert.Equal(t, true, result, "正常服务启动")
+	assert.Equal(t, true, result, "正常-服务start启动")
 
 	time.Sleep(time.Second)
 }
@@ -74,11 +69,8 @@ func Test_start_Not_installed(t *testing.T) {
 	//启动未安装的服务
 	execPrint(t)
 
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	//defer os.Remove(fileName)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	//1. 启动服务
 
@@ -100,17 +92,12 @@ func Test_start_Not_installed(t *testing.T) {
 	go app.Start()
 	time.Sleep(time.Second * 2)
 
-	//2. 删除服务 
-	os.Args =  []string{"xxtest", "remove"}
+	//2. 删除服务
+	os.Args = []string{"xxtest", "remove"}
 	app.Start()
+
 	time.Sleep(time.Second * 2)
-
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := fileCallback()
 
 	if err != nil {
 		t.Error(err)

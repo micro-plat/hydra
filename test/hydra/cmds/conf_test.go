@@ -1,8 +1,6 @@
 package cmds
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -20,11 +18,9 @@ const registryAddr = "zk://192.168.0.101"
 
 //@todo show 会无限循环写入
 func xTestshowNow(t *testing.T) {
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	//show
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
+
 	args := []string{"xxtest", "conf", "show", "-r", registryAddr, "-c", "c"}
 
 	var app = hydra.NewApp(
@@ -35,14 +31,9 @@ func xTestshowNow(t *testing.T) {
 	)
 	os.Args = args
 	app.Start()
-	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 	if err != nil {
 		t.Error(err)
 		return
@@ -52,12 +43,10 @@ func xTestshowNow(t *testing.T) {
 }
 
 func Test_installNow_Normal(t *testing.T) {
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 	//正常的安装
+
 	args := []string{"xxtest", "conf", "install", "-r", registryAddr, "-c", "c"}
 
 	var app = hydra.NewApp(
@@ -68,14 +57,9 @@ func Test_installNow_Normal(t *testing.T) {
 	)
 	os.Args = args
 	app.Start()
-	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 	if err != nil {
 		t.Error(err)
 		return
@@ -87,11 +71,9 @@ func Test_installNow_Normal(t *testing.T) {
 }
 
 func Test_installNow_NoFlag(t *testing.T) {
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
+
 	//正常的安装
 	args := []string{"xxtest", "conf", "install", "-r", registryAddr, "-xc", "c"}
 
@@ -104,14 +86,9 @@ func Test_installNow_NoFlag(t *testing.T) {
 
 	os.Args = args
 	app.Start()
-	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
 	if err != nil {
 		t.Error(err)
 		return
@@ -123,12 +100,8 @@ func Test_installNow_NoFlag(t *testing.T) {
 }
 
 func Test_installNow_Cover(t *testing.T) {
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-
-	defer os.Remove(fileName)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	orgRedisAddr := "192.168.5.79:1000"
 	newRedisAddr := "192.168.5.79:6379"
@@ -163,9 +136,6 @@ func Test_installNow_Cover(t *testing.T) {
 	app.Start()
 	time.Sleep(time.Second)
 
-	//还原std
-	*os.Stdout = orgStd
-
 	regist, err := registry.NewRegistry(registryAddr, logger.Nil())
 	if err != nil {
 		t.Error("registry.NewRegistry", err)
@@ -184,9 +154,9 @@ func Test_installNow_Cover(t *testing.T) {
 		return
 	}
 
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	time.Sleep(time.Second * 2)
+	bytes, err := fileCallback()
+
 	if err != nil {
 		t.Error(err)
 		return

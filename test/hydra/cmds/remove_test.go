@@ -1,8 +1,6 @@
 package cmds
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -17,14 +15,8 @@ import (
 const removeRegistryAddr = "lm://."
 
 func Test_remove_Normal(t *testing.T) {
-	//正常的删除
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
-
-
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	args := []string{"xxtest", "install", "-r", removeRegistryAddr, "-c", "c"}
 	var app = hydra.NewApp(
@@ -44,18 +36,13 @@ func Test_remove_Normal(t *testing.T) {
 	app.Start()
 	time.Sleep(time.Second * 2)
 
-	//2. 删除服务
+	//3. 删除服务
 	args = []string{"xxtest", "remove"}
 	os.Args = args
 	app.Start()
+
 	time.Sleep(time.Second * 2)
-
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := fileCallback()
 
 	if err != nil {
 		t.Error(err)
@@ -82,12 +69,8 @@ func Test_remove_Normal(t *testing.T) {
 }
 
 func Test_remove_NotExists(t *testing.T) {
-	//删除不存在
-	fileName := fmt.Sprint(time.Now().Nanosecond())
-	file, _ := os.Create(fileName)
-	orgStd := *os.Stdout
-	*os.Stdout = *file
-	defer os.Remove(fileName)
+	defunc, fileCallback := injectStdOutFile()
+	defer defunc()
 
 	//1. 删除服务
 	args := []string{"xxtest", "remove"}
@@ -99,14 +82,9 @@ func Test_remove_NotExists(t *testing.T) {
 	)
 	os.Args = args
 	app.Start()
+
 	time.Sleep(time.Second * 2)
-
-	//还原std
-	*os.Stdout = orgStd
-
-	file.Close()
-	time.Sleep(time.Second)
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := fileCallback()
 	if err != nil {
 		t.Error("读取文件报错：", err)
 	}
