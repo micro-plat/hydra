@@ -218,7 +218,7 @@ func Test_dispCtx_File(t *testing.T) {
 	//判断未写入状态
 	w := g.Written()
 	assert.Equal(t, false, w, "是否写入数据判断")
-	fileName := "servers.pkgs.middleware.middle.test.txt"
+	fileName := "pkgs.middleware.middle.test.txt"
 
 	//写入文件
 	g.File(fileName)
