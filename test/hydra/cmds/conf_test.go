@@ -44,12 +44,11 @@ func xTestshowNow(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		orgStd.WriteString(err.Error())
+		t.Error(err)
+		return
 	}
-	lines := strings.Split(string(bytes), "\r")
-	for _, row := range lines {
-		assert.Equal(t, true, strings.Contains(row, "OK"), "正常参数的安装")
-	}
+	line := string(bytes)
+	assert.Equal(t, true, strings.Contains(line, "OK"), "正常参数的安装")
 }
 
 func Test_installNow_Normal(t *testing.T) {
@@ -78,7 +77,8 @@ func Test_installNow_Normal(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		orgStd.WriteString(err.Error())
+		t.Error(err)
+		return
 	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
@@ -113,7 +113,8 @@ func Test_installNow_NoFlag(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		orgStd.WriteString(err.Error())
+		t.Error(err)
+		return
 	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
@@ -187,7 +188,8 @@ func Test_installNow_Cover(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		orgStd.WriteString(err.Error())
+		t.Error(err)
+		return
 	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {

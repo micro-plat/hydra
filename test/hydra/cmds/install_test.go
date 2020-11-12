@@ -10,21 +10,21 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/hydra/servers/http"
+ 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
 const installRegistryAddr = "lm://."
 
 func Test_install_Normal(t *testing.T) {
+	resetServiceName(t.Name())
+	execPrint(t)
 	//正常的安装
 	fileName := fmt.Sprint(time.Now().Nanosecond())
 	file, _ := os.Create(fileName)
 	orgStd := *os.Stdout
 	*os.Stdout = *file
 	defer os.Remove(fileName)
-	//正常的安装
-	args := []string{"xxtest", "install", "-r", installRegistryAddr, "-c", "c"}
 
 	var app = hydra.NewApp(
 		hydra.WithServerTypes(http.API),
@@ -32,9 +32,22 @@ func Test_install_Normal(t *testing.T) {
 		hydra.WithSystemName("apiserver"),
 		hydra.WithClusterName("c"),
 	)
-	os.Args = args
+
+	//2. 清除服务(保证没有服务安装)
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
+
+	//正常的安装
+	os.Args = []string{"xxtest", "install", "-r", installRegistryAddr, "-c", "c"}
 	app.Start()
 	time.Sleep(time.Second)
+
+
+	//3. 清除服务
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
 
 	//还原std
 	*os.Stdout = orgStd
@@ -43,8 +56,10 @@ func Test_install_Normal(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {
@@ -64,24 +79,36 @@ func Test_install_Normal(t *testing.T) {
 }
 
 func Test_install_Less_param(t *testing.T) {
+	resetServiceName(t.Name())
+	execPrint(t)
 	//缺少参数的安装 -c
 	fileName := fmt.Sprint(time.Now().Nanosecond())
 	file, _ := os.Create(fileName)
 	orgStd := *os.Stdout
 	*os.Stdout = *file
 	defer os.Remove(fileName)
-	//缺少参数的安装 -c
-	args := []string{"xxtest", "install", "-r", installRegistryAddr}
-
+ 
 	var app = hydra.NewApp(
 		hydra.WithServerTypes(http.API),
 		hydra.WithPlatName("xxtest"),
 		hydra.WithSystemName("apiserver"),
 		hydra.WithClusterName("c"),
 	)
-	os.Args = args
+
+	//2. 清除服务(保证没有服务安装)
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
+	
+	//缺少参数的安装 -c
+	os.Args = []string{"xxtest", "install", "-r", installRegistryAddr}
 	app.Start()
 	time.Sleep(time.Second)
+
+	//2. 删除服务
+ 	os.Args = []string{"xxtest", "remove"}
+	app.Start()
+	time.Sleep(time.Second * 2)
 
 	//还原std
 	*os.Stdout = orgStd
@@ -90,8 +117,10 @@ func Test_install_Less_param(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {
@@ -111,6 +140,8 @@ func Test_install_Less_param(t *testing.T) {
 }
 
 func Test_install_Cover(t *testing.T) {
+	resetServiceName(t.Name())
+	execPrint(t)
 	//覆盖安装 -c
 	fileName := fmt.Sprint(time.Now().Nanosecond())
 	file, _ := os.Create(fileName)
@@ -137,8 +168,10 @@ func Test_install_Cover(t *testing.T) {
 	time.Sleep(time.Second)
 	bytes, err := ioutil.ReadFile(fileName)
 
-	fmt.Println("bytes:", string(bytes), err)
-
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	lines := strings.Split(string(bytes), "\r")
 	for _, row := range lines {
 		if !strings.Contains(row, "Install") {
