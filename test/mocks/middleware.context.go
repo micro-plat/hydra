@@ -75,7 +75,7 @@ func (ctx *MiddleContext) User() extcontext.IUser {
 
 //Log 日志组件
 func (ctx *MiddleContext) Log() logger.ILogger {
-	return logger.Nil()
+	return logger.GetSession(ctx.MockAPPConf.GetServerConf().GetServerName(), ctx.User().GetRequestID())
 }
 
 //Close 关闭并释放资源
@@ -490,4 +490,69 @@ func (w *MockResponseWriter) Write(bytes []byte) (int, error) {
 }
 func (w *MockResponseWriter) WriteHeader(statusCode int) {
 	w.StatusCode = statusCode
+}
+
+const (
+	noWritten     = -1
+	defaultStatus = 200
+)
+
+type MockResponseWriter2 struct {
+	size   int
+	status int
+	data   []byte
+	header http.Header
+}
+
+func (w *MockResponseWriter2) Copy() *MockResponseWriter2 {
+	var cp = *w
+	return &cp
+}
+
+func (w *MockResponseWriter2) Reset() {
+	w.size = noWritten
+	w.header = make(map[string][]string)
+	w.status = defaultStatus
+	w.data = nil
+}
+
+func (w *MockResponseWriter2) WriteHeader(code int) {
+	if code > 0 && w.status != code {
+		w.status = code
+	}
+}
+
+func (w *MockResponseWriter2) WriteHeaderNow() {
+	if !w.Written() {
+		w.size = 0
+	}
+}
+
+func (w *MockResponseWriter2) Write(data []byte) (n int, err error) {
+	w.WriteHeaderNow()
+	w.data = data
+	w.size += len(data)
+	return w.size, nil
+}
+func (w *MockResponseWriter2) Header() http.Header {
+	return w.header
+}
+func (w *MockResponseWriter2) WriteString(s string) (n int, err error) {
+	w.WriteHeaderNow()
+	w.data = []byte(s)
+	w.size += len(w.data)
+	return w.size, nil
+}
+func (w *MockResponseWriter2) Status() int {
+	return w.status
+}
+func (w *MockResponseWriter2) Data() []byte {
+	return w.data
+}
+func (w *MockResponseWriter2) Size() int {
+	return w.size
+}
+
+func (w *MockResponseWriter2) Written() bool {
+	return w.size != noWritten
 }
