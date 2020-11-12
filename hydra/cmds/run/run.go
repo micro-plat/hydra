@@ -47,7 +47,7 @@ func doRun(c *cli.Context) (err error) {
 
 	globalData := global.Current()
 	//4.创建trace性能跟踪
-	if err = startTrace(globalData.GetTrace()); err != nil {
+	if err = startTrace(globalData.GetTrace(), globalData.GetTracePort()); err != nil {
 		return
 	}
 
