@@ -180,7 +180,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	if len(rdata) == 0 {
 		rdata = []byte("{}")
 	}
-	childConf, err := conf.NewByJSON(rdata, version)
+	childConf, err := conf.NewByText(rdata, version)
 	if err != nil {
 		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
 		return nil, err

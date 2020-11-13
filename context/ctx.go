@@ -225,9 +225,6 @@ type IContext interface {
 	//ServerConf 服务器配置
 	ServerConf() app.IAPPConf
 
-	//TmplFuncs 模板函数列表
-	TmplFuncs() TFuncs
-
 	//User 用户信息
 	User() IUser
 

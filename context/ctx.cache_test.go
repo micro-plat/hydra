@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-var tid uint64
+var tid string
 
 func BenchmarkGetGID(b *testing.B) {
 	b.ResetTimer()
