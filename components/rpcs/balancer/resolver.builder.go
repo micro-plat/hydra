@@ -128,40 +128,28 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 }
 
 func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
-	//如果存在.  说明是老版本的配置
-	rpath, opath := "", ""
-	if strings.Contains(b.plat, ".") {
-		p := strings.Split(b.plat, ".")
-		if len(p) != 2 {
-			return []string{}, fmt.Errorf("配置服务地址错误 %s", b.plat)
-		}
-		rpath = registry.Join(p[1], "services", "rpc", b.service, "providers")
-		opath = registry.Join(p[1], "services", "rpc", p[0], b.service, "providers")
 
-	} else {
-		rpath = registry.Join(b.plat, "services", "rpc", b.service, "providers")
-	}
-
+	rpath := registry.Join(b.plat, "services", "rpc", b.service, "providers")
 	//根据绝对路径查询服务
 	v, err := b.regst.Exists(rpath)
-	fmt.Println("11111111:", v, rpath)
 	if err != nil {
-		return []string{}, fmt.Errorf("检查服务地址出错 %s %w", rpath, err)
+		return []string{}, fmt.Errorf("检查新版服务地址出错 %s %w", rpath, err)
 	}
 	if !v {
-		//如果新版本不存在  再到老版本看看有没有
-		if len(opath) > 0 {
-			v, err = b.regst.Exists(opath)
-			fmt.Println("22222222222:", v, opath)
+		//如果不存在  检查是否是老版本的配置   按照老版本配置查找
+		if strings.Contains(b.plat, ".") {
+			p := strings.Split(b.plat, ".")
+			if len(p) != 2 {
+				return []string{}, fmt.Errorf("配置服务地址错误 %s", b.plat)
+			}
+			rpath = registry.Join(p[1], "services", "rpc", p[0], b.service, "providers")
+			v, err = b.regst.Exists(rpath)
 			if err != nil {
-				return []string{}, fmt.Errorf("检查服务地址出错1 %s %w", rpath, err)
+				return []string{}, fmt.Errorf("检查老版服务地址出错 %s %w", rpath, err)
 			}
 			if !v {
 				return []string{}, nil
 			}
-			rpath = opath
-		} else {
-			return []string{}, nil
 		}
 	}
 
