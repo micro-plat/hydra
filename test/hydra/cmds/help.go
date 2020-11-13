@@ -20,12 +20,12 @@ func execPrint(t *testing.T) {
 }
 
 func injectStdOutFile() (func(), func() (string, error)) {
-	fileName := fmt.Sprint(time.Now().Nanosecond())
+	fileName := fmt.Sprint("cmds_test" + time.Now().Nanosecond())
 	file, _ := os.Create(fileName)
 	orgStd := *os.Stdout
 	*os.Stdout = *file
 	return func() {
-			//os.Remove(fileName)
+			os.Remove(fileName)
 		},
 		func() (string, error) {
 			*os.Stdout = orgStd

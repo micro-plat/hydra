@@ -157,6 +157,11 @@ func Test_stop_has_stopped(t *testing.T) {
 	go app.Start()
 	time.Sleep(time.Second)
 
+	//4. 清理服务
+	os.Args = []string{"xxtest", "remove"}
+	go app.Start()
+	time.Sleep(time.Second * 2)
+
 	bytes, err := fileCallback()
 
 	if err != nil {
