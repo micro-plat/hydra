@@ -14,6 +14,7 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/resolver"
 )
 
 //IRequest RPC请求
@@ -241,9 +242,12 @@ func (c *Client) connect() (err error) {
 	if c.balancer == "" {
 		c.balancer = balancer.RoundRobin
 	}
-	//fmt.Println("client.connect.2", c.balancer, c.address)
 
-	rb := balancer.NewResolverBuilder(c.address, c.plat, c.service, c.sortPrefix)
+	var rb resolver.Builder
+	//兼容直接传服务器ip来进行访问
+	if len(c.plat) > 0 {
+		rb = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.sortPrefix)
+	}
 
 	ctx, _ := context.WithTimeout(context.Background(), c.connectionTimeout)
 	c.conn, err = grpc.DialContext(ctx,
@@ -253,7 +257,6 @@ func (c *Client) connect() (err error) {
 		grpc.WithResolvers(rb))
 
 	if err != nil {
-		//fmt.Println("client.connect.3", err)
 		return
 	}
 	c.client = pb.NewRPCClient(c.conn)
@@ -269,21 +272,15 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 	}
 	o.service = service
 	response, err := c.clientRequest(ctx, o, form)
-	//fmt.Println("Client.Request.1")
 	if err != nil {
-		//fmt.Println("Client.Request.2", err)
 		return NewResponseByStatus(http.StatusInternalServerError, err), err
 	}
-	//fmt.Println("Client.Request.3")
 	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 
 //Close 关闭RPC客户端连接
 func (c *Client) Close() {
 	c.isClose = true
-	// if c.resolver != nil {
-	// 	c.resolver.Close()
-	// }
 	if c.conn != nil {
 		c.conn.Close()
 	}

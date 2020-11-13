@@ -32,13 +32,6 @@ func WithEnable() Option {
 //RuleOption Rule配置选项
 type RuleOption func(*Rule)
 
-//WithAction 设置请求类型 支持:GET|POST|PUT|DELETE
-func WithAction(action ...string) RuleOption {
-	return func(a *Rule) {
-		a.Action = action
-	}
-}
-
 //WithMaxWait 设置请求允许等待的时长
 func WithMaxWait(second int) RuleOption {
 	return func(a *Rule) {

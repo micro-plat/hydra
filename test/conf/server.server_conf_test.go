@@ -142,7 +142,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.Proxy(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
 	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
-	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
+	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	confN.Metric("http://192.168.0.111:8080", "1", "cron1", metric.WithEnable(), metric.WithUPName("upnem", "1223456"))
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
 		ras.WithCheckTimestamp(false), ras.WithDecryptName("duser"), ras.WithParam("key1", "v1"), ras.WithParam("key2", "v2"), ras.WithAuthDisable())))
@@ -223,7 +223,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, blackC, blackListConf, "测试conf初始化,判断blackList节点对象")
 
 	limiterConf, err := gotS.GetLimiterConf()
-	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
+	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, limiterC, limiterConf, "测试conf初始化,判断limiter节点对象")
 

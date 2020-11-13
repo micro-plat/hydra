@@ -34,7 +34,6 @@ func TestLimit(t *testing.T) {
 			opts: []limiter.Option{limiter.WithEnable(),
 				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
-					Action:   []string{"GET"},
 					MaxAllow: 1,
 					MaxWait:  0,
 					Fallback: false,
@@ -46,7 +45,6 @@ func TestLimit(t *testing.T) {
 			opts: []limiter.Option{limiter.WithEnable(),
 				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
-					Action:   []string{"GET"},
 					MaxAllow: 1,
 					MaxWait:  0,
 					Fallback: false,
@@ -58,7 +56,6 @@ func TestLimit(t *testing.T) {
 			opts: []limiter.Option{limiter.WithEnable(),
 				limiter.WithRuleList(&limiter.Rule{
 					Path:     "/limiter",
-					Action:   []string{"GET"},
 					MaxAllow: 0,
 					MaxWait:  1,
 					Fallback: false,
@@ -80,8 +77,8 @@ func TestLimit(t *testing.T) {
 					MockRequestPath: tt.requestPath,
 				},
 			},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockAPPConf: serverConf,
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
@@ -105,7 +102,6 @@ func TestLimit1(t *testing.T) {
 	opts := []limiter.Option{limiter.WithEnable(),
 		limiter.WithRuleList(&limiter.Rule{
 			Path:     "/limiter",
-			Action:   []string{"GET"},
 			MaxAllow: 1,
 			MaxWait:  1,
 			Fallback: false,
@@ -141,8 +137,8 @@ func TestLimit1(t *testing.T) {
 				MockRequestPath: "/limiter",
 			},
 		},
-		MockResponse:   &mocks.MockResponse{MockStatus: 200},
-		MockAPPConf: serverConf,
+		MockResponse: &mocks.MockResponse{MockStatus: 200},
+		MockAPPConf:  serverConf,
 	}
 	//调用中间件
 	handler(ctx)
@@ -161,8 +157,8 @@ func TestLimit1(t *testing.T) {
 							MockRequestPath: tt.requestPath,
 						},
 					},
-					MockResponse:   &mocks.MockResponse{MockStatus: 200},
-					MockAPPConf: serverConf,
+					MockResponse: &mocks.MockResponse{MockStatus: 200},
+					MockAPPConf:  serverConf,
 				}
 				//调用中间件
 				handler(ctx)

@@ -133,10 +133,24 @@ func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
 	//根据绝对路径查询服务
 	v, err := b.regst.Exists(rpath)
 	if err != nil {
-		return []string{}, fmt.Errorf("检查服务地址出错 %s %w", rpath, err)
+		return []string{}, fmt.Errorf("检查新版服务地址出错 %s %w", rpath, err)
 	}
 	if !v {
-		return []string{}, nil
+		//如果不存在  检查是否是老版本的配置   按照老版本配置查找
+		if strings.Contains(b.plat, ".") {
+			p := strings.Split(b.plat, ".")
+			if len(p) != 2 {
+				return []string{}, fmt.Errorf("配置服务地址错误 %s", b.plat)
+			}
+			rpath = registry.Join(p[1], "services", "rpc", p[0], b.service, "providers")
+			v, err = b.regst.Exists(rpath)
+			if err != nil {
+				return []string{}, fmt.Errorf("检查老版服务地址出错 %s %w", rpath, err)
+			}
+			if !v {
+				return []string{}, nil
+			}
+		}
 	}
 
 	chilren, _, err := b.regst.GetChildren(rpath)
@@ -145,6 +159,7 @@ func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
 	}
 
 	addrs = b.extractAddrs(chilren)
+	fmt.Println("------------:", addrs)
 	return
 }
 

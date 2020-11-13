@@ -2,10 +2,11 @@ package dlock
 
 import (
 	"fmt"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/micro-plat/hydra/global"
 
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
@@ -43,10 +44,12 @@ func (d *DLock) TryLock() (err error) {
 			d.registry.Delete(d.path)
 		}
 	}()
-	d.path, err = d.registry.CreateSeqNode(registry.Join(d.name, "dlock_"),
+
+	path := registry.Join("dlock", global.Current().GetPlatName(), d.name, "dlock_")
+	d.path, err = d.registry.CreateSeqNode(path,
 		fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
-		return fmt.Errorf("创建分布式锁%s失败:%v", registry.Join(d.name, "dlock_"), err)
+		return fmt.Errorf("创建分布式锁%s失败:%v", path, err)
 	}
 
 	cldrs, _, err := d.registry.GetChildren(d.name)
@@ -66,9 +69,10 @@ func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 			d.registry.Delete(d.path)
 		}
 	}()
-	d.path, err = d.registry.CreateSeqNode(filepath.Join(d.name, "dlock_"), fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
+	path := registry.Join("dlock", global.Current().GetPlatName(), d.name, "dlock_")
+	d.path, err = d.registry.CreateSeqNode(path, fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
-		return fmt.Errorf("创建锁%s失败:%v", filepath.Join(d.name, "dlock_"), err)
+		return fmt.Errorf("创建锁%s失败:%v", path, err)
 	}
 
 	cldrs, _, err := d.registry.GetChildren(d.name)
