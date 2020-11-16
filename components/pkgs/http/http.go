@@ -11,11 +11,12 @@ import (
 
 	"time"
 
+	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 )
 
 //Client HTTP客户端
 type Client struct {
-	*conf
+	*varhttp.HTTPConf
 	client   *http.Client
 	Response *http.Response
 }
@@ -31,41 +32,39 @@ type ClientRequest struct {
 }
 
 // NewClient 构建HTTP客户端，用于发送GET POST等请求
-func NewClient(opts ...Option) (client *Client, err error) {
+func NewClient(opts ...varhttp.Option) (client *Client, err error) {
+	httpconf := varhttp.New(opts...)
+	return NewClientByConf(httpconf)
+}
+
+//NewClientByConf 通过配置对象获取客户端
+func NewClientByConf(conf *varhttp.HTTPConf) (client *Client, err error) {
 	client = &Client{}
-	client.conf = &conf{
-		ConnectionTimeout: time.Second * 30,
-		RequestTimeout:    time.Second * 10,
-	}
-	for _, opt := range opts {
-		opt(client.conf)
-	}
-	tlsConf, err := getCert(client.conf)
+	client.HTTPConf = conf
+	tlsConf, err := getCert(client.HTTPConf)
 	if err != nil {
 		return nil, err
 	}
-
 	orginalClient := &http.Client{
 		Transport: &http.Transport{
-			DisableKeepAlives: client.conf.Keepalive,
+			DisableKeepAlives: client.HTTPConf.Keepalive,
 			TLSClientConfig:   tlsConf,
-			Proxy:             getProxy(client.conf),
+			Proxy:             getProxy(client.HTTPConf),
 			Dial: func(netw, addr string) (net.Conn, error) {
-				c, err := net.DialTimeout(netw, addr, client.conf.ConnectionTimeout)
+				c, err := net.DialTimeout(netw, addr, time.Second*time.Duration(client.HTTPConf.ConnectionTimeout))
 				if err != nil {
 					return nil, err
 				}
-				c.SetDeadline(time.Now().Add(client.conf.RequestTimeout))
+				c.SetDeadline(time.Now().Add(time.Duration(client.HTTPConf.RequestTimeout) * time.Second))
 				return c, nil
 			},
 			MaxIdleConnsPerHost:   0,
 			ResponseHeaderTimeout: 0,
 		},
 	}
-	client.client = orginalClient 
+	client.client = orginalClient
 	return
 }
- 
 
 // Get http get请求
 func (c *Client) Get(url string, charset ...string) (content string, status int, err error) {

@@ -4,16 +4,9 @@ import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/pkgs/http"
 	"github.com/micro-plat/hydra/conf"
+	httpconf "github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
-)
-
-const (
-	//typeNode DB在var配置中的类型名称
-	httpTypeNode = "http"
-
-	//nameNode DB名称在var配置中的末节点名称
-	httpNameNode = "client"
 )
 
 //StandardHTTPClient db
@@ -37,25 +30,22 @@ func (s *StandardHTTPClient) GetRegularClient(names ...string) (d IClient) {
 
 //GetClient 获取http请求对象
 func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
-	name := types.GetStringByIndex(names, 0, httpNameNode)
-	obj, err := s.c.GetOrCreate(httpTypeNode, name, func(conf conf.IVarConf) (interface{}, error) {
-		js, err := conf.GetConf(httpNameNode, name)
-		if err != nil {
+	name := types.GetStringByIndex(names, 0, httpconf.HttpNameNode)
+	obj, err := s.c.GetOrCreate(httpconf.HttpTypeNode, name, func(vconf conf.IVarConf) (interface{}, error) {
+		js, err := vconf.GetConf(httpconf.HttpNameNode, name)
+		if err != nil && err != conf.ErrNoSetting {
 			return nil, err
 		}
 		ctx := context.Current()
-		opt := []http.Option{
-			http.WithRequestID(ctx.User().GetRequestID()),
+		opt := []httpconf.Option{
+			httpconf.WithRequestID(ctx.User().GetRequestID()),
 		}
-		if js == nil {
-			return http.NewClient(opt...)
+		if js != nil {
+			opt = append(opt, httpconf.WithRaw(js.GetRaw()))
 		}
-		raw, err := http.WithRaw(js.GetRaw())
-		if err != nil {
-			return nil, err
-		}
-		opt = append(opt, raw)
-		return http.NewClient(opt...)
+
+		hconf := httpconf.New(opt...)
+		return http.NewClientByConf(hconf)
 	})
 	if err != nil {
 		return nil, err

@@ -20,11 +20,9 @@ import (
 func TestJWTAuth(t *testing.T) {
 	secert := utility.GetGUID()
 	requestPath := "/jwt/test"
-	// routerObj := router.NewRouter(requestPath, "service", []string{"GET"})
 	type testCase struct {
-		name    string
-		jwtOpts []jwt.Option
-		// router      *router.Router
+		name        string
+		jwtOpts     []jwt.Option
 		token       string
 		isSource    string //cookie/header
 		authURL     string
@@ -72,9 +70,8 @@ func TestJWTAuth(t *testing.T) {
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
 				MockPath: &mocks.MockPath{
-					MockHeader:  headerMap,
-					MockCookies: cookieMap,
-					// MockRouter:      tt.router,
+					MockHeader:      headerMap,
+					MockCookies:     cookieMap,
 					MockRequestPath: requestPath,
 				},
 			},
