@@ -23,7 +23,7 @@ func Proxy() Handler {
 		}
 
 		//检查当前请求是否需要进行代理
-		need, err := proxy.Check(ctx.TmplFuncs(), nil)
+		need, err := proxy.Check(nil, nil)
 		if err != nil {
 			ctx.Response().AddSpecial("proxy")
 			ctx.Response().Abort(http.StatusBadGateway, err)

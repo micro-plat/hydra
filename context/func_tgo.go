@@ -19,13 +19,13 @@ func GetTGOModules() []*tgo.Module {
 		Add("getContent", tgo.FuncARS(func() string { ctx := Current(); _, s := ctx.Response().GetFinalResponse(); return s }))
 
 	app := tgo.NewModule("app").
-		Add("getServerID", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetServerID() })).
-		Add("getPlatName", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetPlatName() })).
-		Add("getSysName", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetSysName() })).
-		Add("getServerType", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetServerType() })).
-		Add("getClusterName", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetClusterName() })).
-		Add("getServerName", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetServerName() })).
-		Add("getServerPath", tgo.FuncARS(func() string { ctx := Current(); return ctx.ServerConf().GetServerConf().GetServerPath() }))
+		Add("getServerID", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerID() })).
+		Add("getPlatName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetPlatName() })).
+		Add("getSysName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetSysName() })).
+		Add("getServerType", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerType() })).
+		Add("getClusterName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterName() })).
+		Add("getServerName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerName() })).
+		Add("getServerPath", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerPath() }))
 
 	return []*tgo.Module{request, response, app}
 }

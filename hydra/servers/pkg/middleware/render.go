@@ -20,7 +20,7 @@ func Render() Handler {
 			return
 		}
 
-		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetRequestPath(), ctx.TmplFuncs(), ctx.Response().GetRaw())
+		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetRequestPath(), nil, ctx.Response().GetRaw())
 		if !enable {
 			return
 		}
