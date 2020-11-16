@@ -83,6 +83,8 @@ type IPath interface {
 
 	//AllowFallback 是否允许降级
 	AllowFallback() bool
+
+	GetEncoding() string
 }
 
 //IVariable 参与变量

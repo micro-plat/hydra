@@ -128,6 +128,10 @@ func (p *MockPath) GetMethod() string {
 	return p.MockMethod
 }
 
+func (p *MockPath) GetEncoding() string {
+	return ""
+}
+
 //GetRouter 获取当前请求对应的路由信息
 func (p *MockPath) GetRouter() (*router.Router, error) {
 	if p.MockRouter == nil {
