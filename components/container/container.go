@@ -7,6 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -42,15 +43,15 @@ func NewContainer() *Container {
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
 func (c *Container) GetOrCreate(typ string, name string, creator func(conf conf.IVarConf) (interface{}, error)) (interface{}, error) {
 
-	vc, err := app.Cache.GetVarConf()
-	if err != nil {
-		return nil, err
+	var jsconf = conf.EmptyJSONConf
+	vc, _ := app.Cache.GetVarConf()
+	if vc != nil {
+		jsconf, _ = vc.GetConf(typ, name)
+	} else {
+		vc = vars.EmptyVarConf
 	}
-	js, err := vc.GetConf(typ, name)
-	if err != nil && err != conf.ErrNoSetting {
-		return nil, err
-	}
-	key := fmt.Sprintf("%s_%s_%d", typ, name, js.GetVersion())
+
+	key := fmt.Sprintf("%s_%s_%d", typ, name, jsconf.GetVersion())
 	_, obj, err := c.cache.SetIfAbsentCb(key, func(i ...interface{}) (interface{}, error) {
 		v, err := creator(vc)
 		if err != nil {

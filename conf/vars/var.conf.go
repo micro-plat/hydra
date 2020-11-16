@@ -9,6 +9,14 @@ import (
 
 var _ conf.IVarConf = &VarConf{}
 
+//EmptyVarConf 空的EmptyVarConf
+var EmptyVarConf = &VarConf{
+	IVarPub:      nil,
+	varConfPath:  "",
+	registry:     nil,
+	varNodeConfs: make(map[string]conf.RawConf),
+}
+
 //VarConf 变量信息
 type VarConf struct {
 	conf.IVarPub

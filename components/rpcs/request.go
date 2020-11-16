@@ -9,16 +9,11 @@ import (
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
-
-//rpcTypeNode rpc在var配置中的类型名称
-const rpcTypeNode = "rpc"
-
-//rpcNameNode rpc名称在var配置中的末节点名称
-const rpcNameNode = "rpc"
 
 var requests = cmap.New(4)
 
@@ -30,13 +25,15 @@ type IRequest interface {
 
 //Request RPC Request
 type Request struct {
-	j *conf.RawConf
+	conf    *rpcconf.RPCConf
+	version int32
 }
 
 //NewRequest 构建请求
-func NewRequest(j *conf.RawConf) *Request {
+func NewRequest(version int32, conf *rpcconf.RPCConf) *Request {
 	req := &Request{
-		j: j,
+		version: version,
+		conf:    conf,
 	}
 	return req
 }
@@ -71,13 +68,13 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	matchPath := conf.NewPathMatch(paths...)
 	matchPath.Match(rservice)
 
-	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.j.GetVersion()), func(i ...interface{}) (interface{}, error) {
+	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.version), func(i ...interface{}) (interface{}, error) {
 		if isip {
-			return rpc.NewClient(platName)
+			return rpc.NewClientByConf(platName, "", "", r.conf)
 		}
 		//return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, pkgs.LocalIP()))
 
-		return rpc.NewClient(global.Def.RegistryAddr, rpc.WithRoundRobinBalancer(platName, rservice))
+		return rpc.NewClientByConf(global.Def.RegistryAddr, platName, rservice, r.conf)
 	})
 	if err != nil {
 		return nil, err

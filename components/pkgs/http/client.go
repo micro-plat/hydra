@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
 )
@@ -36,7 +37,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	for i, v := range header {
 		req.Header.Set(i, strings.Join(v, ","))
 	}
-	if id := c.conf.RequestId; id != "" {
+	if id := c.HTTPConf.RequestID; id != "" {
 		req.Header.Set("X-Request-Id", id)
 	}
 	c.Response, err = c.client.Do(req)
@@ -59,7 +60,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	return
 }
 
-func getCert(c *conf) (*tls.Config, error) {
+func getCert(c *varhttp.HTTPConf) (*tls.Config, error) {
 	ssl := &tls.Config{InsecureSkipVerify: true}
 	if len(c.Certs) == 2 {
 		cert, err := tls.LoadX509KeyPair(c.Certs[0], c.Certs[1])
@@ -84,7 +85,7 @@ func getCert(c *conf) (*tls.Config, error) {
 	return ssl, nil
 
 }
-func getProxy(c *conf) func(*http.Request) (*url.URL, error) {
+func getProxy(c *varhttp.HTTPConf) func(*http.Request) (*url.URL, error) {
 	if c.Proxy != "" {
 		return func(_ *http.Request) (*url.URL, error) {
 			return url.Parse(c.Proxy) //根据定义Proxy func(*Request) (*url.URL, error)这里要返回url.URL
