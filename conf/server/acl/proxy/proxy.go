@@ -1,12 +1,9 @@
 package proxy
 
 import (
-	"errors"
 	"fmt"
-	"net/url"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/tgo"
 )
@@ -14,78 +11,58 @@ import (
 const (
 	//ParNodeName proxy配置父节点名
 	ParNodeName = "acl"
+
 	//SubNodeName proxy配置子节点名
 	SubNodeName = "proxy"
+
+	//脚本中的上游集群参数名称
+	upclusterName = "upcluster"
 )
 
 //Proxy 代理设置
 type Proxy struct {
-	Disable bool          `json:"disable,omitempty" toml:"disable,omitempty"`
-	Script  string        `json:"-"`
-	cluster conf.ICluster `json:"-"`
+	Disable bool `json:""-`
 	c       conf.IServerConf
 	tengo   *tgo.VM
 }
 
 //New 代理设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
 func New(opts ...Option) *Proxy {
-	r := &Proxy{
-		Disable: false,
-	}
+	r := &Proxy{}
 	for _, f := range opts {
 		f(r)
 	}
 	return r
 }
 
-//Allow 当前服务是否允许使用代理
-func (g *Proxy) Allow() bool {
-	if g.cluster == nil {
-		return false
-	}
-	return g.cluster.GetServerType() == global.API || g.cluster.GetServerType() == global.Web
-}
-
 //Check 检查当前是否需要转到上游服务器处理
-func (g *Proxy) Check(funcs map[string]interface{}, i interface{}) (bool, error) {
+func (g *Proxy) Check() (*UpCluster, bool, error) {
+
+	//执行脚本，检查当前请求是否需要转到上游服务器
 	result, err := g.tengo.Run()
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
-	result.GetBool("")
-	return false, nil
-}
 
-//Next 获取下一个可用的上游地址
-func (g *Proxy) Next() (u *url.URL, err error) {
-	if g.cluster == nil {
-		return nil, errors.New("当前配置不可用")
+	//获取脚本执行结果
+	upstream := result.GetString(upclusterName)
+	if upstream == "" || upstream == g.c.GetClusterName() {
+		return nil, false, nil
 	}
-	node, ok := g.cluster.Next()
-	if !ok {
-		return nil, fmt.Errorf("无法获取到集群的下一个服务器")
-	}
-	path := fmt.Sprintf("http://%s:%s", node.GetHost(), node.GetPort())
-	url, err := url.Parse(path)
-	if err != nil {
-		return nil, fmt.Errorf("集群的服务器地址不合法:%s %s", path, err)
-	}
-	return url, nil
-}
 
-func (g *Proxy) checkServers() (err error) {
-	g.tengo, err = tgo.New(g.Script)
+	//保存到缓存，或从缓存获取上游集群信息
+	_, cluster, err := clusters.SetIfAbsentCb(upstream, func(value ...interface{}) (interface{}, error) {
+		up, err := g.c.GetCluster(upstream)
+		if err != nil {
+			return nil, err
+		}
+		return &UpCluster{c: up, name: upstream}, nil
+	})
 	if err != nil {
-		return err
+		return nil, false, err
 	}
-	result, err := g.tengo.Run()
-	upstream := result.GetString("upstream")
-	cluster, err := g.c.GetCluster(upstream)
-	if err != nil {
-		return err
-	}
-	g.cluster = cluster
-	return err
+	return cluster.(*UpCluster), true, nil
+
 }
 
 //GetConf 获取Proxy
@@ -97,10 +74,11 @@ func GetConf(cnf conf.IServerConf) (*Proxy, error) {
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy配置有误:%v", err)
 	}
-	proxy := New(WithScript(string(script.GetRaw())))
+	proxy := New()
 	proxy.c = cnf
-	if err := proxy.checkServers(); err != nil {
-		return nil, fmt.Errorf("acl.proxy服务检查错误:%v", err)
+	proxy.tengo, err = tgo.New(string(script.GetRaw()))
+	if err != nil {
+		return nil, fmt.Errorf("acl.proxy脚本错误:%v", err)
 	}
 	return proxy, nil
 }
