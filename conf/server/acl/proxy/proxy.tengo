@@ -1,0 +1,14 @@
+
+http := import("http")
+app := import("app")
+text := import("text")
+
+getUpCluster := func(){
+    ip := http.getClientIP()
+    if text.Has_prefix(ip,"192.168."){
+        return app.getOtherClusterName()
+    }
+    return app.getClusterName()
+}
+
+upcluster := getUpCluster()
