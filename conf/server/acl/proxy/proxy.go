@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/tgo"
 )
 
 const (
@@ -21,10 +20,11 @@ const (
 
 //Proxy 代理设置
 type Proxy struct {
-	Disable   bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-	Filter    string `json:"filter,omitempty" valid:"required" toml:"filter,omitempty"`
-	UPCluster string `json:"upCluster,omitempty" valid:"required" toml:"upCluster,omitempty"`
-	cluster   conf.ICluster
+	Disable bool          `json:"disable,omitempty" toml:"disable,omitempty"`
+	Script  string        `json:"-"`
+	cluster conf.ICluster `json:"-"`
+	c       conf.IServerConf
+	tengo   *tgo.VM
 }
 
 //New 代理设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
@@ -48,14 +48,12 @@ func (g *Proxy) Allow() bool {
 
 //Check 检查当前是否需要转到上游服务器处理
 func (g *Proxy) Check(funcs map[string]interface{}, i interface{}) (bool, error) {
-	if g.Filter == "" {
-		return true, nil
-	}
-	r, err := conf.TmpltTranslate(g.Filter, g.Filter, funcs, i)
+	result, err := g.tengo.Run()
 	if err != nil {
-		return true, fmt.Errorf("%s 过滤器转换出错 %w", g.Filter, err)
+		return false, err
 	}
-	return strings.EqualFold(r, "true"), nil
+	result.GetBool("")
+	return false, nil
 }
 
 //Next 获取下一个可用的上游地址
@@ -75,34 +73,34 @@ func (g *Proxy) Next() (u *url.URL, err error) {
 	return url, nil
 }
 
-func (g *Proxy) checkServers(c conf.IServerConf) error {
-	cluster, err := c.GetCluster(g.UPCluster)
+func (g *Proxy) checkServers() (err error) {
+	g.tengo, err = tgo.New(g.Script)
+	if err != nil {
+		return err
+	}
+	result, err := g.tengo.Run()
+	upstream := result.GetString("upstream")
+	cluster, err := g.c.GetCluster(upstream)
 	if err != nil {
 		return err
 	}
 	g.cluster = cluster
-	return nil
+	return err
 }
 
 //GetConf 获取Proxy
 func GetConf(cnf conf.IServerConf) (*Proxy, error) {
-	proxy := &Proxy{}
-	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), proxy)
+	script, err := cnf.GetSubConf(registry.Join(ParNodeName, SubNodeName))
 	if err == conf.ErrNoSetting {
 		return &Proxy{Disable: true}, nil
 	}
-
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy配置有误:%v", err)
 	}
-
-	if b, err := govalidator.ValidateStruct(proxy); !b {
-		return nil, fmt.Errorf("acl.proxy配置数据有误:%v %+v", err, proxy)
-	}
-
-	if err := proxy.checkServers(cnf); err != nil {
+	proxy := New(WithScript(string(script.GetRaw())))
+	proxy.c = cnf
+	if err := proxy.checkServers(); err != nil {
 		return nil, fmt.Errorf("acl.proxy服务检查错误:%v", err)
 	}
-
 	return proxy, nil
 }

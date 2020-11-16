@@ -58,14 +58,14 @@ func TestNewByJSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotC, err := NewByJSON(tt.args.message, tt.args.version)
+			gotC, err := NewByText(tt.args.message, tt.args.version)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewByJSON() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NewByText() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if err == nil && !reflect.DeepEqual(gotC, tt.wantC) {
-				t.Errorf("NewByJSON() = %v, want %v", gotC, tt.wantC)
+				t.Errorf("NewByText() = %v, want %v", gotC, tt.wantC)
 			}
 		})
 	}
