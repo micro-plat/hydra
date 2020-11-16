@@ -23,7 +23,7 @@ func Proxy() Handler {
 		}
 
 		//检查当前请求是否需要进行代理
-		need, err := proxy.Check(nil, nil)
+		cluster, need, err := proxy.Check()
 		if err != nil {
 			ctx.Response().AddSpecial("proxy")
 			ctx.Response().Abort(http.StatusBadGateway, err)
@@ -36,11 +36,11 @@ func Proxy() Handler {
 
 		//获取当前http信息
 		ctx.Response().AddSpecial("proxy")
-		useProxy(ctx, proxy)
+		useProxy(ctx, cluster)
 
 	}
 }
-func useProxy(ctx IMiddleContext, proxy *proxy.Proxy) {
+func useProxy(ctx IMiddleContext, cluster *proxy.UpCluster) {
 
 	//检查当前请求
 	req, resp := ctx.GetHttpReqResp()
@@ -56,7 +56,7 @@ RETRY:
 	num++
 
 	//获取服务器列表
-	url, err := proxy.Next()
+	url, err := cluster.Next()
 	if err != nil {
 		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("无法获取上游服务器地址:%w", err))
 		goto RETRY
