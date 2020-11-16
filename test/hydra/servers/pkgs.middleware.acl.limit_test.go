@@ -1,4 +1,4 @@
-package hydra
+package servers
 
 import (
 	"sync"
