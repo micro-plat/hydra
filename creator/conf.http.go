@@ -112,9 +112,9 @@ func (b *httpBuilder) Limit(opts ...limiter.Option) *httpBuilder {
 }
 
 //Proxy 代理配置
-func (b *httpBuilder) Proxy(opts ...proxy.Option) *httpBuilder {
+func (b *httpBuilder) Proxy(script string) *httpBuilder {
 	path := fmt.Sprintf("%s/%s", proxy.ParNodeName, proxy.SubNodeName)
-	b.CustomerBuilder[path] = proxy.New(opts...)
+	b.CustomerBuilder[path] = script
 	return b
 }
 

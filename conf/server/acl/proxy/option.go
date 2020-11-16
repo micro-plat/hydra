@@ -1,7 +1,7 @@
 package proxy
 
 //Option 配置选项
-type Option func(*Proxy)
+// type Option func(*Proxy)
 
 // //WithDisable 关闭
 // func WithDisable() Option {

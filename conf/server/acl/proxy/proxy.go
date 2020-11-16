@@ -26,15 +26,6 @@ type Proxy struct {
 	tengo   *tgo.VM
 }
 
-//New 代理设置(该方法只用在注册中心安装时调用,如果要使用对象方法请通过GetConf获取对象)
-func New(opts ...Option) *Proxy {
-	r := &Proxy{}
-	for _, f := range opts {
-		f(r)
-	}
-	return r
-}
-
 //Check 检查当前是否需要转到上游服务器处理
 func (g *Proxy) Check() (*UpCluster, bool, error) {
 
@@ -74,8 +65,7 @@ func GetConf(cnf conf.IServerConf) (*Proxy, error) {
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy配置有误:%v", err)
 	}
-	proxy := New()
-	proxy.c = cnf
+	proxy := &Proxy{c: cnf}
 	proxy.tengo, err = tgo.New(string(script.GetRaw()))
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy脚本错误:%v", err)
