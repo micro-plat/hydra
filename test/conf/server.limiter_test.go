@@ -21,7 +21,6 @@ func TestNewLimmiterRule(t *testing.T) {
 		want *limiter.Rule
 	}{
 		{name: "默认对象初始化", args: args{path: "path", allow: 1, opts: []limiter.RuleOption{}}, want: &limiter.Rule{Path: "path", MaxAllow: 1}},
-		{name: "设置action对象初始化", args: args{path: "path", allow: 1, opts: []limiter.RuleOption{limiter.WithAction("get", "post")}}, want: &limiter.Rule{Action: []string{"get", "post"}, Path: "path", MaxAllow: 1}},
 		{name: "设置maxwait对象初始化", args: args{path: "path", allow: 1, opts: []limiter.RuleOption{limiter.WithMaxWait(3)}}, want: &limiter.Rule{MaxWait: 3, Path: "path", MaxAllow: 1}},
 		{name: "设置fallback对象初始化", args: args{path: "path", allow: 1, opts: []limiter.RuleOption{limiter.WithFallback()}}, want: &limiter.Rule{Fallback: true, Path: "path", MaxAllow: 1}},
 		{name: "设置Resp对象初始化", args: args{path: "path", allow: 1, opts: []limiter.RuleOption{limiter.WithReponse(205, "success")}}, want: &limiter.Rule{Resp: &limiter.Resp{Status: 205, Content: "success"}, Path: "path", MaxAllow: 1}},
@@ -29,7 +28,6 @@ func TestNewLimmiterRule(t *testing.T) {
 	for _, tt := range tests {
 		got := limiter.NewRule(tt.args.path, tt.args.allow, tt.args.opts...)
 		assert.Equal(t, tt.want.Path, got.Path, tt.name+",Path")
-		assert.Equal(t, tt.want.Action, got.Action, tt.name+",Action")
 		assert.Equal(t, tt.want.MaxAllow, got.MaxAllow, tt.name+",MaxAllow")
 		assert.Equal(t, tt.want.MaxWait, got.MaxWait, tt.name+",MaxWait")
 		assert.Equal(t, tt.want.Fallback, got.Fallback, tt.name+",Fallback")
@@ -79,16 +77,6 @@ func TestLimiter_GetLimiter(t *testing.T) {
 		assert.Equal(t, tt.want, got, tt.name+",bool")
 		assert.Equal(t, tt.want1, got1, tt.name+",Path")
 	}
-
-	defer func() {
-		e := recover()
-		if e != nil {
-			assert.Equal(t, "从缓存中未找到limite组件", e.(error).Error(), "从缓存中未找到limite组件")
-		}
-	}()
-
-	//limiter是私有变脸不能测试分支panic
-	tests = []test{}
 }
 
 func TestGetConf(t *testing.T) {
@@ -112,16 +100,16 @@ func TestGetConf(t *testing.T) {
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, limiterObj, test2.name+",obj")
 
-	confB.Limit(limiter.WithRuleList(limiter.NewRule("path", 1, limiter.WithAction("sss"))))
+	confB.Limit(limiter.WithRuleList(limiter.NewRule("错误数据", 1)))
 	test3 := test{name: "灰度节点存在,数据不合法", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "limit配置数据有误"}
 	limiterObj, err = limiter.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.wantErrStr, err.Error()[:len(test3.wantErrStr)], test3.name+",err1")
 	assert.Equal(t, test3.want, limiterObj, test3.name+",obj")
 
-	confB.Limit(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success"))))
+	confB.Limit(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithReponse(200, "success"))))
 	test4 := test{name: "灰度节点存在,正确配置",
-		cnf: conf.GetAPIConf().GetServerConf(), want: limiter.New(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithAction("GET"), limiter.WithReponse(200, "success")))), wantErr: false}
+		cnf: conf.GetAPIConf().GetServerConf(), want: limiter.New(limiter.WithRuleList(limiter.NewRule("/path", 1, limiter.WithFallback(), limiter.WithMaxWait(3), limiter.WithReponse(200, "success")))), wantErr: false}
 	limiterObj, err = limiter.GetConf(test4.cnf)
 	assert.Equal(t, test4.wantErr, (err != nil), test4.name+",err")
 	assert.Equal(t, test4.want, limiterObj, test4.name+",obj")

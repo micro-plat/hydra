@@ -9,7 +9,7 @@ import (
 //Static 静态文件处理插件
 func Static() Handler {
 	return func(ctx IMiddleContext) {
-		static, err := ctx.ServerConf().GetStaticConf()
+		static, err := ctx.APPConf().GetStaticConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
@@ -48,7 +48,6 @@ func Static() Handler {
 		//文件已存在，则返回文件
 		ctx.Response().StatusCode(200)
 		if gzfile := static.GetGzFile(fpath); gzfile != "" {
-			//fmt.Println("GetGzFile:", gzfile)
 			ctx.Response().File(gzfile)
 			ctx.Response().Header("Content-Encoding", "gzip")
 			return

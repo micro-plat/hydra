@@ -24,8 +24,8 @@ func TestRPCNew(t *testing.T) {
 	}{
 		{name: "默认初始化", opts: []rpc.Option{}, want: &rpc.Server{Status: "start"}},
 		{name: "设置address初始化", address: ":8080", opts: []rpc.Option{}, want: &rpc.Server{Address: ":8080", Status: "start"}},
-		{name: "设置option初始化", opts: []rpc.Option{rpc.WithTrace(), rpc.WithDNS("host1", "ip1"), rpc.WithHeaderReadTimeout(10), rpc.WithTimeout(11, 12)},
-			want: &rpc.Server{RTimeout: 11, WTimeout: 12, RHTimeout: 10, Host: "host1", Domain: "ip1", Trace: true, Status: "start"}},
+		{name: "设置option初始化", opts: []rpc.Option{rpc.WithTrace(), rpc.WithDNS("host1", "ip1")},
+			want: &rpc.Server{Host: "host1", Domain: "ip1", Trace: true, Status: "start"}},
 		{name: "设置disable初始化", opts: []rpc.Option{rpc.WithDisable()}, want: &rpc.Server{Status: "stop"}},
 		{name: "设置Enable初始化", opts: []rpc.Option{rpc.WithEnable()}, want: &rpc.Server{Status: "start"}},
 	}
@@ -55,8 +55,8 @@ func xTestRPCGetConf(t *testing.T) {
 	tests := []test{
 		{name: "节点为空,获取默认对象", opts: []rpc.Option{}, want: rpc.New(":8090")},
 		{name: "正常对象获取",
-			opts: []rpc.Option{rpc.WithTrace(), rpc.WithHeaderReadTimeout(10)},
-			want: rpc.New(":8090", rpc.WithTrace(), rpc.WithHeaderReadTimeout(10))},
+			opts: []rpc.Option{rpc.WithTrace()},
+			want: rpc.New(":8090", rpc.WithTrace())},
 	}
 	for _, tt := range tests {
 		conf.RPC(":8090", tt.opts...)
@@ -64,6 +64,4 @@ func xTestRPCGetConf(t *testing.T) {
 		assert.Equal(t, nil, err, tt.name+",err")
 		assert.Equal(t, tt.want, obj, tt.name)
 	}
-
-	//异常的json数据  需要完善注册中心后测试(借鉴blacklist的写法)
 }

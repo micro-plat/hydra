@@ -67,7 +67,7 @@ func (windows *windowsRecord) Install(args ...string) (string, error) {
 	}
 	defer s.Close()
 
-	return installAction + " completed.", nil
+	return installAction + success, nil
 }
 
 // Remove the service
@@ -89,7 +89,7 @@ func (windows *windowsRecord) Remove() (string, error) {
 		return removeAction + failed, getWindowsError(err)
 	}
 
-	return removeAction + " completed.", nil
+	return removeAction + success, nil
 }
 
 // Start the service
@@ -110,7 +110,7 @@ func (windows *windowsRecord) Start() (string, error) {
 		return startAction + failed, getWindowsError(err)
 	}
 
-	return startAction + " completed.", nil
+	return startAction + success, nil
 }
 
 // Stop the service
@@ -131,7 +131,7 @@ func (windows *windowsRecord) Stop() (string, error) {
 		return stopAction + failed, getWindowsError(err)
 	}
 
-	return stopAction + " completed.", nil
+	return stopAction + success, nil
 }
 
 func stopAndWait(s *mgr.Service) error {
@@ -318,7 +318,7 @@ func (windows *windowsRecord) Run(e Executable) (string, error) {
 		e.Run()
 	}
 
-	return runAction + " completed.", nil
+	return runAction + success, nil
 }
 
 //Rollback the service install

@@ -32,7 +32,7 @@ type Server struct {
 //New 构建mqc server配置，默认为对等模式
 func New(addr string, opts ...Option) *Server {
 	if _, _, err := global.ParseProto(addr); err != nil {
-		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://queuename 格式 %w", err))
+		panic(fmt.Errorf("mqc服务器地址配置有误，必须是:proto://configName 格式 %w", err))
 	}
 	s := &Server{Addr: addr, Status: StartStatus}
 	for _, opt := range opts {

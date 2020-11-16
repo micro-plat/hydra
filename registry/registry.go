@@ -102,9 +102,13 @@ func GetAddrs(addr string) []string {
 	return addrs
 }
 
-//Parse 解析地址 @todo
+//Parse 解析地址
 //如:zk://192.168.0.155:2181 或 fs://../
 func Parse(address string) (proto string, raddr []string, u string, p string, err error) {
+	if strings.Count(address, "://") != 1 {
+		return "", nil, "", "", fmt.Errorf("%s，包含多个://。格式:[proto]://[address]", address)
+	}
+
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
 		return "", nil, "", "", fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)

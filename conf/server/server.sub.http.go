@@ -247,8 +247,8 @@ func (s *HttpSub) GetBlackListConf() (*blacklist.BlackList, error) {
 	return blackListObj.(*blacklist.BlackList), nil
 }
 
-//GetLimiter 获取限流配置
-func (s *HttpSub) GetLimiter() (*limiter.Limiter, error) {
+//GetLimiterConf 获取限流配置
+func (s *HttpSub) GetLimiterConf() (*limiter.Limiter, error) {
 	limitObj, err := s.limit.GetConf()
 	if err != nil {
 		return nil, err
@@ -256,8 +256,8 @@ func (s *HttpSub) GetLimiter() (*limiter.Limiter, error) {
 	return limitObj.(*limiter.Limiter), nil
 }
 
-//GetProxy 获取灰度配置
-func (s *HttpSub) GetProxy() (*proxy.Proxy, error) {
+//GetProxyConf 获取灰度配置
+func (s *HttpSub) GetProxyConf() (*proxy.Proxy, error) {
 	proxyObj, err := s.proxy.GetConf()
 	if err != nil {
 		return nil, err

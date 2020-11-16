@@ -14,14 +14,12 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//@todo 注册中心的cluster的需要验证通知功能
-
+//注册中心的cluster的变更通知在并发情况下可能会有丢失
 func Test_NewCluster(t *testing.T) {
 
 	//初始化注册中心
 	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
-  
 
 	clusterName := "cluster1"
 	pub := server.NewServerPub("platName", "sysName", "serverType", "cluster1")
@@ -69,24 +67,21 @@ func Test_NewCluster(t *testing.T) {
 		time.Sleep(1 * time.Second)
 	}
 	close(reduceCh)
-	fmt.Println("len1:",gotS.Len()) 
-	fmt.Println("len(reduceCh):", len(reduceCh)) 
-	reduceCount+= int64(len(reduceCh))
-	//lenCount := len(reduceCh)
-	idx:= 0 
+	fmt.Println("len1:", gotS.Len())
+	fmt.Println("len(reduceCh):", len(reduceCh))
+	reduceCount += int64(len(reduceCh))
+	idx := 0
 	for val := range reduceCh {
-		go func(val string){
+		go func(val string) {
 			idx++
-			//fmt.Println("delete:",val)
 			err = rgt.Delete(val)
 			assert.Equal(t, true, err == nil, "删除节点异常")
 		}(val)
 	}
-	//atomic.AddInt64(&reduceCount, 1)
 
 	time.Sleep(10 * time.Second)
-	fmt.Println("idx:",idx )
-	fmt.Println("len2:",gotS.Len()) 
+	fmt.Println("idx:", idx)
+	fmt.Println("len2:", gotS.Len())
 
 	assert.Equal(t, addCount-reduceCount+1, int64(gotS.Len()), "集群数量不正确n")
 }

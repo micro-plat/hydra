@@ -10,17 +10,16 @@ import (
 //Resp 限流器
 type Resp struct {
 	Status  int    `json:"status" valid:"required" toml:"status,omitempty"`
-	Content string `json:"content" valid:"ascii,required" toml:"content,omitempty"`
+	Content string `json:"content" valid:"required" toml:"content,omitempty"`
 }
 
 //Rule 按请求设定的限流器
 type Rule struct {
-	Path     string   `json:"path" valid:"ascii,required" toml:"path,omitempty"`
-	Action   []string `json:"action,omitempty" valid:"uppercase,in(GET|POST|PUT|DELETE)" toml:"action,omitempty"`
-	MaxAllow int      `json:"maxAllow" valid:"required" toml:"maxAllow,omitempty"`
-	MaxWait  int      `json:"maxWait,omitempty" valid:"required" toml:"maxWait,omitempty"`
-	Fallback bool     `json:"fallback,omitempty" valid:"required" toml:"fallback,omitempty"`
-	Resp     *Resp    `json:"resp,omitempty" valid:"required" toml:"resp,omitempty"`
+	Path     string `json:"path" valid:"ascii,required" toml:"path,omitempty"`
+	MaxAllow int    `json:"maxAllow"  toml:"maxAllow,omitempty"`
+	MaxWait  int    `json:"maxWait,omitempty"  toml:"maxWait,omitempty"`
+	Fallback bool   `json:"fallback,omitempty"  toml:"fallback,omitempty"`
+	Resp     *Resp  `json:"resp,omitempty" valid:"required" toml:"resp,omitempty"`
 	limiter  *rate.Limiter
 }
 

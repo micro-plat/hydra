@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
+
+	"github.com/micro-plat/hydra/compatible"
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
@@ -46,7 +47,7 @@ func doRun(c *cli.Context) (err error) {
 
 	globalData := global.Current()
 	//4.创建trace性能跟踪
-	if err = startTrace(globalData.GetTrace()); err != nil {
+	if err = startTrace(globalData.GetTrace(), globalData.GetTracePort()); err != nil {
 		return
 	}
 
@@ -66,7 +67,7 @@ func doRun(c *cli.Context) (err error) {
 
 	//7. 堵塞当前进程，直到用户退出
 	interrupt := make(chan os.Signal, 4)
-	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGUSR2) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
+	signal.Notify(interrupt, compatible.CmdsRunNotifySignals...) //, syscall.SIGUSR1) //9:kill/SIGKILL,15:SIGTEM,20,SIGTOP 2:interrupt/syscall.SIGINT
 	var signal os.Signal
 LOOP:
 	for {

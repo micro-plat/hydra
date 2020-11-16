@@ -3,10 +3,8 @@ package ctx
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"reflect"
 	"time"
 
@@ -24,6 +22,7 @@ type request struct {
 	appConf app.IAPPConf
 	*body
 	path *rpath
+	*file
 }
 
 //newRequest 构建请求的Request
@@ -35,6 +34,7 @@ func NewRequest(c context.IInnerContext, s app.IAPPConf, meta conf.IMeta) *reque
 		ctx:  c,
 		body: NewBody(c, rpath),
 		path: rpath,
+		file: NewFile(c, meta),
 	}
 }
 
@@ -48,7 +48,7 @@ func (r *request) Param(key string) string {
 	return r.ctx.Param(key)
 }
 
-//Bind 根据输入参数绑定对象 @todo struct限制 test
+//Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
 
 	val := reflect.ValueOf(obj)
@@ -56,14 +56,15 @@ func (r *request) Bind(obj interface{}) error {
 		return fmt.Errorf("输入参数非指针 %v", val.Kind())
 	}
 
+	val = val.Elem()
+	if val.Kind() != reflect.Struct {
+		return fmt.Errorf("输入参数非struct %v", val.Kind())
+	}
+
 	if err := r.ctx.ShouldBind(obj); err != nil {
 		return err
 	}
 
-	val = val.Elem()
-	if val.Kind() != reflect.Struct {
-		return nil
-	}
 	if _, err := govalidator.ValidateStruct(obj); err != nil {
 		err = fmt.Errorf("输入参数有误 %v", err)
 		return err
@@ -130,11 +131,11 @@ func (r *request) Get(name string) (result string, ok bool) {
 				panic(fmt.Errorf("url.unescape出错:%w", err))
 			}
 
-			routerObj, err := r.path.GetRouter() //@todo path只取encoding
-			if err != nil {
-				panic(fmt.Errorf("url.Router配置错误:%w", err))
-			}
-			rx, err := encoding.Decode(u, routerObj.GetEncoding())
+			// routerObj, err := r.path.GetRouter() //@todo path只取encoding
+			// if err != nil {
+			// 	panic(fmt.Errorf("url.Router配置错误:%w", err))
+			// }
+			rx, err := encoding.Decode(u, r.path.GetEncoding())
 			if err != nil {
 				result = u
 				return
@@ -205,8 +206,8 @@ func (r *request) IsEmpty(name string) bool {
 	return ok
 }
 
-//GetTrace 获取trace信息 @todo
-func (r *request) GetTrace() string {
+//GetPlayload 获取trace信息 //@fix GetTrace 改为的GetPlayload @hj
+func (r *request) GetPlayload() string {
 	data, err := r.GetMap()
 	if err != nil {
 		return err.Error()
@@ -215,45 +216,4 @@ func (r *request) GetTrace() string {
 		return string(buff)
 	}
 	return ""
-
-}
-
-//SaveFile 保存上传文件到指定路径 @todo
-func (r *request) SaveFile(fileKey, dst string) error {
-	_, reader, _, err := r.ctx.GetFile(fileKey)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, reader)
-	return err
-}
-
-//GetFileSize 获取上传文件大小
-func (r *request) GetFileSize(fileKey string) (int64, error) {
-	_, _, size, err := r.ctx.GetFile(fileKey)
-	if err != nil {
-		return 0, err
-	}
-	return size, nil
-}
-
-//GetFileName 获取上传文件名称
-func (r *request) GetFileName(fileKey string) (string, error) {
-	fileName, _, _, err := r.ctx.GetFile(fileKey)
-	if err != nil {
-		return "", err
-	}
-	return fileName, nil
-}
-
-//GetFileBody 获取上传文件内容
-func (r *request) GetFileBody(fileKey string) (io.ReadCloser, error) {
-	_, reader, _, err := r.ctx.GetFile(fileKey)
-	return reader, err
 }

@@ -28,6 +28,7 @@ require (
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
 	github.com/pkg/sftp v1.12.0
+	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/urfave/cli v1.22.4

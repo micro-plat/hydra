@@ -1,4 +1,4 @@
-package hydra
+package servers
 
 import (
 	"fmt"
@@ -72,7 +72,7 @@ func TestGray_Disable(t *testing.T) {
 				ResponseHeader: xhttp.Header{},
 			},
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
@@ -150,7 +150,7 @@ func TestGray_Enable_Has(t *testing.T) {
 				ResponseHeader: xhttp.Header{},
 			},
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件
@@ -224,7 +224,7 @@ func TestGray_Enable_None(t *testing.T) {
 				ResponseHeader: xhttp.Header{},
 			},
 			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockServerConf: serverConf,
+			MockAPPConf: serverConf,
 		}
 
 		//获取中间件

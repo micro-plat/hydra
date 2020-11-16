@@ -13,7 +13,7 @@ func RASAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取FSA配置
-		ras, err := ctx.ServerConf().GetRASConf()
+		ras, err := ctx.APPConf().GetRASConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
@@ -24,12 +24,7 @@ func RASAuth() Handler {
 			return
 		}
 
-		routerObj, err := ctx.Request().Path().GetRouter()
-		if err != nil {
-			ctx.Response().Abort(http.StatusNotExtended, err)
-			return
-		}
-		b, auth := ras.Match(routerObj.Service)
+		b, auth := ras.Match(ctx.Request().Path().GetRequestPath())
 		if !b {
 			ctx.Next()
 			return
@@ -51,6 +46,8 @@ func RASAuth() Handler {
 
 		respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
 		if err != nil || !respones.IsSuccess() {
+			fmt.Println("1111111111111:", respones)
+			fmt.Println("22222222222222:", err)
 			ctx.Response().Abort(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,err:%v(%d)", err, respones.Result, respones.Status))
 			return
 		}
@@ -61,6 +58,7 @@ func RASAuth() Handler {
 			return
 		}
 		ctx.Meta().MergeMap(result)
+		fmt.Println("----------:", result)
 		return
 	}
 }

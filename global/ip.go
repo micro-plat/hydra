@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	xnet "github.com/micro-plat/lib4go/net"
-
 	"github.com/asaskevich/govalidator"
+	"github.com/micro-plat/hydra/compatible"
+	xnet "github.com/micro-plat/lib4go/net"
 )
 
 //GetHostPort 获取服务器名及端口
@@ -25,7 +25,7 @@ func GetHostPort(addr string) (host string, port string, err error) {
 		return "", "", fmt.Errorf("端口不合法 %s", port)
 	}
 	if port == "80" {
-		if err := CheckPrivileges(); err != nil {
+		if err := compatible.CheckPrivileges(); err != nil {
 			return "", "", err
 		}
 	}

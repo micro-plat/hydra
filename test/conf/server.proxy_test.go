@@ -79,7 +79,7 @@ func TestGrayGetConf(t *testing.T) {
 	assert.Equal(t, test1.want, grayObj, test1.name)
 
 	confB.Proxy(proxy.WithDisable(), proxy.WithUPCluster("graytest"))
-	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.gray配置数据有误"}
+	test2 := test{name: "灰度节点存在,filter不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.proxy配置数据有误"}
 	grayObj, err = proxy.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.want, grayObj, test2.name)
@@ -88,7 +88,7 @@ func TestGrayGetConf(t *testing.T) {
 	}
 
 	confB.Proxy(proxy.WithDisable(), proxy.WithFilter("tao"))
-	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.gray配置数据有误"}
+	test3 := test{name: "灰度节点存在,UPCluster不存在", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "acl.proxy配置数据有误"}
 	grayObj, err = proxy.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")
 	assert.Equal(t, test3.want, grayObj, test3.name)

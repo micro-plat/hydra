@@ -30,8 +30,6 @@ func Test_varSub_GetRLogConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取layout对象失败")
 	assert.Equal(t, &rlog.Layout{Layout: rlog.DefaultLayout, Disable: true}, rlogConf, "测试conf初始化,判断layout节点对象")
 
-	//设置错误数据的task获取对象(设置不了错误的参数)
-
 	//设置正确的task对象
 	confM.Vars().RLog("test1")
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)

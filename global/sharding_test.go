@@ -1,10 +1,6 @@
-package registry
+package global
 
-import (
-	"testing"
-
-	"github.com/micro-plat/hydra/registry/pub"
-)
+import "testing"
 
 type master struct {
 	master        bool
@@ -34,7 +30,7 @@ func TestFirstStart(t *testing.T) {
 		&master{master: false, shardingCount: 2, path: "/plat/00000_0004", all: []string{"192.168.0.100_0002", "192.168.0.100_0001", "192.168.0.100_0003", "192.168.0.100_0004"}, expSharding: 1, expMaster: true},
 	}
 	for _, m := range masters {
-		actSharding, actMaster := pub.GetSharding(m.master, m.shardingCount, m.path, m.all)
+		actSharding, actMaster := IsMaster(m.master, m.shardingCount, m.path, m.all)
 		if actSharding != m.expSharding || actMaster != m.expMaster {
 			t.Errorf("请求结果不一致:%v,[%d,%v]", m, actSharding, actMaster)
 		}
@@ -60,7 +56,7 @@ func TestFirstSeoncd(t *testing.T) {
 		&master{master: true, shardingCount: 2, path: "/plat/00000_0004", all: []string{"192.168.0.100_0002", "192.168.0.100_0001", "192.168.0.100_0003", "192.168.0.100_0004"}, expSharding: 1, expMaster: true},
 	}
 	for _, m := range masters {
-		actSharding, actMaster := pub.GetSharding(m.master, m.shardingCount, m.path, m.all)
+		actSharding, actMaster := IsMaster(m.master, m.shardingCount, m.path, m.all)
 		if actSharding != m.expSharding || actMaster != m.expMaster {
 			t.Errorf("请求结果不一致:%v,[%d,%v]", m, actSharding, actMaster)
 		}

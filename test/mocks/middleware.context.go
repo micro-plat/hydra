@@ -4,27 +4,34 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	extcontext "github.com/micro-plat/hydra/context"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 )
 
+var _ middleware.IMiddleContext = &MiddleContext{}
+
 type MiddleContext struct {
-	MockNext       func()
-	MockMeta       conf.IMeta
-	MockUser       *MockUser
-	MockTFuncs     extcontext.TFuncs
-	MockRequest    extcontext.IRequest
-	MockResponse   extcontext.IResponse
-	HttpRequest    *http.Request
-	HttpResponse   http.ResponseWriter
-	MockServerConf app.IAPPConf
+	MockNext     func()
+	MockMeta     conf.IMeta
+	MockUser     *MockUser
+	MockTFuncs   extcontext.TFuncs
+	MockRequest  extcontext.IRequest
+	MockResponse extcontext.IResponse
+	HttpRequest  *http.Request
+	HttpResponse http.ResponseWriter
+	MockAPPConf  app.IAPPConf
 }
 
 func (ctx *MiddleContext) Next() {
@@ -52,9 +59,9 @@ func (ctx *MiddleContext) Context() context.Context {
 	return context.Background()
 }
 
-//ServerConf 服务器配置
-func (ctx *MiddleContext) ServerConf() app.IAPPConf {
-	return ctx.MockServerConf
+//APPConf 服务器配置
+func (ctx *MiddleContext) APPConf() app.IAPPConf {
+	return ctx.MockAPPConf
 }
 
 //TmplFuncs 模板函数列表
@@ -69,7 +76,7 @@ func (ctx *MiddleContext) User() extcontext.IUser {
 
 //Log 日志组件
 func (ctx *MiddleContext) Log() logger.ILogger {
-	return logger.Nil()
+	return logger.GetSession(ctx.MockAPPConf.GetServerConf().GetServerName(), ctx.User().GetRequestID())
 }
 
 //Close 关闭并释放资源
@@ -123,6 +130,9 @@ func (p *MockPath) GetMethod() string {
 
 //GetRouter 获取当前请求对应的路由信息
 func (p *MockPath) GetRouter() (*router.Router, error) {
+	if p.MockRouter == nil {
+		return nil, fmt.Errorf("路由信息不存在")
+	}
 	return p.MockRouter, nil
 }
 
@@ -173,6 +183,8 @@ func (p *MockPath) AllowFallback() bool {
 	return p.MockAllowFallback
 }
 
+var _ extcontext.IRequest = &MockRequest{}
+
 type MockRequest struct {
 	SpecialList  []string
 	MockPath     extcontext.IPath
@@ -181,6 +193,7 @@ type MockRequest struct {
 	MockQueryMap map[string]interface{}
 	MockBodyMap  map[string]interface{}
 	extcontext.IGetter
+	extcontext.IFile
 }
 
 //Path 地址、头、cookie相关信息
@@ -196,18 +209,34 @@ func (r *MockRequest) Param(name string) string {
 //Bind 将请求的参数绑定到对象
 func (r *MockRequest) Bind(obj interface{}) error {
 	obj = &r.MockBindObj
-
 	return nil
 }
 
 //Check 检查指定的字段是否有值
 func (r *MockRequest) Check(field ...string) error {
+	if len(field) == 0 {
+		return nil
+	}
+	for _, str := range field {
+		res, ok := r.Get(str)
+		if !ok || types.IsEmpty(res) {
+			return fmt.Errorf("[%s]数据不存在", str)
+		}
+	}
 	return nil
 }
 
 //GetMap 将当前请求转换为map并返回
 func (r *MockRequest) GetMap() (map[string]interface{}, error) {
+	if r.MockQueryMap == nil {
+		return nil, fmt.Errorf("人工制造错误")
+	}
 	return r.MockQueryMap, nil
+}
+
+//GetRawBody 获取请求的body参数
+func (r *MockRequest) GetRawBody(encoding ...string) (string, error) {
+	return "", nil
 }
 
 //GetBody 获取请求的body参数
@@ -221,14 +250,133 @@ func (r *MockRequest) GetBodyMap(encoding ...string) (map[string]interface{}, er
 	return r.MockBodyMap, nil
 }
 
+//GetBodyMap 将body转换为map
+func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{}, error) {
+	return nil, nil
+}
+
 //GetTrace 获取请求的trace信息
-func (r *MockRequest) GetTrace() string {
+func (r *MockRequest) GetPlayload() string {
 	return ""
+}
+
+//GetKeys 获取字段名称
+func (r *MockRequest) GetKeys() []string {
+	keys := make([]string, 0, 1)
+	keyMap := map[string]string{}
+	for k, _ := range r.MockParamMap {
+		if _, ok := keyMap[k]; !ok {
+			keyMap[k] = k
+		}
+	}
+	for k, _ := range r.MockQueryMap {
+		if _, ok := keyMap[k]; !ok {
+			keyMap[k] = k
+		}
+	}
+	for k, _ := range r.MockBodyMap {
+		if _, ok := keyMap[k]; !ok {
+			keyMap[k] = k
+		}
+	}
+
+	for _, v := range keyMap {
+		keys = append(keys, v)
+	}
+
+	return keys
+}
+
+//Get 获取字段的值
+func (r *MockRequest) Get(name string) (result string, ok bool) {
+
+	v, b := r.MockParamMap[name]
+	if b {
+		return fmt.Sprint(v), b
+	}
+
+	q, b := r.MockQueryMap[name]
+	if b {
+		return fmt.Sprint(q), b
+	}
+
+	m, b := r.MockBodyMap[name]
+	if b {
+		return fmt.Sprint(m), b
+	}
+
+	return "", false
+}
+
+//GetString 获取字符串
+func (r *MockRequest) GetString(name string, def ...string) string {
+	if v, ok := r.Get(name); ok {
+		return v
+	}
+	return types.GetStringByIndex(def, 0, "")
+}
+
+func (r *MockRequest) GetInt(name string, def ...int) int {
+	v, _ := r.Get(name)
+	return types.GetInt(v, def...)
+}
+
+func (r *MockRequest) GetMax(name string, o ...int) int {
+	v := r.GetInt(name, o...)
+	return types.GetMax(v, o...)
+}
+func (r *MockRequest) GetMin(name string, o ...int) int {
+	v := r.GetInt(name, o...)
+	return types.GetMin(v, o...)
+}
+func (r *MockRequest) GetInt64(name string, def ...int64) int64 {
+	v, _ := r.Get(name)
+	return types.GetInt64(v, def...)
+}
+func (r *MockRequest) GetFloat32(name string, def ...float32) float32 {
+	v, _ := r.Get(name)
+	return types.GetFloat32(v, def...)
+}
+func (r *MockRequest) GetFloat64(name string, def ...float64) float64 {
+	v, _ := r.Get(name)
+	return types.GetFloat64(v, def...)
+}
+func (r *MockRequest) GetBool(name string, def ...bool) bool {
+	v, _ := r.Get(name)
+	return types.GetBool(v, def...)
+}
+func (r *MockRequest) GetDatetime(name string, format ...string) (time.Time, error) {
+	v, _ := r.Get(name)
+	return types.GetDatetime(v, format...)
+}
+func (r *MockRequest) IsEmpty(name string) bool {
+	_, ok := r.Get(name)
+	return ok
+}
+
+//SaveFile 保存上传文件到指定路径
+func (r *MockRequest) SaveFile(fileKey, dst string) error {
+	return nil
+}
+
+//GetFileSize 获取上传文件大小
+func (r *MockRequest) GetFileSize(fileKey string) (int64, error) {
+	return 0, nil
+}
+
+//GetFileName 获取上传文件名称
+func (r *MockRequest) GetFileName(fileKey string) (string, error) {
+	return "", nil
+}
+
+//GetFileBody 获取上传文件内容
+func (r *MockRequest) GetFileBody(fileKey string) (io.ReadCloser, error) {
+	return nil, nil
 }
 
 type MockResponse struct {
 	SpecialList     []string
-	MockHeader      map[string]string
+	MockHeader      map[string][]string
 	MockRaw         interface{}
 	MockStatus      int
 	MockContent     string
@@ -248,7 +396,12 @@ func (res *MockResponse) GetSpecials() string {
 
 //Header 设置响应头
 func (res *MockResponse) Header(key string, val string) {
-	res.MockHeader[key] = val
+	res.MockHeader[key] = []string{val}
+}
+
+//GetHeaders 设置响应头
+func (res *MockResponse) GetHeaders() map[string][]string {
+	return res.MockHeader
 }
 
 //GetRaw 获取未经处理的响应内容
@@ -264,6 +417,7 @@ func (res *MockResponse) StatusCode(code int) {
 //ContentType 设置Content-Type响应头
 func (res *MockResponse) ContentType(v string) {
 	res.MockContentType = v
+	res.Header("Content-Type", v)
 }
 
 //NoNeedWrite 无需写入响应数据到缓存
@@ -275,7 +429,7 @@ func (res *MockResponse) NoNeedWrite(status int) {
 func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
 	res.MockStatus = status
 	res.MockContent = content
-	res.MockContentType = ctp
+	res.ContentType(ctp)
 	return
 }
 
@@ -288,18 +442,31 @@ func (res *MockResponse) Write(s int, v interface{}) error {
 
 //WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 func (res *MockResponse) WriteAny(v interface{}) error {
+	switch t := v.(type) {
+	case errs.IError:
+		res.MockStatus = t.GetCode()
+	case error:
+		res.MockStatus = 500
+	default:
+		res.MockContent = types.GetString(v)
+	}
 	return nil
 }
 
 //File 向响应流中写入文件(立即写入)
 func (res *MockResponse) File(path string) {
-
+	res.MockContent = path
 }
 
 //Abort 终止当前请求继续执行
 func (res *MockResponse) Abort(code int, err error) {
 	res.MockStatus = code
-	res.MockError = err
+	switch v := err.(type) {
+	case errs.IError:
+		res.MockContent = v.GetError().Error()
+	case error:
+		res.MockContent = v.Error()
+	}
 }
 
 //Stop 停止当前服务执行
@@ -338,4 +505,69 @@ func (w *MockResponseWriter) Write(bytes []byte) (int, error) {
 }
 func (w *MockResponseWriter) WriteHeader(statusCode int) {
 	w.StatusCode = statusCode
+}
+
+const (
+	noWritten     = -1
+	defaultStatus = 200
+)
+
+type MockResponseWriter2 struct {
+	size   int
+	status int
+	data   []byte
+	header http.Header
+}
+
+func (w *MockResponseWriter2) Copy() *MockResponseWriter2 {
+	var cp = *w
+	return &cp
+}
+
+func (w *MockResponseWriter2) Reset() {
+	w.size = noWritten
+	w.header = make(map[string][]string)
+	w.status = defaultStatus
+	w.data = nil
+}
+
+func (w *MockResponseWriter2) WriteHeader(code int) {
+	if code > 0 && w.status != code {
+		w.status = code
+	}
+}
+
+func (w *MockResponseWriter2) WriteHeaderNow() {
+	if !w.Written() {
+		w.size = 0
+	}
+}
+
+func (w *MockResponseWriter2) Write(data []byte) (n int, err error) {
+	w.WriteHeaderNow()
+	w.data = data
+	w.size += len(data)
+	return w.size, nil
+}
+func (w *MockResponseWriter2) Header() http.Header {
+	return w.header
+}
+func (w *MockResponseWriter2) WriteString(s string) (n int, err error) {
+	w.WriteHeaderNow()
+	w.data = []byte(s)
+	w.size += len(w.data)
+	return w.size, nil
+}
+func (w *MockResponseWriter2) Status() int {
+	return w.status
+}
+func (w *MockResponseWriter2) Data() []byte {
+	return w.data
+}
+func (w *MockResponseWriter2) Size() int {
+	return w.size
+}
+
+func (w *MockResponseWriter2) Written() bool {
+	return w.size != noWritten
 }

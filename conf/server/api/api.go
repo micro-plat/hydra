@@ -118,7 +118,8 @@ func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	if _, ok := validTypes[cnf.GetServerType()]; !ok {
 		return nil, fmt.Errorf("api主配置类型错误:%s != %+v", cnf.GetServerType(), validTypes)
 	}
-	_, err = cnf.GetMainObject(&s)
+	s = &Server{}
+	_, err = cnf.GetMainObject(s)
 	if err == conf.ErrNoSetting {
 		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}

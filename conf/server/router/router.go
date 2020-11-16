@@ -130,7 +130,7 @@ func (h *Routers) GetPath() []string {
 //GetConf 设置路由
 func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
 	router = new(Routers)
-	_, err = cnf.GetSubObject(TypeNodeName, &router)
+	_, err = cnf.GetSubObject(TypeNodeName, router)
 	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
 		return NewRouters(), nil
 	}

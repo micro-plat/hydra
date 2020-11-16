@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/micro-plat/hydra/compatible"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/hydra/conf/server/router"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/net"
 	"google.golang.org/grpc"
 )
@@ -25,14 +26,15 @@ type Server struct {
 //NewServer 创建mqc服务器
 //未使用压缩，由于传输数据默认限制为4M(已修改为20M)压缩后会影响系统并发能力
 // grpc.RPCDecompressor(grpc.NewGZIPDecompressor())
-func NewServer(addr string, routers []*router.Router) (t *Server, err error) {
+func NewServer(addr string, routers []*router.Router, maxRecvSize, maxSendSize int) (t *Server, err error) {
 	t = &Server{
 		Processor: NewProcessor(routers...),
 		engine: grpc.NewServer(
-			grpc.MaxRecvMsgSize(1024*1024*20),
-			grpc.MaxSendMsgSize(1024*1024*20),
+			grpc.MaxRecvMsgSize(maxRecvSize),
+			grpc.MaxSendMsgSize(maxSendSize),
 		),
 	}
+
 	if t.addr, err = getAddress(addr); err != nil {
 		return nil, err
 	}
@@ -106,7 +108,7 @@ func getAddress(addr string) (string, error) {
 		return "", fmt.Errorf("%s端口不合法", addr)
 	}
 	if port == "80" {
-		if err := global.CheckPrivileges(); err != nil {
+		if err := compatible.CheckPrivileges(); err != nil {
 			return "", err
 		}
 	}

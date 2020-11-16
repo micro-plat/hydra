@@ -15,6 +15,12 @@ const (
 	StartStop = "stop"
 )
 
+//DefaultMaxRecvMsgSize 最大默认接收字节数
+const DefaultMaxRecvMsgSize = 1024 * 1024 * 20
+
+//DefaultMaxSendMsgSize 最大默认发送字节数
+const DefaultMaxSendMsgSize = 1024 * 1024 * 20
+
 //DefaultRPCAddress rpc服务默认地址
 const DefaultRPCAddress = ":8090"
 
@@ -26,14 +32,13 @@ var SubConfName = []string{"router", "metric"}
 
 //Server rpc server配置信息
 type Server struct {
-	Address   string `json:"address,omitempty" toml:"address,omitempty"`
-	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-	RTimeout  int    `json:"rTimeout,omitzero" toml:"rTimeout,omitzero"`
-	WTimeout  int    `json:"wTimeout,omitzero" toml:"wTimeout,omitzero"`
-	RHTimeout int    `json:"rhTimeout,omitzero" toml:"rhTimeout,omitzero"`
-	Host      string `json:"host,omitempty" toml:"host,omitempty"`
-	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
-	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	Address        string `json:"address,omitempty" toml:"address,omitempty"`
+	Status         string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Host           string `json:"host,omitempty" toml:"host,omitempty"`
+	Domain         string `json:"dn,omitempty" toml:"dn,omitempty"`
+	Trace          bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	MaxRecvMsgSize int    `json:"maxRecvMsgSize,omitempty" toml:"maxRecvMsgSize,omitempty"`
+	MaxSendMsgSize int    `json:"maxSendMsgSize,omitempty" toml:"maxSendMsgSize,omitempty"`
 }
 
 //New 构建rpc server配置信息
@@ -46,6 +51,24 @@ func New(address string, opts ...Option) *Server {
 		opt(a)
 	}
 	return a
+}
+
+//GetMaxRecvMsgSize 获取最大接收字节数
+func (c *Server) GetMaxRecvMsgSize() int {
+	if c.MaxRecvMsgSize <= 0 {
+		return DefaultMaxRecvMsgSize
+	}
+
+	return c.MaxRecvMsgSize
+}
+
+//GetMaxSendMsgSize 获取最大发送字节数
+func (c *Server) GetMaxSendMsgSize() int {
+	if c.MaxSendMsgSize <= 0 {
+		return DefaultMaxSendMsgSize
+	}
+
+	return c.MaxSendMsgSize
 }
 
 //GetConf 获取主配置信息

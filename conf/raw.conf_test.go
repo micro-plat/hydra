@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
@@ -53,7 +54,7 @@ func TestNewByJSON(t *testing.T) {
 	}{
 		{name: "反序列化失败初始化", args: args{message: []byte("{sdfsdfsdf}"), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("{sdfsdfsdf}"), signature: md5.EncryptBytes([]byte("{sdfsdfsdf}"))}, wantErr: true},
 		{name: "正常初始化", args: args{message: []byte(`{"sss":"11"}`), version: 0}, wantC: &RawConf{XMap: map[string]interface{}{"sss": "11"}, version: 0, raw: []byte(`{"sss":"11"}`), signature: md5.EncryptBytes([]byte(`{"sss":"11"}`))}, wantErr: false},
-		{name: "无data,正常初始化", args: args{message: []byte(`test1`), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("test1"), signature: md5.EncryptBytes([]byte(`test1`))}, wantErr: false},
+		{name: "无data,正常初始化", args: args{message: []byte(`test1`), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("test1"), signature: md5.EncryptBytes([]byte(`test1`))}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -70,110 +71,52 @@ func TestNewByJSON(t *testing.T) {
 	}
 }
 
-func TestRawConf_GetString(t *testing.T) {
-	type fields struct {
-		raw       json.RawMessage
-		version   int32
-		signature string
-		data      map[string]interface{}
-	}
-	dn, _ := NewByMap(nil, 1)
-	dataN := fields{data: dn.XMap, version: dn.version, raw: dn.raw, signature: dn.signature}
-	// dv, _ := NewByMap(map[string]interface{}{"test": "1"}, 1)
-	// dataV := fields{data: dv.data, version: dv.version, raw: dv.raw, signature: dv.signature}
-	type args struct {
-		key string
-		def []string
-	}
+func TestRawConf_GetSignature(t *testing.T) {
+	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 0)
 	tests := []struct {
 		name   string
-		fields fields
-		args   args
-		wantR  string
+		fields *RawConf
+		want   string
 	}{
-		{name: "空对象获取", fields: dataN, args: args{key: "", def: []string{}}, wantR: ""},
-		{name: "空对象获取", fields: dataN, args: args{}, wantR: ""},
+		{name: "正常的数据md5", fields: obj, want: md5.EncryptBytes([]byte(`{"sss":"11"}`))},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			j := &RawConf{
-				raw:       tt.fields.raw,
-				version:   tt.fields.version,
-				signature: tt.fields.signature,
-				XMap:      tt.fields.data,
-			}
-			if gotR := j.GetString(tt.args.key, tt.args.def...); gotR != tt.wantR {
-				t.Errorf("RawConf.GetString() = %v, want %v", gotR, tt.wantR)
-			}
-		})
+		got := tt.fields.GetSignature()
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
-func TestRawConf_GetInt(t *testing.T) {
-	type fields struct {
-		raw       json.RawMessage
-		version   int32
-		signature string
-		data      map[string]interface{}
-	}
-	type args struct {
-		key string
-		def []int
-	}
+func TestRawConf_GetVersion(t *testing.T) {
+	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 1000)
+	obj1, _ := NewByJSON([]byte(`{"sss":"11"}`), 122)
 	tests := []struct {
 		name   string
-		fields fields
-		args   args
-		want   int
+		fields *RawConf
+		want   int32
 	}{
-		// TODO: Add test cases.
+		{name: "获取对象的版本号1", fields: obj, want: 1000},
+		{name: "获取对象的版本号2", fields: obj1, want: 122},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			j := &RawConf{
-				raw:       tt.fields.raw,
-				version:   tt.fields.version,
-				signature: tt.fields.signature,
-				XMap:      tt.fields.data,
-			}
-			if got := j.GetInt(tt.args.key, tt.args.def...); got != tt.want {
-				t.Errorf("RawConf.GetInt() = %v, want %v", got, tt.want)
-			}
-		})
+		got := tt.fields.GetVersion()
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
-func TestRawConf_GetStrings(t *testing.T) {
-	type fields struct {
-		raw       json.RawMessage
-		version   int32
-		signature string
-		data      map[string]interface{}
-	}
-	type args struct {
-		key string
-		def []string
-	}
+func TestRawConf_GetRaw(t *testing.T) {
+	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 1)
+	obj1, _ := NewByJSON([]byte(`{"sss":"12121122"}`), 1)
 	tests := []struct {
 		name   string
-		fields fields
-		args   args
-		wantR  []string
+		fields *RawConf
+		want   []byte
 	}{
-		// TODO: Add test cases.
+		{name: "获取对象的byte1", fields: obj, want: []byte(`{"sss":"11"}`)},
+		{name: "获取对象的byte2", fields: obj1, want: []byte(`{"sss":"12121122"}`)},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			j := &RawConf{
-				raw:       tt.fields.raw,
-				version:   tt.fields.version,
-				signature: tt.fields.signature,
-				XMap:      tt.fields.data,
-			}
-			if gotR := j.GetStrings(tt.args.key, tt.args.def...); !reflect.DeepEqual(gotR, tt.wantR) {
-				t.Errorf("RawConf.GetStrings() = %v, want %v", gotR, tt.wantR)
-			}
-		})
+		got := tt.fields.GetRaw()
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 

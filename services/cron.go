@@ -54,23 +54,27 @@ func (c *cron) Add(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
-	c.tasks.Append(task) //@todo 状态未变化的是否要进行通知
-	for _, s := range c.subscribers {
-		s.taskChan <- task
+	_, notifyTasks := c.tasks.Append(task)
+	for _, t := range notifyTasks {
+		for _, s := range c.subscribers {
+			s.taskChan <- t
+		}
 	}
 	c.signalChan <- struct{}{}
 	return c
 }
 
 //Remove 移除任务
-func (c *cron) Remove(cron string, service string) ICRON { //*cron 改为ICRON @hj
+func (c *cron) Remove(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
 	task.Disable = true
-	c.tasks.Append(task)
-	for _, s := range c.subscribers {
-		s.taskChan <- task
+	_, notifyTasks := c.tasks.Append(task)
+	for _, t := range notifyTasks {
+		for _, s := range c.subscribers {
+			s.taskChan <- t
+		}
 	}
 	c.signalChan <- struct{}{}
 	return c
@@ -88,6 +92,7 @@ func (c *cron) Subscribe(callback func(t *task.Task)) {
 		subscriber.taskChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
+	c.signalChan <- struct{}{}
 }
 
 //notify 通知任务
@@ -99,10 +104,14 @@ func (c *cron) notify() {
 		case <-c.signalChan:
 			c.lock.Lock()
 			for _, e := range c.subscribers {
-				select {
-				case t := <-e.taskChan:
-					e.callback(t)
-				default:
+			SUBFOR:
+				for {
+					select {
+					case t := <-e.taskChan:
+						e.callback(t)
+					default:
+						break SUBFOR
+					}
 				}
 			}
 			c.lock.Unlock()

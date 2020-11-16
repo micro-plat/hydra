@@ -150,8 +150,8 @@ func Test_httpBuilder_WhiteList(t *testing.T) {
 			args: []whitelist.Option{},
 			want: CustomerBuilder{"acl/white.list": whitelist.New()}},
 		{name: " 初始化实体对象", fields: &httpBuilder{tp: "x1", fnGetRouter: nil, CustomerBuilder: make(map[string]interface{})},
-			args: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList("request"))},
-			want: CustomerBuilder{"acl/white.list": whitelist.New(whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList("request")))}},
+			args: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"request"}))},
+			want: CustomerBuilder{"acl/white.list": whitelist.New(whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"request"})))}},
 	}
 	for _, tt := range tests {
 		got := tt.fields.WhiteList(tt.args...)

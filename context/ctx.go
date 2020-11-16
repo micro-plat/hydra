@@ -91,7 +91,7 @@ type IVariable interface {
 }
 
 //@fix 提供上传文件的处理 @hj
-type IUploadFile interface {
+type IFile interface {
 	SaveFile(fileKey, dst string) error
 	GetFileSize(fileKey string) (int64, error)
 	GetFileName(fileKey string) (string, error)
@@ -124,10 +124,14 @@ type IRequest interface {
 	//GetBodyMap 将body转换为map
 	GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 
-	//GetTrace 获取请求的trace信息
-	GetTrace() string
+	// //GetTrace 获取请求的trace信息
+	// GetTrace() string
+
+	//GetPlayload 更改名称 @fix
+	GetPlayload() string
+
 	IGetter
-	IUploadFile
+	IFile
 }
 
 //IResponse 响应信息
@@ -180,6 +184,9 @@ type IResponse interface {
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
+
+	//GetHeaders 获取返回数据
+	GetHeaders() map[string][]string
 }
 
 //IAuth 认证信息
@@ -222,8 +229,8 @@ type IContext interface {
 	//Context 控制超时的Context
 	Context() context.Context
 
-	//ServerConf 服务器配置
-	ServerConf() app.IAPPConf
+	//APPConf 服务器配置
+	APPConf() app.IAPPConf
 
 	//User 用户信息
 	User() IUser

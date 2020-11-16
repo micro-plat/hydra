@@ -3,6 +3,7 @@ package rpcs
 import (
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/conf"
+	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -35,14 +36,21 @@ func (s *StandardRPC) GetRegularRPC(names ...string) (c IRequest) {
 
 //GetRPC 获取缓存操作对象
 func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
-	name := types.GetStringByIndex(names, 0, rpcNameNode)
-	v, err := s.c.GetOrCreate(rpcTypeNode, name, func(conf conf.IVarConf) (interface{}, error) {
-		js, err := conf.GetConf(rpcNameNode, name)
-		if err != nil {
+	name := types.GetStringByIndex(names, 0, rpcconf.RPCNameNode)
+	v, err := s.c.GetOrCreate(rpcconf.RPCTypeNode, name, func(vconf conf.IVarConf) (interface{}, error) {
+		js, err := vconf.GetConf(rpcconf.RPCTypeNode, name)
+		if err != nil && err != conf.ErrNoSetting {
 			return nil, err
 		}
+		if err == conf.ErrNoSetting {
+			js = &conf.RawConf{}
+		}
 
-		return NewRequest(js), nil
+		opt := []rpcconf.Option{
+			rpcconf.WithRaw(js.GetRaw()),
+		}
+
+		return NewRequest(js.GetVersion(), rpcconf.New(opt...)), nil
 	})
 	if err != nil {
 		return nil, err

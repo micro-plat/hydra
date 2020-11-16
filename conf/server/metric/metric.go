@@ -45,7 +45,7 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 //GetConf 设置metric
 func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
-	_, err = cnf.GetSubObject(TypeNodeName, &metric)
+	_, err = cnf.GetSubObject(TypeNodeName, metric)
 	if err == conf.ErrNoSetting {
 		metric.Disable = true
 		return metric, nil

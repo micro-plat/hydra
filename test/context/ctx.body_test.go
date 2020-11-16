@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 type testBody struct {
@@ -328,5 +331,74 @@ func Test_body_GetBodyMap(t *testing.T) {
 		got, err := w.GetRawBodyMap(tt.encoding...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		assert.Equal(t, tt.want, got, tt.name)
+	}
+}
+
+func getTestUTF8Json(s map[string]string) string {
+	for k, v := range s {
+		s[k] = url.QueryEscape(v)
+	}
+	r, _ := json.Marshal(s)
+	return string(r)
+}
+
+func getTestGBKJson(s map[string]string) string {
+	for k, v := range s {
+		s[k] = url.QueryEscape(string(Utf8ToGbk([]byte(v))))
+	}
+
+	r, _ := json.Marshal(s)
+	return string(r)
+}
+
+func Utf8ToGbk(s []byte) []byte {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewEncoder())
+	d, _ := ioutil.ReadAll(reader)
+	return d
+}
+
+func GbkToUtf8(s []byte) []byte {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
+	d, _ := ioutil.ReadAll(reader)
+	return d
+}
+
+func Test_body_GetBody_Encoding(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        string
+	}{
+		{name: "utf-8", contentType: "application/json;charset=utf-8",
+			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+		{name: "gbk", contentType: "application/json;charset=gbk",
+			body: getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+		{name: "未设置charset", contentType: "application/json",
+			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbody/encoding", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, false, err != nil, tt.name)
+		defer resp.Body.Close()
+		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "200 OK", resp.Status, tt.name)
+		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		want := map[string]interface{}{}
+		json.Unmarshal([]byte(tt.want), &want)
+
+		got := map[string]interface{}{}
+		if tt.name == "gbk" {
+			json.Unmarshal(GbkToUtf8(body), &got)
+		} else {
+			json.Unmarshal(body, &got)
+		}
+		assert.Equal(t, want, got, tt.name)
 	}
 }

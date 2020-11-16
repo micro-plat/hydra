@@ -53,6 +53,8 @@ func NewTestRegistry(platName string, systemName string, clusterName string, pat
 		}
 	}
 	f.nodes["/platname/apiserver/api/test/hosts1"] = "getErr"
+	f.nodes["/platname/apiserver/api/test/hosts_delete/server1"] = "value1"
+	fmt.Println(f.nodes)
 	return f
 }
 
@@ -125,6 +127,7 @@ func (l *TestRegistry) WatchChildren(path string) (data chan registry.ChildrenWa
 
 	data = make(chan registry.ChildrenWatcher, 1)
 
+	//节点添加
 	if (path == "/platname/apiserver/api/test/hosts/server6" && l.Deep == 1) ||
 		(path == "/platname/apiserver/api/test/hosts" && l.Deep == 2) ||
 		(path == "/platname/apiserver/api/test" && l.Deep == 3) {
@@ -138,6 +141,13 @@ func (l *TestRegistry) WatchChildren(path string) (data chan registry.ChildrenWa
 			data <- &valuesEntity{path: path, Err: nil, values: c, version: 0}
 			return
 		}
+	}
+
+	//节点删除
+	if path == "/platname/apiserver/api/test/hosts_delete" && l.Deep == 2 {
+		delete(l.nodes, "/platname/apiserver/api/test/hosts_delete/server1")
+		data <- &valuesEntity{path: path, Err: nil, values: nil, version: 0}
+		return
 	}
 
 	return data, nil

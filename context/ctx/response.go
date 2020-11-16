@@ -56,6 +56,11 @@ func (c *response) Header(k string, v string) {
 	c.ctx.Header(k, v)
 }
 
+//Header 设置头信息到response里
+func (c *response) GetHeaders() map[string][]string {
+	return c.ctx.GetHeaders()
+}
+
 //ContentType 设置contentType
 func (c *response) ContentType(v string) {
 	c.ctx.Header("Content-Type", v)
@@ -115,11 +120,11 @@ func (c *response) Write(status int, content interface{}) error {
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 
 	//将编码设置到content type
-	routerObj, err := c.path.GetRouter()
-	if err != nil {
-		return err
-	}
-	c.final.contentType = fmt.Sprintf(c.final.contentType, routerObj.GetEncoding())
+	// routerObj, err := c.path.GetRouter()
+	// if err != nil {
+	// 	return err
+	// }
+	c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
 
 	//记录为原始状态
 	c.raw.contentType = c.final.contentType
@@ -163,7 +168,6 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 			rc = "Internal Server Error"
 		}
 	case error:
-		//@todo: 这里如果状态是302 等，会被强制转换为400（是否为error必须转换状态码）
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}
@@ -246,23 +250,35 @@ func (c *response) getContentType() string {
 
 //writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow(status int, ctyp string, content string) error {
-	//@todo 这个地方会强制跳转到content 的路径。
-	// if status >= http.StatusMultipleChoices && status < http.StatusBadRequest {
-	// 	c.ctx.Redirect(status, content)
+	//301 302 303 307 308 这个地方会强制跳转到content 的路径。
+	if status == http.StatusMovedPermanently || status == http.StatusFound || status == http.StatusSeeOther ||
+		status == http.StatusTemporaryRedirect || status == http.StatusPermanentRedirect {
+		//从header里面获取的Location
+		location := content
+		if l := c.ctx.WHeader("Location"); l != "" {
+			location = l
+		}
+		c.ctx.Redirect(status, location)
+		return nil
+	}
+	//@todo encoding的测试
+	// routerObj, err := c.path.GetRouter()
+	// if err != nil {
+	// 	return err
+	// }
+	// if routerObj.IsUTF8() {
+	// 	c.ctx.Data(status, ctyp, []byte(content))
 	// 	return nil
 	// }
-	//@todo encoding的测试
-	routerObj, err := c.path.GetRouter()
-	if err != nil {
-		return err
-	}
-	if routerObj.IsUTF8() {
+
+	e := c.path.GetEncoding()
+	if e == "utf-8" {
 		c.ctx.Data(status, ctyp, []byte(content))
 		return nil
 	}
-	buff, err := encoding.Encode(content, routerObj.GetEncoding())
+	buff, err := encoding.Encode(content, e)
 	if err != nil {
-		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", routerObj.GetEncoding(), err, content)
+		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
 	}
 	c.ctx.Data(status, ctyp, buff)
 	return nil

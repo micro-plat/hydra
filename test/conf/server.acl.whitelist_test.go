@@ -45,7 +45,7 @@ func TestWhitelistNew(t *testing.T) {
 			wantallow: true,
 		},
 		{name: "初始化自定义ip白名单配置",
-			opts:      []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...))},
+			opts:      []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))},
 			want:      &whitelist.WhiteList{IPS: []*whitelist.IPList{&whitelist.IPList{Requests: []string{"/t1/t2/*"}, IPS: []string{"192.168.0.101"}}}},
 			allowIP:   "192.168.0.101",
 			allowReq:  "/t1/t2/t3",
@@ -100,8 +100,8 @@ func TestWhiteListGetConf(t *testing.T) {
 		{name: "节点不存在,获取默认对象", opts: []whitelist.Option{}, want: &whitelist.WhiteList{Disable: true}},
 		{name: "节点为空,获取默认对象", opts: []whitelist.Option{}, want: whitelist.New()},
 		{name: "正常对象获取",
-			opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...))},
-			want: whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))},
+			opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))},
+			want: whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))},
 	}
 
 	//初始化服务conf配置对象
@@ -116,6 +116,4 @@ func TestWhiteListGetConf(t *testing.T) {
 		assert.Equal(t, len(tt.want.IPS), len(obj.IPS), tt.name)
 
 	}
-
-	// json数据不合法,现在还不能测试   需要等待注册中心监听完善后测试
 }

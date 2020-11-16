@@ -314,10 +314,10 @@ func Test_httpSub_GetWhiteListConf(t *testing.T) {
 		wantConf *whitelist.WhiteList
 	}{
 		{name: "不设置whitelist节点", opts: []whitelist.Option{}, wantErr: true, wantConf: &whitelist.WhiteList{Disable: true}},
-		{name: "设置错误的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("", []string{"192.168.0.101"}...))}, wantErr: false,
+		{name: "设置错误的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{""}, []string{"192.168.0.101"}...))}, wantErr: false,
 			wantConf: nilWhitelist},
-		{name: "设置正确的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...))}, wantErr: true,
-			wantConf: whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))},
+		{name: "设置正确的whitelist节点", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))}, wantErr: true,
+			wantConf: whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))},
 	}
 
 	for _, tt := range tests {
@@ -375,10 +375,10 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 		wantConf *limiter.Limiter
 	}{
 		{name: "不设置limiter节点", opts: []limiter.Option{}, wantErr: true, wantConf: &limiter.Limiter{Disable: true}},
-		{name: "设置错误的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("错误数据1", "错误数据"), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: false,
+		{name: "设置错误的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("错误数据", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: false,
 			wantConf: nilLImiter},
-		{name: "设置正确的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: true,
-			wantConf: limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))},
+		{name: "设置正确的limiter节点", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success")))}, wantErr: true,
+			wantConf: limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))},
 	}
 
 	for _, tt := range tests {
@@ -390,7 +390,7 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		limiterConf, err := gotS.GetLimiter()
+		limiterConf, err := gotS.GetLimiterConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		assert.Equal(t, tt.wantConf, limiterConf, tt.name+",conf")
 	}
@@ -420,7 +420,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 		confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 		gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 		assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-		grayConf, err := gotS.GetProxy()
+		grayConf, err := gotS.GetProxyConf()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
 		assert.Equal(t, tt.wantConf.Disable, grayConf.Disable, "测试conf初始化,判断gary.Disable节点对象")
 		assert.Equal(t, tt.wantConf.Filter, grayConf.Filter, "测试conf初始化,判断gary.Filter节点对象")
@@ -435,7 +435,7 @@ func Test_httpSub_GetGray(t *testing.T) {
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
-	grayConf, err := gotS.GetProxy()
+	grayConf, err := gotS.GetProxyConf()
 	assert.Equal(t, test1.wantErr, err == nil, test1.name+",err")
 	assert.Equal(t, test1.wantConf, grayConf, test1.name+",conf")
 }

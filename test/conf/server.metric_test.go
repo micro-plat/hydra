@@ -53,14 +53,14 @@ func TestMetricGetConf(t *testing.T) {
 	assert.Equal(t, test1.want, limiterObj, test1.name)
 
 	confB.Metric("", "", "", metric.WithDisable())
-	test2 := test{name: "限流节点存在,数据错误", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "metric配置数据有误"}
+	test2 := test{name: "metric节点存在,数据错误", cnf: conf.GetAPIConf().GetServerConf(), want: nil, wantErr: true, wantErrStr: "metric配置数据有误"}
 	limiterObj, err = metric.GetConf(test2.cnf)
 	assert.Equal(t, test2.wantErr, (err != nil), test2.name+",err")
 	assert.Equal(t, test2.wantErrStr, err.Error()[:len(test2.wantErrStr)], test2.name+",err1")
 	assert.Equal(t, test2.want, limiterObj, test2.name+",obj")
 
 	confB.Metric("http://192.168.0.101", "1", "cron", metric.WithDisable(), metric.WithUPName("upnem", "1223456"))
-	test3 := test{name: "限流节点存在,正确节点", cnf: conf.GetAPIConf().GetServerConf(),
+	test3 := test{name: "metric节点存在,正确节点", cnf: conf.GetAPIConf().GetServerConf(),
 		want: metric.New("http://192.168.0.101", "1", "cron", metric.WithDisable(), metric.WithUPName("upnem", "1223456")), wantErr: false}
 	limiterObj, err = metric.GetConf(test3.cnf)
 	assert.Equal(t, test3.wantErr, (err != nil), test3.name+",err")

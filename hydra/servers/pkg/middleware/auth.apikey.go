@@ -17,7 +17,7 @@ func APIKeyAuth() Handler {
 	return func(ctx IMiddleContext) {
 
 		//获取apikey配置
-		auth, err := ctx.ServerConf().GetAPIKeyConf()
+		auth, err := ctx.APPConf().GetAPIKeyConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
@@ -39,13 +39,6 @@ func APIKeyAuth() Handler {
 			return
 		}
 
-		//获取secret   密钥已经在配置中  不用再获取
-		// secret, err := getSecret(ctx, auth)
-		// if err != nil {
-		// 	ctx.Response().Abort(http.StatusForbidden, err)
-		// 	return
-		// }
-
 		//验证签名
 		sign, raw := getSignRaw(ctx.Request(), "", "")
 		if err := auth.Verify(raw, sign); err != nil {
@@ -53,7 +46,6 @@ func APIKeyAuth() Handler {
 			return
 		}
 		ctx.Next()
-
 	}
 }
 
@@ -89,5 +81,4 @@ func getSignRaw(r context.IRequest, a string, b string) (string, string) {
 	}
 	values.Sort()
 	return sign, values.Join(a, b)
-
 }

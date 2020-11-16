@@ -3,7 +3,7 @@ package ctx
 import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 )
@@ -42,7 +42,7 @@ func (c *user) GetRequestID() string {
 func (c *user) GetClientIP() string {
 	ip := c.ctx.ClientIP()
 	if ip == "::1" || ip == "127.0.0.1" {
-		return net.GetLocalIPAddress() //@todo 从global取
+		return global.LocalIP()
 	}
 	return ip
 }

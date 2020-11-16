@@ -54,7 +54,7 @@ func (c *ServerConf) GetMainConf() *conf.RawConf {
 //GetMainObject 获取主配置信息
 func (c *ServerConf) GetMainObject(v interface{}) (int32, error) {
 	conf := c.GetMainConf()
-	if err := conf.ToStruct(&v); err != nil {
+	if err := conf.ToStruct(v); err != nil {
 		err = fmt.Errorf("获取主配置失败:%v", err)
 		return 0, err
 	}
@@ -66,6 +66,7 @@ func (c *ServerConf) GetSubConf(name string) (*conf.RawConf, error) {
 	if v, ok := c.subConfs[name]; ok {
 		return &v, nil
 	}
+
 	return nil, conf.ErrNoSetting
 }
 
@@ -81,7 +82,7 @@ func (c *ServerConf) GetSubObject(name string, v interface{}) (int32, error) {
 		return 0, err
 	}
 
-	if err := conf.ToStruct(&v); err != nil {
+	if err := conf.ToStruct(v); err != nil {
 		err = fmt.Errorf("获取%s配置失败:%v", name, err)
 		return 0, err
 	}

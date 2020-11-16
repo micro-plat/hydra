@@ -15,6 +15,10 @@ type ginCtx struct {
 	once sync.Once
 }
 
+func NewGinCtx(c *gin.Context) *ginCtx {
+	return &ginCtx{Context: c}
+}
+
 func (g *ginCtx) load() {
 	g.once.Do(func() {
 		g.Context.Request.ParseForm()

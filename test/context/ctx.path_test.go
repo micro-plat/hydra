@@ -69,10 +69,6 @@ func Test_rpath_GetRouter(t *testing.T) {
 			Action:  []string{"GET"},
 			Service: "/api",
 		}},
-		{name: "http非正确路径和方法", ctx: &mocks.TestContxt{
-			Routerpath: "/api",
-			Method:     "DELETE",
-		}, serverConf: httpConf, meta: conf.NewMeta(), wantError: "未找到与[/api][DELETE]匹配的路由"},
 		{name: "非http的路径和的方法", ctx: &mocks.TestContxt{
 			Routerpath: "/cron",
 		}, serverConf: cronConf, meta: conf.NewMeta(), want: &router.Router{

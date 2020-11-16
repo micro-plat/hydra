@@ -106,11 +106,11 @@ func TestNewEmptyServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, &blacklist.BlackList{Disable: true}, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
+	limiterConf, err := gotS.GetLimiterConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, &limiter.Limiter{Disable: true}, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetProxy()
+	garyConf, err := gotS.GetProxyConf()
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
 	assert.Equal(t, &proxy.Proxy{Disable: true}, garyConf, "测试conf初始化,判断gary节点对象")
 
@@ -142,14 +142,14 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.Proxy(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	confN.Header(header.WithCrossDomain("localhost"))
 	confN.Jwt(jwt.WithDisable(), jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111"))
-	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
+	confN.Limit(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	confN.Metric("http://192.168.0.111:8080", "1", "cron1", metric.WithEnable(), metric.WithUPName("upnem", "1223456"))
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
 		ras.WithCheckTimestamp(false), ras.WithDecryptName("duser"), ras.WithParam("key1", "v1"), ras.WithParam("key2", "v2"), ras.WithAuthDisable())))
 	confN.Render(render.WithDisable(), render.WithTmplt("/path1", "success", render.WithStatus("500"), render.WithContentType("tpltm1")))
 	confN.Static(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
-	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
 	gotS, err := app.NewAPPConfBy(platName, sysName, serverType, clusterName, rgst)
 	assert.Equal(t, true, err == nil, "测试conf初始化,设置主节点")
@@ -213,7 +213,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, renderC, renderConf, "测试conf初始化,判断render节点对象")
 
 	whiteListConf, err := gotS.GetWhiteListConf()
-	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList("/t1/t2/*", []string{"192.168.0.101"}...)))
+	whiteC := whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取whiteList对象失败")
 	assert.Equal(t, whiteC, whiteListConf, "测试conf初始化,判断whiteList节点对象")
 
@@ -222,12 +222,12 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取blackList对象失败")
 	assert.Equal(t, blackC, blackListConf, "测试conf初始化,判断blackList节点对象")
 
-	limiterConf, err := gotS.GetLimiter()
-	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithAction("GET", "POST"), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
+	limiterConf, err := gotS.GetLimiterConf()
+	limiterC := limiter.New(limiter.WithEnable(), limiter.WithRuleList(limiter.NewRule("path1", 1, limiter.WithMaxWait(3), limiter.WithFallback(), limiter.WithReponse(200, "success"))))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取limiter对象失败")
 	assert.Equal(t, limiterC, limiterConf, "测试conf初始化,判断limiter节点对象")
 
-	garyConf, err := gotS.GetProxy()
+	garyConf, err := gotS.GetProxyConf()
 	garyC := proxy.New(proxy.WithDisable(), proxy.WithFilter("Filter"), proxy.WithUPCluster("UPCluster"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取gary对象失败")
 	assert.Equal(t, garyC.Disable, garyConf.Disable, "测试conf初始化,判断gary.Disable节点对象")
