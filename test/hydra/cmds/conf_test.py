@@ -12,7 +12,7 @@ def test_Conf_Show_Normal():
     测试conf show 
     """
     #执行conf show
-    args = ["conf","show","-r","lm://."]
+    args = ["conf","show","-r","lm://.","-c","c"]
     response = runApp(args,["1","2","3","111","q"])
     #获取main
     if not '19003' in response:
@@ -28,7 +28,7 @@ def test_Conf_Show_Normal():
     return 
 
 
-@test(testName)
+#@test(testName)
 def test_Conf_Install_Normal():
     #执行conf install
     args = ["conf","install","-r",ZKAddress,"-c","t"]
@@ -42,7 +42,7 @@ def test_Conf_Install_Normal():
 
 
 
-@test(testName)
+#@test(testName)
 def test_Conf_Install_cover():
     #执行conf install -cover
     args = ["conf","install","-r",ZKAddress,"-c","c","-cover","true"]
