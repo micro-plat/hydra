@@ -37,15 +37,12 @@ func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 			return nil, err
 		}
 		ctx := context.Current()
-		opt := []httpconf.Option{
-			httpconf.WithRequestID(ctx.User().GetRequestID()),
-		}
+		opt := []httpconf.Option{}
 		if js != nil {
 			opt = append(opt, httpconf.WithRaw(js.GetRaw()))
 		}
 
-		hconf := httpconf.New(opt...)
-		return http.NewClientByConf(hconf)
+		return http.NewClient(ctx.User().GetRequestID(), opt...)
 	})
 	if err != nil {
 		return nil, err

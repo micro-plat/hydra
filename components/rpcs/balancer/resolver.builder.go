@@ -43,16 +43,16 @@ type ResolverBuilder struct {
 	orgResolver *manual.Resolver
 }
 
-func NewResolverBuilder(address, plat, service, sortPrefix string) resolver.Builder {
+func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Builder, error) {
 	proto, _, err := global.ParseProto(address)
 	if err != nil {
-		panic(fmt.Sprintf("GRPC address:%s parse error:%+v", address, err))
+		return nil, fmt.Errorf("GRPC address:%s parse error:%+v", address, err)
 	}
 	logging := logger.New("rpc.resolve")
 
 	regst, err := registry.NewRegistry(address, logging)
 	if err != nil {
-		panic(fmt.Sprintf("rpc.client.resolver target err:%v", err))
+		return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 	}
 
 	builder := &ResolverBuilder{
@@ -67,11 +67,11 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) resolver.Buil
 
 	addresses, err := builder.getGrpcAddress()
 	if err != nil {
-		panic(fmt.Sprintf("rpc.client.resolver target err:%v", err))
+		return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 	}
 
 	builder.buildManualResolver(proto, addresses)
-	return builder
+	return builder, nil
 }
 
 // Build creates a new resolver for the given target.
@@ -129,37 +129,19 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 
 func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
 
-	rpath := registry.Join(b.plat, "services", "rpc", b.service, "providers")
-	//根据绝对路径查询服务
-	v, err := b.regst.Exists(rpath)
+	rpath, err := b.getRealPath()
 	if err != nil {
-		return []string{}, fmt.Errorf("检查新版服务地址出错 %s %w", rpath, err)
-	}
-	if !v {
-		//如果不存在  检查是否是老版本的配置   按照老版本配置查找
-		if strings.Contains(b.plat, ".") {
-			p := strings.Split(b.plat, ".")
-			if len(p) != 2 {
-				return []string{}, fmt.Errorf("配置服务地址错误 %s", b.plat)
-			}
-			rpath = registry.Join(p[1], "services", "rpc", p[0], b.service, "providers")
-			v, err = b.regst.Exists(rpath)
-			if err != nil {
-				return []string{}, fmt.Errorf("检查老版服务地址出错 %s %w", rpath, err)
-			}
-			if !v {
-				return []string{}, nil
-			}
-		}
+		return []string{}, err
 	}
 
+	//获取所有rpc服务下的子节点
 	chilren, _, err := b.regst.GetChildren(rpath)
 	if err != nil {
 		return []string{}, fmt.Errorf("GetChildren服务地址出错 %s %w", rpath, err)
 	}
 
 	addrs = b.extractAddrs(chilren)
-	fmt.Println("------------:", addrs)
+	fmt.Println("addrs:", addrs)
 	return
 }
 
@@ -175,6 +157,85 @@ func (b *ResolverBuilder) extractAddrs(resp []string) []string {
 		})
 	}
 	return addrs
+}
+
+func (b *ResolverBuilder) getRealPath() (string, error) {
+	rpath := registry.Join(b.plat, "services", "rpc", b.service, "providers")
+	v, err := b.regst.Exists(rpath)
+	if err != nil {
+		return "", fmt.Errorf("检查新版服务地址出错 %s %w", rpath, err)
+	}
+	if v {
+		return rpath, nil
+	}
+
+	//如果不存在  检查是否是老版本的配置   按照老版本配置查找
+	if strings.Contains(b.plat, ".") {
+		p := strings.Split(b.plat, ".")
+		if len(p) != 2 {
+			return "", fmt.Errorf("配置服务地址错误 %s", b.plat)
+		}
+		rpath = registry.Join(p[1], "services", "rpc", p[0], b.service, "providers")
+		v, err = b.regst.Exists(rpath)
+		if err != nil {
+			return "", fmt.Errorf("检查老版服务地址出错 %s %w", rpath, err)
+		}
+		if v {
+			return rpath, nil
+		}
+	}
+
+	rpath = rpath[:len(rpath)-len(registry.Join(b.service, "providers"))]
+	//精确路径没有找到  现在需要获取模糊匹配路径
+	sp := strings.Split(strings.Trim(b.service, "/"), "/")
+	if len(sp) == 0 {
+		return "", fmt.Errorf("service服务路径错误, %s", b.service)
+	}
+
+	//递归获取真实的路径
+	path, ok, err := b.getPath(rpath, sp, 0)
+	if err != nil {
+		return "", err
+	}
+
+	if !ok {
+		return "", fmt.Errorf("没有找到有效的服务路径, %s", b.service)
+	}
+
+	rpath = registry.Join(path, "providers")
+	return rpath, nil
+}
+
+func (b *ResolverBuilder) getPath(rpath string, sp []string, index int) (string, bool, error) {
+	if index >= len(sp) {
+		return rpath, false, nil
+	}
+
+	chilren, _, err := b.regst.GetChildren(rpath)
+	if err != nil {
+		return "", false, fmt.Errorf("GetChildren服务地址出错 %s %w", rpath, err)
+	}
+
+	ok := false
+	for _, str := range chilren {
+
+		if strings.Contains(str, sp[index]) || strings.HasPrefix(str, ":") {
+			xpath := registry.Join(rpath, str)
+			if index == len(sp)-1 {
+				return xpath, true, nil
+			}
+			xpath, ok, err = b.getPath(xpath, sp, index+1)
+			if err != nil {
+				return "", false, err
+			}
+
+			if ok {
+				return xpath, ok, nil
+			}
+		}
+	}
+
+	return "", false, nil
 }
 
 /*

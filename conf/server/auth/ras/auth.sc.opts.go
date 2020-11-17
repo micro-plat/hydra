@@ -11,7 +11,8 @@ const (
 	FiledSortStatic = "static"
 )
 
-type connectOption struct {
+//Connect 签名拼接串
+type Connect struct {
 
 	//键值连接符
 	KeyValue string `json:"kv,omitempty" valid:"ascii" toml:"kv,omitempty"`
@@ -30,11 +31,11 @@ type connectOption struct {
 }
 
 //ConnectOption 配置选项
-type ConnectOption func(*connectOption)
+type ConnectOption func(*Connect)
 
 //WithConnectChar 设置字段拼接方式
 func WithConnectChar(kv string, chain string) ConnectOption {
-	return func(c *connectOption) {
+	return func(c *Connect) {
 		c.KeyValue = kv
 		c.Chain = chain
 	}
@@ -42,21 +43,21 @@ func WithConnectChar(kv string, chain string) ConnectOption {
 
 //WithConnectSortByData 只排序数据字段，不排序secrect
 func WithConnectSortByData() ConnectOption {
-	return func(c *connectOption) {
+	return func(c *Connect) {
 		c.Sort = FiledSortData
 	}
 }
 
 //WithConnectSortAll 排序所有字段，包括数据，secrect
 func WithConnectSortAll() ConnectOption {
-	return func(c *connectOption) {
+	return func(c *Connect) {
 		c.Sort = FiledSortAll
 	}
 }
 
 //WithConnectSortStatic 使用指定的字段进行排序
 func WithConnectSortStatic(fields ...string) ConnectOption {
-	return func(c *connectOption) {
+	return func(c *Connect) {
 		c.Sort = FiledSortStatic
 		c.Fields = strings.Join(fields, "|")
 	}
@@ -64,7 +65,7 @@ func WithConnectSortStatic(fields ...string) ConnectOption {
 
 //WithSecretConnect 启用配置
 func WithSecretConnect(opts ...SecretOption) ConnectOption {
-	return func(a *connectOption) {
+	return func(a *Connect) {
 		a.Secret = &SecretConnect{}
 		for _, opt := range opts {
 			opt(a.Secret)

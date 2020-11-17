@@ -82,9 +82,9 @@ func WithAuthEnable() AuthOption {
 //WithConnect 启用配置
 func WithConnect(opts ...ConnectOption) AuthOption {
 	return func(a *Auth) {
-		a.Connect = &Connect{connectOption: &connectOption{}}
+		a.Connect = &Connect{}
 		for _, opt := range opts {
-			opt(a.Connect.connectOption)
+			opt(a.Connect)
 		}
 	}
 }
