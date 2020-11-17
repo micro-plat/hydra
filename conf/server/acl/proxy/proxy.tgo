@@ -1,8 +1,0 @@
-
-http := import("http")
-
-upstream=""
-check:=func(){
-
-}
-toUpstream:=check()
