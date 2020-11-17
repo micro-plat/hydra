@@ -107,7 +107,7 @@ def runApp(args,steps=[],exe_name=""):
 
     finally:   
         server.kill()
-        print("server.kill")
+        #print("server.kill")
 
     response = server.recv()
     #print(unicode(response,"utf-8"))
