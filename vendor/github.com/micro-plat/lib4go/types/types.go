@@ -372,3 +372,10 @@ func ParseBool(val interface{}) (value bool, err error) {
 	}
 	return false, fmt.Errorf("parsing %q: invalid syntax", val)
 }
+
+//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+func Translate(format string, kv ...interface{}) string {
+	trf := NewXMap()
+	trf.Append(kv...)
+	return trf.Translate(format)
+}

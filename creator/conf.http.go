@@ -119,7 +119,7 @@ func (b *httpBuilder) Proxy(script string) *httpBuilder {
 }
 
 //Render 响应渲染配置
-func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
-	b.CustomerBuilder[render.TypeNodeName] = render.NewRender(opts...)
+func (b *httpBuilder) Render(script string) *httpBuilder {
+	b.CustomerBuilder[render.TypeNodeName] = script
 	return b
 }

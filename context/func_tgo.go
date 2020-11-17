@@ -34,7 +34,8 @@ func GetTGOModules() []*tgo.Module {
 		Add("getStringByIndex", internal.GetStringByIndex).
 		Add("getIntByIndex", internal.GetIntByIndex).
 		Add("getFloatByIndex", internal.GetFloatByIndex).
-		Add("exclude", internal.Exclude)
+		Add("exclude", internal.Exclude).
+		Add("translate", internal.Translate)
 
 	return []*tgo.Module{request, response, app, types}
 }

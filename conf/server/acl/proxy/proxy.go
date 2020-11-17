@@ -22,6 +22,8 @@ const (
 
 //Proxy 代理设置
 type Proxy struct {
+
+	//Disable 禁用
 	Disable bool `json:""-`
 	c       conf.IServerConf
 	tengo   *tgo.VM

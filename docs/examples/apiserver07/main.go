@@ -10,7 +10,7 @@ func main() {
 		hydra.WithServerTypes(http.API),
 		hydra.WithSystemName("apiserver"),
 	)
-	hydra.Conf.API(":8080").Proxy()
+	hydra.Conf.API(":8080")
 	app.API("/api", api)
 	app.Start()
 }
