@@ -296,7 +296,7 @@ func (c *response) GetSpecials() string {
 
 //GetRaw 获取原始响应请求
 func (c *response) GetRaw() interface{} {
-	return c.raw
+	return c.raw.content
 }
 
 //GetRawResponse 获取响应内容信息

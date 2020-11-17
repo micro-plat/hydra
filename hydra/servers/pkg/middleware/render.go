@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -21,15 +20,15 @@ func Render() Handler {
 			return
 		}
 
-		rd, enable, err := render.Get(ctx.Request().Path().GetRequestPath())
-		if !enable {
-			return
-		}
+		rd, enable, err := render.Get()
 		if err != nil {
 			ctx.Log().Error("render出错:", err)
 			return
 		}
-		fmt.Println("render:", rd)
+
+		if !enable {
+			return
+		}
 
 		ctx.Response().AddSpecial("render")
 		ctx.Response().WriteFinal(rd.Status, rd.Content, rd.ContentType)

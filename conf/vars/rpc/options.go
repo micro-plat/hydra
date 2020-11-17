@@ -34,20 +34,14 @@ func WithTLS(tls []string) Option {
 //WithRoundRobin 配置为轮询负载均衡器
 func WithRoundRobin() Option {
 	return func(o *RPCConf) {
-		o.SortPrefix = ""
-		o.RoundRobin = true
-		o.LocalFirst = false
-		o.LocalIP = ""
+		o.Balancer = RoundRobin
 	}
 }
 
 //WithLocalFirst 配置为本地优先负载均衡器
-func WithLocalFirst(local string) Option {
+func WithLocalFirst() Option {
 	return func(o *RPCConf) {
-		o.SortPrefix = local
-		o.LocalIP = local
-		o.LocalFirst = true
-		o.RoundRobin = false
+		o.Balancer = LocalFirst
 	}
 }
 
