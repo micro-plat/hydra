@@ -18,7 +18,8 @@ func GetTGOModules() []*tgo.Module {
 
 	response := tgo.NewModule("response").
 		Add("getStatus", tgo.FuncARI(func() int { ctx := Current(); s, _ := ctx.Response().GetFinalResponse(); return s })).
-		Add("getContent", tgo.FuncARS(func() string { ctx := Current(); _, s := ctx.Response().GetFinalResponse(); return s }))
+		Add("getContent", tgo.FuncARS(func() string { ctx := Current(); _, s := ctx.Response().GetFinalResponse(); return s })).
+		Add("getRaw", internal.IASANY(func() interface{} { ctx := Current(); return ctx.Response().GetRaw() }))
 
 	app := tgo.NewModule("app").
 		Add("getServerID", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerID() })).
