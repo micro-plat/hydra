@@ -446,6 +446,14 @@ func (res *MockResponse) Write(s int, v interface{}) error {
 
 //WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 func (res *MockResponse) WriteAny(v interface{}) error {
+	switch t := v.(type) {
+	case errs.IError:
+		res.MockStatus = t.GetCode()
+	case error:
+		res.MockStatus = 500
+	default:
+		res.MockContent = types.GetString(v)
+	}
 	return nil
 }
 

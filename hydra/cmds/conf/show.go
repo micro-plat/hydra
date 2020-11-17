@@ -71,7 +71,7 @@ func (s *show) readPrint() error {
 		}
 		nv := types.GetInt(value, -1) - 1
 		if nv > len(s.nodes)-1 || nv < 0 {
-			s.print("输入的数字无效")
+			s.print("输入的数字无效:", value)
 			continue
 		}
 		content := s.nodes[nv]

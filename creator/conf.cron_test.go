@@ -25,6 +25,9 @@ func Test_newCron(t *testing.T) {
 }
 
 func Test_cronBuilder_Load(t *testing.T) {
+
+	tasks1, _ := task.NewEmptyTasks().Append(task.NewTask("cron", "server"))
+	tasks2, _ := task.NewEmptyTasks().Append(task.NewTask("cron", "server"), task.NewTask("cron1", "server1"))
 	tests := []struct {
 		name    string
 		addlist map[string]string
@@ -32,8 +35,8 @@ func Test_cronBuilder_Load(t *testing.T) {
 		want    *cronBuilder
 	}{
 		{name: "全空数据", addlist: map[string]string{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks()}}},
-		{name: "实体对象,add任务", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks().Append(task.NewTask("cron", "server"))}},
-			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks().Append(task.NewTask("cron", "server"), task.NewTask("cron1", "server1"))}}},
+		{name: "实体对象,add任务", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks1}},
+			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks2}}},
 	}
 	for _, tt := range tests {
 		for k, v := range tt.addlist {

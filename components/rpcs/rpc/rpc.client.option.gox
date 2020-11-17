@@ -1,0 +1,87 @@
+package rpc
+
+import (
+	"time"
+
+	"github.com/micro-plat/hydra/components/rpcs/balancer"
+	"github.com/micro-plat/lib4go/logger"
+)
+
+type clientOption struct {
+	connectionTimeout time.Duration
+	log               *logger.Logger
+	balancer          string
+	localIP           string
+	plat              string
+	service           string
+	sortPrefix        string
+	tls               []string
+}
+
+//ClientOption 客户端配置选项
+type ClientOption func(*clientOption)
+
+//WithConnectionTimeout 配置网络连接超时时长
+func WithConnectionTimeout(t time.Duration) ClientOption {
+	return func(o *clientOption) {
+		o.connectionTimeout = t
+	}
+}
+
+//WithLogger 配置日志记录器
+func WithLogger(log *logger.Logger) ClientOption {
+	return func(o *clientOption) {
+		o.log = log
+	}
+}
+
+//WithTLS 设置TLS证书(pem,key)
+func WithTLS(tls []string) ClientOption {
+	return func(o *clientOption) {
+		if len(tls) == 2 {
+			o.tls = tls
+		}
+	}
+}
+
+//WithRoundRobinBalancer 配置为轮询负载均衡器
+func WithRoundRobinBalancer(plat, service string) ClientOption {
+	return func(o *clientOption) {
+		o.plat = plat
+		o.service = service
+		o.sortPrefix = ""
+		//o.resolver = balancer.NewResolver(plat, service, "")
+		//o.balancer = balancer.RoundRobin(service, o.resolver, o.log)
+		o.balancer = balancer.RoundRobin
+	}
+}
+
+//WithLocalFirstBalancer 配置为本地优先负载均衡器
+func WithLocalFirstBalancer(plat, service string, local string) ClientOption {
+	return func(o *clientOption) {
+		o.plat = plat
+		o.service = service
+		o.sortPrefix = local
+		//o.resolver = balancer.NewResolver(plat, service, local)
+		//o.balancer = balancer.LocalFirst(service, local, o.resolver)
+		o.balancer = balancer.LocalFirst
+		o.localIP = local
+	}
+}
+
+//WithBalancer 设置负载均衡器
+func WithBalancer(plat, service string, lbname string) ClientOption {
+	return func(o *clientOption) {
+		o.plat = plat
+		o.service = service
+		o.balancer = lbname
+	}
+}
+
+// //WithBalancer 设置负载均衡器
+// func WithBalancer(service string, lb balancer.CustomerBalancer) ClientOption {
+// 	return func(o *clientOption) {
+// 		o.service = service
+// 		o.balancer = lb
+// 	}
+// }

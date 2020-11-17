@@ -37,6 +37,9 @@ type IServerConf interface {
 	//GetVersion 获服主配置版本号
 	GetVersion() int32
 
+	//获取所有当前服务器下所有集群名称
+	GetClusterNames() []string
+
 	//GetCluster 获取集群信息
 	GetCluster(clustName ...string) (ICluster, error)
 
@@ -107,6 +110,7 @@ type ICluster interface {
 
 //IServerPub 发布路径服务
 type IServerPub interface {
+	GetServerRoot() string
 	GetServerPath() string
 	GetSubConfPath(name ...string) string
 	GetRPCServicePubPath(svName string) string
