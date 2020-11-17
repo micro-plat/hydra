@@ -3,91 +3,66 @@ package render
 import (
 	"fmt"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/tgo"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//TypeNodeName render配置节点名
-const TypeNodeName = "render"
+const (
+	//TypeNodeName render配置节点名
+	TypeNodeName = "render"
 
-type Tmplt struct {
-	ContentType string `json:"content_type,omitempty" toml:"content_type,omitempty"`
-	Content     string `json:"content,omitempty" toml:"content,omitempty"`
-	Status      string `json:"status,omitempty" valid:"required" toml:"status,omitempty"`
-}
+	//scriptName 脚本中render结果值
+	scriptName = "render"
+)
 
 //Render 响应模板信息
 type Render struct {
-	Tmplts map[string]*Tmplt `json:"tmplts,omitempty" toml:"Tmplts,omitempty"`
 	//Disable 禁用
-	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
-	*conf.PathMatch
-}
-
-//NewRender 构建模板
-func NewRender(opts ...Option) *Render {
-	r := &Render{Tmplts: make(map[string]*Tmplt)}
-	for _, opt := range opts {
-		opt(r)
-	}
-	paths := make([]string, len(r.Tmplts))
-	idx := 0
-	for k := range r.Tmplts {
-		paths[idx] = k
-		idx++
-	}
-	r.PathMatch = conf.NewPathMatch(paths...)
-	return r
+	Disable bool `json:"-"`
+	tengo   *tgo.VM
 }
 
 //GetConf 设置GetRender配置
 func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
-	rsp = &Render{}
-	_, err = cnf.GetSubObject(TypeNodeName, rsp)
+	script, err := cnf.GetSubConf(TypeNodeName)
 	if err == conf.ErrNoSetting {
-		rsp.Disable = true
-		return rsp, nil
+		return &Render{Disable: true}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("render配置格式有误:%v", err)
+		return nil, fmt.Errorf("%s配置有误:%v", TypeNodeName, err)
 	}
-
-	paths := make([]string, 0, len(rsp.Tmplts))
-	for k, v := range rsp.Tmplts {
-		if b, err := govalidator.ValidateStruct(v); !b {
-			return nil, fmt.Errorf("render Tmplt配置数据有误:%v", err)
-		}
-		paths = append(paths, k)
+	render := &Render{}
+	render.tengo, err = tgo.New(string(script.GetRaw()), tgo.WithModule(global.GetTGOModules()...))
+	if err != nil {
+		return nil, fmt.Errorf("%s脚本错误:%v", TypeNodeName, err)
 	}
-	rsp.PathMatch = conf.NewPathMatch(paths...)
-	return rsp, nil
+	return render, nil
 }
 
 //Get 获取转换结果
-func (r *Render) Get(path string, funcs map[string]interface{}, i interface{}) (bool, int, string, string, error) {
-	exists, service := r.PathMatch.Match(path)
-	if !exists {
-		return false, 0, "", "", nil
-	}
-	tmpltStatus, tmpltContentType, tmpltContent := "", "", ""
-	var err error
-	if r.Tmplts[service].Status != "" {
-		tmpltStatus, err = conf.TmpltTranslate(service, r.Tmplts[service].Status, funcs, i)
-		if err != nil || types.GetInt(tmpltStatus) == 0 {
-			return true, 0, "", "", fmt.Errorf("status模板%s配置有误 %w", r.Tmplts[service].Status, err)
-		}
-	}
-	if r.Tmplts[service].ContentType != "" {
-		tmpltContentType, err = conf.TmpltTranslate(service, r.Tmplts[service].ContentType, funcs, i)
-		if err != nil {
-			return true, 0, "", "", fmt.Errorf("content_type模板%s配置有误 %w", r.Tmplts[service].ContentType, err)
-		}
+func (r *Render) Get() (*Result, bool, error) {
+
+	//执行脚本，获取render结果
+	result, err := r.tengo.Run()
+	if err != nil {
+		return nil, false, err
 	}
 
-	tmpltContent, err = conf.TmpltTranslate(service, r.Tmplts[service].Content, funcs, i)
-	if err != nil {
-		return true, 0, "", "", fmt.Errorf("响应内容模板%s配置有误 %w", r.Tmplts[service].Content, err)
+	//获取脚本执行结果
+	sresult := result.GetArray(scriptName)
+	if len(sresult) >= 2 {
+		ct := ""
+		if len(sresult) > 2 {
+			ct = types.GetString(sresult[2])
+		}
+		return &Result{
+			Status:      types.GetInt(sresult[0]),
+			Content:     types.GetString(sresult[1]),
+			ContentType: ct,
+		}, true, nil
 	}
-	return true, types.GetInt(tmpltStatus, 0), tmpltContentType, tmpltContent, nil
+	return nil, false, nil
+
 }

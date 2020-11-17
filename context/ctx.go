@@ -78,11 +78,14 @@ type IPath interface {
 
 	//Limit 设置限流信息
 	Limit(isLimit bool, fallback bool)
+
 	//IsLimited 是否已限流
 	IsLimited() bool
 
 	//AllowFallback 是否允许降级
 	AllowFallback() bool
+
+	GetEncoding() string
 }
 
 //IVariable 参与变量
@@ -204,6 +207,9 @@ type IAuth interface {
 //IUser 用户相关信息
 type IUser interface {
 
+	//GetGID 获取当前处理的goroutine id
+	GetGID() string
+
 	//GetClientIP 获取客户端请求IP
 	GetClientIP() string
 
@@ -231,9 +237,6 @@ type IContext interface {
 
 	//APPConf 服务器配置
 	APPConf() app.IAPPConf
-
-	//TmplFuncs 模板函数列表
-	TmplFuncs() TFuncs
 
 	//User 用户信息
 	User() IUser

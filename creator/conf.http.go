@@ -112,14 +112,14 @@ func (b *httpBuilder) Limit(opts ...limiter.Option) *httpBuilder {
 }
 
 //Proxy 代理配置
-func (b *httpBuilder) Proxy(opts ...proxy.Option) *httpBuilder {
+func (b *httpBuilder) Proxy(script string) *httpBuilder {
 	path := fmt.Sprintf("%s/%s", proxy.ParNodeName, proxy.SubNodeName)
-	b.CustomerBuilder[path] = proxy.New(opts...)
+	b.CustomerBuilder[path] = script
 	return b
 }
 
 //Render 响应渲染配置
-func (b *httpBuilder) Render(opts ...render.Option) *httpBuilder {
-	b.CustomerBuilder[render.TypeNodeName] = render.NewRender(opts...)
+func (b *httpBuilder) Render(script string) *httpBuilder {
+	b.CustomerBuilder[render.TypeNodeName] = script
 	return b
 }

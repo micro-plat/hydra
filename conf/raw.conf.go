@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"github.com/micro-plat/lib4go/security/md5"
@@ -14,8 +15,8 @@ type IConf interface {
 	GetSignature() string
 }
 
-//EmptyJSONConf 空的jsonconf
-var EmptyJSONConf = &RawConf{
+//EmptyRawConf 空的rawconf
+var EmptyRawConf = &RawConf{
 	version:   0,
 	raw:       []byte("{}"),
 	signature: md5.EncryptBytes([]byte("{}")),
@@ -45,14 +46,20 @@ func NewByMap(data map[string]interface{}, version int32) (c *RawConf, err error
 	return c, nil
 }
 
-//NewByJSON 初始化JsonConf
-func NewByJSON(message []byte, version int32) (c *RawConf, err error) {
+//NewByText 初始化RawConf
+func NewByText(message []byte, version int32) (c *RawConf, err error) {
 	c = &RawConf{
-		raw:       json.RawMessage(message),
+		raw:       message,
 		signature: md5.EncryptBytes(message),
 		version:   version,
 	}
-	c.XMap, err = types.NewXMapByJSON(string(message))
+	switch {
+	case bytes.HasPrefix(message, []byte("<?xml")):
+		c.XMap, err = types.NewXMapByXML(string(message))
+	case json.Valid(message) && (bytes.HasPrefix(message, []byte("{")) ||
+		bytes.HasPrefix(message, []byte("["))):
+		c.XMap, err = types.NewXMapByJSON(string(message))
+	}
 	return c, err
 }
 

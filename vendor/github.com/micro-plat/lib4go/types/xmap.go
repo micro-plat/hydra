@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -113,6 +114,9 @@ type IXMap interface {
 
 	//Cascade 将多层map转换为单层map
 	Cascade(m IXMap)
+
+	//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+	Translate(format string) string
 
 	//Merge 合并多个xmap
 	Merge(m IXMap)
@@ -422,7 +426,7 @@ func (q XMap) ToStruct(out interface{}) error {
 	val := reflect.ValueOf(out)
 
 	if val.Kind() != reflect.Interface && val.Kind() != reflect.Ptr {
-		return fmt.Errorf("function only accepts structs; got %s", val.Kind())
+		return fmt.Errorf("function only accepts interface or ptr; got %s", val.Kind())
 	}
 
 	buff, err := json.Marshal(q)
@@ -446,6 +450,8 @@ func (q XMap) ToSMap() map[string]string {
 	for k, v := range q {
 		if s, ok := v.(string); ok {
 			rmap[k] = s
+		} else if _, ok := v.(float64); ok {
+			rmap[k] = q.GetString(k)
 		} else if s, ok := v.(interface{}); ok {
 			buff, err := json.Marshal(s)
 			if err != nil {
@@ -458,6 +464,19 @@ func (q XMap) ToSMap() map[string]string {
 		}
 	}
 	return rmap
+}
+
+//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+func (q XMap) Translate(format string) string {
+	brackets, _ := regexp.Compile(`\{@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\}`)
+	result := brackets.ReplaceAllStringFunc(format, func(s string) string {
+		return q.GetString(s[2 : len(s)-1])
+	})
+	word, _ := regexp.Compile(`@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*`)
+	result = word.ReplaceAllStringFunc(result, func(s string) string {
+		return q.GetString(s[1:])
+	})
+	return result
 }
 
 //GetCascade 根据key将值转换为map[string]ineterface{}

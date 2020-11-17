@@ -1,6 +1,8 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+)
 
 //Render 响应结果输出组件
 func Render() Handler {
@@ -18,15 +20,17 @@ func Render() Handler {
 			return
 		}
 
-		enable, status, ctp, content, err := render.Get(ctx.Request().Path().GetRequestPath(), ctx.TmplFuncs(), ctx.Response().GetRaw())
+		rd, enable, err := render.Get()
+		if err != nil {
+			ctx.Log().Error("render出错:", err)
+			return
+		}
+
 		if !enable {
 			return
 		}
+
 		ctx.Response().AddSpecial("render")
-		if err != nil {
-			ctx.Log().Error("渲染响应结果出错:", err)
-			return
-		}
-		ctx.Response().WriteFinal(status, content, ctp)
+		ctx.Response().WriteFinal(rd.Status, rd.Content, rd.ContentType)
 	}
 }

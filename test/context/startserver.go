@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
@@ -30,6 +31,12 @@ func startServer() {
 		hydra.Conf.API(":9091")
 		app.API("/getbodymap", GetBodyMap)
 		app.API("/getbody/encoding", GetBodyEncoding)
+		app.API("/getbody/encoding/gbk", GetBodyEncodingGBK, router.WithEncoding("gbk"))
+		app.API("/getbody/encoding/utf8", GetBodyEncodingUTF8, router.WithEncoding("utf-8"))
+		app.API("/getcookies/encoding", GetCookiesEncoding)
+		app.API("/getheaders/encoding", GetHeaderEncoding)
+		app.API("/getheaders/encoding/gbk", GetHeaderEncodingGBK, router.WithEncoding("gbk"))
+		app.API("/getheaders/encoding/utf8", GetHeaderEncoding, router.WithEncoding("utf-8"))
 		app.API("/form", GetBodyMapFormData)
 		app.API("/upload", UploadFile)
 		app.API("/download", DownloadFile)
@@ -37,6 +44,8 @@ func startServer() {
 		app.API("/request/check", Check)
 		app.API("/response/redirect", Redirect)
 		app.API("/response/redirect/dst", RedirectDst)
+		app.API("/rpc", RpcRequest)
+
 		os.Args = []string{"startserver", "run"}
 		go app.Start()
 		time.Sleep(time.Second * 2)
@@ -59,9 +68,58 @@ func GetBodyEncoding(ctx hydra.IContext) interface{} {
 	if err != nil {
 		return fmt.Errorf("getBody出错")
 	}
-	header := ctx.Request().Path().GetHeader("Content-Type")
-	ctx.Response().Header("Content-Type", header)
 	return raw
+}
+
+func GetBodyEncodingGBK(ctx hydra.IContext) interface{} {
+	raw, err := ctx.Request().GetBody()
+	if err != nil {
+		return fmt.Errorf("getBody出错")
+	}
+	return raw
+}
+func GetBodyEncodingUTF8(ctx hydra.IContext) interface{} {
+	raw, err := ctx.Request().GetBody()
+	if err != nil {
+		return fmt.Errorf("getBody出错")
+	}
+	return raw
+}
+
+func GetCookiesEncoding(ctx hydra.IContext) interface{} {
+	r := ctx.Request().Path().GetCookies()
+	if r == nil {
+		return fmt.Errorf("GetCookies出错")
+	}
+	return r
+}
+
+func GetHeaderEncoding(ctx hydra.IContext) interface{} {
+	r := ctx.Request().Path().GetHeader("Hname")
+	if r == "" {
+		return fmt.Errorf("GetHeaders出错")
+	}
+	return r
+}
+
+func GetHeaderEncodingGBK(ctx hydra.IContext) interface{} {
+	r := ctx.Request().Path().GetHeader("Hname")
+	if r == "" {
+		return fmt.Errorf("GetHeaders出错")
+	}
+	return r
+}
+
+func GetHeaderEncodingUtf8(ctx hydra.IContext) interface{} {
+	r := ctx.Request().Path().GetHeader("Hname")
+	if r == "" {
+		return fmt.Errorf("GetHeaders出错")
+	}
+	e := ctx.Request().Path().GetEncoding()
+	if e == "gbk" {
+		r = GbkToUtf8(r)
+	}
+	return r
 }
 
 func GetBodyMapFormData(ctx hydra.IContext) interface{} {

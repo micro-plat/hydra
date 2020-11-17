@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 	"time"
@@ -13,8 +14,15 @@ import (
 //GetString 获取字符串
 func GetString(v interface{}, def ...string) string {
 	if v != nil {
-		if r := fmt.Sprintf("%v", v); r != "" {
-			return r
+		switch v.(type) {
+		case float32:
+			d := decimal.NewFromFloat32(v.(float32))
+			return d.String()
+		case float64:
+			d := decimal.NewFromFloat(v.(float64))
+			return d.String()
+		default:
+			return fmt.Sprintf("%v", v)
 		}
 	}
 	return GetStringByIndex(def, 0)
@@ -45,7 +53,17 @@ func GetInt(v interface{}, def ...int) int {
 	if err != nil {
 		return GetIntByIndex(def, 0)
 	}
-	return int(d.BigInt().Int64())
+
+	//如果分母!=1  说明是小数
+	if d.Rat().Denom().Int64() != 1 {
+		return GetIntByIndex(def, 0)
+	}
+
+	res := d.BigInt()
+	if res.IsInt64() {
+		return int(res.Int64())
+	}
+	return GetIntByIndex(def, 0)
 }
 
 //GetInt32 获取int32数据，不是有效的数字则返回默然值或0
@@ -55,10 +73,20 @@ func GetInt32(v interface{}, def ...int32) int32 {
 	if err != nil {
 		return GetInt32ByIndex(def, 0)
 	}
-	if d.BigInt().IsInt64() {
-		return 0
+
+	//如果分母!=1  说明是小数
+	if d.Rat().Denom().Int64() != 1 {
+		return GetInt32ByIndex(def, 0)
 	}
-	return int32(d.BigInt().Int64())
+
+	res := d.BigInt()
+	if res.IsInt64() {
+		if res.Int64() > math.MaxInt32 || res.Int64() < math.MinInt32 {
+			return GetInt32ByIndex(def, 0)
+		}
+		return int32(res.Int64())
+	}
+	return GetInt32ByIndex(def, 0)
 }
 
 //GetInt64 获取int64数据，不是有效的数字则返回默然值或0
@@ -68,7 +96,17 @@ func GetInt64(v interface{}, def ...int64) int64 {
 	if err != nil {
 		return GetInt64ByIndex(def, 0)
 	}
-	return d.BigInt().Int64()
+
+	//如果分母!=1  说明是小数
+	if d.Rat().Denom().Int64() != 1 {
+		return GetInt64ByIndex(def, 0)
+	}
+
+	res := d.BigInt()
+	if res.IsInt64() {
+		return res.Int64()
+	}
+	return GetInt64ByIndex(def, 0)
 }
 
 //GetFloat32 获取float32数据，不是有效的数字则返回默然值或0
@@ -76,9 +114,12 @@ func GetFloat32(v interface{}, def ...float32) float32 {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
 	if err != nil {
-		return GetFloat32(def, 0)
+		return GetFloat32ByIndex(def, 0)
 	}
 	nv, _ := d.BigFloat().Float32()
+	if float64(nv) == math.Inf(-1) || float64(nv) == math.Inf(1) {
+		return GetFloat32ByIndex(def, 0)
+	}
 	return nv
 }
 
@@ -90,6 +131,9 @@ func GetFloat64(v interface{}, def ...float64) float64 {
 		return GetFloat64ByIndex(def, 0)
 	}
 	nv, _ := d.BigFloat().Float64()
+	if float64(nv) == math.Inf(-1) || float64(nv) == math.Inf(1) {
+		return GetFloat64ByIndex(def, 0)
+	}
 	return nv
 }
 
@@ -157,7 +201,7 @@ func MustInt64(v interface{}) (int64, bool) {
 //MustFloat32 获取float32，不是有效的数字则返回false
 func MustFloat32(v interface{}) (float32, bool) {
 	if value, ok := v.(float32); ok {
-		vn, _ := decimal.NewFromFloat32(value).Abs().BigFloat().Float32()
+		vn, _ := decimal.NewFromFloat32(value).BigFloat().Float32()
 		return vn, true
 	}
 	return 0, false
@@ -166,7 +210,7 @@ func MustFloat32(v interface{}) (float32, bool) {
 //MustFloat64 获取float64，不是有效的数字则返回false
 func MustFloat64(v interface{}) (float64, bool) {
 	if value, ok := v.(float64); ok {
-		vn, _ := decimal.NewFromFloat(value).Abs().BigFloat().Float64()
+		vn, _ := decimal.NewFromFloat(value).BigFloat().Float64()
 		return vn, true
 	}
 	return 0, false
@@ -327,4 +371,11 @@ func ParseBool(val interface{}) (value bool, err error) {
 		return true, nil
 	}
 	return false, fmt.Errorf("parsing %q: invalid syntax", val)
+}
+
+//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+func Translate(format string, kv ...interface{}) string {
+	trf := NewXMap()
+	trf.Append(kv...)
+	return trf.Translate(format)
 }

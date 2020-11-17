@@ -43,7 +43,7 @@ func NewContainer() *Container {
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
 func (c *Container) GetOrCreate(typ string, name string, creator func(conf conf.IVarConf) (interface{}, error)) (interface{}, error) {
 
-	var jsconf = conf.EmptyJSONConf
+	var jsconf = conf.EmptyRawConf
 	vc, _ := app.Cache.GetVarConf()
 	if vc != nil {
 		jsconf, _ = vc.GetConf(typ, name)
