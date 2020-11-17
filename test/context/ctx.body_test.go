@@ -19,6 +19,7 @@ import (
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
+	"github.com/micro-plat/lib4go/encoding"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
@@ -344,61 +345,165 @@ func getTestUTF8Json(s map[string]string) string {
 
 func getTestGBKJson(s map[string]string) string {
 	for k, v := range s {
-		s[k] = url.QueryEscape(string(Utf8ToGbk([]byte(v))))
+		s[k] = url.QueryEscape(Utf8ToGbk(v))
 	}
 
 	r, _ := json.Marshal(s)
 	return string(r)
 }
 
-func Utf8ToGbk(s []byte) []byte {
-	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewEncoder())
+func Utf8ToGbk(s string) string {
+	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GBK.NewEncoder())
 	d, _ := ioutil.ReadAll(reader)
-	return d
+	return string(d)
 }
 
-func GbkToUtf8(s []byte) []byte {
-	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
+func GbkToUtf8(s string) string {
+	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GBK.NewDecoder())
 	d, _ := ioutil.ReadAll(reader)
-	return d
+	return string(d)
 }
 
 func Test_body_GetBody_Encoding(t *testing.T) {
 	tests := []struct {
-		name        string
-		contentType string
-		body        string
-		want        string
+		name            string
+		contentType     string
+		encoding        string
+		body            string
+		want            string
+		wantContentType string
+		wantStatus      string
+		wantStatusCode  int
 	}{
-		{name: "utf-8", contentType: "application/json;charset=utf-8",
+		{name: "头部编码utf-8,请求数据为utf-8", contentType: "application/json; charset=utf-8", encoding: "utf-8", wantContentType: "application/json; charset=utf-8",
 			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
-		{name: "gbk", contentType: "application/json;charset=gbk",
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
+		{name: "头部编码utf-8,请求数据为gbk", contentType: "application/json; charset=gbk", encoding: "gbk", wantContentType: "application/json; charset=gbk",
 			body: getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
-		{name: "未设置charset", contentType: "application/json",
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
+		{name: "头部编码gbk,请求数据为utf-8", contentType: "application/json; charset=gbk", encoding: "utf-8", wantContentType: "text/plain; charset=gbk",
+			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}), wantStatus: "510 Not Extended", wantStatusCode: 510,
+			want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+		{name: "头部编码gbk,请求数据为gbk", contentType: "application/json; charset=gbk", encoding: "gbk", wantContentType: "application/json; charset=gbk",
+			body: getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
+		{name: "未设置charset,请求数据为gbk", contentType: "application/json", encoding: "utf-8", wantContentType: "application/json; charset=utf-8",
+			body: getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`), wantStatus: "200 OK", wantStatusCode: 200},
+		{name: "未设置charset,请求数据为utf-8", contentType: "application/json; charset=utf-8", encoding: "utf-8", wantContentType: "application/json; charset=utf-8",
 			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
 	}
 	startServer()
 	for _, tt := range tests {
 		resp, err := http.Post("http://localhost:9091/getbody/encoding", tt.contentType, strings.NewReader(tt.body))
 		assert.Equal(t, false, err != nil, tt.name)
+
+		assert.Equal(t, tt.wantContentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.wantStatus, resp.Status, tt.name)
+		assert.Equal(t, tt.wantStatusCode, resp.StatusCode, tt.name)
+
 		defer resp.Body.Close()
-		assert.Equal(t, tt.contentType, resp.Header["Content-Type"][0], tt.name)
-		assert.Equal(t, "200 OK", resp.Status, tt.name)
-		assert.Equal(t, 200, resp.StatusCode, tt.name)
+		body, err := ioutil.ReadAll(resp.Body)
+		got, _ := encoding.Decode(string(body), tt.encoding)
+		assert.Equal(t, tt.want, string(got), tt.name)
+	}
+}
+
+func Test_body_GetBody_Encoding_UTF8(t *testing.T) {
+	tests := []struct {
+		name            string
+		contentType     string
+		encoding        string
+		body            string
+		want            string
+		wantStatus      string
+		wantContentType string
+		wantStatusCode  int
+	}{
+		{name: "请求编码为GBK", contentType: "application/json;charset=gbk", wantContentType: "application/json; charset=utf-8",
+			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},
+		{name: "请求数据为GBK,未设置头部编码", contentType: "application/json", wantContentType: "application/json; charset=utf-8",
+			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},
+		{name: "请求数据为utf-8,头为gbk", contentType: "application/json;charset=gbk", wantContentType: "application/json; charset=utf-8",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+		{name: "请求编码为utf-8", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=utf-8",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+		{name: "请求数据为utf-8,未设置头部编码", contentType: "application/json", wantContentType: "application/json; charset=utf-8",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbody/encoding/utf8", tt.contentType, strings.NewReader(tt.body))
+		fmt.Printf("resp:%+v \n", resp)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.wantContentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, tt.wantStatusCode, resp.StatusCode, tt.name)
+		assert.Equal(t, tt.wantStatus, resp.Status, tt.name)
+		defer resp.Body.Close()
+		got, err := ioutil.ReadAll(resp.Body)
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.want, string(got), tt.name)
+	}
+}
+
+func Test_body_GetBody_Encoding_GBK(t *testing.T) {
+	tests := []struct {
+		name            string
+		contentType     string
+		body            string
+		want            string
+		wantStatus      string
+		wantContentType string
+		wantStatusCode  int
+	}{
+		{name: "请求编码为utf-8,头为gbk", contentType: "application/json;charset=gbk", wantContentType: "text/plain; charset=gbk",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+		{name: "请求编码为utf-8", contentType: "application/json;charset=utf-8", wantContentType: "text/plain; charset=gbk",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+		{name: "请求数据为utf-8,未设置头部编码", contentType: "application/json", wantContentType: "text/plain; charset=gbk",
+			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+		{name: "请求数据为gbk,头为utf-8", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=gbk",
+			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},
+		{name: "请求编码为gbk", contentType: "application/json;charset=gbk", wantContentType: "application/json; charset=gbk",
+			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},
+		{name: "请求数据为gbk,未设置头部编码", contentType: "application/json", wantContentType: "application/json; charset=gbk",
+			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
+			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},
+	}
+	startServer()
+	for _, tt := range tests {
+		resp, err := http.Post("http://localhost:9091/getbody/encoding/gbk", tt.contentType, strings.NewReader(tt.body))
+		assert.Equal(t, false, err != nil, tt.name)
+		assert.Equal(t, tt.wantContentType, resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, tt.wantStatusCode, resp.StatusCode, tt.name)
+		assert.Equal(t, tt.wantStatus, resp.Status, tt.name)
+		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		assert.Equal(t, false, err != nil, tt.name)
-		want := map[string]interface{}{}
-		json.Unmarshal([]byte(tt.want), &want)
-
-		got := map[string]interface{}{}
-		if tt.name == "gbk" {
-			json.Unmarshal(GbkToUtf8(body), &got)
-		} else {
-			json.Unmarshal(body, &got)
-		}
-		assert.Equal(t, want, got, tt.name)
+		assert.Equal(t, tt.want, string(body), tt.name)
 	}
+}
+
+func Test_request_api(t *testing.T) {
+
+	startServer()
+
+	resp, err := http.Post("http://localhost:9091/rpc", "application/json", strings.NewReader(`{"a":1}`))
+	assert.Equal(t, false, err != nil, "xxxx")
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body), err)
 }
