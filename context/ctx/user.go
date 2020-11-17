@@ -13,6 +13,7 @@ var xRequestID = "X-Request-Id"
 var _ context.IUser = &user{}
 
 type user struct {
+	gid       string
 	meta      conf.IMeta
 	ctx       context.IInnerContext
 	requestID string
@@ -20,9 +21,10 @@ type user struct {
 	jwtToken  interface{}
 }
 
-func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
+func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
 	return &user{
 		ctx:  ctx,
+		gid:  gid,
 		auth: &Auth{},
 		meta: meta,
 	}
@@ -36,6 +38,11 @@ func (c *user) GetRequestID() string {
 		c.requestID = utility.GetGUID()[0:9]
 	}
 	return c.requestID
+}
+
+//GetGID 获取当前处理的goroutine id
+func (c *user) GetGID() string {
+	return c.gid
 }
 
 //GetClientIP 获取客户端IP地址

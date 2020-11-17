@@ -119,12 +119,10 @@ func (c *response) Write(status int, content interface{}) error {
 	//检查内容类型并转换成字符串
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 
-	//将编码设置到content type
-	// routerObj, err := c.path.GetRouter()
-	// if err != nil {
-	// 	return err
-	// }
-	c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
+	//@fix 将编码设置到content type
+	if strings.Contains(c.final.contentType, "%s") {
+		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
+	}
 
 	//记录为原始状态
 	c.raw.contentType = c.final.contentType
@@ -261,25 +259,19 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 		c.ctx.Redirect(status, location)
 		return nil
 	}
-	//@todo encoding的测试
-	// routerObj, err := c.path.GetRouter()
-	// if err != nil {
-	// 	return err
-	// }
-	// if routerObj.IsUTF8() {
-	// 	c.ctx.Data(status, ctyp, []byte(content))
-	// 	return nil
-	// }
 
+	buff := []byte(content)
 	e := c.path.GetEncoding()
-	if e == "utf-8" {
-		c.ctx.Data(status, ctyp, []byte(content))
-		return nil
+	var err error
+
+	//@fix 510
+	if e != "utf-8" && status != http.StatusNotExtended {
+		buff, err = encoding.Encode(content, e)
+		if err != nil {
+			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
+		}
 	}
-	buff, err := encoding.Encode(content, e)
-	if err != nil {
-		return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
-	}
+
 	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
@@ -304,7 +296,7 @@ func (c *response) GetSpecials() string {
 
 //GetRaw 获取原始响应请求
 func (c *response) GetRaw() interface{} {
-	return c.raw
+	return c.raw.content
 }
 
 //GetRawResponse 获取响应内容信息
@@ -325,10 +317,11 @@ func (c *response) Flush() {
 	if c.noneedWrite || c.asyncWrite == nil {
 		return
 	}
-	c.noneedWrite = true
 	if err := c.asyncWrite(); err != nil {
 		panic(err)
 	}
+	//@fix 放在异步之前中间件recovery不能重写
+	c.noneedWrite = true
 }
 
 func (c *response) getString(ctp string, v interface{}) string {

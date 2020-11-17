@@ -50,13 +50,6 @@ func WithKeepalive(keepalive bool) Option {
 	}
 }
 
-//WithRequestID 设置请求编号
-func WithRequestID(requestID string) Option {
-	return func(o *HTTPConf) {
-		o.RequestID = requestID
-	}
-}
-
 //WithRaw 根据json串设置配置信息
 func WithRaw(raw []byte) Option {
 	c := &HTTPConf{}

@@ -19,6 +19,7 @@ type RspServers struct {
 	registryAddr string
 	registry     registry.IRegistry
 	delayChan    chan string
+	DelayTime    time.Duration
 	path         []string
 	mpath        string
 	notify       chan *watcher.ValueChangeArgs
@@ -101,6 +102,7 @@ LOOP:
 			if r.done {
 				break LOOP
 			}
+			fmt.Println("P:", p)
 			if err := r.checkServer(p); err != nil {
 				r.log.Error(err)
 			}
@@ -108,6 +110,7 @@ LOOP:
 			if r.done {
 				break LOOP
 			}
+			fmt.Println("u:", u)
 			if err := r.checkServer(u.Path); err != nil {
 				r.log.Error(err)
 			}
@@ -180,7 +183,11 @@ func (r *RspServers) delayPub(p string) {
 		if r.done {
 			return
 		}
-		time.Sleep(time.Second * 300)
+		delayTime := time.Second * 300
+		if r.DelayTime > 0 {
+			delayTime = r.DelayTime
+		}
+		time.Sleep(delayTime)
 		if r.done {
 			return
 		}

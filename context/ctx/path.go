@@ -42,24 +42,30 @@ func (c *rpath) GetEncoding() string {
 		return c.encoding
 	}
 
-	//从请求header中获取
-	if ctp, ok := c.ctx.GetHeaders()["Content-Type"]; ok {
-		for _, params := range strings.Split(ctp[0], ";") {
-			if strings.HasPrefix(params, "charset=") {
-				c.encoding = strings.TrimPrefix(params, "charset=")
-			}
-		}
-	}
-	if c.encoding != "" {
-		return c.encoding
-	}
-
 	//从router配置获取
 	routerObj, err := c.GetRouter()
 	if err != nil {
 		panic(fmt.Errorf("url.Router配置错误:%w", err))
 	}
-	c.encoding = routerObj.GetEncoding()
+	c.encoding = routerObj.Encoding
+	if c.encoding != "" {
+		return c.encoding
+	}
+
+	//从请求header中获取
+	if ctp, ok := c.ctx.GetHeaders()["Content-Type"]; ok {
+		for _, param := range strings.Split(ctp[0], ";") {
+			if strings.Contains(param, "charset=") {
+				c.encoding = strings.Split(param, "charset=")[1]
+				break
+			}
+		}
+	}
+
+	if c.encoding == "" {
+		c.encoding = "utf-8"
+	}
+
 	return c.encoding
 }
 

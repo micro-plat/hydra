@@ -7,8 +7,6 @@ import (
 	"reflect"
 
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
-	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/conf/app"
 	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	r "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
@@ -56,18 +54,7 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 		return
 	}
 
-	//获取rpc所有的注册服务路由
-	// matchPath := conf.PathMatch
-	rpcConf, _ := app.Cache.GetAPPConf("rpc")
-	routerObj, _ := rpcConf.GetRouterConf()
-	paths := []string{}
-	for _, r := range routerObj.GetRouters() {
-		paths = append(paths, r.Path)
-	}
-
-	matchPath := conf.NewPathMatch(paths...)
-	matchPath.Match(rservice)
-
+	//如果入参不是ip 通过注册中心去获取所请求平台的所有rpc服务子节点  再通过路由匹配获取真实的路由
 	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.version), func(i ...interface{}) (interface{}, error) {
 		if isip {
 			return rpc.NewClientByConf(platName, "", "", r.conf)
@@ -85,7 +72,7 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	nopts = append(nopts, opts...)
 	nopts = append(nopts, rpc.WithXRequestID(fmt.Sprint(ctx.Value("X-Request-Id"))))
 	fm := getRequestForm(input)
-	return client.Request(ctx, rservice, fm, nopts...)
+	return client.RequestByString(ctx, rservice, fm, nopts...)
 }
 
 //Close 关闭RPC连接
@@ -97,20 +84,15 @@ func (r *Request) Close() error {
 	})
 	return nil
 }
-func getRequestForm(content interface{}) map[string]interface{} {
-	mp := make(map[string]interface{})
+func getRequestForm(content interface{}) string {
 	if content == nil {
-		return mp
+		return ""
 	}
 	switch v := content.(type) {
 	case []byte:
-		return map[string]interface{}{
-			"__body_": v,
-		}
+		return string(v)
 	case string:
-		return map[string]interface{}{
-			"__body_": v,
-		}
+		return v
 	}
 
 	//反射检查
@@ -121,20 +103,18 @@ func getRequestForm(content interface{}) map[string]interface{} {
 	}
 	switch tp {
 	case reflect.String:
-		return map[string]interface{}{
-			"__body_": content,
-		}
+		return content.(string)
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
-		return map[string]interface{}{
-			"__body_": fmt.Sprint(content),
-		}
+		return fmt.Sprint(content)
 	default:
 		buff, err := json.Marshal(content)
 		if err != nil {
 			panic(fmt.Errorf("将请求转换为json串时错误%w", err))
 		}
-		return map[string]interface{}{
-			"__body_": string(buff),
+		if len(buff) == 0 {
+			buff = []byte("{}")
 		}
+
+		return string(buff)
 	}
 }

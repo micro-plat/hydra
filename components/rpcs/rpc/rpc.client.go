@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -57,6 +58,20 @@ func NewClientByConf(address, plat, service string, conf *rpcconf.RPCConf) (*Cli
 //Request 发送Request请求
 func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error) {
 	//处理可选参数
+	buff, err := json.Marshal(form)
+	if err != nil {
+		return nil, err
+	}
+	if len(buff) == 0 {
+		buff = []byte("{}")
+	}
+
+	return c.RequestByString(ctx, service, string(buff), opts...)
+}
+
+//RequestByString 发送Request请求
+func (c *Client) RequestByString(ctx context.Context, service string, form string, opts ...RequestOption) (res *Response, err error) {
+	//处理可选参数
 	o := newOption()
 	for _, opt := range opts {
 		opt(o)
@@ -87,22 +102,24 @@ func (c *Client) connect() (err error) {
 		return nil
 	}
 
-	balanc := balancer.RoundRobin
-	if c.LocalFirst {
-		balanc = balancer.LocalFirst
+	if c.Balancer == "" {
+		c.Balancer = rpcconf.LocalFirst
 	}
 
 	var rb resolver.Builder
 	//兼容直接传服务器ip来进行访问
 	if len(c.plat) > 0 {
-		rb = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
+		rb, err = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
+		if err != nil {
+			return
+		}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(c.ConntTimeout)*time.Second)
 	c.conn, err = grpc.DialContext(ctx,
 		c.address+"/mockrpc",
 		grpc.WithInsecure(),
-		grpc.WithBalancerName(balanc),
+		grpc.WithBalancerName(c.Balancer),
 		grpc.WithResolvers(rb))
 
 	if err != nil {
