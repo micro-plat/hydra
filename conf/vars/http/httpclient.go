@@ -10,13 +10,12 @@ const (
 
 //HTTPConf http客户端配置对象
 type HTTPConf struct {
-	RequestID         string   `json:"-"`
-	ConnectionTimeout int      `json:"ctime"`
-	RequestTimeout    int      `json:"rtime"`
+	ConnectionTimeout int      `json:"connectionTimeout"`
+	RequestTimeout    int      `json:"requestTimeout"`
 	Certs             []string `json:"certs"`
 	Ca                string   `json:"ca"`
 	Proxy             string   `json:"proxy"`
-	Keepalive         bool     `json:"keepalive"`
+	Keepalive         bool     `json:"keepAlive"`
 	Trace             bool     `json:"trace"`
 }
 
