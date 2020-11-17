@@ -1,10 +1,5 @@
 package ras
 
-//Connect 签名拼接串
-type Connect struct {
-	*connectOption
-}
-
 const (
 	//SecretConnectModeHead 密钥拼接模式,将secret串拼接到数据串的头部
 	SecretConnectModeHead = "head"

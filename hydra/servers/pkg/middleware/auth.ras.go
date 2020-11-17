@@ -31,24 +31,23 @@ func RASAuth() Handler {
 		}
 
 		ctx.Response().AddSpecial("ras")
-
 		input, err := ctx.Request().GetMap()
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
-
 		input["__auth_"], err = auth.AuthString()
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
-
 		respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
-		if err != nil || !respones.IsSuccess() {
-			fmt.Println("1111111111111:", respones)
-			fmt.Println("22222222222222:", err)
-			ctx.Response().Abort(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,err:%v(%d)", err, respones.Result, respones.Status))
+		if err != nil {
+			ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("rpc远程认证异常:err:%v", err))
+			return
+		}
+		if !respones.IsSuccess() {
+			ctx.Response().Abort(types.GetMax(respones.Status, http.StatusForbidden), fmt.Errorf("远程认证失败:%s,(%d)", respones.Result, respones.Status))
 			return
 		}
 
@@ -58,7 +57,6 @@ func RASAuth() Handler {
 			return
 		}
 		ctx.Meta().MergeMap(result)
-		fmt.Println("----------:", result)
 		return
 	}
 }
