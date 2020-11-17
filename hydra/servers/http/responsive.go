@@ -58,7 +58,7 @@ func (w *Responsive) Start() (err error) {
 		return err
 	}
 
-	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), len(w.Server.engine.Routes()))
+	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.serverNum())
 	return nil
 }
 
@@ -115,6 +115,18 @@ func (w *Responsive) publish() (err error) {
 	}
 
 	return
+}
+
+//serverNum 获取服务数量
+func (w *Responsive) serverNum() int {
+	routers := w.Server.engine.Routes()
+	serverMap := map[string]string{}
+	for _, item := range routers {
+		if _, ok := serverMap[item.Path]; !ok {
+			serverMap[item.Path] = item.Path
+		}
+	}
+	return len(serverMap)
 }
 
 //根据main.conf创建服务嚣

@@ -10,7 +10,6 @@ var app = hydra.NewApp(
 	hydra.WithServerTypes(http.API),
 	hydra.WithPlatName("xxtest"),
 	hydra.WithSystemName("apiserver"),
-	hydra.WithClusterName("c"),
 )
 
 const OrgRedisAddr = "192.168.5.79:1000"

@@ -4,17 +4,15 @@ import (
 	"strings"
 	"sync"
 
+	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	"github.com/micro-plat/hydra/global"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
 
-//LocalFirst LocalFirst
-const LocalFirst = "localfirst"
-
 // newBuilder creates a new roundrobin balancer builder.
 func newBuilder(localip string) balancer.Builder {
-	return base.NewBalancerBuilder(LocalFirst, &lfPickerBuilder{
+	return base.NewBalancerBuilder(rpcconf.LocalFirst, &lfPickerBuilder{
 		localip: localip,
 	}, base.Config{HealthCheck: true})
 }
