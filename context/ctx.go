@@ -78,6 +78,7 @@ type IPath interface {
 
 	//Limit 设置限流信息
 	Limit(isLimit bool, fallback bool)
+
 	//IsLimited 是否已限流
 	IsLimited() bool
 

@@ -13,6 +13,7 @@ func Render() Handler {
 
 		//加载渲染配置
 		render, err := ctx.APPConf().GetRenderConf()
+		fmt.Println("render:", render, err)
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
@@ -21,14 +22,16 @@ func Render() Handler {
 			return
 		}
 
-		rd, enable, err := render.Get(ctx.Request().Path().GetRequestPath())
-		if !enable {
-			return
-		}
+		rd, enable, err := render.Get()
 		if err != nil {
 			ctx.Log().Error("render出错:", err)
 			return
 		}
+
+		if !enable {
+			return
+		}
+
 		fmt.Println("render:", rd)
 
 		ctx.Response().AddSpecial("render")

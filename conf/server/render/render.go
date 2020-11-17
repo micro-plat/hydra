@@ -42,7 +42,7 @@ func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 }
 
 //Get 获取转换结果
-func (r *Render) Get(path string) (*Result, bool, error) {
+func (r *Render) Get() (*Result, bool, error) {
 
 	//执行脚本，获取render结果
 	result, err := r.tengo.Run()
