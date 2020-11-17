@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/tgo"
 )
@@ -65,8 +66,9 @@ func GetConf(cnf conf.IServerConf) (*Proxy, error) {
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy配置有误:%v", err)
 	}
+
 	proxy := &Proxy{c: cnf}
-	proxy.tengo, err = tgo.New(string(script.GetRaw()))
+	proxy.tengo, err = tgo.New(string(script.GetRaw()), tgo.WithModule(global.GetTGOModules()...))
 	if err != nil {
 		return nil, fmt.Errorf("acl.proxy脚本错误:%v", err)
 	}

@@ -31,6 +31,11 @@ func NewServerPub(platName string, sysName string, serverType string, clusterNam
 	}
 }
 
+//GetServerRoot 获取服务器根路径
+func (c *ServerPub) GetServerRoot() string {
+	return registry.Join(c.platName, c.sysName, c.serverType)
+}
+
 //GetServerPath 获取配置路径
 func (c *ServerPub) GetServerPath() string {
 	return registry.Join(c.platName, c.sysName, c.serverType, c.clusterName, "conf")

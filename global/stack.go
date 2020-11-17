@@ -14,6 +14,16 @@ var (
 	slash     = []byte("/")
 )
 
+//GetGoroutineID 获取goroutine id
+func GetGoroutineID() string {
+	b := make([]byte, 64)
+	b = b[:32]
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	return string(b)
+}
+
 //GetStack 获取当前stack信息
 func GetStack() string {
 	return string(stack(5))
