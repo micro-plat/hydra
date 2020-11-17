@@ -1,9 +1,8 @@
 
 http := import("http")
 
-cluster := http.getCluster()
+upstream=""
+check:=func(){
 
-
-
-
-upstream=[]
+}
+toUpstream:=check()

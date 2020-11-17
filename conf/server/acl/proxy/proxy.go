@@ -74,7 +74,7 @@ func (g *Proxy) Next() (u *url.URL, err error) {
 }
 
 func (g *Proxy) checkServers() (err error) {
-	g.tengo, err = tgo.New(g.Script)
+	g.tengo, err = tgo.New(g.Script, tgo.WithModule(global.GetTGOModules()...))
 	if err != nil {
 		return err
 	}
