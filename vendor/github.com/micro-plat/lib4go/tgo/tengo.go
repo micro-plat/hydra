@@ -1,9 +1,8 @@
 package tgo
 
 import (
-	"context"
-
 	"github.com/d5/tengo/v2"
+	"github.com/d5/tengo/v2/stdlib"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -45,7 +44,7 @@ func New(scope string, opts ...Option) (*VM, error) {
 	}
 
 	//加载模块
-	modules := tengo.NewModuleMap()
+	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	for _, v := range vm.modules {
 		modules.AddBuiltinModule(v.name, v.Objects())
 	}
@@ -70,9 +69,7 @@ func (v *VM) Run(vars ...*Variable) (types.XMap, error) {
 		}
 
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	if err := script.RunContext(ctx); err != nil {
+	if err := script.Run(); err != nil {
 		return nil, err
 	}
 	return var2Mpa(script), nil

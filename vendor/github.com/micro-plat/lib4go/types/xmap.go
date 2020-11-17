@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -113,6 +114,9 @@ type IXMap interface {
 
 	//Cascade 将多层map转换为单层map
 	Cascade(m IXMap)
+
+	//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+	Translate(format string) string
 
 	//Merge 合并多个xmap
 	Merge(m IXMap)
@@ -460,6 +464,19 @@ func (q XMap) ToSMap() map[string]string {
 		}
 	}
 	return rmap
+}
+
+//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+func (q XMap) Translate(format string) string {
+	brackets, _ := regexp.Compile(`\{@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\}`)
+	result := brackets.ReplaceAllStringFunc(format, func(s string) string {
+		return q.GetString(s[2 : len(s)-1])
+	})
+	word, _ := regexp.Compile(`@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*`)
+	result = word.ReplaceAllStringFunc(result, func(s string) string {
+		return q.GetString(s[1:])
+	})
+	return result
 }
 
 //GetCascade 根据key将值转换为map[string]ineterface{}

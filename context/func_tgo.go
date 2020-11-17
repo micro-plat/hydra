@@ -1,6 +1,8 @@
 package context
 
 import (
+	"github.com/micro-plat/hydra/context/internal"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/tgo"
 )
 
@@ -23,9 +25,21 @@ func GetTGOModules() []*tgo.Module {
 		Add("getPlatName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetPlatName() })).
 		Add("getSysName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetSysName() })).
 		Add("getServerType", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerType() })).
-		Add("getClusterName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterName() })).
+		Add("getCurrentClusterName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterName() })).
+		Add("getAllClusterNames", tgo.FuncARSs(func() []string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterNames() })).
 		Add("getServerName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerName() })).
 		Add("getServerPath", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerPath() }))
 
-	return []*tgo.Module{request, response, app}
+	types := tgo.NewModule("types").
+		Add("getStringByIndex", internal.GetStringByIndex).
+		Add("getIntByIndex", internal.GetIntByIndex).
+		Add("getFloatByIndex", internal.GetFloatByIndex).
+		Add("exclude", internal.Exclude).
+		Add("translate", internal.Translate)
+
+	return []*tgo.Module{request, response, app, types}
+}
+
+func init() {
+	global.AddTGOModules(GetTGOModules()...)
 }

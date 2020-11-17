@@ -1,9 +1,0 @@
-
-http := import("http")
-
-cluster := http.getCluster()
-
-
-
-
-upstream=[]

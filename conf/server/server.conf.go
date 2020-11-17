@@ -9,10 +9,11 @@ import (
 
 //ServerConf 服务器主配置
 type ServerConf struct {
-	mainConf    *conf.RawConf
-	mainVersion int32
-	subConfs    map[string]conf.RawConf
-	registry    registry.IRegistry
+	mainConf     *conf.RawConf
+	mainVersion  int32
+	subConfs     map[string]conf.RawConf
+	registry     registry.IRegistry
+	clusterNames []string
 	conf.IServerPub
 	closeCh chan struct{}
 }
@@ -68,6 +69,11 @@ func (c *ServerConf) GetSubConf(name string) (*conf.RawConf, error) {
 	}
 
 	return nil, conf.ErrNoSetting
+}
+
+//GetClusterNames 获取所有当前服务器下所有集群名称
+func (c *ServerConf) GetClusterNames() []string {
+	return c.clusterNames
 }
 
 //GetCluster 获取集群信息
@@ -134,6 +140,12 @@ func (c *ServerConf) load() (err error) {
 
 	//获取子配置
 	c.subConfs, err = c.getSubConf(c.GetServerPath())
+	if err != nil {
+		return err
+	}
+
+	//获取所有集群名称
+	c.clusterNames, _, err = c.registry.GetChildren(c.GetServerRoot())
 	if err != nil {
 		return err
 	}

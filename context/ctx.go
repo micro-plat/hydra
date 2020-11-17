@@ -204,6 +204,9 @@ type IAuth interface {
 //IUser 用户相关信息
 type IUser interface {
 
+	//GetGID 获取当前处理的goroutine id
+	GetGID() string
+
 	//GetClientIP 获取客户端请求IP
 	GetClientIP() string
 
