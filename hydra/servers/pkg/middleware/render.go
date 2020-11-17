@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -13,7 +12,6 @@ func Render() Handler {
 
 		//加载渲染配置
 		render, err := ctx.APPConf().GetRenderConf()
-		fmt.Println("render:", render, err)
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
@@ -31,8 +29,6 @@ func Render() Handler {
 		if !enable {
 			return
 		}
-
-		fmt.Println("render:", rd)
 
 		ctx.Response().AddSpecial("render")
 		ctx.Response().WriteFinal(rd.Status, rd.Content, rd.ContentType)
