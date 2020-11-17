@@ -15,7 +15,7 @@ func getInstallFlags() []cli.Flag {
 		Name:        "url,u",
 		Required:    true,
 		Destination: &url,
-		Usage:       "\033[;31m*\033[0m" + `应用下载地址`,
+		Usage:       `应用下载地址`,
 	})
 	return flags
 }
@@ -27,7 +27,7 @@ func getBuildFlags() []cli.Flag {
 		Name:        "url,u",
 		Required:    true,
 		Destination: &url,
-		Usage:       "\033[;31m*\033[0m" + `应用下载地址`,
+		Usage:       `应用下载地址`,
 	})
 	flags = append(flags, cli.BoolFlag{
 		Name:        "cover,v",

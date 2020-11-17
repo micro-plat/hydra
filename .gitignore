@@ -1,5 +1,8 @@
 logs
 !*.go
+*.pyc
+*.exe
+
 
 launch.json
 apiserver*
@@ -10,6 +13,5 @@ flowserver*
 webserver*
 wsserver*
 jwtserver*
-
 examples/conf
 logger.toml
