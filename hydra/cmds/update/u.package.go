@@ -42,7 +42,7 @@ func GetPackage(url string) (*Package, error) {
 		return nil, fmt.Errorf("下载package更新包出错:%w", err)
 	}
 
-	cnf, err := conf.NewByJSON(buffer, 0)
+	cnf, err := conf.NewByText(buffer, 0)
 	if err != nil {
 		return nil, fmt.Errorf("package更新包必须是有效的json格式:%w", err)
 	}

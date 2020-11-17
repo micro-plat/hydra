@@ -9,6 +9,14 @@ import (
 
 var _ conf.IVarConf = &VarConf{}
 
+//EmptyVarConf 空的EmptyVarConf
+var EmptyVarConf = &VarConf{
+	IVarPub:      nil,
+	varConfPath:  "",
+	registry:     nil,
+	varNodeConfs: make(map[string]conf.RawConf),
+}
+
 //VarConf 变量信息
 type VarConf struct {
 	conf.IVarPub
@@ -66,7 +74,7 @@ func (c *VarConf) load() (err error) {
 			if err != nil {
 				return err
 			}
-			varConf, err := conf.NewByJSON(rdata, version)
+			varConf, err := conf.NewByText(rdata, version)
 			if err != nil {
 				err = fmt.Errorf("%s配置有误:%v", nodePath, err)
 				return err
@@ -88,7 +96,7 @@ func (c *VarConf) GetConf(tp string, name string) (*conf.RawConf, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
-	return conf.EmptyJSONConf, conf.ErrNoSetting
+	return conf.EmptyRawConf, conf.ErrNoSetting
 }
 
 //GetConfVersion 获取配置的版本号

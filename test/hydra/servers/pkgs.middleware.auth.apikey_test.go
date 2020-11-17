@@ -1,4 +1,4 @@
-package hydra
+package servers
 
 import (
 	"testing"
@@ -40,7 +40,11 @@ func TestAuthAPIKey(t *testing.T) {
 			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
 		{name: "apikey-配置启动-验证失败", isSet: true, params: map[string]string{"f1": "21", "sign": "4444444", "timestamp": "5421515"}, wantStatus: 403, wantContent: "", wantSpecial: "apikey",
 			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
-		{name: "apikey-配置启动-验证通过", isSet: true, params: map[string]string{"f1": "21", "timestamp": "5421515", "sign": getSign(map[string]string{"f1": "21", "timestamp": "5421515"}, secret)}, wantStatus: 200, wantContent: "", wantSpecial: "apikey",
+		{name: "apikey-配置启动-验证通过-utf8", isSet: true, params: map[string]string{"f1": "21", "timestamp": "5421515", "sign": getSign(map[string]string{"f1": "21", "timestamp": "5421515"}, secret)}, wantStatus: 200, wantContent: "", wantSpecial: "apikey",
+			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
+		{name: "apikey-配置启动-验证通过-gbk", isSet: true, params: map[string]string{"f1": "21", "timestamp": "5421515", "sign": getSign(map[string]string{"f1": "21", "timestamp": "5421515"}, secret)}, wantStatus: 200, wantContent: "", wantSpecial: "apikey",
+			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
+		{name: "apikey-配置启动-验证通过-gb2312", isSet: true, params: map[string]string{"f1": "21", "timestamp": "5421515", "sign": getSign(map[string]string{"f1": "21", "timestamp": "5421515"}, secret)}, wantStatus: 200, wantContent: "", wantSpecial: "apikey",
 			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
 	}
 	for _, tt := range tests {

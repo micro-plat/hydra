@@ -168,7 +168,6 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 			rc = "Internal Server Error"
 		}
 	case error:
-		//@todo: 这里如果状态是302 等，会被强制转换为400（是否为error必须转换状态码）
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}

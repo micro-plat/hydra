@@ -15,6 +15,7 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -416,6 +417,7 @@ func (res *MockResponse) StatusCode(code int) {
 //ContentType 设置Content-Type响应头
 func (res *MockResponse) ContentType(v string) {
 	res.MockContentType = v
+	res.Header("Content-Type", v)
 }
 
 //NoNeedWrite 无需写入响应数据到缓存
@@ -427,7 +429,7 @@ func (res *MockResponse) NoNeedWrite(status int) {
 func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
 	res.MockStatus = status
 	res.MockContent = content
-	res.MockContentType = ctp
+	res.ContentType(ctp)
 	return
 }
 
@@ -440,18 +442,31 @@ func (res *MockResponse) Write(s int, v interface{}) error {
 
 //WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 func (res *MockResponse) WriteAny(v interface{}) error {
+	switch t := v.(type) {
+	case errs.IError:
+		res.MockStatus = t.GetCode()
+	case error:
+		res.MockStatus = 500
+	default:
+		res.MockContent = types.GetString(v)
+	}
 	return nil
 }
 
 //File 向响应流中写入文件(立即写入)
 func (res *MockResponse) File(path string) {
-
+	res.MockContent = path
 }
 
 //Abort 终止当前请求继续执行
 func (res *MockResponse) Abort(code int, err error) {
 	res.MockStatus = code
-	res.MockError = err
+	switch v := err.(type) {
+	case errs.IError:
+		res.MockContent = v.GetError().Error()
+	case error:
+		res.MockContent = v.Error()
+	}
 }
 
 //Stop 停止当前服务执行

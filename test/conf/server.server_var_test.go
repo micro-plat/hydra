@@ -25,7 +25,7 @@ func TestNewVarConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "初始化varconf失败")
 	dbConf, err := varConf.GetConf("db", "db")
 	assert.Equal(t, conf.ErrNoSetting, err, "获取db节点配置异常")
-	assert.Equal(t, conf.EmptyJSONConf, dbConf, "获取db节点配置数据不正确")
+	assert.Equal(t, conf.EmptyRawConf, dbConf, "获取db节点配置数据不正确")
 	assert.Equal(t, int32(0), varConf.GetVersion(), "获取的版本号是错误的")
 
 	vsion, err := varConf.GetConfVersion("db", "db")
@@ -50,7 +50,7 @@ func TestNewVarConf(t *testing.T) {
 	assert.Equal(t, true, err == nil, "初始化varconf失败1")
 	dbConf, err = varConf.GetConf("db", "db")
 	assert.Equal(t, conf.ErrNoSetting, err, "获取db节点配置异常1")
-	assert.Equal(t, conf.EmptyJSONConf, dbConf, "获取db节点配置数据不正确1")
+	assert.Equal(t, conf.EmptyRawConf, dbConf, "获取db节点配置数据不正确1")
 
 	vsion, err = varConf.GetConfVersion("db", "db")
 	assert.Equal(t, conf.ErrNoSetting, err, "获取db子节点版本号异常1")
@@ -155,7 +155,7 @@ func TestVarConf_GetConf(t *testing.T) {
 		want    *conf.RawConf
 		wantErr bool
 	}{
-		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: conf.EmptyJSONConf, wantErr: true},
+		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: conf.EmptyRawConf, wantErr: true},
 		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			want: nil, wantErr: true},
 	}
@@ -178,7 +178,7 @@ func TestVarConf_GetConf(t *testing.T) {
 			assert.Equal(t, 600, dbConf.GetInt("lifeTime"), "获取db节点lifeTime配置数据不正确")
 		} else {
 			assert.Equal(t, conf.ErrNoSetting, err, "获取db节点配置异常1")
-			assert.Equal(t, conf.EmptyJSONConf, dbConf, "获取db节点配置数据不正确1")
+			assert.Equal(t, conf.EmptyRawConf, dbConf, "获取db节点配置数据不正确1")
 		}
 	}
 }

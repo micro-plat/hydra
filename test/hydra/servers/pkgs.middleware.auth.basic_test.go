@@ -1,4 +1,4 @@
-package hydra
+package servers
 
 import (
 	"net/http"
@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/lib4go/encoding/base64"
 
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
@@ -25,7 +24,7 @@ func TestAuthBasic(t *testing.T) {
 	type testCase struct {
 		name        string
 		basicOpts   []basic.Option
-		router      *router.Router
+		requestPath string
 		reqHeadVal  string
 		isSet       bool
 		wantStatus  int
@@ -35,18 +34,16 @@ func TestAuthBasic(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "basic-未配置", isSet: false, router: nil, wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{}},
-		{name: "basic-配置未启动", isSet: true, router: nil, wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithDisable()}},
-		{name: "basic-配置启动-路由不存在", isSet: true, router: nil, wantStatus: 510, wantSpecial: "",
-			basicOpts: []basic.Option{basic.WithUP("taosy", "tpwd")}},
-		{name: "basic-配置启动-路由存在,被排除", isSet: true, router: router.NewRouter("/basic/test", "service", []string{"GET"}), wantStatus: 200, wantSpecial: "",
+		{name: "basic-未配置", isSet: false, requestPath: "", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{}},
+		{name: "basic-配置未启动", isSet: true, requestPath: "", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithDisable()}},
+		{name: "basic-配置启动-路由存在,被排除", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
 			basicOpts: []basic.Option{basic.WithExcludes("/basic/test")}},
-		{name: "basic-配置启动-不排除,认证信息为空", isSet: true, router: router.NewRouter("/basic/test", "service", []string{"GET"}), wantStatus: 200, wantSpecial: "",
+		{name: "basic-配置启动-不排除,认证信息为空", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
 			reqHeadVal: "suibianchuan", basicOpts: []basic.Option{basic.WithExcludes("/basic/test1")}},
-		{name: "basic-配置启动-不排除,认证失败", isSet: true, router: router.NewRouter("/basic/test", "service", []string{"GET"}), wantStatus: 401, wantSpecial: "basic",
+		{name: "basic-配置启动-不排除,认证失败", isSet: true, requestPath: "/basic/test", wantStatus: 401, wantSpecial: "basic",
 			reqHeadVal: "suibianchuan", repHeadVal: "Basic realm=" + strconv.Quote("Authorization Required"),
 			basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
-		{name: "basic-配置启动-不排除,认证成功", isSet: true, router: router.NewRouter("/basic/test", "service", []string{"GET"}), wantStatus: 200, wantSpecial: "basic",
+		{name: "basic-配置启动-不排除,认证成功", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "basic",
 			user: "taosy", reqHeadVal: "Basic " + base64.Encode("taosy:tpwd"), basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
 	}
 
@@ -64,8 +61,8 @@ func TestAuthBasic(t *testing.T) {
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
 				MockPath: &mocks.MockPath{
-					MockHeader: http.Header{"Authorization": []string{tt.reqHeadVal}},
-					MockRouter: tt.router,
+					MockHeader:      http.Header{"Authorization": []string{tt.reqHeadVal}},
+					MockRequestPath: tt.requestPath,
 				},
 			},
 			MockAPPConf: serverConf,

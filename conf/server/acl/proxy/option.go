@@ -3,17 +3,10 @@ package proxy
 //Option 配置选项
 type Option func(*Proxy)
 
-//WithFilter 设置筛选器
-func WithFilter(filter string) Option {
+//WithScript 设置脚本
+func WithScript(script string) Option {
 	return func(a *Proxy) {
-		a.Filter = filter
-	}
-}
-
-//WithUPCluster 设置上游集群名
-func WithUPCluster(upcluster string) Option {
-	return func(a *Proxy) {
-		a.UPCluster = upcluster
+		a.Script = script
 	}
 }
 
