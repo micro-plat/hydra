@@ -31,14 +31,14 @@ def test_Install_Less_param():
     #缺少集群名称
     args = ["install","-r",ZKAddress]
     response = runApp(args)
-    print(response)
+    #print(response)
     if not u"集群名称不能为空" in response:
         return u"缺少参数安装服务用例失败"
 
 
 
 @test(testName)
-def Test_Install_Cover():
+def test_Install_Cover():
     args = ["install","-r",ZKAddress,"-c","c","-cover","true"]
     response = runApp(args)
     if not u"OK" in response:
@@ -50,7 +50,7 @@ def Test_Install_Cover():
 
 
 @test(testName)
-def Test_remove_NotExists():
+def test_remove_NotExists():
     #1.清理已存在的服务
     args = ["remove"]
     runApp(args)

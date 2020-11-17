@@ -8,26 +8,26 @@ from test_help import ZKAddress
 testName = os.path.basename(__file__)
 
 @test(testName)
-def Test_stop_Normal_running():
+def test_stop_Normal_running():
     try:
         #1.安装服务
         args = ["install","-r",ZKAddress,"-c","c"]
         response = runApp(args)
-        print("install",response)
+        #print("install",response)
         if not "OK" in response:
             return u"安装服务失败"
 
         #2.启动
         args = ["start"]
         response = runApp(args)
-        print("start",response)
+        #print("start",response)
         if not "OK" in response:
             return u"启动服务失败"
 
         #3.停止
         args = ["stop"]
         response = runApp(args)
-        print("stop",response)
+        #print("stop",response)
         if not "OK" in response:
             return u"停止服务失败"
 
@@ -38,7 +38,7 @@ def Test_stop_Normal_running():
         #4.删除
         args = ["remove"]
         response = runApp(args)
-        print("remove",response)
+        #print("remove",response)
 
         if not "OK" in response:
             return u"删除服务失败"
@@ -47,7 +47,7 @@ def Test_stop_Normal_running():
 
 
 @test(testName)
-def Test_stop_Not_installed():
+def test_stop_Not_installed():
     #1. 清理服务，避免其他遗留存在服务
     args = ["remove"]
     runApp(args)
@@ -62,7 +62,7 @@ def Test_stop_Not_installed():
 
 
 @test(testName)
-def Test_stop_has_stopped():
+def test_stop_has_stopped():
     try:
         args = ["remove"]
         runApp(args)

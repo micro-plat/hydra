@@ -9,7 +9,7 @@ from test_help import LMAddress
 testName = os.path.basename(__file__)
 
 @test(testName)
-def Test_run_Normal():
+def test_run_Normal():
 
     args = ["run","-r",LMAddress,"-c","c"]
     response = runApp(args)
@@ -19,7 +19,7 @@ def Test_run_Normal():
     
 
 @test(testName)
-def Test_run_Withtrace():
+def test_run_Withtrace():
 
     args = ["run","-r",LMAddress,"-c","c","-trace", "web"]
     response = runApp(args)
@@ -36,7 +36,7 @@ def Test_run_Withtrace():
 
 
 @test(testName)
-def Test_run_error_registry():
+def test_run_error_registry():
 
     args = ["run","-r","xx://xxx","-c","c"]
     response = runApp(args)

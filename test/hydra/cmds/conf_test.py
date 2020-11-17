@@ -7,7 +7,7 @@ from test_help import ZKAddress
 testName = os.path.basename(__file__)
 
 @test(testName)
-def testConfShow_Normal():
+def test_Conf_Show_Normal():
     """
     测试conf show 
     """
@@ -29,7 +29,7 @@ def testConfShow_Normal():
 
 
 @test(testName)
-def testConfInstall_Normal():
+def test_Conf_Install_Normal():
     #执行conf install
     args = ["conf","install","-r",ZKAddress,"-c","t"]
     response = runApp(args)
@@ -43,7 +43,7 @@ def testConfInstall_Normal():
 
 
 @test(testName)
-def testConfInstall_cover():
+def test_Conf_Install_cover():
     #执行conf install -cover
     args = ["conf","install","-r",ZKAddress,"-c","c","-cover","true"]
     response = runApp(args,exe_name="new")
