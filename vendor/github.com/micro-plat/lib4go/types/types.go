@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"reflect"
 	"strings"
 	"time"
 
@@ -220,21 +219,13 @@ func MustFloat64(v interface{}) (float64, bool) {
 //IsEmpty 值是否为空
 func IsEmpty(vs ...interface{}) bool {
 	for _, v := range vs {
-		if v == nil {
-			return true
-		}
-		tp := reflect.TypeOf(v).Kind()
-		value := reflect.ValueOf(v)
-		if tp == reflect.Ptr {
-			value = value.Elem()
-		}
-		switch tp {
-		case reflect.Chan, reflect.Map, reflect.Slice:
-			if value.Len() == 0 {
+		switch value := v.(type) {
+		case string:
+			if value == "" {
 				return true
 			}
 		default:
-			if value.IsZero() {
+			if value == nil {
 				return true
 			}
 		}

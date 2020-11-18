@@ -31,6 +31,6 @@ func Render() Handler {
 		}
 
 		ctx.Response().AddSpecial("render")
-		ctx.Response().WriteFinal(rd.Status, rd.Content, rd.ContentType)
+		ctx.Response().Write(rd.Status, rd.Content)
 	}
 }
