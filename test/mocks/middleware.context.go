@@ -26,7 +26,6 @@ type MiddleContext struct {
 	MockNext     func()
 	MockMeta     conf.IMeta
 	MockUser     *MockUser
-	MockTFuncs   extcontext.TFuncs
 	MockRequest  extcontext.IRequest
 	MockResponse extcontext.IResponse
 	HttpRequest  *http.Request
@@ -444,7 +443,7 @@ func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
 //Write 向响应流中写入状态码与内容(不会立即写入)
 func (res *MockResponse) Write(s int, v ...interface{}) error {
 	res.MockStatus = s
-	res.MockContent = fmt.Sprint(v)
+	res.MockContent = fmt.Sprint(v...)
 	return nil
 }
 

@@ -71,7 +71,6 @@ func TestLimit(t *testing.T) {
 		confB.Limit(tt.opts...)
 		serverConf := apiConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockTFuncs: map[string]interface{}{},
 			MockRequest: &mocks.MockRequest{
 				MockPath: &mocks.MockPath{
 					MockRequestPath: tt.requestPath,
@@ -131,7 +130,6 @@ func TestLimit1(t *testing.T) {
 	//获取中间件
 	handler := middleware.Limit()
 	ctx := &mocks.MiddleContext{
-		MockTFuncs: map[string]interface{}{},
 		MockRequest: &mocks.MockRequest{
 			MockPath: &mocks.MockPath{
 				MockRequestPath: "/limiter",
@@ -151,7 +149,6 @@ func TestLimit1(t *testing.T) {
 			go func() {
 				defer wg.Done()
 				ctx := &mocks.MiddleContext{
-					MockTFuncs: map[string]interface{}{},
 					MockRequest: &mocks.MockRequest{
 						MockPath: &mocks.MockPath{
 							MockRequestPath: tt.requestPath,

@@ -78,8 +78,7 @@ func TestServer(t *testing.T) {
 		assert.Equalf(t, true, err == nil, tt.name+"rpc cilent error")
 
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
+			MockMeta: types.XMap{},
 			MockRequest: &mocks.MockRequest{
 				MockPath:     &mocks.MockPath{MockRequestPath: tt.path},
 				MockQueryMap: tt.params,
@@ -126,8 +125,7 @@ func BenchmarkRPCServer(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
+			MockMeta: types.XMap{},
 			MockRequest: &mocks.MockRequest{
 				MockPath:     &mocks.MockPath{MockRequestPath: "/rpc/server/test1"},
 				MockQueryMap: map[string]interface{}{},
