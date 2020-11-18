@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
 )
@@ -88,12 +89,10 @@ func (m *global) Bind(c *cli.Context) (err error) {
 //GetLongAppName 获取包含有部分路径的app name
 func (m *global) GetLongAppName(n ...string) string {
 	name := types.GetStringByIndex(n, 0, AppName)
+
 	path, _ := filepath.Abs(name)
-	rname := strings.Trim(strings.Replace(path, string(filepath.Separator), "_", -1), "_")
-	if len(rname) < 32 {
-		return rname
-	}
-	return rname[len(rname)-32:]
+
+	return fmt.Sprintf("%s_%s", name, md5.Encrypt(path)[:8])
 }
 
 //HasServerType 是否包含指定的服务类型
