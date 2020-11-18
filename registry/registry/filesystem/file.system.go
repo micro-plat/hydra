@@ -1,142 +1,245 @@
 package filesystem
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/BurntSushi/toml"
-	"github.com/micro-plat/hydra/global"
+	"github.com/fsnotify/fsnotify"
 	r "github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/registry"
 )
 
-//Local 本地内存作为注册中心
-var _ r.IRegistry = &fileSystem{}
+var _ r.IRegistry = &local{}
 
-type fileSystem struct {
-	closeCh  chan struct{}
-	nodes    map[string]string
-	seqValue int32
-	path     string
-	lock     sync.RWMutex
+type eventWatcher struct {
+	watcher chan registry.ValueWatcher
+	event   chan fsnotify.Event
 }
 
-//NewFileSystem 构建基于文件系统的注册中心
-func NewFileSystem(platName string, systemName string, clusterName string, path string) (*fileSystem, error) {
-	f := &fileSystem{
-		closeCh: make(chan struct{}),
-		nodes:   make(map[string]string),
-		path:    path,
-	}
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("配置文件不存在:%s %v", path, err)
-	}
-	vnodes := make(map[string]map[string]interface{})
-	if _, err := toml.DecodeFile(path, &vnodes); err != nil {
+type local struct {
+	watcher      *fsnotify.Watcher
+	watcherMaps  map[string]*eventWatcher
+	watchLock    sync.Mutex
+	tempNode     []string
+	tempNodeLock sync.Mutex
+	seqNode      int32
+	closeCh      chan struct{}
+	prefix       string
+}
+
+func newLocal(prefix string) (*local, error) {
+	if err := checkPrivileges(); err != nil {
 		return nil, err
 	}
-	for k, sub := range vnodes {
-		for name, value := range sub {
-			var path = r.Join(platName, systemName, k, clusterName, "conf", name)
-			if name == "main" {
-				path = r.Join(platName, systemName, k, clusterName, "conf")
+	w, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+	return &local{
+		prefix:      strings.TrimRight(prefix, "/"),
+		watcher:     w,
+		watcherMaps: make(map[string]*eventWatcher),
+		tempNode:    make([]string, 0, 2),
+		seqNode:     10000,
+		closeCh:     make(chan struct{}),
+	}, nil
+}
+
+//Start 启动文件监控
+func (l *local) Start() {
+	go func() {
+	LOOP:
+		for {
+			select {
+			case <-l.closeCh:
+				break LOOP
+			case event := <-l.watcher.Events:
+				func(event fsnotify.Event) {
+					//fmt.Println("event:", event.Name, event.Op, event.String())
+					l.watchLock.Lock()
+					watcher, ok := l.watcherMaps[event.Name]
+					l.watchLock.Unlock()
+					if !ok {
+						return
+					}
+					watcher.event <- event
+					delete(l.watcherMaps, event.Name)
+				}(event)
+
 			}
-			buff, err := json.Marshal(&value)
-			if err != nil {
-				return nil, fmt.Errorf("转换配置信息为json串失败:%s %w", path, err)
-			}
-			f.nodes[path] = string(buff)
 		}
+		l.watcher.Close()
+	}()
+}
+func (l *local) formatPath(path string) string {
+	if !strings.HasPrefix(path, l.prefix) {
+		return l.prefix + r.Join("/", path)
 	}
-	return f, nil
-
+	return path
+}
+func (l *local) Exists(path string) (bool, error) {
+	_, err := os.Stat(l.formatPath(path))
+	return err == nil || os.IsExist(err), nil
+}
+func (l *local) GetValue(path string) (data []byte, version int32, err error) {
+	rpath := l.formatPath(path)
+	fs, err := os.Stat(rpath)
+	if os.IsNotExist(err) {
+		return nil, 0, errors.New(rpath + "不存在")
+	}
+	if !fs.IsDir() {
+		data, err = ioutil.ReadFile(rpath)
+		version = int32(fs.ModTime().Unix())
+		return
+	}
+	return l.GetValue(r.Join(path, ".init"))
 }
 
-func (l *fileSystem) Exists(path string) (bool, error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	if _, ok := l.nodes[r.Join(path)]; ok {
-		return true, nil
+func (l *local) Update(path string, data string) (err error) {
+	if b, _ := l.Exists(path); !b {
+		return errors.New(path + "不存在")
 	}
-	return false, nil
-}
-func (l *fileSystem) GetValue(path string) (data []byte, version int32, err error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	if v, ok := l.nodes[r.Join(path)]; ok {
-		return []byte(v), 0, nil
-	}
-	return nil, 0, fmt.Errorf("节点[%s]不存在", path)
+	return ioutil.WriteFile(l.formatPath(path), []byte(data), 0666)
 
 }
-func (l *fileSystem) Update(path string, data string) (err error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	if _, ok := l.nodes[r.Join(path)]; ok {
-		l.nodes[r.Join(path)] = data
-		return nil
+func (l *local) GetChildren(path string) (paths []string, version int32, err error) {
+	rpath := l.formatPath(path)
+	fs, err := os.Stat(rpath)
+	if os.IsNotExist(err) {
+		return nil, 0, errors.New(path + "不存在")
 	}
-	return fmt.Errorf("节点[%s]不存在", path)
-}
-func (l *fileSystem) GetChildren(path string) (paths []string, version int32, err error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	paths = make([]string, 0, 1)
-	npath := r.Join(path)
-	for k := range l.nodes {
-		lk := strings.TrimPrefix(k, npath)
-		if len(lk) > 2 {
-			paths = append(paths, strings.Trim(lk, "/"))
+	version = int32(fs.ModTime().Unix())
+	rf, err := ioutil.ReadDir(rpath)
+	if err != nil {
+		return nil, 0, err
+	}
+	paths = make([]string, 0, len(rf))
+	for _, f := range rf {
+		if strings.HasSuffix(f.Name(), ".swp") || strings.HasPrefix(f.Name(), "~") || strings.HasPrefix(f.Name(), ".init") {
+			continue
 		}
+		paths = append(paths, f.Name())
 	}
-	return paths, 0, nil
+	return paths, version, nil
 }
 
-func (l *fileSystem) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	v := &eventWatcher{
+func (l *local) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
+	rpath := l.formatPath(path)
+	absPath := rpath
+	fs, _ := os.Stat(rpath)
+	if fs != nil && fs.IsDir() {
+		absPath = r.Join(rpath, ".init")
+	}
+	l.watchLock.Lock()
+	defer l.watchLock.Unlock()
+	v, ok := l.watcherMaps[absPath]
+	if ok {
+		return v.watcher, nil
+	}
+	l.watcherMaps[absPath] = &eventWatcher{
+		event:   make(chan fsnotify.Event),
 		watcher: make(chan registry.ValueWatcher),
 	}
 
-	return v.watcher, nil
-
+	go func(rpath string, v *eventWatcher) {
+		if err := l.watcher.Add(rpath); err != nil {
+			v.watcher <- &valueEntity{path: rpath, Err: err}
+		}
+		select {
+		case <-l.closeCh:
+			return
+		case event := <-v.event:
+			switch event.Op {
+			case fsnotify.Write, fsnotify.Create:
+				buff, version, err := l.GetValue(rpath)
+				v.watcher <- &valueEntity{Value: buff, version: version, path: rpath, Err: err}
+			default:
+				v.watcher <- &valueEntity{path: rpath, Err: fmt.Errorf("文件发生变化:%v", event.Op)}
+			}
+		}
+	}(rpath, l.watcherMaps[absPath])
+	return l.watcherMaps[absPath].watcher, nil
 }
-func (l *fileSystem) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
+func (l *local) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
 	return nil, nil
 }
-func (l *fileSystem) Delete(path string) error {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	delete(l.nodes, r.Join(path))
-	return nil
+func (l *local) Delete(path string) error {
+
+	if b, _ := l.Exists(path); !b {
+		return nil
+	}
+	return os.Remove(l.formatPath(path))
+}
+func (l *local) getRealPath(path string, data string) string {
+	extPath := ""
+	if data != "" {
+		extPath = "/.init"
+	}
+	return fmt.Sprintf("%s%s", path, extPath)
 }
 
-func (l *fileSystem) CreatePersistentNode(path string, data string) (err error) {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	l.nodes[r.Join(path)] = data
+func (l *local) CreatePersistentNode(path string, data string) (err error) {
+	rpath := l.formatPath(path)
+
+	rpath = l.getRealPath(rpath, data)
+	_, err = os.Stat(rpath)
+	if err == nil || os.IsExist(err) {
+		os.Remove(rpath)
+	}
+	if err = os.MkdirAll(filepath.Dir(rpath), 0777); err != nil {
+		return err
+	}
+	f, err := os.Create(rpath) //创建文件
+	if err != nil {
+		return err
+	}
+	err = os.Chmod(rpath, 0777)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err = f.WriteString(data); err != nil {
+		return err
+	}
 	return nil
 }
-func (l *fileSystem) CreateTempNode(path string, data string) (err error) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.nodes[r.Join(path)] = data
+func (l *local) CreateTempNode(path string, data string) (err error) {
+	if err = l.CreatePersistentNode(path, data); err != nil {
+		return err
+	}
+	l.tempNodeLock.Lock()
+	defer l.tempNodeLock.Unlock()
+	l.tempNode = append(l.tempNode, l.formatPath(path))
 	return nil
 }
-func (l *fileSystem) CreateSeqNode(path string, data string) (rpath string, err error) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	nid := atomic.AddInt32(&l.seqValue, 1)
-	rpath = fmt.Sprintf("%s%d", path, nid)
-	l.nodes[rpath] = data
-	return rpath, nil
+func (l *local) CreateSeqNode(path string, data string) (rpath string, err error) {
+	nid := atomic.AddInt32(&l.seqNode, 1)
+	rpath = fmt.Sprintf("%s_%d", l.formatPath(path), nid)
+	return rpath, l.CreateTempNode(rpath, data)
+}
+func (l *local) GetSeparator() string {
+	return string(filepath.Separator)
 }
 
-func (l *fileSystem) Close() error {
+func (l *local) CanWirteDataInDir() bool {
+	return false
+}
+func (l *local) Close() error {
+	l.tempNodeLock.Lock()
+	defer l.tempNodeLock.Unlock()
+	close(l.closeCh)
+	for _, p := range l.tempNode {
+		os.Remove(p)
+	}
 	return nil
 }
 
@@ -173,31 +276,20 @@ func (v *valuesEntity) GetPath() string {
 	return v.path
 }
 
-type eventWatcher struct {
-	watcher chan registry.ValueWatcher
-}
-
-//fsFactory 基于本地文件系统
-type fsFactory struct {
-	opts *r.Options
-}
-
-//Build 根据配置生成文件系统注册中心
-func (z *fsFactory) Create(opts ...r.Option) (r.IRegistry, error) {
-	//addrs []string, u string, p string, log logger.ILogging
-	for i := range opts {
-		opts[i](z.opts)
+func checkPrivileges() error {
+	if output, err := exec.Command("id", "-g").Output(); err == nil {
+		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {
+			if gid == 0 {
+				return nil
+			}
+			return ErrRootPrivileges
+		}
 	}
-
-	return NewFileSystem(global.Def.PlatName,
-		global.Def.SysName,
-		global.Def.ClusterName,
-		filepath.Join(z.opts.Addrs[0], global.Def.LocalConfName))
-
+	if runtime.GOOS == "windows" {
+		return nil
+	}
+	return fmt.Errorf("%v %s", ErrUnsupportedSystem, runtime.GOOS)
 }
 
-func init() {
-	r.Register(r.FileSystem, &fsFactory{
-		opts: &r.Options{},
-	})
-}
+var ErrUnsupportedSystem = errors.New("Unsupported system")
+var ErrRootPrivileges = errors.New("You must have root user privileges. Possibly using 'sudo' command should help")

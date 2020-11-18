@@ -13,7 +13,8 @@ import (
 
 //GetString 获取字符串
 func GetString(v interface{}, def ...string) string {
-	if v != nil {
+
+	if !IsEmpty(v) {
 		switch v.(type) {
 		case float32:
 			d := decimal.NewFromFloat32(v.(float32))

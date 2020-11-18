@@ -3,7 +3,6 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -18,10 +17,10 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	}
 
 	//本地文件系统则直接使用toml序列化方式进行发布
-	proto := registry.GetProto(registryAddr)
-	if proto == registry.FileSystem {
-		return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], global.Def.LocalConfName), cover)
-	}
+	// proto := registry.GetProto(registryAddr)
+	// if proto == registry.FileSystem {
+	// 	return c.Encode2File(filepath.Join(registry.GetAddrs(registryAddr)[0], global.Def.LocalConfName), cover)
+	// }
 
 	//创建注册中心，根据注册中心提供的接口进行配置发布
 	r, err := registry.NewRegistry(registryAddr, global.Def.Log())
