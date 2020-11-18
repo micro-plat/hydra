@@ -22,7 +22,7 @@ func TestSingleValueWatcher_Close(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
-	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	w := wvalue.NewSingleValueWatcher(c.GetRegistry(), c.GetServerPubPath(), log)
 	w.Close()
@@ -56,7 +56,7 @@ func TestSingleValueWatcher_Start(t *testing.T) {
 	//发布节点到注册中心
 	router, _ := apiconf.GetRouterConf()
 	pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
-	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, conf.NewMeta()).GetRequestID())
+	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
 		//变化之前的值

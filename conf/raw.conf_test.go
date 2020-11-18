@@ -72,7 +72,7 @@ func TestNewByJSON(t *testing.T) {
 }
 
 func TestRawConf_GetSignature(t *testing.T) {
-	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 0)
+	obj, _ := NewByText([]byte(`{"sss":"11"}`), 0)
 	tests := []struct {
 		name   string
 		fields *RawConf
@@ -87,8 +87,8 @@ func TestRawConf_GetSignature(t *testing.T) {
 }
 
 func TestRawConf_GetVersion(t *testing.T) {
-	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 1000)
-	obj1, _ := NewByJSON([]byte(`{"sss":"11"}`), 122)
+	obj, _ := NewByText([]byte(`{"sss":"11"}`), 1000)
+	obj1, _ := NewByText([]byte(`{"sss":"11"}`), 122)
 	tests := []struct {
 		name   string
 		fields *RawConf
@@ -104,8 +104,8 @@ func TestRawConf_GetVersion(t *testing.T) {
 }
 
 func TestRawConf_GetRaw(t *testing.T) {
-	obj, _ := NewByJSON([]byte(`{"sss":"11"}`), 1)
-	obj1, _ := NewByJSON([]byte(`{"sss":"12121122"}`), 1)
+	obj, _ := NewByText([]byte(`{"sss":"11"}`), 1)
+	obj1, _ := NewByText([]byte(`{"sss":"12121122"}`), 1)
 	tests := []struct {
 		name   string
 		fields *RawConf

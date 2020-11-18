@@ -2,7 +2,7 @@ package pub
 
 import (
 	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
 	"github.com/urfave/cli"
 )

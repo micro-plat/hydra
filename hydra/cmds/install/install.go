@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
 	hydracmds "github.com/micro-plat/hydra/hydra/cmds"
 	"github.com/micro-plat/lib4go/errs"
