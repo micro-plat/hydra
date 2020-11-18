@@ -383,7 +383,7 @@ func Test_body_GetBody_Encoding(t *testing.T) {
 			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
 		{name: "头部编码gbk,请求数据为utf-8", contentType: "application/json; charset=gbk", encoding: "utf-8", wantContentType: "text/plain; charset=gbk",
 			body: getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}), wantStatus: "510 Not Extended", wantStatusCode: 510,
-			want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+			want: `Server Error`},
 		{name: "头部编码gbk,请求数据为gbk", contentType: "application/json; charset=gbk", encoding: "gbk", wantContentType: "application/json; charset=gbk",
 			body: getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
 			want: `{"address":"科技园路~!#$%^&*()_+{}:<?"}`, wantStatus: "200 OK", wantStatusCode: 200},
@@ -441,7 +441,7 @@ func Test_body_GetBody_Encoding_UTF8(t *testing.T) {
 	startServer()
 	for _, tt := range tests {
 		resp, err := http.Post("http://localhost:9091/getbody/encoding/utf8", tt.contentType, strings.NewReader(tt.body))
-		fmt.Printf("resp:%+v \n", resp)
+		//fmt.Printf("resp:%+v \n", resp)
 		assert.Equal(t, false, err != nil, tt.name)
 		assert.Equal(t, tt.wantContentType, resp.Header["Content-Type"][0], tt.name)
 		assert.Equal(t, tt.wantStatusCode, resp.StatusCode, tt.name)
@@ -465,13 +465,13 @@ func Test_body_GetBody_Encoding_GBK(t *testing.T) {
 	}{
 		{name: "请求编码为utf-8,头为gbk", contentType: "application/json;charset=gbk", wantContentType: "text/plain; charset=gbk",
 			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `Server Error`},
 		{name: "请求编码为utf-8", contentType: "application/json;charset=utf-8", wantContentType: "text/plain; charset=gbk",
 			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: "Server Error"},
 		{name: "请求数据为utf-8,未设置头部编码", contentType: "application/json", wantContentType: "text/plain; charset=gbk",
 			body:       getTestUTF8Json(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
-			wantStatus: "510 Not Extended", wantStatusCode: 510, want: `输出时进行gbk编码转换错误：编码转换失败:content:{"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}, err:encoding: rune not supported by encoding. {"address":"绉戞妧鍥�矾~!#$%^&*()_+{}:<?"}`},
+			wantStatus: "510 Not Extended", wantStatusCode: 510, want: "Server Error"},
 		{name: "请求数据为gbk,头为utf-8", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=gbk",
 			body:       getTestGBKJson(map[string]string{"address": "科技园路~!#$%^&*()_+{}:<?"}),
 			wantStatus: "200 OK", wantStatusCode: 200, want: Utf8ToGbk(`{"address":"科技园路~!#$%^&*()_+{}:<?"}`)},

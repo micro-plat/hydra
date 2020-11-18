@@ -11,13 +11,16 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+var _ IServerConf = &TMainConf{}
+
 //TMainConf 服务器主配置
 type TMainConf struct {
 	rootConf    *RawConf
 	rootVersion int32
 	subConfs    map[string]RawConf
 	IServerPub
-	registry registry.IRegistry
+	registry     registry.IRegistry
+	ClusterNames []string
 }
 
 func NewTMainConf(rootVersion int32, data map[string]interface{}) IServerConf {
@@ -131,6 +134,10 @@ func (c *TMainConf) Iter(f func(path string, conf *RawConf) bool) {
 //Close 关闭清理资源
 func (c *TMainConf) Close() error {
 	return nil
+}
+
+func (c *TMainConf) GetClusterNames() []string {
+	return c.ClusterNames
 }
 
 func TestComparer_Update(t *testing.T) {

@@ -29,7 +29,7 @@ func startServer() {
 
 func client(ctx hydra.IContext) interface{} {
 	raw := ctx.Request().GetString("raw")
-	o, _ := h.WithRaw([]byte(raw))
+	o, _ := h.()([]byte(raw))
 	fmt.Println("RAW:", raw)
 	_, err := h.NewClient(o)
 	if (err != nil) != false {
