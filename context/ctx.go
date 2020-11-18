@@ -153,7 +153,7 @@ type IResponse interface {
 	GetRaw() interface{}
 
 	//StatusCode 设置状态码
-	StatusCode(int)
+	// StatusCode(int)
 
 	//ContentType 设置Content-Type响应头
 	ContentType(v string)
@@ -161,11 +161,8 @@ type IResponse interface {
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
 
-	//WriteFinal 修改最终渲染内容(不会立即写入)
-	WriteFinal(status int, content string, ctp string)
-
 	//Write 向响应流中写入状态码与内容(不会立即写入)
-	Write(s int, v interface{}) error
+	Write(s int, v ...interface{}) error
 
 	//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 	WriteAny(v interface{}) error
@@ -173,11 +170,8 @@ type IResponse interface {
 	//File 向响应流中写入文件(立即写入)
 	File(path string)
 
-	//Abort 终止当前请求继续执行(立即写入)
-	Abort(int, error)
-
-	//Stop 停止当前服务执行(立即写入)
-	Stop(int)
+	//Abort 停止当前服务执行(立即写入)
+	Abort(int, ...error)
 
 	//GetRawResponse 获取原始响应状态码与内容
 	GetRawResponse() (int, interface{})
@@ -246,12 +240,4 @@ type IContext interface {
 
 	//Close 关闭并释放资源
 	Close()
-}
-
-//TFuncs 用于模板翻译的函数列表
-type TFuncs map[string]interface{}
-
-//Add 添加一个自定义的函数
-func (f TFuncs) Add(name string, handle interface{}) {
-	f[name] = handle
 }

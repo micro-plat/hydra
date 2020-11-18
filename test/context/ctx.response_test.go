@@ -170,7 +170,7 @@ func Test_response_Stop(t *testing.T) {
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	//测试Stop
-	c.Stop(200)
+	c.Abort(200)
 	rs, rc := c.GetFinalResponse()
 	assert.Equal(t, 200, rs, "验证状态码")
 	assert.Equal(t, []byte(rc), context.Content, "验证返回内容")
@@ -199,7 +199,7 @@ func Test_response_StatusCode(t *testing.T) {
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
 	c := ctx.NewResponse(context, serverConf, log, meta)
 	for _, tt := range tests {
-		c.StatusCode(tt.s)
+		c.Write(tt.s)
 		rs, _ := c.GetFinalResponse()
 		assert.Equal(t, tt.wantStatus, rs, tt.name)
 		assert.Equal(t, context.Status(), rs, tt.name)
@@ -245,7 +245,7 @@ func Test_response_WriteFinal(t *testing.T) {
 	c := ctx.NewResponse(context, serverConf, log, meta)
 
 	for _, tt := range tests {
-		c.WriteFinal(tt.status, tt.content, tt.ctp)
+		c.Write(tt.status, tt.content)
 		rs, rc := c.GetFinalResponse()
 		assert.Equal(t, tt.wantS, rs, tt.name)
 		assert.Equal(t, tt.wantC, rc, tt.name)

@@ -45,7 +45,7 @@ func JwtAuth() Handler {
 		ctx.Log().Error(err)
 		if jwtAuth.AuthURL != "" {
 			ctx.Response().Header("Location", jwtAuth.AuthURL)
-			ctx.Response().Stop(xjwt.JWTStatusRedirect)
+			ctx.Response().Abort(xjwt.JWTStatusRedirect)
 			return
 		}
 		ctx.Response().Abort(errs.GetCode(err, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))

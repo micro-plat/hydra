@@ -16,6 +16,8 @@ func (client *ZookeeperClient) CreatePersistentNode(path string, data string) (e
 		return
 	}
 	//检查目录是否存在
+	client.clock.Lock()
+	defer client.clock.Unlock()
 	if b, err := client.Exists(path); err != nil {
 		err = fmt.Errorf("create node %s fail(%t, err : %v)", path, b, err)
 		return err
