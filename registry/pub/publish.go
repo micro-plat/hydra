@@ -196,7 +196,6 @@ func (p *Publisher) PubDNSNode(serverName string) (map[string]string, error) {
 		return nil, err
 	}
 	path := registry.Join(p.c.GetDNSPubPath(server.Domain), ip)
-	fmt.Println("path:", path)
 	err = p.c.GetRegistry().CreateTempNode(path, "")
 	if err != nil {
 		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
