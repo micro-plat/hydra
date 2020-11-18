@@ -42,7 +42,7 @@ func NewServer(addr string, routers []*router.Router, maxRecvSize, maxSendSize i
 	return t, nil
 }
 
-//Start 启动cron服务嚣
+//Start 启动rpc服务嚣
 func (s *Server) Start() error {
 	if s.running {
 		return nil
@@ -121,7 +121,6 @@ func (s *Server) Shutdown() {
 		s.running = false
 		s.engine.GracefulStop()
 	}
-
 }
 
 //GetAddress 获取当前服务地址

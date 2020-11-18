@@ -44,16 +44,11 @@ type ResolverBuilder struct {
 }
 
 func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Builder, error) {
-	proto, _, err := global.ParseProto(address)
+	proto, addr, err := global.ParseProto(address)
 	if err != nil {
 		return nil, fmt.Errorf("GRPC address:%s parse error:%+v", address, err)
 	}
 	logging := logger.New("rpc.resolve")
-
-	regst, err := registry.NewRegistry(address, logging)
-	if err != nil {
-		return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
-	}
 
 	builder := &ResolverBuilder{
 		plat:       plat,
@@ -61,13 +56,22 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 		sortPrefix: sortPrefix,
 		address:    address,
 		proto:      proto,
-		regst:      regst,
 		logger:     logging,
 	}
 
-	addresses, err := builder.getGrpcAddress()
-	if err != nil {
-		return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
+	addresses := []string{addr}
+	//兼容直接传服务器ip来进行访问
+	if len(plat) > 0 {
+		regst, err := registry.NewRegistry(address, logging)
+		if err != nil {
+			return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
+		}
+
+		builder.regst = regst
+		addresses, err = builder.getGrpcAddress()
+		if err != nil {
+			return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
+		}
 	}
 
 	builder.buildManualResolver(proto, addresses)
@@ -92,17 +96,17 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 	rb.ResolveNowCallback = func(o resolver.ResolveNowOptions) {
 		//fmt.Println("ResolveNowCallback:1")
 
-		addrs, err := b.getGrpcAddress()
-		if err != nil {
-			b.logger.Errorf("getGrpcAddress:%+v", err)
-			return
-		}
-		fmt.Println("ResolveNowCallback:", addrs)
+		// addrs, err := b.getGrpcAddress()
+		// if err != nil {
+		// 	b.logger.Errorf("getGrpcAddress:%+v", err)
+		// 	return
+		// }
+		// fmt.Println("ResolveNowCallback:", address)
 		var needUpdate = false
 		newCache := make(map[string]bool)
-		for i := 0; i < len(addrs); i++ {
-			newCache[addrs[i]] = true
-			if _, ok := b.caches[addrs[i]]; !ok {
+		for i := 0; i < len(address); i++ {
+			newCache[address[i]] = true
+			if _, ok := b.caches[address[i]]; !ok {
 				needUpdate = true
 			}
 		}
@@ -113,8 +117,8 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 		}
 
 		var grpcAddrs []resolver.Address
-		for i := range addrs {
-			grpcAddrs = append(grpcAddrs, resolver.Address{Addr: addrs[i], Type: resolver.Backend})
+		for i := range address {
+			grpcAddrs = append(grpcAddrs, resolver.Address{Addr: address[i], Type: resolver.Backend})
 		}
 		rb.CC.UpdateState(resolver.State{Addresses: grpcAddrs})
 	}
@@ -141,7 +145,6 @@ func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
 	}
 
 	addrs = b.extractAddrs(chilren)
-	fmt.Println("addrs:", addrs)
 	return
 }
 
