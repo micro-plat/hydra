@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -162,6 +163,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 }
 
 func (c *response) swapByctp(content interface{}) (string, string) {
+	fmt.Println("content:", content)
 	ctp := c.getContentType()
 	switch {
 	case strings.Contains(ctp, "plain"):
@@ -182,8 +184,6 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
 				return context.JSONF, content.(string)
-			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				return context.XMLF, content.(string)
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
 				return context.HTMLF, content.(string)
 			case strings.Contains(ctp, "yaml"):
@@ -191,6 +191,11 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case ctp == "" || strings.Contains(ctp, "plain"):
 				return context.PLAINF, content.(string)
 			default:
+				_, errx := mxj.BeautifyXml(text, "", "")
+				if errx != io.EOF {
+					return context.XMLF, content.(string)
+				}
+
 				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
 				})
