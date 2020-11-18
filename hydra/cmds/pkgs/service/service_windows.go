@@ -193,8 +193,7 @@ loop:
 
 func (ws *windowsService) Install() error {
 	exepath, err := ws.execPath()
-	fmt.Println("windowsService：", exepath)
-	if err != nil {
+ 	if err != nil {
 		return err
 	}
 
@@ -203,8 +202,7 @@ func (ws *windowsService) Install() error {
 		return err
 	}
 	defer m.Disconnect()
-	fmt.Println("windows.Name:", ws.Name)
-	s, err := m.OpenService(ws.Name)
+ 	s, err := m.OpenService(ws.Name)
 	if err == nil {
 		s.Close()
 		return fmt.Errorf("service %s already exists", ws.Name)
@@ -337,8 +335,7 @@ func (ws *windowsService) Start() error {
 		return err
 	}
 	defer s.Close()
-	fmt.Println("ws.Config.Arguments...:", ws.Config.Arguments)
-	return s.Start(ws.Config.Arguments...)
+ 	return s.Start( )
 }
 
 func (ws *windowsService) Stop() error {
