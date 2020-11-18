@@ -44,7 +44,6 @@ func startServer() {
 		app.API("/request/check", Check)
 		app.API("/response/redirect", Redirect)
 		app.API("/response/redirect/dst", RedirectDst)
-		app.API("/rpc", RpcRequest)
 
 		os.Args = []string{"startserver", "run"}
 		go app.Start()

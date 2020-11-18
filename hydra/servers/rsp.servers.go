@@ -110,7 +110,6 @@ LOOP:
 			if r.done {
 				break LOOP
 			}
-			fmt.Println("u:", u)
 			if err := r.checkServer(u.Path); err != nil {
 				r.log.Error(err)
 			}

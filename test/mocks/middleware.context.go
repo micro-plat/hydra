@@ -111,6 +111,11 @@ func (u *MockUser) GetRequestID() string {
 	return u.MockRequestID
 }
 
+//GetGID 获取当前处理的goroutine id
+func (u *MockUser) GetGID() string {
+	return u.MockRequestID
+}
+
 //Auth 认证信息
 func (u *MockUser) Auth() extcontext.IAuth {
 	return u.MockAuth
