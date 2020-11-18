@@ -241,11 +241,3 @@ type IContext interface {
 	//Close 关闭并释放资源
 	Close()
 }
-
-//TFuncs 用于模板翻译的函数列表
-type TFuncs map[string]interface{}
-
-//Add 添加一个自定义的函数
-func (f TFuncs) Add(name string, handle interface{}) {
-	f[name] = handle
-}
