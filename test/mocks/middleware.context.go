@@ -92,14 +92,9 @@ func (ctx *MiddleContext) GetHttpReqResp() (*http.Request, http.ResponseWriter) 
 var _ extcontext.IUser = &MockUser{}
 
 type MockUser struct {
-	MockGID       string
 	MockClientIP  string
 	MockRequestID string
 	MockAuth      extcontext.IAuth
-}
-
-func (u *MockUser) GetGID() string {
-	return u.MockGID
 }
 
 //GetClientIP 获取客户端请求IP
