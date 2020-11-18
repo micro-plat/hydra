@@ -89,6 +89,8 @@ func (ctx *MiddleContext) GetHttpReqResp() (*http.Request, http.ResponseWriter) 
 	return ctx.HttpRequest, ctx.HttpResponse
 }
 
+var _ extcontext.IUser = &MockUser{}
+
 type MockUser struct {
 	MockClientIP  string
 	MockRequestID string
@@ -102,6 +104,11 @@ func (u *MockUser) GetClientIP() string {
 
 //GetRequestID 获取请求编号
 func (u *MockUser) GetRequestID() string {
+	return u.MockRequestID
+}
+
+//GetGID 获取当前处理的goroutine id
+func (u *MockUser) GetGID() string {
 	return u.MockRequestID
 }
 
@@ -377,6 +384,8 @@ func (r *MockRequest) GetFileName(fileKey string) (string, error) {
 func (r *MockRequest) GetFileBody(fileKey string) (io.ReadCloser, error) {
 	return nil, nil
 }
+
+var _ extcontext.IResponse = &MockResponse{}
 
 type MockResponse struct {
 	SpecialList     []string
