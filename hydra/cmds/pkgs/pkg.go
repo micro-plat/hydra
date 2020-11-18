@@ -15,7 +15,8 @@ func Pub2Registry(cover bool) error {
 	if err := creator.Conf.Pub(global.Current().GetPlatName(),
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
-		global.Def.RegistryAddr, cover); err != nil {
+		global.Def.RegistryAddr,
+		cover); err != nil {
 		return err
 	}
 	return nil
