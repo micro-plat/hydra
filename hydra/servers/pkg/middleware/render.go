@@ -16,6 +16,7 @@ func Render() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
+
 		if render.Disable {
 			return
 		}
