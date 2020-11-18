@@ -15,7 +15,7 @@ func (z *fsRegistry) Create(opts ...registry.Option) (registry.IRegistry, error)
 		opts[i](z.opts)
 	}
 	prefix := "."
-	client, err := newLocal(prefix)
+	client, err := NewFileSystem(prefix)
 	if err != nil {
 		return nil, err
 	}

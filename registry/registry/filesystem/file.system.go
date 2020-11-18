@@ -18,14 +18,14 @@ import (
 	"github.com/micro-plat/lib4go/registry"
 )
 
-var _ r.IRegistry = &local{}
+var _ r.IRegistry = &fs{}
 
 type eventWatcher struct {
 	watcher chan registry.ValueWatcher
 	event   chan fsnotify.Event
 }
 
-type local struct {
+type fs struct {
 	watcher      *fsnotify.Watcher
 	watcherMaps  map[string]*eventWatcher
 	watchLock    sync.Mutex
@@ -36,7 +36,7 @@ type local struct {
 	prefix       string
 }
 
-func newLocal(prefix string) (*local, error) {
+func NewFileSystem(prefix string) (*fs, error) {
 	if err := checkPrivileges(); err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func newLocal(prefix string) (*local, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &local{
+	return &fs{
 		prefix:      strings.TrimRight(prefix, "/"),
 		watcher:     w,
 		watcherMaps: make(map[string]*eventWatcher),
@@ -55,7 +55,7 @@ func newLocal(prefix string) (*local, error) {
 }
 
 //Start 启动文件监控
-func (l *local) Start() {
+func (l *fs) Start() {
 	go func() {
 	LOOP:
 		for {
@@ -80,17 +80,17 @@ func (l *local) Start() {
 		l.watcher.Close()
 	}()
 }
-func (l *local) formatPath(path string) string {
+func (l *fs) formatPath(path string) string {
 	if !strings.HasPrefix(path, l.prefix) {
 		return l.prefix + r.Join("/", path)
 	}
 	return path
 }
-func (l *local) Exists(path string) (bool, error) {
+func (l *fs) Exists(path string) (bool, error) {
 	_, err := os.Stat(l.formatPath(path))
 	return err == nil || os.IsExist(err), nil
 }
-func (l *local) GetValue(path string) (data []byte, version int32, err error) {
+func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 	rpath := l.formatPath(path)
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
@@ -104,14 +104,14 @@ func (l *local) GetValue(path string) (data []byte, version int32, err error) {
 	return l.GetValue(r.Join(path, ".init"))
 }
 
-func (l *local) Update(path string, data string) (err error) {
+func (l *fs) Update(path string, data string) (err error) {
 	if b, _ := l.Exists(path); !b {
 		return errors.New(path + "不存在")
 	}
 	return ioutil.WriteFile(l.formatPath(path), []byte(data), 0666)
 
 }
-func (l *local) GetChildren(path string) (paths []string, version int32, err error) {
+func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
 	rpath := l.formatPath(path)
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
@@ -132,7 +132,7 @@ func (l *local) GetChildren(path string) (paths []string, version int32, err err
 	return paths, version, nil
 }
 
-func (l *local) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
+func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
 	rpath := l.formatPath(path)
 	absPath := rpath
 	fs, _ := os.Stat(rpath)
@@ -169,17 +169,17 @@ func (l *local) WatchValue(path string) (data chan registry.ValueWatcher, err er
 	}(rpath, l.watcherMaps[absPath])
 	return l.watcherMaps[absPath].watcher, nil
 }
-func (l *local) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
+func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
 	return nil, nil
 }
-func (l *local) Delete(path string) error {
+func (l *fs) Delete(path string) error {
 
 	if b, _ := l.Exists(path); !b {
 		return nil
 	}
 	return os.Remove(l.formatPath(path))
 }
-func (l *local) getRealPath(path string, data string) string {
+func (l *fs) getRealPath(path string, data string) string {
 	extPath := ""
 	if data != "" {
 		extPath = "/.init"
@@ -187,7 +187,7 @@ func (l *local) getRealPath(path string, data string) string {
 	return fmt.Sprintf("%s%s", path, extPath)
 }
 
-func (l *local) CreatePersistentNode(path string, data string) (err error) {
+func (l *fs) CreatePersistentNode(path string, data string) (err error) {
 	rpath := l.formatPath(path)
 
 	rpath = l.getRealPath(rpath, data)
@@ -212,7 +212,7 @@ func (l *local) CreatePersistentNode(path string, data string) (err error) {
 	}
 	return nil
 }
-func (l *local) CreateTempNode(path string, data string) (err error) {
+func (l *fs) CreateTempNode(path string, data string) (err error) {
 	if err = l.CreatePersistentNode(path, data); err != nil {
 		return err
 	}
@@ -221,19 +221,19 @@ func (l *local) CreateTempNode(path string, data string) (err error) {
 	l.tempNode = append(l.tempNode, l.formatPath(path))
 	return nil
 }
-func (l *local) CreateSeqNode(path string, data string) (rpath string, err error) {
+func (l *fs) CreateSeqNode(path string, data string) (rpath string, err error) {
 	nid := atomic.AddInt32(&l.seqNode, 1)
 	rpath = fmt.Sprintf("%s_%d", l.formatPath(path), nid)
 	return rpath, l.CreateTempNode(rpath, data)
 }
-func (l *local) GetSeparator() string {
+func (l *fs) GetSeparator() string {
 	return string(filepath.Separator)
 }
 
-func (l *local) CanWirteDataInDir() bool {
+func (l *fs) CanWirteDataInDir() bool {
 	return false
 }
-func (l *local) Close() error {
+func (l *fs) Close() error {
 	l.tempNodeLock.Lock()
 	defer l.tempNodeLock.Unlock()
 	close(l.closeCh)
