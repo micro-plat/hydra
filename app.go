@@ -2,7 +2,7 @@ package hydra
 
 import (
 	"github.com/micro-plat/cli"
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"

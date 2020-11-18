@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/lib4go/ps"
 )
 
