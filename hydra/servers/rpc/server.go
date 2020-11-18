@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"

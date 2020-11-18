@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/compatible"
+	"github.com/micro-plat/hydra/global/compatible"
 	xnet "github.com/micro-plat/lib4go/net"
 )
 
