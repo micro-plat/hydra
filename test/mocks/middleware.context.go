@@ -97,10 +97,6 @@ type MockUser struct {
 	MockAuth      extcontext.IAuth
 }
 
-func (u *MockUser) GetGID() string {
-	return ""
-}
-
 //GetClientIP 获取客户端请求IP
 func (u *MockUser) GetClientIP() string {
 	return u.MockClientIP
