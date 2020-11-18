@@ -37,9 +37,9 @@ type fs struct {
 }
 
 func NewFileSystem(prefix string) (*fs, error) {
-	if err := checkPrivileges(); err != nil {
-		return nil, err
-	}
+	// if err := checkPrivileges(); err != nil {
+	// 	return nil, err
+	// }
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
@@ -64,15 +64,15 @@ func (l *fs) Start() {
 				break LOOP
 			case event := <-l.watcher.Events:
 				func(event fsnotify.Event) {
-					//fmt.Println("event:", event.Name, event.Op, event.String())
 					l.watchLock.Lock()
-					watcher, ok := l.watcherMaps[event.Name]
+					path := l.formatPath(event.Name)
+					watcher, ok := l.watcherMaps[path]
 					l.watchLock.Unlock()
 					if !ok {
 						return
 					}
 					watcher.event <- event
-					delete(l.watcherMaps, event.Name)
+					delete(l.watcherMaps, path)
 				}(event)
 
 			}
@@ -137,7 +137,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 	absPath := rpath
 	fs, _ := os.Stat(rpath)
 	if fs != nil && fs.IsDir() {
-		absPath = r.Join(rpath, ".init")
+		absPath = fmt.Sprintf("%s/.init", rpath)
 	}
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
@@ -149,7 +149,6 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 		event:   make(chan fsnotify.Event),
 		watcher: make(chan registry.ValueWatcher),
 	}
-
 	go func(rpath string, v *eventWatcher) {
 		if err := l.watcher.Add(rpath); err != nil {
 			v.watcher <- &valueEntity{path: rpath, Err: err}
@@ -177,7 +176,7 @@ func (l *fs) Delete(path string) error {
 	if b, _ := l.Exists(path); !b {
 		return nil
 	}
-	return os.Remove(l.formatPath(path))
+	return os.RemoveAll(l.formatPath(path))
 }
 func (l *fs) getRealPath(path string, data string) string {
 	extPath := ""
