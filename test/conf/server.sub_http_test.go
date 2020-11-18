@@ -7,7 +7,6 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/limiter"
-	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
@@ -15,7 +14,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
-	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
@@ -271,6 +269,8 @@ func Test_httpSub_GetBasicConf(t *testing.T) {
 	//不能设置错误的basic节点
 }
 
+/*
+
 func Test_httpSub_GetRenderConf(t *testing.T) {
 
 	platName, sysName, serverType, clusterName, rgst := newReady(t, "platName9", "sysName9", global.API, "cluster9")
@@ -302,6 +302,8 @@ func Test_httpSub_GetRenderConf(t *testing.T) {
 		assert.Equal(t, tt.wantConf, renderConf, tt.name+",conf")
 	}
 }
+
+*/
 
 func Test_httpSub_GetWhiteListConf(t *testing.T) {
 
@@ -396,6 +398,8 @@ func Test_httpSub_GetLimiter(t *testing.T) {
 	}
 }
 
+/*
+
 func Test_httpSub_GetGray(t *testing.T) {
 	type test struct {
 		name     string
@@ -439,3 +443,4 @@ func Test_httpSub_GetGray(t *testing.T) {
 	assert.Equal(t, test1.wantErr, err == nil, test1.name+",err")
 	assert.Equal(t, test1.wantConf, grayConf, test1.name+",conf")
 }
+*/

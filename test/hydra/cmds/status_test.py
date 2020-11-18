@@ -10,6 +10,12 @@ testName = os.path.basename(__file__)
 @test(testName)
 def test_status_Normal_running():
     try:
+        #0.停止并清楚遗留内容
+        args = ["stop"]
+        runApp(args)
+        args = ["remove"]
+        runApp(args)
+        
         #1.安装服务
         args = ["install","-r",ZKAddress,"-c","c"]
         response = runApp(args)
@@ -28,7 +34,7 @@ def test_status_Normal_running():
         args = ["status"]
         response = runApp(args)
         #print("status",response)
-        if not ("Starting" in response and "running..." in response):
+        if not ("Service" in response and "running..." in response):
             return u"status服务失败"
 
         #3.停止
@@ -55,12 +61,21 @@ def test_status_Normal_running():
 @test(testName)
 def test_status_Normal_notrunning():
     try:
+        #0.停止并清楚遗留内容
+        args = ["stop"]
+        runApp(args)
+        args = ["remove"]
+        runApp(args)
+
         #1.安装服务
         args = ["install","-r",ZKAddress,"-c","c"]
         response = runApp(args)
         #print("install",response)
         if not "OK" in response:
             return u"安装服务失败"
+
+        args = ["stop"]
+        runApp(args)
 
         #2.status
         args = ["status"]
