@@ -1,28 +1,47 @@
-package cmds
+package pkgs
 
 import (
 	"fmt"
 
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs/rlog"
+ 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/rlog"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/service"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
 	"github.com/urfave/cli"
+
 )
 
+type HydraService struct{
+	service.Service
+	ServiceName string 
+	Description string 
+	Arguments []string  
+}
+
+
 //GetService GetService
-func GetService(c *cli.Context, args ...string) (hydraSrv service.Service, err error) {
-	//3.创建本地服务
-	hydraSrv, err = service.New(GetSrvApp(c), GetSrvConfig(args...))
+func GetService(c *cli.Context, args ...string) (hydraSrv *HydraService, err error) {
+	//1. 构建服务配置
+	cfg := GetSrvConfig(args...)
+	
+	//2.创建本地服务
+	appSrv, err := service.New(GetSrvApp(c), cfg)
 	if err != nil {
 		return nil, err
 	}
-	return hydraSrv, err
+	return &HydraService{
+			Service: appSrv,
+			ServiceName : cfg.Name,
+			Description: cfg.Description,
+			Arguments:cfg.Arguments,
+		}, err
 }
+
+
+
 
 //GetSrvConfig SrvCfg
 func GetSrvConfig(args ...string) *service.Config {
@@ -49,10 +68,8 @@ type ServiceApp struct {
 
 //Start Start
 func (p *ServiceApp) Start(s service.Service) (err error) {
-	fmt.Println("ServiceApp:start")
-	err = p.run()
-	fmt.Println("ServiceApp:start:", err)
-	return err
+ 	err = p.run()
+ 	return err
 }
 
 //Stop Stop
@@ -84,35 +101,30 @@ func (p *ServiceApp) run() error {
 		cli.ShowCommandHelp(p.c, p.c.Command.Name)
 		return nil
 	}
-	fmt.Println("1.")
-	//3. 注册远程日志组件
+ 	//3. 注册远程日志组件
 	if err := rlog.Registry(global.Def.PlatName, global.Def.RegistryAddr); err != nil {
 		logs.Log.Error(err)
 		return nil
 	}
-	fmt.Println("2.")
-
+ 
 	globalData := global.Current()
 	//4.创建trace性能跟踪
 	if err := startTrace(globalData.GetTrace(), globalData.GetTracePort()); err != nil {
 		return err
 	}
-	fmt.Println("3.")
-	//5. 处理本地内存作为注册中心的服务发布问题
+ 	//5. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
+		if err := Pub2Registry(true); err != nil {
 			return err
 		}
 	}
-	fmt.Println("4.")
-	//6. 创建服务器
+ 	//6. 创建服务器
 	server := servers.NewRspServers(globalData.GetRegistryAddr(),
 		globalData.GetPlatName(), globalData.GetSysName(),
 		globalData.GetServerTypes(), globalData.GetClusterName())
 	if err := server.Start(); err != nil {
 		return err
 	}
-	fmt.Println("5.")
-	p.server = server
+ 	p.server = server
 	return nil
 }

@@ -1,12 +1,10 @@
 package start
 
 import (
-	"fmt"
 	"github.com/micro-plat/cli/cmds"
-	hydracmds "github.com/micro-plat/hydra/hydra/cmds"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
 
@@ -26,15 +24,11 @@ func doStart(c *cli.Context) (err error) {
 	global.Current().Log().Pause()
 
 	//3.创建本地服务
-	hydraSrv, err := hydracmds.GetService(c)
+	hydraSrv, err := pkgs.GetService(c)
 	if err != nil {
-		fmt.Println("doStart.hydracmds.GetService:", err)
 		return err
 	}
 	err = hydraSrv.Start()
-	if err != nil {
-		fmt.Println("doStart. hydraSrv.Start:", err)
-		return err
-	}
-	return errs.NewIgnoreError(0, err)
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Start", err)
+
 }

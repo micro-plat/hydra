@@ -7,8 +7,7 @@ import (
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
-	hydracmds "github.com/micro-plat/hydra/hydra/cmds"
-	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
 
@@ -40,7 +39,7 @@ func doInstall(c *cli.Context) (err error) {
 	args := []string{"run"}
 	args = append(args, os.Args[2:]...)
 	//3.创建本地服务
-	hydraSrv, err := hydracmds.GetService(c, args...)
+	hydraSrv, err := pkgs.GetService(c, args...)
 	if err != nil {
 		return err
 	}
@@ -49,8 +48,6 @@ func doInstall(c *cli.Context) (err error) {
 	}
 
 	err = hydraSrv.Install()
-	if err != nil {
-		return err
-	}
-	return errs.NewIgnoreError(0, err)
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName,"Install",err)
 }
+

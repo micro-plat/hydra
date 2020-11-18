@@ -3,10 +3,8 @@ package stop
 import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/hydra/global"
-	hydracmds "github.com/micro-plat/hydra/hydra/cmds"
 
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
-	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
 
@@ -27,7 +25,7 @@ func doStop(c *cli.Context) (err error) {
 	//关闭日志显示
 	global.Current().Log().Pause()
 	//3.创建本地服务
-	hydraSrv, err := hydracmds.GetService(c)
+	hydraSrv, err := pkgs.GetService(c)
 	if err != nil {
 		return err
 	}
@@ -35,5 +33,5 @@ func doStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	return errs.NewIgnoreError(0, "OK")
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Stop", err)
 }
