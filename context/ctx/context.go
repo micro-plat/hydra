@@ -33,7 +33,6 @@ type Ctx struct {
 	user       *user
 	appConf    app.IAPPConf
 	cancelFunc func()
-	funs       *funcs
 }
 
 //NewCtx 构建基于gin.Context的上下文
@@ -52,7 +51,6 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	timeout := time.Duration(ctx.appConf.GetServerConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
-	ctx.funs = newFunc(ctx)
 	return ctx
 }
 
@@ -64,11 +62,6 @@ func (c *Ctx) Meta() conf.IMeta {
 //Request 获取请求对象
 func (c *Ctx) Request() context.IRequest {
 	return c.request
-}
-
-//TmplFuncs 提供用于模板转换的函数表达式
-func (c *Ctx) TmplFuncs() context.TFuncs {
-	return c.funs.TmplFuncs()
 }
 
 //Response 获取响应对象
@@ -104,7 +97,6 @@ func (c *Ctx) Close() {
 	c.cancelFunc = nil
 	c.context = nil
 	c.ctx = nil
-	c.funs = nil
 	c.log = nil
 	c.meta = nil
 	c.request = nil

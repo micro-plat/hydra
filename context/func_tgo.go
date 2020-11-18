@@ -1,6 +1,8 @@
 package context
 
 import (
+	"strings"
+
 	"github.com/micro-plat/hydra/context/internal"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/tgo"
@@ -26,6 +28,7 @@ func GetTGOModules() []*tgo.Module {
 		Add("getPlatName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetPlatName() })).
 		Add("getSysName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetSysName() })).
 		Add("getServerType", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerType() })).
+		Add("getClusterNameBy", tgo.FuncASRS(getClusterNameBy)).
 		Add("getCurrentClusterName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterName() })).
 		Add("getAllClusterNames", tgo.FuncARSs(func() []string { ctx := Current(); return ctx.APPConf().GetServerConf().GetClusterNames() })).
 		Add("getServerName", tgo.FuncARS(func() string { ctx := Current(); return ctx.APPConf().GetServerConf().GetServerName() })).
@@ -43,4 +46,14 @@ func GetTGOModules() []*tgo.Module {
 
 func init() {
 	global.AddTGOModules(GetTGOModules()...)
+}
+func getClusterNameBy(n string) string {
+	ctx := Current()
+	names := ctx.APPConf().GetServerConf().GetClusterNames()
+	for _, nm := range names {
+		if strings.Contains(nm, n) {
+			return nm
+		}
+	}
+	return ""
 }

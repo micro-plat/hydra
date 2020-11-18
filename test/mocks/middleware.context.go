@@ -64,11 +64,6 @@ func (ctx *MiddleContext) APPConf() app.IAPPConf {
 	return ctx.MockAPPConf
 }
 
-//TmplFuncs 模板函数列表
-func (ctx *MiddleContext) TmplFuncs() extcontext.TFuncs {
-	return ctx.MockTFuncs
-}
-
 //User 用户信息
 func (ctx *MiddleContext) User() extcontext.IUser {
 	return ctx.MockUser
@@ -472,10 +467,10 @@ func (res *MockResponse) File(path string) {
 }
 
 //Abort 终止当前请求继续执行
-func (res *MockResponse) Abort(code int, errs ...error) {
+func (res *MockResponse) Abort(code int, errsx ...error) {
 	res.MockStatus = code
-	if len(errs) > 0 {
-		switch v := errs[0].(type) {
+	if len(errsx) > 0 {
+		switch v := errsx[0].(type) {
 		case errs.IError:
 			res.MockContent = v.GetError().Error()
 		case error:
