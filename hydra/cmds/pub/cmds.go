@@ -2,7 +2,7 @@ package pub
 
 import (
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/lib4go/transform"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type cmd string
@@ -27,5 +27,5 @@ func (c cmd) CMD(path string) string {
 	ps = append(ps, "install_params")
 	ps = append(ps, runInstall)
 
-	return transform.Translate(string(c), ps...)
+	return types.Translate(string(c), ps...)
 }
