@@ -12,7 +12,7 @@ def test_Conf_Show_Normal():
     测试conf show 
     """
     #执行conf show
-    args = ["conf","show","-r","lm://."]
+    args = ["conf","show","-r","lm://.","-c","c"]
     response = runApp(args,["1","2","3","111","q"])
     #获取main
     if not '19003' in response:

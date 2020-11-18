@@ -204,7 +204,7 @@ func TestRLogGetConf(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		rawCnf, err := conf.NewByJSON(tt.args.cnfData, tt.args.version)
+		rawCnf, err := conf.NewByText(tt.args.cnfData, tt.args.version)
 		cnf := &mocks.MockVarConf{
 			Version: tt.args.version,
 			ConfData: map[string]map[string]*conf.RawConf{

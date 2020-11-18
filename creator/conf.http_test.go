@@ -9,7 +9,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/acl/blacklist"
 	"github.com/micro-plat/hydra/conf/server/acl/limiter"
-	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -18,7 +17,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
-	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/services"
@@ -285,6 +283,7 @@ func Test_httpBuilder_Limit(t *testing.T) {
 	}
 }
 
+/*
 func Test_httpBuilder_Proxy(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -324,3 +323,4 @@ func Test_httpBuilder_Render(t *testing.T) {
 		assert.Equal(t, tt.want, got.CustomerBuilder, tt.name)
 	}
 }
+*/

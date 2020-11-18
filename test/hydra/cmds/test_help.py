@@ -96,7 +96,7 @@ def runApp(args,steps=[],exe_name=""):
     try:
         for val in steps:
             server.send(val)
-            time.sleep(0.5)
+            time.sleep(1)
 
         if len(steps)>0:
             time.sleep(2)
@@ -107,6 +107,7 @@ def runApp(args,steps=[],exe_name=""):
 
     finally:   
         server.kill()
+        #print("server.kill")
 
     response = server.recv()
     #print(unicode(response,"utf-8"))

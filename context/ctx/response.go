@@ -118,12 +118,12 @@ func (c *response) Write(status int, content interface{}) error {
 
 	//检查内容类型并转换成字符串
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
-
+	fmt.Println("c:", c.final.contentType)
 	//@fix 将编码设置到content type
 	if strings.Contains(c.final.contentType, "%s") {
 		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
 	}
-
+	fmt.Println("c:", c.final.contentType)
 	//记录为原始状态
 	c.raw.contentType = c.final.contentType
 
@@ -182,6 +182,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 
 func (c *response) swapByctp(content interface{}) (string, string) {
 	ctp := c.getContentType()
+	fmt.Printf("s:%+v %+v \n", ctp, content)
 	switch {
 	case strings.Contains(ctp, "plain"):
 		return ctp, fmt.Sprint(content)
@@ -264,8 +265,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 	e := c.path.GetEncoding()
 	var err error
 
-	//@fix 510
-	if e != "utf-8" && status != http.StatusNotExtended {
+	if e != "utf-8" {
 		buff, err = encoding.Encode(content, e)
 		if err != nil {
 			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
