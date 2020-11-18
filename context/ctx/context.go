@@ -34,15 +34,14 @@ type Ctx struct {
 	appConf    app.IAPPConf
 	cancelFunc func()
 	funs       *funcs
-	tid        string
 }
 
 //NewCtx 构建基于gin.Context的上下文
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
+	var err error
 	ctx := contextPool.Get().(*Ctx)
 	ctx.meta = conf.NewMeta()
 	ctx.context = c
-	var err error
 	ctx.appConf, err = app.Cache.GetAPPConf(tp)
 	if err != nil {
 		panic(err)
@@ -72,11 +71,6 @@ func (c *Ctx) TmplFuncs() context.TFuncs {
 	return c.funs.TmplFuncs()
 }
 
-// //LuaModules 提供用于模板转换的函数表达式
-// func (c *Ctx) LuaModules() lua.Modules {
-// 	return c.funs.LuaFuncs()
-// }
-
 //Response 获取响应对象
 func (c *Ctx) Response() context.IResponse {
 	return c.response
@@ -104,7 +98,7 @@ func (c *Ctx) APPConf() app.IAPPConf {
 
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
-	context.Del(c.tid) //从当前请求上下文中删除
+	context.Del(c.user.gid) //从当前请求上下文中删除
 	c.appConf = nil
 	c.cancelFunc()
 	c.cancelFunc = nil
@@ -115,7 +109,6 @@ func (c *Ctx) Close() {
 	c.meta = nil
 	c.request = nil
 	c.response = nil
-	c.tid = ""
 	c.user = nil
 
 	contextPool.Put(c)
