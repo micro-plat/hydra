@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -225,7 +224,6 @@ func TestWatchValue(t *testing.T) {
 			go func(c chan r.ValueWatcher, name, nvalue string) {
 				select {
 				case v := <-c:
-					fmt.Println("V:", v)
 					value, version := v.GetValue()
 					assert.NotEqual(t, version, int32(0), name)
 					assert.Equal(t, nvalue, string(value), name)

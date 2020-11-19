@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -238,7 +237,6 @@ func TestChildWatcher_deleted(t *testing.T) {
 			select {
 			case c := <-gotC:
 				//对返回的节点进行验证
-				fmt.Println("c:", c)
 				//children, _, _ := tt.r.GetChildren(c.Parent)
 
 				if c.OP == watcher.ADD && tt.path == c.Parent { //未删除节点前的返回值
