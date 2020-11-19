@@ -270,7 +270,7 @@ func TestNew(t *testing.T) {
 	c := apiconf.GetServerConf()    //获取配置
 
 	//发布节点
-	p := pub.New(c, time.Second*3)
+	p := pub.New(c, time.Second*2)
 	p.Publish("192.168.5.118:9091", "192.168.5.118:9091", c.GetServerID())
 
 	//删除节点
@@ -281,7 +281,7 @@ func TestNew(t *testing.T) {
 		path := registry.Join(pPath, v)
 		err := lm.Delete(path)
 		assert.Equal(t, nil, err, "NEW()-测试自动恢复节点")
-		fmt.Printf("节点%s已删除", path)
+		fmt.Printf("节点%s已删除 \n", path)
 	}
 
 	//自动恢复节点
