@@ -129,7 +129,6 @@ github.com/micro-plat/lib4go/security/sha1
 github.com/micro-plat/lib4go/security/sha256
 github.com/micro-plat/lib4go/sysinfo/pipes
 github.com/micro-plat/lib4go/tgo
-github.com/micro-plat/lib4go/transform
 github.com/micro-plat/lib4go/types
 github.com/micro-plat/lib4go/utility
 github.com/micro-plat/lib4go/zk
@@ -229,6 +228,7 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
 golang.org/x/sys/windows/svc
+golang.org/x/sys/windows/svc/eventlog
 golang.org/x/sys/windows/svc/mgr
 # golang.org/x/text v0.3.3
 ## explicit

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -182,8 +183,12 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
 				return context.JSONF, content.(string)
-			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				return context.XMLF, content.(string)
+			case (ctp == "" || bytes.HasPrefix(text, []byte("<"))) && bytes.HasSuffix(text, []byte(">")):
+				_, errx := mxj.BeautifyXml(text, "", "")
+				if errx != io.EOF {
+					return context.XMLF, content.(string)
+				}
+				fallthrough
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
 				return context.HTMLF, content.(string)
 			case strings.Contains(ctp, "yaml"):
@@ -191,6 +196,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case ctp == "" || strings.Contains(ctp, "plain"):
 				return context.PLAINF, content.(string)
 			default:
+
 				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
 				})
@@ -238,6 +244,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 			location = l
 		}
 		c.ctx.Redirect(status, location)
+		c.noneedWrite = true
 		return nil
 	}
 
@@ -251,7 +258,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
 		}
 	}
-
+	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
@@ -259,6 +266,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 //Redirect 转跳g刚才gc
 func (c *response) Redirect(code int, url string) {
 	c.ctx.Redirect(code, url)
+	c.noneedWrite = true
 }
 
 //AddSpecial 添加响应的特殊字符

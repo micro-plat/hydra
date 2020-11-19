@@ -3,9 +3,9 @@ package status
 import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/hydra/global"
+
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs/daemon"
-	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs/service"
 	"github.com/urfave/cli"
 )
 
@@ -26,13 +26,17 @@ func doStatus(c *cli.Context) (err error) {
 
 	//关闭日志显示
 	global.Current().Log().Pause()
-	service, err := daemon.New(pkgs.GetAppNameDesc(vname))
+	//3.创建本地服务
+	hydraSrv, err := pkgs.GetService(c)
 	if err != nil {
 		return err
 	}
-	msg, err := service.Status()
-	if err != nil {
-		return err
-	}
-	return errs.NewIgnoreError(0, msg)
+	status, err := hydraSrv.Status()
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Status", err, statusMap[status])
+}
+
+var statusMap = map[service.Status]string{
+	service.StatusRunning: "Running",
+	service.StatusStopped: "Stopped",
+	service.StatusUnknown: "Unknown",
 }

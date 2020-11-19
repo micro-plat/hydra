@@ -107,12 +107,9 @@ func (c *Client) connect() (err error) {
 	}
 
 	var rb resolver.Builder
-	//兼容直接传服务器ip来进行访问
-	if len(c.plat) > 0 {
-		rb, err = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
-		if err != nil {
-			return
-		}
+	rb, err = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
+	if err != nil {
+		return
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(c.ConntTimeout)*time.Second)
