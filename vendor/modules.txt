@@ -108,6 +108,7 @@ github.com/micro-plat/gmq/mqtt/client
 # github.com/micro-plat/lib4go v1.0.2 => ../../../github.com/micro-plat/lib4go
 ## explicit
 github.com/micro-plat/lib4go/archiver
+github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
 github.com/micro-plat/lib4go/db
 github.com/micro-plat/lib4go/db/tpl

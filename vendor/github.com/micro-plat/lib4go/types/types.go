@@ -253,6 +253,14 @@ func StringContains(input []string, v string) bool {
 	return false
 }
 
+//GetFirst 获取数组中获取首个元素
+func GetFirst(v ...interface{}) interface{} {
+	if len(v) > 0 {
+		return v[0]
+	}
+	return nil
+}
+
 //GetStringByIndex 获取数组中的指定元素
 func GetStringByIndex(v []string, index int, def ...string) string {
 	if len(v) > index {
@@ -339,6 +347,17 @@ func GetDecimalByIndex(v []Decimal, index int, def ...Decimal) Decimal {
 		return def[0]
 	}
 	return decimal.Zero
+}
+
+//GetErrorByIndex 获取数组中的指定元素
+func GetErrorByIndex(v []error, index int, def ...error) error {
+	if len(v) > index {
+		return v[index]
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return nil
 }
 
 //ParseBool 将字符串转换为bool值

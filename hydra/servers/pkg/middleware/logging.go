@@ -21,7 +21,7 @@ func Logging() Handler {
 		ctx.Response().Flush()
 
 		//4. 处理响应日志
-		code, _ := ctx.Response().GetFinalResponse()
+		code, _, _ := ctx.Response().GetFinalResponse()
 		if code >= http.StatusOK && code < http.StatusBadRequest {
 			ctx.Log().Info(ctx.APPConf().GetServerConf().GetServerType()+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
 		} else {

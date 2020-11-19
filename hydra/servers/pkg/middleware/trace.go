@@ -20,7 +20,7 @@ func Trace() Handler {
 		ctx.Next()
 
 		//3. 打印响应参数
-		s, c := ctx.Response().GetFinalResponse()
+		s, c, _ := ctx.Response().GetFinalResponse()
 		ctx.Log().Debug("> trace.response:", s, c)
 
 	}
