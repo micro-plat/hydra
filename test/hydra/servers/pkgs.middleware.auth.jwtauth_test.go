@@ -69,9 +69,9 @@ func TestJWTAuth(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1", MockAuth: &octx.Auth{}},
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
+				MockHeader:  headerMap,
+				MockCookies: cookieMap,
 				MockPath: &mocks.MockPath{
-					MockHeader:      headerMap,
-					MockCookies:     cookieMap,
 					MockRequestPath: requestPath,
 				},
 			},
