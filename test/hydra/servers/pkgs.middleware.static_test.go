@@ -44,7 +44,7 @@ func TestStatic(t *testing.T) {
 		handler := middleware.Static()
 		handler(ctx)
 
-		gotStatus, getContent := ctx.Response().GetFinalResponse()
+		gotStatus, getContent, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name)
 		assert.Equalf(t, tt.wantContent, getContent, tt.name)
 

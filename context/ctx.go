@@ -180,7 +180,7 @@ type IResponse interface {
 	GetRawResponse() (int, interface{}, string)
 
 	//GetFinalResponse 获取最终渲染的响应状态码与内容
-	GetFinalResponse() (int, string, string)
+	GetFinalResponse() (statusCode int, content string, contentType string)
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
