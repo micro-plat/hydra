@@ -26,7 +26,7 @@ func getTestData(serviceAddr, clusterID string) string {
 
 func TestPublisher_PubRPCServiceNode(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("rgst_publish_test", "publishrgt") //构建对象
 	confObj.API(":8080")
 	confObj.Service.API.Add("/api1", "/api1", []string{"GET"})
 	confObj.Service.API.Add("/api2", "/api1", []string{"GET"})
@@ -136,7 +136,7 @@ func TestPublisher_PubDNSNode_WithDomain(t *testing.T) {
 		{name: "dns再次发布", serverName: "127.0.0.1:8899"},
 	}
 
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("rgst_publish_test1", "publishrgt1") //构建对象
 	confObj.API(":8080", api.WithDNS("127.0.0.101"))
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetServerConf()    //获取配置
@@ -161,7 +161,7 @@ func TestPublisher_PubDNSNode_WithDomain(t *testing.T) {
 
 func TestPublisher_PubDNSNode_NoDomain(t *testing.T) {
 	//验证节点未设置Domain
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("rgst_publish_test2", "publishrgt2") //构建对象
 	confObj.API(":8080")
 	s := confObj.GetAPIConf() //初始化参数
 	c := s.GetServerConf()    //获取配置
@@ -172,7 +172,7 @@ func TestPublisher_PubDNSNode_NoDomain(t *testing.T) {
 
 func TestPublisher_Publish_API(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("rgst_publish_test3", "publishrgt3") //构建对象
 	confObj.API(":8080", api.WithDNS("127.0.0.101"))
 	confObj.RPC(":9377")
 	apiconf := confObj.GetAPIConf() //初始化参数
@@ -196,7 +196,7 @@ func TestPublisher_Publish_API(t *testing.T) {
 
 func TestPublisher_Publish_RPC(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("rgst_publish_test4", "publishrgt4") //构建对象
 	confObj.API(":8080", api.WithDNS("127.0.0.101"))
 	confObj.Service.API.Add("/api1", "/api1", []string{"GET"})
 	confObj.Service.API.Add("/api2", "/api1", []string{"GET"})
@@ -296,7 +296,7 @@ func TestNew(t *testing.T) {
 
 // func TestPublisher_WatchClusterChange(t *testing.T) {
 
-// 	confObj := mocks.NewConf() //构建对象
+// 	confObj :=mocks.NewConfBy("rgst_publish_test5", "publishrgt5")//构建对象
 // 	confObj.API(":8080")
 // 	apiconf := confObj.GetAPIConf() //初始化参数
 // 	c := apiconf.GetServerConf()    //获取配置

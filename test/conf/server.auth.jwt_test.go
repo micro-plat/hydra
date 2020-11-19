@@ -57,7 +57,7 @@ func TestJWTGetConf(t *testing.T) {
 		{name: "配置参数正确", opts: []jwt.Option{jwt.WithExpireAt(123), jwt.WithSecret("11111")}, want: jwt.NewJWT(jwt.WithExpireAt(123), jwt.WithSecret("11111"))},
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_jwt_test2", "jwttest")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
 		if !strings.EqualFold(tt.name, "未设置jwt节点") {

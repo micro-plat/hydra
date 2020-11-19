@@ -49,7 +49,7 @@ func TestAuthAPIKey(t *testing.T) {
 			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test1")}},
 	}
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_apikey_test", "apikey")
 		//初始化测试用例参数
 		confB := mockConf.GetAPI()
 		if tt.isSet {

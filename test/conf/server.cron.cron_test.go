@@ -40,7 +40,7 @@ func TestCronGetConf(t *testing.T) {
 		want *cron.Server
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_cron_test2", "cronmain")
 	test1 := test{name: "节点不存在,获取默认对象", opts: []cron.Option{}, want: &cron.Server{Status: "start"}}
 	obj, err := cron.GetConf(conf.GetCronConf().GetServerConf())
 	assert.Equal(t, nil, err, test1.name+",err")

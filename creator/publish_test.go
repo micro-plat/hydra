@@ -49,7 +49,7 @@ func Test_conf_Pub(t *testing.T) {
 			olddata: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "{}", "testvar1": "{}"}},
 			oldvars: map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "{}"}, "cache1": map[string]interface{}{"dccsss": "{}"}}},
 			args:    args{registryAddr: "lm://.", platName: "platName3", systemName: "systemName3", clusterName: "clusterName3", cover: false},
-			isExsit: true, wantErr: false},
+			isExsit: true, wantErr: true},
 		{name: "实体对象,覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
 			vars:    map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "545454"}, "cache1": map[string]interface{}{"dccsss": "5454"}},
 			olddata: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "{}", "testvar1": "{}"}},
@@ -65,7 +65,7 @@ func Test_conf_Pub(t *testing.T) {
 			c.data = tt.fields.olddata
 			c.vars = tt.fields.oldvars
 			err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, true)
-			assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
+			assert.Equal(t, false, err != nil, tt.name+",err")
 		}
 
 		c.data = tt.fields.data
@@ -146,7 +146,7 @@ func Test_publish(t *testing.T) {
 	}{
 		{name: "空对象,不覆盖数据", path: "/path/x1/y1", v: `{"testdata":"1"}`, isExsit: false, cover: false, wantErr: false},
 		{name: "空对象,覆盖数据", path: "/path/x2/y2", v: `{"testdata":"2"}`, isExsit: false, cover: true, wantErr: false},
-		{name: "实体对象,不覆盖数据", path: "/path/x3/y3", v: `{"testdata":"3"}`, isExsit: true, cover: false, wantErr: false},
+		{name: "实体对象,不覆盖数据", path: "/path/x3/y3", v: `{"testdata":"3"}`, isExsit: true, cover: false, wantErr: true},
 		{name: "实体对象,覆盖数据", path: "/path/x4/y4", v: `{"testdata":"4"}`, isExsit: true, cover: true, wantErr: false},
 	}
 	for _, tt := range tests {

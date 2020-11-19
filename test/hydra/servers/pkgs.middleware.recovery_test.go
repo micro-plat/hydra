@@ -33,7 +33,7 @@ func TestRecovery(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: tt.clientIP, MockRequestID: tt.requstID},
 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockURL: tt.requestURL, MockMethod: tt.method}},
 			MockResponse: &mocks.MockResponse{MockStatus: tt.responseStatus},
-			MockAPPConf:  mocks.NewConf().GetAPIConf(),
+			MockAPPConf:  mocks.NewConfBy("middleware_recovery_test", "recovery").GetAPIConf(),
 		}
 
 		//调用中间件

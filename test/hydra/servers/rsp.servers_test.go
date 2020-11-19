@@ -64,8 +64,8 @@ func TestRspServers_Start(t *testing.T) {
 		//	{name: "启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
 	}
 
-	platName := "hydra_test"
-	clusterName := "t"
+	platName := "servershydra_test"
+	clusterName := "serv_test_go"
 	registryAddr := "lm://./"
 
 	for _, tt := range tests {
@@ -157,8 +157,8 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 		{name: "启动apiServer失败,之后延迟启动成功", serverName: "apiserver", sysType: "api"},
 	}
 
-	platName := "hydra_test"
-	clusterName := "t"
+	platName := "servershydra_test1"
+	clusterName := "serv_test_go1"
 	registryAddr := "lm://./"
 
 	for _, tt := range tests {
