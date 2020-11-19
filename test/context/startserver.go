@@ -204,7 +204,7 @@ func Check(ctx hydra.IContext) interface{} {
 
 func Redirect(ctx hydra.IContext) interface{} {
 	ctx.Response().Header("Location", "http://localhost:9091/response/redirect/dst")
-	ctx.Response().Stop(ghttp.StatusFound)
+	ctx.Response().Abort(ghttp.StatusFound)
 	return nil
 }
 func RedirectDst(ctx hydra.IContext) interface{} {

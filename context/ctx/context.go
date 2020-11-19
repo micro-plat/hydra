@@ -33,16 +33,14 @@ type Ctx struct {
 	user       *user
 	appConf    app.IAPPConf
 	cancelFunc func()
-	funs       *funcs
-	tid        string
 }
 
 //NewCtx 构建基于gin.Context的上下文
 func NewCtx(c context.IInnerContext, tp string) *Ctx {
+	var err error
 	ctx := contextPool.Get().(*Ctx)
 	ctx.meta = conf.NewMeta()
 	ctx.context = c
-	var err error
 	ctx.appConf, err = app.Cache.GetAPPConf(tp)
 	if err != nil {
 		panic(err)
@@ -53,7 +51,6 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	timeout := time.Duration(ctx.appConf.GetServerConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
-	ctx.funs = newFunc(ctx)
 	return ctx
 }
 
@@ -66,16 +63,6 @@ func (c *Ctx) Meta() conf.IMeta {
 func (c *Ctx) Request() context.IRequest {
 	return c.request
 }
-
-//TmplFuncs 提供用于模板转换的函数表达式
-func (c *Ctx) TmplFuncs() context.TFuncs {
-	return c.funs.TmplFuncs()
-}
-
-// //LuaModules 提供用于模板转换的函数表达式
-// func (c *Ctx) LuaModules() lua.Modules {
-// 	return c.funs.LuaFuncs()
-// }
 
 //Response 获取响应对象
 func (c *Ctx) Response() context.IResponse {
@@ -104,18 +91,16 @@ func (c *Ctx) APPConf() app.IAPPConf {
 
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
-	context.Del(c.tid) //从当前请求上下文中删除
+	context.Del(c.user.gid) //从当前请求上下文中删除
 	c.appConf = nil
 	c.cancelFunc()
 	c.cancelFunc = nil
 	c.context = nil
 	c.ctx = nil
-	c.funs = nil
 	c.log = nil
 	c.meta = nil
 	c.request = nil
 	c.response = nil
-	c.tid = ""
 	c.user = nil
 
 	contextPool.Put(c)

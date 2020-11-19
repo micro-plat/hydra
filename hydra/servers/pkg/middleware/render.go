@@ -16,6 +16,7 @@ func Render() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
+
 		if render.Disable {
 			return
 		}
@@ -31,6 +32,6 @@ func Render() Handler {
 		}
 
 		ctx.Response().AddSpecial("render")
-		ctx.Response().WriteFinal(rd.Status, rd.Content, rd.ContentType)
+		ctx.Response().Write(rd.Status, rd.Content)
 	}
 }

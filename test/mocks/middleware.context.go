@@ -64,11 +64,6 @@ func (ctx *MiddleContext) APPConf() app.IAPPConf {
 	return ctx.MockAPPConf
 }
 
-//TmplFuncs 模板函数列表
-func (ctx *MiddleContext) TmplFuncs() extcontext.TFuncs {
-	return ctx.MockTFuncs
-}
-
 //User 用户信息
 func (ctx *MiddleContext) User() extcontext.IUser {
 	return ctx.MockUser
@@ -447,7 +442,7 @@ func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
 }
 
 //Write 向响应流中写入状态码与内容(不会立即写入)
-func (res *MockResponse) Write(s int, v interface{}) error {
+func (res *MockResponse) Write(s int, v ...interface{}) error {
 	res.MockStatus = s
 	res.MockContent = fmt.Sprint(v)
 	return nil
@@ -472,14 +467,17 @@ func (res *MockResponse) File(path string) {
 }
 
 //Abort 终止当前请求继续执行
-func (res *MockResponse) Abort(code int, err error) {
+func (res *MockResponse) Abort(code int, errsx ...error) {
 	res.MockStatus = code
-	switch v := err.(type) {
-	case errs.IError:
-		res.MockContent = v.GetError().Error()
-	case error:
-		res.MockContent = v.Error()
+	if len(errsx) > 0 {
+		switch v := errsx[0].(type) {
+		case errs.IError:
+			res.MockContent = v.GetError().Error()
+		case error:
+			res.MockContent = v.Error()
+		}
 	}
+
 }
 
 //Stop 停止当前服务执行

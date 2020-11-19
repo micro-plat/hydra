@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -35,6 +36,7 @@ type response struct {
 	path        *rpath
 	raw         rspns
 	final       rspns
+	hasWrite    bool
 	noneedWrite bool
 	log         logger.ILogger
 	asyncWrite  func() error
@@ -43,11 +45,10 @@ type response struct {
 
 func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
 	return &response{
-		ctx:   ctx,
-		conf:  conf,
-		path:  NewRpath(ctx, conf, meta),
-		log:   log,
-		final: rspns{status: http.StatusNotFound},
+		ctx:  ctx,
+		conf: conf,
+		path: NewRpath(ctx, conf, meta),
+		log:  log,
 	}
 }
 
@@ -67,34 +68,25 @@ func (c *response) ContentType(v string) {
 }
 
 //Abort 设置错误码与错误消息,并将数据写入响应流,并终止应用
-func (c *response) Abort(s int, err error) {
-	c.Write(s, err)
-	c.Flush()
-	c.ctx.Abort()
-}
-
-//Stop 设置错误码,并将数据写入响应流,并终止应用
-func (c *response) Stop(s int) {
-	//c.noneedWrite = true
-	c.Write(s, "")
-	c.Flush()
-	c.ctx.Abort()
-}
-
-//StatusCode 设置response头部状态码
-func (c *response) StatusCode(s int) {
-	//c.raw.status = s
-	c.final.status = s
-	c.ctx.WStatus(s)
+func (c *response) Abort(s int, errs ...error) {
+	defer c.ctx.Abort()
+	defer c.Flush()
+	if len(errs) > 0 {
+		c.Write(s, errs[0])
+		return
+	}
+	c.Write(s)
 }
 
 //File 将指定的文件的返回,文件数据写入响应流,并终止应用
 func (c *response) File(path string) {
-	if c.ctx.Written() {
-		panic(fmt.Sprint("不能重复写入到响应流::", path))
+	defer c.ctx.Abort()
+	if c.noneedWrite || c.ctx.Written() {
+		return
 	}
+	c.noneedWrite = true
+	c.ctx.WStatus(http.StatusOK)
 	c.ctx.File(path)
-	c.ctx.Abort()
 }
 
 //NoNeedWrite 无需写入响应数据到缓存
@@ -104,50 +96,40 @@ func (c *response) NoNeedWrite(status int) {
 }
 
 //Write 检查内容并处理状态码,数据未写入响应流
-func (c *response) Write(status int, content interface{}) error {
-	if c.ctx.Written() {
-		panic(fmt.Sprintf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status))
+func (c *response) Write(status int, ct ...interface{}) error {
+	if c.noneedWrite {
+		return fmt.Errorf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status)
 	}
 
-	//保存初始状态与结果
-	c.raw.status, c.raw.content = status, content
+	//1. 处理content
+	var content interface{}
+	if len(ct) > 0 {
+		content = ct[0]
+	}
+
+	//2. 修改当前结果状态码与内容
 	var ncontent interface{}
-
-	//检查内容获取匹配的状态码
 	c.final.status, ncontent = c.swapBytp(status, content)
-
-	//检查内容类型并转换成字符串
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
-	fmt.Println("c:", c.final.contentType)
-	//@fix 将编码设置到content type
 	if strings.Contains(c.final.contentType, "%s") {
 		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
 	}
-	fmt.Println("c:", c.final.contentType)
-	//记录为原始状态
-	c.raw.contentType = c.final.contentType
+	if c.hasWrite {
+		return nil
+	}
 
-	//将写入操作处理为异步流程
+	//3. 保存初始状态与结果
+	c.raw.status, c.raw.content, c.hasWrite, c.raw.contentType = status, content, true, c.final.contentType
 	c.asyncWrite = func() error {
 		return c.writeNow(c.final.status, c.final.contentType, c.final.content.(string))
 	}
 	return nil
 }
 
-//WriteAny 处理结果并处理响应码为200,数据未写入响应流
+//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 func (c *response) WriteAny(v interface{}) error {
 	return c.Write(http.StatusOK, v)
 }
-
-//WriteFinal 设置的返回结果,状态码和contentType,数据未写入响应流
-func (c *response) WriteFinal(status int, content string, ctp string) {
-	if status != 0 {
-		c.final.status = status
-	}
-	c.final.contentType = types.GetString(ctp, c.final.contentType)
-	c.final.content = content
-}
-
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	rs = status
 	rc = content
@@ -182,7 +164,6 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 
 func (c *response) swapByctp(content interface{}) (string, string) {
 	ctp := c.getContentType()
-	fmt.Printf("s:%+v %+v \n", ctp, content)
 	switch {
 	case strings.Contains(ctp, "plain"):
 		return ctp, fmt.Sprint(content)
@@ -202,8 +183,12 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case (ctp == "" || strings.Contains(ctp, "json")) && json.Valid(text) && (bytes.HasPrefix(text, []byte("{")) ||
 				bytes.HasPrefix(text, []byte("["))):
 				return context.JSONF, content.(string)
-			case (ctp == "" || strings.Contains(ctp, "xml")) && bytes.HasPrefix(text, []byte("<?xml")):
-				return context.XMLF, content.(string)
+			case (ctp == "" || bytes.HasPrefix(text, []byte("<"))) && bytes.HasSuffix(text, []byte(">")):
+				_, errx := mxj.BeautifyXml(text, "", "")
+				if errx != io.EOF {
+					return context.XMLF, content.(string)
+				}
+				fallthrough
 			case strings.Contains(ctp, "html") && bytes.HasPrefix(text, []byte("<!DOCTYPE html")):
 				return context.HTMLF, content.(string)
 			case strings.Contains(ctp, "yaml"):
@@ -211,6 +196,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			case ctp == "" || strings.Contains(ctp, "plain"):
 				return context.PLAINF, content.(string)
 			default:
+
 				return ctp, c.getString(ctp, map[string]interface{}{
 					"data": content,
 				})
@@ -258,6 +244,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 			location = l
 		}
 		c.ctx.Redirect(status, location)
+		c.noneedWrite = true
 		return nil
 	}
 
@@ -271,7 +258,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
 		}
 	}
-
+	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
 }
@@ -279,6 +266,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 //Redirect 转跳g刚才gc
 func (c *response) Redirect(code int, url string) {
 	c.ctx.Redirect(code, url)
+	c.noneedWrite = true
 }
 
 //AddSpecial 添加响应的特殊字符
@@ -314,7 +302,7 @@ func (c *response) GetFinalResponse() (int, string) {
 
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
-	if c.noneedWrite || c.asyncWrite == nil {
+	if c.noneedWrite || c.asyncWrite == nil || c.ctx.Written() {
 		return
 	}
 	if err := c.asyncWrite(); err != nil {

@@ -33,6 +33,9 @@ github.com/eclipse/paho.mqtt.golang
 github.com/eclipse/paho.mqtt.golang/packets
 # github.com/frankban/quicktest v1.10.2
 ## explicit
+# github.com/fsnotify/fsnotify v1.4.7
+## explicit
+github.com/fsnotify/fsnotify
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.6.2
@@ -126,7 +129,6 @@ github.com/micro-plat/lib4go/security/sha1
 github.com/micro-plat/lib4go/security/sha256
 github.com/micro-plat/lib4go/sysinfo/pipes
 github.com/micro-plat/lib4go/tgo
-github.com/micro-plat/lib4go/transform
 github.com/micro-plat/lib4go/types
 github.com/micro-plat/lib4go/utility
 github.com/micro-plat/lib4go/zk
@@ -226,6 +228,7 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
 golang.org/x/sys/windows/svc
+golang.org/x/sys/windows/svc/eventlog
 golang.org/x/sys/windows/svc/mgr
 # golang.org/x/text v0.3.3
 ## explicit
