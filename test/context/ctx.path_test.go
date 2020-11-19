@@ -123,14 +123,14 @@ func Test_rpath_GetCookies_WithHttp(t *testing.T) {
 		wantStatusCode  int
 	}{
 		//net/http: invalid byte 'Ö' in Cookie.Value; dropping invalid bytes
-		{name: "cookie编码为中文GBK,无法提交的cookie", contentType: "application/json;charset=gbk", wantContentType: "application/json; charset=UTF-8",
+		{name: "cookie编码为中文GBK,无法提交的cookie", contentType: "application/json;charset=gbk", wantContentType: "application/json; charset=gbk",
 			cookie:     http.Cookie{Name: "cname", Value: Utf8ToGbk("中文")},
 			wantStatus: "200 OK", wantStatusCode: 200, want: `{"cname":""}`},
 		//net/http: invalid byte 'ä' in Cookie.Value; dropping invalid bytes
-		{name: "cookie编码为中文UTF-8,无法提交的cookie", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=UTF-8",
+		{name: "cookie编码为中文UTF-8,无法提交的cookie", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=utf-8",
 			cookie:     http.Cookie{Name: "cname", Value: "中文"},
 			wantStatus: "200 OK", wantStatusCode: 200, want: `{"cname":""}`},
-		{name: "cookie不带中文", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=UTF-8",
+		{name: "cookie不带中文", contentType: "application/json;charset=utf-8", wantContentType: "application/json; charset=utf-8",
 			cookie:     http.Cookie{Name: "cname", Value: "value!@#$%^&*()_+"},
 			wantStatus: "200 OK", wantStatusCode: 200, want: `{"cname":"value!@#$%^\u0026*()_+"}`},
 	}
