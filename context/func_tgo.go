@@ -41,7 +41,10 @@ func GetTGOModules() []*tgo.Module {
 		Add("exclude", internal.Exclude).
 		Add("translate", internal.Translate)
 
-	return []*tgo.Module{request, response, app, types}
+	users := tgo.NewModule("user").
+		Add("getUserInfo", internal.IASANY(getUserInfo))
+
+	return []*tgo.Module{request, response, app, types, users}
 }
 
 func init() {
@@ -56,4 +59,11 @@ func getClusterNameBy(n string) string {
 		}
 	}
 	return ""
+}
+
+func getUserInfo() interface{} {
+	ctx := Current()
+	mp := make(map[string]interface{})
+	ctx.User().Auth().Bind(&mp)
+	return mp
 }
