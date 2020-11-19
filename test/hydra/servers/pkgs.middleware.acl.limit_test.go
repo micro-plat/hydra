@@ -119,7 +119,7 @@ func TestLimit1(t *testing.T) {
 
 	tests := []*testCase{
 		{name: "限流-启用-在限流配置内-延迟-不降级", count: 1, requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "limit"},
-		{name: "限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
+		// {name: "限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
 	}
 
 	global.Def.ServerTypes = []string{http.API}

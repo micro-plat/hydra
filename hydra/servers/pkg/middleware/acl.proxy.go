@@ -84,6 +84,7 @@ RETRY:
 	//处理代理服务
 	response := newRWriter(resp)
 	rproxy.ServeHTTP(response, req)
+
 	//处理重试问题
 	if canRetry {
 		goto RETRY
@@ -93,7 +94,6 @@ RETRY:
 		return
 	}
 
-	// response.ResponseWriter.
 	ctx.Response().Abort(response.statusCode)
 }
 

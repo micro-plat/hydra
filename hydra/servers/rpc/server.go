@@ -35,7 +35,7 @@ func NewServer(addr string, routers []*router.Router, maxRecvSize, maxSendSize i
 		),
 	}
 
-	if t.addr, err = getAddress(addr); err != nil {
+	if t.addr, err = GetAddress(addr); err != nil {
 		return nil, err
 	}
 
@@ -71,7 +71,7 @@ func (s *Server) Start() error {
 
 }
 
-func getAddress(addr string) (string, error) {
+func GetAddress(addr string) (string, error) {
 	host := "0.0.0.0"
 	port := "8090"
 	args := strings.Split(addr, ":")
