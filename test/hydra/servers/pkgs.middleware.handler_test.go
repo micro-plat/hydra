@@ -94,9 +94,8 @@ func TestHandler(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -187,9 +186,8 @@ func TestHandler1(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -280,9 +278,8 @@ func TestHandler2(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -367,9 +364,8 @@ func TestHandler3(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -454,9 +450,8 @@ func TestHandler4(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -541,9 +536,8 @@ func TestHandler5(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -629,9 +623,8 @@ func TestHandler6(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -716,9 +709,8 @@ func TestHandler7(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{
@@ -803,9 +795,8 @@ func TestHandler8(t *testing.T) {
 		app.API(tt.service, tt.handleObj)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
-			MockUser:   &mocks.MockUser{MockRequestID: utility.GetGUID()},
+			MockMeta: types.XMap{},
+			MockUser: &mocks.MockUser{MockRequestID: utility.GetGUID()},
 			MockRequest: &mocks.MockRequest{
 
 				MockPath: &mocks.MockPath{

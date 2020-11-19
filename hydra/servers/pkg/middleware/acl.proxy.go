@@ -66,13 +66,7 @@ RETRY:
 	}
 	//获取服务器列表
 	url, err := cluster.Next()
-	fmt.Println("url:", url)
-	fmt.Println("err:", err)
 	if err != nil {
-		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("无法获取上游服务器地址:%w", err))
-		if num > max {
-			return
-		}
 		goto RETRY
 	}
 
