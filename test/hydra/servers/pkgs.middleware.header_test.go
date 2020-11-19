@@ -104,8 +104,8 @@ func TestHeader(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
+				MockHeader: map[string][]string{"Origin": []string{"www.baidu.com"}},
 				MockPath: &mocks.MockPath{
-					MockHeader:      map[string][]string{"Origin": []string{"www.baidu.com"}},
 					MockRequestPath: "/header/test",
 				},
 			},
