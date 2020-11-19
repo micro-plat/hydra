@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
@@ -158,46 +157,45 @@ func TestProxy(t *testing.T) {
 	}
 }
 
-var serverConf app.IAPPConf
+// var serverConf app.IAPPConf
 
-var oncelock1 sync.Once
+// var oncelock1 sync.Once
 
-//并发测试rpc服务器调用性能
-func BenchmarkRPCServer(b *testing.B) {
+// //并发测试rpc服务器调用性能
+// func BenchmarkRPCServer(b *testing.B) {
 
-	startUpstreamServer(":5121")
-	oncelock1.Do(func() {
-		global.Def.ServerTypes = []string{http.API}
-		conf := mocks.NewConfBy("middleware_test", "porxy")
-		confN := conf.API(":5120")
-		confN.Proxy(script1)
-		serverConf = conf.GetAPIConf()
-		app.Cache.Save(serverConf)
-	})
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		req, _ := orhttp.NewRequest("GET", "http://192.168.0.111/upcluster/ok", nil)
-		req.Header = map[string][]string{}
-		//初始化测试用例参数
-		ctx := &mocks.MiddleContext{
-			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.111"},
-			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockRequestPath: "/upcluster/ok"}},
-			MockResponse: &mocks.MockResponse{MockStatus: 200, MockContent: "success", MockHeader: map[string][]string{"Content-Type": []string{"json"}}},
-			MockAPPConf:  serverConf,
-			HttpRequest:  req,
-			HttpResponse: &MockResponseWriter{},
-		}
+// 	startUpstreamServer(":15121")
 
-		gid := global.GetGoroutineID()
-		context.Del(gid)
-		context.Cache(ctx)
-		handler := middleware.Proxy()
-		handler(ctx)
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+// 		global.Def.ServerTypes = []string{http.API}
+// 		conf := mocks.NewConfBy("middleware_test", "porxy")
+// 		confN := conf.API(":5120")
+// 		confN.Proxy(script1)
+// 		serverConf = conf.GetAPIConf()
+// 		app.Cache.Save(serverConf)
+// 		req, _ := orhttp.NewRequest("GET", "http://192.168.0.111/upcluster/ok", nil)
+// 		req.Header = map[string][]string{}
+// 		//初始化测试用例参数
+// 		ctx := &mocks.MiddleContext{
+// 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.111"},
+// 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockRequestPath: "/upcluster/ok"}},
+// 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockContent: "success", MockHeader: map[string][]string{"Content-Type": []string{"json"}}},
+// 			MockAPPConf:  serverConf,
+// 			HttpRequest:  req,
+// 			HttpResponse: &MockResponseWriter{},
+// 		}
 
-		gotStatus, _ := ctx.Response().GetFinalResponse()
-		assert.Equalf(b, 200, gotStatus, "BenchmarkRPCServer status error")
-	}
-}
+// 		gid := global.GetGoroutineID()
+// 		context.Del(gid)
+// 		context.Cache(ctx)
+// 		handler := middleware.Proxy()
+// 		handler(ctx)
+
+// 		gotStatus, _ := ctx.Response().GetFinalResponse()
+// 		assert.Equalf(b, 200, gotStatus, "BenchmarkRPCServer status error")
+// 	}
+// }
 
 var oncelock sync.Once
 
@@ -222,6 +220,7 @@ func startUpstreamServer(port string) {
 
 func upclusterOK(ctx hydra.IContext) interface{} {
 	return "success"
+	// return errs.NewError(666, fmt.Errorf("代理返回错误"))
 }
 
 func upclusterErr(ctx hydra.IContext) interface{} {

@@ -75,9 +75,9 @@ func TestRender(t *testing.T) {
 		{name: "render 设置错误的节点,编译报错", isSet: true, script: scriptERR1, requestURL: "/tx/request", responseStatus: 200, wantStatus: 510, responseContent: "success", responseCType: "dddd", wantContent: "render脚本错误", wantContentType: "dddd", wantSpecial: ""},
 		{name: "render 设置正确节点,运行报错", isSet: true, script: scriptERR2, requestURL: "/tx/ssss", responseStatus: 200, wantStatus: 200, responseContent: "success", responseCType: "dddd", wantContent: "success", wantContentType: "dddd", wantSpecial: ""},
 		{name: "render 设置返回一个参数的节点", isSet: true, script: scriptERR, requestURL: "/tx/request", responseStatus: 200, responseContent: "success", responseCType: "dddd", wantStatus: 200, wantContent: "success", wantContentType: "dddd", wantSpecial: ""},
-		{name: "render 设置正确节点,返回xml数据", isSet: true, script: scriptOK, requestURL: "/tx/request", responseStatus: 200, wantStatus: 333, responseContent: "success", responseCType: "dddd", wantContent: "<response><code>200</code><msg>success</msg></response>", wantContentType: "application/xml", wantSpecial: "render"},
-		{name: "render 设置正确节点,返回json数据", isSet: true, script: scriptOK, requestURL: "/tx/query", responseStatus: 200, wantStatus: 444, responseContent: "success", responseCType: "dddd", wantContent: "<json>", wantContentType: "application/json", wantSpecial: "render"},
-		{name: "render 设置正确节点,返回两个参数数据", isSet: true, script: scriptOK, requestURL: "/tx/ssss", responseStatus: 200, wantStatus: 204, responseContent: "success", responseCType: "dddd", wantContent: "success", wantContentType: "", wantSpecial: "render"},
+		{name: "render 设置正确节点,返回xml数据", isSet: true, script: scriptOK, requestURL: "/tx/request", responseStatus: 200, wantStatus: 333, responseContent: "success", responseCType: "application/xml", wantContent: "<response><code>200</code><msg>success</msg></response>", wantContentType: "application/xml", wantSpecial: "render"},
+		{name: "render 设置正确节点,返回json数据", isSet: true, script: scriptOK, requestURL: "/tx/query", responseStatus: 200, wantStatus: 444, responseContent: "success", responseCType: "application/json", wantContent: "<json>", wantContentType: "application/json", wantSpecial: "render"},
+		{name: "render 设置正确节点,返回两个参数数据", isSet: true, script: scriptOK, requestURL: "/tx/ssss", responseStatus: 200, wantStatus: 204, responseContent: "success", responseCType: "", wantContent: "success", wantContentType: "", wantSpecial: "render"},
 	}
 
 	for _, tt := range tests {
@@ -146,7 +146,7 @@ func BenchmarkRender(b *testing.B) {
 		}
 
 		gotHeaders := ctx.Response().GetHeaders()
-		if "application/xml" != gotHeaders["Content-Type"][0] {
+		if "application/json" != gotHeaders["Content-Type"][0] {
 			b.Error("获取的数据有误2")
 			return
 		}

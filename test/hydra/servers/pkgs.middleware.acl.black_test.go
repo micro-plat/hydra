@@ -48,7 +48,7 @@ func TestBlackList(t *testing.T) {
 			name:        "黑名单-启用-黑名单IP",
 			blackOpts:   []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.1")},
 			wantStatus:  http.StatusForbidden,
-			wantContent: "",
+			wantContent: "黑名单限制[192.168.0.1]不允许访问",
 			wantSpecial: "black",
 		},
 	}
@@ -59,9 +59,9 @@ func TestBlackList(t *testing.T) {
 		mockConf.GetAPI().BlackList(tt.blackOpts...)
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
-			MockUser:       &mocks.MockUser{MockClientIP: "192.168.0.1"},
-			MockResponse:   &mocks.MockResponse{MockStatus: 200},
-			MockAPPConf: serverConf,
+			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},
+			MockResponse: &mocks.MockResponse{MockStatus: 200},
+			MockAPPConf:  serverConf,
 		}
 
 		//获取中间件
