@@ -34,9 +34,9 @@ func Test_response_Write_WithPanic(t *testing.T) {
 		}, status: 200, content: map[string]string{"key": "value"}, err: "xml: unsupported type: map[string]string"},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test", "response") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 	meta := conf.NewMeta()
 
 	for _, tt := range tests {
@@ -77,9 +77,9 @@ func Test_response_Write(t *testing.T) {
 		{name: "状态码非0,content-type为空,返回非字符串/布尔值/整型/浮点型/复数的内容", header: http.Header{}, status: 200, content: map[string]string{"key": "value"}, wantRs: 200, wantRc: `{"key":"value"}`},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	global.IsDebug = true
 	for _, tt := range tests {
@@ -101,9 +101,9 @@ func Test_response_Write(t *testing.T) {
 }
 
 func Test_response_Header(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test2", "response2") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, "", meta).GetRequestID())
@@ -123,9 +123,9 @@ func Test_response_Header(t *testing.T) {
 }
 
 func Test_response_ContentType(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test3", "response3") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, "", meta).GetRequestID())
@@ -141,9 +141,9 @@ func Test_response_ContentType(t *testing.T) {
 }
 
 func Test_response_Abort(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.mocks.NewConfBy("context_response_test4", "response4") //构建对象
+	confObj.API(":8080")                                                    //初始化参数
+	serverConf := confObj.GetAPIConf()                                      //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
@@ -161,9 +161,9 @@ func Test_response_Abort(t *testing.T) {
 }
 
 func Test_response_Stop(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test5", "response5") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
@@ -191,9 +191,9 @@ func Test_response_StatusCode(t *testing.T) {
 		{name: "设置状态码为400", s: 400, wantStatus: 400},
 		{name: "设置状态码为500", s: 500, wantStatus: 500},
 	}
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test6", "response6") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
@@ -208,9 +208,9 @@ func Test_response_StatusCode(t *testing.T) {
 }
 
 func Test_response_File(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test7", "response7") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
@@ -237,9 +237,9 @@ func Test_response_WriteFinal(t *testing.T) {
 		{name: "写入空状态码和空数据", ctp: "application/json", wantS: 200, wantC: ""},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test8", "response8") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
@@ -255,9 +255,9 @@ func Test_response_WriteFinal(t *testing.T) {
 
 func Test_response_Redirect(t *testing.T) {
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_response_test9", "response9") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())

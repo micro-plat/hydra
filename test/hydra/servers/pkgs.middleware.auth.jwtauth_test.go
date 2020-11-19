@@ -50,7 +50,7 @@ func TestJWTAuth(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_jwtauth_test", "jwtauth")
 		//初始化测试用例参数
 		confB := mockConf.GetAPI()
 		if tt.isSet {

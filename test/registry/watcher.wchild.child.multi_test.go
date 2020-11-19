@@ -14,7 +14,7 @@ import (
 func TestNewMultiChildWatcher(t *testing.T) {
 
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiChild", "rgtwatchMultiChildest")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
@@ -26,7 +26,7 @@ func TestNewMultiChildWatcher(t *testing.T) {
 
 func TestMultiChildWatcher_Close(t *testing.T) {
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiChild1", "rgtwatchMultiChildest1")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()

@@ -28,7 +28,7 @@ func Test_zookeeperFactory_Create(t *testing.T) {
 		{name: "指定测试服务器,获取存在的节点值", addr: "zk://192.168.0.101", path: "/hydra/apiserver/api", wantValue: ``},
 	}
 
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_zook_test", "rgtzooktest")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())

@@ -83,7 +83,7 @@ func TestApikeyGetConf(t *testing.T) {
 		want *apikey.APIKeyAuth
 	}
 
-	apiConf := mocks.NewConf()
+	apiConf := mocks.NewConfBy("hydraconf_apikey_test", "apikey")
 	confB := apiConf.API(":8081")
 	test1 := test{name: "未设置apikey节点", want: &apikey.APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}}
 	got, err := apikey.GetConf(apiConf.GetAPIConf().GetServerConf())
@@ -105,7 +105,7 @@ func TestApikeyGetConf1(t *testing.T) {
 		want *apikey.APIKeyAuth
 	}
 
-	apiConf := mocks.NewConf()
+	apiConf := mocks.NewConfBy("hydraconf_apikey_test1", "apikey1")
 	confB := apiConf.API(":8081")
 	test1 := test{name: "节点密钥不存在,验证异常", opts: []apikey.Option{apikey.WithMD5Mode()}, want: nil}
 	confB.APIKEY("", test1.opts...)
@@ -121,7 +121,7 @@ func TestApikeyGetConf2(t *testing.T) {
 		want *apikey.APIKeyAuth
 	}
 
-	apiConf := mocks.NewConf()
+	apiConf := mocks.NewConfBy("hydraconf_apikey_test2", "apikey2")
 	confB := apiConf.API(":8081")
 	test1 := test{name: "apikey修改为错误json串", opts: []apikey.Option{apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"), apikey.WithSecret("123456")},
 		want: apikey.New("123456", apikey.WithMD5Mode(), apikey.WithDisable(), apikey.WithExcludes("/t1/t2"))}
@@ -129,5 +129,5 @@ func TestApikeyGetConf2(t *testing.T) {
 	// 修改json数据不合法
 	path := apiConf.GetAPIConf().GetServerConf().GetSubConfPath("auth", "apikey")
 	apiConf.Registry.Update(path, "错误的json字符串")
-	apiConf = mocks.NewConf()
+	// apiConf = mocks.NewConfBy("hydraconf_apikey_test2", "apikey2")
 }

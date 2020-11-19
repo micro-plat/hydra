@@ -92,7 +92,7 @@ func TestHeader(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_header_test", "header")
 		//初始化测试用例参数
 		confb := mockConf.GetAPI()
 		if tt.isSet {

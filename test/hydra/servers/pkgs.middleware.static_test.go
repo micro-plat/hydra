@@ -31,7 +31,7 @@ func TestStatic(t *testing.T) {
 
 	for _, tt := range tests {
 		//初始化测试用例参数
-		c := mocks.NewConf()
+		c := mocks.NewConfBy("middleware_static_test", "static")
 		apiConf := c.API(":9090")
 		apiConf.Static(tt.opts...)
 		ctx := &mocks.MiddleContext{

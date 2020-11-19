@@ -54,7 +54,7 @@ func TestBlackList(t *testing.T) {
 	}
 	for _, tt := range tests {
 
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_black_test", "black")
 		//初始化测试用例参数
 		mockConf.GetAPI().BlackList(tt.blackOpts...)
 		serverConf := mockConf.GetAPIConf()
@@ -76,6 +76,5 @@ func TestBlackList(t *testing.T) {
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 		assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)
 		assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)
-
 	}
 }

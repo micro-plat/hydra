@@ -18,8 +18,8 @@ func TestHandler_GinFunc(t *testing.T) {
 	h = func(middleware.IMiddleContext) { return }
 	tps := []string{global.API}
 
-	confObj := mocks.NewConf()         //构建对象
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("middleware_main_test", "middle") //构建对象
+	serverConf := confObj.GetAPIConf()                           //获取配置
 	_, _ = shttp.NewResponsive(serverConf)
 
 	r, err := http.NewRequest("POST", "http://localhost:9091/getbody", strings.NewReader(""))

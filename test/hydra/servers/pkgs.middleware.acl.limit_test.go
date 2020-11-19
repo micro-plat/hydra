@@ -66,7 +66,7 @@ func TestLimit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		global.Def.ServerTypes = []string{http.API}
-		apiConf := mocks.NewConf()
+		apiConf := mocks.NewConfBy("middleware_limit_test1", "limiter1")
 		confB := apiConf.API(":51001")
 		confB.Limit(tt.opts...)
 		serverConf := apiConf.GetAPIConf()
@@ -123,7 +123,7 @@ func TestLimit1(t *testing.T) {
 	}
 
 	global.Def.ServerTypes = []string{http.API}
-	apiConf := mocks.NewConf()
+	apiConf := mocks.NewConfBy("middleware_limit_test", "limiter")
 	confB := apiConf.API(":51001")
 	confB.Limit(opts...)
 	serverConf := apiConf.GetAPIConf()

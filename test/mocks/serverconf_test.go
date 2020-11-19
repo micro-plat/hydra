@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetConf(t *testing.T) {
-	conf := NewConf() //构建对象
+	conf := NewConfBy("hydra_serverconf_test", "serverconf") //构建对象
 
 	conf.API(":8081", api.WithHeaderReadTimeout(30), api.WithTimeout(31, 32))
 

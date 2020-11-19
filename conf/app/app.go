@@ -83,7 +83,7 @@ func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst regist
 	}
 
 	//构建server的组件配置(todo:移到server配置内)
-	s.HttpSub = server.NewhttpSub(s.serverConf)
+	s.HttpSub = server.NewHttpSub(s.serverConf)
 	s.CronSub = server.NewCronSub(s.serverConf)
 	s.MQCSub = server.NewMQCSub(s.serverConf)
 	s.VarSub = vars.NewVarSub(s.varConf)
