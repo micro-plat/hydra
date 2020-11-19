@@ -22,28 +22,28 @@ func Test_global_GetLongAppName(t *testing.T) {
 			args: args{
 				n: nil,
 			},
-			want: "ro-plat_hydra_global_global.test",
+			want: "global.test_04f81c71",
 		},
 		{
 			name: "测试未传入名称-空数组",
 			args: args{
 				n: []string{},
 			},
-			want: "ro-plat_hydra_global_global.test",
+			want: "global.test_04f81c71",
 		},
 		{
 			name: "测试有传入名称-短",
 			args: args{
 				n: []string{"name"},
 			},
-			want: "com_micro-plat_hydra_global_name",
+			want: "name_6a848303",
 		},
 		{
 			name: "测试有传入名称-超过32",
 			args: args{
 				n: []string{"name123456789012345678901234567890"},
 			},
-			want: "me123456789012345678901234567890",
+			want: "name1234567890123456789_a0e7045b",
 		},
 	}
 	for _, tt := range tests {

@@ -55,7 +55,7 @@ func TestSingleValueWatcher_Start(t *testing.T) {
 
 	//发布节点到注册中心
 	router, _ := apiconf.GetRouterConf()
-	pub.New(c).Publish("192.168.5.115:9091", "192.168.5.115:9091", c.GetServerID(), router.GetPath()...)
+	pub.New(c).Publish("192.168.0.1:9091", "192.168.0.2:9091", c.GetServerID(), router.GetPath()...)
 	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {

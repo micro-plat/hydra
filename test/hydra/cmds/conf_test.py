@@ -31,7 +31,7 @@ def test_Conf_Show_Normal():
 @test(testName)
 def test_Conf_Install_Normal():
     #执行conf install
-    args = ["conf","install","-r",ZKAddress,"-c","t"]
+    args = ["conf","install","-r",ZKAddress,"-c","t","--cover"]
     response = runApp(args)
 
    #获取main

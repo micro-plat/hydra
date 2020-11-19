@@ -60,14 +60,21 @@ getContent := func(){
 	return response.getContent1()
 }
 
-render := getContent()`
+upcluster := getContent()`
 
 var script3 = `
 getContent := func(){
 	return [error]
 }
 
-render := getContent()`
+upcluster := getContent()`
+
+var script4 = `
+getContent := func(){
+	return "newporxy1"
+}
+
+upcluster := getContent()`
 
 //author:taosy
 //time:2020-11-18
@@ -91,26 +98,24 @@ func TestProxy(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		// {name: "proxy-没有设置节点", isSet: false, script: "", requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		// {name: "proxy-设置错误的节点,编译失败", isSet: true, script: script3, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 510, wantContent: "acl.proxy脚本错误", wantContentType: "application/xml", wantSpecial: ""},
-		// {name: "proxy-设置错误的节点,运行失败", isSet: true, script: script2, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 502, wantContent: "", wantContentType: "application/xml", wantSpecial: "proxy"},
-		// {name: "proxy-设置正确的节点,就是当前集群", isSet: true, script: script1, requestURL: "", localIP: "192.167.0.111", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		// {name: "proxy-设置正确的节点,上游集群名为空", isSet: true, script: script0, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		// {name: "proxy-设置正确的节点,不是api或rpc服务", isSet: true, script: script1, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 502, wantContent: "只有api,web服务器支持代理配置", wantContentType: "application/xml", wantSpecial: "proxy"},
-		// {name: "proxy-设置正确的节点,上游集群无服务", isSet: true, script: script1, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 502, wantContent: "无法获取上游服务器地址", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "proxy-没有设置节点", isSet: false, script: "", requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "proxy-设置错误的节点,编译失败", isSet: true, script: script3, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 510, wantContent: "acl.proxy脚本错误", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "proxy-设置错误的节点,运行失败", isSet: true, script: script2, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 502, wantContent: "", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "proxy-设置正确的节点,就是当前集群", isSet: true, script: script1, requestURL: "", localIP: "192.167.0.111", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "proxy-设置正确的节点,上游集群名为空", isSet: true, script: script0, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "proxy-设置正确的节点,上游集群无服务", isSet: true, script: script4, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 502, wantContent: "无法获取上游服务器地址", wantContentType: "application/xml", wantSpecial: "proxy"},
 		{name: "proxy-设置正确的节点,上游集群存在,服务器返回异常", isSet: true, script: script1, requestURL: "/upcluster/err", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 502, wantContent: "远程请求出错", wantContentType: "application/xml", wantSpecial: "proxy"},
-		// {name: "proxy-设置正确的节点,上游集群存在,服务被拒绝", isSet: true, script: script2, requestURL: "", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		// {name: "proxy-设置正确的节点,上游集群存在,服务可用", isSet: true, script: script2, requestURL: "", Status: 200, Content: "success", CType: "application/xml",
-		// 	wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+			wantStatus: 555, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "proxy-设置正确的节点,上游集群存在,服务不存在", isSet: true, script: script1, requestURL: "/upcluster/xxx", Status: 200, localIP: "192.168.0.111", Content: "success", CType: "application/xml",
+			wantStatus: 404, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "proxy-设置正确的节点,上游集群存在,服务可用", isSet: true, script: script1, requestURL: "/upcluster/ok", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
+			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
 	}
 	for _, tt := range tests {
 		global.Def.ServerTypes = []string{http.API}
@@ -120,7 +125,7 @@ func TestProxy(t *testing.T) {
 			confN.Proxy(tt.script)
 		}
 
-		req, _ := orhttp.NewRequest("GET", tt.localIP, nil)
+		req, _ := orhttp.NewRequest("GET", "http://"+tt.localIP+tt.requestURL, nil)
 
 		req.Header = map[string][]string{}
 		//初始化测试用例参数
@@ -145,13 +150,52 @@ func TestProxy(t *testing.T) {
 		assert.Equalf(t, true, strings.Contains(gotContent, tt.wantContent), tt.name)
 		gotHeaders := ctx.Response().GetHeaders()
 		assert.Equalf(t, tt.wantContentType, gotHeaders["Content-Type"][0], tt.name)
-
 		if tt.wantSpecial != "" {
 			gotSpecial := ctx.Response().GetSpecials()
 			assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name)
 		}
 	}
 }
+
+// var serverConf app.IAPPConf
+
+// var oncelock1 sync.Once
+
+// //并发测试rpc服务器调用性能
+// func BenchmarkRPCServer(b *testing.B) {
+
+// 	startUpstreamServer(":15121")
+
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+// 		global.Def.ServerTypes = []string{http.API}
+// 		conf := mocks.NewConfBy("middleware_test", "porxy")
+// 		confN := conf.API(":5120")
+// 		confN.Proxy(script1)
+// 		serverConf = conf.GetAPIConf()
+// 		app.Cache.Save(serverConf)
+// 		req, _ := orhttp.NewRequest("GET", "http://192.168.0.111/upcluster/ok", nil)
+// 		req.Header = map[string][]string{}
+// 		//初始化测试用例参数
+// 		ctx := &mocks.MiddleContext{
+// 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.111"},
+// 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockRequestPath: "/upcluster/ok"}},
+// 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockContent: "success", MockHeader: map[string][]string{"Content-Type": []string{"json"}}},
+// 			MockAPPConf:  serverConf,
+// 			HttpRequest:  req,
+// 			HttpResponse: &MockResponseWriter{},
+// 		}
+
+// 		gid := global.GetGoroutineID()
+// 		context.Del(gid)
+// 		context.Cache(ctx)
+// 		handler := middleware.Proxy()
+// 		handler(ctx)
+
+// 		gotStatus, _ := ctx.Response().GetFinalResponse()
+// 		assert.Equalf(b, 200, gotStatus, "BenchmarkRPCServer status error")
+// 	}
+// }
 
 var oncelock sync.Once
 
@@ -167,7 +211,6 @@ func startUpstreamServer(port string) {
 		hydra.Conf.API(port)
 		app.API("/upcluster/ok", upclusterOK)
 		app.API("/upcluster/err", upclusterErr)
-		app.API("/upcluster/err1", upclusterErr1)
 
 		os.Args = []string{"upclusterserver", "run"}
 		go app.Start()
@@ -177,14 +220,11 @@ func startUpstreamServer(port string) {
 
 func upclusterOK(ctx hydra.IContext) interface{} {
 	return "success"
+	// return errs.NewError(666, fmt.Errorf("代理返回错误"))
 }
 
 func upclusterErr(ctx hydra.IContext) interface{} {
 	return errs.NewError(555, fmt.Errorf("代理返回错误"))
-}
-
-func upclusterErr1(ctx hydra.IContext) interface{} {
-	return errs.NewError(511, fmt.Errorf("connect: connection refused"))
 }
 
 var _ orhttp.ResponseWriter = &MockResponseWriter{}

@@ -42,7 +42,7 @@ func (r *Request) RequestByCtx(service string, ctx r.IContext) (res *rpc.Respons
 	if err != nil {
 		return nil, err
 	}
-	headers := ctx.Request().Path().GetHeaders()
+	headers := ctx.Request().GetHeaders()
 	return r.Request(ctx.Context(), service, input,
 		rpc.WithHeaders(headers), rpc.WithXRequestID(ctx.User().GetRequestID()))
 }

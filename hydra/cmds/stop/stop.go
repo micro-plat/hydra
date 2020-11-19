@@ -29,6 +29,7 @@ func doStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+
 	err = hydraSrv.Stop()
 	if err != nil {
 		return err
