@@ -86,6 +86,8 @@ func (c *response) File(path string) {
 		return
 	}
 	c.noneedWrite = true
+	c.raw.status = http.StatusOK
+	c.final.status = http.StatusOK
 	c.ctx.WStatus(http.StatusOK)
 	c.ctx.File(path)
 }

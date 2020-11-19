@@ -31,16 +31,14 @@ func (c *Auth) Request(v ...interface{}) interface{} {
 
 //Bind 绑定用户信息
 func (c *Auth) Bind(out interface{}) error {
+	if c.request == nil {
+		return errs.NewError(401, "请求中未包含用户信息,用户未登录")
+	}
 
 	val := reflect.ValueOf(out)
 	if val.Kind() != reflect.Ptr {
 		return fmt.Errorf("输入参数非指针 %v", val.Kind())
 	}
-
-	if c.request == nil {
-		return errs.NewError(401, "请求中未包含用户信息,用户未登录")
-	}
-
 	switch v := c.request.(type) {
 	case func() interface{}:
 		r := v()

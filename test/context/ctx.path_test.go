@@ -15,8 +15,8 @@ import (
 
 func Test_rpath_GetRouter_WithPanic(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":8080")       //初始化参数
+	confObj := mocks.NewConfBy("context_path_test", "pathctx") //构建对象
+	confObj.API(":8080")                                       //初始化参数
 	confObj.CRON(c.WithMasterSlave(), c.WithTrace())
 	confObj.Service.API.Add("/api", "/api", []string{"GET"})
 	httpConf := confObj.GetAPIConf() //获取配置
@@ -45,8 +45,8 @@ func Test_rpath_GetRouter_WithPanic(t *testing.T) {
 
 func Test_rpath_GetRouter(t *testing.T) {
 
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":8080")       //初始化参数
+	confObj := mocks.NewConfBy("context_path_test1", "pathctx1") //构建对象
+	confObj.API(":8080")                                         //初始化参数
 	confObj.CRON(c.WithMasterSlave(), c.WithTrace())
 	confObj.Service.API.Add("/api", "/api", []string{"GET"})
 	httpConf := confObj.GetAPIConf()  //获取配置

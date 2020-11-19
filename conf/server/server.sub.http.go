@@ -34,7 +34,7 @@ type HttpSub struct {
 	proxy     *Loader
 }
 
-func NewhttpSub(cnf conf.IServerConf) *HttpSub {
+func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s := &HttpSub{cnf: cnf}
 	s.header = GetLoader(cnf, s.getHeaderConfFunc())
 	s.jwt = GetLoader(cnf, s.getJWTConfFunc())

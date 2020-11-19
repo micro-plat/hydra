@@ -22,9 +22,9 @@ func TestNewChildWatcher(t *testing.T) {
 		{name: "获取不支持协议的节点监控对象", registryAddr: "cloud://.", wantNil: true, wantErr: true},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_clid", "rgtwatcherclidtest") //构建对象
+	confObj.API(":8080")                                                        //初始化参数
+	serverConf := confObj.GetAPIConf()                                          //获取配置
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 	for _, tt := range tests {
 		gotR, err := watcher.NewChildWatcher(tt.registryAddr, []string{}, log)
@@ -35,9 +35,9 @@ func TestNewChildWatcher(t *testing.T) {
 
 func TestNewChildWatcherByRegistry(t *testing.T) {
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_clid1", "rgtwatcherclidtest1") //构建对象
+	confObj.API(":8080")                                                          //初始化参数
+	serverConf := confObj.GetAPIConf()                                            //获取配置
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	r := serverConf.GetServerConf().GetRegistry()

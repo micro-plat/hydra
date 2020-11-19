@@ -65,7 +65,7 @@ func TestServer(t *testing.T) {
 			wantStatus: 200, wantContent: `{"taosy":"testrpcserver"}`, routers: []*router.Router{router.NewRouter("/rpc/server/test2", "/rpc/server/test2", []string{"Get"})}},
 	}
 	for _, tt := range tests {
-		mockConf := mocks.NewConfBy("rpacserve", "testserver")
+		mockConf := mocks.NewConfBy("rpacserve_test", "testrpcserver")
 		mockConf.RPC(":51001")
 		serverConf := mockConf.GetRPCConf()
 		app.Cache.Save(serverConf)

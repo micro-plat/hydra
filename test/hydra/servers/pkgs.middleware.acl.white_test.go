@@ -40,7 +40,7 @@ func TestWhiteList(t *testing.T) {
 			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.1"))}},
 	}
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_white_test", "white")
 		//初始化测试用例参数
 		confB := mockConf.GetAPI()
 		if tt.isSet {
