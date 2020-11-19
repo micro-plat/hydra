@@ -44,7 +44,7 @@ func useProxy(ctx IMiddleContext, cluster *proxy.UpCluster) {
 	//检查当前请求
 	req, resp := ctx.GetHttpReqResp()
 	if strings.Contains(req.Header.Get("proxy"), ctx.APPConf().GetServerConf().GetServerID()) {
-		ctx.Response().Abort(502, fmt.Errorf("服务多次经过当前服务器 %s", req.Header.Get("proxy")))
+		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("服务多次经过当前服务器 %s", req.Header.Get("proxy")))
 		return
 	}
 
@@ -83,7 +83,6 @@ RETRY:
 	//处理代理服务
 	response := newRWriter(resp)
 	rproxy.ServeHTTP(response, req)
-
 	//处理重试问题
 	if canRetry {
 		goto RETRY
@@ -92,6 +91,8 @@ RETRY:
 		ctx.Response().Abort(http.StatusBadGateway, proxyError)
 		return
 	}
+
+	// response.ResponseWriter.
 	ctx.Response().Abort(response.statusCode)
 	rproxy = nil
 }
@@ -108,4 +109,8 @@ func newRWriter(w http.ResponseWriter) *rWriter {
 func (lrw *rWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func (lrw *rWriter) Write(b []byte) (int, error) {
+	return lrw.ResponseWriter.Write(b)
 }

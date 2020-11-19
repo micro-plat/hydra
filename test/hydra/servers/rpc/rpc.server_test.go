@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	crpc "github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/hydra/test/assert"
@@ -42,6 +43,7 @@ func (n *okObj1) Handle(ctx context.IContext) interface{} {
 //time:2020-11-18
 //desc:测试rpc服务无路由初始化
 func TestServer(t *testing.T) {
+	localIP := global.LocalIP()
 	tests := []struct {
 		name    string
 		address string
@@ -54,11 +56,12 @@ func TestServer(t *testing.T) {
 		wantStatus  int
 		wantContent string
 	}{
-		{name: "rpc-server 注册返回错误的服务", address: ":18091", reqUrl: "tcp://localhost:18091", path: "/rpc/server/test", handle: &errorObj{}, params: map[string]interface{}{},
+
+		{name: "rpc-server 注册返回错误的服务", address: ":8091", reqUrl: fmt.Sprintf("tcp://%s:8091", localIP), path: "/rpc/server/test", handle: &errorObj{}, params: map[string]interface{}{},
 			wantStatus: 670, wantContent: "Internal Server Error", routers: []*router.Router{router.NewRouter("/rpc/server/test", "/rpc/server/test", []string{"Get"})}},
-		{name: "rpc-server 注册返回正确的服务", address: ":18090", reqUrl: "tcp://localhost:18090", path: "/rpc/server/test1", handle: &okObj{}, params: map[string]interface{}{},
+		{name: "rpc-server 注册返回正确的服务", address: "", reqUrl: fmt.Sprintf("tcp://%s:8090", localIP), path: "/rpc/server/test1", handle: &okObj{}, params: map[string]interface{}{},
 			wantStatus: 200, wantContent: "success", routers: []*router.Router{router.NewRouter("/rpc/server/test1", "/rpc/server/test1", []string{"Get"})}},
-		{name: "rpc-server 注册返回正确的服务,有参数", address: ":18090", reqUrl: "tcp://localhost:18090", path: "/rpc/server/test2", handle: &okObj1{}, params: map[string]interface{}{"taosy": "testrpcserver"},
+		{name: "rpc-server 注册返回正确的服务,有参数", address: "", reqUrl: fmt.Sprintf("tcp://%s:8090", localIP), path: "/rpc/server/test2", handle: &okObj1{}, params: map[string]interface{}{"taosy": "testrpcserver"},
 			wantStatus: 200, wantContent: `{"taosy":"testrpcserver"}`, routers: []*router.Router{router.NewRouter("/rpc/server/test2", "/rpc/server/test2", []string{"Get"})}},
 	}
 	for _, tt := range tests {
@@ -88,10 +91,7 @@ func TestServer(t *testing.T) {
 		}
 
 		resp, err := rclient.Request(ctx.Context(), tt.path, tt.params)
-		fmt.Println(tt.name, err)
-
-		time.Sleep(100 * time.Minute)
-		assert.Equalf(t, true, err == nil, tt.name+"rpc request error")
+		assert.Equalf(t, true, err == nil, tt.name+"rpc request error", err)
 		assert.Equalf(t, tt.wantStatus, resp.Status, tt.name+"rpc request Status")
 		assert.Equalf(t, tt.wantContent, resp.Result, tt.name+"rpc request Result")
 
@@ -107,7 +107,6 @@ var serverConf app.IAPPConf
 
 //并发测试rpc服务器调用性能
 func BenchmarkRPCServer(b *testing.B) {
-
 	oncelock.Do(func() {
 		mockConf := mocks.NewConf()
 		mockConf.RPC(":51001")
@@ -123,7 +122,7 @@ func BenchmarkRPCServer(b *testing.B) {
 		assert.Equalf(b, true, err == nil, "server 启动 error")
 		time.Sleep(1 * time.Second)
 
-		rclient, err = xrpc.NewClient("http://192.168.5.94:8092", "", "")
+		rclient, err = xrpc.NewClient("http://"+global.LocalIP()+":8092", "", "")
 		assert.Equalf(b, true, err == nil, "rpc cilent 初始化 error")
 	})
 
