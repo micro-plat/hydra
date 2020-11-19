@@ -59,7 +59,7 @@ func TestLogging(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		gotStatus, _ := ctx.Response().GetFinalResponse()
+		gotStatus, _, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.responseStatus, gotStatus, tt.name)
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantReq), tt.name)
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantRsp), tt.name)

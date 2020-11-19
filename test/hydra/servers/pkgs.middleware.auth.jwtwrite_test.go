@@ -78,7 +78,7 @@ func TestJWTWriter(t *testing.T) {
 		//调用中间件
 		handler(ctx)
 		//断言结果
-		gotStatus, _ := ctx.Response().GetFinalResponse()
+		gotStatus, _, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 		headers := ctx.Response().GetHeaders()
 		if tt.isSucc {

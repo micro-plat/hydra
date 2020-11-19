@@ -3,7 +3,6 @@ package conf
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 
 	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/types"
@@ -60,8 +59,6 @@ func NewByText(message []byte, version int32) (c *RawConf, err error) {
 	case json.Valid(message) && (bytes.HasPrefix(message, []byte("{")) ||
 		bytes.HasPrefix(message, []byte("["))):
 		c.XMap, err = types.NewXMapByJSON(string(message))
-	default:
-		err = fmt.Errorf("错误的数据格式（非json/xml)")
 	}
 	return c, err
 }

@@ -40,7 +40,7 @@ func TestRecovery(t *testing.T) {
 		handler := middleware.Recovery()
 		handler(ctx)
 
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name)
 		assert.Equalf(t, tt.wantContent, gotContent, tt.name)
 
