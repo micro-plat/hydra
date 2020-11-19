@@ -27,5 +27,5 @@ func doRun(c *cli.Context) (err error) {
 		return err
 	}
 	err = hydraSrv.Run()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Run", err)
+	return nil 
 }
