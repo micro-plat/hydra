@@ -2,7 +2,6 @@ package ctx
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -92,40 +91,6 @@ func (c *rpath) GetURL() string {
 //GetRequestPath 获取请求路径
 func (c *rpath) GetRequestPath() string {
 	return c.ctx.GetURL().Path
-}
-
-//GetHeader 获取请求头信息
-func (c *rpath) GetHeader(key string) string {
-	return strings.Join(c.GetHeaders()[key], ",")
-}
-
-//GetHeaders 获取请求的header
-func (c *rpath) GetHeaders() http.Header {
-	return c.ctx.GetHeaders()
-}
-
-//GetHeaders 获取请求的header
-func (c *rpath) GetCookies() map[string]string {
-	out := make(map[string]string)
-	cookies := c.ctx.GetCookies()
-	for _, cookie := range cookies {
-		out[cookie.Name] = cookie.Value
-	}
-	return out
-}
-
-//GetCookie 获取cookie信息
-func (c *rpath) GetCookie(name string) (string, bool) {
-	if cookie, ok := c.GetCookies()[name]; ok {
-		return cookie, true
-	}
-	return "", false
-}
-
-//GetCookie 获取cookie信息
-func (c *rpath) getCookie(name string) string {
-	m, _ := c.GetCookie(name)
-	return m
 }
 
 //Limit 限流设置

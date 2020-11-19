@@ -11,7 +11,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
-	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -52,7 +51,7 @@ func NewWSServer(name string, addr string, routers []*router.Router, opts ...Opt
 func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	t = &Server{
 		proto: "http",
-		ip:    net.GetLocalIPAddress(),
+		ip:    global.LocalIP(), // net.GetLocalIPAddress(),
 		option: &option{
 			readHeaderTimeout: 6,
 			readTimeout:       6,

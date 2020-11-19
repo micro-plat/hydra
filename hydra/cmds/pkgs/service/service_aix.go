@@ -51,7 +51,7 @@ func getPidOfSvcMaster() int {
 	cmd.Stdout = &out
 	pid := 0
 	if err := cmd.Run(); err == nil {
-		matches := pat.FindAllStringSubmatch(out.String(),-1)
+		matches := pat.FindAllStringSubmatch(out.String(), -1)
 		for _, match := range matches {
 			pid, _ = strconv.Atoi(match[1])
 			break
@@ -125,7 +125,7 @@ func (s *aixService) Install() error {
 	if err != nil {
 		return err
 	}
-	err = run("mkssys", "-s", s.Name, "-p", path, "-u", "0", "-R", "-Q", "-S", "-n", "15", "-f", "9", "-d", "-w", "30" )
+	err = run("mkssys", "-s", s.Name, "-p", path, "-u", "0", "-R", "-Q", "-S", "-n", "15", "-f", "9", "-d", "-w", "30")
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (s *aixService) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.Create(confPath)
@@ -175,18 +175,25 @@ func (s *aixService) Install() error {
 }
 
 func (s *aixService) Uninstall() error {
-	s.Stop()
-
-	err := run("rmssys", "-s", s.Name)
-	if err != nil {
-		return err
-	}
 
 	confPath, err := s.configPath()
 	if err != nil {
 		return err
 	}
-	return os.Remove(confPath)
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
+	s.Stop()
+
+	err = run("rmssys", "-s", s.Name)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(confPath); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *aixService) Status() (Status, error) {
@@ -224,9 +231,29 @@ func (s *aixService) Status() (Status, error) {
 }
 
 func (s *aixService) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("startsrc", "-s", s.Name)
 }
 func (s *aixService) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("stopsrc", "-s", s.Name)
 }
 func (s *aixService) Restart() error {
@@ -264,6 +291,19 @@ func (s *aixService) Logger(errs chan<- error) (Logger, error) {
 func (s *aixService) SystemLogger(errs chan<- error) (Logger, error) {
 	return newSysLogger(s.Name, errs)
 }
+
+func (s *aixService) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 
 var svcConfig = `#!/bin/ksh
 case "$1" in

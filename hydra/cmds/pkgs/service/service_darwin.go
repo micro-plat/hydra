@@ -6,7 +6,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/signal"
 	"os/user"
@@ -132,7 +131,7 @@ func (s *darwinLaunchdService) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	if s.userService {
@@ -160,9 +159,8 @@ func (s *darwinLaunchdService) Install() error {
 
 		KeepAlive, RunAtLoad bool
 		SessionCreate        bool
-		StandardOut bool
-		StandardError bool
-		
+		StandardOut          bool
+		StandardError        bool
 	}{
 		Config:        s.Config,
 		Path:          path,
@@ -175,13 +173,22 @@ func (s *darwinLaunchdService) Install() error {
 }
 
 func (s *darwinLaunchdService) Uninstall() error {
-	s.Stop()
 
 	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return err
 	}
-	return os.Remove(confPath)
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
+	s.Stop()
+
+	if err := os.Remove(confPath); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (s *darwinLaunchdService) Status() (Status, error) {
@@ -211,6 +218,16 @@ func (s *darwinLaunchdService) Status() (Status, error) {
 }
 
 func (s *darwinLaunchdService) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return err
@@ -221,6 +238,16 @@ func (s *darwinLaunchdService) Stop() error {
 	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return err
+	}
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
 	}
 	return run("launchctl", "unload", confPath)
 }
@@ -258,6 +285,19 @@ func (s *darwinLaunchdService) Logger(errs chan<- error) (Logger, error) {
 }
 func (s *darwinLaunchdService) SystemLogger(errs chan<- error) (Logger, error) {
 	return newSysLogger(s.Name, errs)
+}
+
+
+func (s *darwinLaunchdService) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 var launchdConfig = `<?xml version='1.0' encoding='UTF-8'?>

@@ -6,7 +6,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -70,7 +69,7 @@ func (s *sysv) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.Create(confPath)
@@ -115,11 +114,15 @@ func (s *sysv) Install() error {
 }
 
 func (s *sysv) Uninstall() error {
-	cp, err := s.configPath()
+	confPath, err := s.configPath()
 	if err != nil {
 		return err
 	}
-	if err := os.Remove(cp); err != nil {
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
+	if err := os.Remove(confPath); err != nil {
 		return err
 	}
 	return nil
@@ -167,10 +170,30 @@ func (s *sysv) Status() (Status, error) {
 }
 
 func (s *sysv) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("service", s.Name, "start")
 }
 
 func (s *sysv) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("service", s.Name, "stop")
 }
 
@@ -181,6 +204,18 @@ func (s *sysv) Restart() error {
 	}
 	time.Sleep(50 * time.Millisecond)
 	return s.Start()
+}
+
+func (s *sysv) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 const sysvScript = `#!/bin/sh

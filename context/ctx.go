@@ -70,18 +70,6 @@ type IPath interface {
 	//GetURL 获取请求的URL信息
 	GetURL() string
 
-	//GetCookie 获取请求Cookie
-	GetCookie(string) (string, bool)
-
-	//GetHeader 获取头信息
-	GetHeader(string) string
-
-	//GetHeaders 获取请求头
-	GetHeaders() http.Header
-
-	//GetCookies 获取cookie信息
-	GetCookies() map[string]string
-
 	//Limit 设置限流信息
 	Limit(isLimit bool, fallback bool)
 
@@ -138,6 +126,18 @@ type IRequest interface {
 
 	//GetPlayload 更改名称 @fix
 	GetPlayload() string
+
+	//GetCookie 获取请求Cookie
+	GetCookie(string) (string, bool)
+
+	//GetHeader 获取头信息
+	GetHeader(string) string
+
+	//GetHeaders 获取请求头
+	GetHeaders() http.Header
+
+	//GetCookies 获取cookie信息
+	GetCookies() map[string]string
 
 	IGetter
 	IFile

@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -34,8 +33,7 @@ var fscases = []struct {
 
 func createfsRegistry() []registry.IRegistry {
 	rgs := make([]registry.IRegistry, 0, 1)
-	f, err := filesystem.NewFileSystem(".")
-	fmt.Println(err)
+	f, _ := filesystem.NewFileSystem(".")
 	rgs = append(rgs, f)
 	return rgs
 
@@ -101,7 +99,6 @@ func TestFSUpdateNode(t *testing.T) {
 		//检查节点值是否正确
 		for _, c := range fscases {
 			data, v, err := fs.GetValue(c.path)
-			fmt.Println(c.path, data)
 			assert.Equal(t, nil, err, c.name)
 			assert.NotEqual(t, v, int32(0), c.name)
 			assert.Equal(t, string(data), c.nvalue, c.name)
@@ -235,7 +232,6 @@ func TestFSWatchValue(t *testing.T) {
 			go func(c chan r.ValueWatcher, name, nvalue string) {
 				select {
 				case v := <-c:
-					fmt.Println("V:", v)
 					value, version := v.GetValue()
 					assert.NotEqual(t, version, int32(0), name)
 					assert.Equal(t, nvalue, string(value), name)

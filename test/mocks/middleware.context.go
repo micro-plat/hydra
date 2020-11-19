@@ -151,27 +151,6 @@ func (p *MockPath) GetURL() string {
 	return p.MockURL
 }
 
-//GetCookie 获取请求Cookie
-func (p *MockPath) GetCookie(name string) (string, bool) {
-	v, ok := p.MockCookies[name]
-	return v, ok
-}
-
-//GetHeader 获取头信息
-func (p *MockPath) GetHeader(name string) string {
-	return p.MockHeader.Get(name)
-}
-
-//GetHeaders 获取请求头
-func (p *MockPath) GetHeaders() http.Header {
-	return p.MockHeader
-}
-
-//GetCookies 获取cookie信息
-func (p *MockPath) GetCookies() map[string]string {
-	return p.MockCookies
-}
-
 //Limit 设置限流信息
 func (p *MockPath) Limit(isLimit bool, fallback bool) {
 	p.MockIsLimit = isLimit
@@ -197,6 +176,8 @@ type MockRequest struct {
 	MockParamMap map[string]string
 	MockQueryMap map[string]interface{}
 	MockBodyMap  map[string]interface{}
+	MockCookies  map[string]string
+	MockHeader   http.Header
 	extcontext.IGetter
 	extcontext.IFile
 }
@@ -263,6 +244,27 @@ func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{},
 //GetTrace 获取请求的trace信息
 func (r *MockRequest) GetPlayload() string {
 	return ""
+}
+
+//GetCookie 获取请求Cookie
+func (p *MockRequest) GetCookie(name string) (string, bool) {
+	v, ok := p.MockCookies[name]
+	return v, ok
+}
+
+//GetHeader 获取头信息
+func (p *MockRequest) GetHeader(name string) string {
+	return p.MockHeader.Get(name)
+}
+
+//GetHeaders 获取请求头
+func (p *MockRequest) GetHeaders() http.Header {
+	return p.MockHeader
+}
+
+//GetCookies 获取cookie信息
+func (p *MockRequest) GetCookies() map[string]string {
+	return p.MockCookies
 }
 
 //GetKeys 获取字段名称

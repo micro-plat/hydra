@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/hydra/test/assert"
-
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 func TestNewContainer(t *testing.T) {
@@ -21,7 +20,7 @@ func TestNewContainer(t *testing.T) {
 }
 
 func TestContainer_GetOrCreate(t *testing.T) {
-	
+
 	c := NewContainer()
 	type args struct {
 		typ     string
@@ -38,13 +37,14 @@ func TestContainer_GetOrCreate(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: nil , wantErr: false},
+		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: nil, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := c.GetOrCreate(tt.args.typ, tt.args.name, tt.args.creator)
 			assert.IsNil(t, tt.wantErr, err, tt.name)
-			assert.Equal(t, tt.want, got, tt.name) 
+			assert.Equal(t, tt.wantErr, err == nil, tt.name)
+			assert.Equal(t, tt.want, got, tt.name)
 		})
 	}
 }

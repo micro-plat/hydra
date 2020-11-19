@@ -20,7 +20,7 @@ func Header() Handler {
 		}
 
 		//3. 处理响应header参数
-		origin := ctx.Request().Path().GetHeader(originName)
+		origin := ctx.Request().GetHeader(originName)
 		hds := headers.GetHeaderByOrigin(origin)
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
