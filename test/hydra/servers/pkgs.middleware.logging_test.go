@@ -33,6 +33,7 @@ func TestLogging(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		time.Sleep(time.Second)
 		//初始化测试用例参数
 		ctx := &mocks.MiddleContext{
 			MockUser:     &mocks.MockUser{MockClientIP: tt.clientIP, MockRequestID: tt.requstID},

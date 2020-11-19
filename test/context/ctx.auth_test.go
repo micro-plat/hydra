@@ -61,7 +61,7 @@ func Test_Auth_Bind(t *testing.T) {
 		errCode   int
 		errStr    string
 	}{
-		{name: "参数非地址", out: map[string]string{}, wantError: true, errStr: "输入参数非指针 map"},
+		{name: "参数非地址", request: 1, out: map[string]string{}, wantError: true, errStr: "输入参数非指针 map"},
 		{name: "request为空指针", out: &map[string]string{}, request: r, wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
 		{name: "request为空", out: &map[string]string{}, wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},
 		{name: "request为空字符串", out: &map[string]string{}, request: "", wantError: true, errCode: 401, errStr: "请求中未包含用户信息,用户未登录"},

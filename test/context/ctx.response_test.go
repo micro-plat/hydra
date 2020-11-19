@@ -280,9 +280,9 @@ func Test_response_ContentType(t *testing.T) {
 }
 
 func Test_response_Abort(t *testing.T) {
-	confObj := mocks.mocks.NewConfBy("context_response_test4", "response4") //构建对象
-	confObj.API(":8080")                                                    //初始化参数
-	serverConf := confObj.GetAPIConf()                                      //获取配置
+	confObj := mocks.NewConfBy("context_response_test4", "response4") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
 	meta := conf.NewMeta()
 	context := &mocks.TestContxt{HttpHeader: http.Header{"Content-Type": []string{"text/plain; charset=utf-8"}}}
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
