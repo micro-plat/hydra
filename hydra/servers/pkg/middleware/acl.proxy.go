@@ -61,10 +61,9 @@ RETRY:
 	var proxyError error
 	num++
 	if num > max {
-		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("无法获取上游服务器地址"))
+		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("重试超过服务器限制"))
 		return
 	}
-	ctx.Log().Debug("发送到远程服务：", num)
 	//获取服务器列表
 	url, err := cluster.Next()
 	if err != nil {
@@ -95,6 +94,7 @@ RETRY:
 	}
 
 	ctx.Response().Abort(response.statusCode)
+	rproxy = nil
 }
 
 type rWriter struct {

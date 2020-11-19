@@ -5,7 +5,6 @@
 package service
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -105,7 +104,7 @@ func (s *freebsdService) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.Create(confPath)
@@ -135,11 +134,18 @@ func (s *freebsdService) Install() error {
 }
 
 func (s *freebsdService) Uninstall() error {
-	cp, err := s.configPath()
+	confPath, err := s.configPath()
 	if err != nil {
 		return err
 	}
-	return os.Remove(cp)
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
+	if err := os.Remove(confPath); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *freebsdService) Status() (Status, error) {
@@ -162,10 +168,30 @@ func (s *freebsdService) Status() (Status, error) {
 }
 
 func (s *freebsdService) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("service", s.Name, "start")
 }
 
 func (s *freebsdService) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("service", s.Name, "stop")
 }
 
@@ -199,6 +225,19 @@ func (s *freebsdService) Logger(errs chan<- error) (Logger, error) {
 
 func (s *freebsdService) SystemLogger(errs chan<- error) (Logger, error) {
 	return newSysLogger(s.Name, errs)
+}
+
+
+func (s *freebsdService) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 var rcScript = `#!/bin/sh

@@ -94,6 +94,7 @@ func TestServer(t *testing.T) {
 		assert.Equalf(t, true, err == nil, tt.name+"rpc request error", err)
 		assert.Equalf(t, tt.wantStatus, resp.Status, tt.name+"rpc request Status")
 		assert.Equalf(t, tt.wantContent, resp.Result, tt.name+"rpc request Result")
+
 		server.Shutdown()
 	}
 }

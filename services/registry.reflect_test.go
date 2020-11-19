@@ -31,7 +31,7 @@ func Test_reflectHandle(t *testing.T) {
 			wantService:       []string{"path"},
 			wantServicePath:   []string{"path"},
 			wantServiceAction: [][]string{[]string{}}},
-		{name: "handler为rpc协议", path: "path", h: "rpc://192.168.5.115:9091",
+		{name: "handler为rpc协议", path: "path", h: "rpc://192.168.0.1:9091",
 			wantService:       []string{"path"},
 			wantServicePath:   []string{"path"},
 			wantServiceAction: [][]string{[]string{}}},

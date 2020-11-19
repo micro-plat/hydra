@@ -7,7 +7,6 @@ package service
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"os"
 	"os/signal"
 	"regexp"
@@ -114,7 +113,7 @@ func (s *solarisService) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Manifest already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.Create(confPath)
@@ -134,9 +133,9 @@ func (s *solarisService) Install() error {
 	}
 	var to = &struct {
 		*Config
-		Prefix string
+		Prefix  string
 		Display string
-		Path string
+		Path    string
 	}{
 		s.Config,
 		s.Prefix,
@@ -150,7 +149,7 @@ func (s *solarisService) Install() error {
 	}
 
 	// import service
-	err = run("svcadm", "restart", "manifest-import" )
+	err = run("svcadm", "restart", "manifest-import")
 	if err != nil {
 		return err
 	}
@@ -165,13 +164,16 @@ func (s *solarisService) Uninstall() error {
 	if err != nil {
 		return err
 	}
-	err = os.Remove(confPath)
+	_, err = os.Stat(confPath)
 	if err != nil {
+		return ErrNotInstalled
+	}
+	if err := os.Remove(confPath); err != nil {
 		return err
 	}
 
 	// unregister service
-	err = run("svcadm", "restart", "manifest-import" )
+	err = run("svcadm", "restart", "manifest-import")
 	if err != nil {
 		return err
 	}
@@ -200,9 +202,29 @@ func (s *solarisService) Status() (Status, error) {
 }
 
 func (s *solarisService) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("/usr/sbin/svcadm", "enable", s.getFMRI())
 }
 func (s *solarisService) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("/usr/sbin/svcadm", "disable", s.getFMRI())
 }
 func (s *solarisService) Restart() error {
@@ -239,6 +261,18 @@ func (s *solarisService) Logger(errs chan<- error) (Logger, error) {
 }
 func (s *solarisService) SystemLogger(errs chan<- error) (Logger, error) {
 	return newSysLogger(s.Name, errs)
+}
+
+func (s *solarisService) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 var manifest = `<?xml version="1.0"?>

@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -42,8 +41,8 @@ func TestChildWatcher_Start(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
-	addr1 := "192.168.5.115:9091"
-	addr2 := "192.168.5.116:9091"
+	addr1 := "127.0.0.1:9091"
+	addr2 := "127.0.0.2:9091"
 
 	tests := []struct {
 		name    string
@@ -118,8 +117,8 @@ func TestChildWatcher_Start_2(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
-	addr1 := "192.168.5.115:9091"
-	addr2 := "192.168.5.116:9091"
+	addr1 := "192.168.0.1:9091"
+	addr2 := "192.168.0.2:9091"
 
 	tests := []struct {
 		name    string
@@ -194,8 +193,8 @@ func TestChildWatcher_deleted(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
-	addr1 := "192.168.5.115:9091"
-	addr2 := "192.168.5.116:9091"
+	addr1 := "192.168.0.1:9091"
+	addr2 := "192.168.0.2:9091"
 
 	tests := []struct {
 		name    string
@@ -238,7 +237,6 @@ func TestChildWatcher_deleted(t *testing.T) {
 			select {
 			case c := <-gotC:
 				//对返回的节点进行验证
-				fmt.Println("c:", c)
 				//children, _, _ := tt.r.GetChildren(c.Parent)
 
 				if c.OP == watcher.ADD && tt.path == c.Parent { //未删除节点前的返回值

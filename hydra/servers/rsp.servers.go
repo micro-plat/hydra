@@ -102,7 +102,6 @@ LOOP:
 			if r.done {
 				break LOOP
 			}
-			fmt.Println("P:", p)
 			if err := r.checkServer(p); err != nil {
 				r.log.Error(err)
 			}

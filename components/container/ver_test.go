@@ -38,7 +38,6 @@ func Test_vers_Add(t *testing.T) {
 				if ver.current != tt.args.key {
 					t.Errorf("vers.keys[%s].current isn't right", tps)
 				}
-				fmt.Println(ver.keys)
 				if ver.keys[len(ver.keys)-1] != tt.args.key {
 					t.Errorf("vers.keys[%s].keys isn't right", tps)
 				}

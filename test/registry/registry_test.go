@@ -125,7 +125,7 @@ func TestNewRegistry(t *testing.T) {
 		{name: "获取不支持的注册中心", args: args{address: "cloud://../"}, wantErr: true, err: "不支持的协议类型[cloud]"},
 		{name: "获取zk的注册中心", args: args{address: "zk://192.168.0.101"}, wantErr: false},
 		{name: "获取lm的注册中心", args: args{address: "lm://."}, wantErr: false},
-		{name: "获取fs的注册中心", args: args{address: "fs://../"}, wantErr: true, err: "配置文件不存在:../registry.test.conf.toml stat ../registry.test.conf.toml: no such file or directory"},
+		{name: "获取fs的注册中心", args: args{address: "fs://../"}, wantErr: false},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
@@ -136,8 +136,7 @@ func TestNewRegistry(t *testing.T) {
 
 	for _, tt := range tests {
 		gotR, err := registry.NewRegistry(tt.args.address, log)
-		assert.Equal(t, tt.wantErr, err != nil, tt.name)
-		if err != nil && tt.wantErr {
+		if tt.wantErr {
 			assert.Equal(t, tt.err, err.Error(), tt.name)
 		}
 		if !tt.wantErr {

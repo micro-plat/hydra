@@ -7,7 +7,6 @@ package service
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -81,7 +80,7 @@ func (s *systemd) configPath() (cp string, err error) {
 	if err != nil {
 		return
 	}
-	cp = filepath.Join(systemdUserDir, s.Config.Name + ".service")
+	cp = filepath.Join(systemdUserDir, s.Config.Name+".service")
 	return
 }
 
@@ -136,7 +135,7 @@ func (s *systemd) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.OpenFile(confPath, os.O_WRONLY|os.O_CREATE, 0644)
@@ -196,6 +195,14 @@ func (s *systemd) Install() error {
 
 func (s *systemd) Uninstall() error {
 	var err error
+	confPath, err := s.configPath()
+	if err != nil {
+		return err
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
 	if s.Option.bool(optionUserService, optionUserServiceDefault) {
 		err = run("systemctl", "disable", "--user", s.Name+".service")
 	} else {
@@ -204,11 +211,8 @@ func (s *systemd) Uninstall() error {
 	if err != nil {
 		return err
 	}
-	cp, err := s.configPath()
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(cp); err != nil {
+
+	if err := os.Remove(confPath); err != nil {
 		return err
 	}
 	return nil
@@ -260,15 +264,50 @@ func (s *systemd) Status() (Status, error) {
 }
 
 func (s *systemd) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("systemctl", "start", s.Name+".service")
 }
 
 func (s *systemd) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("systemctl", "stop", s.Name+".service")
 }
 
 func (s *systemd) Restart() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
 	return run("systemctl", "restart", s.Name+".service")
+}
+
+func (s *systemd) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 const systemdScript = `[Unit]

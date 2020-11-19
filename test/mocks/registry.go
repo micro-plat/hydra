@@ -54,7 +54,6 @@ func NewTestRegistry(platName string, systemName string, clusterName string, pat
 	}
 	f.nodes["/platname/apiserver/api/test/hosts1"] = "getErr"
 	f.nodes["/platname/apiserver/api/test/hosts_delete/server1"] = "value1"
-	fmt.Println(f.nodes)
 	return f
 }
 
