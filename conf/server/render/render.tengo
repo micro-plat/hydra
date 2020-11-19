@@ -1,22 +1,20 @@
+    request := import("request")
+    response := import("response")
+    text := import("text")
+    types :=import("types")
 
-request := import("request")
-response := import("response")
-text := import("text")
-types :=import("types")
+    rc:="<response><code>{@status}</code><msg>{@content}</msg></response>"
 
-rc:="<response><code>{@status}</code><msg>{@content}</msg></response>"
+    getContent := func(){  
 
-
-getContent := func(){  
-
-    input:={status:response.getStatus(),content:response.getContent()}
-    if text.has_prefix(request.getPath(),"/tx/request"){
-        return [200,types.translate(rc,input),"application/xml"]
+        input:={status:response.getStatus(),content:response.getRaw()["id"]}
+        if text.has_prefix(request.getPath(),"/tx/request"){
+            return [200,types.translate(rc,input)]
+        }
+        if text.has_prefix(request.getPath(),"/tx/query"){
+            return [200,"<json>","application/xml"]
+        }
+        return [200,response.getContent()]
     }
-    if text.has_prefix(request.getPath(),"/tx/query"){
-        return [200,"<json>","application/xml"]
-    }
-    return [204,response.getContent()]
-}
 
-render := getContent()
+    render := getContent()

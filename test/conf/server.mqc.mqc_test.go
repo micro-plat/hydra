@@ -43,7 +43,7 @@ func TestMQCGetConf(t *testing.T) {
 		want *mqc.Server
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_mqc_test2", "mqcmain")
 	defer func() {
 		e := recover()
 		if e != nil {

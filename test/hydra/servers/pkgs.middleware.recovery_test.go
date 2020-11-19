@@ -23,7 +23,7 @@ func TestRecovery(t *testing.T) {
 	}{
 		{name: "请求返回200", method: "OPTIONS", clientIP: "127.0.0.1", requstID: "06c6fb24c", responseStatus: 200, wantStatus: 200, wantContent: ""},
 		{name: "请求返回400", method: "GET", clientIP: "127.0.0.1", requstID: "06c6fb24c", responseStatus: 400, wantStatus: 400, wantContent: ""},
-		{name: "请求过程中出现的非预见的错误", method: "POST", clientIP: "127.0.0.1", requstID: "06c6fb24c", next: func() { panic("error") }, responseStatus: 400, wantStatus: http.StatusNotExtended, wantContent: "error"},
+		{name: "请求过程中出现的非预见的错误", method: "POST", clientIP: "127.0.0.1", requstID: "06c6fb24c", next: func() { panic("error") }, responseStatus: 400, wantStatus: http.StatusNotExtended, wantContent: "Server Error"},
 	}
 
 	for _, tt := range tests {
@@ -33,7 +33,7 @@ func TestRecovery(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: tt.clientIP, MockRequestID: tt.requstID},
 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockURL: tt.requestURL, MockMethod: tt.method}},
 			MockResponse: &mocks.MockResponse{MockStatus: tt.responseStatus},
-			MockAPPConf:  mocks.NewConf().GetAPIConf(),
+			MockAPPConf:  mocks.NewConfBy("middleware_recovery_test", "recovery").GetAPIConf(),
 		}
 
 		//调用中间件

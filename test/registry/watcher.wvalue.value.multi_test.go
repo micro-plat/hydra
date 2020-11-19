@@ -17,7 +17,7 @@ import (
 func TestNewMultiValueWatcher(t *testing.T) {
 
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiValue1", "rgtwatcMultiValueest1")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
@@ -29,7 +29,7 @@ func TestNewMultiValueWatcher(t *testing.T) {
 
 func TestMultiValueWatcher_Close(t *testing.T) {
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiValue", "rgtwatcMultiValueest")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
@@ -47,7 +47,7 @@ func TestMultiValueWatcher_Close(t *testing.T) {
 func TestMultiValueWatcher_Start(t *testing.T) {
 
 	//构建配置对象
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiValue2", "rgtwatcMultiValueest2")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()

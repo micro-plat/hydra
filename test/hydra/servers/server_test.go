@@ -18,6 +18,7 @@ func TestRegister(t *testing.T) {
 	//注册服务
 	servers.Register("api-1", fn)
 
+	global.Def.ServerTypes = []string{}
 	//获取服务
 	tps := servers.GetServerTypes()
 	assert.Equal(t, tps, []string{}, "获取服务")

@@ -16,8 +16,8 @@ func TestTag(t *testing.T) {
 		conf        app.IAPPConf
 		wantSpecial string
 	}{
-		{name: "配置serverType为rpc", conf: mocks.NewConf().GetCronConf(), wantSpecial: "cron"},
-		{name: "配置serverType为api", conf: mocks.NewConf().GetAPIConf(), wantSpecial: "api"},
+		{name: "配置serverType为rpc", conf: mocks.NewConfBy("middleware_tag_test", "tag").GetCronConf(), wantSpecial: "cron"},
+		{name: "配置serverType为api", conf: mocks.NewConfBy("middleware_tag_test", "tag").GetAPIConf(), wantSpecial: "api"},
 	}
 
 	for _, tt := range tests {

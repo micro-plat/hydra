@@ -31,7 +31,7 @@ func TestTrace(t *testing.T) {
 
 	for _, tt := range tests {
 		//初始化测试用例参数
-		c := mocks.NewConf()
+		c := mocks.NewConfBy("middleware_trace_test", "trace")
 		c.API(":9090", tt.option...)
 		ctx := &mocks.MiddleContext{
 			MockNext:     func() { fmt.Println("output") },

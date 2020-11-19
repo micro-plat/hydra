@@ -109,7 +109,7 @@ func TestProxy(t *testing.T) {
 		{name: "proxy-设置正确的节点,上游集群名为空", isSet: true, script: script0, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
 			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
 		{name: "proxy-设置正确的节点,上游集群无服务", isSet: true, script: script4, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 502, wantContent: "无法获取上游服务器地址", wantContentType: "application/xml", wantSpecial: "proxy"},
+			wantStatus: 502, wantContent: "重试超过服务器限制", wantContentType: "application/xml", wantSpecial: "proxy"},
 		{name: "proxy-设置正确的节点,上游集群存在,服务器返回异常", isSet: true, script: script1, requestURL: "/upcluster/err", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
 			wantStatus: 555, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
 		{name: "proxy-设置正确的节点,上游集群存在,服务不存在", isSet: true, script: script1, requestURL: "/upcluster/xxx", Status: 200, localIP: "192.168.0.111", Content: "success", CType: "application/xml",
@@ -119,7 +119,7 @@ func TestProxy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		global.Def.ServerTypes = []string{http.API}
-		conf := mocks.NewConfBy("middleware_test", "porxy")
+		conf := mocks.NewConfBy("middleware_porxy_test", "porxy")
 		confN := conf.API(":5120")
 		if tt.isSet {
 			confN.Proxy(tt.script)
@@ -202,7 +202,7 @@ var oncelock sync.Once
 func startUpstreamServer(port string) {
 	oncelock.Do(func() {
 		app := hydra.NewApp(
-			hydra.WithPlatName("middleware_test"),
+			hydra.WithPlatName("middleware_porxy_test"),
 			hydra.WithSystemName("apiserver"),
 			hydra.WithServerTypes(http.API),
 			hydra.WithClusterName("newporxy"),
