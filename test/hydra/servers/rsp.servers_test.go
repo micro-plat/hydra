@@ -92,7 +92,7 @@ func TestRspServers_Start(t *testing.T) {
 		time.Sleep(time.Second * 1)
 
 		//注册中心节点值发生变化
-		path := fmt.Sprintf("/hydra_test/%s/%s/t/conf", tt.serverName, tt.sysType)
+		path := fmt.Sprintf("/servershydra_test/%s/%s/serv_test_go/conf", tt.serverName, tt.sysType)
 		registry, err := registry.NewRegistry(registryAddr, logger.New("hydra"))
 		assert.Equalf(t, false, err != nil, tt.name)
 		err = registry.Update(path, `{"status":"start","addr":"redis://xxx"}`)
@@ -198,8 +198,8 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		//fmt.Println("out:", string(out))
-		path := fmt.Sprintf("/hydra_test/%s/%s/t/conf", tt.serverName, tt.sysType)
+		// fmt.Println("out:", string(out))
+		path := fmt.Sprintf("/servershydra_test1/%s/%s/serv_test_go1/conf", tt.serverName, tt.sysType)
 		wantLog := fmt.Sprintf("初始化: %s", path)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"初始化")
 		wantLog = fmt.Sprintf("启动[%s]服务...", tt.sysType)

@@ -36,7 +36,7 @@ func TestNewResponsive(t *testing.T) {
 	}
 }
 
-func TestResponsive_Start(t *testing.T) {
+func xxTestResponsive_Start(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
 	confObj.API(":55004")      //初始化参数
 	tests := []struct {

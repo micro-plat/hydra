@@ -37,8 +37,8 @@ func TestServer_GetAddress(t *testing.T) {
 
 func setAPICacheConf() {
 	confObj := mocks.NewConfBy("hydra_server_test", "servertest") //构建对象
-	confObj.API(":58080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj.API(":58080")                                         //初始化参数
+	serverConf := confObj.GetAPIConf()                            //获取配置
 	_, _ = http.NewResponsive(serverConf)
 }
 
@@ -64,6 +64,7 @@ func TestServer_Start_WithErr(t *testing.T) {
 		s, err := http.NewServer("api", tt.addr, []*router.Router{}, tt.opts...)
 		assert.Equal(t, nil, err, tt.name)
 		err = s.Start()
+		defer s.Shutdown()
 		if tt.wantErr != "" {
 			assert.Equal(t, tt.wantErr, err.Error(), tt.name)
 			continue
@@ -124,8 +125,8 @@ func TestServer_Start_WithSSL(t *testing.T) {
 	}
 
 	confObj := mocks.NewConfBy("hydra_server_test1", "servertest1") //构建对象
-	confObj.API(":58081")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj.API(":58081")                                           //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 	_, _ = http.NewResponsive(serverConf)
 
 	for _, tt := range tests {
