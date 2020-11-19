@@ -82,6 +82,7 @@ func TestRspServers_Start(t *testing.T) {
 
 		//初始化注册中心
 		sc := mocks.NewConfBy(platName, clusterName)
+		sc.API(":50001")
 		sc.GetCronConf()
 		sc.GetAPIConf()
 		sc.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
@@ -109,7 +110,7 @@ func TestRspServers_Start(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		//fmt.Println("out:", string(out))
+		//	fmt.Println("out:", string(out))
 
 		wantLog := fmt.Sprintf("初始化: %s", path)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"初始化")
@@ -169,10 +170,11 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 
 		//初始化注册中心
 		sc := mocks.NewConfBy(platName, clusterName)
+		sc.API(":50002")
 		sc.GetAPIConf()
 		time.Sleep(time.Second * 2)
 		//占用端口
-		s := &testServer{addr: "127.0.0.1:8080"}
+		s := &testServer{addr: "127.0.0.1:50002"}
 		go s.testListen()
 
 		rsp := servers.NewRspServers(registryAddr, platName, tt.serverName, []string{tt.sysType}, clusterName)
@@ -196,13 +198,13 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		//	fmt.Println("out:", string(out))
+		//fmt.Println("out:", string(out))
 		path := fmt.Sprintf("/hydra_test/%s/%s/t/conf", tt.serverName, tt.sysType)
 		wantLog := fmt.Sprintf("初始化: %s", path)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"初始化")
 		wantLog = fmt.Sprintf("启动[%s]服务...", tt.sysType)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"启动")
-		wantLog = fmt.Sprintf("[%s]服务器启动失败:%s启动失败 listen tcp 0.0.0.0:8080: bind: address already in use", tt.sysType, tt.sysType)
+		wantLog = fmt.Sprintf("[%s]服务器启动失败:%s启动失败 listen tcp 0.0.0.0:50002: bind: address already in use", tt.sysType, tt.sysType)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"占用")
 		wantLog = fmt.Sprintf("监听服务器配置...")
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"监听")
