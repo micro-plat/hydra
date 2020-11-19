@@ -44,8 +44,8 @@ func TestDelay(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},
 			MockResponse: &mocks.MockResponse{MockStatus: 200},
 			MockRequest: &mocks.MockRequest{
+				MockHeader: tt.header,
 				MockPath: &mocks.MockPath{
-					MockHeader:      tt.header,
 					MockRequestPath: "/delay/test",
 				},
 			},
@@ -63,7 +63,7 @@ func TestDelay(t *testing.T) {
 		t2 := decimal.NewFromFloat(delayDuration.Seconds())
 		assert.Equalf(t, t1.IntPart(), t2.IntPart(), tt.name, t1.IntPart(), t2.IntPart())
 		//断言结果
-		gotStatus, _ := ctx.Response().GetFinalResponse()
+		gotStatus, _, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 		gotSpecial := ctx.Response().GetSpecials()
 		assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)

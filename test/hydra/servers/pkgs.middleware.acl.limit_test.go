@@ -87,7 +87,7 @@ func TestLimit(t *testing.T) {
 		handler(ctx)
 
 		//断言结果
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		gotSpecial := ctx.Response().GetSpecials()
 
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
@@ -119,7 +119,7 @@ func TestLimit1(t *testing.T) {
 
 	tests := []*testCase{
 		{name: "限流-启用-在限流配置内-延迟-不降级", count: 1, requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "limit"},
-		{name: "限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
+		// {name: "限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
 	}
 
 	global.Def.ServerTypes = []string{http.API}
@@ -160,7 +160,7 @@ func TestLimit1(t *testing.T) {
 				//调用中间件
 				handler(ctx)
 				//断言结果
-				gotStatus, gotContent := ctx.Response().GetFinalResponse()
+				gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 				gotSpecial := ctx.Response().GetSpecials()
 				assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 				assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)

@@ -1,6 +1,7 @@
 package servers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
@@ -25,7 +26,7 @@ func TestWhiteList(t *testing.T) {
 	tests := []*testCase{
 		{name: "白名单-未配置", isSet: false, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{}},
 		{name: "白名单-配置未启动", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable()}},
-		{name: "白名单-配置启动-不存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "", wantSpecial: "",
+		{name: "白名单-配置启动-不存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "",
 			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{}))}},
 		{name: "白名单-配置启动-存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "", wantSpecial: "",
 			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}))}},
@@ -62,10 +63,10 @@ func TestWhiteList(t *testing.T) {
 		//调用中间件
 		handler(ctx)
 		//断言结果
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		gotSpecial := ctx.Response().GetSpecials()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
-		assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)
+		assert.Equalf(t, true, strings.Contains(gotContent, tt.wantContent), tt.name, tt.wantContent, gotContent)
 		assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)
 	}
 }

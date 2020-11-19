@@ -1,6 +1,7 @@
 package servers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
@@ -30,7 +31,7 @@ func TestAuthAPIKey(t *testing.T) {
 	tests := []*testCase{
 		{name: "apikey-未配置", isSet: false, params: map[string]string{"f1": "21"}, wantStatus: 200, wantContent: "", wantSpecial: "", apikeyOpts: []apikey.Option{}},
 		{name: "apikey-配置未启动", isSet: true, params: map[string]string{"f1": "21"}, wantStatus: 200, wantContent: "", wantSpecial: "", apikeyOpts: []apikey.Option{apikey.WithDisable(), apikey.WithSecret(secret)}},
-		{name: "apikey-配置启动-配置错误", isSet: true, params: map[string]string{"f1": "21"}, wantStatus: 510, wantContent: "", wantSpecial: "",
+		{name: "apikey-配置启动-配置错误", isSet: true, params: map[string]string{"f1": "21"}, wantStatus: 510, wantContent: "apikey配置数据有误", wantSpecial: "",
 			apikeyOpts: []apikey.Option{apikey.WithSecret("错误密钥")}},
 		{name: "apikey-配置启动-路径被排除", isSet: true, params: map[string]string{"f1": "21"}, wantStatus: 200, wantContent: "", wantSpecial: "",
 			apikeyOpts: []apikey.Option{apikey.WithSecret(secret), apikey.WithMD5Mode(), apikey.WithExcludes("/apikey/test")}},
@@ -72,10 +73,10 @@ func TestAuthAPIKey(t *testing.T) {
 		//调用中间件
 		handler(ctx)
 		//断言结果
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		gotSpecial := ctx.Response().GetSpecials()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
-		assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)
+		assert.Equalf(t, true, strings.Contains(gotContent, tt.wantContent), tt.name, tt.wantContent, gotContent)
 		assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)
 	}
 }

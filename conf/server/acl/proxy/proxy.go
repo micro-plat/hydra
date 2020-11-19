@@ -40,6 +40,7 @@ func (g *Proxy) Check() (*UpCluster, bool, error) {
 
 	//获取脚本执行结果
 	upstream := result.GetString(upclusterName)
+	fmt.Println("upstream:", upstream)
 	if upstream == "" || upstream == g.c.GetClusterName() {
 		return nil, false, nil
 	}

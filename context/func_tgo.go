@@ -13,14 +13,14 @@ func GetTGOModules() []*tgo.Module {
 	request := tgo.NewModule("request").
 		Add("getString", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().GetString(input) })).
 		Add("getPath", tgo.FuncARS(func() string { ctx := Current(); return ctx.Request().Path().GetRequestPath() })).
-		Add("getHeader", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().Path().GetHeader(input) })).
-		Add("getCookie", tgo.FuncASRS(func(input string) string { ctx := Current(); c, _ := ctx.Request().Path().GetCookie(input); return c })).
+		Add("getHeader", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().GetHeader(input) })).
+		Add("getCookie", tgo.FuncASRS(func(input string) string { ctx := Current(); c, _ := ctx.Request().GetCookie(input); return c })).
 		Add("getClientIP", tgo.FuncARS(func() string { ctx := Current(); return ctx.User().GetClientIP() })).
 		Add("getRequestID", tgo.FuncARS(func() string { ctx := Current(); return ctx.User().GetRequestID() }))
 
 	response := tgo.NewModule("response").
-		Add("getStatus", tgo.FuncARI(func() int { ctx := Current(); s, _ := ctx.Response().GetFinalResponse(); return s })).
-		Add("getContent", tgo.FuncARS(func() string { ctx := Current(); _, s := ctx.Response().GetFinalResponse(); return s })).
+		Add("getStatus", tgo.FuncARI(func() int { ctx := Current(); s, _, _ := ctx.Response().GetFinalResponse(); return s })).
+		Add("getContent", tgo.FuncARS(func() string { ctx := Current(); _, s, _ := ctx.Response().GetFinalResponse(); return s })).
 		Add("getRaw", internal.IASANY(func() interface{} { ctx := Current(); return ctx.Response().GetRaw() }))
 
 	app := tgo.NewModule("app").

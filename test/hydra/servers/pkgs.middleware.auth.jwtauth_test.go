@@ -69,9 +69,9 @@ func TestJWTAuth(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1", MockAuth: &octx.Auth{}},
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
+				MockHeader:  headerMap,
+				MockCookies: cookieMap,
 				MockPath: &mocks.MockPath{
-					MockHeader:      headerMap,
-					MockCookies:     cookieMap,
 					MockRequestPath: requestPath,
 				},
 			},
@@ -83,7 +83,7 @@ func TestJWTAuth(t *testing.T) {
 		//调用中间件
 		handler(ctx)
 		//断言结果
-		gotStatus, _ := ctx.Response().GetFinalResponse()
+		gotStatus, _, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 		gotSpecial := ctx.Response().GetSpecials()
 		assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)

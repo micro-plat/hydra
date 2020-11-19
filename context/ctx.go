@@ -18,6 +18,12 @@ const (
 	YAMLF  = "text/yaml; charset=%s"
 	HTMLF  = "text/html; charset=%s"
 	PLAINF = "text/plain; charset=%s"
+
+	UTF8JSON  = "application/json; charset=utf-8"
+	UTF8XML   = "application/xml; charset=utf-8"
+	UTF8YAML  = "text/yaml; charset=utf-8"
+	UTF8HTML  = "text/html; charset=utf-8"
+	UTF8PLAIN = "text/plain; charset=utf-8"
 )
 
 //Handler 业务处理Handler
@@ -63,18 +69,6 @@ type IPath interface {
 
 	//GetURL 获取请求的URL信息
 	GetURL() string
-
-	//GetCookie 获取请求Cookie
-	GetCookie(string) (string, bool)
-
-	//GetHeader 获取头信息
-	GetHeader(string) string
-
-	//GetHeaders 获取请求头
-	GetHeaders() http.Header
-
-	//GetCookies 获取cookie信息
-	GetCookies() map[string]string
 
 	//Limit 设置限流信息
 	Limit(isLimit bool, fallback bool)
@@ -133,6 +127,18 @@ type IRequest interface {
 	//GetPlayload 更改名称 @fix
 	GetPlayload() string
 
+	//GetCookie 获取请求Cookie
+	GetCookie(string) (string, bool)
+
+	//GetHeader 获取头信息
+	GetHeader(string) string
+
+	//GetHeaders 获取请求头
+	GetHeaders() http.Header
+
+	//GetCookies 获取cookie信息
+	GetCookies() map[string]string
+
 	IGetter
 	IFile
 }
@@ -152,9 +158,6 @@ type IResponse interface {
 	//GetRaw 获取未经处理的响应内容
 	GetRaw() interface{}
 
-	//StatusCode 设置状态码
-	// StatusCode(int)
-
 	//ContentType 设置Content-Type响应头
 	ContentType(v string)
 
@@ -171,13 +174,13 @@ type IResponse interface {
 	File(path string)
 
 	//Abort 停止当前服务执行(立即写入)
-	Abort(int, ...error)
+	Abort(int, ...interface{})
 
 	//GetRawResponse 获取原始响应状态码与内容
-	GetRawResponse() (int, interface{})
+	GetRawResponse() (int, interface{}, string)
 
 	//GetFinalResponse 获取最终渲染的响应状态码与内容
-	GetFinalResponse() (int, string)
+	GetFinalResponse() (statusCode int, content string, contentType string)
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()

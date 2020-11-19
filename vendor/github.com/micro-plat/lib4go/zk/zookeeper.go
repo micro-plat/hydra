@@ -37,6 +37,7 @@ var (
 type ZookeeperClient struct {
 	servers   []string
 	timeout   time.Duration
+	clock     sync.Mutex
 	conn      *zk.Conn
 	eventChan <-chan zk.Event
 	Log       logger.ILogging

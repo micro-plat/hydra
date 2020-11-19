@@ -117,8 +117,6 @@ type MockPath struct {
 	MockMethod        string
 	MockRequestPath   string
 	MockURL           string
-	MockCookies       map[string]string
-	MockHeader        http.Header
 	MockIsLimit       bool
 	MockAllowFallback bool
 	MockRouter        *router.Router
@@ -151,27 +149,6 @@ func (p *MockPath) GetURL() string {
 	return p.MockURL
 }
 
-//GetCookie 获取请求Cookie
-func (p *MockPath) GetCookie(name string) (string, bool) {
-	v, ok := p.MockCookies[name]
-	return v, ok
-}
-
-//GetHeader 获取头信息
-func (p *MockPath) GetHeader(name string) string {
-	return p.MockHeader.Get(name)
-}
-
-//GetHeaders 获取请求头
-func (p *MockPath) GetHeaders() http.Header {
-	return p.MockHeader
-}
-
-//GetCookies 获取cookie信息
-func (p *MockPath) GetCookies() map[string]string {
-	return p.MockCookies
-}
-
 //Limit 设置限流信息
 func (p *MockPath) Limit(isLimit bool, fallback bool) {
 	p.MockIsLimit = isLimit
@@ -197,6 +174,8 @@ type MockRequest struct {
 	MockParamMap map[string]string
 	MockQueryMap map[string]interface{}
 	MockBodyMap  map[string]interface{}
+	MockCookies  map[string]string
+	MockHeader   http.Header
 	extcontext.IGetter
 	extcontext.IFile
 }
@@ -263,6 +242,27 @@ func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{},
 //GetTrace 获取请求的trace信息
 func (r *MockRequest) GetPlayload() string {
 	return ""
+}
+
+//GetCookie 获取请求Cookie
+func (p *MockRequest) GetCookie(name string) (string, bool) {
+	v, ok := p.MockCookies[name]
+	return v, ok
+}
+
+//GetHeader 获取头信息
+func (p *MockRequest) GetHeader(name string) string {
+	return p.MockHeader.Get(name)
+}
+
+//GetHeaders 获取请求头
+func (p *MockRequest) GetHeaders() http.Header {
+	return p.MockHeader
+}
+
+//GetCookies 获取cookie信息
+func (p *MockRequest) GetCookies() map[string]string {
+	return p.MockCookies
 }
 
 //GetKeys 获取字段名称
@@ -416,11 +416,6 @@ func (res *MockResponse) GetRaw() interface{} {
 	return res.MockRaw
 }
 
-//StatusCode 设置状态码
-func (res *MockResponse) StatusCode(code int) {
-	res.MockStatus = code
-}
-
 //ContentType 设置Content-Type响应头
 func (res *MockResponse) ContentType(v string) {
 	res.MockContentType = v
@@ -430,14 +425,6 @@ func (res *MockResponse) ContentType(v string) {
 //NoNeedWrite 无需写入响应数据到缓存
 func (res *MockResponse) NoNeedWrite(status int) {
 	res.MockStatus = status
-}
-
-//WriteFinal 修改最终渲染内容
-func (res *MockResponse) WriteFinal(status int, content string, ctp string) {
-	res.MockStatus = status
-	res.MockContent = content
-	res.ContentType(ctp)
-	return
 }
 
 //Write 向响应流中写入状态码与内容(不会立即写入)
@@ -466,7 +453,7 @@ func (res *MockResponse) File(path string) {
 }
 
 //Abort 终止当前请求继续执行
-func (res *MockResponse) Abort(code int, errsx ...error) {
+func (res *MockResponse) Abort(code int, errsx ...interface{}) {
 	res.MockStatus = code
 	if len(errsx) > 0 {
 		switch v := errsx[0].(type) {
@@ -485,13 +472,13 @@ func (res *MockResponse) Stop(code int) {
 }
 
 //GetRawResponse 获取原始响应状态码与内容
-func (res *MockResponse) GetRawResponse() (int, interface{}) {
-	return res.MockStatus, res.MockRaw
+func (res *MockResponse) GetRawResponse() (int, interface{}, string) {
+	return res.MockStatus, res.MockRaw, res.MockContentType
 }
 
 //GetFinalResponse 获取最终渲染的响应状态码与内容
-func (res *MockResponse) GetFinalResponse() (int, string) {
-	return res.MockStatus, res.MockContent
+func (res *MockResponse) GetFinalResponse() (int, string, string) {
+	return res.MockStatus, res.MockContent, res.MockContentType
 }
 
 //Flush 将当前内容写入响应流
