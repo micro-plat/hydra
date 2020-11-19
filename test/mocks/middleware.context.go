@@ -117,8 +117,6 @@ type MockPath struct {
 	MockMethod        string
 	MockRequestPath   string
 	MockURL           string
-	MockCookies       map[string]string
-	MockHeader        http.Header
 	MockIsLimit       bool
 	MockAllowFallback bool
 	MockRouter        *router.Router

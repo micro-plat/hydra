@@ -44,8 +44,8 @@ func TestDelay(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},
 			MockResponse: &mocks.MockResponse{MockStatus: 200},
 			MockRequest: &mocks.MockRequest{
+				MockHeader: tt.header,
 				MockPath: &mocks.MockPath{
-					MockHeader:      tt.header,
 					MockRequestPath: "/delay/test",
 				},
 			},
