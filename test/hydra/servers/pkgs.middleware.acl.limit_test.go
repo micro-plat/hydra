@@ -87,7 +87,7 @@ func TestLimit(t *testing.T) {
 		handler(ctx)
 
 		//断言结果
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		gotSpecial := ctx.Response().GetSpecials()
 
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
@@ -160,7 +160,7 @@ func TestLimit1(t *testing.T) {
 				//调用中间件
 				handler(ctx)
 				//断言结果
-				gotStatus, gotContent := ctx.Response().GetFinalResponse()
+				gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 				gotSpecial := ctx.Response().GetSpecials()
 				assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 				assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)

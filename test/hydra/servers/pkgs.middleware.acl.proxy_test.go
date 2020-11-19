@@ -145,7 +145,7 @@ func TestProxy(t *testing.T) {
 		handler := middleware.Proxy()
 		handler(ctx)
 
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name)
 		assert.Equalf(t, true, strings.Contains(gotContent, tt.wantContent), tt.name)
 		gotHeaders := ctx.Response().GetHeaders()

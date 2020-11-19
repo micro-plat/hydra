@@ -101,7 +101,7 @@ func TestRender(t *testing.T) {
 		handler := middleware.Render()
 		handler(ctx)
 
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name)
 		assert.Equalf(t, true, strings.Contains(gotContent, tt.wantContent), tt.name)
 		gotHeaders := ctx.Response().GetHeaders()
@@ -134,7 +134,7 @@ func BenchmarkRender(b *testing.B) {
 		handler := middleware.Render()
 		handler(ctx)
 
-		gotStatus, gotContent := ctx.Response().GetFinalResponse()
+		gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 		if gotStatus != 333 {
 			b.Error("获取的数据有误")
 			return

@@ -34,7 +34,7 @@ func TestOptions(t *testing.T) {
 		handler := middleware.Options()
 		handler(ctx)
 
-		gotStatus, _ := ctx.Response().GetFinalResponse()
+		gotStatus, _, _ := ctx.Response().GetFinalResponse()
 		assert.Equalf(t, tt.wantStatus, gotStatus, tt.name)
 
 		gotSpecial := ctx.Response().GetSpecials()
