@@ -193,7 +193,7 @@ loop:
 
 func (ws *windowsService) Install() error {
 	exepath, err := ws.execPath()
- 	if err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -202,10 +202,10 @@ func (ws *windowsService) Install() error {
 		return err
 	}
 	defer m.Disconnect()
- 	s, err := m.OpenService(ws.Name)
+	s, err := m.OpenService(ws.Name)
 	if err == nil {
 		s.Close()
-		return fmt.Errorf("service %s already exists", ws.Name)
+		return ErrHasInstalled
 	}
 	s, err = m.CreateService(ws.Name, exepath, mgr.Config{
 		DisplayName:      ws.DisplayName,
@@ -237,7 +237,7 @@ func (ws *windowsService) Uninstall() error {
 	defer m.Disconnect()
 	s, err := m.OpenService(ws.Name)
 	if err != nil {
-		return fmt.Errorf("service %s is not installed", ws.Name)
+		return ErrNotInstalled
 	}
 	defer s.Close()
 	err = s.Delete()
@@ -335,7 +335,7 @@ func (ws *windowsService) Start() error {
 		return err
 	}
 	defer s.Close()
- 	return s.Start( )
+	return s.Start()
 }
 
 func (ws *windowsService) Stop() error {

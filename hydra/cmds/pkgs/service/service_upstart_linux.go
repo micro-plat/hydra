@@ -132,7 +132,7 @@ func (s *upstart) Install() error {
 	}
 	_, err = os.Stat(confPath)
 	if err == nil {
-		return fmt.Errorf("Init already exists: %s", confPath)
+		return ErrHasInstalled
 	}
 
 	f, err := os.Create(confPath)
@@ -164,11 +164,15 @@ func (s *upstart) Install() error {
 }
 
 func (s *upstart) Uninstall() error {
-	cp, err := s.configPath()
+	confPath, err := s.configPath()
 	if err != nil {
 		return err
 	}
-	if err := os.Remove(cp); err != nil {
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return ErrNotInstalled
+	}
+	if err := os.Remove(confPath); err != nil {
 		return err
 	}
 	return nil
@@ -216,15 +220,47 @@ func (s *upstart) Status() (Status, error) {
 }
 
 func (s *upstart) Start() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
 	return run("initctl", "start", s.Name)
 }
 
 func (s *upstart) Stop() error {
+	if !s.isInstalled() {
+		return ErrNotInstalled
+	}
+	status, err := s.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
 	return run("initctl", "stop", s.Name)
 }
 
 func (s *upstart) Restart() error {
 	return run("initctl", "restart", s.Name)
+}
+
+func (s *upstart) isInstalled() bool {
+	confPath, err := s.configPath()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(confPath)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // The upstart script should stop with an INT or the Go runtime will terminate
