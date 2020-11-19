@@ -58,7 +58,7 @@ func Test_dispCtx_GetBody(t *testing.T) {
 		want    string
 	}{
 		{name: "cron获取不到", request: getTestCronTask("@every 1h30m", "cron_service"), want: ""},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data": "message"}`},
+		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -67,7 +67,7 @@ func Test_dispCtx_GetBody(t *testing.T) {
 		s, err := ioutil.ReadAll(got)
 		assert.Equal(t, false, err != nil, tt.name)
 		fmt.Println(string(s), err)
-		assert.Equal(t, tt.want, got, tt.name)
+		assert.Equal(t, tt.want, string(s), tt.name)
 	}
 }
 

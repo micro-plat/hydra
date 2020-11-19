@@ -50,6 +50,7 @@ func TestResponsive_Start(t *testing.T) {
 		{name: "starting不报错", cnf: confObj.GetAPIConf(), serverType: "api", starting: func(app.IAPPConf) error { return nil }, wantErr: "err"},
 	}
 	for _, tt := range tests {
+		services.Def = services.New()
 		services.Def.OnStarting(tt.starting)
 		w, err := http.NewResponsive(tt.cnf)
 		assert.Equal(t, nil, err, tt.name)
