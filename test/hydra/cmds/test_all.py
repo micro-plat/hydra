@@ -19,7 +19,7 @@ def get_build_cmd():
         r=os.popen(cmd)
         text = r.read()
         r.close()
-        cmd = text + " build"
+        cmd = text.replace("\n","") + " build\n"
     else:
         cmd= "/usr/local/go/bin/go build"
 

@@ -107,7 +107,7 @@ def test_status_not_installed():
     args = ["start"]
     response = runApp(args)
     
-    if not ("not installed" in response):
+    if not ("not" in response and "installed" in response):
         return u"未安装服务验证"
 
 

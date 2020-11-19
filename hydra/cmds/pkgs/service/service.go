@@ -167,9 +167,9 @@ var (
 	ErrNoServiceSystemDetected = errors.New("No service system detected.")
 	// ErrNotInstalled is returned when the service is not installed
 	ErrNotInstalled = errors.New("the service is not installed")
-	ErrHasInstalled = errors.New("service already exists")
-	ErrHasStopped   = errors.New("service has been stopped")
-	ErrIsRunning    = errors.New("service is running")
+	ErrHasInstalled = errors.New("the service already exists")
+	ErrHasStopped   = errors.New("the service has not been started")
+	ErrIsRunning    = errors.New("the service is running")
 )
 
 // New creates a new service based on a service interface and configuration.

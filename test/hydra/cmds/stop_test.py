@@ -74,7 +74,7 @@ def test_stop_has_stopped():
         #3.停止
         args = ["stop"]
         response = runApp(args)  
-        if "service has been stopped" not in response:
+        if "has not been started" not in response:
             return u"停止关闭的服务"
 
     except Exception as err :
