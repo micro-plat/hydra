@@ -76,8 +76,7 @@ func TestRASAuth(t *testing.T) {
 		serverConf := mockConf.GetAPIConf()
 		app.Cache.Save(serverConf)
 		ctx := &mocks.MiddleContext{
-			MockMeta:   types.XMap{},
-			MockTFuncs: map[string]interface{}{},
+			MockMeta: types.XMap{},
 			MockRequest: &mocks.MockRequest{
 				MockPath:     &mocks.MockPath{MockRequestPath: "/rasauth/test"},
 				MockQueryMap: tt.queryMap,

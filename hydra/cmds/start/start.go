@@ -2,9 +2,9 @@ package start
 
 import (
 	"github.com/micro-plat/cli/cmds"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs/daemon"
-	"github.com/micro-plat/lib4go/errs"
 	"github.com/urfave/cli"
 )
 
@@ -22,13 +22,13 @@ func doStart(c *cli.Context) (err error) {
 
 	//关闭日志显示
 	global.Current().Log().Pause()
-	service, err := daemon.New(global.Def.GetLongAppName(), global.Usage)
+
+	//3.创建本地服务
+	hydraSrv, err := pkgs.GetService(c)
 	if err != nil {
 		return err
 	}
-	msg, err := service.Start()
-	if err != nil {
-		return err
-	}
-	return errs.NewIgnoreError(0, msg)
+	err = hydraSrv.Start()
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Start", err)
+
 }

@@ -37,7 +37,6 @@ func Proxy() Handler {
 		//获取当前http信息
 		ctx.Response().AddSpecial("proxy")
 		useProxy(ctx, cluster)
-
 	}
 }
 func useProxy(ctx IMiddleContext, cluster *proxy.UpCluster) {

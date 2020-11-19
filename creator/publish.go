@@ -61,7 +61,7 @@ func publish(r registry.IRegistry, path string, v interface{}, cover bool) error
 	}
 	if !cover {
 		if b, _ := r.Exists(path); b {
-			return nil
+			return fmt.Errorf("配置信息已存配置,请添加参数[--cover]进行覆盖安装")
 		}
 	}
 	if err := deleteAll(r, path); err != nil {
