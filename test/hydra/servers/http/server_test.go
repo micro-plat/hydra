@@ -24,9 +24,9 @@ func TestServer_GetAddress(t *testing.T) {
 		h    []string
 		want string
 	}{
-		{name: "参数为空", addr: "127.0.0.1:8080", want: "ws://127.0.0.1:8080"},
-		{name: "参数为ip", addr: "127.0.0.1:8080", h: []string{"192.168.0.1"}, want: "ws://192.168.0.1:8080"},
-		{name: "参数为ip", addr: "0.0.0.0:8080", h: []string{}, want: fmt.Sprintf("ws://%s:8080", global.LocalIP())},
+		{name: "参数为空", addr: "127.0.0.1:58080", want: "ws://127.0.0.1:58080"},
+		{name: "参数为ip", addr: "127.0.0.1:58080", h: []string{"192.168.0.1"}, want: "ws://192.168.0.1:58080"},
+		{name: "参数为ip", addr: "0.0.0.0:58080", h: []string{}, want: fmt.Sprintf("ws://%s:58080", global.LocalIP())},
 	}
 	for _, tt := range tests {
 		s, _ := http.NewWSServer("ws", tt.addr, []*router.Router{})
@@ -37,7 +37,7 @@ func TestServer_GetAddress(t *testing.T) {
 
 func setAPICacheConf() {
 	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
+	confObj.API(":58080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
 	_, _ = http.NewResponsive(serverConf)
 }
@@ -55,9 +55,9 @@ func TestServer_Start_WithErr(t *testing.T) {
 		wantErr          string
 		wantRequestPanic string
 	}{
-		{name: "错误的ssl", serverName: "", addr: "127.0.0.1:8081", opts: []http.Option{http.WithTLS([]string{"pem", "key"})}, wantErr: "open pem: no such file or directory"},
-		{name: "未设置serverType", serverName: "", addr: "127.0.0.1:8081", opts: []http.Option{}, wantRequestPanic: "未找到的缓存配置信息"},
-		{name: "没有保存api对应的缓存配置", serverName: "", addr: "127.0.0.1:8082", opts: []http.Option{http.WithServerType(global.API)}, wantRequestPanic: "未找到api的缓存配置信息"},
+		{name: "错误的ssl", serverName: "", addr: "127.0.0.1:58081", opts: []http.Option{http.WithTLS([]string{"pem", "key"})}, wantErr: "open pem: no such file or directory"},
+		{name: "未设置serverType", serverName: "", addr: "127.0.0.1:58081", opts: []http.Option{}, wantRequestPanic: "未找到的缓存配置信息"},
+		{name: "没有保存api对应的缓存配置", serverName: "", addr: "127.0.0.1:58082", opts: []http.Option{http.WithServerType(global.API)}, wantRequestPanic: "未找到api的缓存配置信息"},
 	}
 
 	for _, tt := range tests {
@@ -119,12 +119,12 @@ func TestServer_Start_WithSSL(t *testing.T) {
 		opts       []http.Option
 		isSSL      bool
 	}{
-		{name: "启动不带有ssl证书的服务", serverName: "", addr: "127.0.0.1:8081", opts: []http.Option{http.WithServerType(global.API)}},
-		{name: "启动带有ssl证书的服务", serverName: "", addr: "127.0.0.1:8082", isSSL: true, opts: []http.Option{http.WithServerType(global.API), http.WithTLS([]string{"server_test_crt.txt", "server_test_key.txt"})}},
+		{name: "启动不带有ssl证书的服务", serverName: "", addr: "127.0.0.1:58083", opts: []http.Option{http.WithServerType(global.API)}},
+		{name: "启动带有ssl证书的服务", serverName: "", addr: "127.0.0.1:58084", isSSL: true, opts: []http.Option{http.WithServerType(global.API), http.WithTLS([]string{"server_test_crt.txt", "server_test_key.txt"})}},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8081")               //初始化参数
+	confObj.API(":58081")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
 	_, _ = http.NewResponsive(serverConf)
 
