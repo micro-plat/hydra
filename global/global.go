@@ -89,6 +89,11 @@ func (m *global) Bind(c *cli.Context) (err error) {
 //GetLongAppName 获取包含有部分路径的app name
 func (m *global) GetLongAppName(n ...string) string {
 	name := types.GetStringByIndex(n, 0, AppName)
+	//最大程度32,9位长随机数
+	maxLen := 32 - 9
+	if len(name) >= maxLen {
+		name = name[:maxLen]
+	}
 
 	path, _ := filepath.Abs(name)
 
