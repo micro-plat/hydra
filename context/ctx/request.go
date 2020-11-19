@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -211,4 +212,38 @@ func (r *request) GetPlayload() string {
 		return string(buff)
 	}
 	return ""
+}
+
+//GetHeader 获取请求头信息
+func (c *request) GetHeader(key string) string {
+	return strings.Join(c.GetHeaders()[key], ",")
+}
+
+//GetHeaders 获取请求的header
+func (c *request) GetHeaders() http.Header {
+	return c.ctx.GetHeaders()
+}
+
+//GetHeaders 获取请求的header
+func (c *request) GetCookies() map[string]string {
+	out := make(map[string]string)
+	cookies := c.ctx.GetCookies()
+	for _, cookie := range cookies {
+		out[cookie.Name] = cookie.Value
+	}
+	return out
+}
+
+//GetCookie 获取cookie信息
+func (c *request) GetCookie(name string) (string, bool) {
+	if cookie, ok := c.GetCookies()[name]; ok {
+		return cookie, true
+	}
+	return "", false
+}
+
+//GetCookie 获取cookie信息
+func (c *request) getCookie(name string) string {
+	m, _ := c.GetCookie(name)
+	return m
 }
