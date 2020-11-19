@@ -1,11 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 )
 
 func main() {
+
+	r := `{"a":"b"}`
+	result := map[string]string{}
+	json.Unmarshal([]byte(r), &result)
+	fmt.Println(result)
 
 	o := XX{}
 

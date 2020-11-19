@@ -73,11 +73,8 @@ def test_stop_has_stopped():
        
         #3.停止
         args = ["stop"]
-        response = runApp(args) 
-        if platform.system() == "Windows" and "not been started" not in response:
-            return u"停止关闭的服务"
-        
-        if platform.system() in( "Linux","Darwin") and "has already been stopped" not in response:
+        response = runApp(args)  
+        if "service has been stopped" not in response:
             return u"停止关闭的服务"
 
     except Exception as err :
@@ -85,6 +82,7 @@ def test_stop_has_stopped():
         
     finally:    
         #4.删除
+        print("finally:remove")
         args = ["remove"]
         runApp(args)
 

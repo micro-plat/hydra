@@ -34,7 +34,7 @@ def test_status_Normal_running():
         args = ["status"]
         response = runApp(args)
         #print("status",response)
-        if not ("Service" in response and "running..." in response):
+        if not ("Running" in response):
             return u"status服务失败"
 
         #3.停止
@@ -81,7 +81,7 @@ def test_status_Normal_notrunning():
         args = ["status"]
         response = runApp(args)
         #print("status",response)
-        if not "stopped" in response:
+        if not "Stopped" in response:
             return u"status服务失败"
  
     except Exception as err :
@@ -99,16 +99,15 @@ def test_status_Normal_notrunning():
 
 
 @test(testName)
-def test_status_Not_installed():
+def test_status_not_installed():
     #1. 清理服务，避免其他遗留存在服务
-    args = ["remove"]
-    runApp(args)
+    runApp(["remove"])
 
     #2.启动服务
     args = ["start"]
     response = runApp(args)
     
-    if not ("not" in response and "installed" in response):
+    if not ("not installed" in response):
         return u"未安装服务验证"
 
 
