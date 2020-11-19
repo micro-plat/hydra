@@ -12,8 +12,8 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
-	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -370,10 +370,10 @@ func Test_response_WriteFinal(t *testing.T) {
 		wantC   string
 		wantCP  string
 	}{
-		{name: "写入200状态码和json数据", status: 200, content: `{"a":"b"}`, ctp: "application/json", wantS: 200, wantC: `{"a":"b"}`},
-		{name: "写入300状态码和空数据", status: 300, content: ``, ctp: "application/json", wantS: 300, wantC: ``},
-		{name: "写入400状态码和错误数据", status: 400, content: `错误`, ctp: "application/json", wantS: 400, wantC: "错误"},
-		{name: "写入空状态码和空数据", ctp: "application/json", wantS: 200, wantC: ""},
+		{name: "写入200状态码和json数据", status: 200, content: `{"a":"b"}`, ctp: "application/json; charset=utf-8", wantS: 200, wantC: `{"a":"b"}`},
+		{name: "写入300状态码和空数据", status: 300, content: ``, ctp: "text/plain; charset=utf-8", wantS: 300, wantC: ``},
+		{name: "写入400状态码和错误数据", status: 400, content: `错误`, ctp: "text/plain; charset=utf-8", wantS: 400, wantC: "错误"},
+		{name: "写入空状态码和空数据", ctp: "text/plain; charset=utf-8", wantS: 200, wantC: ""},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
@@ -389,7 +389,7 @@ func Test_response_WriteFinal(t *testing.T) {
 		rs, rc, cp := c.GetFinalResponse()
 		assert.Equal(t, tt.wantS, rs, tt.name)
 		assert.Equal(t, tt.wantC, rc, tt.name)
-		assert.Equal(t, tt.wantCP, cp, tt.name)
+		assert.Equal(t, tt.ctp, cp, tt.name)
 	}
 }
 

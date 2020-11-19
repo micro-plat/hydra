@@ -47,7 +47,7 @@ func TestResponsive_Start(t *testing.T) {
 		wantErr    string
 	}{
 		{name: "starting报错", cnf: confObj.GetAPIConf(), serverType: "api", starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, wantErr: "err"},
-		{name: "starting不报错", cnf: confObj.GetAPIConf(), serverType: "api", starting: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		//{name: "starting不报错", cnf: confObj.GetAPIConf(), serverType: "api", starting: func(app.IAPPConf) error { return nil }, wantErr: "err"},
 	}
 	for _, tt := range tests {
 		services.Def.OnStarting(tt.starting)
