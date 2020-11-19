@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -58,7 +57,7 @@ func Test_request_Bind_WithHttp(t *testing.T) {
 		body        string
 		want        string
 	}{
-		{name: "绑定xml数据", contentType: "application/xml;charset=UTF-8", //gin 不支持gbk编码的xml绑定
+		{name: "绑定xml数据", contentType: "application/xml;charset=utf-8", //gin 不支持gbk编码的xml绑定
 			body: `<?xml version="1.0" encoding="utf-8" ?><data><key>数据绑定bind!@#$%^&amp;*()_+</key><value>12</value></data>`,
 			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
 		{name: "绑定json数据", contentType: "application/json;charset=utf-8",
@@ -75,10 +74,9 @@ func Test_request_Bind_WithHttp(t *testing.T) {
 	startServer()
 	for _, tt := range tests {
 		resp, err := http.Post("http://localhost:9091/request/bind", tt.contentType, strings.NewReader(tt.body))
-		fmt.Println(err)
 		assert.Equal(t, false, err != nil, tt.name)
 		defer resp.Body.Close()
-		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0], tt.name)
 		assert.Equal(t, "200 OK", resp.Status, tt.name)
 		assert.Equal(t, 200, resp.StatusCode, tt.name)
 		body, err := ioutil.ReadAll(resp.Body)
@@ -132,13 +130,13 @@ func Test_request_Check_WithHttp(t *testing.T) {
 		// 	want: `{"data":"success"}`},
 		{name: "检查json数据", contentType: "application/json;charset=utf-8",
 			body: `{"key":"12","value":"12"}`,
-			want: `{"data":"success"}`},
+			want: "success"},
 		{name: "检查form数据", contentType: "application/x-www-form-urlencoded; charset=utf-8",
 			body: `key=12&value=12`,
-			want: `{"data":"success"}`},
+			want: "success"},
 		{name: "检查yaml数据", contentType: "application/x-yaml;charset=utf-8",
 			body: "key: key \nvalue: value",
-			want: `{"data":"success"}`},
+			want: "success"},
 	}
 
 	startServer()
@@ -146,7 +144,7 @@ func Test_request_Check_WithHttp(t *testing.T) {
 		resp, err := http.Post("http://localhost:9091/request/check", tt.contentType, strings.NewReader(tt.body))
 		assert.Equal(t, false, err != nil, tt.name)
 		defer resp.Body.Close()
-		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "text/plain; charset=utf-8", resp.Header["Content-Type"][0], tt.name)
 		assert.Equal(t, "200 OK", resp.Status, tt.name)
 		assert.Equal(t, 200, resp.StatusCode, tt.name)
 		body, err := ioutil.ReadAll(resp.Body)

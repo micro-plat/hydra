@@ -188,8 +188,7 @@ func Bind(ctx hydra.IContext) interface{} {
 		fmt.Println(err)
 		return fmt.Errorf("Bind出错 %+v", err)
 	}
-	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
-	return s
+	return *s
 }
 
 func Check(ctx hydra.IContext) interface{} {
@@ -198,7 +197,6 @@ func Check(ctx hydra.IContext) interface{} {
 		fmt.Println("err:", err)
 		return fmt.Errorf("Check出错 %+v", err)
 	}
-	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
 	return "success"
 }
 
