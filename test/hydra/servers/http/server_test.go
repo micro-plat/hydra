@@ -120,7 +120,7 @@ func TestServer_Start_WithSSL(t *testing.T) {
 		isSSL      bool
 	}{
 		{name: "启动不带有ssl证书的服务", serverName: "", addr: "127.0.0.1:8081", opts: []http.Option{http.WithServerType(global.API)}},
-		{name: "启动带有ssl证书的服务", serverName: "", addr: "127.0.0.1:8081", isSSL: true, opts: []http.Option{http.WithServerType(global.API), http.WithTLS([]string{"server_test_crt.txt", "server_test_key.txt"})}},
+		{name: "启动带有ssl证书的服务", serverName: "", addr: "127.0.0.1:8082", isSSL: true, opts: []http.Option{http.WithServerType(global.API), http.WithTLS([]string{"server_test_crt.txt", "server_test_key.txt"})}},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
