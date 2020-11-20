@@ -318,10 +318,9 @@ func getTypeKind(c interface{}) reflect.Kind {
 	if c == nil {
 		return reflect.String
 	}
-	tp := reflect.TypeOf(c)
-	if tp.Kind() == reflect.Ptr {
-		value := tp.Elem()
-		tp = reflect.TypeOf(value)
+	value := reflect.ValueOf(c)
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
-	return tp.Kind()
+	return value.Kind()
 }
