@@ -13,9 +13,11 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
+	"github.com/micro-plat/lib4go/logger"
 )
 
 func TestNewResponsive(t *testing.T) {
@@ -258,4 +260,43 @@ func TestResponsive_Start(t *testing.T) {
 			assert.Equalf(t, true, strings.Contains(string(out), tt.wantLog), tt.name+"log")
 		}
 	}
+}
+
+func TestResponsive_Notify(t *testing.T) {
+	confObj := mocks.NewConf() //构建对象
+	confObj.API(":55501")      //初始化参数
+	cnf := confObj.GetAPIConf()
+	rsp, err := http.NewResponsive(cnf)
+
+	assert.Equal(t, nil, err, "构建服务错误")
+	//节点未变动
+	tChange, err := rsp.Notify(cnf)
+	assert.Equal(t, nil, err, "通知变动错误")
+	assert.Equal(t, false, tChange, "通知变动判断")
+
+	path := "/hydra/apiserver/api/test/conf"
+	registry, err := registry.NewRegistry("lm://./", logger.New("hydra"))
+	//节点进行值变更 进行启动
+	err = registry.Update(path, `{"status":"start","addr":":55501"}`)
+	assert.Equalf(t, false, err != nil, "更新节点2")
+	time.Sleep(time.Second * 1)
+	conf, err := app.NewAPPConf(path, registry)
+	assert.Equalf(t, false, err != nil, "获取最新配置2")
+	tChange, err = rsp.Notify(conf)
+	time.Sleep(time.Second)
+	assert.Equal(t, nil, err, "通知变动错误2")
+	assert.Equal(t, true, tChange, "通知变动判断2")
+
+	//节点进行值变更 不用重启
+	assert.Equalf(t, false, err != nil, "获取注册中心")
+	err = registry.Update(path, `{"status":"stop","addr":":55501"}`)
+	assert.Equalf(t, false, err != nil, "更新节点")
+	time.Sleep(time.Second * 1)
+	conf, err = app.NewAPPConf(path, registry)
+	assert.Equalf(t, false, err != nil, "获取最新配置")
+	tChange, err = rsp.Notify(conf)
+	time.Sleep(time.Second)
+	assert.Equal(t, nil, err, "通知变动错误")
+	assert.Equal(t, true, tChange, "通知变动判断")
+
 }

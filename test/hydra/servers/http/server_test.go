@@ -6,9 +6,13 @@ import (
 	"io/ioutil"
 	xhttp "net/http"
 	"os"
+	"sync"
 	"testing"
+	"time"
 
+	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/test/assert"
@@ -148,5 +152,42 @@ func TestServer_Start_WithSSL(t *testing.T) {
 
 		err = s.Shutdown()
 		assert.Equal(t, false, err != nil, tt.name)
+	}
+}
+
+var oncelock sync.Once
+
+var serverConf app.IAPPConf
+
+type okObj struct{}
+
+func (n *okObj) Handle(ctx context.IContext) interface{} { return "success" }
+
+//并发测试http服务器调用性能
+func BenchmarkHttpServer(b *testing.B) {
+	oncelock.Do(func() {
+		mockConf := mocks.NewConfBy("httpserver", "Benchmarktestserver")
+		mockConf.API(":550010")
+		serverConf = mockConf.GetAPIConf()
+		app.Cache.Save(serverConf)
+
+		routers := []*router.Router{}
+		server, err := http.NewServer("api", "127.0.0.1:55010", routers, http.WithServerType(global.API))
+		fmt.Println(err)
+		assert.Equalf(b, true, err == nil, "server 初始化 error")
+
+		err = server.Start()
+		assert.Equalf(b, true, err == nil, "server 启动 error")
+		time.Sleep(1 * time.Second)
+	})
+	req, _ := xhttp.NewRequest("GET", "http://127.0.0.1:55010", nil)
+	client := &xhttp.Client{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		resp, err := client.Do(req)
+		assert.Equalf(b, true, err == nil, "request error")
+		assert.Equal(b, "404 Not Found", resp.Status, "request error status")
+		assert.Equal(b, 404, resp.StatusCode, "request error statuscode")
 	}
 }
