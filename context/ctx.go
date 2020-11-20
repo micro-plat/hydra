@@ -121,14 +121,11 @@ type IRequest interface {
 	//GetBodyMap 将body转换为map
 	GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 
-	// //GetTrace 获取请求的trace信息
-	// GetTrace() string
-
 	//GetPlayload 更改名称 @fix
 	GetPlayload() string
 
 	//GetCookie 获取请求Cookie
-	GetCookie(string) (string, bool)
+	GetCookie(string) string
 
 	//GetHeader 获取头信息
 	GetHeader(string) string

@@ -215,19 +215,19 @@ func (r *request) GetPlayload() string {
 }
 
 //GetHeader 获取请求头信息
-func (c *request) GetHeader(key string) string {
-	return strings.Join(c.GetHeaders()[key], ",")
+func (r *request) GetHeader(key string) string {
+	return strings.Join(r.GetHeaders()[key], ",")
 }
 
 //GetHeaders 获取请求的header
-func (c *request) GetHeaders() http.Header {
-	return c.ctx.GetHeaders()
+func (r *request) GetHeaders() http.Header {
+	return r.ctx.GetHeaders()
 }
 
 //GetHeaders 获取请求的header
-func (c *request) GetCookies() map[string]string {
+func (r *request) GetCookies() map[string]string {
 	out := make(map[string]string)
-	cookies := c.ctx.GetCookies()
+	cookies := r.ctx.GetCookies()
 	for _, cookie := range cookies {
 		out[cookie.Name] = cookie.Value
 	}
@@ -235,15 +235,12 @@ func (c *request) GetCookies() map[string]string {
 }
 
 //GetCookie 获取cookie信息
-func (c *request) GetCookie(name string) (string, bool) {
-	if cookie, ok := c.GetCookies()[name]; ok {
-		return cookie, true
+func (r *request) GetCookie(name string) string {
+	cookies := r.ctx.GetCookies()
+	for _, cookie := range cookies {
+		if name == cookie.Name {
+			return cookie.Value
+		}
 	}
-	return "", false
-}
-
-//GetCookie 获取cookie信息
-func (c *request) getCookie(name string) string {
-	m, _ := c.GetCookie(name)
-	return m
+	return ""
 }
