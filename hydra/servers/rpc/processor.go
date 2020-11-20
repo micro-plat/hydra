@@ -39,7 +39,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p.Engine.Use(middleware.APIKeyAuth().DispFunc())
 	p.Engine.Use(middleware.RASAuth().DispFunc())
 	p.Engine.Use(middleware.JwtAuth().DispFunc()) //jwt安全认证
- 	middleware.AddMiddlewareHook(rpcmiddlewares, func(item middleware.Handler) {
+	middleware.AddMiddlewareHook(rpcmiddlewares, func(item middleware.Handler) {
 		p.Engine.Use(item.DispFunc())
 	})
 	p.Engine.Use(middleware.Render().DispFunc())    //响应渲染组件

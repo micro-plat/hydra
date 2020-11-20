@@ -1,4 +1,4 @@
-package rpcserver
+package rpc
 
 import (
 	"encoding/json"
