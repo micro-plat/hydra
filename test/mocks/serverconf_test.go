@@ -17,7 +17,7 @@ func TestGetConf(t *testing.T) {
 	assert.Equal(t, server.GetServerConf().GetMainConf().GetInt("rhTimeout"), 30, "rhTimeout")
 	assert.Equal(t, server.GetServerConf().GetMainConf().GetInt("rTimeout"), 31, "rTimeout")
 	assert.Equal(t, server.GetServerConf().GetMainConf().GetInt("wTimeout"), 32, "wTimeout")
-	assert.Equal(t, server.GetServerConf().GetServerPath(), "/hydra/apiserver/api/test/conf", "地址")
+	assert.Equal(t, server.GetServerConf().GetServerPath(), "/hydra_serverconf_test/apiserver/api/serverconf/conf", "地址")
 }
 func TestRouters(t *testing.T) {
 	conf := NewConfBy("test", "testrouters") //构建对象
