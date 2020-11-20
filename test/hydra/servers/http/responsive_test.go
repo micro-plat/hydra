@@ -211,7 +211,7 @@ func TestResponsive_Start(t *testing.T) {
 			tt.cnf = newConfObj.GetAPIConf()
 			path := fmt.Sprintf("./hydra/%s/%s/test/servers", tt.serverName, tt.serverType)
 			os.RemoveAll(path) //删除文件夹
-			os.Create(path)    //创建文件
+			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
 		}
 
 		//构建服务器
@@ -249,9 +249,10 @@ func TestResponsive_Start(t *testing.T) {
 
 		if tt.wantSubErr != "" {
 			assert.Equal(t, true, strings.Contains(err.Error(), tt.wantSubErr), tt.name+"sub_err")
+		} else {
+			assert.Equal(t, nil, err, tt.name)
 		}
 
-		//	assert.Equal(t, nil, err, tt.name)
 		//fmt.Println("xxxx:", string(out))
 		if tt.wantLog != "" {
 			assert.Equalf(t, true, strings.Contains(string(out), tt.wantLog), tt.name+"log")
