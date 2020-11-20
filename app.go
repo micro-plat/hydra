@@ -2,8 +2,8 @@ package hydra
 
 import (
 	"github.com/micro-plat/cli"
-	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 
@@ -20,12 +20,6 @@ import (
 	_ "github.com/micro-plat/hydra/hydra/cmds/status"
 	_ "github.com/micro-plat/hydra/hydra/cmds/stop"
 
-	//_ "github.com/micro-plat/hydra/hydra/cmds/pub/backup"
-	//_ "github.com/micro-plat/hydra/hydra/cmds/pub/rollback"
-
-	//_ "github.com/micro-plat/hydra/hydra/cmds/pub"
-
-	//_ "github.com/micro-plat/hydra/registry/registry/etcd"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	_ "github.com/micro-plat/hydra/registry/registry/redis"
