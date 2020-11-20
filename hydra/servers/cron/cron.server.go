@@ -15,7 +15,7 @@ type Server struct {
 	addr    string
 }
 
-//NewServer 创建mqc服务器
+//NewServer 创建cron服务器
 func NewServer(tasks ...*task.Task) (t *Server, err error) {
 	t = &Server{Processor: NewProcessor()}
 	if err := t.Processor.Add(tasks...); err != nil {
