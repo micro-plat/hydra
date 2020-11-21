@@ -18,7 +18,7 @@ func Test_cache_GetServerConf(t *testing.T) {
 	assert.Equal(t, true, (err != nil), "获取不存在的配置对象，err")
 	assert.Equal(t, nil, obj, "获取不存在的配置对象，res")
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_servervavhe_test2", "servercache")
 	conf.API(":8080")
 	serveC := conf.GetAPIConf()
 	cacheobjPrt.Save(serveC)
@@ -51,7 +51,7 @@ func Test_cache_GetVarConf(t *testing.T) {
 
 func Test_cache_Clear(t *testing.T) {
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_servervavhe_clear", "servervavhe_clear")
 	conf.API(":8080")
 	serveC := conf.GetAPIConf()
 	app.Cache.Save(serveC)

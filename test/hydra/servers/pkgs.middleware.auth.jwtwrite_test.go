@@ -52,7 +52,7 @@ func TestJWTWriter(t *testing.T) {
 			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}}}
 
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_jwtwrite_test", "jwtwrite")
 		//初始化测试用例参数
 		confB := mockConf.GetAPI()
 		if tt.isSet {

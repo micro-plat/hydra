@@ -90,7 +90,7 @@ func TestBasicGetConf(t *testing.T) {
 			want: basic.NewBasic(basic.WithUP("t1", "123"), basic.WithExcludes("/t1/t12"), basic.WithDisable())},
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_basic_test2", "basic")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
 		if !strings.EqualFold(tt.name, "basic节点不存在") {

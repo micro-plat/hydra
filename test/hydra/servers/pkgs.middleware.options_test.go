@@ -27,7 +27,7 @@ func TestOptions(t *testing.T) {
 		ctx := &mocks.MiddleContext{
 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockURL: tt.requestURL, MockMethod: tt.method}},
 			MockResponse: &mocks.MockResponse{MockStatus: tt.responseStatus},
-			MockAPPConf:  mocks.NewConf().GetAPIConf(),
+			MockAPPConf:  mocks.NewConfBy("middleware_options_test", "options").GetAPIConf(),
 		}
 
 		//调用中间件

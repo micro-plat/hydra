@@ -225,9 +225,9 @@ func Test_body_GetBody(t *testing.T) {
 }
 
 func testGetBody(t *testing.T, body string, tests []testBody) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_body_test", "bodyctx") //构建对象
+	confObj.API(":8080")                                       //初始化参数
+	serverConf := confObj.GetAPIConf()                         //获取配置
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 	w := ctx.NewBody(&mocks.TestContxt{Body: body}, rpath)
 
@@ -264,9 +264,9 @@ func Test_body_GetBodyMap_WithPanic(t *testing.T) {
 		}, err: "将body转换为map失败:invalid character 'b' looking for beginning of value"},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_body_test1", "bodyctx1") //构建对象
+	confObj.API(":8080")                                         //初始化参数
+	serverConf := confObj.GetAPIConf()                           //获取配置
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {
@@ -322,9 +322,9 @@ func Test_body_GetBodyMap(t *testing.T) {
 		}, want: map[string]interface{}{"key1": "value1"}},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_body_test2", "bodyctx2") //构建对象
+	confObj.API(":8080")                                         //初始化参数
+	serverConf := confObj.GetAPIConf()                           //获取配置
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {

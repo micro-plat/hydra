@@ -23,9 +23,9 @@ func TestNewValueWatcher(t *testing.T) {
 		{name: "获取不支持协议的节点值监控对象", registryAddr: "cloud://.", wantNil: true, wantErr: true},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_value", "rgtwatchevaluetest") //构建对象
+	confObj.API(":8080")                                                         //初始化参数
+	serverConf := confObj.GetAPIConf()                                           //获取配置
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 	for _, tt := range tests {
 		gotR, err := watcher.NewValueWatcher(tt.registryAddr, []string{}, log)
@@ -36,9 +36,9 @@ func TestNewValueWatcher(t *testing.T) {
 
 func TestNewValueWatcherByRegistry(t *testing.T) {
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_value1", "rgtwatchevaluetest1") //构建对象
+	confObj.API(":8080")                                                           //初始化参数
+	serverConf := confObj.GetAPIConf()                                             //获取配置
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	r := serverConf.GetServerConf().GetRegistry()
@@ -61,9 +61,9 @@ func TestNewValueWatcherByServers(t *testing.T) {
 		{name: "传入servers", platName: "hydra", systemName: "apiserver", serverTypes: []string{"api"}, clusterName: "test"},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_value2", "rgtwatchevaluetest2") //构建对象
+	confObj.API(":8080")                                                           //初始化参数
+	serverConf := confObj.GetAPIConf()                                             //获取配置
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 	r := serverConf.GetServerConf().GetRegistry()
 	for _, tt := range tests {

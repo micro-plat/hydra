@@ -40,7 +40,7 @@ func TestAPIGetConf(t *testing.T) {
 		want *api.Server
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_apimain_test", "apimain")
 	//getconf的address默认值是8080
 	test1 := test{name: "节点不存在,获取默认对象", opts: []api.Option{}, want: &api.Server{Address: ":8080", Status: "start"}}
 	obj, err := api.GetConf(conf.GetAPIConf().GetServerConf())

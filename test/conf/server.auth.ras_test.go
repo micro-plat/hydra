@@ -89,7 +89,7 @@ func TestAuthRASGetConf(t *testing.T) {
 		wantErrStr string
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_ras_test2", "rastest")
 	confB := conf.API(":8081")
 	test1 := test{name: "未设置ras节点", opts: []ras.Option{}, wantAuths: &ras.RASAuth{Disable: true}, wantErr: false}
 	gotAuths, err := ras.GetConf(conf.GetAPIConf().GetServerConf())
