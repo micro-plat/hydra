@@ -3,6 +3,7 @@ package mqc
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -28,15 +29,32 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 		form:        make(map[string]interface{}),
 		header:      make(map[string]string),
 	}
-	if err = json.Unmarshal([]byte(m.GetMessage()), &r.form); err != nil {
+
+	//将消息原串转换为map
+	input := make(map[string]interface{})
+	if err = json.Unmarshal([]byte(m.GetMessage()), &input); err != nil {
 		return nil, fmt.Errorf("队列%s中存放的数据不是有效的json:%s %w", queue.Queue, m.GetMessage(), err)
 	}
-	if v, ok := r.form["__header__"].(map[string]interface{}); ok {
+
+	//检查是否包含头信息
+	if v, ok := input["__header__"].(map[string]interface{}); ok {
 		for n, m := range v {
 			r.header[n] = fmt.Sprint(m)
 		}
 	}
-	r.header["Client-IP"] = "127.0.0.1"
+
+	//将所有非"__""参数加到form列表
+	for k, v := range input {
+		if !strings.HasPrefix(k, "__") {
+			r.form[k] = v
+		}
+	}
+
+	//检查是否有专门存储数据的节点，并覆盖外部节点
+	if v, ok := input["__raw__"].(map[string]interface{}); ok {
+		r.form = v
+	}
+
 	r.form["__body_"] = m.GetMessage()
 	return r, nil
 }

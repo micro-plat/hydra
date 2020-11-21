@@ -48,7 +48,7 @@ func (c *user) GetGID() string {
 //GetClientIP 获取客户端IP地址
 func (c *user) GetClientIP() string {
 	ip := c.ctx.ClientIP()
-	if ip == "::1" || ip == "127.0.0.1" {
+	if ip == "" || ip == "::1" || ip == "127.0.0.1" {
 		return global.LocalIP()
 	}
 	return ip
