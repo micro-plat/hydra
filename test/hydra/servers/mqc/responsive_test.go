@@ -10,13 +10,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/micro-plat/hydra/components/caches"
+	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/conf/server/queue"
 	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	"github.com/micro-plat/hydra/context"
 
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/hydra/hydra/servers/mqc"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
@@ -33,16 +36,15 @@ func TestNewResponsive(t *testing.T) {
 	tests := []struct {
 		name    string
 		proto   string
-		addr    string
 		cnf     app.IAPPConf
 		wantErr bool
 	}{
-		{name: "构建mqc服务", addr: ":55001", proto: "ws", cnf: confObj.GetWSConf()},
+		{name: "构建mqc服务", proto: "mqc", cnf: confObj.GetMQCConf()},
 	}
 	for _, tt := range tests {
 		gotH, err := mqc.NewResponsive(tt.cnf)
 		assert.Equal(t, nil, err, tt.name)
-		addr := fmt.Sprintf("%s://%s%s", tt.proto, global.LocalIP(), tt.addr)
+		addr := fmt.Sprintf("%s://%s", tt.proto, global.LocalIP())
 		assert.Equal(t, addr, gotH.Server.GetAddress(), tt.name)
 	}
 }
@@ -107,82 +109,86 @@ func (t *testServer) close() {
 
 func TestResponsive_Start(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
-	confObj.API(":55004")      //初始化参数
-	confObj.WS(":55005")       //初始化参数
-	confObj.Web(":55006")      //初始化参数
+	confObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
+	confObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
+	confObj.MQC("redis://xxx") //初始化参数
 	reg := confObj.Registry
 	tests := []struct {
-		name          string
-		cnf           app.IAPPConf
-		serverName    string
-		serverType    string
-		starting      func(app.IAPPConf) error
-		closing       func(app.IAPPConf) error
-		isConfStart   bool //禁用服务
-		isServerStart bool //http服务启动失败
-		isServerPub   bool //服务发布失败
-		wantErr       string
-		wantSubErr    string
-		wantLog       string
+		name           string
+		cnf            app.IAPPConf
+		serverName     string
+		serverType     string
+		starting       func(app.IAPPConf) error
+		closing        func(app.IAPPConf) error
+		isConfStart    bool //禁用服务
+		isGetCluster   bool //集群获取错误
+		isGetMainConf  bool //主配置获取错误
+		isServerResume bool //server回复错误
+		isServerPub    bool //服务发布失败
+		wantErr        string
+		wantSubErr     string
+		wantLog        string
 	}{
 		{name: "starting报错",
-			cnf:        confObj.GetAPIConf(),
-			serverType: "api",
+			cnf:        confObj.GetMQCConf(),
+			serverType: "mqc",
 			starting:   func(app.IAPPConf) error { return fmt.Errorf("err") },
 			closing:    func(app.IAPPConf) error { return nil },
 			wantErr:    "err",
 		},
 		{name: "禁用服务",
-			cnf:         confObj.GetAPIConf(),
-			serverType:  "api",
-			serverName:  "apiserver",
+			cnf:         confObj.GetMQCConf(),
+			serverType:  "mqc",
+			serverName:  "mqcserver",
 			starting:    func(app.IAPPConf) error { return nil },
 			closing:     func(app.IAPPConf) error { return nil },
 			isConfStart: true,
-			wantLog:     "api被禁用，未启动",
+			wantLog:     "mqc被禁用，未启动",
 		},
-		{name: "http服务启动失败",
-			cnf:           confObj.GetAPIConf(),
-			serverType:    "api",
-			serverName:    "apiserver",
-			starting:      func(app.IAPPConf) error { return nil },
-			closing:       func(app.IAPPConf) error { return nil },
-			isServerStart: true,
-			wantErr:       "api启动失败 listen tcp 0.0.0.0:55004: bind: address already in use",
+		{name: "mqc服务获取集群监控失败",
+			cnf:          confObj.GetMQCConf(),
+			serverType:   "mqc",
+			serverName:   "mqcserver",
+			starting:     func(app.IAPPConf) error { return nil },
+			closing:      func(app.IAPPConf) error { return nil },
+			isGetCluster: true,
+			wantLog:      "当前集群节点不可用",
+		},
+		// {name: "mqc服务获取主配置失败",
+		// 	cnf:           confObj.GetMQCConf(),
+		// 	serverType:    "mqc",
+		// 	serverName:    "mqcserver",
+		// 	starting:      func(app.IAPPConf) error { return nil },
+		// 	closing:       func(app.IAPPConf) error { return nil },
+		// 	isGetMainConf: true,
+		// 	wantLog:       "当前集群节点不可用",
+		// },
+		{name: "mqc服务恢复失败",
+			cnf:            confObj.GetMQCConf(),
+			serverType:     "mqc",
+			serverName:     "mqcserver",
+			starting:       func(app.IAPPConf) error { return nil },
+			closing:        func(app.IAPPConf) error { return nil },
+			isServerResume: true,
+			wantLog:        "恢复mqc服务器失败: 队列名字不能为空",
 		},
 		{name: "注册中心服务发布失败",
-			cnf:         confObj.GetAPIConf(),
-			serverType:  "api",
-			serverName:  "apiserver",
+			cnf:         confObj.GetMQCConf(),
+			serverType:  "mqc",
+			serverName:  "mqcserver",
 			starting:    func(app.IAPPConf) error { return nil },
 			closing:     func(app.IAPPConf) error { return fmt.Errorf("closing_err") },
 			isServerPub: true,
-			wantSubErr:  "api服务发布失败 服务发布失败:",
+			wantSubErr:  "mqc服务发布失败 服务发布失败:",
 			wantLog:     "关闭[closing_err]服务,出现错误",
 		},
-		{name: "启动api服务成功",
-			cnf:        confObj.GetAPIConf(),
-			serverType: "api",
-			serverName: "apiserver",
+		{name: "启动mqc服务成功",
+			cnf:        confObj.GetMQCConf(),
+			serverType: "mqc",
+			serverName: "mqcserver",
 			starting:   func(app.IAPPConf) error { return nil },
 			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(api,http:",
-		},
-		{name: "启动ws服务成功",
-			cnf:        confObj.GetWSConf(),
-			serverType: "ws",
-			serverName: "wsserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(ws,ws:",
-		},
-		{name: "启动web服务成功",
-			cnf:        confObj.GetWebConf(),
-			serverType: "web",
-			serverName: "webserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(web,http:",
+			wantLog:    "启动成功(mqc,mqc://",
 		},
 	}
 	for _, tt := range tests {
@@ -202,32 +208,46 @@ func TestResponsive_Start(t *testing.T) {
 			tt.cnf, _ = app.NewAPPConf(path, reg)
 		}
 
-		//占用端口使服务启动失败
-		var httpServer *testServer
-		if tt.isServerStart {
-			httpServer = &testServer{addr: "127.0.0.1:55004"}
-			go httpServer.testListen()
-		}
-
 		//创建节点使服务发布报错
 		if tt.isServerPub {
 			newConfObj := mocks.NewConfBy("hydra", "test", "fs://./") //构建对象
-			newConfObj.API(":55004")
-			tt.cnf = newConfObj.GetAPIConf()
+			newConfObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
+			newConfObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
+			newConfObj.MQC("redis://xxx") //初始化参数
+			tt.cnf = newConfObj.GetMQCConf()
 			path := fmt.Sprintf("./hydra/%s/%s/test/servers", tt.serverName, tt.serverType)
 			os.RemoveAll(path) //删除文件夹
 			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
 		}
 
 		//构建服务器
-		rsp, _ := http.NewResponsive(tt.cnf)
+		rsp, _ := mqc.NewResponsive(tt.cnf)
 
 		//构建的新的os.Stdout
 		r, w, _ := os.Pipe()
 		rescueStdout := newTestStdOut(r, w)
 
+		//添加空队列使server服务恢复失败
+		if tt.isServerResume {
+			rsp.Server.Processor.Add(queue.NewQueue("", "services1"))
+		}
+		// //更改主配置
+		// if tt.isGetMainConf {
+		// 	path := fmt.Sprintf("/hydra/%s/%s/test/conf", tt.serverName, tt.serverType)
+		// 	//节点进行值变更 进行启动
+		// 	err := reg.Update(path, `{"stat11us":"start","addr":"redis://xxx"}`)
+		// 	fmt.Println("y:", err)
+		// }
+
 		//启动服务器
 		err := rsp.Start()
+
+		//删除集群配置
+		if tt.isGetCluster {
+			err := reg.Delete(fmt.Sprintf("/hydra/%s/%s/test/servers", tt.serverName, tt.serverType))
+			fmt.Println("y:", err)
+		}
+
 		//等待日志打印完成
 		time.Sleep(time.Second)
 
@@ -235,12 +255,6 @@ func TestResponsive_Start(t *testing.T) {
 		w.Close()
 		out, _ := ioutil.ReadAll(r)
 		rescueTestStdout(rescueStdout)
-
-		//释放端口
-		if tt.isServerStart {
-			httpServer.close()
-			time.Sleep(time.Second * 1)
-		}
 
 		//删除节点文件
 		if tt.isServerPub {
@@ -258,7 +272,6 @@ func TestResponsive_Start(t *testing.T) {
 			assert.Equal(t, nil, err, tt.name)
 		}
 
-		//fmt.Println("xxxx:", string(out))
 		if tt.wantLog != "" {
 			assert.Equalf(t, true, strings.Contains(string(out), tt.wantLog), tt.name+"log")
 		}
@@ -267,9 +280,11 @@ func TestResponsive_Start(t *testing.T) {
 
 func TestResponsive_Notify(t *testing.T) {
 	confObj := mocks.NewConf() //构建对象
-	confObj.API(":55501")      //初始化参数
-	cnf := confObj.GetAPIConf()
-	rsp, err := http.NewResponsive(cnf)
+	confObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
+	confObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
+	confObj.MQC("redis://xxx") //初始化参数
+	cnf := confObj.GetMQCConf()
+	rsp, err := mqc.NewResponsive(cnf)
 
 	assert.Equal(t, nil, err, "构建服务错误")
 	//节点未变动
@@ -277,22 +292,22 @@ func TestResponsive_Notify(t *testing.T) {
 	assert.Equal(t, nil, err, "通知变动错误")
 	assert.Equal(t, false, tChange, "通知变动判断")
 
-	path := "/hydra/apiserver/api/test/conf"
+	path := "/hydra/mqcserver/mqc/test/conf"
 	registry, err := registry.NewRegistry("lm://./", logger.New("hydra"))
 	//节点进行值变更 进行启动
-	err = registry.Update(path, `{"status":"start","addr":":55501"}`)
+	err = registry.Update(path, `{"stat11us":"start","addr":"redis://xxx"}`)
 	assert.Equalf(t, false, err != nil, "更新节点2")
 	time.Sleep(time.Second * 1)
 	conf, err := app.NewAPPConf(path, registry)
 	assert.Equalf(t, false, err != nil, "获取最新配置2")
 	tChange, err = rsp.Notify(conf)
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 	assert.Equal(t, nil, err, "通知变动错误2")
 	assert.Equal(t, true, tChange, "通知变动判断2")
 
 	//节点进行值变更 不用重启
 	assert.Equalf(t, false, err != nil, "获取注册中心")
-	err = registry.Update(path, `{"status":"stop","addr":":55501"}`)
+	err = registry.Update(path, `{"status":"stop","addr":"redis://xxx"}`)
 	assert.Equalf(t, false, err != nil, "更新节点")
 	time.Sleep(time.Second * 1)
 	conf, err = app.NewAPPConf(path, registry)
@@ -302,4 +317,49 @@ func TestResponsive_Notify(t *testing.T) {
 	assert.Equal(t, nil, err, "通知变动错误")
 	assert.Equal(t, true, tChange, "通知变动判断")
 
+}
+
+var oncelock sync.Once
+
+func BenchmarkResponsive_Start(b *testing.B) {
+	oncelock.Do(func() {
+		testInitServicesDef()
+
+		confObj := mocks.NewConf() //构建对象
+		confObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
+		confObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
+		confObj.MQC("redis://xxx") //初始化参数
+
+		cnf := confObj.GetMQCConf()
+
+		//构建服务器
+		rsp, _ := mqc.NewResponsive(cnf)
+
+		//添加队列
+		//rsp.Server.Processor.Add(queue.NewQueue("queue1", "services1"), queue.NewQueue("queue2", "services1"))
+
+		//注册服务
+		services.Def.MQC("services1", func(ctx context.IContext) (r interface{}) {
+			ctx.Log().Info("services1ss")
+			return "success"
+		}, "queue1")
+		services.Def.MQC("services2", func(ctx context.IContext) (r interface{}) {
+			ctx.Log().Info("services1ss")
+			return "success"
+		}, "queue2")
+
+		//启动服务器
+		rsp.Start()
+
+		//等待日志打印完成
+		time.Sleep(time.Second)
+	})
+
+	c := caches.NewStandardCache(container.NewContainer()).GetRegularCache("redis")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		//往redis添加数据
+		c.Add("queue1","value1",60)
+		c.Add("queue2","value2",60)
+	}
 }

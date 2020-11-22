@@ -127,3 +127,14 @@ func TestProcessor_Close(t *testing.T) {
 	assert.Equal(t, 0, len(s.queues.Items()), "Close")
 	assert.Equal(t, true, s.done, "Close")
 }
+
+func TestProcessor_Resume_withConsume(t *testing.T) {
+
+	s, _ := NewProcessor("redis", `{"proto":"redis","addrs":["192.168.5.79:6379"]}`)
+	//添加消息队列
+	queues := []*queue.Queue{queue.NewQueue("queue1", "services1"), queue.NewQueue("queue2", "services2")}
+	err := s.Add(queues...)
+	
+	//注册服务
+	
+}
