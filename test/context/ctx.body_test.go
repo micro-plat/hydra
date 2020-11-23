@@ -229,7 +229,7 @@ func testGetBody(t *testing.T, body string, tests []testBody) {
 	confObj.API(":8080")                                       //初始化参数
 	serverConf := confObj.GetAPIConf()                         //获取配置
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
-	w := ctx.NewBody(&mocks.TestContxt{Body: body}, rpath)
+	w := ctx.NewBody(&mocks.TestContxt{Body: body}, rpath.GetEncoding())
 
 	for _, tt := range tests {
 		gotS, err := w.GetBody()
@@ -270,9 +270,9 @@ func Test_body_GetBodyMap_WithPanic(t *testing.T) {
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {
-		w := ctx.NewBody(tt.ctx, rpath)
+		w := ctx.NewBody(tt.ctx, rpath.GetEncoding())
 		assert.PanicError(t, tt.err, func() {
-			w.GetRawBodyMap(tt.encoding...)
+			w.GetBodyMap()
 		}, tt.name)
 	}
 }
@@ -328,8 +328,8 @@ func Test_body_GetBodyMap(t *testing.T) {
 	rpath := ctx.NewRpath(&mocks.TestContxt{}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {
-		w := ctx.NewBody(tt.ctx, rpath)
-		got, err := w.GetRawBodyMap(tt.encoding...)
+		w := ctx.NewBody(tt.ctx, rpath.GetEncoding())
+		got, err := w.GetBodyMap()
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
