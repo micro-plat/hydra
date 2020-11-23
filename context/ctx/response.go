@@ -186,12 +186,10 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 
 	buff := []byte(content)
 	e := c.path.GetEncoding()
-	var err error
-
 	if e != "utf-8" {
-		buff, err = encoding.Encode(content, e)
-		if err != nil {
-			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
+		buff1, err := encoding.Encode(content, e)
+		if err == nil {
+			buff = buff1
 		}
 	}
 	c.ContentType(ctyp)
@@ -320,10 +318,9 @@ func getTypeKind(c interface{}) reflect.Kind {
 	if c == nil {
 		return reflect.String
 	}
-	tp := reflect.TypeOf(c)
-	if tp.Kind() == reflect.Ptr {
-		value := tp.Elem()
-		tp = reflect.TypeOf(value)
+	value := reflect.ValueOf(c)
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
-	return tp.Kind()
+	return value.Kind()
 }

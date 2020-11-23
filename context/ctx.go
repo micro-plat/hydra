@@ -10,6 +10,7 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 )
 
 const (
@@ -42,16 +43,35 @@ type IHandler interface {
 
 //IGetter 参数获取
 type IGetter interface {
+
+	//GetKeys 获取所有参数名称
 	GetKeys() []string
+
+	//Get 获取请求参数
 	Get(name string) (string, bool)
+
+	//GetString 获取字符串
 	GetString(name string, def ...string) string
-	GetMax(name string, o ...int) int
-	GetMin(name string, o ...int) int
+
+	//GetInt 获取类型为int的值
 	GetInt(name string, def ...int) int
+
+	//GetInt32 获取类型为int32的值
+	GetInt32(name string, def ...int32) int32
+
+	//GetInt64 获取类型为int64的值
 	GetInt64(name string, def ...int64) int64
+
+	//GetFloat32 获取类型为float32的值
 	GetFloat32(name string, def ...float32) float32
+
+	//GetFloat64 获取类型为float64的值
 	GetFloat64(name string, def ...float64) float64
-	GetBool(name string, def ...bool) bool
+
+	//GetDecimal 获取类型为Decimal的值
+	GetDecimal(name string, def ...types.Decimal) types.Decimal
+
+	//GetDatetime 获取日期类型的值
 	GetDatetime(name string, format ...string) (time.Time, error)
 	IsEmpty(name string) bool
 }
@@ -110,25 +130,22 @@ type IRequest interface {
 	Check(field ...string) error
 
 	//GetMap 将当前请求转换为map并返回
-	GetMap() (map[string]interface{}, error)
+	GetMap() (types.XMap, error)
 
 	//GetRawBody 获取请求的body参数
-	GetRawBody(encoding ...string) (string, error)
+	GetRawBody(encoding ...string) (s []byte, err error)
 
 	//GetBody 获取请求的参数
-	GetBody(encoding ...string) (string, error)
+	GetBody() (string, error)
 
 	//GetBodyMap 将body转换为map
-	GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
-
-	// //GetTrace 获取请求的trace信息
-	// GetTrace() string
+	GetBodyMap() (map[string]interface{}, error)
 
 	//GetPlayload 更改名称 @fix
 	GetPlayload() string
 
 	//GetCookie 获取请求Cookie
-	GetCookie(string) (string, bool)
+	GetCookie(string) string
 
 	//GetHeader 获取头信息
 	GetHeader(string) string

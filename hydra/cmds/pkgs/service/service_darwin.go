@@ -287,9 +287,8 @@ func (s *darwinLaunchdService) SystemLogger(errs chan<- error) (Logger, error) {
 	return newSysLogger(s.Name, errs)
 }
 
-
 func (s *darwinLaunchdService) isInstalled() bool {
-	confPath, err := s.configPath()
+	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return false
 	}

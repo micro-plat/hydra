@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf/server/task"
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/global"
 )
 
 //Server cron服务器
@@ -15,7 +15,7 @@ type Server struct {
 	addr    string
 }
 
-//NewServer 创建mqc服务器
+//NewServer 创建cron服务器
 func NewServer(tasks ...*task.Task) (t *Server, err error) {
 	t = &Server{Processor: NewProcessor()}
 	if err := t.Processor.Add(tasks...); err != nil {
@@ -72,5 +72,5 @@ func (s *Server) Resume() (bool, error) {
 
 //GetAddress 获取当前服务地址
 func (s *Server) GetAddress() string {
-	return fmt.Sprintf("cron://%s", net.GetLocalIPAddress())
+	return fmt.Sprintf("cron://%s", global.LocalIP())
 }
