@@ -184,12 +184,10 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 
 	buff := []byte(content)
 	e := c.path.GetEncoding()
-	var err error
-
 	if e != "utf-8" {
-		buff, err = encoding.Encode(content, e)
-		if err != nil {
-			return fmt.Errorf("输出时进行%s编码转换错误：%w %s", e, err, content)
+		buff1, err := encoding.Encode(content, e)
+		if err == nil {
+			buff = buff1
 		}
 	}
 	c.ContentType(ctyp)
