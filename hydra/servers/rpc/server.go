@@ -68,7 +68,6 @@ func (s *Server) Start() error {
 		s.running = false
 		return err
 	}
-
 }
 
 func GetAddress(addr string) (string, error) {

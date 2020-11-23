@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -58,7 +59,6 @@ func TestProcessor_Add(t *testing.T) {
 		err := s.Add(tt.ts...)
 		assert.Equalf(t, tt.wantErr, err == nil, tt.name, err)
 		assert.Equalf(t, 4+tt.count, len(s.Engine.RouterGroup.Handlers)+len(s.Engine.Routes()), tt.name+",服务数量")
-
 	}
 }
 
@@ -126,5 +126,26 @@ func TestProcessor_Resume(t *testing.T) {
 		got, err := s.Resume()
 		assert.Equalf(t, tt.wantErr, err == nil, tt.name, err)
 		assert.Equalf(t, tt.want, got, tt.name, got)
+	}
+}
+
+func TestProcessor_getOffset(t *testing.T) {
+
+	tests := []struct {
+		name string
+		args *task.Task
+	}{
+		{name: "111", args: task.NewTask("@every 1s", "/server1")},
+	}
+	for _, tt := range tests {
+		s := NewProcessor()
+		taska, _ := NewCronTask(tt.args)
+		for i := 0; i < 10; i++ {
+			now := time.Now()
+			next := taska.NextTime(now)
+			gotPos, gotCircle := s.getOffset(now, next)
+			fmt.Println("--", gotPos, "--", gotCircle)
+			time.Sleep(2 * time.Second)
+		}
 	}
 }
