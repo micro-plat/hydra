@@ -37,7 +37,7 @@ func NewConf() *SConf {
 }
 
 //NewConfBy 构建配置信息
-func NewConfBy(platName, clusterName string) *SConf {
+func NewConfBy(platName, clusterName string, addr ...string) *SConf {
 	c := &SConf{
 		PlatName:    platName,
 		ClusterName: clusterName,
@@ -45,6 +45,10 @@ func NewConfBy(platName, clusterName string) *SConf {
 		//registryAddr: "zk://192.168.0.101",
 		registryAddr: "lm://.",
 	}
+	if len(addr) > 0 {
+		c.registryAddr = addr[0]
+	}
+
 	//API  路由信息
 	c.Service.API = services.NewORouter()
 

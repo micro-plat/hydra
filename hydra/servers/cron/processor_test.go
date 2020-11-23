@@ -58,7 +58,6 @@ func TestProcessor_Add(t *testing.T) {
 		err := s.Add(tt.ts...)
 		assert.Equalf(t, tt.wantErr, err == nil, tt.name, err)
 		assert.Equalf(t, 4+tt.count, len(s.Engine.RouterGroup.Handlers)+len(s.Engine.Routes()), tt.name+",服务数量")
-
 	}
 }
 

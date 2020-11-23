@@ -94,6 +94,9 @@ func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 	rpath := l.formatPath(path)
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
+		if strings.HasSuffix(rpath, ".init") {
+			return []byte{}, 0, nil
+		}
 		return nil, 0, errors.New(rpath + "不存在")
 	}
 	if !fs.IsDir() {

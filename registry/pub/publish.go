@@ -95,7 +95,6 @@ func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID str
 	input["addr"] = serviceAddr
 	input["cluster_id"] = clusterID
 	input["time"] = time.Now().Unix()
-
 	buff, err := jsons.Marshal(input)
 	if err != nil {
 		return fmt.Errorf("服务器发布数据转换为json失败:%w", err)
@@ -208,7 +207,6 @@ func (p *Publisher) PubDNSNode(serverName string) (map[string]string, error) {
 //PubServerNode 发布集群节点，用于服务监控
 func (p *Publisher) PubServerNode(serverName string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetServerPubPath(), fmt.Sprintf("%s_%s_", serverName, p.c.GetServerID()))
-
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)
 	if err != nil {
 		return nil, fmt.Errorf("服务发布失败:(%s)[%v]", path, err)
