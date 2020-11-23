@@ -10,14 +10,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro-plat/hydra/components/caches"
-	"github.com/micro-plat/hydra/components/container"
+	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
 	"github.com/micro-plat/hydra/context"
 
+	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
+	"github.com/urfave/cli"
+
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 
+	_ "github.com/micro-plat/hydra/components/caches/cache/redis"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/mqc"
@@ -319,47 +322,46 @@ func TestResponsive_Notify(t *testing.T) {
 
 }
 
-var oncelock sync.Once
+func TestResponsive_Start_2(t *testing.T) {
 
-func BenchmarkResponsive_Start(b *testing.B) {
-	oncelock.Do(func() {
-		testInitServicesDef()
+	testInitServicesDef()
 
-		confObj := mocks.NewConf() //构建对象
-		confObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
-		confObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
-		confObj.MQC("redis://xxx") //初始化参数
+	confObj := mocks.NewConfBy("hydra_mqc", "test") //构建对象
+	confObj.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
+	confObj.Vars().Queue().Redis("xxx", queueredis.New(queueredis.WithConfigName("5.79")))
+	confObj.Vars().Cache().Redis("xxx", cacheredis.New(cacheredis.WithConfigName("5.79")))
+	confObj.MQC("redis://xxx").Queue(queue.NewQueue("queue1", "/mqc/test/service1"), queue.NewQueue("queue2", "/mqc/test/service2"))
+	global.FlagVal.PlatName = "hydra_mqc"
+	global.FlagVal.ClusterName = "test"
+	global.Def.Bind(&cli.Context{})
 
-		cnf := confObj.GetMQCConf()
+	//注册服务
+	services.Def.MQC("services1", func(ctx context.IContext) (r interface{}) {
+		ctx.Log().Info("services1ss")
+		return "success"
+	}, "queue1")
+	services.Def.MQC("services2", func(ctx context.IContext) (r interface{}) {
+		ctx.Log().Info("services1ss")
+		return "success"
+	}, "queue2")
 
-		//构建服务器
-		rsp, _ := mqc.NewResponsive(cnf)
+	cnf := confObj.GetMQCConf()
 
-		//添加队列
-		//rsp.Server.Processor.Add(queue.NewQueue("queue1", "services1"), queue.NewQueue("queue2", "services1"))
-
-		//注册服务
-		services.Def.MQC("services1", func(ctx context.IContext) (r interface{}) {
-			ctx.Log().Info("services1ss")
-			return "success"
-		}, "queue1")
-		services.Def.MQC("services2", func(ctx context.IContext) (r interface{}) {
-			ctx.Log().Info("services1ss")
-			return "success"
-		}, "queue2")
-
-		//启动服务器
-		rsp.Start()
-
-		//等待日志打印完成
-		time.Sleep(time.Second)
-	})
-
-	c := caches.NewStandardCache(container.NewContainer()).GetRegularCache("redis")
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		//往redis添加数据
-		c.Add("queue1","value1",60)
-		c.Add("queue2","value2",60)
+	//往redis添加数据
+	app.Cache.Save(cnf)
+	c := components.Def.Cache().GetRegularCache("xxx")
+	for i := 0; i < 10000; i++ {
+		c.Add("queue1", "value1", 120)
+		c.Add("queue2", "value2", 120)
 	}
+
+	//构建服务器
+	rsp, _ := mqc.NewResponsive(cnf)
+
+	//启动服务器
+	rsp.Start()
+
+	//等待日志打印完成
+	time.Sleep(time.Second * 1)
+
 }
