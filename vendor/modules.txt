@@ -92,7 +92,6 @@ github.com/leodido/go-urn
 github.com/mattn/go-isatty
 # github.com/mattn/go-oci8 v0.0.8
 ## explicit
-github.com/mattn/go-oci8
 # github.com/mholt/archiver v3.1.1+incompatible
 ## explicit
 github.com/mholt/archiver
@@ -108,7 +107,6 @@ github.com/micro-plat/gmq/mqtt/client
 # github.com/micro-plat/lib4go v1.0.2 => ../../../github.com/micro-plat/lib4go
 ## explicit
 github.com/micro-plat/lib4go/archiver
-github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
 github.com/micro-plat/lib4go/db
 github.com/micro-plat/lib4go/db/tpl

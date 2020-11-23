@@ -36,7 +36,6 @@ func NewBody(c context.IInnerContext, encoding string) *body {
 
 //GetBodyMap 读取body原串并返回map
 func (w *body) GetBodyMap() (map[string]interface{}, error) {
-
 	//从缓存中读取数据
 	if w.mapBody.hasRead {
 		if w.mapBody.err != nil {
@@ -73,8 +72,6 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 		for k, v := range values {
 			data[k] = strings.Join(v, ",")
 		}
-	default:
-		data["__body_"] = body
 	}
 	if w.mapBody.err != nil {
 		w.mapBody.err = fmt.Errorf("将%s转换为map失败:%w", body, w.mapBody.err)
@@ -87,9 +84,11 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 		for k, v := range values {
 			vs := make([]byte, 0, 10)
 			for _, tp := range v {
-				x, err := urlDecode([]byte(tp), w.encoding)
-				fmt.Println("url.query:", k, string(vs), tp, w.encoding, err)
-				vs = append(vs, x...)
+				if x, err := urlDecode([]byte(tp), w.encoding); err == nil {
+					vs = append(vs, x...)
+				} else {
+					vs = append(vs, tp...)
+				}
 			}
 
 			if x, ok := data[k]; ok {
@@ -152,7 +151,7 @@ func (w *body) GetRawBody(e ...string) (s []byte, err error) {
 
 }
 func urlDecode(v []byte, c string) ([]byte, error) {
-	if strings.ToLower(c) == "utf-8" {
+	if strings.ToLower(c) == encoding.UTF8 {
 		return v, nil
 	}
 	s, err := url.QueryUnescape(string(v))

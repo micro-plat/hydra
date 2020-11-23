@@ -478,8 +478,7 @@ func Test_rpath_GetCookie(t *testing.T) {
 	}, serverConf, conf.NewMeta())
 
 	for _, tt := range tests {
-		got, got1 := rpath.GetCookie(tt.cookieName)
+		got := rpath.GetCookie(tt.cookieName)
 		assert.Equal(t, tt.want, got, tt.name)
-		assert.Equal(t, tt.want1, got1, tt.name)
 	}
 }
