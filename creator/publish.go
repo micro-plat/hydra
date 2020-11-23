@@ -3,6 +3,12 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/micro-plat/lib4go/security/md5"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -10,10 +16,16 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+var backdirName string
+
 //Pub 将配置发布到配置中心
 func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
 	if err := c.Load(); err != nil {
 		return err
+	}
+	if cover {
+		backdirName = fmt.Sprintf("conf_%s", md5.Encrypt(time.Now().Format("02150405"))[:8])
+		os.Mkdir(backdirName, os.ModePerm)
 	}
 
 	//本地文件系统则直接使用toml序列化方式进行发布
@@ -81,6 +93,7 @@ func deleteAll(r registry.IRegistry, path string) error {
 		return err
 	}
 	for _, v := range list {
+		confBackup(r, v)
 		if err := r.Delete(v); err != nil {
 			return err
 		}
@@ -118,4 +131,13 @@ func getJSON(v interface{}) (value string, err error) {
 		return "", err
 	}
 	return string(buff), nil
+}
+
+func confBackup(regst registry.IRegistry, path string) {
+	databytes, _, _ := regst.GetValue(path)
+	if len(databytes) <= 0 {
+		return
+	}
+	filepath := fmt.Sprintf("%s/%s.json", backdirName, strings.Trim(strings.Replace(path, "/", "_", -1), "_"))
+	ioutil.WriteFile(filepath, databytes, os.FileMode(0444)) //os.ModePerm
 }
