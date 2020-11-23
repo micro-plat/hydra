@@ -53,18 +53,16 @@ func (c *rpath) GetEncoding() string {
 	}
 
 	//从请求header中获取
-	ctp := c.ctx.GetHeaders()["Content-Type"]
-	if strings.Contains(ctp[0], "charset=") {
-		c.encoding = strings.Split(ctp[0], "charset=")[1]
-	} else if charsets, ok := c.ctx.GetHeaders()["Accept-Charset"]; ok {
-		switch {
-		case strings.Contains(charsets[0], encoding.GB2312):
-			c.encoding = encoding.GB2312
-		case strings.Contains(charsets[0], encoding.GBK):
-			c.encoding = encoding.GBK
-		}
+	charsetStr := strings.Join(c.ctx.GetHeaders()["Content-Type"], ",")
+	if !strings.Contains(charsetStr, "charset=") {
+		charsetStr = strings.Join(c.ctx.GetHeaders()["Accept-Charset"], ",")
 	}
-
+	switch {
+	case strings.Contains(charsetStr, encoding.GB2312):
+		c.encoding = encoding.GB2312
+	case strings.Contains(charsetStr, encoding.GBK):
+		c.encoding = encoding.GBK
+	}
 	c.encoding = types.GetString(c.encoding, encoding.UTF8)
 	return c.encoding
 }
