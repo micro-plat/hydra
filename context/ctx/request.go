@@ -62,8 +62,17 @@ func (r *request) Bind(obj interface{}) error {
 		return fmt.Errorf("输入参数非struct %v", val.Kind())
 	}
 
-	if err := r.ctx.ShouldBind(obj); err != nil {
-		return err
+	if !r.body.hasReadBody {
+		if err := r.ctx.ShouldBind(obj); err != nil {
+			return err
+		}
+	} else {
+		mp, err := r.body.GetRawBodyMap(r.path.encoding)
+		if err != nil {
+			return err
+		}
+		var xmap types.XMap = mp
+		return xmap.ToStruct(obj)
 	}
 
 	if _, err := govalidator.ValidateStruct(obj); err != nil {

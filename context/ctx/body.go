@@ -36,13 +36,15 @@ func (w *body) GetRawBodyMap(encoding ...string) (map[string]interface{}, error)
 	data := make(map[string]interface{})
 	ctp := w.ctx.ContentType()
 	switch {
-	case strings.Contains(ctp, "xml"):
+	case strings.Contains(ctp, "/xml"):
 		mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
 		data, err = mxj.NewMapXml([]byte(body))
-	case strings.Contains(ctp, "yaml"):
+	case strings.Contains(ctp, "/yaml"):
 		err = yaml.Unmarshal([]byte(body), &data)
-	case strings.Contains(ctp, "json"):
+	case strings.Contains(ctp, "/json"):
 		err = json.Unmarshal([]byte(body), &data)
+	case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
+		panic("") //to do
 	default:
 		data["__body_"] = body
 	}
