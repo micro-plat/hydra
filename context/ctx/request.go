@@ -1,10 +1,8 @@
 package ctx
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -13,7 +11,6 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -21,22 +18,27 @@ import (
 type request struct {
 	ctx     context.IInnerContext
 	appConf app.IAPPConf
+	types.XMap
+	readMapErr error
 	*body
 	path *rpath
 	*file
 }
 
-//newRequest 构建请求的Request
+//NewRequest 构建请求的Request
 //自动对请求进行解码，响应结果进行编码。
 //当指定为gbk,gb2312后,请求方式为application/x-www-form-urlencoded或application/xml、application/json时内容必须编码为指定的格式，否则会解码失败
 func NewRequest(c context.IInnerContext, s app.IAPPConf, meta conf.IMeta) *request {
 	rpath := NewRpath(c, s, meta)
-	return &request{
+	req := &request{
 		ctx:  c,
-		body: NewBody(c, rpath),
+		body: NewBody(c, rpath.GetEncoding()),
+		XMap: make(map[string]interface{}),
 		path: rpath,
 		file: NewFile(c, meta),
 	}
+	req.XMap, req.readMapErr = req.body.GetBodyMap()
+	return req
 }
 
 //Path 获取请求路径信息
@@ -52,20 +54,32 @@ func (r *request) Param(key string) string {
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
 
+	//检查输入类型
 	val := reflect.ValueOf(obj)
-	if val.Kind() != reflect.Ptr {
-		return fmt.Errorf("输入参数非指针 %v", val.Kind())
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.Struct && val.Kind() != reflect.Map {
+		return fmt.Errorf("输入参数非struct,map %v", val.Kind())
 	}
 
-	val = val.Elem()
-	if val.Kind() != reflect.Struct {
-		return fmt.Errorf("输入参数非struct %v", val.Kind())
+	//获取body数据
+	mp, err := r.body.GetBodyMap()
+	if err != nil {
+		return err
+	}
+	if val.Kind() == reflect.Map {
+		obj = mp
+		return nil
 	}
 
-	if err := r.ctx.ShouldBind(obj); err != nil {
+	//处理数据结构转换
+	var xmap types.XMap = mp
+	if err := xmap.ToStruct(obj); err != nil {
 		return err
 	}
 
+	//验证数据格式
 	if _, err := govalidator.ValidateStruct(obj); err != nil {
 		err = fmt.Errorf("输入参数有误 %v", err)
 		return err
@@ -75,14 +89,8 @@ func (r *request) Bind(obj interface{}) error {
 
 //Check 检查输入参数和配置参数是否为空 @todo 各类请求的测试
 func (r *request) Check(field ...string) error {
-	data, _ := r.body.GetRawBodyMap()
+	data, _ := r.body.GetBodyMap()
 	for _, key := range field {
-		if _, ok := r.ctx.GetFormValue(key); ok {
-			continue
-		}
-		if _, ok := r.ctx.GetQuery(key); ok {
-			continue
-		}
 		if v, ok := data[key]; !ok || fmt.Sprint(v) == "" {
 			return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数:%s值不能为空", key))
 		}
@@ -92,11 +100,8 @@ func (r *request) Check(field ...string) error {
 
 //GetKeys 获取字段名称
 func (r *request) GetKeys() []string {
-	keys := make([]string, 0, len(r.ctx.GetForm()))
-	for k := range r.ctx.GetForm() {
-		keys = append(keys, k)
-	}
-	data, _ := r.body.GetRawBodyMap()
+	keys := make([]string, 0, 1)
+	data, _ := r.body.GetBodyMap()
 	for k := range data {
 		keys = append(keys, k)
 	}
@@ -104,98 +109,69 @@ func (r *request) GetKeys() []string {
 }
 
 //GetMap 获取请求的参数信息
-func (r *request) GetMap() (map[string]interface{}, error) {
-	forms := r.ctx.GetForm()
-	body, err := r.body.GetRawBodyMap()
-	if err != nil {
-		return nil, err
-	}
-	data := make(map[string]interface{})
-	for k, v := range forms {
-		data[k] = v[0]
-	}
-	for k, v := range body {
-		data[k] = v
-	}
-
-	return data, nil
-
+func (r *request) GetMap() (types.XMap, error) {
+	return r.XMap, r.readMapErr
 }
 
 //Get 获取字段的值
 func (r *request) Get(name string) (result string, ok bool) {
-	var fromBody bool
-	defer func() {
-		if ok && !fromBody { //只对url,form中的参数进行解码,body中的参数已经解码了无需再解码
-			u, err := url.QueryUnescape(result)
-			if err != nil {
-				panic(fmt.Errorf("url.unescape出错:%w", err))
-			}
-			rx, err := encoding.Decode(u, r.path.GetEncoding())
-			if err != nil {
-				result = u
-				return
-			}
-			result = string(rx)
-		}
-	}()
+	result, ok = r.XMap.MustString(name)
+	return result, ok
 
-	if result, ok = r.ctx.GetFormValue(name); ok {
-		return
-	}
-	fromBody = true
-	m, err := r.body.GetRawBodyMap()
-	if err != nil {
-		return "", false
-	}
-	v, b := m[name]
-	if !b {
-		return "", b
-	}
-	return fmt.Sprint(v), b
 }
 
-//GetString 获取字符串
+//GetString 从对象中获取数据值，如果不是字符串则返回空
 func (r *request) GetString(name string, def ...string) string {
-	if v, ok := r.Get(name); ok {
-		return v
-	}
-	return types.GetStringByIndex(def, 0, "")
+	value, _ := r.Get(name)
+	return types.GetString(value, def...)
 }
 
+//GetInt 从对象中获取数据值，如果不是字符串则返回0
 func (r *request) GetInt(name string, def ...int) int {
-	v, _ := r.Get(name)
-	return types.GetInt(v, def...)
+	value, _ := r.Get(name)
+	return types.GetInt(value, def...)
 }
 
-func (r *request) GetMax(name string, o ...int) int {
-	v := r.GetInt(name, o...)
-	return types.GetMax(v, o...)
+//GetInt32 从对象中获取数据值，如果不是字符串则返回0
+func (r *request) GetInt32(name string, def ...int32) int32 {
+	value, _ := r.Get(name)
+	return types.GetInt32(value, def...)
+}
 
-}
-func (r *request) GetMin(name string, o ...int) int {
-	v := r.GetInt(name, o...)
-	return types.GetMin(v, o...)
-}
+//GetInt64 从对象中获取数据值，如果不是字符串则返回0
 func (r *request) GetInt64(name string, def ...int64) int64 {
-	v, _ := r.Get(name)
-	return types.GetInt64(v, def...)
+	value, _ := r.Get(name)
+	return types.GetInt64(value, def...)
 }
+
+//GetFloat32 从对象中获取数据值，如果不是字符串则返回0
 func (r *request) GetFloat32(name string, def ...float32) float32 {
-	v, _ := r.Get(name)
-	return types.GetFloat32(v, def...)
+	value, _ := r.Get(name)
+	return types.GetFloat32(value, def...)
 }
+
+//GetFloat64 从对象中获取数据值，如果不是字符串则返回0
 func (r *request) GetFloat64(name string, def ...float64) float64 {
-	v, _ := r.Get(name)
-	return types.GetFloat64(v, def...)
+	value, _ := r.Get(name)
+	return types.GetFloat64(value, def...)
 }
+
+//GetDecimal 获取类型为Decimal的值
+func (r *request) GetDecimal(name string, def ...types.Decimal) types.Decimal {
+	value, _ := r.Get(name)
+	return types.GetDecimal(value, def...)
+}
+
+//GetBool 从对象中获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
 func (r *request) GetBool(name string, def ...bool) bool {
-	v, _ := r.Get(name)
-	return types.GetBool(v, def...)
+	value, _ := r.Get(name)
+	return types.GetBool(value, def...)
 }
+
+//GetDatetime 获取时间字段
 func (r *request) GetDatetime(name string, format ...string) (time.Time, error) {
-	v, _ := r.Get(name)
-	return types.GetDatetime(v, format...)
+	value, _ := r.Get(name)
+	return types.GetDatetime(value, format...)
 }
 func (r *request) IsEmpty(name string) bool {
 	_, ok := r.Get(name)
@@ -204,14 +180,8 @@ func (r *request) IsEmpty(name string) bool {
 
 //GetPlayload 获取trace信息 //@fix GetTrace 改为的GetPlayload @hj
 func (r *request) GetPlayload() string {
-	data, err := r.GetMap()
-	if err != nil {
-		return err.Error()
-	}
-	if buff, err := json.Marshal(data); err == nil {
-		return string(buff)
-	}
-	return ""
+	raw, _ := r.GetRawBody()
+	return string(raw)
 }
 
 //GetHeader 获取请求头信息
