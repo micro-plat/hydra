@@ -138,6 +138,6 @@ func confBackup(regst registry.IRegistry, path string) {
 	if len(databytes) <= 0 {
 		return
 	}
-	filepath := fmt.Sprintf("%s/%s.json", backdirName, strings.Trim(strings.Replace(path, "/", "_", -1), "_"))
+	filepath := fmt.Sprintf("%s/%s.data", backdirName, strings.Trim(strings.Replace(path, "/", "_", -1), "_"))
 	ioutil.WriteFile(filepath, databytes, os.FileMode(0444)) //os.ModePerm
 }
