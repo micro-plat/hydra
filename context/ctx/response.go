@@ -186,7 +186,7 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 
 	buff := []byte(content)
 	e := c.path.GetEncoding()
-	if e != "utf-8" {
+	if e != encoding.UTF8 {
 		buff1, err := encoding.Encode(content, e)
 		if err == nil {
 			buff = buff1

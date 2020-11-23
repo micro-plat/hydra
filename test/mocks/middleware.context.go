@@ -174,7 +174,7 @@ type MockRequest struct {
 	MockParamMap map[string]string
 	MockQueryMap map[string]interface{}
 	MockBodyMap  map[string]interface{}
-	MockCookies  map[string]string
+	MockCookies  map[string]interface{}
 	MockHeader   http.Header
 	extcontext.IGetter
 	extcontext.IFile
@@ -211,7 +211,7 @@ func (r *MockRequest) Check(field ...string) error {
 }
 
 //GetMap 将当前请求转换为map并返回
-func (r *MockRequest) GetMap() (map[string]interface{}, error) {
+func (r *MockRequest) GetMap() (types.XMap, error) {
 	if r.MockQueryMap == nil {
 		return nil, fmt.Errorf("人工制造错误")
 	}
@@ -219,18 +219,18 @@ func (r *MockRequest) GetMap() (map[string]interface{}, error) {
 }
 
 //GetRawBody 获取请求的body参数
-func (r *MockRequest) GetRawBody(encoding ...string) (string, error) {
-	return "", nil
+func (r *MockRequest) GetRawBody(encoding ...string) ([]byte, error) {
+	return nil, nil
 }
 
 //GetBody 获取请求的body参数
-func (r *MockRequest) GetBody(encoding ...string) (string, error) {
+func (r *MockRequest) GetBody() (string, error) {
 	bytes, _ := json.Marshal(r.MockBodyMap)
 	return string(bytes), nil
 }
 
 //GetBodyMap 将body转换为map
-func (r *MockRequest) GetBodyMap(encoding ...string) (map[string]interface{}, error) {
+func (r *MockRequest) GetBodyMap() (map[string]interface{}, error) {
 	return r.MockBodyMap, nil
 }
 
@@ -245,9 +245,11 @@ func (r *MockRequest) GetPlayload() string {
 }
 
 //GetCookie 获取请求Cookie
-func (p *MockRequest) GetCookie(name string) (string, bool) {
-	v, ok := p.MockCookies[name]
-	return v, ok
+func (p *MockRequest) GetCookie(name string) string {
+	if v, ok := p.MockCookies[name]; ok {
+		return fmt.Sprint(v)
+	}
+	return ""
 }
 
 //GetHeader 获取头信息
@@ -261,7 +263,7 @@ func (p *MockRequest) GetHeaders() http.Header {
 }
 
 //GetCookies 获取cookie信息
-func (p *MockRequest) GetCookies() map[string]string {
+func (p *MockRequest) GetCookies() types.XMap {
 	return p.MockCookies
 }
 
