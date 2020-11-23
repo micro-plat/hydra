@@ -154,7 +154,7 @@ type IRequest interface {
 	GetHeaders() http.Header
 
 	//GetCookies 获取cookie信息
-	GetCookies() map[string]string
+	GetCookies() types.XMap
 
 	IGetter
 	IFile

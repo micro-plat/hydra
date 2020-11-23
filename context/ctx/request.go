@@ -18,6 +18,7 @@ import (
 type request struct {
 	ctx     context.IInnerContext
 	appConf app.IAPPConf
+	cookies types.XMap
 	types.XMap
 	readMapErr error
 	*body
@@ -195,22 +196,19 @@ func (r *request) GetHeaders() http.Header {
 }
 
 //GetHeaders 获取请求的header
-func (r *request) GetCookies() map[string]string {
-	out := make(map[string]string)
+func (r *request) GetCookies() types.XMap {
+	if r.cookies != nil {
+		return r.cookies
+	}
+	r.cookies = make(map[string]interface{})
 	cookies := r.ctx.GetCookies()
 	for _, cookie := range cookies {
-		out[cookie.Name] = cookie.Value
+		r.cookies[cookie.Name] = cookie.Value
 	}
-	return out
+	return r.cookies
 }
 
 //GetCookie 获取cookie信息
 func (r *request) GetCookie(name string) string {
-	cookies := r.ctx.GetCookies()
-	for _, cookie := range cookies {
-		if name == cookie.Name {
-			return cookie.Value
-		}
-	}
-	return ""
+	return r.GetCookies().GetString(name)
 }
