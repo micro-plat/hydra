@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -35,9 +34,9 @@ func Test_request_Bind(t *testing.T) {
 		{name: "正确绑定", body: `{"key":"1","value":"2"}`, out: &result{}, want: &result{Key: "1", Value: "2"}},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test", "request") //构建对象
+	confObj.API(":8080")                                          //初始化参数
+	serverConf := confObj.GetAPIConf()                            //获取配置
 
 	for _, tt := range tests {
 		r := ctx.NewRequest(&mocks.TestContxt{Form: url.Values{"__body_": []string{tt.body}}}, serverConf, conf.NewMeta())
@@ -58,7 +57,7 @@ func Test_request_Bind_WithHttp(t *testing.T) {
 		body        string
 		want        string
 	}{
-		{name: "绑定xml数据", contentType: "application/xml;charset=UTF-8", //gin 不支持gbk编码的xml绑定
+		{name: "绑定xml数据", contentType: "application/xml;charset=utf-8", //gin 不支持gbk编码的xml绑定
 			body: `<?xml version="1.0" encoding="utf-8" ?><data><key>数据绑定bind!@#$%^&amp;*()_+</key><value>12</value></data>`,
 			want: `{"key":"数据绑定bind!@#$%^\u0026*()_+","value":"12"}`},
 		{name: "绑定json数据", contentType: "application/json;charset=utf-8",
@@ -75,10 +74,9 @@ func Test_request_Bind_WithHttp(t *testing.T) {
 	startServer()
 	for _, tt := range tests {
 		resp, err := http.Post("http://localhost:9091/request/bind", tt.contentType, strings.NewReader(tt.body))
-		fmt.Println(err)
 		assert.Equal(t, false, err != nil, tt.name)
 		defer resp.Body.Close()
-		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "application/json; charset=utf-8", resp.Header["Content-Type"][0], tt.name)
 		assert.Equal(t, "200 OK", resp.Status, tt.name)
 		assert.Equal(t, 200, resp.StatusCode, tt.name)
 		body, err := ioutil.ReadAll(resp.Body)
@@ -106,9 +104,9 @@ func Test_request_Check(t *testing.T) {
 		}, args: []string{"key1", "key2"}, wantErrStr: "输入参数:key1值不能为空", wantErr: true},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test1", "request1") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 
 	for _, tt := range tests {
 		r := ctx.NewRequest(tt.ctx, serverConf, conf.NewMeta())
@@ -132,13 +130,13 @@ func Test_request_Check_WithHttp(t *testing.T) {
 		// 	want: `{"data":"success"}`},
 		{name: "检查json数据", contentType: "application/json;charset=utf-8",
 			body: `{"key":"12","value":"12"}`,
-			want: `{"data":"success"}`},
+			want: "success"},
 		{name: "检查form数据", contentType: "application/x-www-form-urlencoded; charset=utf-8",
 			body: `key=12&value=12`,
-			want: `{"data":"success"}`},
+			want: "success"},
 		{name: "检查yaml数据", contentType: "application/x-yaml;charset=utf-8",
 			body: "key: key \nvalue: value",
-			want: `{"data":"success"}`},
+			want: "success"},
 	}
 
 	startServer()
@@ -146,7 +144,7 @@ func Test_request_Check_WithHttp(t *testing.T) {
 		resp, err := http.Post("http://localhost:9091/request/check", tt.contentType, strings.NewReader(tt.body))
 		assert.Equal(t, false, err != nil, tt.name)
 		defer resp.Body.Close()
-		assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], tt.name)
+		assert.Equal(t, "text/plain; charset=utf-8", resp.Header["Content-Type"][0], tt.name)
 		assert.Equal(t, "200 OK", resp.Status, tt.name)
 		assert.Equal(t, 200, resp.StatusCode, tt.name)
 		body, err := ioutil.ReadAll(resp.Body)
@@ -157,9 +155,9 @@ func Test_request_Check_WithHttp(t *testing.T) {
 }
 
 func Test_request_GetKeys(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test2", "request2") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 
 	r := ctx.NewRequest(&mocks.TestContxt{
 		Form:       url.Values{"key3": []string{}},
@@ -175,9 +173,9 @@ func Test_request_GetKeys(t *testing.T) {
 }
 
 func Test_request_GetMap(t *testing.T) {
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test3", "request3") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 
 	r := ctx.NewRequest(&mocks.TestContxt{
 		Form:       url.Values{"key3": []string{"value3"}},
@@ -209,9 +207,9 @@ func Test_request_Get(t *testing.T) {
 		{name: "获取不存在key的值", args: args{name: "key3"}, wantResult: "", wantOk: false},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test4", "request4") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 	r := ctx.NewRequest(&mocks.TestContxt{
 		Body:       `{"key1":"value1"}`,
 		Form:       url.Values{"key2": []string{"%20+value2"}},
@@ -238,9 +236,9 @@ func Test_rpath_GetCookies(t *testing.T) {
 		}, want: map[string]string{"cookie1": "value1", "cookie2": "value2"}},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test5", "request5") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 	for _, tt := range tests {
 		c := ctx.NewRequest(tt.ctx, serverConf, conf.NewMeta())
 		got := c.GetCookies()
@@ -472,9 +470,9 @@ func Test_rpath_GetCookie(t *testing.T) {
 		{name: "获取不存在cookies", cookieName: "cookie3", want: "", want1: false},
 	}
 
-	confObj := mocks.NewConf()         //构建对象
-	confObj.API(":8080")               //初始化参数
-	serverConf := confObj.GetAPIConf() //获取配置
+	confObj := mocks.NewConfBy("context_request_test6", "request6") //构建对象
+	confObj.API(":8080")                                            //初始化参数
+	serverConf := confObj.GetAPIConf()                              //获取配置
 	rpath := ctx.NewRequest(&mocks.TestContxt{
 		Cookie: []*http.Cookie{&http.Cookie{Name: "cookie1", Value: "value1"}, &http.Cookie{Name: "cookie2", Value: "value2"}},
 	}, serverConf, conf.NewMeta())

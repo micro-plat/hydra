@@ -42,7 +42,7 @@ func xTestRPCGetConf(t *testing.T) {
 		want *rpc.Server
 	}
 
-	conf := mocks.NewConf()
+	conf := mocks.NewConfBy("hydraconf_rpc_test2", "rpcmain")
 	pub.New(conf.GetRPCConf().GetServerConf())
 
 	time.Sleep(time.Second)

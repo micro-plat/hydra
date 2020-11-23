@@ -33,12 +33,13 @@ func TestLogging(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		time.Sleep(time.Second)
 		//初始化测试用例参数
 		ctx := &mocks.MiddleContext{
 			MockUser:     &mocks.MockUser{MockClientIP: tt.clientIP, MockRequestID: tt.requstID},
 			MockRequest:  &mocks.MockRequest{MockPath: &mocks.MockPath{MockURL: tt.requestURL, MockMethod: tt.method}},
 			MockResponse: &mocks.MockResponse{MockStatus: tt.responseStatus},
-			MockAPPConf:  mocks.NewConf().GetAPIConf(),
+			MockAPPConf:  mocks.NewConfBy("middleware_logging_test", "logging").GetAPIConf(),
 		}
 
 		//构建的新的os.Stdout

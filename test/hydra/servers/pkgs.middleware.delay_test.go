@@ -35,7 +35,7 @@ func TestDelay(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_delay_test", "delay")
 		//初始化测试用例参数
 		mockConf.GetAPI()
 		serverConf := mockConf.GetAPIConf()

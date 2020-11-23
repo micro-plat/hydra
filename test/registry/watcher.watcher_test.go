@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewCArgsByChange(t *testing.T) {
-	confObj := mocks.NewConf() //构建对象
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_test", "rgtwatchertest") //构建对象
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf() //初始化参数
 	c := apiconf.GetServerConf()    //获取配置

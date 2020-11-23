@@ -17,7 +17,7 @@ import (
 )
 
 func TestChildWatcher_Close(t *testing.T) {
-	confObj := mocks.NewConf()
+	confObj := mocks.NewConfBy("hydra_rgst_watcher_close1", "rgtwatchcloseldest1")
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()

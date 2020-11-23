@@ -48,7 +48,7 @@ func TestAuthBasic(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockConf := mocks.NewConf()
+		mockConf := mocks.NewConfBy("middleware_basic_test", "basic")
 		//初始化测试用例参数
 		confB := mockConf.GetAPI()
 		if tt.isSet {

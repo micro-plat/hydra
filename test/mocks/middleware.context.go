@@ -450,6 +450,7 @@ func (res *MockResponse) WriteAny(v interface{}) error {
 //File 向响应流中写入文件(立即写入)
 func (res *MockResponse) File(path string) {
 	res.MockContent = path
+	res.MockStatus = http.StatusOK
 }
 
 //Abort 终止当前请求继续执行
