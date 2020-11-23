@@ -12,7 +12,6 @@ import (
 
 //GetString 获取字符串
 func GetString(v interface{}, def ...string) string {
-
 	if !IsEmpty(v) {
 		switch v.(type) {
 		case float32:

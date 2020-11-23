@@ -24,7 +24,7 @@ var _ ICRON = CRON
 //ICRON CRON动态服务
 type ICRON interface {
 	Add(cron string, service string) ICRON
-	Remove(cron string, service string) ICRON //暴露remove方法  @hj
+	Remove(cron string, service string) ICRON
 }
 
 type cron struct {

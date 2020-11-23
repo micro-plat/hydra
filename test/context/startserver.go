@@ -53,7 +53,7 @@ func startServer() {
 }
 
 func GetBodyMap(ctx hydra.IContext) interface{} {
-	raw, err := ctx.Request().GetRawBodyMap()
+	raw, err := ctx.Request().GetBodyMap()
 	if err != nil {
 		return fmt.Errorf("getBody出错")
 	}

@@ -17,13 +17,13 @@ type Server struct {
 }
 
 //NewServer 创建mqc服务器
-func NewServer(proto string, raw []byte, tasks ...*queue.Queue) (t *Server, err error) {
+func NewServer(proto string, raw []byte, queues ...*queue.Queue) (t *Server, err error) {
 	p, err := NewProcessor(proto, string(raw))
 	if err != nil {
 		return nil, err
 	}
 	t = &Server{Processor: p}
-	if err := t.Processor.Add(tasks...); err != nil {
+	if err := t.Processor.Add(queues...); err != nil {
 		return nil, err
 	}
 	return

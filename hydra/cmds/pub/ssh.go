@@ -3,6 +3,8 @@ package pub
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -198,4 +200,11 @@ func (s *sshClient) Close() error {
 //删除工作目录
 func (s *sshClient) RmWorkDir() (err error) {
 	return s.run(cmdRm.CMD(s.tmpPath))
+}
+func getScript() (string, string) {
+	bytes, err := ioutil.ReadFile("pub.sh")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return "pub.sh", string(bytes)
 }

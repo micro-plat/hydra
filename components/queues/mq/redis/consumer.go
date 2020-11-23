@@ -80,6 +80,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 							break START
 						}
 						if concurrency == 0 {
+							//默认10个线程获取任务，开启新协程处理任务
 							go callback(message)
 						} else {
 							callback(message)
@@ -101,8 +102,9 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
 						if err := cmd.Err(); err != nil {
-							//这里打错误日志   会造成退出程序的时候报一次异常
-							// consumer.log.Error("从redis中获取消息失败:%w", err)   && err.Error() != "redis: nil"
+							if !consumer.done {
+								consumer.log.Error("从redis中获取消息失败:%w", err)
+							}
 							continue
 						}
 						message := NewRedisMessage(cmd)
@@ -134,6 +136,7 @@ func (consumer *Consumer) UnConsume(queue string) {
 //Close 关闭当前连接
 func (consumer *Consumer) Close() {
 	consumer.once.Do(func() {
+		consumer.done = true
 		close(consumer.closeCh)
 	})
 
@@ -146,6 +149,7 @@ func (consumer *Consumer) Close() {
 		return
 	}
 	consumer.client.Close()
+
 }
 
 type cresolver struct {

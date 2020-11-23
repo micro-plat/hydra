@@ -75,7 +75,7 @@ func getToken(ctx context.IContext, jwt *xjwt.JWTAuth) string {
 	case xjwt.SourceHeader, xjwt.SourceHeaderShort: // "HEADER", "H":
 		return ctx.Request().GetHeader(jwt.Name)
 	default:
-		cookie, _ := ctx.Request().GetCookie(jwt.Name)
+		cookie := ctx.Request().GetCookie(jwt.Name)
 		return cookie
 	}
 }

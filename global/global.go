@@ -171,24 +171,13 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 
 //check 检查参数
 func (m *global) check() (err error) {
-	if FlagVal.RegistryAddr != "" {
-		m.RegistryAddr = FlagVal.RegistryAddr
-	}
-	if FlagVal.Name != "" {
-		m.Name = FlagVal.Name
-	}
-	if FlagVal.PlatName != "" {
-		m.PlatName = FlagVal.PlatName
-	}
-	if FlagVal.SysName != "" {
-		m.SysName = FlagVal.SysName
-	}
-	if FlagVal.ServerTypeNames != "" {
-		m.ServerTypeNames = FlagVal.ServerTypeNames
-	}
-	if FlagVal.ClusterName != "" {
-		m.ClusterName = FlagVal.ClusterName
-	}
+
+	m.RegistryAddr = types.GetString(FlagVal.RegistryAddr, m.RegistryAddr)
+	m.Name = types.GetString(FlagVal.Name, m.Name)
+	m.PlatName = types.GetString(FlagVal.PlatName, m.PlatName)
+	m.SysName = types.GetString(FlagVal.SysName, m.SysName)
+	m.ServerTypeNames = types.GetString(FlagVal.ServerTypeNames, m.ServerTypeNames)
+	m.ClusterName = types.GetString(FlagVal.ClusterName, m.ClusterName)
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
@@ -203,27 +192,15 @@ func (m *global) check() (err error) {
 			return fmt.Errorf("%s不支持，只能是%v", s, ServerTypes)
 		}
 	}
-	if m.SysName == "" {
-		m.SysName = AppName
-	}
-	if m.RegistryAddr == "" {
-		m.RegistryAddr = "lm://."
-	}
+	m.SysName = types.GetString(m.SysName, AppName)
+	m.RegistryAddr = types.GetString(m.RegistryAddr, "lm://.")
+	m.ClusterName = types.GetString(m.ClusterName, "prod")
 
-	if m.RegistryAddr == "" {
-		return fmt.Errorf("注册中心地址不能为空")
-	}
 	if m.PlatName == "" {
 		return fmt.Errorf("平台名称不能为空")
 	}
-	if m.SysName == "" {
-		return fmt.Errorf("系统名称不能为空")
-	}
 	if len(m.ServerTypes) == 0 {
 		return fmt.Errorf("服务器类型不能为空")
-	}
-	if m.ClusterName == "" {
-		return fmt.Errorf("集群名称不能为空")
 	}
 	if m.Trace != "" && !types.StringContains(traces, m.Trace) {
 		return fmt.Errorf("trace名称只能是%v", traces)

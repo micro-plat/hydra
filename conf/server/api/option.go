@@ -1,5 +1,13 @@
 package api
 
+import "github.com/micro-plat/hydra/conf/server/router"
+
+//WithEncoding 添加编码
+var WithEncoding = router.WithEncoding
+
+//WithPages 添加页面地址
+var WithPages = router.WithPages
+
 //Option 配置选项
 type Option func(*Server)
 

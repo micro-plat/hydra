@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/encoding"
+	"github.com/micro-plat/lib4go/types"
 )
 
 var _ context.IPath = &rpath{}
@@ -46,25 +48,22 @@ func (c *rpath) GetEncoding() string {
 	if err != nil {
 		panic(fmt.Errorf("url.Router配置错误:%w", err))
 	}
-	c.encoding = routerObj.Encoding
-	if c.encoding != "" {
+	if c.encoding = routerObj.Encoding; c.encoding != "" {
 		return c.encoding
 	}
 
 	//从请求header中获取
-	if ctp, ok := c.ctx.GetHeaders()["Content-Type"]; ok {
-		for _, param := range strings.Split(ctp[0], ";") {
-			if strings.Contains(param, "charset=") {
-				c.encoding = strings.Split(param, "charset=")[1]
-				break
-			}
-		}
+	charsetStr := strings.Join(c.ctx.GetHeaders()["Content-Type"], ",")
+	if !strings.Contains(charsetStr, "charset=") {
+		charsetStr = strings.Join(c.ctx.GetHeaders()["Accept-Charset"], ",")
 	}
-
-	if c.encoding == "" {
-		c.encoding = "utf-8"
+	switch {
+	case strings.Contains(charsetStr, encoding.GB2312):
+		c.encoding = encoding.GB2312
+	case strings.Contains(charsetStr, encoding.GBK):
+		c.encoding = encoding.GBK
 	}
-
+	c.encoding = types.GetString(c.encoding, encoding.UTF8)
 	return c.encoding
 }
 
