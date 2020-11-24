@@ -21,22 +21,6 @@ import (
 	"github.com/micro-plat/lib4go/encoding"
 )
 
-func getTestMIMEMultipartPOSTForm() string {
-	file, _ := os.Open("upload.test.txt")
-	defer file.Close()
-	body := &bytes.Buffer{}
-	// 文件写入 body
-	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("upload", filepath.Base("upload.test.txt"))
-	io.Copy(part, file)
-	writer.Close()
-	return body.String()
-}
-
-func getUploadBody() string {
-	return "Content-Disposition: form-data; name=\"upload\"; filename=\"upload.test.txt\"\r\nContent-Type: application/octet-stream\r\n\r\nADASDASDASFHNOJM~!@#$%^&*"
-}
-
 func Test_body_GetRawBody(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -448,10 +432,34 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 		{name: "1.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
 		{name: "1.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
+		{name: "2.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为GET,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "UTF-8", value: value},
+		{name: "2.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为GET,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "UTF-8", value: value},
+		{name: "2.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为GET,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "UTF-8", value: value},
+		{name: "3.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为DELETE,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "UTF-8", value: value},
+		{name: "3.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为DELETE,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "UTF-8", value: value},
+		{name: "3.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为DELETE,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "UTF-8", value: value},
+		{name: "4.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PUT,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "4.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PUT,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "4.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PUT,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "5.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PATCH,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "UTF-8", value: value},
+		{name: "5.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PATCH,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "UTF-8", value: value},
+		{name: "5.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为PATCH,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "GBK", value: value},
 
-		{name: "2.1 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.2 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.3 content-type为application/x-www-form-urlencoded,编码为UTF-8,方法为POST,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.4 content-type为application/x-www-form-urlencoded,编码为GBK,方法为POST,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "GBK", value: value},
+		{name: "1.5 content-type为application/x-www-form-urlencoded,编码为GBK,方法为POST,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "GBK", value: value},
+		{name: "1.6 content-type为application/x-www-form-urlencoded,编码为GBK,方法为POST,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "POST", encoding: "GBK", value: value},
+		{name: "2.4 content-type为application/x-www-form-urlencoded,编码为GBK,方法为GET,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "GBK", value: value},
+		{name: "2.5 content-type为application/x-www-form-urlencoded,编码为GBK,方法为GET,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "GBK", value: value},
+		{name: "2.6 content-type为application/x-www-form-urlencoded,编码为GBK,方法为GET,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "GET", encoding: "GBK", value: value},
+		{name: "3.4 content-type为application/x-www-form-urlencoded,编码为GBK,方法为DELETE,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "GBK", value: value},
+		{name: "3.5 content-type为application/x-www-form-urlencoded,编码为GBK,方法为DELETE,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "GBK", value: value},
+		{name: "3.6 content-type为application/x-www-form-urlencoded,编码为GBK,方法为DELETE,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "DELETE", encoding: "GBK", value: value},
+		{name: "4.4 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PUT,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "4.5 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PUT,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "4.6 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PUT,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "5.4 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PATCH,body为空,query不为空", isQuery: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "GBK", value: value},
+		{name: "5.5 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PATCH,body不为空,query为空", isBody: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "GBK", value: value},
+		{name: "5.6 content-type为application/x-www-form-urlencoded,编码为GBK,方法为PATCH,body和query不为空", isQuery: true, isBody: true, contentType: "application/x-www-form-urlencoded", method: "PATCH", encoding: "GBK", value: value},
 	}
 
 	for _, tt := range tests {
@@ -485,13 +493,16 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBody()
-		if tt.isBody && !tt.isQuery {
-			assert.Equal(t, `a=2&key=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
-		}
 		if tt.isQuery && !tt.isBody {
 			assert.Equal(t, `a=1&query=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
 		}
-		if tt.isQuery && tt.isBody {
+		if tt.isBody && (tt.method == "GET" || tt.method == "DELETE") {
+			assert.Equal(t, `a=2&key=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
+		}
+		if tt.isBody && !tt.isQuery {
+			assert.Equal(t, `a=2&key=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
+		}
+		if tt.isQuery && tt.isBody && (tt.method != "GET" && tt.method != "DELETE") { //body和query的数据都有
 			assert.Equal(t, `a=2&a=1&key=中文~!@#$%^&*()_+{}:"<>?&query=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
 		}
 		gotS2, err := w.GetBody()
@@ -499,6 +510,22 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 
+}
+
+func getTestMIMEMultipartPOSTForm() string {
+	file, _ := os.Open("upload.test.txt")
+	defer file.Close()
+	body := &bytes.Buffer{}
+	// 文件写入 body
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("upload", filepath.Base("upload.test.txt"))
+	io.Copy(part, file)
+	writer.Close()
+	return body.String()
+}
+
+func getUploadBody() string {
+	return "Content-Disposition: form-data; name=\"upload\"; filename=\"upload.test.txt\"\r\nContent-Type: application/octet-stream\r\n\r\nADASDASDASFHNOJM~!@#$%^&*"
 }
 
 func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
@@ -512,44 +539,29 @@ func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为multipart/form-data,编码为UTF-8,方法为POST", contentType: "multipart/form-data", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为multipart/form-data,编码为UTF-8,方法为GET", contentType: "multipart/form-data", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.3 content-type为multipart/form-data,编码为UTF-8,方法为PUT", contentType: "multipart/form-data", method: "PUT", encoding: "UTF-8", value: value},
-		{name: "1.4 content-type为multipart/form-data,编码为UTF-8,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", encoding: "UTF-8", value: value},
-		{name: "1.5 content-type为multipart/form-data,编码为UTF-8,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", encoding: "UTF-8", value: value},
+		{name: "2.1 content-type为multipart/form-data,编码为UTF-8,方法为GET", contentType: "multipart/form-data", method: "GET", encoding: "UTF-8", value: value},
+		{name: "3.1 content-type为multipart/form-data,编码为UTF-8,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", encoding: "UTF-8", value: value},
+		{name: "4.1 content-type为multipart/form-data,编码为UTF-8,方法为PUT", contentType: "multipart/form-data", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "5.1 content-type为multipart/form-data,编码为UTF-8,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", encoding: "UTF-8", value: value},
 
-		{name: "2.1 content-type为text/json,编码为UTF-8,方法为POST", contentType: "text/json", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.2 content-type为text/json,编码为UTF-8,方法为GET", contentType: "text/json", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.3 content-type为text/json,编码为UTF-8,方法为PUT", contentType: "text/json", method: "PUT", encoding: "UTF-8", value: value},
-		{name: "2.4 content-type为text/json,编码为UTF-8,方法为DELETE", contentType: "text/json", method: "DELETE", encoding: "UTF-8", value: value},
-		{name: "2.5 content-type为text/json,编码为UTF-8,方法为PATCH", contentType: "text/json", method: "PATCH", encoding: "UTF-8", value: value},
-
-		{name: "3.1 content-type为application/json,编码为GBK,方法为POST", contentType: "application/json", method: "POST", encoding: "GBK", value: value},
-		{name: "3.2 content-type为application/json,编码为GBK,方法为GET", contentType: "application/json", method: "POST", encoding: "GBK", value: value},
-		{name: "3.3 content-type为application/json,编码为GBK,方法为PUT", contentType: "application/json", method: "PUT", encoding: "GBK", value: value},
-		{name: "3.4 content-type为application/json,编码为GBK,方法为DELETE", contentType: "application/json", method: "DELETE", encoding: "GBK", value: value},
-		{name: "3.5 content-type为application/json,编码为GBK,方法为PATCH", contentType: "application/json", method: "PATCH", encoding: "GBK", value: value},
-
-		{name: "3.1 content-type为text/json,编码为GBK,方法为POST", contentType: "text/json", method: "POST", encoding: "GBK", value: value},
-		{name: "3.2 content-type为text/json,编码为GBK,方法为GET", contentType: "text/json", method: "POST", encoding: "GBK", value: value},
-		{name: "3.3 content-type为text/json,编码为GBK,方法为PUT", contentType: "text/json", method: "PUT", encoding: "GBK", value: value},
-		{name: "3.4 content-type为text/json,编码为GBK,方法为DELETE", contentType: "text/json", method: "DELETE", encoding: "GBK", value: value},
-		{name: "3.5 content-type为text/json,编码为GBK,方法为PATCH", contentType: "text/json", method: "PATCH", encoding: "GBK", value: value},
+		{name: "1.2 content-type为multipart/form-data,编码为GBK,方法为POST", contentType: "multipart/form-data", method: "POST", encoding: "GBK", value: value},
+		{name: "2.2 content-type为multipart/form-data,编码为GBK,方法为GET", contentType: "multipart/form-data", method: "GET", encoding: "GBK", value: value},
+		{name: "3.2 content-type为multipart/form-data,编码为GBK,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", encoding: "GBK", value: value},
+		{name: "4.2 content-type为multipart/form-data,编码为GBK,方法为PUT", contentType: "multipart/form-data", method: "PUT", encoding: "UTF-8", value: value},
+		{name: "5.2 content-type为multipart/form-data,编码为GBK,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", encoding: "GBK", value: value},
 	}
 
 	for _, tt := range tests {
 		//构建上下文
 		c := &gin.Context{}
 
-		data := []byte(tt.value)
+		data := []byte(getTestMIMEMultipartPOSTForm())
 		if strings.ToLower(tt.encoding) == encoding.GBK {
-			data, _ = encoding.Encode(tt.value, encoding.GBK)
+			data, _ = encoding.Encode(getTestMIMEMultipartPOSTForm(), encoding.GBK)
 		}
-		bodyRaw, _ := json.Marshal(map[string]string{
-			"key": url.QueryEscape(string(data)),
-		})
-		body := string(bodyRaw)
+
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", strings.NewReader(body))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", strings.NewReader(url.QueryEscape(string(data))))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -560,9 +572,9 @@ func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBody()
-		assert.Equal(t, nil, err, tt.name)
-		want := `{"key":"中文~!@#$%^&*()_+{}:"<>?"}`
-		assert.Equal(t, want, gotS, tt.name)
+
+		assert.Equal(t, true, strings.Contains(gotS, getUploadBody()), tt.name)
+
 		gotS2, err := w.GetBody()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
