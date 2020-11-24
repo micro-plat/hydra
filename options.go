@@ -93,7 +93,7 @@ func WithConfFlag(name string, usage string) Option {
 	}
 }
 
-//WithIPMask WithIPMask
+//WithIPMask 设置获取本地IP的掩码
 func WithIPMask(mask string) Option {
 	return func() {
 		global.Def.IPMask = mask
