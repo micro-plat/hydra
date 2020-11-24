@@ -12,13 +12,12 @@ func getFlags() []cli.Flag {
 	flags = append(flags, cli.StringFlag{
 		Name:        "trace,t",
 		Destination: &global.Def.Trace,
-		Usage: `-性能跟踪，可选项。用于生成golang的pprof的性能分析数据,支持的模式有:cpu,mem,block,mutex,web。其中web是以http
-	 服务的方式提供pprof数据。`,
+		Usage:       `-性能分析。支持:cpu,mem,block,mutex,web`,
 	})
 	flags = append(flags, cli.StringFlag{
-		Name:        "traceport,tp",
+		Name:        "tport,tp",
 		Destination: &global.Def.TracePort,
-		Usage:       `-性能跟踪，可选项。用于生成golang的pprof的性能分析数据, 当trace为web时候，指定pprof的web端口。默认：19999`,
+		Usage:       `-性能分析服务端口号。用于trace为web模式时的端口号。默认：19999`,
 	})
 	flags = append(flags, global.RunCli.GetFlags()...)
 	return flags

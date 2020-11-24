@@ -12,7 +12,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "start",
-			Usage:  "启动服务",
+			Usage:  "启动服务，以后台方式运行服务",
 			Action: doStart,
 		}
 	})

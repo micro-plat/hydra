@@ -92,4 +92,3 @@ func WithConfFlag(name string, usage string) Option {
 		global.ConfCli.AddFlag(name, usage)
 	}
 }
- 
