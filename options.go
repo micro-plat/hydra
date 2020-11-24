@@ -92,4 +92,24 @@ func WithConfFlag(name string, usage string) Option {
 		global.ConfCli.AddFlag(name, usage)
 	}
 }
- 
+
+//WithIPMask WithIPMask
+func WithIPMask(mask string) Option {
+	return func() {
+		global.Def.IPMask = mask
+	}
+}
+
+//WithTrace 用于生成pprof的性能分析数据,支持的模式有:cpu,mem,block,mutex,web
+func WithTrace(trace string) Option {
+	return func() {
+		global.Def.Trace = trace
+	}
+}
+
+//WithTracePort 性能跟踪端口，当Trace为web时候可用，指定pprof的端口
+func WithTracePort(port string) Option {
+	return func() {
+		global.Def.TracePort = port
+	}
+}

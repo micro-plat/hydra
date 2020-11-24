@@ -36,7 +36,6 @@ func GetHostPort(addr string) (host string, port string, err error) {
 }
 
 var (
-	mask    = ""
 	localip = ""
 )
 var onceLock sync.Once
@@ -44,12 +43,7 @@ var onceLock sync.Once
 //LocalIP LocalIP
 func LocalIP() string {
 	onceLock.Do(func() {
-		localip = xnet.GetLocalIPAddress(mask)
+		localip = xnet.GetLocalIPAddress(Def.IPMask)
 	})
 	return localip
-}
-
-//WithIPMask WithIPMask
-func WithIPMask(val string) {
-	mask = val
 }
