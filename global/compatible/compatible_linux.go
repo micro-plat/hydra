@@ -37,3 +37,8 @@ func AppClose() {
 	parent := syscall.Getppid()
 	syscall.Kill(parent, syscall.SIGUSR2)
 }
+
+const (
+	SUCCESS = "\033[32m\t\t\t\t\t[OK]\033[0m"     // Show colored "OK"
+	FAILED  = "\033[31m\t\t\t\t\t[FAILED]\033[0m" // Show colored "FAILED"
+)

@@ -21,3 +21,8 @@ var CmdsUpdateProcessSignal = syscall.SIGINT
 func AppClose() {
 	syscall.Exit(0)
 }
+
+const (
+	SUCCESS = "\t\t\t\t\t[OK]"     // Show colored "OK"
+	FAILED  = "\t\t\t\t\t[FAILED]" // Show colored "FAILED"
+)
