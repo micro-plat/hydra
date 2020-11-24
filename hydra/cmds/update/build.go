@@ -6,7 +6,7 @@ import (
 
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/lib4go/osext"
 	"github.com/urfave/cli"
 )
@@ -24,18 +24,18 @@ func doBuild(c *cli.Context) (err error) {
 	}
 
 	if _, err := os.Stat(p); err == nil && !coverIfExists {
-		logs.Log.Errorf("目录已存在%s%s", p, pkgs.FAILED)
+		logs.Log.Errorf("目录已存在%s%s", p, compatible.FAILED)
 		return nil
 	}
 
 	if err := os.RemoveAll(p); err != nil {
-		logs.Log.Errorf("无法移除目录%s%s", p, pkgs.FAILED)
+		logs.Log.Errorf("无法移除目录%s%s", p, compatible.FAILED)
 		return nil
 	}
 
 	if err := Archive(path, p, url); err != nil {
 		return err
 	}
-	logs.Log.Infof("文件已生成到%s%s", p, pkgs.SUCCESS)
+	logs.Log.Infof("文件已生成到%s%s", p, compatible.SUCCESS)
 	return nil
 }

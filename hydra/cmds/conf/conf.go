@@ -4,6 +4,7 @@ import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/urfave/cli"
@@ -68,10 +69,10 @@ func installNow(c *cli.Context) (err error) {
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			logs.Log.Error("安装到配置中心:", pkgs.FAILED)
+			logs.Log.Error("安装到配置中心:", compatible.FAILED)
 			return err
 		}
-		logs.Log.Info("安装到配置中心:" + pkgs.SUCCESS)
+		logs.Log.Info("安装到配置中心:" + compatible.SUCCESS)
 		return
 	}
 	return nil
