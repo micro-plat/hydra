@@ -4,7 +4,7 @@ import (
 	rds "github.com/go-redis/redis"
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
