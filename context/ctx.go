@@ -133,7 +133,7 @@ type IRequest interface {
 	GetMap() (types.XMap, error)
 
 	//GetRawBody 获取请求的body参数
-	GetRawBody(encoding ...string) (s []byte, err error)
+	GetRawBody() (s []byte, err error)
 
 	//GetBody 获取请求的参数
 	GetBody() (string, error)

@@ -102,7 +102,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
 						if err := cmd.Err(); err != nil {
-							if !consumer.done {
+							if !consumer.done && err.Error() != "redis: nil" {
 								consumer.log.Error("从redis中获取消息失败:%w", err)
 							}
 							continue
