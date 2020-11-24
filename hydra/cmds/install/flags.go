@@ -13,7 +13,7 @@ func getFlags() []cli.Flag {
 	flags = append(flags, cli.BoolFlag{
 		Name:        "cover,v",
 		Destination: &coverIfExists,
-		Usage:       `-覆盖配置，覆盖配置中心和本地服务`,
+		Usage:       `-覆盖安装，本地已安装服务`,
 	})
 	return flags
 }
