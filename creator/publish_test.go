@@ -2,13 +2,12 @@ package creator
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
-	"github.com/micro-plat/hydra/context"
-
-	"github.com/micro-plat/hydra/services"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -145,11 +144,16 @@ func Test_conf_Pub(t *testing.T) {
 }
 
 func Test_conf_Pub1(t *testing.T) {
+	data := map[string]string{
+		"/platname3/systemname3/api/clustername3/conf":                `{"address":":8585","status":"start"}`,
+		"/platname3/systemname3/api/clustername3/conf/acl/white.list": `{"disable":true}`,
+		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"first-page":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
+		"/platname3/var/http/httpclient":                              `{"connectionTimeout":10,"requestTimeout":10,"certs":null,"ca":"","proxy":"","keepAlive":true,"trace":false}`,
+		"/platname3/var/rpc/rpcclinent":                               `{"connectionTimeout":20,"log":"","sortPrefix":"","tls":null,"balancer":"localfirst"}`,
+	}
 	Conf.API(":8585").WhiteList(whitelist.WithDisable()).Static()
 	Conf.Vars().HTTP("httpclient", http.WithConnTimeout(10), http.WithKeepalive(true))
 	Conf.Vars().RPC("rpcclinent", rpc.WithConnectionTimeout(20), rpc.WithLocalFirst())
-	services.Def.API("/taoxy/test1", func(ctx context.IContext) (r interface{}) { return "success" })
-	services.Def.API("/taoxy/test2", func(ctx context.IContext) (r interface{}) { return "fail" })
 	global.Def.ServerTypes = []string{"api"}
 	Conf.Load()
 	tests := []struct {
@@ -158,15 +162,51 @@ func Test_conf_Pub1(t *testing.T) {
 		wantErr   bool
 	}{
 		{name: "1. 发布到fs系统", regstType: "fs://.", wantErr: true},
-		// {name: "2. 发布到lm系统", regstType: "lm://.", wantErr: true},
-		// {name: "3. 发布到zk系统", regstType: "zk://192.168.0.101", wantErr: true},
+		{name: "2. 发布到lm系统", regstType: "lm://.", wantErr: true},
+		{name: "3. 发布到zk系统", regstType: "zk://192.168.0.101", wantErr: true},
 	}
 
 	for _, tt := range tests {
 		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
 		assert.Equal(t, tt.wantErr, err == nil, "发布异常", err)
+		r, err := registry.NewRegistry(tt.regstType, global.Def.Log())
+		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		err = checkData(r, registry.Join("platname3"), data)
+		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		r.Delete(registry.Join("platname3"))
+	}
+}
+
+func checkData(r registry.IRegistry, path string, data map[string]string) error {
+	bd, _, err := r.GetValue(path)
+	if err != nil {
+		return err
 	}
 
+	str := string(bd)
+	if _, ok := data[path]; ok {
+		if !strings.EqualFold(str, data[path]) {
+			return fmt.Errorf("数据不合法,str:%s, data[path]:%s", str, data[path])
+		}
+	} else if !(str == "" || str == "{}") {
+		return fmt.Errorf("数据不合法1,str:%s", str)
+	}
+
+	paths, _, err := r.GetChildren(path)
+	if err != nil {
+		return err
+	}
+
+	if len(paths) == 0 {
+		return nil
+	}
+
+	for _, xpath := range paths {
+		xpath = registry.Join(path, xpath)
+		return checkData(r, xpath, data)
+	}
+
+	return nil
 }
 
 func Test_publish(t *testing.T) {
