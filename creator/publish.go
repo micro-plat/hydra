@@ -60,13 +60,11 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 				return err
 			}
 		}
-
 	}
 	return nil
 }
 
 func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
-
 	value, err := getJSON(v)
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)

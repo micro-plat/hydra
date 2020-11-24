@@ -22,7 +22,7 @@ func TestNew(t *testing.T) {
 		name string
 		want *conf
 	}{
-		{name: "1.初始化默认对象", want: &conf{
+		{name: "1. 初始化默认对象", want: &conf{
 			data:         make(map[string]iCustomerBuilder),
 			vars:         make(map[string]map[string]interface{}),
 			routerLoader: services.GetRouter}},
@@ -41,7 +41,7 @@ func TestNewByLoader(t *testing.T) {
 		routerLoader func(string) *services.ORouter
 		want         *conf
 	}{
-		{name: "1.初始化Loader默认对象", routerLoader: func(string) *services.ORouter { return &services.ORouter{} }, want: &conf{
+		{name: "1. 初始化Loader默认对象", routerLoader: func(string) *services.ORouter { return &services.ORouter{} }, want: &conf{
 			data:         make(map[string]iCustomerBuilder),
 			vars:         make(map[string]map[string]interface{}),
 			routerLoader: func(string) *services.ORouter { return &services.ORouter{} }}},

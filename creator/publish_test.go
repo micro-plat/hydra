@@ -5,11 +5,20 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
+	"github.com/micro-plat/hydra/context"
+
+	"github.com/micro-plat/hydra/services"
+
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
+	"github.com/micro-plat/hydra/conf/vars/http"
+	"github.com/micro-plat/hydra/conf/vars/rpc"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
+	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
+	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
@@ -79,7 +88,7 @@ func Test_conf_Pub(t *testing.T) {
 			for tp, subs := range c.data {
 				pub := server.NewServerPub(tt.args.platName, tt.args.systemName, tp, tt.args.clusterName)
 				data, _, err := rgt.GetValue(pub.GetServerPath())
-				assert.Equal(t, true, err == nil, tt.name+",err3")
+				assert.Equalf(t, true, err == nil, tt.name+",err3", err)
 				data1, _ := json.Marshal(subs.Map()["main"])
 				assert.Equal(t, string(data), string(data1)[1:len(string(data1))-1], tt.name+",data")
 				for name, value := range subs.Map() {
@@ -133,6 +142,31 @@ func Test_conf_Pub(t *testing.T) {
 			}
 		}
 	}
+}
+
+func Test_conf_Pub1(t *testing.T) {
+	Conf.API(":8585").WhiteList(whitelist.WithDisable()).Static()
+	Conf.Vars().HTTP("httpclient", http.WithConnTimeout(10), http.WithKeepalive(true))
+	Conf.Vars().RPC("rpcclinent", rpc.WithConnectionTimeout(20), rpc.WithLocalFirst())
+	services.Def.API("/taoxy/test1", func(ctx context.IContext) (r interface{}) { return "success" })
+	services.Def.API("/taoxy/test2", func(ctx context.IContext) (r interface{}) { return "fail" })
+	global.Def.ServerTypes = []string{"api"}
+	Conf.Load()
+	tests := []struct {
+		name      string
+		regstType string
+		wantErr   bool
+	}{
+		{name: "1. 发布到fs系统", regstType: "fs://.", wantErr: true},
+		// {name: "2. 发布到lm系统", regstType: "lm://.", wantErr: true},
+		// {name: "3. 发布到zk系统", regstType: "zk://192.168.0.101", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
+		assert.Equal(t, tt.wantErr, err == nil, "发布异常", err)
+	}
+
 }
 
 func Test_publish(t *testing.T) {

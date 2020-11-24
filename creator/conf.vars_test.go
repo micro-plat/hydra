@@ -3,15 +3,15 @@ package creator
 import (
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	gocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	memcached "github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
 	"github.com/micro-plat/hydra/conf/vars/db/mysql"
 	"github.com/micro-plat/hydra/conf/vars/db/oracle"
 	"github.com/micro-plat/hydra/conf/vars/http"
 	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/conf/vars/rpc"
