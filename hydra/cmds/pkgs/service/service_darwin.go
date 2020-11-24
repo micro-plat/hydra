@@ -221,13 +221,6 @@ func (s *darwinLaunchdService) Start() error {
 	if !s.isInstalled() {
 		return ErrNotInstalled
 	}
-	status, err := s.Status()
-	if err != nil {
-		return err
-	}
-	if status == StatusRunning {
-		return ErrIsRunning
-	}
 	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return err
@@ -242,13 +235,7 @@ func (s *darwinLaunchdService) Stop() error {
 	if !s.isInstalled() {
 		return ErrNotInstalled
 	}
-	status, err := s.Status()
-	if err != nil {
-		return err
-	}
-	if status == StatusStopped {
-		return ErrHasStopped
-	}
+
 	return run("launchctl", "unload", confPath)
 }
 func (s *darwinLaunchdService) Restart() error {
