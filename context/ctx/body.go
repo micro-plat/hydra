@@ -149,12 +149,12 @@ func (w *body) GetRawBody() (s []byte, err error) {
 
 }
 func urlDecode(v []byte, c string) ([]byte, error) {
-	if strings.ToLower(c) == encoding.UTF8 {
-		return v, nil
-	}
 	s, err := url.QueryUnescape(string(v))
 	if err != nil {
 		return nil, fmt.Errorf("QueryUnescape.err:%w", err)
+	}
+	if strings.ToLower(c) == encoding.UTF8 {
+		return []byte(s), nil
 	}
 	buff, err := encoding.DecodeBytes([]byte(s), c)
 	if err != nil {
