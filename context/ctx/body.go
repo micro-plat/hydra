@@ -10,7 +10,6 @@ import (
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
-	"github.com/micro-plat/lib4go/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -115,7 +114,7 @@ func (w *body) GetBody() (s string, err error) {
 	//从原串中读取
 	w.fullBody.hasRead = true
 	var buff []byte
-	buff, w.fullBody.err = w.GetRawBody(w.encoding)
+	buff, w.fullBody.err = w.GetRawBody()
 	if w.fullBody.err != nil {
 		return "", w.fullBody.err
 	}
@@ -134,15 +133,14 @@ func (w *body) GetBody() (s string, err error) {
 }
 
 //GetRawBody 获取POST,PUT,DELETET等提交的数据
-func (w *body) GetRawBody(e ...string) (s []byte, err error) {
-	encode := types.GetStringByIndex(e, 0, w.encoding)
+func (w *body) GetRawBody() (s []byte, err error) {
 	if w.rawBody.hasRead {
 		if w.rawBody.err != nil {
 			return nil, w.rawBody.err
 		}
-		buff, err := encoding.DecodeBytes(w.rawBody.value.([]byte), encode)
-		return buff, err
+		return w.rawBody.value.([]byte), nil
 	}
+	w.rawBody.hasRead = true
 	w.rawBody.value, w.rawBody.err = ioutil.ReadAll(w.ctx.GetBody())
 	if w.rawBody.err != nil {
 		return nil, fmt.Errorf("获取body发生错误:%w", w.rawBody.err)
