@@ -47,11 +47,14 @@ type global struct {
 	//Name 服务器请求名称
 	Name string
 
-	//Trace 显示请求与响应信息
+	//Trace 用于生成pprof的性能分析数据,支持的模式有:cpu,mem,block,mutex,web
 	Trace string
 
-	//TracePort 当Trace为web时候，需要设置
+	//TracePort 性能跟踪端口，当Trace为web时候可用，指定pprof的端口
 	TracePort string
+
+	//IPMask 设置获取本地IP的掩码
+	IPMask string
 
 	//isClose 是否关闭当前应用程序
 	isClose bool

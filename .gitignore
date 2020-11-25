@@ -3,6 +3,7 @@ logs
 *.pyc
 *.exe
 
+trace.out
 
 launch.json
 apiserver*

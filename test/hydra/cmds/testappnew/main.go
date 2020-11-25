@@ -8,7 +8,6 @@ import (
 
 var app = hydra.NewApp(
 	hydra.WithServerTypes(http.API),
-	hydra.WithPlatName("xxtest"),
 	hydra.WithSystemName("apiserver"),
 	hydra.WithClusterName("c"),
 )

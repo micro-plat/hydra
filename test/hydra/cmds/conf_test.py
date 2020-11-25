@@ -45,13 +45,13 @@ def test_Conf_Install_Normal():
 @test(testName)
 def test_Conf_Install_cover():
     #执行conf install -cover
-    args = ["conf","install","-r",ZKAddress,"-c","c","-cover","true"]
+    args = ["conf","install","-plat","xxtest","-r",ZKAddress,"-c","c","-cover","true"]
     response = runApp(args,exe_name="new")
 
     if not 'OK' in response:
         return u"覆盖-安装到配置中心失败"
 
-    args = ["conf","show","-r",ZKAddress]
+    args = ["conf","show","-r",ZKAddress,"-plat","xxtest"]
     response = runApp(args,["3"],exe_name="new")
     if not '192.168.5.79:6379' in response:
         return u"覆盖-安装到配置中心失败"

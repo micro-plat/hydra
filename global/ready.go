@@ -22,17 +22,6 @@ func OnReady(fs ...interface{}) {
 			panic("函数签名格式不正确，支持的格式有func(){} 或 func()error{}")
 		}
 
-		// switch fx := fn.(type) {
-		// case func():
-		// 	nfunc = func() error {
-		// 		fx()
-		// 		return nil
-		// 	}
-		// case func() error:
-		// 	nfunc = fx
-		// default:
-		// 	panic("函数签名格式不正确，支持的格式有func(){} 或 func()error{}")
-		// }
 		if !isReady {
 			funcs = append(funcs, nfunc)
 			continue

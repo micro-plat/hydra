@@ -15,21 +15,9 @@ func TestIsLocal(t *testing.T) {
 		args args
 		want bool
 	}{
-		{
-			name: "本地-lm",
-			args: args{proto: ProtoLM},
-			want: true,
-		},
-		{
-			name: "本地-lmq",
-			args: args{proto: ProtoLMQ},
-			want: true,
-		},
-		{
-			name: "非本地-http",
-			args: args{proto: ProtoHTTP},
-			want: false,
-		},
+		{name: "1.本地-lm", args: args{proto: ProtoLM}, want: true},
+		{name: "2.本地-lmq", args: args{proto: ProtoLMQ}, want: true},
+		{name: "3.非本地-http", args: args{proto: ProtoHTTP}, want: false},
 	}
 	for _, tt := range tests {
 		got := IsLocal(tt.args.proto)
@@ -49,53 +37,13 @@ func TestParseProto(t *testing.T) {
 		isNilErr  bool
 	}{
 
-		{
-			name: "正常的地址-单个地址",
-			args: args{
-				address: "zk://192.168.0.1",
-			},
-			wantProto: "zk",
-			wantAddr:  "192.168.0.1",
-			isNilErr:  true,
-		},
-		{
-			name: "正常的地址-多个地址",
-			args: args{
-				address: "zk://192.168.0.1,192.168.0.2",
-			},
-			wantProto: "zk",
-			wantAddr:  "192.168.0.1,192.168.0.2",
-			isNilErr:  true,
-		},
-		{
-			name: "错误地址-多个://",
-			args: args{
-				address: "zk://192.168.0.1://192.168.0.2",
-			},
-			wantProto: "",
-			wantAddr:  "",
-			isNilErr:  false,
-		},
-		{
-			name: "错误地址-无协议",
-			args: args{
-				address: "://192.168.0.1",
-			},
-			wantProto: "",
-			wantAddr:  "",
-			isNilErr:  false,
-		},
-		{
-			name: "错误地址-无地址",
-			args: args{
-				address: "zk://",
-			},
-			wantProto: "",
-			wantAddr:  "",
-			isNilErr:  false,
-		},
-		// TODO: Add test cases.
+		{name: "1. 正常的地址-单个地址", args: args{address: "zk://192.168.0.1"}, wantProto: "zk", wantAddr: "192.168.0.1", isNilErr: true},
+		{name: "2. 正常的地址-多个地址", args: args{address: "zk://192.168.0.1,192.168.0.2"}, wantProto: "zk", wantAddr: "192.168.0.1,192.168.0.2", isNilErr: true},
+		{name: "3. 错误地址-多个://", args: args{address: "zk://192.168.0.1://192.168.0.2"}, wantProto: "", wantAddr: "", isNilErr: false},
+		{name: "4. 错误地址-无协议", args: args{address: "://192.168.0.1"}, wantProto: "", wantAddr: "", isNilErr: false},
+		{name: "5. 错误地址-无地址", args: args{address: "zk://"}, wantProto: "", wantAddr: "", isNilErr: false},
 	}
+
 	for _, tt := range tests {
 		gotproto, gotAddr, err := ParseProto(tt.args.address)
 

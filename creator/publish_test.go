@@ -2,14 +2,22 @@ package creator
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
+	"strings"
 	"testing"
+
+	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
+	"github.com/micro-plat/hydra/conf/vars/http"
+	"github.com/micro-plat/hydra/conf/vars/rpc"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
+	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
+	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
@@ -35,22 +43,22 @@ func Test_conf_Pub(t *testing.T) {
 		wantErr bool
 	}{
 		//文件系统注册的分支没有测试  因为关系到toml文件发布的问题,暂时没有实现  所以不测试
-		{name: "注册中心地址错误", fields: fields{}, args: args{registryAddr: "errdata:"}, isExsit: false, wantErr: true},
-		{name: "空对象,不覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
+		{name: "1. 发布时,注册中心地址错误", fields: fields{}, args: args{registryAddr: "errdata:"}, isExsit: false, wantErr: true},
+		{name: "2. 发布时,地址正确,空对象,不覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
 			vars: map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "545454"}, "cache1": map[string]interface{}{"dccsss": "5454"}}},
 			args:    args{registryAddr: "lm://.", platName: "platName1", systemName: "systemName1", clusterName: "clusterName1", cover: false},
 			isExsit: false, wantErr: false},
-		{name: "空对象,覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
+		{name: "3. 发布时,地址正确,空对象,覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
 			vars: map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "545454"}, "cache1": map[string]interface{}{"dccsss": "5454"}}},
 			args:    args{registryAddr: "lm://.", platName: "platName2", systemName: "systemName2", clusterName: "clusterName2", cover: true},
 			isExsit: false, wantErr: false},
-		{name: "实体对象,不覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
+		{name: "4. 发布时,地址正确,实体对象,不覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
 			vars:    map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "545454"}, "cache1": map[string]interface{}{"dccsss": "5454"}},
 			olddata: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "{}", "testvar1": "{}"}},
 			oldvars: map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "{}"}, "cache1": map[string]interface{}{"dccsss": "{}"}}},
 			args:    args{registryAddr: "lm://.", platName: "platName3", systemName: "systemName3", clusterName: "clusterName3", cover: false},
 			isExsit: true, wantErr: true},
-		{name: "实体对象,覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
+		{name: "5. 发布时,地址正确,实体对象,覆盖", fields: fields{data: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "123456", "testvar1": "22222"}},
 			vars:    map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "545454"}, "cache1": map[string]interface{}{"dccsss": "5454"}},
 			olddata: map[string]iCustomerBuilder{"api": CustomerBuilder{"main": "{}", "testvar1": "{}"}},
 			oldvars: map[string]map[string]interface{}{"db": map[string]interface{}{"dcc": "{}"}, "cache1": map[string]interface{}{"dccsss": "{}"}}},
@@ -79,7 +87,7 @@ func Test_conf_Pub(t *testing.T) {
 			for tp, subs := range c.data {
 				pub := server.NewServerPub(tt.args.platName, tt.args.systemName, tp, tt.args.clusterName)
 				data, _, err := rgt.GetValue(pub.GetServerPath())
-				assert.Equal(t, true, err == nil, tt.name+",err3")
+				assert.Equalf(t, true, err == nil, tt.name+",err3", err)
 				data1, _ := json.Marshal(subs.Map()["main"])
 				assert.Equal(t, string(data), string(data1)[1:len(string(data1))-1], tt.name+",data")
 				for name, value := range subs.Map() {
@@ -135,6 +143,72 @@ func Test_conf_Pub(t *testing.T) {
 	}
 }
 
+func Test_conf_Pub1(t *testing.T) {
+	data := map[string]string{
+		"/platname3/systemname3/api/clustername3/conf":                `{"address":":8585","status":"start"}`,
+		"/platname3/systemname3/api/clustername3/conf/acl/white.list": `{"disable":true}`,
+		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"first-page":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
+		"/platname3/var/http/httpclient":                              `{"connectionTimeout":10,"requestTimeout":10,"certs":null,"ca":"","proxy":"","keepAlive":true,"trace":false}`,
+		"/platname3/var/rpc/rpcclinent":                               `{"connectionTimeout":20,"log":"","sortPrefix":"","tls":null,"balancer":"localfirst"}`,
+	}
+	Conf.API(":8585").WhiteList(whitelist.WithDisable()).Static()
+	Conf.Vars().HTTP("httpclient", http.WithConnTimeout(10), http.WithKeepalive(true))
+	Conf.Vars().RPC("rpcclinent", rpc.WithConnectionTimeout(20), rpc.WithLocalFirst())
+	global.Def.ServerTypes = []string{"api"}
+	Conf.Load()
+	tests := []struct {
+		name      string
+		regstType string
+		wantErr   bool
+	}{
+		{name: "1. 发布到fs系统", regstType: "fs://.", wantErr: true},
+		{name: "2. 发布到lm系统", regstType: "lm://.", wantErr: true},
+		{name: "3. 发布到zk系统", regstType: "zk://192.168.0.101", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
+		assert.Equal(t, tt.wantErr, err == nil, "发布异常", err)
+		r, err := registry.NewRegistry(tt.regstType, global.Def.Log())
+		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		err = checkData(r, registry.Join("platname3"), data)
+		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		r.Delete(registry.Join("platname3"))
+	}
+}
+
+func checkData(r registry.IRegistry, path string, data map[string]string) error {
+	bd, _, err := r.GetValue(path)
+	if err != nil {
+		return err
+	}
+
+	str := string(bd)
+	if _, ok := data[path]; ok {
+		if !strings.EqualFold(str, data[path]) {
+			return fmt.Errorf("数据不合法,str:%s, data[path]:%s", str, data[path])
+		}
+	} else if !(str == "" || str == "{}") {
+		return fmt.Errorf("数据不合法1,str:%s", str)
+	}
+
+	paths, _, err := r.GetChildren(path)
+	if err != nil {
+		return err
+	}
+
+	if len(paths) == 0 {
+		return nil
+	}
+
+	for _, xpath := range paths {
+		xpath = registry.Join(path, xpath)
+		return checkData(r, xpath, data)
+	}
+
+	return nil
+}
+
 func Test_publish(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -144,10 +218,10 @@ func Test_publish(t *testing.T) {
 		cover   bool
 		wantErr bool
 	}{
-		{name: "空对象,不覆盖数据", path: "/path/x1/y1", v: `{"testdata":"1"}`, isExsit: false, cover: false, wantErr: false},
-		{name: "空对象,覆盖数据", path: "/path/x2/y2", v: `{"testdata":"2"}`, isExsit: false, cover: true, wantErr: false},
-		{name: "实体对象,不覆盖数据", path: "/path/x3/y3", v: `{"testdata":"3"}`, isExsit: true, cover: false, wantErr: true},
-		{name: "实体对象,覆盖数据", path: "/path/x4/y4", v: `{"testdata":"4"}`, isExsit: true, cover: true, wantErr: false},
+		{name: "1. 空对象,不覆盖数据", path: "/path/x1/y1", v: `{"testdata":"1"}`, isExsit: false, cover: false, wantErr: false},
+		{name: "2. 空对象,覆盖数据", path: "/path/x2/y2", v: `{"testdata":"2"}`, isExsit: false, cover: true, wantErr: false},
+		{name: "3. 实体对象,不覆盖数据", path: "/path/x3/y3", v: `{"testdata":"3"}`, isExsit: true, cover: false, wantErr: true},
+		{name: "4. 实体对象,覆盖数据", path: "/path/x4/y4", v: `{"testdata":"4"}`, isExsit: true, cover: true, wantErr: false},
 	}
 	for _, tt := range tests {
 		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
@@ -180,9 +254,9 @@ func Test_deleteAll(t *testing.T) {
 		subList []string
 		wantErr bool
 	}{
-		{name: "节点不存在", path: "/path1", subList: []string{}, wantErr: false},
-		{name: "节点存在,删除所有节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2"}, wantErr: false},
-		{name: "多级节点存在,删除所有节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, wantErr: false},
+		{name: "1. 节点不存在", path: "/path1", subList: []string{}, wantErr: false},
+		{name: "2. 单级节点存在,删除所有节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2"}, wantErr: false},
+		{name: "3. 多级节点存在,删除所有节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, wantErr: false},
 	}
 	for _, tt := range tests {
 		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
@@ -207,9 +281,9 @@ func Test_getAllPath(t *testing.T) {
 		want    []string
 		wantErr bool
 	}{
-		{name: "没有子级节点", path: "/path1", subList: []string{}, want: []string{"/path1"}, wantErr: false},
-		{name: "有子节点节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2"}, want: []string{"/path1/cx1", "/path1/cx2", "/path1"}, wantErr: false},
-		{name: "多级子节点节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, want: []string{"/path1/cx1/cc/xx", "/path1/cx1/cc", "/path1/cx1", "/path1/cx2", "/path1"}, wantErr: false},
+		{name: "1. 无子级节点,获取所有的路径", path: "/path1", subList: []string{}, want: []string{"/path1"}, wantErr: false},
+		{name: "2. 有单级子节点节点,获取所有的路径", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2"}, want: []string{"/path1/cx1", "/path1/cx2", "/path1"}, wantErr: false},
+		{name: "3. 有多级子节点节点,获取所有的路径", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, want: []string{"/path1/cx1/cc/xx", "/path1/cx1/cc", "/path1/cx1", "/path1/cx2", "/path1"}, wantErr: false},
 	}
 	for _, tt := range tests {
 		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
@@ -227,6 +301,10 @@ func Test_getAllPath(t *testing.T) {
 	}
 }
 
+type testss struct {
+	XX string `json:"xx"`
+}
+
 func Test_getJSON(t *testing.T) {
 	buff, _ := json.Marshal(map[string]string{"xx": "cc"})
 	tests := []struct {
@@ -235,8 +313,13 @@ func Test_getJSON(t *testing.T) {
 		wantValue string
 		wantErr   bool
 	}{
-		{name: "参数是字符串", args: "string", wantValue: "string", wantErr: false},
-		{name: "参数是map", args: map[string]string{"xx": "cc"}, wantValue: string(buff), wantErr: false},
+		{name: "1. 参数是字符串", args: "string", wantValue: "string", wantErr: false},
+		{name: "2. 参数是map", args: map[string]string{"xx": "cc"}, wantValue: string(buff), wantErr: false},
+		{name: "3. 参数是struct", args: testss{XX: "cc"}, wantValue: string(buff), wantErr: false},
+		{name: "3. 参数是prt", args: &testss{XX: "cc"}, wantValue: string(buff), wantErr: false},
+		{name: "4. 参数是int", args: 1, wantValue: "1", wantErr: false},
+		{name: "5. 参数是float", args: 1.5, wantValue: "1.5", wantErr: false},
+		{name: "6. 参数是byte", args: []byte("d"), wantValue: `"ZA=="`, wantErr: false},
 	}
 	for _, tt := range tests {
 		got, err := getJSON(tt.args)

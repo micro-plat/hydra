@@ -53,11 +53,11 @@ func (r *Request) Request(ctx context.Context, service string, input interface{}
 	if err != nil {
 		return
 	}
-
 	//如果入参不是ip 通过注册中心去获取所请求平台的所有rpc服务子节点  再通过路由匹配获取真实的路由
 	_, c, err := requests.SetIfAbsentCb(fmt.Sprintf("%s@%s.%d", rservice, platName, r.version), func(i ...interface{}) (interface{}, error) {
+
 		if isip {
-			return rpc.NewClientByConf(platName, "", "", r.conf)
+			return rpc.NewClientByConf(platName, "", rservice, r.conf)
 		}
 		//return rpc.NewClient(global.Def.RegistryAddr, rpc.WithLocalFirstBalancer(platName, rservice, pkgs.LocalIP()))
 

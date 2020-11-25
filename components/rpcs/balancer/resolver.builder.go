@@ -94,14 +94,16 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 	rb := manual.NewBuilderWithScheme(proto)
 
 	rb.ResolveNowCallback = func(o resolver.ResolveNowOptions) {
-		//fmt.Println("ResolveNowCallback:1")
 
-		// addrs, err := b.getGrpcAddress()
-		// if err != nil {
-		// 	b.logger.Errorf("getGrpcAddress:%+v", err)
-		// 	return
-		// }
-		// fmt.Println("ResolveNowCallback:", address)
+		if len(b.plat) <= 0 {
+			return
+		}
+
+		address, err := b.getGrpcAddress()
+		if err != nil {
+			b.logger.Errorf("getGrpcAddress:%+v", err)
+			return
+		}
 		var needUpdate = false
 		newCache := make(map[string]bool)
 		for i := 0; i < len(address); i++ {

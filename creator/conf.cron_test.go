@@ -15,8 +15,8 @@ func Test_newCron(t *testing.T) {
 		opts []cron.Option
 		want *cronBuilder
 	}{
-		{name: "生成空对象", opts: []cron.Option{}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"main": cron.New()}}},
-		{name: "生成实体对象对象", opts: []cron.Option{cron.WithDisable(), cron.WithMasterSlave()}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"main": cron.New(cron.WithDisable(), cron.WithMasterSlave())}}},
+		{name: "1. 初始化空对象", opts: []cron.Option{}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"main": cron.New()}}},
+		{name: "2. 初始化实体对象", opts: []cron.Option{cron.WithDisable(), cron.WithMasterSlave()}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"main": cron.New(cron.WithDisable(), cron.WithMasterSlave())}}},
 	}
 	for _, tt := range tests {
 		got := newCron(tt.opts...)
@@ -28,15 +28,18 @@ func Test_cronBuilder_Load(t *testing.T) {
 
 	tasks1, _ := task.NewEmptyTasks().Append(task.NewTask("cron", "server"))
 	tasks2, _ := task.NewEmptyTasks().Append(task.NewTask("cron", "server"), task.NewTask("cron1", "server1"))
+	tasks3 := &task.Tasks{Tasks: []*task.Task{task.NewTask("cron", "server"), task.NewTask("cron1", "server1")}}
 	tests := []struct {
 		name    string
 		addlist map[string]string
 		obj     *cronBuilder
 		want    *cronBuilder
 	}{
-		{name: "全空数据", addlist: map[string]string{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks()}}},
-		{name: "实体对象,add任务", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks1}},
+		{name: "1. 加载空任务对象", addlist: map[string]string{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks()}}},
+		{name: "2. 加载实体对象", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks1}},
 			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks2}}},
+		{name: "3. 加载重复的任务对象", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks2}},
+			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks3}}},
 	}
 	for _, tt := range tests {
 		for k, v := range tt.addlist {
@@ -54,10 +57,10 @@ func Test_cronBuilder_Task(t *testing.T) {
 		obj  *cronBuilder
 		want *cronBuilder
 	}{
-		{name: "全空数据", tks: []*task.Task{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks()}}},
-		{name: "空数据,加对象", tks: []*task.Task{task.NewTask("cron", "service")}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}},
+		{name: "1. 全空数据", tks: []*task.Task{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks()}}},
+		{name: "2. 空对象添加任务数据", tks: []*task.Task{task.NewTask("cron", "service")}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}},
 			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks(task.NewTask("cron", "service"))}}},
-		{name: "有数据,加对象", tks: []*task.Task{task.NewTask("cron1", "service1")}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks(task.NewTask("cron", "service"))}},
+		{name: "3. 有数据对象累加任务数据", tks: []*task.Task{task.NewTask("cron1", "service1")}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks(task.NewTask("cron", "service"))}},
 			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewTasks(task.NewTask("cron", "service"), task.NewTask("cron1", "service1"))}}},
 	}
 	for _, tt := range tests {

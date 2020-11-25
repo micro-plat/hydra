@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-func IsMaster(master bool, scount int, path string, cldrs []string) (int, bool) {
+//IsMaster IsMaster
+func IsMaster(master bool, scount int, path string, cldrs []string) (idx int, isMaster bool) {
 	if len(cldrs) == 0 {
 		return 0, master
 	}

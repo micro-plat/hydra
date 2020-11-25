@@ -14,7 +14,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "remove",
-			Usage:  "删除服务",
+			Usage:  "删除服务，从本地服务器移除服务",
 			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doRemove,
 		}
