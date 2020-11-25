@@ -6,7 +6,7 @@ import (
 	_ "github.com/micro-plat/hydra/components/caches/cache/redis"
 	xrpc "github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf/server/task"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	confRedis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/cron"

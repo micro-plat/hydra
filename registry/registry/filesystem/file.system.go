@@ -88,6 +88,9 @@ func (l *fs) formatPath(path string) string {
 }
 
 func (l *fs) getRealPath(path string) string {
+	if strings.HasSuffix(path, ".init") {
+		return path
+	}
 	return fmt.Sprintf("%s/.init", path)
 }
 
@@ -96,11 +99,11 @@ func (l *fs) Exists(path string) (bool, error) {
 	return err == nil || os.IsExist(err), nil
 }
 func (r *fs) getPaths(path string) []string {
-	nodes := strings.Split(path, "/")
+	nodes := strings.Split(strings.Trim(path, "/"), "/")
 	len := len(nodes)
-	paths := make([]string, 0, len-1)
-	for i := 1; i < len; i++ {
-		npath := "/" + strings.Join(nodes[1:i+1], "/")
+	paths := make([]string, 0, len)
+	for i := 0; i < len; i++ {
+		npath := "/" + strings.Join(nodes[:i+1], "/")
 		paths = append(paths, npath)
 	}
 	return paths
@@ -180,9 +183,11 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 		case event := <-v.event:
 			switch event.Op {
 			case fsnotify.Write, fsnotify.Create:
+				// fmt.Println("111111111111:", rpath)
 				buff, version, err := l.GetValue(rpath)
 				v.watcher <- &valueEntity{Value: buff, version: version, path: rpath, Err: err}
 			default:
+				// fmt.Println("22222222222:", rpath)
 				v.watcher <- &valueEntity{path: rpath, Err: fmt.Errorf("文件发生变化:%v", event.Op)}
 			}
 		}
@@ -261,9 +266,10 @@ func (l *fs) CreateTempNode(path string, data string) (err error) {
 }
 func (l *fs) CreateSeqNode(path string, data string) (rpath string, err error) {
 	nid := atomic.AddInt32(&l.seqNode, 1)
-	rpath = fmt.Sprintf("%s_%d", l.formatPath(path), nid)
+	rpath = fmt.Sprintf("%s_%d", path, nid)
 	return rpath, l.CreateTempNode(rpath, data)
 }
+
 func (l *fs) GetSeparator() string {
 	return string(filepath.Separator)
 }
@@ -276,6 +282,10 @@ func (l *fs) Close() error {
 	defer l.tempNodeLock.Unlock()
 	close(l.closeCh)
 	for _, p := range l.tempNode {
+		rp := l.getRealPath(p)
+		if ok, _ := l.Exists(rp); ok {
+			os.Remove(rp)
+		}
 		os.Remove(p)
 	}
 	return nil

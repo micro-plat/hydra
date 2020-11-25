@@ -40,27 +40,45 @@ func createRegistry() []registry.IRegistry {
 
 func TestCreateTempNode(t *testing.T) {
 
-	//构建所有注册中心
-	rgs := createRegistry()
+	//构建注册中心
+	lm := localmemory.NewLocalMemory()
+	var cases = []struct {
+		name  string
+		path  string
+		value string
+	}{
+		{name: "1.1 LMCreateTemp-一段路径-字母", path: "hydrax", value: "1"},
+		{name: "1.2 LMCreateTemp-一段路径-数字", path: "1231222", value: "2"},
+		{name: "1.3 LMCreateTemp-一段路径-字母数字混合", path: "123hydra3", value: "3"},
+		{name: "1.4 LMCreateTemp-一段路径-含特殊字符", path: "1232hydra#$%", value: "4"},
+		{name: "1.5 LMCreateTemp-一段路径-全特殊字符", path: "#$%", value: "5"},
+		{name: "1.6 LMCreateTemp-一段路径-有前/", path: "/123123", value: "6"},
+		{name: "1.7 LMCreateTemp-一段路径-有后/", path: "hydra#$%xee/", value: "7"},
+		{name: "1.8 LMCreateTemp-一段路径-有前后/", path: "/hydra#$%/", value: "8"},
+		{name: "1.9 LMCreateTemp-一段路径-长路径", path: "/hydraabcefgjijkfsnopqrstuvwxyz", value: "1445"},
 
-	//按注册中心进行测试
-	for _, lm := range rgs {
-		//创建节点
-		for _, c := range cases {
-			err := lm.CreateTempNode(c.path, c.value)
-			assert.Equal(t, nil, err, c.name)
-		}
+		{name: "2.1 LMCreateTemp-二段路径-以段以上路径", path: "/hydra1/abc/", value: "18"},
+		{name: "2.2 LMCreateTemp-二段路径-多段有数字", path: "/hydra2/454/", value: "17"},
+		{name: "2.3 LMCreateTemp-二段路径-多段有特殊字符", path: "/hydra3/#$#%/", value: "189"},
+		{name: "2.4 LMCreateTemp-二段路径-有后/", path: "hydra4/abc/", value: "181"},
+		{name: "2.5 LMCreateTemp-二段路径-前后/", path: "/hydra5/454/", value: "173"},
+		{name: "2.6 LMCreateTemp-二段路径-前/", path: "/hydra6/#$#%", value: "189x"},
 
-		//检查节点值是否正确，是否有被覆盖等
-		for _, c := range cases {
-			data, v, err := lm.GetValue(c.path)
-			assert.Equal(t, nil, err, c.name)
-			assert.NotEqual(t, v, int32(0), c.name)
-			assert.Equal(t, string(data), c.value, c.name)
-		}
+		{name: "3.1 LMCreateTemp-多段-较长分段", path: "/hydra11/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/xxx", value: "1255"},
+		{name: "3.2 LMCreateTemp-多段-较长分段1", path: "hydra22/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/yyy", value: "12225"},
 	}
 
+	//按注册中心进行测试
+	//创建节点
+	for _, c := range cases {
+		err := lm.CreateTempNode(c.path, c.value)
+		assert.Equal(t, nil, err, c.name)
+		mp := map[string]string{c.path: c.value}
+		err = checkData(lm, c.path, mp)
+		assert.Equal(t, nil, err, c.name)
+	}
 }
+
 func TestUpdateNode(t *testing.T) {
 	cases := []struct {
 		name   string
