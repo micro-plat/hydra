@@ -20,11 +20,6 @@ func TestNewCtx(t *testing.T) {
 		serverConf := confObj.GetAPIConf()                               //获取配置
 		_, _ = http.NewResponsive(serverConf)
 	}
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("recover:NewCtx() = %v", r)
-		}
-	}()
 	got := ctx.NewCtx(&mocks.TestContxt{}, h.API)
 	assert.NotEqual(t, nil, got, "获取ctx对象")
 }
@@ -69,6 +64,5 @@ func TestCtx_Close(t *testing.T) {
 		}
 		t.Errorf("context.Del(c.tid) doesn't run")
 	}()
-
 	context.Current()
 }
