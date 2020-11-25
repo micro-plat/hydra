@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	//"github.com/micro-plat/hydra/global/compatible"
 
 	"github.com/fsnotify/fsnotify"
 	r "github.com/micro-plat/hydra/registry"
@@ -19,6 +18,8 @@ import (
 )
 
 var _ r.IRegistry = &fs{}
+var fileMode = os.FileMode(0664)
+var dirMode = os.FileMode(0755)
 
 type eventWatcher struct {
 	watcher chan registry.ValueWatcher
@@ -29,15 +30,17 @@ type fs struct {
 	watcher      *fsnotify.Watcher
 	watcherMaps  map[string]*eventWatcher
 	watchLock    sync.Mutex
-	tempNode     []string
+	tempNodes    map[string]bool
 	tempNodeLock sync.Mutex
 	seqNode      int32
 	closeCh      chan struct{}
-	prefix       string
+	rootDir      string
+	done         bool
 }
 
-func NewFileSystem(prefix string) (*fs, error) {
-	// if err := checkPrivileges(); err != nil {
+//NewFileSystem 文件系统的注册中心
+func NewFileSystem(rootDir string) (*fs, error) {
+	// if err := compatible.CheckPrivileges(); err != nil {
 	// 	return nil, err
 	// }
 	w, err := fsnotify.NewWatcher()
@@ -45,10 +48,10 @@ func NewFileSystem(prefix string) (*fs, error) {
 		return nil, err
 	}
 	return &fs{
-		prefix:      strings.TrimRight(prefix, "/"),
+		rootDir:     strings.TrimRight(rootDir, "/"),
 		watcher:     w,
 		watcherMaps: make(map[string]*eventWatcher),
-		tempNode:    make([]string, 0, 2),
+		tempNodes:   make(map[string]bool),
 		seqNode:     10000,
 		closeCh:     make(chan struct{}),
 	}, nil
@@ -57,22 +60,25 @@ func NewFileSystem(prefix string) (*fs, error) {
 //Start 启动文件监控
 func (l *fs) Start() {
 	go func() {
-	LOOP:
 		for {
 			select {
 			case <-l.closeCh:
-				break LOOP
+				return
 			case event := <-l.watcher.Events:
+				if l.done {
+					return
+				}
+				fmt.Println("l.watcher.Events:", event)
 				func(event fsnotify.Event) {
 					l.watchLock.Lock()
-					path := l.formatPath(event.Name)
+					defer l.watchLock.Unlock()
+					dataPath := l.formatPath(event.Name)
+					path := filepath.Dir(dataPath)
 					watcher, ok := l.watcherMaps[path]
-					l.watchLock.Unlock()
 					if !ok {
 						return
 					}
 					watcher.event <- event
-					delete(l.watcherMaps, path)
 				}(event)
 
 			}
@@ -80,14 +86,17 @@ func (l *fs) Start() {
 		l.watcher.Close()
 	}()
 }
+
+//formatPath 将rootDir 构建到路径中去
 func (l *fs) formatPath(path string) string {
-	if !strings.HasPrefix(path, l.prefix) {
-		return l.prefix + r.Join("/", path)
+	if !strings.HasPrefix(path, l.rootDir) {
+		return l.rootDir + r.Join("/", path)
 	}
 	return path
 }
 
-func (l *fs) getRealPath(path string) string {
+//getDataPath 获取目录下的.init路径
+func (l *fs) getDataPath(path string) string {
 	if strings.HasSuffix(path, ".init") {
 		return path
 	}
@@ -98,7 +107,8 @@ func (l *fs) Exists(path string) (bool, error) {
 	_, err := os.Stat(l.formatPath(path))
 	return err == nil || os.IsExist(err), nil
 }
-func (r *fs) getPaths(path string) []string {
+
+func (l *fs) getPaths(path string) []string {
 	nodes := strings.Split(strings.Trim(path, "/"), "/")
 	len := len(nodes)
 	paths := make([]string, 0, len)
@@ -110,20 +120,21 @@ func (r *fs) getPaths(path string) []string {
 }
 
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
+
 	rpath := l.formatPath(path)
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
-		if strings.HasSuffix(rpath, ".init") {
-			return []byte{}, 0, nil
-		}
-		return nil, 0, errors.New(rpath + "不存在")
+		return []byte{}, 0, nil
 	}
-	if !fs.IsDir() {
-		data, err = ioutil.ReadFile(rpath)
-		version = int32(fs.ModTime().Unix())
-		return
+	dataPath := l.getDataPath(rpath)
+	fs, err = os.Stat(dataPath)
+	if os.IsNotExist(err) {
+		return []byte{}, 0, nil
 	}
-	return l.GetValue(r.Join(path, ".init"))
+	data, err = ioutil.ReadFile(dataPath)
+	version = int32(fs.ModTime().Unix())
+	return
+
 }
 
 func (l *fs) Update(path string, data string) (err error) {
@@ -132,7 +143,7 @@ func (l *fs) Update(path string, data string) (err error) {
 	}
 
 	rpath := l.formatPath(path)
-	return ioutil.WriteFile(l.getRealPath(rpath), []byte(data), 0666)
+	return ioutil.WriteFile(l.getDataPath(rpath), []byte(data), fileMode)
 
 }
 func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
@@ -142,12 +153,12 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 		return nil, 0, errors.New(path + "不存在")
 	}
 	version = int32(fs.ModTime().Unix())
-	rf, err := ioutil.ReadDir(rpath)
+	children, err := ioutil.ReadDir(rpath)
 	if err != nil {
 		return nil, 0, err
 	}
-	paths = make([]string, 0, len(rf))
-	for _, f := range rf {
+	paths = make([]string, 0, len(children))
+	for _, f := range children {
 		if strings.HasSuffix(f.Name(), ".swp") || strings.HasPrefix(f.Name(), "~") || strings.HasPrefix(f.Name(), ".init") {
 			continue
 		}
@@ -157,111 +168,96 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 }
 
 func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	rpath := l.formatPath(path)
-	absPath := rpath
-	fs, _ := os.Stat(rpath)
-	if fs != nil && fs.IsDir() {
-		absPath = l.getRealPath(rpath)
+	realPath := l.formatPath(path)
+	_, err = os.Stat(realPath)
+	if os.IsNotExist(err) {
+		err = fmt.Errorf("Watch path:%s 不存在", path)
+		return
 	}
+
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
-	v, ok := l.watcherMaps[absPath]
+	v, ok := l.watcherMaps[realPath]
 	if ok {
 		return v.watcher, nil
 	}
-	l.watcherMaps[absPath] = &eventWatcher{
+	l.watcherMaps[realPath] = &eventWatcher{
 		event:   make(chan fsnotify.Event),
 		watcher: make(chan registry.ValueWatcher),
 	}
 	go func(rpath string, v *eventWatcher) {
-		if err := l.watcher.Add(rpath); err != nil {
+		dataFile := l.getDataPath(rpath)
+		if err := l.watcher.Add(dataFile); err != nil {
 			v.watcher <- &valueEntity{path: rpath, Err: err}
 		}
 		select {
 		case <-l.closeCh:
 			return
 		case event := <-v.event:
-			switch event.Op {
-			case fsnotify.Write, fsnotify.Create:
-				// fmt.Println("111111111111:", rpath)
-				buff, version, err := l.GetValue(rpath)
-				v.watcher <- &valueEntity{Value: buff, version: version, path: rpath, Err: err}
-			default:
-				// fmt.Println("22222222222:", rpath)
-				v.watcher <- &valueEntity{path: rpath, Err: fmt.Errorf("文件发生变化:%v", event.Op)}
+			if event.Op == fsnotify.Chmod {
+				return
 			}
+
+			buff, version, err := l.GetValue(rpath)
+			ett := &valueEntity{
+				path: rpath,
+			}
+			if len(buff) == 0 {
+				ett.Err = fmt.Errorf("文件发生变化:%v", event.Op)
+			} else {
+				ett.Value = buff
+				ett.version = version
+				ett.Err = err
+			}
+			fmt.Println("GetValue:", path, string(buff), version, err)
+			v.watcher <- ett
 		}
-	}(rpath, l.watcherMaps[absPath])
-	return l.watcherMaps[absPath].watcher, nil
+	}(realPath, l.watcherMaps[realPath])
+
+	return l.watcherMaps[realPath].watcher, nil
 }
 func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
 	return nil, nil
 }
-func (l *fs) Delete(path string) error {
 
-	if b, _ := l.Exists(path); !b {
-		return nil
-	}
+func (l *fs) Delete(path string) error {
 	return os.RemoveAll(l.formatPath(path))
 }
 
 func (l *fs) CreatePersistentNode(path string, data string) (err error) {
-	xpath := l.formatPath(path)
-	paths := l.getPaths(path)
-	for _, spath := range paths {
-		rpath := l.formatPath(spath)
-		rpath = l.getRealPath(rpath)
-		if strings.HasPrefix(rpath, xpath) {
-			if err = l.createNode(rpath, data); err != nil {
-				return err
-			}
-		} else {
-			if err = l.createNode(rpath, ""); err != nil {
-				return err
-			}
-		}
+	err = l.createDirPath(path)
+	if err != nil {
+		return
 	}
-
+	err = l.createNodeData(path, data)
+	if err != nil {
+		return
+	}
 	return nil
 }
 
-func (l *fs) createNode(path, data string) error {
-	b, err := l.Exists(path)
-	if err != nil {
-		return err
-	}
-	if b {
-		if data == "" {
-			//节点有包含关系的时候  保证有数据的节点不被覆盖
-			return nil
-		}
-		os.Remove(path)
-	}
-	if err = os.MkdirAll(filepath.Dir(path), 0777); err != nil {
-		return err
-	}
-	f, err := os.Create(path) //创建文件
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	err = os.Chmod(path, 0777)
-	if err != nil {
-		return err
-	}
-
-	if _, err = f.WriteString(data); err != nil {
-		return err
+func (l *fs) createDirPath(path string) error {
+	realPath := l.formatPath(path)
+	_, err := os.Stat(realPath)
+	if os.IsNotExist(err) {
+		return os.MkdirAll(realPath, dirMode)
 	}
 	return nil
 }
+
+func (l *fs) createNodeData(path, data string) error {
+	realPath := l.formatPath(path)
+	dataPath := l.getDataPath(realPath)
+	return ioutil.WriteFile(dataPath, []byte(data), fileMode)
+}
+
 func (l *fs) CreateTempNode(path string, data string) (err error) {
 	if err = l.CreatePersistentNode(path, data); err != nil {
 		return err
 	}
 	l.tempNodeLock.Lock()
 	defer l.tempNodeLock.Unlock()
-	l.tempNode = append(l.tempNode, l.formatPath(path))
+	l.tempNodes[l.formatPath(path)] = true
 	return nil
 }
 func (l *fs) CreateSeqNode(path string, data string) (rpath string, err error) {
@@ -277,16 +273,17 @@ func (l *fs) GetSeparator() string {
 func (l *fs) CanWirteDataInDir() bool {
 	return false
 }
+
 func (l *fs) Close() error {
 	l.tempNodeLock.Lock()
 	defer l.tempNodeLock.Unlock()
+	if l.done {
+		return nil
+	}
+	l.done = true
 	close(l.closeCh)
-	for _, p := range l.tempNode {
-		rp := l.getRealPath(p)
-		if ok, _ := l.Exists(rp); ok {
-			os.Remove(rp)
-		}
-		os.Remove(p)
+	for path := range l.tempNodes {
+		os.RemoveAll(path)
 	}
 	return nil
 }
@@ -323,21 +320,3 @@ func (v *valuesEntity) GetError() error {
 func (v *valuesEntity) GetPath() string {
 	return v.path
 }
-
-func checkPrivileges() error {
-	if output, err := exec.Command("id", "-g").Output(); err == nil {
-		if gid, parseErr := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 32); parseErr == nil {
-			if gid == 0 {
-				return nil
-			}
-			return ErrRootPrivileges
-		}
-	}
-	if runtime.GOOS == "windows" {
-		return nil
-	}
-	return fmt.Errorf("%v %s", ErrUnsupportedSystem, runtime.GOOS)
-}
-
-var ErrUnsupportedSystem = errors.New("Unsupported system")
-var ErrRootPrivileges = errors.New("You must have root user privileges. Possibly using 'sudo' command should help")

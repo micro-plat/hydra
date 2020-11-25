@@ -309,7 +309,7 @@ func TestFSUpdateNode(t *testing.T) {
 	for _, c := range fscases {
 		data, v, err := fs.GetValue(c.path)
 		if !c.isE {
-			assert.Equal(t, true, strings.Contains(err.Error(), "不存在"), c.name)
+			assert.Equal(t, true, len(data) == 0, c.name)
 		} else {
 			assert.Equal(t, nil, err, c.name)
 			assert.NotEqual(t, v, int32(0), c.name)
@@ -511,6 +511,8 @@ func TestFSChildren(t *testing.T) {
 	}
 
 	for _, c := range fscases {
+		err := fs.CreateTempNode(c.path, c.value)
+		assert.Equal(t, nil, err, c.name)
 
 		//创建节点
 		for _, ch := range c.children {
