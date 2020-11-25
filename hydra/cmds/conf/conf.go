@@ -4,6 +4,7 @@ import (
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/urfave/cli"
@@ -13,17 +14,17 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:  "conf",
-			Usage: "配置管理",
+			Usage: "配置管理, 查看、安装配置信息",
 			Subcommands: []cli.Command{
 				{
 					Name:   "show",
-					Usage:  "查看注册中心的配置信息",
+					Usage:  "-查看配置，从注册中获取配置并显示",
 					Action: showNow,
 					Flags:  getShowFlags(),
 				},
 				{
 					Name:   "install",
-					Usage:  "将配置信息安装到注册中心",
+					Usage:  "-安装配置，将配置信息安装到注册中心",
 					Flags:  getInstallFlags(),
 					Action: installNow,
 				},
@@ -68,10 +69,10 @@ func installNow(c *cli.Context) (err error) {
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			logs.Log.Error("安装到配置中心:", pkgs.FAILED)
+			logs.Log.Error("安装到配置中心:", compatible.FAILED)
 			return err
 		}
-		logs.Log.Info("安装到配置中心:" + pkgs.SUCCESS)
+		logs.Log.Info("安装到配置中心:" + compatible.SUCCESS)
 		return
 	}
 	return nil

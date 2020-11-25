@@ -86,10 +86,26 @@ func (l *fs) formatPath(path string) string {
 	}
 	return path
 }
+
+func (l *fs) getRealPath(path string) string {
+	return fmt.Sprintf("%s/.init", path)
+}
+
 func (l *fs) Exists(path string) (bool, error) {
 	_, err := os.Stat(l.formatPath(path))
 	return err == nil || os.IsExist(err), nil
 }
+func (r *fs) getPaths(path string) []string {
+	nodes := strings.Split(path, "/")
+	len := len(nodes)
+	paths := make([]string, 0, len-1)
+	for i := 1; i < len; i++ {
+		npath := "/" + strings.Join(nodes[1:i+1], "/")
+		paths = append(paths, npath)
+	}
+	return paths
+}
+
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 	rpath := l.formatPath(path)
 	fs, err := os.Stat(rpath)
@@ -111,7 +127,9 @@ func (l *fs) Update(path string, data string) (err error) {
 	if b, _ := l.Exists(path); !b {
 		return errors.New(path + "不存在")
 	}
-	return ioutil.WriteFile(l.formatPath(path), []byte(data), 0666)
+
+	rpath := l.formatPath(path)
+	return ioutil.WriteFile(l.getRealPath(rpath), []byte(data), 0666)
 
 }
 func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
@@ -140,7 +158,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 	absPath := rpath
 	fs, _ := os.Stat(rpath)
 	if fs != nil && fs.IsDir() {
-		absPath = fmt.Sprintf("%s/.init", rpath)
+		absPath = l.getRealPath(rpath)
 	}
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
@@ -181,34 +199,52 @@ func (l *fs) Delete(path string) error {
 	}
 	return os.RemoveAll(l.formatPath(path))
 }
-func (l *fs) getRealPath(path string, data string) string {
-	extPath := ""
-	if data != "" {
-		extPath = "/.init"
-	}
-	return fmt.Sprintf("%s%s", path, extPath)
-}
 
 func (l *fs) CreatePersistentNode(path string, data string) (err error) {
-	rpath := l.formatPath(path)
+	xpath := l.formatPath(path)
+	paths := l.getPaths(path)
+	for _, spath := range paths {
+		rpath := l.formatPath(spath)
+		rpath = l.getRealPath(rpath)
+		if strings.HasPrefix(rpath, xpath) {
+			if err = l.createNode(rpath, data); err != nil {
+				return err
+			}
+		} else {
+			if err = l.createNode(rpath, ""); err != nil {
+				return err
+			}
+		}
+	}
 
-	rpath = l.getRealPath(rpath, data)
-	_, err = os.Stat(rpath)
-	if err == nil || os.IsExist(err) {
-		os.Remove(rpath)
-	}
-	if err = os.MkdirAll(filepath.Dir(rpath), 0777); err != nil {
-		return err
-	}
-	f, err := os.Create(rpath) //创建文件
+	return nil
+}
+
+func (l *fs) createNode(path, data string) error {
+	b, err := l.Exists(path)
 	if err != nil {
 		return err
 	}
-	err = os.Chmod(rpath, 0777)
+	if b {
+		if data == "" {
+			//节点有包含关系的时候  保证有数据的节点不被覆盖
+			return nil
+		}
+		os.Remove(path)
+	}
+	if err = os.MkdirAll(filepath.Dir(path), 0777); err != nil {
+		return err
+	}
+	f, err := os.Create(path) //创建文件
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+	err = os.Chmod(path, 0777)
+	if err != nil {
+		return err
+	}
+
 	if _, err = f.WriteString(data); err != nil {
 		return err
 	}

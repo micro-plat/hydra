@@ -192,11 +192,19 @@ func (s *darwinLaunchdService) Uninstall() error {
 }
 
 func (s *darwinLaunchdService) Status() (Status, error) {
+	if !s.isInstalled() {
+		return StatusUnknown, ErrNotInstalled
+	}
+
 	exitCode, out, err := runWithOutput("launchctl", "list", s.Name)
 	if exitCode == 0 && err != nil {
+		if strings.Contains(err.Error(), "Could not find service") {
+			return StatusStopped, nil
+		}
 		if !strings.Contains(err.Error(), "failed with StandardError") {
 			return StatusUnknown, err
 		}
+
 	}
 
 	re := regexp.MustCompile(`"PID" = ([0-9]+);`)
@@ -221,13 +229,16 @@ func (s *darwinLaunchdService) Start() error {
 	if !s.isInstalled() {
 		return ErrNotInstalled
 	}
+
 	status, err := s.Status()
 	if err != nil {
 		return err
 	}
+
 	if status == StatusRunning {
 		return ErrIsRunning
 	}
+
 	confPath, err := s.getServiceFilePath()
 	if err != nil {
 		return err
@@ -235,20 +246,24 @@ func (s *darwinLaunchdService) Start() error {
 	return run("launchctl", "load", confPath)
 }
 func (s *darwinLaunchdService) Stop() error {
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
 	if !s.isInstalled() {
 		return ErrNotInstalled
 	}
+
 	status, err := s.Status()
 	if err != nil {
 		return err
 	}
+
 	if status == StatusStopped {
 		return ErrHasStopped
 	}
+
+	confPath, err := s.getServiceFilePath()
+	if err != nil {
+		return err
+	}
+
 	return run("launchctl", "unload", confPath)
 }
 func (s *darwinLaunchdService) Restart() error {
@@ -329,9 +344,9 @@ var launchdConfig = `<?xml version='1.0' encoding='UTF-8'?>
     <false/>
     
     <key>StandardOutPath</key>
-    <string>/usr/local/var/log/{{html .Name}}.out.log</string>
+    <string>/usr/local/var/logs/{{html .Name}}.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/usr/local/var/log/{{html .Name}}.err.log</string>
+    <string>/usr/local/var/logs/{{html .Name}}.err.log</string>
   
   </dict>
 </plist>

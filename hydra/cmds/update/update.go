@@ -11,7 +11,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:  "update",
-			Usage: "更新应用",
+			Usage: "更新应用，将服务发布到远程服务器",
 			Subcommands: []cli.Command{
 				{
 					Name:   "install",

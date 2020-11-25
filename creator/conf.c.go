@@ -161,10 +161,10 @@ func (c *conf) GetWeb() *httpBuilder {
 	return c.Web(api.DefaultWEBAddress)
 }
 
-//Web web服务器配置
+//Ws websocket服务器配置
 func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
 	ws := newHTTP(global.WS, address, c.routerLoader, opts...)
-	ws.Static(static.WithArchive(global.AppName))
+	//ws.Static(static.WithArchive(global.AppName))
 	c.data[global.WS] = ws
 	return ws
 }

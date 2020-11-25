@@ -27,12 +27,12 @@ def test_Install_Normal():
 @test(testName)
 def test_Install_Less_param():
     args = ["remove"]
-    runApp(args)
+    runApp(args,exe_name="new")
     #缺少集群名称
     args = ["install","-r",ZKAddress]
-    response = runApp(args)
+    response = runApp(args,exe_name="new")
     #print(response)
-    if not u"集群名称不能为空" in response:
+    if not u"平台名称不能为空" in response:
         return u"缺少参数安装服务用例失败"
 
 

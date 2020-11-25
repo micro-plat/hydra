@@ -291,7 +291,7 @@ func (ws *windowsService) Status() (Status, error) {
 
 	s, err := m.OpenService(ws.Name)
 	if err != nil {
-		if err.Error() == "The specified service does not exist as an installed service." {
+		if strings.Contains(err.Error(), "The specified service does not exist as an installed service") {
 			return StatusUnknown, ErrNotInstalled
 		}
 		return StatusUnknown, err
@@ -324,6 +324,15 @@ func (ws *windowsService) Status() (Status, error) {
 }
 
 func (ws *windowsService) Start() error {
+
+	status, err := ws.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusRunning {
+		return ErrIsRunning
+	}
+
 	m, err := mgr.Connect()
 	if err != nil {
 		return err
@@ -339,6 +348,15 @@ func (ws *windowsService) Start() error {
 }
 
 func (ws *windowsService) Stop() error {
+
+	status, err := ws.Status()
+	if err != nil {
+		return err
+	}
+	if status == StatusStopped {
+		return ErrHasStopped
+	}
+
 	m, err := mgr.Connect()
 	if err != nil {
 		return err
