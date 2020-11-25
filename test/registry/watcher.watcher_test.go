@@ -11,10 +11,7 @@ import (
 
 func TestNewCArgsByChange(t *testing.T) {
 	confObj := mocks.NewConfBy("hydra_rgst_watcher_test", "rgtwatchertest") //构建对象
-	confObj.API(":8080")
-	apiconf := confObj.GetAPIConf() //初始化参数
-	c := apiconf.GetServerConf()    //获取配置
-	r := c.GetRegistry()
+	r := confObj.Registry
 
 	tests := []struct {
 		name     string
@@ -26,7 +23,7 @@ func TestNewCArgsByChange(t *testing.T) {
 		r        registry.IRegistry
 		want     *watcher.ChildChangeArgs
 	}{
-		{name: "构建子节点变动参数,父节点不为空", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*", children: []string{"children1", "children2"},
+		{name: "1. 构建子节点变动参数,父节点不为空,无后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*", children: []string{"children1", "children2"},
 			v: 1, r: r, want: &watcher.ChildChangeArgs{
 				OP:       1,
 				Registry: r,
@@ -36,7 +33,17 @@ func TestNewCArgsByChange(t *testing.T) {
 				Deep:     1,
 				Name:     "!@#$%^&*",
 			}},
-		{name: "构建子节点变动参数,父节点为空", op: 1, deep: 1, parent: "", children: []string{"children1", "children2"},
+		{name: "2. 构建子节点变动参数,父节点不为空,有后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*/", children: []string{"children1", "children2"},
+			v: 1, r: r, want: &watcher.ChildChangeArgs{
+				OP:       1,
+				Registry: r,
+				Parent:   "a/b/c/!@#$%^&*/",
+				Version:  1,
+				Children: []string{"children1", "children2"},
+				Deep:     1,
+				Name:     "!@#$%^&*",
+			}},
+		{name: "3. 构建子节点变动参数,父节点为空", op: 1, deep: 1, parent: "", children: []string{"children1", "children2"},
 			v: 1, r: r, want: &watcher.ChildChangeArgs{
 				OP:       1,
 				Registry: r,

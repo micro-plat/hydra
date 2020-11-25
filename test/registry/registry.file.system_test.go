@@ -34,7 +34,6 @@ func checkData(r registry.IRegistry, path string, data map[string]string) error 
 	}
 
 	paths, v, err := r.GetChildren(path)
-	fmt.Println("xxxxxxxxxx:", paths)
 	if err != nil {
 		return err
 	}
@@ -582,20 +581,27 @@ func TestFSWatchValue(t *testing.T) {
 		notify, err := fs.WatchValue(c.path)
 		assert.Equal(t, nil, err, c.name)
 		//此时值未变化不应收到通知
-		go func(c chan r.ValueWatcher, name, nvalue string, isD bool) {
+		go func(c chan r.ValueWatcher, name, nvalue string, isD, isE bool) {
 			select {
 			case v := <-c:
-				value, _ := v.GetValue()
+				if !isE {
+					assert.Equal(t, true, true, name, "新增是没有值通知的，所以不合法")
+				}
+
+				value, version := v.GetValue()
 				if isD {
 					assert.NotEqual(t, true, strings.Contains(v.GetError().Error(), "文件发生变化"), name, v.GetError())
 				} else {
-					// assert.Equal(t, true, version > 0, name, version)
+					assert.Equal(t, true, version > 0, name, version)
 					assert.Equal(t, nvalue, string(value), name, nvalue, string(value))
 				}
 			case <-time.After(2 * time.Second):
-				assert.Equal(t, false, true, name, "通知没有及时回来，测试未通过")
+				//如果是新增   是没有通知的
+				if isE {
+					assert.Equal(t, false, true, name, "通知没有及时回来，测试未通过")
+				}
 			}
-		}(notify, c.name, c.nvalue, c.isD)
+		}(notify, c.name, c.nvalue, c.isD, c.isE)
 
 		if !c.isE {
 			err := fs.CreatePersistentNode(c.path, c.nvalue)
