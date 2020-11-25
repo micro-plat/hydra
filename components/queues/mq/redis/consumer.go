@@ -9,7 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -102,7 +102,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 					if consumer.client != nil && !consumer.done {
 						cmd := consumer.client.BLPop(time.Second, queue)
 						if err := cmd.Err(); err != nil {
-							if !consumer.done {
+							if !consumer.done && err.Error() != "redis: nil" {
 								consumer.log.Error("从redis中获取消息失败:%w", err)
 							}
 							continue

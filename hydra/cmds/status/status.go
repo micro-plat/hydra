@@ -15,7 +15,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "status",
-			Usage:  "查询服务状态",
+			Usage:  "查询状态，查询服务器运行、停止状态",
 			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doStatus,
 		}

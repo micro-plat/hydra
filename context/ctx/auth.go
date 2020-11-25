@@ -31,14 +31,16 @@ func (c *Auth) Request(v ...interface{}) interface{} {
 
 //Bind 绑定用户信息
 func (c *Auth) Bind(out interface{}) error {
-	if c.request == nil {
-		return errs.NewError(401, "请求中未包含用户信息,用户未登录")
-	}
 
 	val := reflect.ValueOf(out)
 	if val.Kind() != reflect.Ptr {
 		return fmt.Errorf("输入参数非指针 %v", val.Kind())
 	}
+
+	if c.request == nil || c.isNil(c.request) {
+		return errs.NewError(401, "请求中未包含用户信息,用户未登录")
+	}
+
 	switch v := c.request.(type) {
 	case func() interface{}:
 		r := v()
@@ -53,16 +55,10 @@ func (c *Auth) Bind(out interface{}) error {
 			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	case string:
-		if c.request == "" {
-			return errs.NewError(401, "请求中未包含用户信息,用户未登录")
-		}
 		if err := json.Unmarshal([]byte(v), out); err != nil {
 			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
 		}
 	default:
-		if reflect.ValueOf(c.request).IsNil() {
-			return errs.NewError(401, "请求中未包含用户信息,用户未登录")
-		}
 		buff, err := json.Marshal(v)
 		if err != nil {
 			return fmt.Errorf("将用户信息转换为json失败:%w", err)
@@ -72,4 +68,15 @@ func (c *Auth) Bind(out interface{}) error {
 		}
 	}
 	return nil
+}
+
+func (c *Auth) isNil(i interface{}) bool {
+	vi := reflect.ValueOf(i)
+	if vi.Kind() == reflect.String {
+		return i == ""
+	}
+	if vi.Kind() == reflect.Ptr || vi.Kind() == reflect.Func || vi.Kind() == reflect.Map || vi.Kind() == reflect.Slice {
+		return vi.IsNil()
+	}
+	return false
 }

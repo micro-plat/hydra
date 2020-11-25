@@ -5,8 +5,8 @@ import (
 
 	"github.com/micro-plat/cli/cmds"
 	"github.com/micro-plat/cli/logs"
-	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
@@ -15,7 +15,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "install",
-			Usage:  "安装本地服务。安装完成后可通过'start'命令启动服务",
+			Usage:  "安装服务，以服务方式安装到本地系统",
 			Flags:  getFlags(),
 			Action: doInstall,
 		}
@@ -48,6 +48,5 @@ func doInstall(c *cli.Context) (err error) {
 	}
 
 	err = hydraSrv.Install()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName,"Install",err)
+	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Install", err)
 }
-

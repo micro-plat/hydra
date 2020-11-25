@@ -23,11 +23,11 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	if err := c.Load(); err != nil {
 		return err
 	}
-	if cover {
+	proto := registry.GetProto(registryAddr)
+	if !global.IsLocal(proto) && cover {
 		backdirName = fmt.Sprintf("conf_%s", md5.Encrypt(time.Now().Format("02150405"))[:8])
 		os.Mkdir(backdirName, os.ModePerm)
 	}
-
 	//本地文件系统则直接使用toml序列化方式进行发布
 	// proto := registry.GetProto(registryAddr)
 	// if proto == registry.FileSystem {
@@ -60,13 +60,11 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 				return err
 			}
 		}
-
 	}
 	return nil
 }
 
 func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
-
 	value, err := getJSON(v)
 	if err != nil {
 		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)

@@ -14,7 +14,7 @@ func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "stop",
-			Usage:  "停止服务",
+			Usage:  "停止服务，停止服务器运行",
 			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doStop,
 		}
@@ -31,8 +31,5 @@ func doStop(c *cli.Context) (err error) {
 	}
 
 	err = hydraSrv.Stop()
-	if err != nil {
-		return err
-	}
 	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Stop", err)
 }

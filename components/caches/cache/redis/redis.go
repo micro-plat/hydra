@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/caches/cache"
 	"github.com/micro-plat/hydra/components/pkgs/redis"
-	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 

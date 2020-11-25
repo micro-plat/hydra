@@ -283,7 +283,7 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 
 	switch {
 	case strings.Contains(ctp, "xml"):
-		if s, ok := content.(map[string]interface{}); ok { //@fix 修改成的xml转为多层的map
+		if s, ok := content.(map[string]interface{}); ok {
 			var m mxj.Map = s
 			if str, err := m.Xml(); err != nil {
 				panic(err)
