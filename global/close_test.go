@@ -13,11 +13,12 @@ func Test_global_Close(t *testing.T) {
 	}
 	testcases := []struct {
 		name      string
-		closer    *mockClose
+		closer    []*mockClose
 		expectLen int
 	}{
-		{name: "存在closer", closer: &mockClose{}, expectLen: 1},
-		{name: "没有closer", closer: nil, expectLen: 0},
+		{name: "1. 没有closer", closer: nil, expectLen: 0},
+		{name: "2. 存在closer-单个", closer: []*mockClose{&mockClose{}}, expectLen: 1},
+		{name: "3. 存在closer-多个", closer: []*mockClose{&mockClose{}, &mockClose{}}, expectLen: 2},
 	}
 
 	for _, tt := range testcases {
@@ -26,8 +27,10 @@ func Test_global_Close(t *testing.T) {
 			isClose: false,
 			close:   make(chan struct{}),
 		}
-		if tt.closer != nil {
-			m.AddCloser(tt.closer)
+		if len(tt.closer) > 0 {
+			for i := range tt.closer {
+				m.AddCloser(tt.closer[i])
+			}
 		}
 		m.Close()
 
@@ -42,6 +45,11 @@ func Test_global_Close_repeat(t *testing.T) {
 		isClose: false,
 		close:   make(chan struct{}),
 	}
+	defer func() {
+		if obj := recover(); obj != nil {
+			assert.Equal(t, nil, obj, "1. 重复调用Close出现崩溃")
+		}
+	}()
 	m.Close() //第一次
 	m.Close() //第二次
 }
@@ -72,11 +80,11 @@ func Test_global_AddCloser(t *testing.T) {
 		closer  []interface{}
 		wantLen int
 	}{
-		{name: "正常的io.Closer", closer: []interface{}{&mockClose{}}, wantLen: 1},
-		{name: "正常的closeHandle", closer: []interface{}{closeHandle(func() (err error) { return })}, wantLen: 1},
-		{name: "正常的io.Closer+closeHandle", closer: []interface{}{&mockClose{}, closeHandle(func() (err error) { return })}, wantLen: 2},
-		{name: "函数签名不匹配io.Closer", closer: []interface{}{&mockCloseNotMatch{}}, wantLen: 0},
-		{name: "函数签名不匹配closeHandle", closer: []interface{}{func(x int) (err error) { return }}, wantLen: 0},
+		{name: "1. 正常的io.Closer", closer: []interface{}{&mockClose{}}, wantLen: 1},
+		{name: "2. 正常的closeHandle", closer: []interface{}{closeHandle(func() (err error) { return })}, wantLen: 1},
+		{name: "3. 正常的io.Closer+closeHandle", closer: []interface{}{&mockClose{}, closeHandle(func() (err error) { return })}, wantLen: 2},
+		{name: "4. 函数签名不匹配io.Closer", closer: []interface{}{&mockCloseNotMatch{}}, wantLen: 0},
+		{name: "5. 函数签名不匹配closeHandle", closer: []interface{}{func(x int) (err error) { return }}, wantLen: 0},
 	}
 
 	for _, tt := range testcases {

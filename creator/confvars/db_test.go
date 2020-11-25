@@ -15,7 +15,7 @@ func TestNewDB(t *testing.T) {
 		args map[string]map[string]interface{}
 		want *Vardb
 	}{
-		{name: "初始化db对象", args: map[string]map[string]interface{}{"main": map[string]interface{}{"test1": "123456"}},
+		{name: "1. 初始化db对象", args: map[string]map[string]interface{}{"main": map[string]interface{}{"test1": "123456"}},
 			want: &Vardb{vars: map[string]map[string]interface{}{"main": map[string]interface{}{"test1": "123456"}}}},
 	}
 	for _, tt := range tests {
@@ -35,7 +35,7 @@ func TestVardb_Oracle(t *testing.T) {
 		args   args
 		want   *Vardb
 	}{
-		{name: "初始化对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "oracleDB", q: dboracle.New("connstr")},
+		{name: "1. 初始化Oracle对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "oracleDB", q: dboracle.New("connstr")},
 			want: NewDB(map[string]map[string]interface{}{db.TypeNodeName: map[string]interface{}{"oracleDB": dboracle.New("connstr")}})},
 	}
 	for _, tt := range tests {
@@ -55,7 +55,7 @@ func TestVardb_MySQL(t *testing.T) {
 		args   args
 		want   *Vardb
 	}{
-		{name: "初始化对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "mysqlDB", q: dbmysql.New("connstr1")},
+		{name: "1. 初始化MySQL对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "mysqlDB", q: dbmysql.New("connstr1")},
 			want: NewDB(map[string]map[string]interface{}{db.TypeNodeName: map[string]interface{}{"mysqlDB": dbmysql.New("connstr1")}})},
 	}
 	for _, tt := range tests {
@@ -73,13 +73,23 @@ func TestVardb_Custom(t *testing.T) {
 		name   string
 		fields *Vardb
 		args   args
+		repeat *args
 		want   *Vardb
 	}{
-		{name: "初始化对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "customer", q: map[string]interface{}{"sss": "sdfdsfsdf"}},
+		{name: "1. 初始化空子定义对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "", q: map[string]interface{}{}},
+			want: NewDB(map[string]map[string]interface{}{db.TypeNodeName: map[string]interface{}{"": map[string]interface{}{}}})},
+		{name: "2. 初始化自定义对象", fields: NewDB(map[string]map[string]interface{}{}), args: args{name: "customer", q: map[string]interface{}{"sss": "sdfdsfsdf"}},
 			want: NewDB(map[string]map[string]interface{}{db.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"sss": "sdfdsfsdf"}}})},
+		{name: "3. 重复初始化自定义对象", fields: NewDB(map[string]map[string]interface{}{}),
+			args:   args{name: "customer", q: map[string]interface{}{"sss": "sdfdsfsdf"}},
+			repeat: &args{name: "customer", q: map[string]interface{}{"xxx": "54dfdff"}},
+			want:   NewDB(map[string]map[string]interface{}{db.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"xxx": "54dfdff"}}})},
 	}
 	for _, tt := range tests {
 		got := tt.fields.Custom(tt.args.name, tt.args.q)
+		if tt.repeat != nil {
+			got = tt.fields.Custom(tt.repeat.name, tt.repeat.q)
+		}
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

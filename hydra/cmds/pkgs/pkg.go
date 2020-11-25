@@ -45,28 +45,6 @@ func GetAppNameDesc(vname string) (string, string) {
 //GetBaseFlags 获取运行时的参数
 func GetBaseFlags() []cli.Flag {
 	flags := make([]cli.Flag, 0, 4)
-	// if global.Def.RegistryAddr == "" {
-	// 	flags = append(flags, registryFlag)
-	// }
-	// if global.Def.Name == "" &&
-	// 	global.Def.PlatName == "" && global.Def.SysName == "" && len(global.Def.ServerTypes) == 0 &&
-	// 	global.Def.ClusterName == "" {
-	// 	flags = append(flags, nameFlag)
-	// } else {
-	// 	if global.Def.PlatName == "" {
-	// 		flags = append(flags, platFlag)
-	// 	}
-	// 	if global.Def.SysName == "" {
-	// 		flags = append(flags, sysNameFlag)
-	// 	}
-	// 	if len(global.Def.ServerTypes) == 0 {
-	// 		flags = append(flags, serverTypesFlag)
-	// 	}
-	// 	if global.Def.ClusterName == "" {
-	// 		flags = append(flags, clusterFlag)
-	// 	}
-	// }
-
 	flags = append(flags, registryFlag)
 	flags = append(flags, nameFlag)
 	flags = append(flags, platFlag)

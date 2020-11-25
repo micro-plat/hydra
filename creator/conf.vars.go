@@ -49,10 +49,10 @@ func (v vars) RPC(name string, opts ...rpc.Option) vars {
 }
 
 //Redis 添加Redis配置
-func (v vars) Redis(name string, opts *redis.Redis) vars {
+func (v vars) Redis(name string, r *redis.Redis) vars {
 	if _, ok := v[redis.TypeNodeName]; !ok {
 		v[redis.TypeNodeName] = make(map[string]interface{})
 	}
-	v[redis.TypeNodeName][name] = opts
+	v[redis.TypeNodeName][name] = r
 	return v
 }

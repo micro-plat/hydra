@@ -14,12 +14,10 @@ const serviceRoot = "/%s/services/rpc/%s%s/providers"
 //order.request@merchant
 func ResolvePath(address string, defPlatName string) (isip bool, service string, platName string, err error) {
 	raddress := strings.TrimSpace(strings.TrimRight(address, "@"))
+
 	addrs := strings.SplitN(raddress, "@", 2)
-	if len(addrs) == 0 || addrs[0] == "" {
-		return false, "", "", fmt.Errorf("服务名不能为空 %s", address)
-	}
 	if addrs[0] == "" {
-		return false, "", "", fmt.Errorf("服务地址%s不能为空", address)
+		return false, "", "", fmt.Errorf("服务地址不能为空:%s", address)
 	}
 	service = "/" + strings.Trim(strings.Replace(addrs[0], ".", "/", -1), "/")
 	platName = defPlatName
@@ -33,6 +31,14 @@ func ResolvePath(address string, defPlatName string) (isip bool, service string,
 	return false, service, platName, nil
 }
 func isIPPort(s string) bool {
+	if strings.Contains(s, "://") {
+		parties := strings.Split(s, "://")
+		if len(parties) != 2 {
+			return false
+		}
+		s = parties[1]
+	}
+
 	host, port, err := net.SplitHostPort(s)
 	if err != nil {
 		return false

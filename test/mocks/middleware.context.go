@@ -219,7 +219,7 @@ func (r *MockRequest) GetMap() (types.XMap, error) {
 }
 
 //GetRawBody 获取请求的body参数
-func (r *MockRequest) GetRawBody(encoding ...string) ([]byte, error) {
+func (r *MockRequest) GetRawBody() ([]byte, error) {
 	return nil, nil
 }
 

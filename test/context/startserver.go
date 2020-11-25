@@ -2,16 +2,20 @@ package context
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	ghttp "net/http"
+	"net/url"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/micro-plat/hydra"
-	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/hydra/servers/http"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 var oncelock sync.Once
@@ -31,12 +35,12 @@ func startServer() {
 		hydra.Conf.API(":9091")
 		app.API("/getbodymap", GetBodyMap)
 		app.API("/getbody/encoding", GetBodyEncoding)
-		app.API("/getbody/encoding/gbk", GetBodyEncodingGBK, router.WithEncoding("gbk"))
-		app.API("/getbody/encoding/utf8", GetBodyEncodingUTF8, router.WithEncoding("utf-8"))
+		app.API("/getbody/encoding/gbk", GetBodyEncodingGBK, api.WithEncoding("gbk"))
+		app.API("/getbody/encoding/utf8", GetBodyEncodingUTF8, api.WithEncoding("utf-8"))
 		app.API("/getcookies/encoding", GetCookiesEncoding)
 		app.API("/getheaders/encoding", GetHeaderEncoding)
-		app.API("/getheaders/encoding/gbk", GetHeaderEncodingGBK, router.WithEncoding("gbk"))
-		app.API("/getheaders/encoding/utf8", GetHeaderEncoding, router.WithEncoding("utf-8"))
+		app.API("/getheaders/encoding/gbk", GetHeaderEncodingGBK, api.WithEncoding("gbk"))
+		app.API("/getheaders/encoding/utf8", GetHeaderEncoding, api.WithEncoding("utf-8"))
 		app.API("/form", GetBodyMapFormData)
 		app.API("/upload", UploadFile)
 		app.API("/download", DownloadFile)
@@ -208,4 +212,33 @@ func Redirect(ctx hydra.IContext) interface{} {
 func RedirectDst(ctx hydra.IContext) interface{} {
 	ctx.Response().Header("Content-Type", "application/json; charset=UTF-8")
 	return "success"
+}
+
+func getTestUTF8Json(s map[string]string) string {
+	for k, v := range s {
+		s[k] = url.QueryEscape(v)
+	}
+	r, _ := json.Marshal(s)
+	return string(r)
+}
+
+func getTestGBKJson(s map[string]string) string {
+	for k, v := range s {
+		s[k] = url.QueryEscape(Utf8ToGbk(v))
+	}
+
+	r, _ := json.Marshal(s)
+	return string(r)
+}
+
+func Utf8ToGbk(s string) string {
+	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GBK.NewEncoder())
+	d, _ := ioutil.ReadAll(reader)
+	return string(d)
+}
+
+func GbkToUtf8(s string) string {
+	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GBK.NewDecoder())
+	d, _ := ioutil.ReadAll(reader)
+	return string(d)
 }
