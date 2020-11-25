@@ -26,16 +26,16 @@ func Test_ucli_AddFlag(t *testing.T) {
 	c := newCli(expectName)
 
 	//测试cli name 与预期是否一致
-	assert.Equal(t, expectName, c.Name, "newCli name与预期不匹配")
+	assert.Equal(t, expectName, c.Name, "1.1 newCli name与预期不匹配")
 
 	//测试添加flag
 	c.AddFlag("-r", "注册中心")
-	assert.Equal(t, 1, len(c.flags), "AddFlag 长度与预期不匹配")
-	assert.Equal(t, "-r", c.flags[0].GetName(), "AddFlag flags.name与预期不匹配")
+	assert.Equal(t, 1, len(c.flags), "2.1 AddFlag 长度与预期不匹配")
+	assert.Equal(t, "-r", c.flags[0].GetName(), "2.2 AddFlag flags.name与预期不匹配")
 
 	//测试重复添加相同的flag
 	c.AddFlag("-r", "注册中心")
-	assert.Equal(t, 1, len(c.flags), "AddFlag 添加重复名称，未去重处理")
+	assert.Equal(t, 1, len(c.flags), "3.1 AddFlag 添加重复名称，未去重处理")
 
 }
 
@@ -44,12 +44,12 @@ func Test_ucli_AddSliceFlag(t *testing.T) {
 
 	//测试添加flag
 	c.AddSliceFlag("-r", "注册中心")
-	assert.Equal(t, 1, len(c.flags), "AddSliceFlag 长度与预期不匹配")
-	assert.Equal(t, "-r", c.flags[0].GetName(), "AddSliceFlag flags.name与预期不匹配")
+	assert.Equal(t, 1, len(c.flags), "1.1 AddSliceFlag 长度与预期不匹配")
+	assert.Equal(t, "-r", c.flags[0].GetName(), "1.2 AddSliceFlag flags.name与预期不匹配")
 
 	//测试重复添加相同的flag
 	c.AddSliceFlag("-r", "注册中心")
-	assert.Equal(t, 1, len(c.flags), "AddSliceFlag 添加重复名称，未去重处理")
+	assert.Equal(t, 1, len(c.flags), "2.1 AddSliceFlag 添加重复名称，未去重处理")
 }
 
 func Test_ucli_GetFlags(t *testing.T) {
@@ -62,7 +62,7 @@ func Test_ucli_GetFlags(t *testing.T) {
 		want   []cli.Flag
 	}{
 		{
-			name: "测试GetFlags-相同的Flag类型",
+			name: "1.1 测试GetFlags-相同的Flag类型",
 			fields: fields{
 				flags: []cli.Flag{
 					cli.StringFlag{
@@ -83,7 +83,7 @@ func Test_ucli_GetFlags(t *testing.T) {
 			},
 		},
 		{
-			name: "测试GetFlags-不同的Flag类型",
+			name: "1.2 测试GetFlags-不同的Flag类型",
 			fields: fields{
 				flags: []cli.Flag{
 					cli.StringFlag{
@@ -140,21 +140,21 @@ func Test_doCliCallback(t *testing.T) {
 		isNillError bool
 	}{
 		{
-			name: "不存在的command名称-完全包含cmdName",
+			name: "1. 不存在的command名称-完全包含cmdName",
 			args: args{
 				c: newCtx(app, set, "runtest"), //run的完全包含
 			},
 			isNillError: true,
 		},
 		{
-			name: "不存在的command名称-只包含cmdName前缀",
+			name: "2. 不存在的command名称-只包含cmdName前缀",
 			args: args{
 				c: newCtx(app, set, "r"), //run的前缀 r
 			},
 			isNillError: true,
 		},
 		{
-			name: "不存在的command名称-完全不包含cmdName",
+			name: "3. 不存在的command名称-完全不包含cmdName",
 			args: args{
 				c: newCtx(app, set, "nonecmd"),
 			},
