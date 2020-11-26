@@ -664,12 +664,33 @@ func Test_response_GetRaw(t *testing.T) {
 
 func Test_response_Flush(t *testing.T) {
 	tests := []struct {
-		name     string
-		encoding string
+		name       string
+		encoding   string
+		isRedirect bool
+		status     int
 	}{
-		{name: "1. 编码为utf-8", encoding: "utf-8"},
-		{name: "2. 编码为gbk", encoding: "gbk"},
+		{name: "1.1 状态码200 编码为utf-8", encoding: "utf-8", status: 200},
+		{name: "1.2 状态码200 编码为gbk", encoding: "gbk", status: 200},
+
+		{name: "2.1 状态码301 编码为gbk", encoding: "utf-8", isRedirect: true, status: 301},
+		{name: "2.2 状态码301 编码为gbk", encoding: "gbk", isRedirect: true, status: 301},
+		{name: "2.3 状态码302 编码为gbk", encoding: "utf-8", isRedirect: true, status: 302},
+		{name: "2.4 状态码302 编码为gbk", encoding: "gbk", isRedirect: true, status: 302},
+		{name: "2.5 状态码303 编码为gbk", encoding: "utf-8", isRedirect: true, status: 303},
+		{name: "2.6 状态码303 编码为gbk", encoding: "gbk", isRedirect: true, status: 303},
+		{name: "2.7 状态码307 编码为gbk", encoding: "utf-8", isRedirect: true, status: 307},
+		{name: "2.8 状态码307 编码为gbk", encoding: "gbk", isRedirect: true, status: 307},
+		{name: "2.9 状态码308 编码为gbk", encoding: "utf-8", isRedirect: true, status: 308},
+		{name: "2.10 状态码308 编码为gbk", encoding: "gbk", isRedirect: true, status: 308},
+
+		{name: "3.1 状态码400 编码为utf-8", encoding: "utf-8", status: 400},
+		{name: "3.2 状态码400 编码为gbk", encoding: "gbk", status: 400},
+
+		{name: "3.1 状态码600 编码为utf-8", encoding: "utf-8", status: 600},
+		{name: "3.2 状态码600 编码为gbk", encoding: "gbk", status: 600},
 	}
+
+	//	301 302 303 307 308
 
 	confObj := mocks.NewConfBy("context", "flush") //构建对象
 	confObj.API(":8080")                           //初始化参数
@@ -683,17 +704,21 @@ func Test_response_Flush(t *testing.T) {
 		//构建请求 方法要与注册方法一致
 		r, _ := http.NewRequest("POST", "http://localhost:8080/url?", bytes.NewReader([]byte("")))
 		r.Header.Set("Content-Type", fmt.Sprintf("application/json;charset=%s", tt.encoding))
+		location := "http://localhost:8080/redirect"
+		httpWriter.Header().Set("Location", location)
 		c.Request = r
 		rsp := ctx.NewResponse(middleware.NewGinCtx(c), serverConf, logger.New("context"), conf.NewMeta())
 
 		//写入
 		writeContent := `content中文~!@#$%^&*()_+{}:">?+>?=`
-		rsp.Write(200, writeContent)
-
+		rsp.Write(tt.status, writeContent)
 		//写入相应流
 		rsp.Flush()
 		s, content, ctp := rsp.GetFinalResponse()
-
+		if tt.isRedirect {
+			assert.Equal(t, location, httpWriter.HeaderMap["Location"][0], tt.name)
+			continue
+		}
 		assert.Equal(t, s, httpWriter.Code, tt.name)
 		gotContent, _ := encoding.Decode(httpWriter.Body.String(), tt.encoding)
 		assert.Equal(t, content, string(gotContent), tt.name)
