@@ -35,17 +35,30 @@ func TestJWTAuth(t *testing.T) {
 	rawData, _ := wjwt.Encrypt(secert, jwt.ModeHS512, data, 86400)
 
 	tests := []*testCase{
-		{name: "jwt-未配置", isSet: false, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{}},
-		{name: "jwt-配置未启动", isSet: true, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{jwt.WithDisable()}},
-		{name: "jwt-配置启动-被排除", isSet: true, wantStatus: 200, wantSpecial: "jwt", jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test")}},
-		{name: "jwt-配置启动-token不存在", isSet: true, wantStatus: 401, wantSpecial: "jwt", jwtOpts: []jwt.Option{}},
-		{name: "jwt-配置启动-token在header中,失败", isSet: true, isSource: "header", token: "errorToken", wantStatus: 403, wantSpecial: "jwt",
+		{name: "1.1 jwt-配置不存在", isSet: false, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{}},
+
+		{name: "2.1 jwt-配置存在-未启动-无数据", isSet: true, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{jwt.WithDisable()}},
+		{name: "2.2 jwt-配置存在-未启动-被排除", isSet: true, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithExcludes("/jwt/test")}},
+		{name: "2.3 jwt-配置存在-未启动-token不存在", isSet: true, wantStatus: 200, wantSpecial: "", jwtOpts: []jwt.Option{jwt.WithDisable()}},
+		{name: "2.4 jwt-配置存在-未启动-token在header中,失败", isSet: true, isSource: "header", token: "errorToken", wantStatus: 200, wantSpecial: "",
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithHeader(), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.5 jwt-配置存在-未启动-token在cookie中,失败authurl不为空", isSet: true, authURL: "", isSource: "cookie", token: "errorToken", wantStatus: 200, wantSpecial: "",
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithCookie(), jwt.WithAuthURL("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.6 jwt-配置存在-未启动-token在header中,成功", isSet: true, isSource: "header", token: rawData, wantStatus: 200, wantSpecial: "",
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.7 jwt-配置存在-未启动-token在cookie中,成功authurl不为空", isSet: true, authURL: "", isSource: "cookie", token: rawData, wantStatus: 200, wantSpecial: "",
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithAuthURL("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
+
+		{name: "3.1 jwt-配置存在-启动-无数据", isSet: true, wantStatus: 401, wantSpecial: "jwt", jwtOpts: []jwt.Option{}},
+		{name: "3.2 jwt-配置存在-启动-被排除", isSet: true, wantStatus: 200, wantSpecial: "jwt", jwtOpts: []jwt.Option{jwt.WithExcludes("/jwt/test")}},
+		{name: "3.3 jwt-配置存在-启动-token不存在", isSet: true, wantStatus: 401, wantSpecial: "jwt", jwtOpts: []jwt.Option{}},
+		{name: "3.4 jwt-配置存在-启动-token在header中,失败", isSet: true, isSource: "header", token: "errorToken", wantStatus: 403, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithHeader(), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwt-配置启动-token在cookie中,失败authurl不为空", isSet: true, authURL: "www.baidu.com", isSource: "cookie", token: "errorToken", wantStatus: 302, wantSpecial: "jwt",
+		{name: "3.5 jwt-配置存在-启动-token在cookie中,失败authurl不为空", isSet: true, authURL: "www.baidu.com", isSource: "cookie", token: "errorToken", wantStatus: 302, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithAuthURL("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwt-配置启动-token在header中,成功", isSucc: true, isSet: true, isSource: "header", token: rawData, wantStatus: 200, wantSpecial: "jwt",
+		{name: "3.6 jwt-配置存在-启动-token在header中,成功", isSucc: true, isSet: true, isSource: "header", token: rawData, wantStatus: 200, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwt-配置启动-token在cookie中,成功authurl不为空", isSucc: true, isSet: true, authURL: "www.baidu.com", isSource: "cookie", token: rawData, wantStatus: 200, wantSpecial: "jwt",
+		{name: "3.7 jwt-配置存在-启动-token在cookie中,成功authurl不为空", isSucc: true, isSet: true, authURL: "www.baidu.com", isSource: "cookie", token: rawData, wantStatus: 200, wantSpecial: "jwt",
 			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithAuthURL("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
 	}
 

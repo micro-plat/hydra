@@ -8,6 +8,7 @@ import (
 func Render() Handler {
 	return func(ctx IMiddleContext) {
 
+		//render是最后根据配置修改相应结果   所以需要先执行了业务逻辑 然后在执行下面逻辑
 		ctx.Next()
 
 		//加载渲染配置

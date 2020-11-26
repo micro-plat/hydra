@@ -3,7 +3,6 @@ package servers
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -40,8 +39,8 @@ func Test_dispCtx_GetRouterPath(t *testing.T) {
 		request dispatcher.IRequest
 		want    string
 	}{
-		{name: "cron", request: getTestCronTask("@every 1h30m", "cron_service"), want: "cron_service"},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: "queue_service"},
+		{name: "1. cron-ctx-GetRouterPath", request: getTestCronTask("@every 1h30m", "cron_service"), want: "cron_service"},
+		{name: "2. mqc-ctx-GetRouterPath", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: "queue_service"},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -57,8 +56,8 @@ func Test_dispCtx_GetBody(t *testing.T) {
 		request dispatcher.IRequest
 		want    string
 	}{
-		{name: "cron获取不到", request: getTestCronTask("@every 1h30m", "cron_service"), want: ""},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`},
+		{name: "1. cron-ctx-GetBody获取不到(没有body字段)", request: getTestCronTask("@every 1h30m", "cron_service"), want: ""},
+		{name: "2. mqc-ctx-GetBody-json数据", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -66,7 +65,6 @@ func Test_dispCtx_GetBody(t *testing.T) {
 		got := g.GetBody()
 		s, err := ioutil.ReadAll(got)
 		assert.Equal(t, false, err != nil, tt.name)
-		fmt.Println(string(s), err)
 		assert.Equal(t, tt.want, string(s), tt.name)
 	}
 }
@@ -77,8 +75,8 @@ func Test_dispCtx_GetMethod(t *testing.T) {
 		request dispatcher.IRequest
 		want    string
 	}{
-		{name: "cron", request: getTestCronTask("@every 1h30m", "cron_service"), want: "GET"},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `GET`},
+		{name: "1. cron-ctx-GetMethod", request: getTestCronTask("@every 1h30m", "cron_service"), want: "GET"},
+		{name: "2. mqc-ctx-GetMethod", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `GET`},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -94,8 +92,8 @@ func Test_dispCtx_GetURL(t *testing.T) {
 		request dispatcher.IRequest
 		want    *url.URL
 	}{
-		{name: "cron", request: getTestCronTask("@every 1h30m", "/cron/service"), want: &url.URL{Path: "/cron/service"}},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "/mqc/service", `{"data":"message"}`, true), want: &url.URL{Path: "/mqc/service"}},
+		{name: "1. cron-ctx-GetURL", request: getTestCronTask("@every 1h30m", "/cron/service"), want: &url.URL{Path: "/cron/service"}},
+		{name: "2. mqc-ctx-GetURL", request: getTestMqcQueue("queue_name", "/mqc/service", `{"data":"message"}`, true), want: &url.URL{Path: "/mqc/service"}},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -110,12 +108,8 @@ func Test_dispCtx_GetHeaders(t *testing.T) {
 		request dispatcher.IRequest
 		want    http.Header
 	}{
-		{name: "cron", request: getTestCronTask("@every 1h30m", "/cron/service"), want: http.Header{
-			"Client-IP": []string{"127.0.0.1"},
-		}},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "/mqc/service", `{"data":"message"}`, true), want: http.Header{
-			"Client-IP": []string{"127.0.0.1"},
-		}},
+		{name: "1. cron-ctx-GetHeaders", request: getTestCronTask("@every 1h30m", "/cron/service"), want: http.Header{"Client-IP": []string{"127.0.0.1"}}},
+		{name: "2. mqc-ctx-GetHeaders", request: getTestMqcQueue("queue_name", "/mqc/service", `{"data":"message","__header__":{"Client-IP":"192.168.0.11"}}`, true), want: http.Header{"Client-IP": []string{"192.168.0.11"}}},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -133,9 +127,9 @@ func Test_dispCtx_GetQuery(t *testing.T) {
 		want    string
 		wantOK  bool
 	}{
-		{name: "cron获取不到", request: getTestCronTask("@every 1h30m", "cron_service")},
-		{name: "mqc获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true)},
-		{name: "mqc获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
+		{name: "1. cron-ctx-GetQuery获取不到(默认都是空的不能设置)", request: getTestCronTask("@every 1h30m", "cron_service")},
+		{name: "2. mqc-ctx-GetQuery获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), k: "error", want: "", wantOK: false},
+		{name: "3. mqc-ctx-GetQuery获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -156,9 +150,9 @@ func Test_dispCtx_GetFormValue(t *testing.T) {
 		want    string
 		wantOK  bool
 	}{
-		{name: "cron获取不到", request: getTestCronTask("@every 1h30m", "cron_service")},
-		{name: "mqc获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true)},
-		{name: "mqc获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
+		{name: "1. cron-ctx-GetFormValue获取不到(默认都是空的不能设置)", request: getTestCronTask("@every 1h30m", "cron_service")},
+		{name: "2. mqc-ctx-GetFormValue获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), k: "error", want: "", wantOK: false},
+		{name: "3. mqc-ctx-GetFormValue获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -177,17 +171,13 @@ func Test_dispCtx_GetForm(t *testing.T) {
 		request dispatcher.IRequest
 		want    url.Values
 	}{
-		{name: "cron", request: getTestCronTask("@every 1h30m", "cron_service"), want: url.Values{}},
-		{name: "mqc", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: url.Values{
-			"__body_": []string{`{"data":"message"}`},
-			"data":    []string{"message"},
-		}},
+		{name: "1. cron-ctx-GetForm(默认是空，不能进行设置)", request: getTestCronTask("@every 1h30m", "cron_service"), want: url.Values{}},
+		{name: "2. mqc-ctx-GetForm", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: url.Values{"__body_": []string{`{"data":"message"}`}, "data": []string{"message"}}},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
 		g.Request = tt.request
 		got := g.GetForm()
-		fmt.Println(got)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
@@ -196,16 +186,22 @@ func Test_dispCtx_Status(t *testing.T) {
 	tests := []struct {
 		name   string
 		status int
+		want   int
 	}{
-		{name: "设置200", status: 200},
-		{name: "设置302", status: 302},
+		{name: "1. 设置=0", status: 0, want: 0},
+		{name: "2. 设置200", status: 200, want: 200},
+		{name: "3. 设置302", status: 302, want: 302},
+		{name: "4. 设置402", status: 302, want: 302},
+		{name: "5. 设置502", status: 302, want: 302},
+		{name: "6. 设置999", status: 999, want: 999},
+		{name: "7. 设置<0", status: -100, want: 0},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
 		g.Writer = &mocks.MockResponseWriter2{}
 		g.WStatus(tt.status)
 		got := g.Status()
-		assert.Equal(t, tt.status, got, tt.name)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
 
