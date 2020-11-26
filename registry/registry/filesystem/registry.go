@@ -18,13 +18,13 @@ func (z *fsRegistry) Create(opts ...registry.Option) (registry.IRegistry, error)
 	}
 
 	if len(z.opts.Addrs) <= 0 {
-		return nil, fmt.Errorf("FS注册中心，需要指定一个地址：%v", z.opts.Addrs)
+		return nil, fmt.Errorf("FS注册中心，需要指定一个本地目录地址：%v", z.opts.Addrs)
 	}
 	if len(z.opts.Addrs) > 1 {
-		return nil, fmt.Errorf("FS注册中心，只允许传递一个地址：%v", z.opts.Addrs)
+		return nil, fmt.Errorf("FS注册中心，只允许传递一个本地目录地址：%v", z.opts.Addrs)
 	}
-	prefix := z.opts.Addrs[0]
-	client, err := NewFileSystem(prefix)
+	rootDir := z.opts.Addrs[0]
+	client, err := NewFileSystem(rootDir)
 	if err != nil {
 		return nil, err
 	}

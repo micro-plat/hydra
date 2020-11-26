@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
@@ -27,7 +26,8 @@ func NewServerPub(platName string, sysName string, serverType string, clusterNam
 		sysName:     sysName,
 		serverType:  serverType,
 		clusterName: clusterName,
-		serverID:    global.GetMatchineCode() + time.Now().Format("0405"),
+		//@bugfix:如果加上时间，conf 由stop变为start 会提示 “当前集群节点不可用”
+		serverID: global.GetMatchineCode(), //+ time.Now().Format("0405"),
 	}
 }
 

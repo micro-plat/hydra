@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"sync/atomic"
+	"time"
 
 	//"github.com/micro-plat/hydra/global/compatible"
 
@@ -21,39 +21,43 @@ var _ r.IRegistry = &fs{}
 var fileMode = os.FileMode(0664)
 var dirMode = os.FileMode(0755)
 
-type eventWatcher struct {
-	watcher chan registry.ValueWatcher
-	event   chan fsnotify.Event
+type fsValueWatcher struct {
+	watcher  chan registry.ValueWatcher
+	event    chan fsnotify.Event
+	syncChan chan fsnotify.Event
+}
+
+type fsChildrenWatcher struct {
+	watcher  chan registry.ChildrenWatcher
+	event    chan fsnotify.Event
+	syncChan chan fsnotify.Event
 }
 
 type fs struct {
-	watcher      *fsnotify.Watcher
-	watcherMaps  map[string]*eventWatcher
-	watchLock    sync.Mutex
-	tempNodes    map[string]bool
-	tempNodeLock sync.Mutex
-	seqNode      int32
-	closeCh      chan struct{}
-	rootDir      string
-	done         bool
+	watcher             *fsnotify.Watcher
+	valueWatcherMaps    map[string]*fsValueWatcher
+	childrenWatcherMaps map[string]*fsChildrenWatcher
+	watchLock           sync.Mutex
+	tempNodes           map[string]bool
+	tempNodeLock        sync.Mutex
+	closeCh             chan struct{}
+	rootDir             string
+	done                bool
 }
 
 //NewFileSystem 文件系统的注册中心
 func NewFileSystem(rootDir string) (*fs, error) {
-	// if err := compatible.CheckPrivileges(); err != nil {
-	// 	return nil, err
-	// }
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
 	return &fs{
-		rootDir:     strings.TrimRight(rootDir, "/"),
-		watcher:     w,
-		watcherMaps: make(map[string]*eventWatcher),
-		tempNodes:   make(map[string]bool),
-		seqNode:     10000,
-		closeCh:     make(chan struct{}),
+		rootDir:             strings.TrimRight(rootDir, "/"),
+		watcher:             w,
+		valueWatcherMaps:    make(map[string]*fsValueWatcher),
+		childrenWatcherMaps: make(map[string]*fsChildrenWatcher),
+		tempNodes:           make(map[string]bool),
+		closeCh:             make(chan struct{}),
 	}, nil
 }
 
@@ -68,13 +72,12 @@ func (l *fs) Start() {
 				if l.done {
 					return
 				}
-				fmt.Println("l.watcher.Events:", event)
 				func(event fsnotify.Event) {
 					l.watchLock.Lock()
 					defer l.watchLock.Unlock()
 					dataPath := l.formatPath(event.Name)
 					path := filepath.Dir(dataPath)
-					watcher, ok := l.watcherMaps[path]
+					watcher, ok := l.valueWatcherMaps[path]
 					if !ok {
 						return
 					}
@@ -106,17 +109,6 @@ func (l *fs) getDataPath(path string) string {
 func (l *fs) Exists(path string) (bool, error) {
 	_, err := os.Stat(l.formatPath(path))
 	return err == nil || os.IsExist(err), nil
-}
-
-func (l *fs) getPaths(path string) []string {
-	nodes := strings.Split(strings.Trim(path, "/"), "/")
-	len := len(nodes)
-	paths := make([]string, 0, len)
-	for i := 0; i < len; i++ {
-		npath := "/" + strings.Join(nodes[:i+1], "/")
-		paths = append(paths, npath)
-	}
-	return paths
 }
 
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
@@ -177,47 +169,130 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 
 	l.watchLock.Lock()
 	defer l.watchLock.Unlock()
-	v, ok := l.watcherMaps[realPath]
+	v, ok := l.valueWatcherMaps[realPath]
 	if ok {
 		return v.watcher, nil
 	}
-	l.watcherMaps[realPath] = &eventWatcher{
-		event:   make(chan fsnotify.Event),
-		watcher: make(chan registry.ValueWatcher),
+	l.valueWatcherMaps[realPath] = &fsValueWatcher{
+		event:    make(chan fsnotify.Event),
+		watcher:  make(chan registry.ValueWatcher),
+		syncChan: make(chan fsnotify.Event, 100),
 	}
-	go func(rpath string, v *eventWatcher) {
+	go func(rpath string, v *fsValueWatcher) {
 		dataFile := l.getDataPath(rpath)
 		if err := l.watcher.Add(dataFile); err != nil {
 			v.watcher <- &valueEntity{path: rpath, Err: err}
 		}
-		select {
-		case <-l.closeCh:
-			return
-		case event := <-v.event:
-			if event.Op == fsnotify.Chmod {
+		go func(evtw *fsValueWatcher) {
+			ticker := time.NewTicker(time.Second * 2)
+			for {
+				select {
+				case <-ticker.C:
+					path := ""
+				INFOR:
+					for {
+						select {
+						case p := <-evtw.syncChan:
+							path = p.Name
+						default:
+							break INFOR
+
+						}
+					}
+					if len(path) > 0 {
+						ett := &valueEntity{
+							path: rpath,
+						}
+						evtw.watcher <- ett
+					}
+				}
+			}
+		}(v)
+
+		for {
+			select {
+			case <-l.closeCh:
 				return
+			case event := <-v.event:
+				if event.Op == fsnotify.Chmod || event.Op == fsnotify.Rename {
+					break
+				}
+				v.syncChan <- event
 			}
-
-			buff, version, err := l.GetValue(rpath)
-			ett := &valueEntity{
-				path: rpath,
-			}
-			if len(buff) == 0 {
-				ett.Err = fmt.Errorf("文件发生变化:%v", event.Op)
-			} else {
-				ett.Value = buff
-				ett.version = version
-				ett.Err = err
-			}
-			fmt.Println("GetValue:", path, string(buff), version, err)
-			v.watcher <- ett
 		}
-	}(realPath, l.watcherMaps[realPath])
+	}(realPath, l.valueWatcherMaps[realPath])
 
-	return l.watcherMaps[realPath].watcher, nil
+	return l.valueWatcherMaps[realPath].watcher, nil
 }
+
 func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-	return nil, nil
+	realPath := l.formatPath(path)
+	_, err = os.Stat(realPath)
+	if os.IsNotExist(err) {
+		err = fmt.Errorf("Watch path:%s 不存在", path)
+		return
+	}
+
+	l.watchLock.Lock()
+	defer l.watchLock.Unlock()
+	v, ok := l.childrenWatcherMaps[realPath]
+	if ok {
+		return v.watcher, nil
+	}
+	l.childrenWatcherMaps[realPath] = &fsChildrenWatcher{
+		event:    make(chan fsnotify.Event),
+		watcher:  make(chan registry.ChildrenWatcher),
+		syncChan: make(chan fsnotify.Event, 100),
+	}
+
+	go func(rpath string, v *fsChildrenWatcher) {
+		rpath = l.formatPath(rpath)
+		if err := l.watcher.Add(rpath); err != nil {
+			v.watcher <- &valuesEntity{path: rpath, Err: err}
+		}
+		go func(evtw *fsChildrenWatcher) {
+			ticker := time.NewTicker(time.Second * 2)
+			for {
+				select {
+				case <-ticker.C:
+					path := ""
+				INFOR:
+					for {
+						select {
+						case p := <-evtw.syncChan:
+							path = p.Name
+						default:
+							break INFOR
+						}
+					}
+					if len(path) > 0 {
+						vals, version, err := l.GetChildren(rpath)
+						ett := &valuesEntity{
+							path:    rpath,
+							values:  vals,
+							version: version,
+							Err:     err,
+						}
+						evtw.watcher <- ett
+					}
+				}
+			}
+		}(v)
+
+		for {
+			select {
+			case <-l.closeCh:
+				return
+			case event := <-v.event:
+				if event.Op == fsnotify.Chmod || event.Op == fsnotify.Rename {
+					break
+				}
+				v.syncChan <- event
+			}
+		}
+	}(realPath, l.childrenWatcherMaps[realPath])
+
+	return l.childrenWatcherMaps[realPath].watcher, nil
 }
 
 func (l *fs) Delete(path string) error {
@@ -261,17 +336,13 @@ func (l *fs) CreateTempNode(path string, data string) (err error) {
 	return nil
 }
 func (l *fs) CreateSeqNode(path string, data string) (rpath string, err error) {
-	nid := atomic.AddInt32(&l.seqNode, 1)
+	nid := time.Now().UnixNano()
 	rpath = fmt.Sprintf("%s_%d", path, nid)
 	return rpath, l.CreateTempNode(rpath, data)
 }
 
 func (l *fs) GetSeparator() string {
 	return string(filepath.Separator)
-}
-
-func (l *fs) CanWirteDataInDir() bool {
-	return false
 }
 
 func (l *fs) Close() error {

@@ -37,19 +37,34 @@ func TestJWTWriter(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "jwtwrite-未配置", isSet: false, authData: data, domain: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
-		{name: "jwtwrite-配置未启动", isSet: true, authData: data, domain: "", wantStatus: 200, jwtOpts: []jwt.Option{jwt.WithDisable()}},
-		{name: "jwtwrite-配置启动-错误的配置", isSet: true, authData: data, domain: "", wantStatus: 510, jwtOpts: []jwt.Option{jwt.WithName("错误配置"), jwt.WithExcludes("/jwt/test")}},
-		{name: "jwtwrite-配置启动-authdata不存在,head", isSet: true, domain: "", isSource: "header", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
-		{name: "jwtwrite-配置启动-authdata不存在,cookie", isSet: true, domain: "", isSource: "cookie", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
-		{name: "jwtwrite-配置启动-jwt设置header无domain", isSucc: true, isSet: true, domain: "", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
+		{name: "1.1 jwtwrite-配置不存在", isSet: false, authData: data, domain: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
+
+		{name: "2.1 jwtwrite-配置存在-未启动-无数据", isSet: true, authData: data, domain: "", wantStatus: 200, jwtOpts: []jwt.Option{jwt.WithDisable()}},
+		{name: "2.2 jwtwrite-配置存在-未启动-错误的配置", isSet: true, authData: data, domain: "", wantStatus: 510, jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithName("错误配置"), jwt.WithExcludes("/jwt/test")}},
+		{name: "2.3 jwtwrite-配置存在-未启动-authdata不存在,head", isSet: true, domain: "", isSource: "header", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{jwt.WithDisable()}},
+		{name: "2.4 jwtwrite-配置存在-未启动-authdata不存在,cookie", isSet: true, domain: "", isSource: "cookie", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{jwt.WithDisable()}},
+		{name: "2.5 jwtwrite-配置存在-未启动-jwt设置header无domain", isSet: true, domain: "", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.6 jwtwrite-配置存在-未启动-jwt设置header有domain", isSet: true, domain: "www.baidu.com", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.7 jwtwrite-配置存在-未启动-jwt设置cookie无domain", isSet: true, domain: "", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
+		{name: "2.8 jwtwrite-配置存在-未启动-jwt设置cookie有domain", isSet: true, domain: "www.baidu.com", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
+			jwtOpts: []jwt.Option{jwt.WithDisable(), jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
+
+		{name: "3.1 jwtwrite-配置存在-启动-无数据", isSet: true, authData: data, domain: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
+		{name: "3.2 jwtwrite-配置存在-启动-错误的配置", isSet: true, authData: data, domain: "", wantStatus: 510, jwtOpts: []jwt.Option{jwt.WithName("错误配置"), jwt.WithExcludes("/jwt/test")}},
+		{name: "3.3 jwtwrite-配置存在-启动-authdata不存在,head", isSet: true, domain: "", isSource: "header", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
+		{name: "3.4 jwtwrite-配置存在-启动-authdata不存在,cookie", isSet: true, domain: "", isSource: "cookie", authData: nil, wanttoken: "", wantStatus: 200, jwtOpts: []jwt.Option{}},
+		{name: "3.5 jwtwrite-配置存在-启动-jwt设置header无domain", isSucc: true, isSet: true, domain: "", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
 			jwtOpts: []jwt.Option{jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwtwrite-配置启动-jwt设置header有domain", isSucc: true, isSet: true, domain: "www.baidu.com", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
+		{name: "3.6 jwtwrite-配置存在-启动-jwt设置header有domain", isSucc: true, isSet: true, domain: "www.baidu.com", authData: data, isSource: "header", wanttoken: rawData, wantStatus: 200,
 			jwtOpts: []jwt.Option{jwt.WithHeader(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwtwrite-配置启动-jwt设置cookie无domain", isSucc: true, isSet: true, domain: "", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
+		{name: "3.7 jwtwrite-配置存在-启动-jwt设置cookie无domain", isSucc: true, isSet: true, domain: "", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
 			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithExcludes("/jwt/test1")}},
-		{name: "jwtwrite-配置启动-jwt设置cookie有domain", isSucc: true, isSet: true, domain: "www.baidu.com", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
-			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}}}
+		{name: "3.8 jwtwrite-配置存在-启动-jwt设置cookie有domain", isSucc: true, isSet: true, domain: "www.baidu.com", authData: data, isSource: "cookie", wanttoken: rawData, wantStatus: 200,
+			jwtOpts: []jwt.Option{jwt.WithCookie(), jwt.WithSecret(secert), jwt.WithDomain("www.baidu.com"), jwt.WithExcludes("/jwt/test1")}},
+	}
 
 	for _, tt := range tests {
 		mockConf := mocks.NewConfBy("middleware_jwtwrite_test", "jwtwrite")
