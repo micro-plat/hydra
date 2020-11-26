@@ -15,8 +15,8 @@ func TestUnit_GetHandlings(t *testing.T) {
 		h           context.IHandler
 		want        []context.IHandler
 	}{
-		{name: "name为支持的http请求类型,group添加handing", mName: "GET", wantService: "/path/$GET", h: hander1{}, want: []context.IHandler{hander1{}}},
-		{name: "name为空,group添加handing", mName: "", wantService: "/path/$GET", h: hander2{}, want: []context.IHandler{hander2{}, hander1{}}},
+		{name: "1.1 添加GET的预处理函数", mName: "GET", wantService: "/path/$GET", h: hander1{}, want: []context.IHandler{hander1{}}},
+		{name: "1.2 添加没有前缀的预处理函数", mName: "", wantService: "/path/$GET", h: hander2{}, want: []context.IHandler{hander2{}, hander1{}}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {
@@ -34,8 +34,8 @@ func TestUnit_GetHandleds(t *testing.T) {
 		h           context.IHandler
 		want        []context.IHandler
 	}{
-		{name: "name为支持的http请求类型,group添加handing", mName: "GET", wantService: "/path/$GET", h: hander1{}, want: []context.IHandler{hander1{}}},
-		{name: "name为空,group添加handing", mName: "", wantService: "/path/$GET", h: hander2{}, want: []context.IHandler{hander1{}, hander2{}}},
+		{name: "1.1 添加GET的后处理函数", mName: "GET", wantService: "/path/$GET", h: hander1{}, want: []context.IHandler{hander1{}}},
+		{name: "1.2 添加没有前缀的后处理函数", mName: "", wantService: "/path/$GET", h: hander2{}, want: []context.IHandler{hander1{}, hander2{}}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {

@@ -16,14 +16,21 @@ func TestUnitGroup_getPaths(t *testing.T) {
 		wantService string
 		wantAction  []string
 	}{
-		{name: "handleName为空", path: "/path", mName: "", wantRpath: "/path", wantService: "/path", wantAction: []string{}},
-		{name: "handleName为支持的http请求类型[GET]", path: "/path", mName: "GET", wantRpath: "/path", wantService: "/path/$GET", wantAction: []string{"GET"}},
-		{name: "handleName为支持的http请求类型[POST]", path: "/path", mName: "POST", wantRpath: "/path", wantService: "/path/$POST", wantAction: []string{"POST"}},
-		{name: "HandleName为不支持的http请求类型", path: "/path", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
-		{name: "HandleName为空,需要对path进行替换", path: "/*/**path/*/*", mName: "", wantRpath: "/*/**path/*/handle", wantService: "/*/**path/*/handle", wantAction: []string{}},
-		{name: "HandleName为支持的http请求类型,需要对path进行替换", path: "/*/**path/*/*", mName: "GET",
-			wantRpath: "/*/**path/*/GET", wantService: "/*/**path/*/GET/$GET", wantAction: []string{"GET"}},
-		{name: "HandleName为不支持的http请求类型,需要对path进行替换", path: "/*/path", mName: "FILE", wantRpath: "/FILE/path", wantService: "/FILE/path", wantAction: []string{"GET", "POST"}},
+		{name: "1.1 函数前缀为空,注册路径没有*", path: "/path", mName: "", wantRpath: "/path", wantService: "/path", wantAction: []string{}},
+		{name: "1.2 函数前缀为空,注册路径有一个*", path: "/path/*", mName: "", wantRpath: "/path/handle", wantService: "/path/handle", wantAction: []string{}},
+		{name: "1.3 函数前缀为空,注册路径有多个*", path: "/*/path*", mName: "", wantRpath: "/*/pathhandle", wantService: "/*/pathhandle", wantAction: []string{}},
+
+		{name: "2.1 函数前缀为[GET],注册路径没有*", path: "/path", mName: "GET", wantRpath: "/path", wantService: "/path/$GET", wantAction: []string{"GET"}},
+		{name: "2.2 函数前缀为[GET],注册路径有一个*", path: "/path/*", mName: "GET", wantRpath: "/path/GET", wantService: "/path/GET/$GET", wantAction: []string{"GET"}},
+		{name: "2.3 函数前缀为[GET],注册路径有多个*", path: "/*/path*", mName: "GET", wantRpath: "/*/pathGET", wantService: "/*/pathGET/$GET", wantAction: []string{"GET"}},
+
+		{name: "3.1 函数前缀为[POST],注册路径没有*", path: "/path", mName: "POST", wantRpath: "/path", wantService: "/path/$POST", wantAction: []string{"POST"}},
+		{name: "3.2 函数前缀为[POST],注册路径没有*", path: "/path/*", mName: "POST", wantRpath: "/path/POST", wantService: "/path/POST/$POST", wantAction: []string{"POST"}},
+		{name: "3.3 函数前缀为[POST],注册路径没有*", path: "/*/path*", mName: "POST", wantRpath: "/*/pathPOST", wantService: "/*/pathPOST/$POST", wantAction: []string{"POST"}},
+
+		{name: "1.4 函数前缀为[ORDER],注册路径没有*", path: "/path", mName: "ORDER", wantRpath: "/path/ORDER", wantService: "/path/ORDER", wantAction: []string{"GET", "POST"}},
+		{name: "1.4 函数前缀为[ORDER],注册路径有一个*", path: "/path/*", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
+		{name: "1.4 函数前缀为[ORDER],注册路径有多个*", path: "/*/path*", mName: "FILE", wantRpath: "/*/pathFILE", wantService: "/*/pathFILE", wantAction: []string{"GET", "POST"}},
 	}
 	g := &UnitGroup{}
 	for _, tt := range tests {
@@ -41,10 +48,10 @@ func TestUnitGroup_AddHandling(t *testing.T) {
 		h           context.IHandler
 		wantService string
 	}{
-		{name: "name为空", h: hander1{}},
-		{name: "name为支持的http请求类型,添加不存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander1{}},
-		{name: "name为支持的http请求类型,添加存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander2{}},
-		{name: "name为不支持的http请求类型", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
+		{name: "1.1 预处理函数前缀为空", h: hander1{}},
+		{name: "1.2 预处理函数前缀为GET", mName: "GET", wantService: "/path/$GET", h: hander1{}},
+		{name: "1.3 预处理函数前缀为GET,替换存在对应的handler", mName: "GET", wantService: "/path/$GET", h: hander2{}},
+		{name: "1.4 预处理函数前缀为FILE", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {
@@ -68,10 +75,10 @@ func TestUnitGroup_AddHandled(t *testing.T) {
 		h           context.IHandler
 		wantService string
 	}{
-		{name: "name为空", h: hander1{}},
-		{name: "name为支持的http请求类型,添加不存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander1{}},
-		{name: "name为支持的http请求类型,添加存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander2{}},
-		{name: "name为不支持的http请求类型", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
+		{name: "1.1 后处理函数前缀为空", h: hander1{}},
+		{name: "1.2 后处理函数前缀为GET", mName: "GET", wantService: "/path/$GET", h: hander1{}},
+		{name: "1.3 后处理函数前缀为GET,替换存在对应的handler", mName: "GET", wantService: "/path/$GET", h: hander2{}},
+		{name: "1.4 后处理函数前缀为FILE", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {
@@ -96,10 +103,10 @@ func TestUnitGroup_AddHandl(t *testing.T) {
 		wantService string
 		wantAction  []string
 	}{
-		{name: "name为空", h: hander1{}, wantPath: "path", wantService: "path", wantAction: []string{}},
-		{name: "name为支持的http请求类型,添加不存在serviecs", mName: "GET", wantPath: "path", wantService: "/path/$GET", h: hander1{}, wantAction: []string{"GET"}},
-		{name: "name为支持的http请求类型,添加存在serviecs", mName: "GET", wantPath: "path", wantService: "/path/$GET", h: hander2{}, wantAction: []string{"GET"}},
-		{name: "name为不支持的http请求类型", mName: "FILE", wantPath: "/path/FILE", wantService: "/path/FILE", h: hander2{}, wantAction: []string{"GET", "POST"}},
+		{name: "1.1 处理函数前缀为空", h: hander1{}, wantPath: "path", wantService: "path", wantAction: []string{}},
+		{name: "1.2 处理函数前缀为GET", mName: "GET", wantPath: "path", wantService: "/path/$GET", h: hander1{}, wantAction: []string{"GET"}},
+		{name: "1.3 处理函数前缀为GET,替换存在对应的handler", mName: "GET", wantPath: "path", wantService: "/path/$GET", h: hander2{}, wantAction: []string{"GET"}},
+		{name: "1.4 处理函数前缀为FILE", mName: "FILE", wantPath: "/path/FILE", wantService: "/path/FILE", h: hander2{}, wantAction: []string{"GET", "POST"}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {
@@ -121,10 +128,10 @@ func TestUnitGroup_AddFallback(t *testing.T) {
 		h           context.IHandler
 		wantService string
 	}{
-		{name: "name为空", h: hander1{}, wantService: "path"},
-		{name: "name为支持的http请求类型,添加不存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander1{}},
-		{name: "name为支持的http请求类型,添加存在serviecs", mName: "GET", wantService: "/path/$GET", h: hander2{}},
-		{name: "name为不支持的http请求类型", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
+		{name: "1.1 降级函数前缀为空", h: hander1{}, wantService: "path"},
+		{name: "1.2 降级函数前缀为GET", mName: "GET", wantService: "/path/$GET", h: hander1{}},
+		{name: "1.3 降级函数前缀为GET,替换存在对应的handler", mName: "GET", wantService: "/path/$GET", h: hander2{}},
+		{name: "1.4 降级函数前缀为FILE", mName: "FILE", wantService: "/path/FILE", h: hander2{}},
 	}
 	g := newUnitGroup("path")
 	for _, tt := range tests {
