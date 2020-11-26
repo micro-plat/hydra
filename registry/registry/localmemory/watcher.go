@@ -53,7 +53,7 @@ func (l *localMemory) notifyParentChange(cPath string, version int32) {
 	if err != nil { //未找到父节点，无需通知
 		return
 	}
-	//@fix 修复节点变动未进行通知的bug
+
 	if v, ok := l.childrenWatchs[path]; ok {
 		select {
 		case v <- &childrenEntity{path: path, children: []string{cPath}, version: version}:

@@ -188,7 +188,7 @@ func (w *ChildWatcher) changeChilrenWatcher(ppath, path string, deep int) {
 		w.logger.Error(err)
 		return
 	}
-	w.Watchers[path] = watcher //@fix 存在并发锁的问题
+	w.Watchers[path] = watcher //deep多层时 存在并发锁的问题
 	go func() {
 		for {
 			select {

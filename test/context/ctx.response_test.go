@@ -1,24 +1,27 @@
 package context
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strings"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
+	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 )
 
-func TestContentErr(t *testing.T) {
+func Test_response_Write_ERR(t *testing.T) {
 	tests := []struct {
 		name    string
 		status  int
@@ -59,7 +62,7 @@ func TestContentErr(t *testing.T) {
 	}
 }
 
-func TestContentNil(t *testing.T) {
+func Test_response_Write_Nil(t *testing.T) {
 	tests := []struct {
 		name    string
 		status  int
@@ -119,7 +122,7 @@ func TestContentNil(t *testing.T) {
 	}
 }
 
-func TestContentString(t *testing.T) {
+func Test_response_Write_String(t *testing.T) {
 	tests := []struct {
 		name    string
 		status  int
@@ -179,7 +182,184 @@ func TestContentString(t *testing.T) {
 	}
 }
 
-func TestContentMap(t *testing.T) {
+func Test_response_Write_JSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		status  int
+		content interface{}
+		wantRs  int
+		wantRc  string
+		wantCt  string
+		header  http.Header
+	}{
+		{name: "1.1.内容JSON字符串,未设置状态码,content-type未设置", status: 0, content: `{"key":"value"}`, wantRs: 200, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "1.2.内容JSON字符串,未设置状态码,content-type为plain", status: 0, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: `{"key":"value"}`, wantCt: "text/plain; charset=utf-8"},
+		{name: "1.3.内容JSON字符串,未设置状态码,content-type为json", status: 0, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "1.4.内容JSON字符串,未设置状态码,content-type为xml", status: 0, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: `{"key":"value"}`, wantCt: "application/xml; charset=utf-8"},
+		{name: "1.5.内容JSON字符串,未设置状态码,content-type为yaml", status: 0, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: `{"key":"value"}`, wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "2.1.内容JSON字符串,状态码为成功,content-type未设置", status: 200, content: `{"key":"value"}`, wantRs: 200, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "2.2.内容JSON字符串,状态码为成功,content-type为plain", status: 200, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: `{"key":"value"}`, wantCt: "text/plain; charset=utf-8"},
+		{name: "2.3.内容JSON字符串,状态码为成功,content-type为json", status: 200, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "2.4.内容JSON字符串,状态码为成功,content-type为xml", status: 200, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: `{"key":"value"}`, wantCt: "application/xml; charset=utf-8"},
+		{name: "2.5.内容JSON字符串,状态码为成功,content-type为yaml", status: 200, content: `{"key":"value"}`, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: `{"key":"value"}`, wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "3.1.内容JSON字符串,状态码为600,content-type未设置", status: 600, content: `{"key":"value"}`, wantRs: 600, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "3.2.内容JSON字符串,状态码为600,content-type为plain", status: 600, content: `{"key":"value"}`, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: `{"key":"value"}`, wantCt: "text/plain; charset=utf-8"},
+		{name: "3.3.内容JSON字符串,状态码为600,content-type为json", status: 600, content: `{"key":"value"}`, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "3.4.内容JSON字符串,状态码为600,content-type为xml", status: 600, content: `{"key":"value"}`, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: `{"key":"value"}`, wantCt: "application/xml; charset=utf-8"},
+		{name: "3.5.内容JSON字符串,状态码为600,content-type为yaml", status: 600, content: `{"key":"value"}`, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: `{"key":"value"}`, wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "4.1.内容JSON字符串,状态码为400,content-type未设置", status: 400, content: `{"key":"value"}`, wantRs: 400, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "4.2.内容JSON字符串,状态码为400,content-type为plain", status: 400, content: `{"key":"value"}`, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: `{"key":"value"}`, wantCt: "text/plain; charset=utf-8"},
+		{name: "4.3.内容JSON字符串,状态码为400,content-type为json", status: 400, content: `{"key":"value"}`, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "4.4.内容JSON字符串,状态码为400,content-type为xml", status: 400, content: `{"key":"value"}`, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: `{"key":"value"}`, wantCt: "application/xml; charset=utf-8"},
+		{name: "4.5.内容JSON字符串,状态码为400,content-type为yaml", status: 400, content: `{"key":"value"}`, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: `{"key":"value"}`, wantCt: "text/yaml; charset=utf-8"},
+	}
+
+	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
+	meta := conf.NewMeta()
+	global.IsDebug = true
+	for _, tt := range tests {
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
+
+		//构建response对象
+		c := ctx.NewResponse(contx, serverConf, log, meta)
+		err := c.Write(tt.status, tt.content)
+		assert.Equal(t, nil, err, tt.name)
+
+		//测试reponse状态码和内容
+		rs, rc, cp := c.GetFinalResponse()
+		assert.Equal(t, tt.wantRs, rs, tt.name)
+		assert.Equal(t, tt.wantRc, rc, tt.name)
+		assert.Equal(t, tt.wantCt, cp, tt.name)
+
+	}
+}
+
+func Test_response_Write_XML(t *testing.T) {
+	tests := []struct {
+		name    string
+		status  int
+		content interface{}
+		wantRs  int
+		wantRc  string
+		wantCt  string
+		header  http.Header
+	}{
+		{name: "1.1.内容XML字符串,未设置状态码,content-type未设置", status: 0, content: "<xml><key>value</key></xml>", wantRs: 200, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "1.2.内容XML字符串,未设置状态码,content-type为plain", status: 0, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/plain; charset=utf-8"},
+		{name: "1.3.内容XML字符串,未设置状态码,content-type为json", status: 0, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/json; charset=utf-8"},
+		{name: "1.4.内容XML字符串,未设置状态码,content-type为xml", status: 0, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "1.5.内容XML字符串,未设置状态码,content-type为yaml", status: 0, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "2.1.内容XML字符串,状态码为成功,content-type未设置", status: 200, content: "<xml><key>value</key></xml>", wantRs: 200, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "2.2.内容XML字符串,状态码为成功,content-type为plain", status: 200, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/plain; charset=utf-8"},
+		{name: "2.3.内容XML字符串,状态码为成功,content-type为json", status: 200, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/json; charset=utf-8"},
+		{name: "2.4.内容XML字符串,状态码为成功,content-type为xml", status: 200, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "2.5.内容XML字符串,状态码为成功,content-type为yaml", status: 200, content: "<xml><key>value</key></xml>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "3.1.内容XML字符串,状态码为600,content-type未设置", status: 600, content: "<xml><key>value</key></xml>", wantRs: 600, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "3.2.内容XML字符串,状态码为600,content-type为plain", status: 600, content: "<xml><key>value</key></xml>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/plain; charset=utf-8"},
+		{name: "3.3.内容XML字符串,状态码为600,content-type为json", status: 600, content: "<xml><key>value</key></xml>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/json; charset=utf-8"},
+		{name: "3.4.内容XML字符串,状态码为600,content-type为xml", status: 600, content: "<xml><key>value</key></xml>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "3.5.内容XML字符串,状态码为600,content-type为yaml", status: 600, content: "<xml><key>value</key></xml>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "4.1.内容XML字符串,状态码为400,content-type未设置", status: 400, content: "<xml><key>value</key></xml>", wantRs: 400, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "4.2.内容XML字符串,状态码为400,content-type为plain", status: 400, content: "<xml><key>value</key></xml>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/plain; charset=utf-8"},
+		{name: "4.3.内容XML字符串,状态码为400,content-type为json", status: 400, content: "<xml><key>value</key></xml>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/json; charset=utf-8"},
+		{name: "4.4.内容XML字符串,状态码为400,content-type为xml", status: 400, content: "<xml><key>value</key></xml>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "application/xml; charset=utf-8"},
+		{name: "4.5.内容XML字符串,状态码为400,content-type为yaml", status: 400, content: "<xml><key>value</key></xml>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<xml><key>value</key></xml>", wantCt: "text/yaml; charset=utf-8"},
+	}
+
+	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
+	meta := conf.NewMeta()
+	global.IsDebug = true
+	for _, tt := range tests {
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
+
+		//构建response对象
+		c := ctx.NewResponse(contx, serverConf, log, meta)
+		err := c.Write(tt.status, tt.content)
+		assert.Equal(t, nil, err, tt.name)
+
+		//测试reponse状态码和内容
+		rs, rc, cp := c.GetFinalResponse()
+		assert.Equal(t, tt.wantRs, rs, tt.name)
+		assert.Equal(t, tt.wantRc, rc, tt.name)
+		assert.Equal(t, tt.wantCt, cp, tt.name)
+
+	}
+}
+
+func Test_response_Write_HTML(t *testing.T) {
+	tests := []struct {
+		name    string
+		status  int
+		content interface{}
+		wantRs  int
+		wantRc  string
+		wantCt  string
+		header  http.Header
+	}{
+		{name: "1.1.内容XML字符串,未设置状态码,content-type未设置", status: 0, content: "<!DOCTYPE html><html></html>", wantRs: 200, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/html; charset=utf-8"},
+		{name: "1.2.内容XML字符串,未设置状态码,content-type为plain", status: 0, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/plain; charset=utf-8"},
+		{name: "1.3.内容XML字符串,未设置状态码,content-type为json", status: 0, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/json; charset=utf-8"},
+		{name: "1.4.内容XML字符串,未设置状态码,content-type为xml", status: 0, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/xml; charset=utf-8"},
+		{name: "1.5.内容XML字符串,未设置状态码,content-type为yaml", status: 0, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "2.1.内容XML字符串,状态码为成功,content-type未设置", status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/html; charset=utf-8"},
+		{name: "2.2.内容XML字符串,状态码为成功,content-type为plain", status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/plain; charset=utf-8"},
+		{name: "2.3.内容XML字符串,状态码为成功,content-type为json", status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/json; charset=utf-8"},
+		{name: "2.4.内容XML字符串,状态码为成功,content-type为xml", status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/xml; charset=utf-8"},
+		{name: "2.5.内容XML字符串,状态码为成功,content-type为yaml", status: 200, content: "<!DOCTYPE html><html></html>", wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "3.1.内容XML字符串,状态码为600,content-type未设置", status: 600, content: "<!DOCTYPE html><html></html>", wantRs: 600, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/html; charset=utf-8"},
+		{name: "3.2.内容XML字符串,状态码为600,content-type为plain", status: 600, content: "<!DOCTYPE html><html></html>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/plain; charset=utf-8"},
+		{name: "3.3.内容XML字符串,状态码为600,content-type为json", status: 600, content: "<!DOCTYPE html><html></html>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/json; charset=utf-8"},
+		{name: "3.4.内容XML字符串,状态码为600,content-type为xml", status: 600, content: "<!DOCTYPE html><html></html>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/xml; charset=utf-8"},
+		{name: "3.5.内容XML字符串,状态码为600,content-type为yaml", status: 600, content: "<!DOCTYPE html><html></html>", wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "4.1.内容XML字符串,状态码为400,content-type未设置", status: 400, content: "<!DOCTYPE html><html></html>", wantRs: 400, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/html; charset=utf-8"},
+		{name: "4.2.内容XML字符串,状态码为400,content-type为plain", status: 400, content: "<!DOCTYPE html><html></html>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/plain; charset=utf-8"},
+		{name: "4.3.内容XML字符串,状态码为400,content-type为json", status: 400, content: "<!DOCTYPE html><html></html>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/json; charset=utf-8"},
+		{name: "4.4.内容XML字符串,状态码为400,content-type为xml", status: 400, content: "<!DOCTYPE html><html></html>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "application/xml; charset=utf-8"},
+		{name: "4.5.内容XML字符串,状态码为400,content-type为yaml", status: 400, content: "<!DOCTYPE html><html></html>", wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "<!DOCTYPE html><html></html>", wantCt: "text/yaml; charset=utf-8"},
+	}
+
+	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
+	confObj.API(":8080")                                              //初始化参数
+	serverConf := confObj.GetAPIConf()                                //获取配置
+	meta := conf.NewMeta()
+	global.IsDebug = true
+	for _, tt := range tests {
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
+
+		//构建response对象
+		c := ctx.NewResponse(contx, serverConf, log, meta)
+		err := c.Write(tt.status, tt.content)
+		assert.Equal(t, nil, err, tt.name)
+
+		//测试reponse状态码和内容
+		rs, rc, cp := c.GetFinalResponse()
+		assert.Equal(t, tt.wantRs, rs, tt.name)
+		assert.Equal(t, tt.wantRc, rc, tt.name)
+		assert.Equal(t, tt.wantCt, cp, tt.name)
+
+	}
+}
+
+func Test_response_Write_MAP(t *testing.T) {
 	tests := []struct {
 		name    string
 		status  int
@@ -239,54 +419,169 @@ func TestContentMap(t *testing.T) {
 	}
 }
 
+func Test_response_Write_Struct(t *testing.T) {
+	type content struct {
+		Key string `json:"key" xml:"key"`
+	}
+
+	tests := []struct {
+		name    string
+		status  int
+		content interface{}
+		wantRs  int
+		wantRc  string
+		wantCt  string
+		header  http.Header
+	}{
+		{name: "1.1.内容Struct,未设置状态码,content-type未设置", status: 0, content: &content{Key: "value"}, wantRs: 200, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "1.2.内容Struct,未设置状态码,content-type为plain", status: 0, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "&{value}", wantCt: "text/plain; charset=utf-8"},
+		{name: "1.3.内容Struct,未设置状态码,content-type为json", status: 0, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "1.4.内容Struct,未设置状态码,content-type为xml", status: 0, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<content><key>value</key></content>", wantCt: "application/xml; charset=utf-8"},
+		{name: "1.5.内容Struct,未设置状态码,content-type为yaml", status: 0, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "key: value\n", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "2.1.内容Struct,状态码为成功,content-type未设置", status: 200, content: &content{Key: "value"}, wantRs: 200, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "2.2.内容Struct,状态码为成功,content-type为plain", status: 200, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "&{value}", wantCt: "text/plain; charset=utf-8"},
+		{name: "2.3.内容Struct,状态码为成功,content-type为json", status: 200, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "2.4.内容Struct,状态码为成功,content-type为xml", status: 200, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<content><key>value</key></content>", wantCt: "application/xml; charset=utf-8"},
+		{name: "2.5.内容Struct,状态码为成功,content-type为yaml", status: 200, content: &content{Key: "value"}, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "key: value\n", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "3.1.内容Struct,状态码为600,content-type未设置", status: 600, content: &content{Key: "value"}, wantRs: 600, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "3.2.内容Struct,状态码为600,content-type为plain", status: 600, content: &content{Key: "value"}, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "&{value}", wantCt: "text/plain; charset=utf-8"},
+		{name: "3.3.内容Struct,状态码为600,content-type为json", status: 600, content: &content{Key: "value"}, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "3.4.内容Struct,状态码为600,content-type为xml", status: 600, content: &content{Key: "value"}, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<content><key>value</key></content>", wantCt: "application/xml; charset=utf-8"},
+		{name: "3.5.内容Struct,状态码为600,content-type为yaml", status: 600, content: &content{Key: "value"}, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "key: value\n", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "4.1.内容Struct,状态码为400,content-type未设置", status: 400, content: &content{Key: "value"}, wantRs: 400, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "4.2.内容Struct,状态码为400,content-type为plain", status: 400, content: &content{Key: "value"}, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "&{value}", wantCt: "text/plain; charset=utf-8"},
+		{name: "4.3.内容Struct,状态码为400,content-type为json", status: 400, content: &content{Key: "value"}, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `{"key":"value"}`, wantCt: "application/json; charset=utf-8"},
+		{name: "4.4.内容Struct,状态码为400,content-type为xml", status: 400, content: &content{Key: "value"}, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "<content><key>value</key></content>", wantCt: "application/xml; charset=utf-8"},
+		{name: "4.5.内容Struct,状态码为400,content-type为yaml", status: 400, content: &content{Key: "value"}, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "key: value\n", wantCt: "text/yaml; charset=utf-8"},
+	}
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+	meta := conf.NewMeta()
+	global.IsDebug = true
+	for _, tt := range tests {
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
+
+		//构建response对象
+		c := ctx.NewResponse(contx, serverConf, log, meta)
+		err := c.Write(tt.status, tt.content)
+		assert.Equal(t, nil, err, tt.name)
+
+		//测试reponse状态码和内容
+		rs, rc, cp := c.GetFinalResponse()
+		assert.Equal(t, tt.wantRs, rs, tt.name)
+		assert.Equal(t, tt.wantRc, rc, tt.name)
+		assert.Equal(t, tt.wantCt, cp, tt.name)
+
+	}
+}
+
+func Test_response_Write_Int(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		status  int
+		content interface{}
+		wantRs  int
+		wantRc  string
+		wantCt  string
+		header  http.Header
+	}{
+		{name: "1.1.内容Int,未设置状态码,content-type未设置", status: 0, content: 1, wantRs: 200, wantRc: `1`, wantCt: "text/plain; charset=utf-8"},
+		{name: "1.2.内容Int,未设置状态码,content-type为plain", status: 0, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "1", wantCt: "text/plain; charset=utf-8"},
+		{name: "1.3.内容Int,未设置状态码,content-type为json", status: 0, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `1`, wantCt: "application/json; charset=utf-8"},
+		{name: "1.4.内容Int,未设置状态码,content-type为xml", status: 0, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "1", wantCt: "application/xml; charset=utf-8"},
+		{name: "1.5.内容Int,未设置状态码,content-type为yaml", status: 0, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "1", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "2.1.内容Int,状态码为成功,content-type未设置", status: 200, content: 1, wantRs: 200, wantRc: `1`, wantCt: "text/plain; charset=utf-8"},
+		{name: "2.2.内容Int,状态码为成功,content-type为plain", status: 200, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "1", wantCt: "text/plain; charset=utf-8"},
+		{name: "2.3.内容Int,状态码为成功,content-type为json", status: 200, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `1`, wantCt: "application/json; charset=utf-8"},
+		{name: "2.4.内容Int,状态码为成功,content-type为xml", status: 200, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "1", wantCt: "application/xml; charset=utf-8"},
+		{name: "2.5.内容Int,状态码为成功,content-type为yaml", status: 200, content: 1, wantRs: 200, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "1", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "3.1.内容Int,状态码为600,content-type未设置", status: 600, content: 1, wantRs: 600, wantRc: `1`, wantCt: "text/plain; charset=utf-8"},
+		{name: "3.2.内容Int,状态码为600,content-type为plain", status: 600, content: 1, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "1", wantCt: "text/plain; charset=utf-8"},
+		{name: "3.3.内容Int,状态码为600,content-type为json", status: 600, content: 1, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `1`, wantCt: "application/json; charset=utf-8"},
+		{name: "3.4.内容Int,状态码为600,content-type为xml", status: 600, content: 1, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "1", wantCt: "application/xml; charset=utf-8"},
+		{name: "3.5.内容Int,状态码为600,content-type为yaml", status: 600, content: 1, wantRs: 600, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "1", wantCt: "text/yaml; charset=utf-8"},
+
+		{name: "4.1.内容Int,状态码为400,content-type未设置", status: 400, content: 1, wantRs: 400, wantRc: `1`, wantCt: "text/plain; charset=utf-8"},
+		{name: "4.2.内容Int,状态码为400,content-type为plain", status: 400, content: 1, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8PLAIN}}, wantRc: "1", wantCt: "text/plain; charset=utf-8"},
+		{name: "4.3.内容Int,状态码为400,content-type为json", status: 400, content: 1, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8JSON}}, wantRc: `1`, wantCt: "application/json; charset=utf-8"},
+		{name: "4.4.内容Int,状态码为400,content-type为xml", status: 400, content: 1, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8XML}}, wantRc: "1", wantCt: "application/xml; charset=utf-8"},
+		{name: "4.5.内容Int,状态码为400,content-type为yaml", status: 400, content: 1, wantRs: 400, header: http.Header{"Content-Type": []string{context.UTF8YAML}}, wantRc: "1", wantCt: "text/yaml; charset=utf-8"},
+	}
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+	meta := conf.NewMeta()
+	global.IsDebug = true
+	for _, tt := range tests {
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+
+		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
+
+		//构建response对象
+		c := ctx.NewResponse(contx, serverConf, log, meta)
+		err := c.Write(tt.status, tt.content)
+		assert.Equal(t, nil, err, tt.name)
+
+		//测试reponse状态码和内容
+		rs, rc, cp := c.GetFinalResponse()
+		assert.Equal(t, tt.wantRs, rs, tt.name)
+		assert.Equal(t, tt.wantRc, rc, tt.name)
+		assert.Equal(t, tt.wantCt, cp, tt.name)
+
+	}
+}
+
 func Test_response_Header(t *testing.T) {
-	confObj := mocks.NewConfBy("context_response_test2", "response2") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, "", meta).GetRequestID())
-	c := ctx.NewResponse(rc, serverConf, log, meta)
+	c := ctx.NewResponse(rc, serverConf, logger.New("context"), meta)
 
-	//设置header
 	c.Header("header1", "value1")
 	assert.Equal(t, http.Header{"header1": []string{"value1"}}, rc.GetHeaders(), "设置header")
 
-	//再次设置header
 	c.Header("header1", "value1-1")
-	assert.Equal(t, http.Header{"header1": []string{"value1-1"}}, rc.GetHeaders(), "再次设置header")
+	assert.Equal(t, http.Header{"header1": []string{"value1-1"}}, rc.GetHeaders(), "更新已设置的header")
 
-	//设置不同的header
 	c.Header("header2", "value2")
-	assert.Equal(t, http.Header{"header1": []string{"value1-1"}, "header2": []string{"value2"}}, rc.GetHeaders(), "再次设置header")
+	assert.Equal(t, http.Header{"header1": []string{"value1-1"}, "header2": []string{"value2"}}, rc.GetHeaders(), "设置不存在的header")
 }
 
 func Test_response_ContentType(t *testing.T) {
-	confObj := mocks.NewConfBy("context_response_test3", "response3") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
 	meta := conf.NewMeta()
 	rc := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(rc, "", meta).GetRequestID())
-	c := ctx.NewResponse(rc, serverConf, log, meta)
+	c := ctx.NewResponse(rc, serverConf, logger.New("context"), meta)
 
-	//设置content-type
 	c.ContentType("application/json")
 	assert.Equal(t, "application/json", rc.ContentType(), "设置content-type")
 
-	//再次设置header
 	c.ContentType("text/plain")
-	assert.Equal(t, "text/plain", rc.ContentType(), "再次设置content-type")
+	assert.Equal(t, "text/plain", rc.ContentType(), "更新content-type")
 }
 
 func Test_response_Abort(t *testing.T) {
-	confObj := mocks.NewConfBy("context_response_test4", "response4") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
 	context := &mocks.TestContxt{HttpHeader: http.Header{"Content-Type": []string{"text/plain; charset=utf-8"}}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
+	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
 
 	//测试Abort
 	c.Abort(200, fmt.Errorf("终止"))
@@ -299,109 +594,28 @@ func Test_response_Abort(t *testing.T) {
 	assert.Equal(t, true, context.Doen, "验证上下文中的abort状态")
 }
 
-func Test_response_Stop(t *testing.T) {
-	confObj := mocks.NewConfBy("context_response_test5", "response5") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
-	context := &mocks.TestContxt{HttpHeader: http.Header{"Content-Type": []string{"text/plain; charset=utf-8"}}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
-
-	//测试Stop
-	c.Abort(200)
-	rs, rc, cp := c.GetFinalResponse()
-	assert.Equal(t, 200, rs, "验证状态码")
-	assert.Equal(t, []byte(rc), context.Content, "验证返回内容")
-	assert.Equal(t, rs, context.StatusCode, "验证上下文中的状态码")
-	assert.Equal(t, context.HttpHeader["Content-Type"][0], cp, "验证上下文中的content-type")
-	assert.Equal(t, true, context.WrittenStatus, "验证上下文中的写入状态")
-	assert.Equal(t, true, context.Doen, "验证上下文中的abort状态")
-}
-
-func Test_response_StatusCode(t *testing.T) {
-	tests := []struct {
-		name       string
-		s          int
-		wantStatus int
-	}{
-		{name: "设置状态码为200", s: 200, wantStatus: 200},
-		{name: "设置状态码为300", s: 300, wantStatus: 300},
-		{name: "设置状态码为400", s: 400, wantStatus: 400},
-		{name: "设置状态码为500", s: 500, wantStatus: 500},
-	}
-	confObj := mocks.NewConfBy("context_response_test6", "response6") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
-	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
-	for _, tt := range tests {
-		c.Write(tt.s)
-		rs, _, _ := c.GetFinalResponse()
-		assert.Equal(t, tt.wantStatus, rs, tt.name)
-		// assert.Equal(t, context.Status(), rs, tt.name)
-	}
-}
-
 func Test_response_File(t *testing.T) {
-	confObj := mocks.NewConfBy("context_response_test7", "response7") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
+	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
 
 	//测试File
-	c.File("file")
+	c.File("upload.test.txt")
 	assert.Equal(t, true, context.WrittenStatus, "验证上下文中的文件内容")
 	assert.Equal(t, true, context.Doen, "验证上下文中的abort状态")
 }
 
-func Test_response_WriteFinal(t *testing.T) {
-	tests := []struct {
-		name    string
-		status  int
-		content string
-		ctp     string
-		wantS   int
-		wantC   string
-		wantCP  string
-	}{
-		{name: "写入200状态码和json数据", status: 200, content: `{"a":"b"}`, ctp: "application/json; charset=utf-8", wantS: 200, wantC: `{"a":"b"}`},
-		{name: "写入300状态码和空数据", status: 300, content: ``, ctp: "text/plain; charset=utf-8", wantS: 300, wantC: ``},
-		{name: "写入400状态码和错误数据", status: 400, content: `错误`, ctp: "text/plain; charset=utf-8", wantS: 400, wantC: "错误"},
-		{name: "写入空状态码和空数据", ctp: "text/plain; charset=utf-8", wantS: 200, wantC: ""},
-	}
-
-	confObj := mocks.NewConfBy("context_response_test8", "response8") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
-	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
-
-	for _, tt := range tests {
-		c.Write(tt.status, tt.content)
-		rs, rc, cp := c.GetFinalResponse()
-		assert.Equal(t, tt.wantS, rs, tt.name)
-		assert.Equal(t, tt.wantC, rc, tt.name)
-		assert.Equal(t, tt.ctp, cp, tt.name)
-	}
-}
-
 func Test_response_Redirect(t *testing.T) {
 
-	confObj := mocks.NewConfBy("context_response_test9", "response9") //构建对象
-	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
-	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(context, "", meta).GetRequestID())
-	c := ctx.NewResponse(context, serverConf, log, meta)
+	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
 
 	c.Redirect(200, "url")
 	assert.Equal(t, true, context.WrittenStatus, "验证上下文中的写入状态")
@@ -409,17 +623,81 @@ func Test_response_Redirect(t *testing.T) {
 	assert.Equal(t, 200, context.StatusCode, "验证上下文中的状态码")
 }
 
-func Test_response_Redirect_WithHttp(t *testing.T) {
+func Test_response_Special(t *testing.T) {
 
-	startServer()
-	resp, err := http.Post("http://localhost:9091/response/redirect", "application/json", strings.NewReader(""))
-	assert.Equal(t, false, err != nil, "重定向请求错误")
-	defer resp.Body.Close()
-	assert.Equal(t, "application/json; charset=UTF-8", resp.Header["Content-Type"][0], "重定向响应头错误")
-	assert.Equal(t, "200 OK", resp.Status, "重定向响应状态错误")
-	assert.Equal(t, 200, resp.StatusCode, "重定向响应码错误")
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.Equal(t, false, err != nil, "重定向响应体读取错误")
-	assert.Equal(t, "success", string(body))
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
+	context := &mocks.TestContxt{HttpHeader: http.Header{}}
+	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
+
+	//添加响应的特殊字符
+	c.AddSpecial("proxy")
+	c.AddSpecial("logging")
+	c.AddSpecial("render")
+
+	//获取
+	assert.Equal(t, "proxy|logging|render", c.GetSpecials(), "获取响应的特殊字符")
+}
+
+func Test_response_GetRaw(t *testing.T) {
+
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
+	context := &mocks.TestContxt{HttpHeader: http.Header{}}
+	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
+
+	//获取
+	assert.Equal(t, nil, c.GetRaw(), "获取content")
+
+	//写入
+	c.Write(200, "content")
+
+	s, content, ctp := c.GetRawResponse()
+	assert.Equal(t, 200, s, "获取status")
+	assert.Equal(t, "content", content, "获取content")
+	assert.Equal(t, "text/plain; charset=utf-8", ctp, "获取content-type")
+}
+
+func Test_response_Flush(t *testing.T) {
+	tests := []struct {
+		name     string
+		encoding string
+	}{
+		{name: "1. 编码为utf-8", encoding: "utf-8"},
+		{name: "2. 编码为gbk", encoding: "gbk"},
+	}
+
+	confObj := mocks.NewConfBy("context", "flush") //构建对象
+	confObj.API(":8080")                           //初始化参数
+	serverConf := confObj.GetAPIConf()             //获取配置
+
+	for _, tt := range tests {
+
+		httpWriter := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(httpWriter)
+
+		//构建请求 方法要与注册方法一致
+		r, _ := http.NewRequest("POST", "http://localhost:8080/url?", bytes.NewReader([]byte("")))
+		r.Header.Set("Content-Type", fmt.Sprintf("application/json;charset=%s", tt.encoding))
+		c.Request = r
+		rsp := ctx.NewResponse(middleware.NewGinCtx(c), serverConf, logger.New("context"), conf.NewMeta())
+
+		//写入
+		writeContent := `content中文~!@#$%^&*()_+{}:">?+>?=`
+		rsp.Write(200, writeContent)
+
+		//写入相应流
+		rsp.Flush()
+		s, content, ctp := rsp.GetFinalResponse()
+
+		assert.Equal(t, s, httpWriter.Code, tt.name)
+		gotContent, _ := encoding.Decode(httpWriter.Body.String(), tt.encoding)
+		assert.Equal(t, content, string(gotContent), tt.name)
+		assert.Equal(t, ctp, httpWriter.HeaderMap["Content-Type"][0], tt.name)
+	}
 
 }
