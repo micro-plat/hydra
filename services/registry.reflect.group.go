@@ -41,7 +41,6 @@ func (g *UnitGroup) AddHandling(name string, h context.IHandler) {
 		g.Handling = h
 		return
 	}
-	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
 	g.storeService(name, h, handling)
 }
 
@@ -65,7 +64,6 @@ func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
 }
 
 func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
-	//@bugfix liujinyin 修改注册对象时候，包含Handle,Handing,Handled,Fallback 丢失Path造成的错误提醒“重复注册问题”
 	path, service, actions := g.getPaths(g.Path, name)
 	unit, ok := g.Services[service]
 	if !ok {
@@ -89,7 +87,7 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 
 func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
 
-	//@fix 路径里面对最后一个*进行替换 @hj
+	//替换注册路径中最后一个*
 	lastIndex := strings.LastIndex(path, "*")
 	if lastIndex > -1 {
 		replacement := defaultReplaceMent
