@@ -25,8 +25,7 @@ func (l *localMemory) GetChildren(path string) (paths []string, version int32, e
 	npath := registry.Format(path)
 	exists := make(map[string]string)
 	for k := range l.nodes {
-		if strings.HasPrefix(k, npath) && len(k) > len(npath) {
-			// list := registry.Split(npath)
+		if strings.HasPrefix(k, npath+"/") && len(k) > len(npath) {
 			list := strings.Split(strings.Trim(k[len(npath):], "/"), "/")
 			name := list[0]
 			if _, ok := exists[name]; !ok {
