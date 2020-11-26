@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry"
@@ -58,10 +58,10 @@ func TestRspServers_Start(t *testing.T) {
 		isFirst    bool
 		wantErr    bool
 	}{
-		{name: "启动cronServer", serverName: "cronserver", sysType: "cron", isFirst: true},
-		{name: "启动apiServer", serverName: "apiserver", sysType: "api"},
-		{name: "启动mqcServer", serverName: "mqcserver", sysType: "mqc"},
-		//	{name: "启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
+		{name: "1. 启动cronServer", serverName: "cronserver", sysType: "cron", isFirst: true},
+		{name: "2. 启动apiServer", serverName: "apiserver", sysType: "api"},
+		{name: "3. 启动mqcServer", serverName: "mqcserver", sysType: "mqc"},
+		// {name: "4. 启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
 	}
 
 	platName := "servershydra_test"
@@ -83,6 +83,7 @@ func TestRspServers_Start(t *testing.T) {
 		//初始化注册中心
 		sc := mocks.NewConfBy(platName, clusterName)
 		sc.API(":50001")
+		sc.RPC(":54241")
 		sc.GetCronConf()
 		sc.GetAPIConf()
 		sc.Vars().Redis("5.79", varredis.New([]string{"192.168.5.79:6379"}))
@@ -110,7 +111,7 @@ func TestRspServers_Start(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		//	fmt.Println("out:", string(out))
+		// fmt.Println("out:", string(out))
 
 		wantLog := fmt.Sprintf("初始化: %s", path)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"初始化")
@@ -154,13 +155,12 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 		isFirst    bool
 		wantErr    bool
 	}{
-		{name: "启动apiServer失败,之后延迟启动成功", serverName: "apiserver", sysType: "api"},
+		{name: "1. 启动apiServer失败,之后延迟启动成功", serverName: "apiserver", sysType: "api"},
 	}
 
 	platName := "servershydra_test1"
 	clusterName := "serv_test_go1"
 	registryAddr := "lm://./"
-
 	for _, tt := range tests {
 
 		//构建的新的os.Stdout
