@@ -69,7 +69,7 @@ func TestLogging(t *testing.T) {
 		//调用中间件
 		handler := middleware.Logging()
 		handler(ctx)
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 1)
 
 		//获取输出
 		w.Close()
@@ -84,5 +84,4 @@ func TestLogging(t *testing.T) {
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantReq), tt.name)
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantRsp), tt.name)
 	}
-
 }

@@ -219,7 +219,7 @@ func startUpstreamServer(port string) {
 
 		os.Args = []string{"upclusterserver", "run"}
 		go app.Start()
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 	})
 }
 

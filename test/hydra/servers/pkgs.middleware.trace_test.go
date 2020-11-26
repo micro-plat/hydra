@@ -69,7 +69,7 @@ func TestTrace(t *testing.T) {
 		//调用中间件
 		handler := middleware.Trace()
 		handler(ctx)
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 1)
 
 		//获取输出
 		w.Close()
