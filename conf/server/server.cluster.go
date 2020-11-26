@@ -17,7 +17,8 @@ import (
 var cluster = cmap.New(2)
 
 func getCluster(pub conf.IServerPub, rgst registry.IRegistry, clusterName ...string) (s *Cluster, err error) {
-	_, c, err := cluster.SetIfAbsentCb(pub.GetServerPubPath(clusterName...), func(...interface{}) (interface{}, error) {
+	clusterCachekey := pub.GetServerPubPath(clusterName...)
+	_, c, err := cluster.SetIfAbsentCb(clusterCachekey, func(...interface{}) (interface{}, error) {
 		return NewCluster(pub, rgst, clusterName...)
 	})
 	if err != nil {
@@ -135,7 +136,6 @@ func (c *Cluster) getAndWatch() error {
 	}
 }
 func (c *Cluster) getCluster() error {
-
 	//重新拉取所有节点
 	current := c.current
 	path := c.GetServerPubPath(c.clusterName...)
@@ -169,7 +169,6 @@ func (c *Cluster) getCluster() error {
 
 		return removeNow
 	})
-
 	//修改或添加在线节点
 	for i, name := range children {
 		node := NewCNode(name, c.GetServerID(), i)
@@ -183,8 +182,8 @@ func (c *Cluster) getCluster() error {
 
 	//更新当前节点
 	c.lock.Lock()
-	c.current = current
 	defer c.lock.Unlock()
+	c.current = current
 
 	//每次节点变化都通知所有订阅者
 	c.watchers.IterCb(func(key string, v interface{}) bool {

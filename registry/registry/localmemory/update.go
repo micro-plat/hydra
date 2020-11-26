@@ -20,13 +20,22 @@ func (l *localMemory) Update(path string, data string) (err error) {
 }
 
 func (l *localMemory) Delete(path string) error {
-	_, version, err := l.GetValue(registry.Format(path))
+	rpath := registry.Format(path)
+	b, err := l.Exists(rpath)
+	if err != nil {
+		return err
+	}
+	if !b {
+		return nil
+	}
+
+	_, version, err := l.GetValue(rpath)
 	if err != nil {
 		return err
 	}
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	np := registry.Format(path)
+	np := rpath
 	for k, nv := range l.nodes {
 		if strings.HasPrefix(k, np) {
 			delete(l.nodes, k)

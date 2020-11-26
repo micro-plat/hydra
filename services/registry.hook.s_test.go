@@ -43,9 +43,9 @@ func Test_serverHook_AddClosing(t *testing.T) {
 		wantErr bool
 		ErrStr  string
 	}{
-		{name: "添加空服务", h: nil, wantErr: true, ErrStr: "关闭服务不能为空"},
-		{name: "添加服务", h: h},
-		{name: "再次添加服务", h: h, wantErr: true, ErrStr: "关闭服务不能重复注册"},
+		{name: "1.1 添加空服务", h: nil, wantErr: true, ErrStr: "关闭服务不能为空"},
+		{name: "1.2 添加服务", h: h},
+		{name: "1.3 再次添加服务", h: h, wantErr: true, ErrStr: "关闭服务不能重复注册"},
 	}
 	s := &serverHook{}
 	for _, tt := range tests {
@@ -64,9 +64,9 @@ func Test_serverHook_AddHandleExecuting(t *testing.T) {
 		wantErr    bool
 		wantHandle []context.IHandler
 	}{
-		{name: "添加空接口", h: nil, wantHandle: nil},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}}, wantHandle: []context.IHandler{hander1{}}},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandle: []context.IHandler{hander1{}, hander1{}, hander2{}}},
+		{name: "1.1 添加空接口", h: nil, wantHandle: nil},
+		{name: "1.2 添加单个接口", h: []context.IHandler{hander1{}}, wantHandle: []context.IHandler{hander1{}}},
+		{name: "1.3 添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandle: []context.IHandler{hander1{}, hander1{}, hander2{}}},
 	}
 	s := &serverHook{}
 	for _, tt := range tests {
@@ -87,9 +87,9 @@ func Test_serverHook_AddHandleExecuted(t *testing.T) {
 		wantErr     bool
 		wantHandled []context.IHandler
 	}{
-		{name: "添加空接口", h: nil, wantHandled: nil},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}}, wantHandled: []context.IHandler{hander1{}}},
-		{name: "添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandled: []context.IHandler{hander1{}, hander1{}, hander2{}}},
+		{name: "1.1 添加空接口", h: nil, wantHandled: nil},
+		{name: "1.2 添加单个接口", h: []context.IHandler{hander1{}}, wantHandled: []context.IHandler{hander1{}}},
+		{name: "1.3 添加单个接口", h: []context.IHandler{hander1{}, hander2{}}, wantHandled: []context.IHandler{hander1{}, hander1{}, hander2{}}},
 	}
 	s := &serverHook{}
 	for _, tt := range tests {

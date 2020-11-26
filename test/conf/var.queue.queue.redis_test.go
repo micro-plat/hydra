@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/vars/queue"
-	"github.com/micro-plat/hydra/conf/vars/queue/redis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 
 	"github.com/micro-plat/hydra/test/assert"

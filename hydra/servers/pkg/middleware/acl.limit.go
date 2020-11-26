@@ -36,7 +36,6 @@ func Limit() Handler {
 			ctx.Next()
 			return
 		}
-
 		//当前请求被限流
 		ctx.Response().AddSpecial("limit")
 		wait := rule.GetDelay()

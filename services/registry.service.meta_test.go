@@ -14,9 +14,9 @@ func Test_metaServices_AddHanler(t *testing.T) {
 		h       context.IHandler
 		wantErr bool
 	}{
-		{name: "service和handler为空", service: "", h: nil},
-		{name: "添加service和handler", service: "service", h: hander1{}},
-		{name: "再次添加同一个service", service: "service", wantErr: true},
+		{name: "1.1 service和handler为空", service: "", h: nil},
+		{name: "1.2 service和handler不为空", service: "service", h: hander1{}},
+		{name: "1.3 更新已存在service", service: "service", wantErr: true},
 	}
 	s := newService()
 	services := []string{}
@@ -43,9 +43,9 @@ func Test_metaServices_AddFallback(t *testing.T) {
 		h       context.IHandler
 		wantErr bool
 	}{
-		{name: "service和handler为空", service: "", h: nil},
-		{name: "添加service和handler", service: "service", h: hander1{}},
-		{name: "再次添加同一个service", service: "service", h: hander2{}},
+		{name: "1.1 service和handler为空", service: "", h: nil},
+		{name: "1.2 添加service和handler", service: "service", h: hander1{}},
+		{name: "1.3 更新已存在service", service: "service", h: hander2{}},
 	}
 	s := newService()
 	for _, tt := range tests {

@@ -21,8 +21,8 @@ func Test_pathRouter_Add_WithPanic(t *testing.T) {
 		opts      []interface{}
 		wantPanic error
 	}{
-		{name: "opts类型不是router.Option", service: "service", action: []string{"POST"}, opts: []interface{}{"opt1", "opt2"},
-			wantPanic: fmt.Errorf("%s注册的服务类型必须是router.Option", "service")},
+		{name: "1.1 opts不是router.Option", service: "service", action: []string{"POST"}, opts: []interface{}{"opt1", "opt2"}, wantPanic: fmt.Errorf("%s注册的服务类型必须是router.Option", "service")},
+		{name: "1.2 opts为空", service: "service", action: []string{"POST"}, opts: []interface{}{}, wantPanic: nil},
 	}
 	p := newPathRouter("path")
 	for _, tt := range tests {
@@ -38,15 +38,8 @@ func Test_pathRouter_String(t *testing.T) {
 		want    string
 		routers []*router.Router
 	}{
-		{name: "routers为空", want: ""},
-		{name: "routers不为空", want: fmt.Sprintf("%-32s %-32s\n", "service", strings.Join([]string{"POST", "GET"}, " ")),
-			routers: []*router.Router{&router.Router{
-				Path:     "path",
-				Service:  "service",
-				Action:   []string{"POST", "GET"},
-				Encoding: "utf-8",
-				Pages:    []string{"pages"},
-			}}},
+		{name: "1.1 routers为空", want: ""},
+		{name: "1.2 routers不为空", want: fmt.Sprintf("%-32s %-32s\n", "service", strings.Join([]string{"POST", "GET"}, " ")), routers: []*router.Router{&router.Router{Path: "path", Service: "service", Action: []string{"POST", "GET"}, Encoding: "utf-8", Pages: []string{"pages"}}}},
 	}
 	p := newPathRouter("path")
 	for _, tt := range tests {

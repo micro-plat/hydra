@@ -15,6 +15,5 @@ func Options() Handler {
 			return
 		}
 		ctx.Next()
-
 	}
 }

@@ -16,6 +16,7 @@ import (
 func TestBlackList(t *testing.T) {
 	type testCase struct {
 		name        string
+		isBool      bool
 		blackOpts   []blacklist.Option
 		wantStatus  int
 		wantContent string
@@ -23,40 +24,24 @@ func TestBlackList(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{
-			name:        "黑名单-未启用",
-			blackOpts:   []blacklist.Option{blacklist.WithDisable()},
-			wantStatus:  200,
-			wantContent: "",
-			wantSpecial: "",
-		},
-		{
-			name:        "黑名单-未启用-黑名单IP",
-			blackOpts:   []blacklist.Option{blacklist.WithDisable(), blacklist.WithIP("192.168.0.1")},
-			wantStatus:  200,
-			wantContent: "",
-			wantSpecial: "",
-		},
-		{
-			name:        "黑名单-启用-不在黑名单内的IP",
-			blackOpts:   []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.2", "192.168.0.3")},
-			wantStatus:  200,
-			wantContent: "",
-			wantSpecial: "black",
-		},
-		{
-			name:        "黑名单-启用-黑名单IP",
-			blackOpts:   []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.1")},
-			wantStatus:  http.StatusForbidden,
-			wantContent: "黑名单限制[192.168.0.1]不允许访问",
-			wantSpecial: "black",
-		},
+		{name: "1.1 黑名单-配置不存在", isBool: false, blackOpts: []blacklist.Option{}, wantStatus: 200, wantContent: "", wantSpecial: ""},
+
+		{name: "2.1 黑名单-配置存在-未启用-列表为空", isBool: true, blackOpts: []blacklist.Option{blacklist.WithDisable()}, wantStatus: 200, wantContent: "", wantSpecial: ""},
+		{name: "2.2 黑名单-配置存在-未启用-黑名单IP", isBool: true, blackOpts: []blacklist.Option{blacklist.WithDisable(), blacklist.WithIP("192.168.0.1")}, wantStatus: 200, wantContent: "", wantSpecial: ""},
+		{name: "2.3 黑名单-配置存在-未启用-IP不在列表单内", isBool: true, blackOpts: []blacklist.Option{blacklist.WithDisable(), blacklist.WithIP("192.168.0.3", "192.168.0.2")}, wantStatus: 200, wantContent: "", wantSpecial: ""},
+
+		{name: "3.1 黑名单-配置存在-启用-列表为空", isBool: true, blackOpts: []blacklist.Option{blacklist.WithEnable()}, wantStatus: 200, wantContent: "", wantSpecial: "black"},
+		{name: "3.2 黑名单-配置存在-启用-IP不在列表单内", isBool: true, blackOpts: []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.2", "192.168.0.3")}, wantStatus: 200, wantContent: "", wantSpecial: "black"},
+		{name: "3.3 黑名单-配置存在-启用-黑名单IP", isBool: true, blackOpts: []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("192.168.0.1", "192.168.0.2")}, wantStatus: http.StatusForbidden, wantContent: "黑名单限制[192.168.0.1]不允许访问", wantSpecial: "black"},
 	}
 	for _, tt := range tests {
 
 		mockConf := mocks.NewConfBy("middleware_black_test", "black")
 		//初始化测试用例参数
-		mockConf.GetAPI().BlackList(tt.blackOpts...)
+		confB := mockConf.GetAPI()
+		if tt.isBool {
+			confB.BlackList(tt.blackOpts...)
+		}
 		serverConf := mockConf.GetAPIConf()
 		ctx := &mocks.MiddleContext{
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1"},

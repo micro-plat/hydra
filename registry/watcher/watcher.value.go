@@ -9,14 +9,11 @@ import (
 
 //NewValueWatcher 构建值监控,监控指定路径的值变化
 func NewValueWatcher(registryAddr string, path []string, l logger.ILogging) (IValueWatcher, error) {
-	if valueWatchFactory == nil {
-		panic(fmt.Errorf("未提供节点值监控的工厂实现对象IValueWatcherFactory"))
-	}
 	r, err := registry.NewRegistry(registryAddr, l)
 	if err != nil {
 		return nil, err
 	}
-	return valueWatchFactory.Create(r, path, l)
+	return NewValueWatcherByRegistry(r, path, l)
 }
 
 //NewValueWatcherByRegistry 根据注册中心构建监控对象，监控指定路径的值变化
