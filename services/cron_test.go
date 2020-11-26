@@ -27,9 +27,9 @@ func Test_cron_Add(t *testing.T) {
 		wantTasksLen int
 		want         ICRON
 	}{
-		{name: "添加任务", cron: "task:task1", service: "service1", wantTasksLen: 1},
-		{name: "再次添加任务", cron: "task:task2", service: "service2", wantTasksLen: 2},
-		{name: "再次添加已存在任务", cron: "task:task2", service: "service2", wantTasksLen: 2},
+		{name: "1.1 添加任务", cron: "task:task1", service: "service1", wantTasksLen: 1},
+		{name: "1.2 添加不存在任务", cron: "task:task2", service: "service2", wantTasksLen: 2},
+		{name: "1.3 添加已存在任务", cron: "task:task2", service: "service2", wantTasksLen: 2},
 	}
 	c := newCron()
 
