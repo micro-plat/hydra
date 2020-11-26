@@ -50,7 +50,6 @@ func (s *handleHook) AddClosingHanle(c ...interface{}) error {
 		}
 		if vv, ok := h.(func() error); ok {
 			s.closings = append(s.closings, vv)
-			//return nil  //此时不该return  @hujun
 		} else if vv, ok := h.(func()); ok {
 			s.closings = append(s.closings, func() error {
 				vv()
