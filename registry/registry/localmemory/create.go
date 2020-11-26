@@ -8,21 +8,34 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+func (r *localMemory) getPaths(path string) []string {
+	nodes := strings.Split(strings.Trim(path, "/"), "/")
+	len := len(nodes)
+	paths := make([]string, 0, len)
+	for i := 0; i < len; i++ {
+		npath := "/" + strings.Join(nodes[:i+1], "/")
+		paths = append(paths, npath)
+	}
+	return paths
+}
+
 func (l *localMemory) CreatePersistentNode(path string, data string) (err error) {
 	l.lock.Lock()
-	list := strings.Split(registry.Format(path), "/")
-	for i := range list {
-		path := registry.Join(list[:i]...)
-		if _, ok := l.nodes[path]; !ok {
-			l.nodes[path] = newValue("{}")
+	path = registry.Format(path)
+	paths := l.getPaths(path)
+	for _, xpath := range paths {
+		if _, ok := l.nodes[xpath]; !ok && xpath != path {
+			l.nodes[xpath] = newValue("{}")
 		}
 	}
+
 	nvalue := newValue(data)
 	l.nodes[registry.Format(path)] = nvalue
 	l.lock.Unlock()
 	l.notifyParentChange(path, nvalue.version)
 	return nil
 }
+
 func (l *localMemory) CreateTempNode(path string, data string) (err error) {
 	return l.CreatePersistentNode(path, data)
 }

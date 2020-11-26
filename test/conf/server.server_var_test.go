@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/vars"
-	"github.com/micro-plat/hydra/conf/vars/cache/redis"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	"github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/db/oracle"
 	"github.com/micro-plat/hydra/registry"

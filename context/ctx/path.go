@@ -64,6 +64,7 @@ func (c *rpath) GetEncoding() string {
 		c.encoding = encoding.GBK
 	}
 	c.encoding = types.GetString(c.encoding, encoding.UTF8)
+
 	return c.encoding
 }
 

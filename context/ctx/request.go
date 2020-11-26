@@ -57,9 +57,10 @@ func (r *request) Bind(obj interface{}) error {
 
 	//检查输入类型
 	val := reflect.ValueOf(obj)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
+	if val.Kind() != reflect.Ptr {
+		return fmt.Errorf("输入参数非指针 %v", val.Kind())
 	}
+	val = val.Elem()
 	if val.Kind() != reflect.Struct && val.Kind() != reflect.Map {
 		return fmt.Errorf("输入参数非struct,map %v", val.Kind())
 	}
@@ -88,7 +89,7 @@ func (r *request) Bind(obj interface{}) error {
 	return nil
 }
 
-//Check 检查输入参数和配置参数是否为空 @todo 各类请求的测试
+//Check 检查输入参数和配置参数是否为空
 func (r *request) Check(field ...string) error {
 	data, _ := r.body.GetBodyMap()
 	for _, key := range field {
@@ -179,7 +180,7 @@ func (r *request) IsEmpty(name string) bool {
 	return ok
 }
 
-//GetPlayload 获取trace信息 //@fix GetTrace 改为的GetPlayload @hj
+//GetPlayload 获取trace信息
 func (r *request) GetPlayload() string {
 	raw, _ := r.GetRawBody()
 	return string(raw)

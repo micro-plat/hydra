@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/queue"
 	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/lib4go/types"

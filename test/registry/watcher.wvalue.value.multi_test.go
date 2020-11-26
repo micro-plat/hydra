@@ -18,24 +18,18 @@ func TestNewMultiValueWatcher(t *testing.T) {
 
 	//构建配置对象
 	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiValue1", "rgtwatcMultiValueest1")
-	confObj.API(":8080")
-	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetServerConf()
-	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
+	log := logger.GetSession("hydra_rgst_watcher_MultiValue1", ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
-	w, _ := wvalue.NewMultiValueWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
+	w, _ := wvalue.NewMultiValueWatcher(confObj.Registry, []string{"a", "b", "c"}, log)
 	assert.Equal(t, 3, len(w.Watchers), "构建的值监控对象")
 }
 
 func TestMultiValueWatcher_Close(t *testing.T) {
 	//构建配置对象
 	confObj := mocks.NewConfBy("hydra_rgst_watcher_MultiValue", "rgtwatcMultiValueest")
-	confObj.API(":8080")
-	apiconf := confObj.GetAPIConf()
-	c := apiconf.GetServerConf()
-	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
+	log := logger.GetSession("hydra_rgst_watcher_MultiValue", ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
-	w, _ := wvalue.NewMultiValueWatcher(c.GetRegistry(), []string{"a", "b", "c"}, log)
+	w, _ := wvalue.NewMultiValueWatcher(confObj.Registry, []string{"a", "b", "c"}, log)
 	w.Close()
 	for _, v := range w.Watchers {
 		assert.Equal(t, true, v.Done, "节点值监控对象关闭")
@@ -59,8 +53,8 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 		r       registry.IRegistry
 		wantErr bool
 	}{
-		{name: "监控过程中,注册中心节点的值未发生改变", path: c.GetServerPubPath(), r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "监控过程中,注册中心子节点的值发生改变", path: "/platname/apiserver/api/test/hosts/server1",
+		{name: "1. Watcher-Start-监控过程中,值未发生改变", path: c.GetServerPubPath(), r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "2. Watcher-Start-监控过程中,值发生改变", path: "/platname/apiserver/api/test/hosts/server1",
 			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
 	}
 

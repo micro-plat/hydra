@@ -25,7 +25,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/conf/vars"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"

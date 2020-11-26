@@ -12,10 +12,10 @@ import (
 
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/server/queue"
-	queueredis "github.com/micro-plat/hydra/conf/vars/queue/redis"
+	  "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/context"
 
-	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
+	 "github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	"github.com/urfave/cli"
 
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"

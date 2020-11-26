@@ -45,9 +45,9 @@ func Test_mqc_Add(t *testing.T) {
 		wantQueyesLen int
 		want          IMQC
 	}{
-		{name: "添加队列", mqName: "mqc1", service: "service1", wantQueyesLen: 1, concurrency: 1},
-		{name: "再次添加队列", mqName: "mqc2", service: "service2", wantQueyesLen: 2, concurrency: 2},
-		{name: "添加已存在的队列", mqName: "mqc2", service: "service2", wantQueyesLen: 2, concurrency: 2},
+		{name: "1.1 添加队列", mqName: "mqc1", service: "service1", wantQueyesLen: 1, concurrency: 1},
+		{name: "1.2 添加不存在队列", mqName: "mqc2", service: "service2", wantQueyesLen: 2, concurrency: 2},
+		{name: "1.3 已存在的队列", mqName: "mqc2", service: "service2", wantQueyesLen: 2, concurrency: 2},
 	}
 	c := newMQC()
 	//添加队列

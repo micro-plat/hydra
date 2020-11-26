@@ -1,4 +1,4 @@
 {
-    "go.testFlags": ["-v","-timeout=60s"],
+    "go.testFlags": ["-v","-timeout=100s"],
     "go.buildFlags": ["-mod=mod"],
 }

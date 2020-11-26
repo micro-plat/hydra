@@ -24,12 +24,31 @@ func TestLogging(t *testing.T) {
 		wantReq        string
 		wantRsp        string
 	}{
-		{name: "GET请求返回200", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 200,
+		{name: "1.1 GET请求-返回101", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 101,
+			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 101  "},
+		{name: "1.2 GET请求-返回200", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 200,
 			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 200  "},
-		{name: "POST请求返回303", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 303,
-			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 303  "},
-		{name: "POST请求返回400", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 400,
+		{name: "1.3 GET请求-返回300", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 300,
+			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 300  "},
+		{name: "1.4 GET请求返回400", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 400,
 			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 400  "},
+		{name: "1.5 GET请求返回401", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 401,
+			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 401  "},
+		{name: "1.6 GET请求返回510", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "GET", responseStatus: 510,
+			wantReq: "api.request: GET /URL from 127.0.0.1", wantRsp: "api.response: GET /URL 510  "},
+
+		{name: "2.1 POST请求-返回101", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 101,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 101  "},
+		{name: "2.2 POST请求-返回200", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 200,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 200  "},
+		{name: "2.3 POST请求-返回300", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 300,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 300  "},
+		{name: "2.4 POST请求返回400", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 400,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 400  "},
+		{name: "2.5 POST请求返回401", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 401,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 401  "},
+		{name: "2.6 POST请求返回510", clientIP: "127.0.0.1", requstID: "06c6fb24c", requestURL: "/URL", method: "POST", responseStatus: 510,
+			wantReq: "api.request: POST /URL from 127.0.0.1", wantRsp: "api.response: POST /URL 510  "},
 	}
 
 	for _, tt := range tests {
@@ -50,7 +69,7 @@ func TestLogging(t *testing.T) {
 		//调用中间件
 		handler := middleware.Logging()
 		handler(ctx)
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 1)
 
 		//获取输出
 		w.Close()
@@ -65,5 +84,4 @@ func TestLogging(t *testing.T) {
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantReq), tt.name)
 		assert.Equalf(t, true, strings.Contains(string(out), tt.wantRsp), tt.name)
 	}
-
 }

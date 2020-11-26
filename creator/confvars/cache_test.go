@@ -9,7 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/cache"
 	gocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	memcached "github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	cacheredis "github.com/micro-plat/hydra/conf/vars/cache/redis"
+	 "github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 )
 
