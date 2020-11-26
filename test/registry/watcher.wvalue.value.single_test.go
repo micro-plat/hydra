@@ -22,9 +22,9 @@ func TestSingleValueWatcher_Close(t *testing.T) {
 	confObj.API(":8080")
 	apiconf := confObj.GetAPIConf()
 	c := apiconf.GetServerConf()
-	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
+	log := logger.GetSession("hydra_rgst_watcher_SingleValue", ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
-	w := wvalue.NewSingleValueWatcher(c.GetRegistry(), c.GetServerPubPath(), log)
+	w := wvalue.NewSingleValueWatcher(confObj.Registry, c.GetServerPubPath(), log)
 	w.Close()
 	assert.Equal(t, true, w.Done, "valueWatcher关闭测试")
 	_, ok := <-w.CloseChan
@@ -48,9 +48,8 @@ func TestSingleValueWatcher_Start(t *testing.T) {
 		//	{name: "监控的错误节点的值变动", path: "/a/b/c", r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false}, //@watch方法 陷入死循环
 		// {name: "监控过程中,注册中心节点存在,获取子节点值错误", path: "/platname/apiserver/api/test/hosts1/",
 		// r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false}, //@watch方法 陷入死循环
-		{name: "监控过程中,注册中心节点的值未发生改变", path: c.GetServerPubPath(), r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "监控过程中,注册中心子节点的值发生改变", path: "/platname/apiserver/api/test/hosts/server1",
-			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
+		{name: "1. 监控过程中,值未发生改变", path: c.GetServerPubPath(), r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "2. 监控过程中,值发生改变", path: "/platname/apiserver/api/test/hosts/server1", r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
 	}
 
 	//发布节点到注册中心

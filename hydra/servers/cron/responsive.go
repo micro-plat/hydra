@@ -74,6 +74,7 @@ func (w *Responsive) Start() (err error) {
 //Notify 服务器配置变更通知
 func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	w.comparer.Update(c.GetServerConf())
+
 	if !w.comparer.IsChanged() {
 		return false, nil
 	}
@@ -91,10 +92,10 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 		if err != nil {
 			return false, err
 		}
+		w.conf = c
 		if err = w.Start(); err != nil {
 			return false, err
 		}
-		w.conf = c
 		return true, nil
 	}
 	app.Cache.Save(c)

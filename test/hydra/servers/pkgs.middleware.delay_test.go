@@ -26,12 +26,12 @@ func TestDelay(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "delay-不设置延迟头", isSet: false, header: map[string][]string{}, delayTime: "0", wantStatus: 200, wantSpecial: ""},
-		{name: "delay-设置错误的头名称", isSet: true, header: map[string][]string{"errorname": []string{"111"}}, delayTime: "0", wantStatus: 200, wantSpecial: ""},
-		{name: "delay-设置错误的数据", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"errdata"}}, delayTime: "0", wantStatus: 200, wantSpecial: "delay"},
-		{name: "delay-设置延迟0s", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"0"}}, delayTime: "0", wantStatus: 200, wantSpecial: "delay"},
-		{name: "delay-设置延迟1s", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"1s"}}, delayTime: "1s", wantStatus: 200, wantSpecial: "delay"},
-		{name: "delay-设置延迟3秒", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"3s"}}, delayTime: "3s", wantStatus: 200, wantSpecial: "delay"},
+		{name: "1. delay-配置不存在", isSet: false, header: map[string][]string{}, delayTime: "0", wantStatus: 200, wantSpecial: ""},
+		{name: "2. delay-配置错误的头名称", isSet: true, header: map[string][]string{"errorname": []string{"111"}}, delayTime: "0", wantStatus: 200, wantSpecial: ""},
+		{name: "3. delay-配置错误的数据", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"errdata"}}, delayTime: "0", wantStatus: 200, wantSpecial: "delay"},
+		{name: "4. delay-配置延迟0s", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"0"}}, delayTime: "0", wantStatus: 200, wantSpecial: "delay"},
+		{name: "5. delay-配置延迟1s", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"1s"}}, delayTime: "1s", wantStatus: 200, wantSpecial: "delay"},
+		{name: "6. delay-配置延迟3秒", isSet: true, header: map[string][]string{"X-Add-Delay": []string{"3s"}}, delayTime: "3s", wantStatus: 200, wantSpecial: "delay"},
 	}
 
 	for _, tt := range tests {

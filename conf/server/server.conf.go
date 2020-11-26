@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 )
@@ -34,7 +36,7 @@ func NewServerConf(platName string, systemName string, serverType string, cluste
 
 //IsStarted 当前服务是否已启动
 func (c *ServerConf) IsStarted() bool {
-	return c.mainConf.GetString("status", "start") == "start"
+	return strings.EqualFold(c.mainConf.GetString("status", "start"), "start")
 }
 
 //IsTrace 是否跟踪请求或响应
@@ -181,11 +183,11 @@ func (c *ServerConf) getSubConf(path string) (map[string]conf.RawConf, error) {
 	return values, nil
 }
 func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
+
 	data, version, err := registry.GetValue(path)
 	if err != nil {
 		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
 	}
-
 	rdata, err := conf.Decrypt(data)
 	if err != nil {
 		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)

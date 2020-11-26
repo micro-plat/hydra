@@ -67,13 +67,11 @@ func (r *request) Bind(obj interface{}) error {
 
 	//获取body数据
 	mp, err := r.body.GetBodyMap()
-	fmt.Println("XXXX:", mp)
 	if err != nil {
 		return err
 	}
 	if val.Kind() == reflect.Map {
 		obj = mp
-		fmt.Println("obj:", obj)
 		return nil
 	}
 
