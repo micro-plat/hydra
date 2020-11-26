@@ -464,6 +464,8 @@ func (res *MockResponse) Abort(code int, errsx ...interface{}) {
 			res.MockContent = v.GetError().Error()
 		case error:
 			res.MockContent = v.Error()
+		default:
+			res.MockContent = types.GetString(v)
 		}
 	}
 

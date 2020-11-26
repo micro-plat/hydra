@@ -110,6 +110,7 @@ func (h *Routers) Match(path string, method string) *Router {
 			Action: []string{method},
 		}
 	}
+
 	for _, r := range h.Routers {
 		if r.Path == path && types.StringContains(r.Action, method) {
 			return r
