@@ -36,7 +36,6 @@ func NewBody(c context.IInnerContext, encoding string) *body {
 //GetBodyMap 读取body原串并返回map
 func (w *body) GetBodyMap() (map[string]interface{}, error) {
 
-	fmt.Println("ddddddddddd")
 	//从缓存中读取数据
 	if w.mapBody.hasRead {
 		if w.mapBody.err != nil {
@@ -50,7 +49,6 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 	var body string
 	var noNeedReadURLQuery bool
 	body, w.mapBody.err = w.GetBody()
-	fmt.Println("xxxxxxxxxxxxx:", body, w.ctx.ContentType())
 	if w.mapBody.err != nil || body == "" {
 		return nil, w.mapBody.err
 	}
