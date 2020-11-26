@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
@@ -61,7 +62,9 @@ type testAdd struct {
 func getTests(path string, h interface{}, tests *[]*testAdd) {
 	//构建测试用例
 	g, err := reflectHandle(path, h)
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	for _, v := range g.Services {
 		*tests = append(*tests, &testAdd{
@@ -84,6 +87,10 @@ func TestORouter_Add(t *testing.T) {
 
 	//构建测试用例
 	getTests("/path", &testHandler2{}, &tests)
+	getTests("/path2", func(ctx context.IContext) (r interface{}) {
+		return "success"
+	}, &tests)
+	getTests("/path3", newTestHandler9, &tests)
 
 	//测试添加
 	s := NewORouter()
@@ -108,18 +115,25 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 	tests := []struct {
 		name         string
 		path         string
-		testHandler  interface{}
+		testHandler  []interface{}
 		wantErr      bool
 		errStr       string
 		handleAction []string
 	}{
-		{name: "action分配完成", path: "/path", testHandler: &testHandler3{}, wantErr: true, errStr: "服务/path无法注册，所有action已分配"},
-		{name: "获取所有routers", path: "/path", testHandler: &testHandler2{}, handleAction: []string{"GET"}},
+		{name: "1.1 同一路径,action被分配完成", path: "/path", testHandler: []interface{}{&testHandler3{}}, wantErr: true, errStr: "服务/path无法注册，所有action已分配"},
+		{name: "1.2 同一路径,有多个需要分配的action的service", path: "/path", testHandler: []interface{}{&testHandler7{}, func(ctx context.IContext) (r interface{}) { return }}, wantErr: true, errStr: `重复注册的服务{"path":"/path","service":"/path","encoding":"utf-8","pages":["pages"]}`},
+
+		{name: "2.1 获取指针所有routers", path: "/path", testHandler: []interface{}{&testHandler2{}}, handleAction: []string{"GET"}},
+		{name: "2.2 获取函数所有routers", path: "/path", testHandler: []interface{}{func(ctx context.IContext) (r interface{}) { return }}, handleAction: []string{"GET", "POST"}},
+		{name: "2.3 获取构建函数的所有routers", path: "/path", testHandler: []interface{}{newTestHandler9}, handleAction: []string{"GET", "POST"}},
+		{name: "2.4 获取结构体的所有routers", path: "/path", testHandler: []interface{}{testHandler8{}}, handleAction: []string{"GET", "POST"}},
 	}
 	for _, tt := range tests {
 		//添加routers
 		rtests := []*testAdd{}
-		getTests(tt.path, tt.testHandler, &rtests)
+		for _, v := range tt.testHandler {
+			getTests(tt.path, v, &rtests)
+		}
 		s := NewORouter()
 		routers := []*router.Router{}
 		for _, tt2 := range rtests {
