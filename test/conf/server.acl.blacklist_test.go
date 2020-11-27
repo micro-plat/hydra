@@ -80,7 +80,7 @@ func TestBlackListGetConf(t *testing.T) {
 	conf := mocks.NewConfBy("hydraconf_blacklist_test", "blacklist")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
-		if !strings.EqualFold(tt.name, "节点不存在,获取默认对象") {
+		if !strings.EqualFold(tt.name, "1. Conf-BlackListGetConf-节点不存在,获取默认对象") {
 			confB.BlackList(tt.opts...)
 		}
 		obj, err := blacklist.GetConf(conf.GetAPIConf().GetServerConf())

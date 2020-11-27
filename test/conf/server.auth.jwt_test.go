@@ -47,7 +47,7 @@ func TestJWTGetConf(t *testing.T) {
 	conf := mocks.NewConfBy("hydraconf_jwt_test2", "jwttest")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
-		if !strings.EqualFold(tt.name, "未设置jwt节点") {
+		if !strings.EqualFold(tt.name, "1. Conf-JWTGetConf-未设置jwt节点") {
 			confB.Jwt(tt.opts...)
 		}
 		got, err := jwt.GetConf(conf.GetAPIConf().GetServerConf())

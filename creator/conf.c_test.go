@@ -405,7 +405,7 @@ func Test_conf_GetMQC(t *testing.T) {
 	for _, tt := range tests {
 		defer func(name string) {
 			e := recover()
-			if name == "获取未设置mqc对象" {
+			if name == "1. 未设置,获取mqc配置对象" {
 				assert.Equal(t, "未指定mqc服务器配置", types.GetString(e), name+",mqc-panic")
 			} else {
 				assert.Equal(t, true, e == nil, name+",panic1")
