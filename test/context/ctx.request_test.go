@@ -1,47 +1,71 @@
 package context
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
 )
 
 func Test_request_Bind(t *testing.T) {
 	type result struct {
-		Key   string `json:"key" valid:"required"`
-		Value string `json:"value" valid:"required"`
+		Key string `json:"key" valid:"required" m2s:"key"`
 	}
+	var res string
 	tests := []struct {
-		name       string
-		body       string
-		out        interface{}
-		wantErrStr string
-		want       interface{}
+		name        string
+		method      string
+		queryRaw    string
+		body        []byte
+		contentType string
+		out         interface{}
+		wantErrStr  string
+		want        interface{}
 	}{
-		{name: "参数非指针,无法进行数据绑定", out: map[string]string{}, wantErrStr: "输入参数非指针 map"},
-		{name: "参数类型非struct,无法进行数据绑定", out: &map[string]string{}, wantErrStr: "输入参数非struct map"},
-		{name: "绑定数据为空", body: "", out: &result{}, wantErrStr: "unexpected end of JSON input"},
-		{name: "绑定数据验证错误", body: `{"key":"","value":"2"}`, out: &result{}, wantErrStr: "输入参数有误 key: non zero value required"},
-		{name: "正确绑定", body: `{"key":"1","value":"2"}`, out: &result{}, want: &result{Key: "1", Value: "2"}},
+		{name: "1.1 参数非指针", out: map[string]string{}, wantErrStr: "输入参数非指针 map"},
+		{name: "1.2 参数类型非struct,map", out: &res, wantErrStr: "输入参数非struct,map string"},
+
+		{name: "2.1 内容为xml,绑定MAP", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "xml"), out: &map[string]string{}, want: &map[string]string{"key": value}},
+		{name: "2.2 内容为xml,绑定Struct", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "xml"), out: &result{}, want: &result{Key: value}},
+		// {name: "2.2 参数类型非struct,map", body:,    out: &res, wantErrStr: "输入参数非struct,map string"},
+		// {name: "2.1 参数类型非struct,map", out: &res, wantErrStr: "输入参数非struct,map string"},
+		// {name: "绑定数据为空", body: "", out: &result{}, wantErrStr: "unexpected end of JSON input"},
+		// {name: "绑定数据验证错误", body: `{"key":"","value":"2"}`, out: &result{}, wantErrStr: "输入参数有误 key: non zero value required"},
+		// {name: "正确绑定", body: `{"key":"1","value":"2"}`, out: &result{}, want: &result{Key: "1", Value: "2"}},
 	}
 
 	confObj := mocks.NewConfBy("context_request_test", "request") //构建对象
 	confObj.API(":8080")                                          //初始化参数
 	serverConf := confObj.GetAPIConf()                            //获取配置
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
 	for _, tt := range tests {
-		r := ctx.NewRequest(&mocks.TestContxt{Form: url.Values{"__body_": []string{tt.body}}}, serverConf, conf.NewMeta())
 
-		err := r.Bind(tt.out)
+		//构建请求 方法要与注册方法一致
+		r, err := http.NewRequest("POST", "http://localhost:8080/url?"+tt.queryRaw, bytes.NewReader(tt.body))
+		assert.Equal(t, nil, err, "构建请求")
+
+		//设置content-type
+		r.Header.Set("Content-Type", fmt.Sprintf("%s; charset=UTF-8", tt.contentType))
+
+		c.Request = r
+		req := ctx.NewRequest(middleware.NewGinCtx(c), serverConf, conf.NewMeta())
+
+		err = req.Bind(tt.out)
+		fmt.Println(tt.out, err)
 		if tt.wantErrStr != "" {
 			assert.Equal(t, tt.wantErrStr, err.Error(), tt.name)
 			continue

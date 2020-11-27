@@ -594,10 +594,10 @@ func Test_response_Redirect(t *testing.T) {
 	context := &mocks.TestContxt{HttpHeader: http.Header{}}
 	c := ctx.NewResponse(context, serverConf, logger.New("context"), conf.NewMeta())
 
-	c.Redirect(200, "url")
+	c.Redirect(302, "url")
 	assert.Equal(t, true, context.WrittenStatus, "验证上下文中的写入状态")
 	assert.Equal(t, "url", context.Url, "验证上下文中的url")
-	assert.Equal(t, 200, context.StatusCode, "验证上下文中的状态码")
+	assert.Equal(t, 302, context.StatusCode, "验证上下文中的状态码")
 }
 
 func Test_response_Special(t *testing.T) {

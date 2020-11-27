@@ -153,8 +153,10 @@ github.com/pkg/profile
 ## explicit
 github.com/pkg/sftp
 # github.com/russross/blackfriday/v2 v2.0.1
+## explicit
 github.com/russross/blackfriday/v2
 # github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
+## explicit
 github.com/samuel/go-zookeeper/zk
 # github.com/shopspring/decimal v1.2.0
 ## explicit
@@ -177,6 +179,7 @@ github.com/urfave/cli
 ## explicit
 github.com/xi2/xz
 # github.com/yosssi/gmq v0.0.1
+## explicit
 github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
 # github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
@@ -189,6 +192,7 @@ github.com/zkfy/go-cache
 ## explicit
 github.com/zkfy/go-metrics
 # github.com/zkfy/jwt-go v3.0.0+incompatible
+## explicit
 github.com/zkfy/jwt-go
 # github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 ## explicit

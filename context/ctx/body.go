@@ -21,11 +21,12 @@ type bodyValue struct {
 
 //body 用于处理http请求的body读取
 type body struct {
-	ctx      context.IInnerContext
-	encoding string
-	rawBody  bodyValue
-	fullBody bodyValue
-	mapBody  bodyValue
+	ctx          context.IInnerContext
+	encoding     string
+	rawBody      bodyValue
+	fullBody     bodyValue
+	fullFormBody string
+	mapBody      bodyValue
 }
 
 //NewBody 构建body处理工具
@@ -49,30 +50,40 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 	var body string
 	var noNeedReadURLQuery bool
 	body, w.mapBody.err = w.GetBody()
-	if w.mapBody.err != nil || body == "" {
-		return nil, w.mapBody.err
-	}
 	data := make(map[string]interface{})
-	ctp := strings.ToLower(w.ctx.ContentType())
-	switch {
-	case strings.Contains(ctp, "/xml"):
-		mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
-		data, w.mapBody.err = mxj.NewMapXml([]byte(body))
-	case strings.Contains(ctp, "/yaml"):
-		w.mapBody.err = yaml.Unmarshal([]byte(body), &data)
-	case strings.Contains(ctp, "/json"):
-		w.mapBody.err = json.Unmarshal([]byte(body), &data)
-	case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
-		noNeedReadURLQuery = true
-		var values url.Values
-		values, w.mapBody.err = url.ParseQuery(body)
-		if w.mapBody.err != nil {
-			break
-		}
-		for k, v := range values {
-			data[k] = strings.Join(v, ",")
+	if w.mapBody.err != nil {
+		return data, w.mapBody.err
+	}
+
+	if body != "" {
+		ctp := strings.ToLower(w.ctx.ContentType())
+		switch {
+		case strings.Contains(ctp, "/xml"):
+			mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
+			data, w.mapBody.err = mxj.NewMapXml([]byte(body))
+		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
+			w.mapBody.err = yaml.Unmarshal([]byte(body), &data)
+		case strings.Contains(ctp, "/json"):
+			w.mapBody.err = json.Unmarshal([]byte(body), &data)
+		case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
+			noNeedReadURLQuery = true
+			var values url.Values
+			values, w.mapBody.err = url.ParseQuery(w.fullFormBody)
+			if w.mapBody.err != nil {
+				break
+			}
+			for k, v := range values {
+				//处理编码问题
+				var buff []byte
+				buff, w.mapBody.err = encoding.Decode(strings.Join(v, ","), w.encoding)
+				if w.mapBody.err != nil {
+					break
+				}
+				data[k] = string(buff)
+			}
 		}
 	}
+
 	if w.mapBody.err != nil {
 		w.mapBody.err = fmt.Errorf("将%s转换为map失败:%w", body, w.mapBody.err)
 		return nil, w.mapBody.err
@@ -116,17 +127,31 @@ func (w *body) GetBody() (s string, err error) {
 	w.fullBody.hasRead = true
 	var buff []byte
 	buff, w.fullBody.err = w.GetRawBody()
-	fmt.Println("cccccccccccc:", string(buff))
 	if w.fullBody.err != nil {
 		return "", w.fullBody.err
 	}
-	if len(buff) == 0 {
-		buff = []byte(w.ctx.GetForm().Encode())
+
+	ctp := strings.ToLower(w.ctx.ContentType())
+	if strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data") {
+
+		formRaw := w.ctx.GetForm().Encode()
+		replaceMent := "%s%s"
+		if len(formRaw) > 0 && len(buff) > 0 {
+			replaceMent = "%s&%s"
+		}
+		w.fullFormBody = fmt.Sprintf(replaceMent, string(buff), formRaw)
+		s, err := url.QueryUnescape(w.fullFormBody)
+		if err != nil {
+			w.fullBody.err = fmt.Errorf("GetBody.QueryUnescape.err:%w", err)
+			return "", w.fullBody.err
+		}
+		buff = []byte(s)
 	}
 
 	//处理编码问题
-	buff, w.fullBody.err = urlDecode(buff, w.encoding)
-	if w.fullBody.err != nil {
+	buff, err = encoding.DecodeBytes(buff, w.encoding)
+	if err != nil {
+		w.fullBody.err = fmt.Errorf("GetBody.DecodeBytes.err:%w", err)
 		return "", w.fullBody.err
 	}
 	w.fullBody.value = string(buff)
@@ -151,14 +176,14 @@ func (w *body) GetRawBody() (s []byte, err error) {
 
 }
 func urlDecode(v []byte, c string) ([]byte, error) {
-	s, err := url.QueryUnescape(string(v))
-	if err != nil {
-		return nil, fmt.Errorf("QueryUnescape.err:%w", err)
+	// s, err := url.QueryUnescape(string(v))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("QueryUnescape.err:%w", err)
+	// }
+	if strings.EqualFold(c, encoding.UTF8) {
+		return v, nil
 	}
-	if strings.ToLower(c) == encoding.UTF8 {
-		return []byte(s), nil
-	}
-	buff, err := encoding.DecodeBytes([]byte(s), c)
+	buff, err := encoding.DecodeBytes(v, c)
 	if err != nil {
 		return nil, fmt.Errorf("DecodeBytes.err:%w", err)
 	}

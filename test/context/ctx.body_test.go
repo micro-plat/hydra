@@ -105,7 +105,7 @@ func Test_body_GetRawBody(t *testing.T) {
 
 }
 
-var value = `中文~!@#$%^&*()_+{}:"<>?`
+var value = `中文~!@#$%^&*()_+{}:"<>?=`
 
 func Test_body_GetBody_MIMEXML(t *testing.T) {
 
@@ -119,25 +119,25 @@ func Test_body_GetBody_MIMEXML(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为application/xml,编码为UTF-8,方法为POST", contentType: "application/xml", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为application/xml,编码为UTF-8,方法为GET", contentType: "application/xml", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.2 content-type为application/xml,编码为UTF-8,方法为GET", contentType: "application/xml", method: "GET", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为application/xml,编码为UTF-8,方法为PUT", contentType: "application/xml", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "1.4 content-type为application/xml,编码为UTF-8,方法为DELETE", contentType: "application/xml", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "1.5 content-type为application/xml,编码为UTF-8,方法为PATCH", contentType: "application/xml", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "2.1 content-type为text/xml,编码为UTF-8,方法为POST", contentType: "text/xml", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.2 content-type为text/xml,编码为UTF-8,方法为GET", contentType: "text/xml", method: "POST", encoding: "UTF-8", value: value},
+		{name: "2.2 content-type为text/xml,编码为UTF-8,方法为GET", contentType: "text/xml", method: "GET", encoding: "UTF-8", value: value},
 		{name: "2.3 content-type为text/xml,编码为UTF-8,方法为PUT", contentType: "text/xml", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "2.4 content-type为text/xml,编码为UTF-8,方法为DELETE", contentType: "text/xml", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "2.5 content-type为text/xml,编码为UTF-8,方法为PATCH", contentType: "text/xml", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "3.1 content-type为application/xml,编码为GBK,方法为POST", contentType: "application/xml", method: "POST", encoding: "GBK", value: value},
-		{name: "3.2 content-type为application/xml,编码为GBK,方法为GET", contentType: "application/xml", method: "POST", encoding: "GBK", value: value},
+		{name: "3.2 content-type为application/xml,编码为GBK,方法为GET", contentType: "application/xml", method: "GET", encoding: "GBK", value: value},
 		{name: "3.3 content-type为application/xml,编码为GBK,方法为PUT", contentType: "application/xml", method: "PUT", encoding: "GBK", value: value},
 		{name: "3.4 content-type为application/xml,编码为GBK,方法为DELETE", contentType: "application/xml", method: "DELETE", encoding: "GBK", value: value},
 		{name: "3.5 content-type为application/xml,编码为GBK,方法为PATCH", contentType: "application/xml", method: "PATCH", encoding: "GBK", value: value},
 
 		{name: "4.1 content-type为text/xml,编码为GBK,方法为POST", contentType: "text/xml", method: "POST", encoding: "GBK", value: value},
-		{name: "4.2 content-type为text/xml,编码为GBK,方法为GET", contentType: "text/xml", method: "POST", encoding: "GBK", value: value},
+		{name: "4.2 content-type为text/xml,编码为GBK,方法为GET", contentType: "text/xml", method: "GET", encoding: "GBK", value: value},
 		{name: "4.3 content-type为text/xml,编码为GBK,方法为PUT", contentType: "text/xml", method: "PUT", encoding: "GBK", value: value},
 		{name: "4.4 content-type为text/xml,编码为GBK,方法为DELETE", contentType: "text/xml", method: "DELETE", encoding: "GBK", value: value},
 		{name: "4.5 content-type为text/xml,编码为GBK,方法为PATCH", contentType: "text/xml", method: "PATCH", encoding: "GBK", value: value},
@@ -188,25 +188,25 @@ func Test_body_GetBody_MIMEJSON(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为application/json,编码为UTF-8,方法为POST", contentType: "application/json", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为application/json,编码为UTF-8,方法为GET", contentType: "application/json", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.2 content-type为application/json,编码为UTF-8,方法为GET", contentType: "application/json", method: "GET", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为application/json,编码为UTF-8,方法为PUT", contentType: "application/json", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "1.4 content-type为application/json,编码为UTF-8,方法为DELETE", contentType: "application/json", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "1.5 content-type为application/json,编码为UTF-8,方法为PATCH", contentType: "application/json", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "1.6 content-type为application/json,编码为GBK,方法为POST", contentType: "application/json", method: "POST", encoding: "GBK", value: value},
-		{name: "1.7 content-type为application/json,编码为GBK,方法为GET", contentType: "application/json", method: "POST", encoding: "GBK", value: value},
+		{name: "1.7 content-type为application/json,编码为GBK,方法为GET", contentType: "application/json", method: "GET", encoding: "GBK", value: value},
 		{name: "1.8 content-type为application/json,编码为GBK,方法为PUT", contentType: "application/json", method: "PUT", encoding: "GBK", value: value},
 		{name: "1.9 content-type为application/json,编码为GBK,方法为DELETE", contentType: "application/json", method: "DELETE", encoding: "GBK", value: value},
 		{name: "1.10 content-type为application/json,编码为GBK,方法为PATCH", contentType: "application/json", method: "PATCH", encoding: "GBK", value: value},
 
 		{name: "2.1 content-type为text/json,编码为UTF-8,方法为POST", contentType: "text/json", method: "POST", encoding: "UTF-8", value: value},
-		{name: "2.2 content-type为text/json,编码为UTF-8,方法为GET", contentType: "text/json", method: "POST", encoding: "UTF-8", value: value},
+		{name: "2.2 content-type为text/json,编码为UTF-8,方法为GET", contentType: "text/json", method: "GET", encoding: "UTF-8", value: value},
 		{name: "2.3 content-type为text/json,编码为UTF-8,方法为PUT", contentType: "text/json", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "2.4 content-type为text/json,编码为UTF-8,方法为DELETE", contentType: "text/json", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "2.5 content-type为text/json,编码为UTF-8,方法为PATCH", contentType: "text/json", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "2.6 content-type为text/json,编码为GBK,方法为POST", contentType: "text/json", method: "POST", encoding: "GBK", value: value},
-		{name: "2.7 content-type为text/json,编码为GBK,方法为GET", contentType: "text/json", method: "POST", encoding: "GBK", value: value},
+		{name: "2.7 content-type为text/json,编码为GBK,方法为GET", contentType: "text/json", method: "GET", encoding: "GBK", value: value},
 		{name: "2.8 content-type为text/json,编码为GBK,方法为PUT", contentType: "text/json", method: "PUT", encoding: "GBK", value: value},
 		{name: "2.9 content-type为text/json,编码为GBK,方法为DELETE", contentType: "text/json", method: "DELETE", encoding: "GBK", value: value},
 		{name: "2.10 content-type为text/json,编码为GBK,方法为PATCH", contentType: "text/json", method: "PATCH", encoding: "GBK", value: value},
@@ -256,13 +256,13 @@ func Test_body_GetBody_MIMEYAML(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为application/x-yaml,编码为UTF-8,方法为POST", contentType: "application/x-yaml", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为application/x-yaml,编码为UTF-8,方法为GET", contentType: "application/x-yaml", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.2 content-type为application/x-yaml,编码为UTF-8,方法为GET", contentType: "application/x-yaml", method: "GET", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为application/x-yaml,编码为UTF-8,方法为PUT", contentType: "application/x-yaml", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "1.4 content-type为application/x-yaml,编码为UTF-8,方法为DELETE", contentType: "application/x-yaml", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "1.5 content-type为application/x-yaml,编码为UTF-8,方法为PATCH", contentType: "application/x-yaml", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "2.1 content-type为application/x-yaml,编码为GBK,方法为POST", contentType: "application/x-yaml", method: "POST", encoding: "GBK", value: value},
-		{name: "2.2 content-type为application/x-yaml,编码为GBK,方法为GET", contentType: "application/x-yaml", method: "POST", encoding: "GBK", value: value},
+		{name: "2.2 content-type为application/x-yaml,编码为GBK,方法为GET", contentType: "application/x-yaml", method: "GET", encoding: "GBK", value: value},
 		{name: "2.3 content-type为application/x-yaml,编码为GBK,方法为PUT", contentType: "application/x-yaml", method: "PUT", encoding: "GBK", value: value},
 		{name: "2.4 content-type为application/x-yaml,编码为GBK,方法为DELETE", contentType: "application/x-yaml", method: "DELETE", encoding: "GBK", value: value},
 		{name: "2.5 content-type为application/x-yaml,编码为GBK,方法为PATCH", contentType: "application/x-yaml", method: "PATCH", encoding: "GBK", value: value},
@@ -305,13 +305,13 @@ func Test_body_GetBody_MIMEPlain(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为text/plain,编码为UTF-8,方法为POST", contentType: "text/plain", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为text/plain,编码为UTF-8,方法为GET", contentType: "text/plain", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.2 content-type为text/plain,编码为UTF-8,方法为GET", contentType: "text/plain", method: "GET", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为text/plain,编码为UTF-8,方法为PUT", contentType: "text/plain", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "1.4 content-type为text/plain,编码为UTF-8,方法为DELETE", contentType: "text/plain", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "1.5 content-type为text/plain,编码为UTF-8,方法为PATCH", contentType: "text/plain", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "2.1 content-type为text/plain,编码为GBK,方法为POST", contentType: "text/plain", method: "POST", encoding: "GBK", value: value},
-		{name: "2.2 content-type为text/plain,编码为GBK,方法为GET", contentType: "text/plain", method: "POST", encoding: "GBK", value: value},
+		{name: "2.2 content-type为text/plain,编码为GBK,方法为GET", contentType: "text/plain", method: "GET", encoding: "GBK", value: value},
 		{name: "2.3 content-type为text/plain,编码为GBK,方法为PUT", contentType: "text/plain", method: "PUT", encoding: "GBK", value: value},
 		{name: "2.4 content-type为text/plain,编码为GBK,方法为DELETE", contentType: "text/plain", method: "DELETE", encoding: "GBK", value: value},
 		{name: "2.5 content-type为text/plain,编码为GBK,方法为PATCH", contentType: "text/plain", method: "PATCH", encoding: "GBK", value: value},
@@ -355,13 +355,13 @@ func Test_body_GetBody_MIMEHTML(t *testing.T) {
 		want        string
 	}{
 		{name: "1.1 content-type为text/html,编码为UTF-8,方法为POST", contentType: "text/html", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为text/html,编码为UTF-8,方法为GET", contentType: "text/html", method: "POST", encoding: "UTF-8", value: value},
+		{name: "1.2 content-type为text/html,编码为UTF-8,方法为GET", contentType: "text/html", method: "GET", encoding: "UTF-8", value: value},
 		{name: "1.3 content-type为text/html,编码为UTF-8,方法为PUT", contentType: "text/html", method: "PUT", encoding: "UTF-8", value: value},
 		{name: "1.4 content-type为text/html,编码为UTF-8,方法为DELETE", contentType: "text/html", method: "DELETE", encoding: "UTF-8", value: value},
 		{name: "1.5 content-type为text/html,编码为UTF-8,方法为PATCH", contentType: "text/html", method: "PATCH", encoding: "UTF-8", value: value},
 
 		{name: "2.1 content-type为text/html,编码为GBK,方法为POST", contentType: "text/html", method: "POST", encoding: "GBK", value: value},
-		{name: "2.2 content-type为text/html,编码为GBK,方法为GET", contentType: "text/html", method: "POST", encoding: "GBK", value: value},
+		{name: "2.2 content-type为text/html,编码为GBK,方法为GET", contentType: "text/html", method: "GET", encoding: "GBK", value: value},
 		{name: "2.3 content-type为text/html,编码为GBK,方法为PUT", contentType: "text/html", method: "PUT", encoding: "GBK", value: value},
 		{name: "2.4 content-type为text/html,编码为GBK,方法为DELETE", contentType: "text/html", method: "DELETE", encoding: "GBK", value: value},
 		{name: "2.5 content-type为text/html,编码为GBK,方法为PATCH", contentType: "text/html", method: "PATCH", encoding: "GBK", value: value},
@@ -454,12 +454,12 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 
 		queryRaw := ""
 		if tt.isQuery {
-			queryRaw = "a=1&query=" + url.QueryEscape(string(data))
+			queryRaw = fmt.Sprintf("query=%s", url.QueryEscape(string(data)))
 		}
 
 		body := ""
 		if tt.isBody {
-			body = "a=2&key=" + url.QueryEscape(string(data))
+			body = fmt.Sprintf("key=%s", url.QueryEscape(string(data)))
 		}
 
 		//构建请求 方法要与注册方法一致
@@ -475,16 +475,13 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBody()
 		if tt.isQuery && !tt.isBody {
-			assert.Equal(t, `a=1&query=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
-		}
-		if tt.isBody && (tt.method == "GET" || tt.method == "DELETE") {
-			assert.Equal(t, `a=2&key=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
+			assert.Equal(t, fmt.Sprintf("query=%s", tt.value), gotS, tt.name)
 		}
 		if tt.isBody && !tt.isQuery {
-			assert.Equal(t, `a=2&key=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
+			assert.Equal(t, fmt.Sprintf("key=%s", tt.value), gotS, tt.name)
 		}
 		if tt.isQuery && tt.isBody && (tt.method != "GET" && tt.method != "DELETE") { //body和query的数据都有
-			assert.Equal(t, `a=2&a=1&key=中文~!@#$%^&*()_+{}:"<>?&query=中文~!@#$%^&*()_+{}:"<>?`, gotS, tt.name)
+			assert.Equal(t, fmt.Sprintf("key=%s&query=%s", tt.value, tt.value), gotS, tt.name)
 		}
 		gotS2, err := w.GetBody()
 		assert.Equal(t, nil, err, tt.name)
@@ -495,47 +492,48 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 
 func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
 	tests := []struct {
-		name        string
-		method      string
-		encoding    string
-		contentType string
-		value       string
-		body        string
-		want        string
+		name     string
+		method   string
+		encoding string
+		value    url.Values
+		body     string
+		want     string
 	}{
-		{name: "1.1 content-type为multipart/form-data,编码为UTF-8,方法为POST", contentType: "multipart/form-data", method: "POST", encoding: "UTF-8", value: value},
-		{name: "1.2 content-type为multipart/form-data,编码为UTF-8,方法为GET", contentType: "multipart/form-data", method: "GET", encoding: "UTF-8", value: value},
-		{name: "1.3 content-type为multipart/form-data,编码为UTF-8,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", encoding: "UTF-8", value: value},
-		{name: "1.4 content-type为multipart/form-data,编码为UTF-8,方法为PUT", contentType: "multipart/form-data", method: "PUT", encoding: "UTF-8", value: value},
-		{name: "1.5 content-type为multipart/form-data,编码为UTF-8,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", encoding: "UTF-8", value: value},
+		{name: "1.1 content-type为multipart/form-data,编码为UTF-8,方法为POST", method: "POST", value: url.Values{"key": []string{value}}, encoding: "UTF-8"},
+		{name: "1.2 content-type为multipart/form-data,编码为UTF-8,方法为GET", method: "GET", encoding: "UTF-8", value: url.Values{"key": []string{value}}},
+		{name: "1.3 content-type为multipart/form-data,编码为UTF-8,方法为DELETE", method: "DELETE", encoding: "UTF-8", value: url.Values{"key": []string{value}}},
+		{name: "1.4 content-type为multipart/form-data,编码为UTF-8,方法为PUT", method: "PUT", encoding: "UTF-8", value: url.Values{"key": []string{value}}},
+		{name: "1.5 content-type为multipart/form-data,编码为UTF-8,方法为PATCH", method: "PATCH", encoding: "UTF-8", value: url.Values{"key": []string{value}}},
 
-		{name: "2.1 content-type为multipart/form-data,编码为GBK,方法为POST", contentType: "multipart/form-data", method: "POST", encoding: "GBK", value: value},
-		{name: "2.2 content-type为multipart/form-data,编码为GBK,方法为GET", contentType: "multipart/form-data", method: "GET", encoding: "GBK", value: value},
-		{name: "2.3 content-type为multipart/form-data,编码为GBK,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", encoding: "GBK", value: value},
-		{name: "2.4 content-type为multipart/form-data,编码为GBK,方法为PUT", contentType: "multipart/form-data", method: "PUT", encoding: "UTF-8", value: value},
-		{name: "2.5 content-type为multipart/form-data,编码为GBK,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", encoding: "GBK", value: value},
+		{name: "2.1 content-type为multipart/form-data,编码为GBK,方法为POST", method: "POST", value: url.Values{"key": []string{value}}, encoding: "GBK"},
+		{name: "2.2 content-type为multipart/form-data,编码为GBK,方法为GET", method: "GET", encoding: "GBK", value: url.Values{"key": []string{value}}},
+		{name: "2.3 content-type为multipart/form-data,编码为GBK,方法为DELETE", method: "DELETE", encoding: "GBK", value: url.Values{"key": []string{value}}},
+		{name: "2.4 content-type为multipart/form-data,编码为GBK,方法为PUT", method: "PUT", encoding: "GBK", value: url.Values{"key": []string{value}}},
+		{name: "2.5 content-type为multipart/form-data,编码为GBK,方法为PATCH", method: "PATCH", encoding: "GBK", value: url.Values{"key": []string{value}}},
 	}
 
 	for _, tt := range tests {
 		//构建上下文
 		c := &gin.Context{}
 
-		data, _ := encoding.Encode(getTestMIMEMultipartPOSTForm(), tt.encoding)
-		body := url.QueryEscape(string(data))
+		//写入文件和设置参数
+		content, contentType := getTestMIMEMultipartPOSTForm(tt.value)
+		data, _ := encoding.Encode(content, tt.encoding)
+		body := string(data)
 		//构建请求 方法要与注册方法一致
 		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader([]byte(body)))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
-		r.Header.Set("Content-Type", fmt.Sprintf("%s; charset=%s", tt.contentType, tt.encoding))
+		r.Header.Set("Content-Type", fmt.Sprintf("%s; charset=%s", contentType, tt.encoding))
 
 		//替换gin上下文的请求
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBody()
-
-		assert.Equal(t, true, strings.Contains(gotS, getUploadBody()), tt.name)
+		want, _ := url.QueryUnescape(tt.value.Encode())
+		assert.Equal(t, want, gotS, tt.name)
 
 		gotS2, err := w.GetBody()
 		assert.Equal(t, nil, err, tt.name)
@@ -563,16 +561,19 @@ func getTestBody(value, e, ctp string) []byte {
 	case "yaml":
 		bodyRaw = []byte("key: " + value)
 	case "form":
-		bodyRaw = []byte("key=" + url.QueryEscape(value))
+		buff, _ := encoding.Encode(value, e)
+		v := url.QueryEscape(string(buff))
+		bodyRaw = []byte("key=" + v)
+		return bodyRaw
 	}
 	bodyRaw, _ = encoding.EncodeBytes(bodyRaw, e)
 	return bodyRaw
 }
 
 func getTestQueryRaw(value, e string) string {
-	value = "key=" + url.QueryEscape(value)
 	t, _ := encoding.Encode(value, e)
-	return string(t)
+	value = "key=" + url.QueryEscape(string(t))
+	return value
 }
 
 func Test_body_GetBodyMap__MIMEXML(t *testing.T) {
@@ -823,7 +824,6 @@ func Test_body_GetBodyMap__MIMEYAML(t *testing.T) {
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBodyMap()
-		fmt.Println(gotS)
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
@@ -847,44 +847,52 @@ func Test_body_GetBodyMap__MIMEPOSTForm(t *testing.T) {
 		errStr      string
 		want        map[string]interface{}
 	}{
+		{name: "1.1 content-type为form,编码为UTF-8,GET,body为空,url为空", method: "POST", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "1.2 content-type为form,编码为UTF-8,POST,body为form,url参数为空", method: "POST", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": value}},
 		{name: "1.3 content-type为form,编码为UTF-8,POST,body为空,url带有参数", method: "POST", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
 		{name: "1.4 content-type为form,编码为UTF-8,POST,body为form,url带有参数", method: "POST", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "1.5 content-type为form,编码为UTF-8,GET,body为空,url为空", method: "GET", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "1.6 content-type为form,编码为UTF-8,GET,body为form,url参数为空", method: "GET", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": value}},
 		{name: "1.7 content-type为form,编码为UTF-8,GET,body为空,url带有参数", method: "GET", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
 		{name: "1.8 content-type为form,编码为UTF-8,GET,body为form,url带有参数", method: "GET", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "1.9 content-type为form,编码为UTF-8,DELETE,body为空,url为空", method: "DELETE", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "1.10 content-type为form,编码为UTF-8,DELETE,body为form,url参数为空", method: "DELETE", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": value}},
 		{name: "1.11 content-type为form,编码为UTF-8,DELETE,body为空,url带有参数", method: "DELETE", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
 		{name: "1.12 content-type为form,编码为UTF-8,DELETE,body为form,url带有参数", method: "DELETE", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "1.13 content-type为form,编码为UTF-8,PUT,body为空,url为空", method: "PUT", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "1.14 content-type为form,编码为UTF-8,PUT,body为form,url参数为空", method: "PUT", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": value}},
 		{name: "1.15 content-type为form,编码为UTF-8,PUT,body为空,url带有参数", method: "PUT", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
 		{name: "1.16 content-type为form,编码为UTF-8,PUT,body为form,url带有参数", method: "PUT", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "1.17 content-type为form,编码为UTF-8,GET,body为空,url为空", method: "PATCH", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "1.18 content-type为form,编码为UTF-8,PATCH,body为form,url参数为空", method: "PATCH", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": value}},
 		{name: "1.19 content-type为form,编码为UTF-8,PATCH,body为空,url带有参数", method: "PATCH", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
 		{name: "1.20 content-type为form,编码为UTF-8,PATCH,body为form,url带有参数", method: "PATCH", encoding: "UTF-8", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "UTF-8"), body: getTestBody(value, "UTF-8", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "2.1 content-type为form,编码为GBK,GET,body为空,url为空", method: "POST", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "2.2 content-type为form,编码为GBK,POST,body为form,url参数为空", method: "POST", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": value}},
 		{name: "2.3 content-type为form,编码为GBK,POST,body为空,url带有参数", method: "POST", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
 		{name: "2.4 content-type为form,编码为GBK,POST,body为form,url带有参数", method: "POST", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "2.5 content-type为form,编码为GBK,GET,body为空,url为空", method: "GET", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "2.6 content-type为form,编码为GBK,GET,body为form,url参数为空", method: "GET", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": value}},
 		{name: "2.7 content-type为form,编码为GBK,GET,body为空,url带有参数", method: "GET", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
 		{name: "2.8 content-type为form,编码为GBK,GET,body为form,url带有参数", method: "GET", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
+		{name: "2.9 content-type为form,编码为GBK,DELETE,body为空,url为空", method: "DELETE", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "2.10 content-type为form,编码为GBK,DELETE,body为form,url参数为空", method: "DELETE", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": value}},
 		{name: "2.11 content-type为form,编码为GBK,DELETE,body为空,url带有参数", method: "DELETE", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
 		{name: "2.12 content-type为form,编码为GBK,DELETE,body为form,url带有参数", method: "DELETE", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
-		{name: "2.13 content-type为form,编码为GBK,PUT,body非正确的form", method: "PUT", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: []byte("{}"), errStr: "将form转换为map失败:invalid character 'j' looking for beginning of value"},
+		{name: "2.13 content-type为form,编码为GBK,PUT,body为空,url为空", method: "PUT", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "2.14 content-type为form,编码为GBK,PUT,body为form,url参数为空", method: "PUT", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": value}},
 		{name: "2.15 content-type为form,编码为GBK,PUT,body为空,url带有参数", method: "PUT", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
 		{name: "2.16 content-type为form,编码为GBK,PUT,body为form,url带有参数", method: "PUT", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
 
-		{name: "2.17 content-type为form,编码为GBK,PATCH,body非正确的form", method: "PATCH", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: []byte("form"), errStr: "将form转换为map失败:invalid character 'j' looking for beginning of value"},
+		{name: "2.17 content-type为form,编码为GBK,PATCH,body为空,url为空", method: "PATCH", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: nil, want: map[string]interface{}{}},
 		{name: "2.18 content-type为form,编码为GBK,PATCH,body为form,url参数为空", method: "PATCH", encoding: "GBK", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": value}},
 		{name: "2.19 content-type为form,编码为GBK,PATCH,body为空,url带有参数", method: "PATCH", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
 		{name: "2.20 content-type为form,编码为GBK,PATCH,body为form,url带有参数", method: "PATCH", encoding: "GBK", contentType: "application/x-www-form-urlencoded", queryRaw: getTestQueryRaw(value, "GBK"), body: getTestBody(value, "GBK", "form"), want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
@@ -902,7 +910,101 @@ func Test_body_GetBodyMap__MIMEPOSTForm(t *testing.T) {
 
 		//替换gin上下文的请求
 		c.Request = r
+		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
+		gotS, err := w.GetBodyMap()
+		if tt.errStr != "" {
+			assert.Equal(t, tt.errStr, err.Error(), tt.name)
+			continue
+		}
+		assert.Equal(t, nil, err, tt.name)
+		assert.Equal(t, tt.want, gotS, tt.name)
+		gotS2, err := w.GetBodyMap()
+		assert.Equal(t, nil, err, tt.name)
+		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+	}
+}
 
+func Test_body_GetBodyMap__MIMEMultipartPOSTForm(t *testing.T) {
+	tests := []struct {
+		name        string
+		method      string
+		encoding    string
+		contentType string
+		queryRaw    string
+		value       url.Values
+		errStr      string
+		want        map[string]interface{}
+	}{
+
+		{name: "1.1 content-type为form-data,编码为UTF-8,GET,body为空,url为空", method: "POST", encoding: "UTF-8", value: nil, want: map[string]interface{}{}},
+		{name: "1.2 content-type为form-data,编码为UTF-8,POST,body为form,url参数为空", method: "POST", encoding: "UTF-8", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "1.3 content-type为form-data,编码为UTF-8,POST,body为空,url带有参数", method: "POST", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
+		{name: "1.4 content-type为form-data,编码为UTF-8,POST,body为form,url带有参数", method: "POST", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "1.5 content-type为form-data,编码为UTF-8,GET,body为空,url为空", method: "GET", encoding: "UTF-8", value: nil, want: map[string]interface{}{}},
+		{name: "1.6 content-type为form-data,编码为UTF-8,GET,body为form,url参数为空", method: "GET", encoding: "UTF-8", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "1.7 content-type为form-data,编码为UTF-8,GET,body为空,url带有参数", method: "GET", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
+		{name: "1.8 content-type为form-data,编码为UTF-8,GET,body为form,url带有参数", method: "GET", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "1.9 content-type为form-data,编码为UTF-8,DELETE,body为空,url为空", method: "DELETE", encoding: "UTF-8", value: nil, want: map[string]interface{}{}},
+		{name: "1.10 content-type为form-data,编码为UTF-8,DELETE,body为form,url参数为空", method: "DELETE", encoding: "UTF-8", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "1.11 content-type为form-data,编码为UTF-8,DELETE,body为空,url带有参数", method: "DELETE", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
+		{name: "1.12 content-type为form-data,编码为UTF-8,DELETE,body为form,url带有参数", method: "DELETE", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "1.13 content-type为form-data,编码为UTF-8,PUT,body为空,url为空", method: "PUT", encoding: "UTF-8", value: nil, want: map[string]interface{}{}},
+		{name: "1.14 content-type为form-data,编码为UTF-8,PUT,body为form,url参数为空", method: "PUT", encoding: "UTF-8", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "1.15 content-type为form-data,编码为UTF-8,PUT,body为空,url带有参数", method: "PUT", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
+		{name: "1.16 content-type为form-data,编码为UTF-8,PUT,body为form,url带有参数", method: "PUT", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "1.17 content-type为form-data,编码为UTF-8,GET,body为空,url为空", method: "PATCH", encoding: "UTF-8", value: nil, want: map[string]interface{}{}},
+		{name: "1.18 content-type为form-data,编码为UTF-8,PATCH,body为form,url参数为空", method: "PATCH", encoding: "UTF-8", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "1.19 content-type为form-data,编码为UTF-8,PATCH,body为空,url带有参数", method: "PATCH", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), want: map[string]interface{}{"key": value}},
+		{name: "1.20 content-type为form-data,编码为UTF-8,PATCH,body为form,url带有参数", method: "PATCH", encoding: "UTF-8", queryRaw: getTestQueryRaw(value, "UTF-8"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "2.1 content-type为form-data,编码为GBK,GET,body为空,url为空", method: "POST", encoding: "GBK", value: nil, want: map[string]interface{}{}},
+		{name: "2.2 content-type为form-data,编码为GBK,POST,body为form,url参数为空", method: "POST", encoding: "GBK", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "2.3 content-type为form-data,编码为GBK,POST,body为空,url带有参数", method: "POST", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
+		{name: "2.4 content-type为form-data,编码为GBK,POST,body为form,url带有参数", method: "POST", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "2.5 content-type为form-data,编码为GBK,GET,body为空,url为空", method: "GET", encoding: "GBK", value: nil, want: map[string]interface{}{}},
+		{name: "2.6 content-type为form-data,编码为GBK,GET,body为form,url参数为空", method: "GET", encoding: "GBK", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "2.7 content-type为form-data,编码为GBK,GET,body为空,url带有参数", method: "GET", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
+		{name: "2.8 content-type为form-data,编码为GBK,GET,body为form,url带有参数", method: "GET", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "2.9 content-type为form-data,编码为GBK,DELETE,body为空,url为空", method: "DELETE", encoding: "GBK", value: nil, want: map[string]interface{}{}},
+		{name: "2.10 content-type为form-data,编码为GBK,DELETE,body为form,url参数为空", method: "DELETE", encoding: "GBK", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "2.11 content-type为form-data,编码为GBK,DELETE,body为空,url带有参数", method: "DELETE", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
+		{name: "2.12 content-type为form-data,编码为GBK,DELETE,body为form,url带有参数", method: "DELETE", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "2.13 content-type为form-data,编码为GBK,PUT,body为空,url为空", method: "PUT", encoding: "GBK", value: nil, want: map[string]interface{}{}},
+		{name: "2.14 content-type为form-data,编码为GBK,PUT,body为form,url参数为空", method: "PUT", encoding: "GBK", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "2.15 content-type为form-data,编码为GBK,PUT,body为空,url带有参数", method: "PUT", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
+		{name: "2.16 content-type为form-data,编码为GBK,PUT,body为form,url带有参数", method: "PUT", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+
+		{name: "2.17 content-type为form-data,编码为GBK,PATCH,body为空,url为空", method: "PATCH", encoding: "GBK", value: nil, want: map[string]interface{}{}},
+		{name: "2.18 content-type为form-data,编码为GBK,PATCH,body为form,url参数为空", method: "PATCH", encoding: "GBK", value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": value}},
+		{name: "2.19 content-type为form-data,编码为GBK,PATCH,body为空,url带有参数", method: "PATCH", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), want: map[string]interface{}{"key": value}},
+		{name: "2.20 content-type为form-data,编码为GBK,PATCH,body为form,url带有参数", method: "PATCH", encoding: "GBK", queryRaw: getTestQueryRaw(value, "GBK"), value: url.Values{"key": []string{value}}, want: map[string]interface{}{"key": fmt.Sprintf("%s,%s", value, value)}},
+	}
+
+	for _, tt := range tests {
+		//构建上下文
+		c := &gin.Context{}
+
+		//写入文件和设置参数
+		content, contentType := getTestMIMEMultipartPOSTForm(tt.value)
+		data, _ := encoding.Encode(content, tt.encoding)
+		body := string(data)
+
+		//构建请求 方法要与注册方法一致
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+tt.queryRaw, bytes.NewReader([]byte(body)))
+		assert.Equal(t, nil, err, "构建请求")
+
+		//设置content-type
+		r.Header.Set("Content-Type", fmt.Sprintf("%s; charset=%s", contentType, tt.encoding))
+
+		//替换gin上下文的请求
+		c.Request = r
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
 		gotS, err := w.GetBodyMap()
 		if tt.errStr != "" {
