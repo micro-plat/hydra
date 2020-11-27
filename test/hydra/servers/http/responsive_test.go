@@ -290,7 +290,7 @@ func TestResponsive_StartWeb(t *testing.T) {
 			os.RemoveAll("./serverhttp_test_respince1") //删除文件夹
 		}
 
-		if tt.wantErr != "" {
+		if tt.wantErr != "" && err != nil {
 			assert.Equal(t, tt.wantErr, err.Error(), tt.name+"err")
 			continue
 		}
