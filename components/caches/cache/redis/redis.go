@@ -142,7 +142,7 @@ func (c *Client) Exists(key string) bool {
 	return err == nil && r == 1
 }
 
-//Delay 延长数据在redis中的时间 @bug 非延长时间,而是指定过期时间
+//Delay 延长数据在redis中的时间
 func (c *Client) Delay(key string, expiresAt int) error {
 	expires := time.Duration(expiresAt) * time.Second
 	if expiresAt == 0 {
