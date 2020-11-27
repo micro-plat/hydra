@@ -130,10 +130,20 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	return nil
 }
 
-//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
-func (c *response) WriteAny(v interface{}) error {
-	return c.Write(http.StatusOK, v)
+func (c *response) getContentType() string {
+	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
+		return ctp
+	}
+	headerObj, err := c.conf.GetHeaderConf()
+	if err != nil {
+		return ""
+	}
+	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
+		return ct
+	}
+	return ""
 }
+
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	//处理状态码与响应内容的默认
 	rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
@@ -155,18 +165,76 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	return rs, rc
 }
 
-func (c *response) getContentType() string {
-	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
-		return ctp
+func (c *response) swapByctp(content interface{}) (string, string) {
+
+	//根据content-type反射内容进行输出
+	vtpKind := getTypeKind(content)
+	if ctp := c.getContentType(); ctp != "" {
+		return ctp, c.getStringByCP(ctp, vtpKind, content)
 	}
-	headerObj, err := c.conf.GetHeaderConf()
-	if err != nil {
-		return ""
+
+	//根据content确定 content-type
+	if vtpKind == reflect.String {
+		text := fmt.Sprint(content)
+		switch {
+		case strings.HasPrefix(text, "<!DOCTYPE html"):
+			return context.HTMLF, text
+		case strings.HasPrefix(text, "<") && strings.HasSuffix(text, ">"):
+			_, errx := mxj.BeautifyXml([]byte(text), "", "")
+			if errx != nil {
+				return context.PLAINF, text
+			}
+			return context.XMLF, text
+		case json.Valid([]byte(text)) && (strings.HasPrefix(text, "{") ||
+			strings.HasPrefix(text, "[")):
+			return context.JSONF, text
+		default:
+			return context.PLAINF, text
+		}
+
+	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map {
+		return context.JSONF, c.getStringByCP(context.JSONF, vtpKind, content)
 	}
-	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
-		return ct
+	return context.PLAINF, c.getStringByCP(context.JSONF, vtpKind, content)
+
+}
+
+func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interface{}) string {
+	if tpkind != reflect.Map && tpkind != reflect.Struct {
+		return fmt.Sprint(content)
 	}
-	return ""
+
+	switch {
+	case strings.Contains(ctp, "xml"):
+		if s, ok := content.(map[string]interface{}); ok {
+			var m mxj.Map = s
+			if str, err := m.Xml(); err != nil {
+				panic(err)
+			} else {
+				return string(str)
+			}
+		}
+		if buff, err := xml.Marshal(content); err != nil {
+			panic(err)
+		} else {
+			return string(buff)
+		}
+	case strings.Contains(ctp, "yaml"):
+		if buff, err := yaml.Marshal(content); err != nil {
+			panic(err)
+		} else {
+			return string(buff)
+		}
+
+	case strings.Contains(ctp, "json"):
+		if buff, err := json.Marshal(content); err != nil {
+			panic(err)
+		} else {
+			return string(buff)
+		}
+	default:
+		return fmt.Sprint(content)
+	}
 }
 
 //writeNow 将状态码、内容写入到响应流中
@@ -195,6 +263,11 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
+}
+
+//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
+func (c *response) WriteAny(v interface{}) error {
+	return c.Write(http.StatusOK, v)
 }
 
 //Redirect 转跳g刚才gc
@@ -239,79 +312,7 @@ func (c *response) Flush() {
 	if err := c.asyncWrite(); err != nil {
 		panic(err)
 	}
-	//@fix 放在异步之前中间件recovery不能重写
 	c.noneedWrite = true
-}
-
-func (c *response) swapByctp(content interface{}) (string, string) {
-
-	//根据content-type反射内容进行输出
-	vtpKind := getTypeKind(content)
-	if ctp := c.getContentType(); ctp != "" {
-		return ctp, c.getStringByCP(ctp, vtpKind, content)
-	}
-
-	//根据content确定 content-type
-	if vtpKind == reflect.String {
-		text := fmt.Sprint(content)
-		switch {
-		case strings.HasPrefix(text, "<!DOCTYPE html"):
-			return context.HTMLF, text
-		case strings.HasPrefix(text, "<") && strings.HasSuffix(text, ">"):
-			_, errx := mxj.BeautifyXml([]byte(text), "", "")
-			if errx != nil {
-				return context.XMLF, text
-			}
-			return context.PLAINF, text
-		case json.Valid([]byte(text)) && (strings.HasPrefix(text, "{") ||
-			strings.HasPrefix(text, "[")):
-			return context.JSONF, text
-		default:
-			return context.PLAINF, text
-		}
-
-	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map {
-		return context.JSONF, c.getStringByCP(context.JSONF, vtpKind, content)
-	}
-	return context.PLAINF, c.getStringByCP(context.JSONF, vtpKind, content)
-
-}
-func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interface{}) string {
-	if tpkind != reflect.Map && tpkind != reflect.Struct {
-		return fmt.Sprint(content)
-	}
-
-	switch {
-	case strings.Contains(ctp, "xml"):
-		if s, ok := content.(map[string]interface{}); ok {
-			var m mxj.Map = s
-			if str, err := m.Xml(); err != nil {
-				panic(err)
-			} else {
-				return string(str)
-			}
-		}
-		if buff, err := xml.Marshal(content); err != nil {
-			panic(err)
-		} else {
-			return string(buff)
-		}
-	case strings.Contains(ctp, "yaml"):
-		if buff, err := yaml.Marshal(content); err != nil {
-			panic(err)
-		} else {
-			return string(buff)
-		}
-
-	case strings.Contains(ctp, "json"):
-		if buff, err := json.Marshal(content); err != nil {
-			panic(err)
-		} else {
-			return string(buff)
-		}
-	default:
-		return fmt.Sprint(content)
-	}
 }
 
 func getTypeKind(c interface{}) reflect.Kind {

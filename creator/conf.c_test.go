@@ -269,8 +269,8 @@ func Test_conf_GetWS(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress, cuurConfDefault.routerLoader).Static(static.WithArchive(global.AppName))}},
-		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1122", cuurConfWs.routerLoader).Static(static.WithArchive(global.AppName))}},
+		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress, cuurConfDefault.routerLoader)}},
+		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1122", cuurConfWs.routerLoader)}},
 	}
 
 	for _, tt := range tests {

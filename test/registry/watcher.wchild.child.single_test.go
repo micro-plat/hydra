@@ -26,7 +26,6 @@ func TestChildWatcher_Close(t *testing.T) {
 
 	w.Close()
 	w.Close()
-
 	for _, v := range w.Watchers {
 		assert.Equal(t, true, v.Done, "childWatcher关闭测试")
 		_, ok := <-v.CloseChan
@@ -55,11 +54,14 @@ func TestChildWatcher_Start(t *testing.T) {
 		// {name: "获取错误路径的节点变动", path: "/a/b/c", r: c.GetRegistry(), wantErr: false},  //@watch方法 陷入死循环
 		// {name: "监控过程中,注册中心节点存在,获取子节点发生错误", path: "/platname/apiserver/api/test/hosts1/",
 		// r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantErr: false},   //watch方法陷入死循环
-		{name: "深度为1,监控过程中,注册中心子节点未发生改变", path: registry.Join(c.GetServerPubPath(), addr1),
-			deep: 1, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "深度为2,监控过程中,注册中心子节点未发生改变", path: c.GetServerPubPath(), deep: 2, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "深度为3,监控过程中,注册中心子节点未发生改变", path: "/hydra/apiserver/api/test/", deep: 3, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "深度为4,监控过程中,注册中心子节点未发生改变", path: "/hydra/apiserver/api/", deep: 4, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "1. 深度为1,监控过程中,子节点未改变", path: registry.Join(c.GetServerPubPath(), addr1), deep: 1, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "2. 深度为1,监控过程中,子节点改变", path: registry.Join(c.GetServerPubPath(), addr1), deep: 1, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "3. 深度为2,监控过程中,子节点未改变", path: c.GetServerPubPath(), deep: 2, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "4. 深度为2,监控过程中,子节点改变", path: c.GetServerPubPath(), deep: 2, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "5. 深度为3,监控过程中,子节点未改变", path: "/hydra/apiserver/api/test/", deep: 3, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "6. 深度为3,监控过程中,子节点改变", path: "/hydra/apiserver/api/test/", deep: 3, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "7. 深度为4,监控过程中,子节点未改变", path: "/hydra/apiserver/api/", deep: 4, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
+		{name: "8. 深度为4,监控过程中,子节点改变", path: "/hydra/apiserver/api/", deep: 4, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
 	}
 
 	//发布节点到注册中心
@@ -127,12 +129,9 @@ func TestChildWatcher_Start_2(t *testing.T) {
 		r       *mocks.TestRegistry
 		wantErr bool
 	}{
-		{name: "深度为1,监控过程中,注册中心添加了当前节点的子节点", path: "/platname/apiserver/api/test/hosts/server6",
-			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 1, wantErr: false},
-		{name: "深度为2,监控过程中,注册中心添加了当前节点的子节点", path: "/platname/apiserver/api/test/hosts",
-			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 2, wantErr: false},
-		{name: "深度为3,监控过程中,注册中心添加了当前节点的子节点", path: "/platname/apiserver/api/test",
-			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 3, wantErr: false},
+		{name: "1. 深度为1,监控过程中,添加子节点", path: "/platname/apiserver/api/test/hosts/server6", r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 1, wantErr: false},
+		{name: "2. 深度为2,监控过程中,添加子节点", path: "/platname/apiserver/api/test/hosts", r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 2, wantErr: false},
+		{name: "3. 深度为3,监控过程中,添加子节点", path: "/platname/apiserver/api/test", r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 3, wantErr: false},
 	}
 
 	//发布节点到注册中心
@@ -203,7 +202,8 @@ func TestChildWatcher_deleted(t *testing.T) {
 		r       *mocks.TestRegistry
 		wantErr bool
 	}{
-		{name: "深度为2,监控过程中,注册中心删除了当前节点的子节点", path: "/platname/apiserver/api/test/hosts_delete",
+		//因为现在框架的注册结构就是2级为准   所以暂时只保证2级深度的正确性
+		{name: "1. 深度为2,监控过程中,注册中心删除了当前节点的子节点", path: "/platname/apiserver/api/test/hosts_delete",
 			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), deep: 2, wantErr: false},
 	}
 

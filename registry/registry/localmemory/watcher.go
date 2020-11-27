@@ -24,13 +24,11 @@ func (l *localMemory) WatchValue(path string) (data chan registry.ValueWatcher, 
 func (l *localMemory) notifyValueChange(path string, value *value) {
 	l.vlock.Lock()
 	defer l.vlock.Unlock()
-	for k, v := range l.valueWatchs {
-		if k == path {
-			select {
-			case v <- &valueEntity{path: path, version: value.version, Value: []byte(value.data)}:
-			default:
-			}
-			break
+
+	if v, ok := l.valueWatchs[path]; ok {
+		select {
+		case v <- &valueEntity{path: path, version: value.version, Value: []byte(value.data)}:
+		default:
 		}
 	}
 	delete(l.valueWatchs, path)
@@ -55,14 +53,11 @@ func (l *localMemory) notifyParentChange(cPath string, version int32) {
 	if err != nil { //未找到父节点，无需通知
 		return
 	}
-	//@fix 修复节点变动未进行通知的bug
-	for k, v := range l.childrenWatchs {
-		if k == path {
-			select {
-			case v <- &childrenEntity{path: path, children: []string{cPath}, version: version}:
-			default:
-			}
-			break
+
+	if v, ok := l.childrenWatchs[path]; ok {
+		select {
+		case v <- &childrenEntity{path: path, children: []string{cPath}, version: version}:
+		default:
 		}
 	}
 	delete(l.childrenWatchs, path)
@@ -70,7 +65,7 @@ func (l *localMemory) notifyParentChange(cPath string, version int32) {
 func (l *localMemory) getParentForNotify(path string) (string, int32, error) {
 	npath := r.Format(path)
 	for k := range l.childrenWatchs {
-		if strings.HasPrefix(npath, k) && len(npath) > len(k) {
+		if strings.HasPrefix(npath, r.Format(k)+"/") && len(npath) > len(k) {
 			list := r.Split(npath)
 			if r.Join(k, list[len(list)-1]) == npath {
 				if v, ok := l.nodes[k]; ok {

@@ -24,20 +24,22 @@ func TestWhiteList(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "白名单-未配置", isSet: false, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{}},
-		{name: "白名单-配置未启动", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable()}},
-		{name: "白名单-配置启动-不存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{}))}},
-		{name: "白名单-配置启动-存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "", wantSpecial: "",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}))}},
-		{name: "白名单-配置启动-不匹配路径,不匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.11"))}},
-		{name: "白名单-配置启动-匹配路径,不匹配ip", isSet: true, wantStatus: 403, wantContent: "", wantSpecial: "white",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.11"))}},
-		{name: "白名单-配置启动-不匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.1"))}},
-		{name: "白名单-配置启动-匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white",
-			whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.1"))}},
+		{name: "1.1 白名单-配置不存在", isSet: false, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{}},
+
+		{name: "2.1 白名单-配置未启动", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable()}},
+		{name: "2.2 白名单-配置未启动-不存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{}))}},
+		{name: "2.3 白名单-配置未启动-存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}))}},
+		{name: "2.4 白名单-配置未启动-不匹配路径,不匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.11"))}},
+		{name: "2.5 白名单-配置未启动-匹配路径,不匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.11"))}},
+		{name: "2.6 白名单-配置未启动-不匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.1"))}},
+		{name: "2.7 白名单-配置未启动-匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithDisable(), whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.1"))}},
+
+		{name: "3.1 白名单-配置启动-不存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{}))}},
+		{name: "3.2 白名单-配置启动-存在路径,不存在ip", isSet: true, wantStatus: 510, wantContent: "white list配置数据有误", wantSpecial: "", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}))}},
+		{name: "3.3 白名单-配置启动-不匹配路径,不匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.11"))}},
+		{name: "3.4 白名单-配置启动-匹配路径,不匹配ip", isSet: true, wantStatus: 403, wantContent: "", wantSpecial: "white", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.11"))}},
+		{name: "3.5 白名单-配置启动-不匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test1"}, "192.168.0.1"))}},
+		{name: "3.6 白名单-配置启动-匹配路径,匹配ip", isSet: true, wantStatus: 200, wantContent: "", wantSpecial: "white", whiteOpts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/whitelist/test"}, "192.168.0.1"))}},
 	}
 	for _, tt := range tests {
 		mockConf := mocks.NewConfBy("middleware_white_test", "white")

@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	ghttp "net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -241,4 +244,21 @@ func GbkToUtf8(s string) string {
 	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GBK.NewDecoder())
 	d, _ := ioutil.ReadAll(reader)
 	return string(d)
+}
+
+func getTestMIMEMultipartPOSTForm() string {
+	file, _ := os.Open("upload.test.txt")
+	defer file.Close()
+	body := &bytes.Buffer{}
+	// 文件写入 body
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("upload", filepath.Base("upload.test.txt"))
+	io.Copy(part, file)
+	writer.Close()
+	return body.String()
+}
+
+
+func getUploadBody() string {
+	return "Content-Disposition: form-data; name=\"upload\"; filename=\"upload.test.txt\"\r\nContent-Type: application/octet-stream\r\n\r\nADASDASDASFHNOJM~!@#$%^&*"
 }

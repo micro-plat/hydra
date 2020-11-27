@@ -20,6 +20,7 @@ var backdirName string
 
 //Pub 将配置发布到配置中心
 func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+	backdirName = ""
 	if err := c.Load(); err != nil {
 		return err
 	}
@@ -132,6 +133,9 @@ func getJSON(v interface{}) (value string, err error) {
 }
 
 func confBackup(regst registry.IRegistry, path string) {
+	if backdirName == "" {
+		return
+	}
 	databytes, _, _ := regst.GetValue(path)
 	if len(databytes) <= 0 {
 		return

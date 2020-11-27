@@ -27,41 +27,25 @@ func TestLimit(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "限流-未启用-未配置", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
-		{name: "限流-未启用-Disable=true,但是rule=0", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable()}},
-		{name: "限流-启用-不在限流配置内", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(),
-				limiter.WithRuleList(&limiter.Rule{
-					Path:     "/limiter",
-					MaxAllow: 1,
-					MaxWait:  0,
-					Fallback: false,
-					Resp:     &limiter.Resp{Status: 510, Content: "fallback"},
-				}),
-			},
-		},
-		{name: "限流-启用-在限流配置内-不延迟", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(),
-				limiter.WithRuleList(&limiter.Rule{
-					Path:     "/limiter",
-					MaxAllow: 1,
-					MaxWait:  0,
-					Fallback: false,
-					Resp:     &limiter.Resp{Status: 510, Content: "fallback"},
-				}),
-			},
-		},
-		{name: "限流-启用-在限流配置内-延迟-降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit",
-			opts: []limiter.Option{limiter.WithEnable(),
-				limiter.WithRuleList(&limiter.Rule{
-					Path:     "/limiter",
-					MaxAllow: 0,
-					MaxWait:  1,
-					Fallback: false,
-					Resp:     &limiter.Resp{Status: 410, Content: "fallback"},
-				}),
-			},
+		{name: "1.1 限流-配置不存在", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
+		{name: "1.2 限流-配置存在-未启用-无数据", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
+		{name: "1.3 限流-配置存在-未启用-不在限流配置内", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
+		{name: "1.4 限流-配置存在-未启用-在限流配置内", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
+
+		{name: "2.1 限流-配置存在-启用-无数据", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable()}},
+		{name: "2.2 限流-配置存在-启用-不在限流配置内-不延迟", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "2.3 限流-配置存在-启用-不在限流配置内-延迟-不降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "2.4 限流-配置存在-启用-不在限流配置内-延迟-降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+
+		{name: "3.1 限流-配置存在-启用-在限流配置内-不延迟", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "3.2 限流-配置存在-启用-在限流配置内-延迟-降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})}},
+		{name: "3.3 限流-配置存在-启用-在限流配置内-延迟-不降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit",
+			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})},
 		},
 	}
 	for _, tt := range tests {
@@ -97,6 +81,7 @@ func TestLimit(t *testing.T) {
 	}
 }
 
+//并发测试限制流量
 func TestLimit1(t *testing.T) {
 	opts := []limiter.Option{limiter.WithEnable(),
 		limiter.WithRuleList(&limiter.Rule{
@@ -118,8 +103,8 @@ func TestLimit1(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "限流-启用-在限流配置内-延迟-不降级", count: 1, requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "limit"},
-		// {name: "限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
+		{name: "1. 限流-启用-在限流配置内-延迟-不降级", count: 1, requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "limit"},
+		// {name: "2. 限流-启用-在限流配置内-延迟-降级", count: 10, requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit"},
 	}
 
 	global.Def.ServerTypes = []string{http.API}
@@ -145,8 +130,9 @@ func TestLimit1(t *testing.T) {
 
 		var wg sync.WaitGroup
 		for j := 0; j < tt.count; j++ {
+
 			wg.Add(1)
-			go func() {
+			go func(i int) {
 				defer wg.Done()
 				ctx := &mocks.MiddleContext{
 					MockRequest: &mocks.MockRequest{
@@ -159,13 +145,17 @@ func TestLimit1(t *testing.T) {
 				}
 				//调用中间件
 				handler(ctx)
+				// if i == 0 || i == tt.count-1 {
+				// 	return
+				// }
+
 				//断言结果
 				gotStatus, gotContent, _ := ctx.Response().GetFinalResponse()
 				gotSpecial := ctx.Response().GetSpecials()
 				assert.Equalf(t, tt.wantStatus, gotStatus, tt.name, tt.wantStatus, gotStatus)
 				assert.Equalf(t, tt.wantContent, gotContent, tt.name, tt.wantContent, gotContent)
 				assert.Equalf(t, tt.wantSpecial, gotSpecial, tt.name, tt.wantSpecial, gotSpecial)
-			}()
+			}(j)
 		}
 		wg.Wait()
 	}

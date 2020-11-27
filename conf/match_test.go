@@ -58,7 +58,6 @@ func Test_sortString_Swap(t *testing.T) {
 	}
 }
 
-//@todo 完善用例  抽离.和/来构造用例
 func Test_sortString_Less(t *testing.T) {
 	type args struct {
 		i int
@@ -136,7 +135,6 @@ func TestPathMatch_Match(t *testing.T) {
 		{name: "t25", fields: fields{all: []string{"/t1/*/*", "/t1/*"}}, args: args{service: "/t1/t3/dd", seq: "/"}, want: true, want1: "/t1/*/*"},
 		{name: "t26", fields: fields{all: []string{"/*"}}, args: args{service: "/t1", seq: "/"}, want: true, want1: "/*"},
 		{name: "t27", fields: fields{all: []string{"*"}}, args: args{service: "/t1", seq: "/"}, want: false, want1: ""},
-		//@todo 用例完善
 		//{name: "t28", fields: fields{all: []string{"**"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},
 		{name: "t29", fields: fields{all: []string{"/t1/t2/"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},
 		{name: "t30", fields: fields{all: []string{"/t1/*/"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},

@@ -26,11 +26,11 @@ func (s *serverServices) Register(name string, h interface{}, ext ...interface{}
 		panic(err)
 	}
 }
-func (s *serverServices) handleExt(g *Unit, ext ...interface{}) error {
+func (s *serverServices) handleExt(u *Unit, ext ...interface{}) error {
 	if s.extHandle == nil {
 		return nil
 	}
-	return s.extHandle(g, ext...)
+	return s.extHandle(u, ext...)
 }
 
 //addGroup 添加服务注册

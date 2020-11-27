@@ -18,12 +18,12 @@ func Test_regist_get(t *testing.T) {
 		tp   string
 		want *serverServices
 	}{
-		{name: "获取初始化的api对应的services", tp: global.API, want: Def.servers[global.API]},
-		{name: "获取初始化的web对应的services", tp: global.Web, want: Def.servers[global.Web]},
-		{name: "获取初始化的rpc对应的services", tp: global.RPC, want: Def.servers[global.RPC]},
-		{name: "获取初始化的ws对应的services", tp: global.WS, want: Def.servers[global.WS]},
-		{name: "获取初始化的cron对应的services", tp: global.CRON, want: Def.servers[global.CRON]},
-		{name: "获取初始化的mqc对应的services", tp: global.MQC, want: Def.servers[global.MQC]},
+		{name: "1.获取api对应的serverServices", tp: global.API, want: Def.servers[global.API]},
+		{name: "2.获取web对应的serverServices", tp: global.Web, want: Def.servers[global.Web]},
+		{name: "3.获取rpc对应的serverServices", tp: global.RPC, want: Def.servers[global.RPC]},
+		{name: "4.获取ws对应的serverServices", tp: global.WS, want: Def.servers[global.WS]},
+		{name: "5.获取cron对应的serverServices", tp: global.CRON, want: Def.servers[global.CRON]},
+		{name: "6.获取mqc对应的serverServices", tp: global.MQC, want: Def.servers[global.MQC]},
 	}
 	s := Def
 	for _, tt := range tests {
@@ -36,24 +36,24 @@ func Test_regist_get(t *testing.T) {
 }
 
 func Test_regist_RegisterServer(t *testing.T) {
+	f := func(g *Unit, ext ...interface{}) error {
+		return nil
+	}
 	tests := []struct {
 		name string
 		tp   string
 		f    []func(g *Unit, ext ...interface{}) error
 	}{
-		{name: "注册未初始化的file服务器", tp: "file", f: nil},
-		{name: "注册未初始化的socket服务器", tp: "socket", f: []func(g *Unit, ext ...interface{}) error{
-			func(g *Unit, ext ...interface{}) error {
-				return nil
-			}}},
+		{name: "1.注册file服务类型", tp: "file", f: nil},
+		{name: "2.注册socket服务类型", tp: "socket", f: []func(g *Unit, ext ...interface{}) error{f}},
 	}
 	s := Def
 	for _, tt := range tests {
 		s.RegisterServer(tt.tp, tt.f...)
 	}
 
-	//注册已经存在的服务器
-	assert.Panic(t, errors.New("服务api已存在，不能重复注册"), func() { s.RegisterServer(global.API) }, "注册已经存在的服务器")
+	//注册已经存在的服务类型
+	assert.Panic(t, errors.New("服务api已存在，不能重复注册"), func() { s.RegisterServer(global.API) }, "注册已经存在的服务类型")
 }
 
 func Test_regist_OnStarting(t *testing.T) {
@@ -65,8 +65,12 @@ func Test_regist_OnStarting(t *testing.T) {
 		h    func(app.IAPPConf) error
 		tps  []string
 	}{
-		{name: "tps不为空", h: h, tps: []string{global.API}},
-		{name: "tps为空", h: h, tps: []string{}},
+		{name: "1.指定api,添加启动预处理函数", tps: []string{global.API}, h: h},
+		{name: "2.指定web,添加启动预处理函数", tps: []string{global.Web}, h: h},
+		{name: "3.指定ws,添加启动预处理函数", tps: []string{global.WS}, h: h},
+		{name: "4.指定cron,添加启动预处理函数", tps: []string{global.CRON}, h: h},
+		{name: "5.指定mqc,添加启动预处理函数", tps: []string{global.MQC}, h: h},
+		{name: "6.未指定服务类型,添加启动预处理函数", tps: []string{}, h: h},
 	}
 	s := Def
 	for _, tt := range tests {
@@ -94,8 +98,12 @@ func Test_regist_OnClosing(t *testing.T) {
 		h    func(app.IAPPConf) error
 		tps  []string
 	}{
-		{name: "tps不为空", h: h, tps: []string{global.API}},
-		{name: "tps为空", h: h, tps: []string{}},
+		{name: "1.指定api,添加关闭服务", tps: []string{global.API}, h: h},
+		{name: "2.指定web,添加关闭服务", tps: []string{global.Web}, h: h},
+		{name: "3.指定ws,添加关闭服务", tps: []string{global.WS}, h: h},
+		{name: "4.指定cron,添加关闭服务", tps: []string{global.CRON}, h: h},
+		{name: "5.指定mqc,添加关闭服务", tps: []string{global.MQC}, h: h},
+		{name: "6.未指定服务类型,添加关闭服务", tps: []string{}, h: h},
 	}
 	s := Def
 	for _, tt := range tests {
@@ -124,10 +132,18 @@ func Test_regist_OnHandleExecuting(t *testing.T) {
 		h    context.Handler
 		tps  []string
 	}{
-		{name: "添加空接口", h: h, tps: []string{global.API}},
-		{name: "添加api单个接口", tps: []string{global.API}, h: h},
-		{name: "添加api单个接口,servertypes为空", tps: []string{}, h: h},
-		{name: "添加cron单个接口", tps: []string{global.CRON}, h: h},
+		{name: "1.指定api,添加空的业务预处理钩子", h: nil, tps: []string{global.API}},
+		{name: "2.指定api,添加业务预处理钩子", tps: []string{global.API}, h: h},
+		{name: "3.指定web,添加空的业务预处理钩子", h: nil, tps: []string{global.Web}},
+		{name: "4.指定web,添加业务预处理钩子", tps: []string{global.Web}, h: h},
+		{name: "5.指定ws,添加空的业务预处理钩子", h: nil, tps: []string{global.WS}},
+		{name: "6.指定ws,添加业务预处理钩子", tps: []string{global.WS}, h: h},
+		{name: "7.指定cron,添加空的业务预处理钩子", h: nil, tps: []string{global.CRON}},
+		{name: "8.指定cron,添加业务预处理钩子", tps: []string{global.CRON}, h: h},
+		{name: "9.指定mqc,添加空的业务预处理钩子", h: nil, tps: []string{global.MQC}},
+		{name: "10.指定mqc,添加业务预处理钩子", tps: []string{global.MQC}, h: h},
+		{name: "11.未指定服务类型,添加空的业务预处理钩子", h: nil, tps: []string{}},
+		{name: "12.未指定服务类型,添加业务预处理钩子", tps: []string{}, h: h},
 	}
 	s := Def
 	for _, tt := range tests {
@@ -153,10 +169,18 @@ func Test_regist_OnHandleExecuted(t *testing.T) {
 		h    context.Handler
 		tps  []string
 	}{
-		{name: "添加空接口", h: h, tps: []string{global.API}},
-		{name: "添加api单个接口", tps: []string{global.API}, h: h},
-		{name: "添加api单个接口,servertypes为空", tps: []string{}, h: h},
-		{name: "添加cron单个接口", tps: []string{global.CRON}, h: h},
+		{name: "1.指定api,添加空的业务后处理钩子", h: nil, tps: []string{global.API}},
+		{name: "2.指定api,添加业务后处理钩子", tps: []string{global.API}, h: h},
+		{name: "3.指定web,添加空的业务后处理钩子", h: nil, tps: []string{global.Web}},
+		{name: "4.指定web,添加业务后处理钩子", tps: []string{global.Web}, h: h},
+		{name: "5.指定ws,添加空的业务后处理钩子", h: nil, tps: []string{global.WS}},
+		{name: "6.指定ws,添加业务后处理钩子", tps: []string{global.WS}, h: h},
+		{name: "7.指定cron,添加空的业务后处理钩子", h: nil, tps: []string{global.CRON}},
+		{name: "8.指定cron,添加业务后处理钩子", tps: []string{global.CRON}, h: h},
+		{name: "9.指定mqc,添加空的业务后处理钩子", h: nil, tps: []string{global.MQC}},
+		{name: "10.指定mqc,添加业务后处理钩子", tps: []string{global.MQC}, h: h},
+		{name: "11.未指定服务类型,添加空的业务后处理钩子", h: nil, tps: []string{}},
+		{name: "12.未指定服务类型,添加业务后处理钩子", tps: []string{}, h: h},
 	}
 	s := Def
 	for _, tt := range tests {
@@ -180,12 +204,12 @@ func Test_regist_Custome(t *testing.T) {
 		h    interface{}
 		ext  []interface{}
 	}{
-		{name: "注册api类型", tp: global.API, path: "/path", h: &testHandler{}},
-		{name: "注册cron类型", tp: global.CRON, path: "/path1", h: &testHandler{}, ext: []interface{}{"taks1", "task2"}},
-		{name: "注册web类型", tp: global.Web, path: "/path2", h: &testHandler{}},
-		{name: "注册rpc类型", tp: global.RPC, path: "/path3", h: &testHandler{}},
-		{name: "注册ws类型", tp: global.WS, path: "/path4", h: &testHandler{}},
-		{name: "注册mqc类型", tp: global.MQC, path: "/path5", h: &testHandler{}, ext: []interface{}{"queue1", "queue2"}},
+		{name: "1.注册api类型服务", tp: global.API, path: "/path", h: &testHandler{}},
+		{name: "2.注册cron类型服务", tp: global.CRON, path: "/path1", h: &testHandler{}, ext: []interface{}{"taks1", "task2"}},
+		{name: "3.注册web类型服务", tp: global.Web, path: "/path2", h: &testHandler{}},
+		{name: "4.注册rpc类型服务", tp: global.RPC, path: "/path3", h: &testHandler{}},
+		{name: "5.注册ws类型服务", tp: global.WS, path: "/path4", h: &testHandler{}},
+		{name: "6.注册mqc类型服务", tp: global.MQC, path: "/path5", h: &testHandler{}, ext: []interface{}{"queue1", "queue2"}},
 	}
 	s := Def
 	global.MQConf.PlatNameAsPrefix(false)
@@ -262,17 +286,18 @@ func Test_regist_Close(t *testing.T) {
 	tests := []struct {
 		name    string
 		path    string
+		tp      string
 		h       interface{}
 		wantErr bool
 		errStr  string
 	}{
-		{name: "注册的Handler的Close()不存在", path: "/api1", h: &hander1{}, wantErr: false},
-		{name: "注册的Handler的Close()未报错", path: "/api2", h: &testHandler2{}, wantErr: false},
-		{name: "注册的Handler的Close()报错", path: "/api4", h: &testHandler4{}, wantErr: true, errStr: "error"},
+		{name: "1.1.api注册的Handler的Close()不存在", tp: global.API, path: "/api1", h: &hander1{}, wantErr: false},
+		{name: "1.2.api注册的Handler的Close()未报错", tp: global.API, path: "/api2", h: &testHandler2{}, wantErr: false},
+		{name: "1.3.api注册的Handler的Close()报错", tp: global.API, path: "/api4", h: &testHandler4{}, wantErr: true, errStr: "error"},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.Custom(global.API, tt.path, tt.h)
+		s.Custom(tt.tp, tt.path, tt.h)
 		err := s.Close()
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
@@ -285,15 +310,22 @@ func Test_regist_API(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []router.Option
 	}{
-		{name: "注册api服务", path: "/path6", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
-		{name: "同一个handler,注册api服务", path: "/path7", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "1.api服务注册对象为结构体指针", path: "/api/reg/path1", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "2.api服务注册对象为结构体", path: "/api/reg/path2", h: []interface{}{testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "3.api服务注册对象为构建函数", path: "/api/reg/path3", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "4.api服务注册对象为函数", path: "/api/reg/path4", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "5.api服务同一个注册对象,注册两个不同地址", path: "/api/reg/path5", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "6.api服务注册对象为两个struct", path: "/api/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "7.api服务注册对象为一个struct,一个构建函数", path: "/api/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.API(tt.path, tt.h, tt.ext...)
+		for _, v := range tt.h {
+			s.API(tt.path, v, tt.ext...)
+		}
 		checkTestCustomeResult(t, s, global.API, tt.name, tt.ext)
 	}
 }
@@ -302,15 +334,22 @@ func Test_regist_Web(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []router.Option
 	}{
-		{name: "注册web服务", path: "/path8", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
-		{name: "同一个handler,注册web服务", path: "/path9", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "1.web服务注册对象为结构体指针", path: "/web/reg/path1", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "2.web服务注册对象为结构体", path: "/web/reg/path2", h: []interface{}{testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "3.web服务注册对象为构建函数", path: "/web/reg/path3", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "4.web服务注册对象为函数", path: "/web/reg/path4", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "5.web服务同一个注册对象,注册两个不同地址", path: "/web/reg/path5", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "6.web服务注册对象为两个struct", path: "/web/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "7.web服务注册对象为一个struct,一个构建函数", path: "/web/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.Web(tt.path, tt.h, tt.ext...)
+		for _, v := range tt.h {
+			s.Web(tt.path, v, tt.ext...)
+		}
 		checkTestCustomeResult(t, s, global.Web, tt.name, tt.ext)
 	}
 }
@@ -319,15 +358,22 @@ func Test_regist_RPC(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []router.Option
 	}{
-		{name: "注册rpc服务", path: "/path10", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
-		{name: "同一个handler,注册rpc服务", path: "/path11", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "1.rpc服务注册对象为结构体指针", path: "/rpc/reg/path1", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "2.rpc服务注册对象为结构体", path: "/rpc/reg/path2", h: []interface{}{testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "3.rpc服务注册对象为构建函数", path: "/rpc/reg/path3", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "4.rpc服务注册对象为函数", path: "/rpc/reg/path4", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "5.rpc服务同一个注册对象,注册两个不同地址", path: "/rpc/reg/path5", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "6.rpc服务注册对象为两个struct", path: "/rpc/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "7.rpc服务注册对象为一个struct,一个构建函数", path: "/rpc/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.RPC(tt.path, tt.h, tt.ext...)
+		for _, v := range tt.h {
+			s.RPC(tt.path, v, tt.ext...)
+		}
 		checkTestCustomeResult(t, s, global.RPC, tt.name, tt.ext)
 	}
 }
@@ -336,15 +382,22 @@ func Test_regist_WS(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []router.Option
 	}{
-		{name: "注册ws服务", path: "/path12", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
-		{name: "同一个handler,注册ws服务", path: "/path13", h: &testHandler{}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "1.ws服务注册对象为结构体指针", path: "/ws/reg/path1", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "2.ws服务注册对象为结构体", path: "/ws/reg/path2", h: []interface{}{testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "3.ws服务注册对象为构建函数", path: "/ws/reg/path3", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "4.ws服务注册对象为函数", path: "/ws/reg/path4", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "5.ws服务同一个注册对象,注册两个不同地址", path: "/ws/reg/path5", h: []interface{}{&testHandler{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "6.ws服务注册对象为两个struct", path: "/ws/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
+		{name: "7.ws服务注册对象为一个struct,一个构建函数", path: "/ws/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []router.Option{router.WithPages("pages"), router.WithEncoding("utf-8")}},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.WS(tt.path, tt.h, tt.ext...)
+		for _, v := range tt.h {
+			s.WS(tt.path, v, tt.ext...)
+		}
 		checkTestCustomeResult(t, s, global.WS, tt.name, tt.ext)
 	}
 }
@@ -353,16 +406,23 @@ func Test_regist_MQC(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []string
 	}{
-		{name: "注册mqc服务", path: "/path14", h: &testHandler{}, ext: []string{"queue1", "queue2"}},
-		{name: "同一个handler,注册mqc服务", path: "/path15", h: &testHandler{}, ext: []string{"queue1", "queue2"}},
+		{name: "1.mqc服务注册对象为结构体指针", path: "/mqc/reg/path1", h: []interface{}{&testHandler{}}, ext: []string{"queue1", "queue2"}},
+		{name: "2.mqc服务注册对象为结构体", path: "/mqc/reg/path2", h: []interface{}{testHandler8{}}, ext: []string{"queue1", "queue2"}},
+		{name: "3.mqc服务注册对象为构建函数", path: "/mqc/reg/path3", h: []interface{}{&testHandler{}}, ext: []string{"queue1", "queue2"}},
+		{name: "4.mqc服务注册对象为函数", path: "/mqc/reg/path4", h: []interface{}{&testHandler{}}, ext: []string{"queue1", "queue2"}},
+		{name: "5.mqc服务同一个注册对象,注册两个不同地址", path: "/mqc/reg/path5", h: []interface{}{&testHandler{}}, ext: []string{"queue1", "queue2"}},
+		{name: "6.mqc服务注册对象为两个struct", path: "/mqc/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []string{"queue1", "queue2"}},
+		{name: "7.mqc服务注册对象为一个struct,一个构建函数", path: "/mqc/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []string{"queue1", "queue2"}},
 	}
 	s := Def
 	global.MQConf.PlatNameAsPrefix(false)
 	for _, tt := range tests {
-		s.MQC(tt.path, tt.h, tt.ext...)
+		for _, v := range tt.h {
+			s.MQC(tt.path, v, tt.ext...)
+		}
 		checkTestCustomeResult(t, s, global.MQC, tt.name, tt.ext[0], tt.ext[1])
 	}
 }
@@ -371,35 +431,22 @@ func Test_regist_CRON(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
-		h    interface{}
+		h    []interface{}
 		ext  []string
 	}{
-		{name: "注册cron服务", path: "/path16", h: &testHandler{}, ext: []string{"task1", "task2"}},
-		{name: "同一个handler,注册cron服务", path: "/path17", h: &testHandler{}, ext: []string{"task1", "task2"}},
+		{name: "1.cron服务注册对象为结构体指针", path: "/cron/reg/path1", h: []interface{}{&testHandler{}}, ext: []string{"task1", "task2"}},
+		{name: "2.cron服务注册对象为结构体", path: "/cron/reg/path2", h: []interface{}{testHandler8{}}, ext: []string{"task1", "task2"}},
+		{name: "3.cron服务注册对象为构建函数", path: "/cron/reg/path3", h: []interface{}{&testHandler{}}, ext: []string{"task1", "task2"}},
+		{name: "4.cron服务注册对象为函数", path: "/cron/reg/path4", h: []interface{}{&testHandler{}}, ext: []string{"task1", "task2"}},
+		{name: "5.cron服务同一个注册对象,注册两个不同地址", path: "/cron/reg/path5", h: []interface{}{&testHandler{}}, ext: []string{"task1", "task2"}},
+		{name: "6.cron服务注册对象为两个struct", path: "/cron/reg/path6", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []string{"task1", "task2"}},
+		{name: "7.cron服务注册对象为一个struct,一个构建函数", path: "/cron/reg/path7", h: []interface{}{testHandler7{}, testHandler8{}}, ext: []string{"task1", "task2"}},
 	}
 	s := Def
-	for _, tt := range tests {
-		s.CRON(tt.path, tt.h, tt.ext...)
-		checkTestCustomeResult(t, s, global.CRON, tt.name, tt.ext[0], tt.ext[1])
-	}
-}
-
-func Test_regist_Custome_TheSamePath(t *testing.T) {
-	tests := []struct {
-		name string
-		tp   string
-		path string
-		h    []interface{}
-	}{
-		{name: "注册api为多个签名互不冲突struct", tp: global.API, path: "/path_s_api1", h: []interface{}{testHandler7{}, testHandler8{}}},
-		{name: "注册api为多个签名互不冲突的数据", tp: global.API, path: "/path_s_api3", h: []interface{}{testHandler7{}, newTestHandler9}},
-	}
-	s := Def
-	global.MQConf.PlatNameAsPrefix(false)
 	for _, tt := range tests {
 		for _, v := range tt.h {
-			s.Custom(tt.tp, tt.path, v, router.WithEncoding("UTF-8"), router.WithPages())
+			s.CRON(tt.path, v, tt.ext...)
 		}
-		checkTestCustomeResult(t, s, tt.tp, tt.name, router.WithEncoding("UTF-8"), router.WithPages())
+		checkTestCustomeResult(t, s, global.CRON, tt.name, tt.ext[0], tt.ext[1])
 	}
 }

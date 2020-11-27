@@ -15,7 +15,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 )
 
-//@todo 左斜线被去掉了
+//
 func xTestNewAuth(t *testing.T) {
 	tests := []struct {
 		name    string

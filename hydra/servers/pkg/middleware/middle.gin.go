@@ -29,7 +29,6 @@ func (g *ginCtx) load() {
 	})
 }
 
-//
 func (g *ginCtx) GetRouterPath() string {
 	return g.Context.FullPath()
 }

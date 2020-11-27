@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
-	"github.com/micro-plat/hydra/conf/vars/cache/redis"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/test/assert"
 )
@@ -14,15 +14,15 @@ func TestCacheRedisNew(t *testing.T) {
 	tests := []struct {
 		name    string
 		address string
-		opts    []redis.Option
-		want    *redis.Redis
+		opts    []cacheredis.Option
+		want    *cacheredis.Redis
 	}{
 		{
 			name: "测试新增-无option",
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
+			opts: []cacheredis.Option{
+				cacheredis.WithAddrs("192.168.5.79:6379"),
 			},
-			want: &redis.Redis{
+			want: &cacheredis.Redis{
 				Cache: &cache.Cache{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -36,11 +36,11 @@ func TestCacheRedisNew(t *testing.T) {
 		},
 		{
 			name: "测试新增-WithDbIndex",
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
+			opts: []cacheredis.Option{
+				cacheredis.WithAddrs("192.168.5.79:6379"),
+				cacheredis.WithDbIndex(2),
 			},
-			want: &redis.Redis{
+			want: &cacheredis.Redis{
 				Cache: &cache.Cache{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -54,12 +54,12 @@ func TestCacheRedisNew(t *testing.T) {
 		},
 		{
 			name: "测试新增-WithTimeout",
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
-				redis.WithTimeout(11, 22, 33),
+			opts: []cacheredis.Option{
+				cacheredis.WithAddrs("192.168.5.79:6379"),
+				cacheredis.WithDbIndex(2),
+				cacheredis.WithTimeout(11, 22, 33),
 			},
-			want: &redis.Redis{
+			want: &cacheredis.Redis{
 				Cache: &cache.Cache{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -73,13 +73,13 @@ func TestCacheRedisNew(t *testing.T) {
 		},
 		{
 			name: "测试新增-WithPoolSize",
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
-				redis.WithTimeout(11, 22, 33),
-				redis.WithPoolSize(40),
+			opts: []cacheredis.Option{
+				cacheredis.WithAddrs("192.168.5.79:6379"),
+				cacheredis.WithDbIndex(2),
+				cacheredis.WithTimeout(11, 22, 33),
+				cacheredis.WithPoolSize(40),
 			},
-			want: &redis.Redis{
+			want: &cacheredis.Redis{
 				Cache: &cache.Cache{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -94,7 +94,7 @@ func TestCacheRedisNew(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := redis.New(tt.opts...)
+		got := cacheredis.New(tt.opts...)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
