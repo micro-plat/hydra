@@ -19,8 +19,8 @@ type SingleValueWatcher struct {
 	logger     logger.ILogging
 	registry   registry.IRegistry
 	mu         sync.Mutex
-	Done       bool          //@fix 方便测试
-	CloseChan  chan struct{} //@fix 方便测试
+	Done       bool
+	CloseChan  chan struct{}
 }
 
 //NewSingleValueWatcher 监控节点值发生变化
@@ -31,7 +31,7 @@ func NewSingleValueWatcher(r registry.IRegistry, path string, logger logger.ILog
 		registry:   r,
 		logger:     logger,
 		notifyChan: make(chan *watcher.ValueChangeArgs, 1),
-		CloseChan:  make(chan struct{}), //@fix 方便测试
+		CloseChan:  make(chan struct{}),
 	}
 }
 

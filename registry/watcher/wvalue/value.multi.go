@@ -8,7 +8,7 @@ import (
 
 //MultiValueWatcher 配置监控服务
 type MultiValueWatcher struct {
-	Watchers   []*SingleValueWatcher //@fix 方便测试
+	Watchers   []*SingleValueWatcher
 	notifyChan chan *watcher.ValueChangeArgs
 }
 

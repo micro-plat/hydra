@@ -107,7 +107,6 @@ type IVariable interface {
 	IGetter
 }
 
-//@fix 提供上传文件的处理 @hj
 type IFile interface {
 	SaveFile(fileKey, dst string) error
 	GetFileSize(fileKey string) (int64, error)
@@ -141,7 +140,7 @@ type IRequest interface {
 	//GetBodyMap 将body转换为map
 	GetBodyMap() (map[string]interface{}, error)
 
-	//GetPlayload 更改名称 @fix
+	//GetPlayload
 	GetPlayload() string
 
 	//GetCookie 获取请求Cookie
