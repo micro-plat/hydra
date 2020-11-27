@@ -12,10 +12,10 @@ import (
 
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/server/queue"
-	  "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/context"
 
-	 "github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	"github.com/urfave/cli"
 
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
@@ -42,7 +42,7 @@ func TestNewResponsive(t *testing.T) {
 		cnf     app.IAPPConf
 		wantErr bool
 	}{
-		{name: "构建mqc服务", proto: "mqc", cnf: confObj.GetMQCConf()},
+		{name: "1. 构建mqc服务", proto: "mqc", cnf: confObj.GetMQCConf()},
 	}
 	for _, tt := range tests {
 		gotH, err := mqc.NewResponsive(tt.cnf)
@@ -132,67 +132,12 @@ func TestResponsive_Start(t *testing.T) {
 		wantSubErr     string
 		wantLog        string
 	}{
-		{name: "starting报错",
-			cnf:        confObj.GetMQCConf(),
-			serverType: "mqc",
-			starting:   func(app.IAPPConf) error { return fmt.Errorf("err") },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantErr:    "err",
-		},
-		{name: "禁用服务",
-			cnf:         confObj.GetMQCConf(),
-			serverType:  "mqc",
-			serverName:  "mqcserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return nil },
-			isConfStart: true,
-			wantLog:     "mqc被禁用，未启动",
-		},
-		{name: "mqc服务获取集群监控失败",
-			cnf:          confObj.GetMQCConf(),
-			serverType:   "mqc",
-			serverName:   "mqcserver",
-			starting:     func(app.IAPPConf) error { return nil },
-			closing:      func(app.IAPPConf) error { return nil },
-			isGetCluster: true,
-			wantLog:      "当前集群节点不可用",
-		},
-		// {name: "mqc服务获取主配置失败",
-		// 	cnf:           confObj.GetMQCConf(),
-		// 	serverType:    "mqc",
-		// 	serverName:    "mqcserver",
-		// 	starting:      func(app.IAPPConf) error { return nil },
-		// 	closing:       func(app.IAPPConf) error { return nil },
-		// 	isGetMainConf: true,
-		// 	wantLog:       "当前集群节点不可用",
-		// },
-		{name: "mqc服务恢复失败",
-			cnf:            confObj.GetMQCConf(),
-			serverType:     "mqc",
-			serverName:     "mqcserver",
-			starting:       func(app.IAPPConf) error { return nil },
-			closing:        func(app.IAPPConf) error { return nil },
-			isServerResume: true,
-			wantLog:        "恢复mqc服务器失败: 队列名字不能为空",
-		},
-		{name: "注册中心服务发布失败",
-			cnf:         confObj.GetMQCConf(),
-			serverType:  "mqc",
-			serverName:  "mqcserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return fmt.Errorf("closing_err") },
-			isServerPub: true,
-			wantSubErr:  "mqc服务发布失败 服务发布失败:",
-			wantLog:     "关闭[closing_err]服务,出现错误",
-		},
-		{name: "启动mqc服务成功",
-			cnf:        confObj.GetMQCConf(),
-			serverType: "mqc",
-			serverName: "mqcserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(mqc,mqc://",
-		},
+		{name: "1. 启动mqc服务-starting报错", cnf: confObj.GetMQCConf(), serverType: "mqc", starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动mqc服务-禁用服务", cnf: confObj.GetMQCConf(), serverType: "mqc", serverName: "mqcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "mqc被禁用，未启动"},
+		{name: "3. 启动mqc服务-mqc服务获取集群监控失败", cnf: confObj.GetMQCConf(), serverType: "mqc", serverName: "mqcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isGetCluster: true, wantLog: "当前集群节点不可用"},
+		{name: "4. 启动mqc服务-mqc服务恢复失败", cnf: confObj.GetMQCConf(), serverType: "mqc", serverName: "mqcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isServerResume: true, wantLog: "恢复mqc服务器失败: 队列名字不能为空"},
+		{name: "5. 启动mqc服务-注册中心服务发布失败", cnf: confObj.GetMQCConf(), serverType: "mqc", serverName: "mqcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "mqc服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "6. 启动mqc服务-启动mqc服务成功", cnf: confObj.GetMQCConf(), serverType: "mqc", serverName: "mqcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(mqc,mqc://"},
 	}
 	for _, tt := range tests {
 
@@ -234,13 +179,6 @@ func TestResponsive_Start(t *testing.T) {
 		if tt.isServerResume {
 			rsp.Server.Processor.Add(queue.NewQueue("", "services1"))
 		}
-		// //更改主配置
-		// if tt.isGetMainConf {
-		// 	path := fmt.Sprintf("/hydra/%s/%s/test/conf", tt.serverName, tt.serverType)
-		// 	//节点进行值变更 进行启动
-		// 	err := reg.Update(path, `{"stat11us":"start","addr":"redis://xxx"}`)
-		// 	fmt.Println("y:", err)
-		// }
 
 		//启动服务器
 		err := rsp.Start()
