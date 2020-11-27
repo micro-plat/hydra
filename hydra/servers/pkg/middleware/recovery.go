@@ -13,7 +13,7 @@ func Recovery() Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
-				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", "Server Error")) //@fix 不直接返回报错
+				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", "Server Error"))
 			}
 		}()
 		ctx.Next()

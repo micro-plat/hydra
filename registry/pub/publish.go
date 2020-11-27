@@ -156,7 +156,7 @@ func (p *Publisher) Update(serverName string, serviceAddr string, clusterID stri
 	return nil
 }
 
-//PubRPCServiceNode 发布RPC服务节点@todo
+//PubRPCServiceNode 发布RPC服务节点
 func (p *Publisher) PubRPCServiceNode(serverName string, service string, data string) (map[string]string, error) {
 	path := registry.Join(p.c.GetRPCServicePubPath(service), serverName+"_")
 	npath, err := p.c.GetRegistry().CreateSeqNode(path, data)

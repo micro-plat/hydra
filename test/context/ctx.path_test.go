@@ -9,7 +9,7 @@ import (
 	c "github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/server/router"
-	  "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
