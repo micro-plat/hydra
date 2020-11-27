@@ -6,6 +6,7 @@ package services
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -166,8 +167,14 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 			for _, v2 := range a.Routers {
 				if v1.Service == v2.Service {
 					assert.Equal(t, v1.Path, v2.Path, tt.name)
+
+					sort.Strings(v1.Action)
+					sort.Strings(v2.Action)
 					assert.Equal(t, v1.Action, v2.Action, tt.name+"1")
 					assert.Equal(t, v1.Encoding, v2.Encoding, tt.name)
+
+					sort.Strings(v1.Pages)
+					sort.Strings(v2.Pages)
 					assert.Equal(t, v1.Pages, v2.Pages, tt.name)
 				}
 			}

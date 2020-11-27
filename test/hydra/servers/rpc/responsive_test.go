@@ -58,7 +58,7 @@ func TestNewResponsive(t *testing.T) {
 		addr    string
 		wantErr bool
 	}{
-		{name: "构建rpc服务", addr: ":35211", proto: "tcp", cnf: confObj.GetRPCConf()},
+		{name: "1. 构建rpc服务", addr: ":35211", proto: "tcp", cnf: confObj.GetRPCConf()},
 	}
 	for _, tt := range tests {
 		gotH, err := rpc.NewResponsive(tt.cnf)
@@ -86,49 +86,11 @@ func TestResponsive_Start(t *testing.T) {
 		wantSubErr    string
 		wantLog       string
 	}{
-		{name: "starting报错",
-			cnf:        confObj.GetRPCConf(),
-			serverType: "rpc",
-			starting:   func(app.IAPPConf) error { return fmt.Errorf("err") },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantErr:    "err",
-		},
-		{name: "禁用服务",
-			cnf:         confObj.GetRPCConf(),
-			serverType:  "rpc",
-			serverName:  "rpcserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return nil },
-			isConfStart: true,
-			wantLog:     "rpc被禁用，未启动",
-		},
-		{name: "rpc服务启动失败",
-			cnf:           confObj.GetRPCConf(),
-			serverType:    "rpc",
-			serverName:    "rpcserver",
-			starting:      func(app.IAPPConf) error { return nil },
-			closing:       func(app.IAPPConf) error { return nil },
-			isServerStart: true,
-			wantErr:       "rpc启动失败 listen tcp 192.168.5.94:64120: bind: address already in use",
-		},
-		{name: "注册中心服务发布失败",
-			cnf:         confObj.GetRPCConf(),
-			serverType:  "rpc",
-			serverName:  "rpcserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return fmt.Errorf("closing_err") },
-			isServerPub: true,
-			wantSubErr:  "rpc服务发布失败 服务发布失败:",
-			wantLog:     "关闭[closing_err]服务,出现错误",
-		},
-		{name: "启动rpc服务成功",
-			cnf:        confObj.GetRPCConf(),
-			serverType: "rpc",
-			serverName: "rpcserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(rpc,",
-		},
+		{name: "1. 启动rpc服务-starting报错", cnf: confObj.GetRPCConf(), serverType: "rpc", starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动rpc服务-禁用服务", cnf: confObj.GetRPCConf(), serverType: "rpc", serverName: "rpcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "rpc被禁用，未启动"},
+		{name: "3. 启动rpc服务-失败", cnf: confObj.GetRPCConf(), serverType: "rpc", serverName: "rpcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isServerStart: true, wantErr: "rpc启动失败 listen tcp 192.168.5.94:64120: bind: address already in use"},
+		{name: "4. 启动rpc服务-注册中心服务发布失败", cnf: confObj.GetRPCConf(), serverType: "rpc", serverName: "rpcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "rpc服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "5. 启动rpc服务-成功", cnf: confObj.GetRPCConf(), serverType: "rpc", serverName: "rpcserver", starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(rpc,"},
 	}
 	for _, tt := range tests {
 		//starting

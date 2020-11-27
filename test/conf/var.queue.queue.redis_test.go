@@ -15,15 +15,15 @@ func TestQueueRedisNew(t *testing.T) {
 	tests := []struct {
 		name    string
 		address string
-		opts    []redis.Option
-		want    *redis.Redis
+		opts    []queueredis.Option
+		want    *queueredis.Redis
 	}{
 		{
-			name:    "测试新增-无option",
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-			 },		
-			 want: &redis.Redis{
+			name: "测试新增-无option",
+			opts: []queueredis.Option{
+				queueredis.WithAddrs("192.168.5.79:6379"),
+			},
+			want: &queueredis.Redis{
 				Queue: &queue.Queue{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -36,12 +36,12 @@ func TestQueueRedisNew(t *testing.T) {
 			},
 		},
 		{
-			name:    "测试新增-WithDbIndex",
- 			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
+			name: "测试新增-WithDbIndex",
+			opts: []queueredis.Option{
+				queueredis.WithAddrs("192.168.5.79:6379"),
+				queueredis.WithDbIndex(2),
 			},
-			want: &redis.Redis{
+			want: &queueredis.Redis{
 				Queue: &queue.Queue{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -54,13 +54,13 @@ func TestQueueRedisNew(t *testing.T) {
 			},
 		},
 		{
-			name:    "测试新增-WithTimeout",
- 			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
-				redis.WithTimeout(11, 22, 33),
+			name: "测试新增-WithTimeout",
+			opts: []queueredis.Option{
+				queueredis.WithAddrs("192.168.5.79:6379"),
+				queueredis.WithDbIndex(2),
+				queueredis.WithTimeout(11, 22, 33),
 			},
-			want: &redis.Redis{
+			want: &queueredis.Redis{
 				Queue: &queue.Queue{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -73,14 +73,14 @@ func TestQueueRedisNew(t *testing.T) {
 			},
 		},
 		{
-			name:    "测试新增-WithTimeout", 
-			opts: []redis.Option{
-				redis.WithAddrs("192.168.5.79:6379"),
-				redis.WithDbIndex(2),
-				redis.WithTimeout(11, 22, 33),
-				redis.WithPoolSize(40),
+			name: "测试新增-WithTimeout",
+			opts: []queueredis.Option{
+				queueredis.WithAddrs("192.168.5.79:6379"),
+				queueredis.WithDbIndex(2),
+				queueredis.WithTimeout(11, 22, 33),
+				queueredis.WithPoolSize(40),
 			},
-			want: &redis.Redis{
+			want: &queueredis.Redis{
 				Queue: &queue.Queue{Proto: "redis"},
 				Redis: &varredis.Redis{
 					Addrs:        []string{"192.168.5.79:6379"},
@@ -94,7 +94,7 @@ func TestQueueRedisNew(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := redis.New( tt.opts...)
+		got := queueredis.New(tt.opts...)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

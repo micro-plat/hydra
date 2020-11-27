@@ -124,7 +124,7 @@ func TestVarConf_GetVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
-		confM.Vars().Cache().Redis("redis", redis.New(redis.WithAddrs("192.168.0.1")))
+		confM.Vars().Cache().Redis("redis", cacheredis.New(cacheredis.WithAddrs("192.168.0.1")))
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		varConf, err := vars.NewVarConf(platName, confM.Registry)
 		assert.Equal(t, nil, err, tt.name+",err")
