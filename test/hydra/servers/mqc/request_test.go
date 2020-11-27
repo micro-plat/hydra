@@ -6,6 +6,8 @@ import (
 	"github.com/micro-plat/hydra/components/queues/mq/redis"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/hydra/hydra/servers/mqc"
+
 )
 
 func TestNewRequest(t *testing.T) {
@@ -21,14 +23,14 @@ func TestNewRequest(t *testing.T) {
 		{name: "2. mqc-NewRequest-添加队列数据", queueName: "queue", service: "service", message: `{"key":"value","__header__":{"Content-Type":"application/json"}}`, hasData: true},
 	}
 	for _, tt := range tests {
-		gotR, err := NewRequest(queue.NewQueue(tt.queueName, tt.service), &redis.RedisMessage{Message: tt.message, HasData: tt.hasData})
+		gotR, err := mqc.NewRequest(queue.NewQueue(tt.queueName, tt.service), &redis.RedisMessage{Message: tt.message, HasData: tt.hasData})
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, tt.queueName, gotR.GetName(), tt.name)
 		assert.Equal(t, tt.service, gotR.GetService(), tt.name)
-		assert.Equal(t, DefMethod, gotR.GetMethod(), tt.name)
+		assert.Equal(t, mqc.DefMethod, gotR.GetMethod(), tt.name)
 
 		assert.Equal(t, tt.message, gotR.GetForm()["__body_"], tt.name)
 	}
