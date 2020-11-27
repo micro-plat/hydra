@@ -3,17 +3,28 @@ package main
 import (
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/components"
+	_ "github.com/micro-plat/hydra/components/caches/cache/gocache"
+	_ "github.com/micro-plat/hydra/components/caches/cache/memcached"
 	_ "github.com/micro-plat/hydra/components/caches/cache/redis"
+
+	_ "github.com/micro-plat/hydra/components/queues/mq/lmq"
+	_ "github.com/micro-plat/hydra/components/queues/mq/mqtt"
+	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
+	_ "github.com/micro-plat/hydra/components/queues/mq/xmq"
+
 	"github.com/micro-plat/hydra/conf/server/task"
+
 	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	confRedis "github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/cron"
+	"github.com/micro-plat/hydra/hydra/servers/http"
+	"github.com/micro-plat/hydra/hydra/servers/mqc"
 	"github.com/micro-plat/hydra/hydra/servers/rpc"
 )
 
 var app = hydra.NewApp(
-	hydra.WithServerTypes(cron.CRON, rpc.RPC),
+	hydra.WithServerTypes(cron.CRON, rpc.RPC, http.API, http.Web, mqc.MQC),
 	hydra.WithPlatName("taosytest"),
 	hydra.WithSystemName("testserver"),
 	hydra.WithClusterName("t"),
@@ -103,6 +114,12 @@ func init() {
 	app.RPC("/test/rpc", func(ctx context.IContext) (r interface{}) {
 		return "test.rpc.success"
 	})
+	app.API("/http/api", func(ctx context.IContext) (r interface{}) {
+		return "test.api.success"
+	})
+	app.MQC("/mqc/api", func(ctx context.IContext) (r interface{}) {
+		return "test.api.success"
+	}, "mqc:api")
 }
 
 func main() {
