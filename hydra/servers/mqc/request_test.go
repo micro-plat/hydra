@@ -1,8 +1,6 @@
 package mqc
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/micro-plat/hydra/components/queues/mq/redis"
@@ -31,15 +29,7 @@ func TestNewRequest(t *testing.T) {
 		assert.Equal(t, tt.queueName, gotR.GetName(), tt.name)
 		assert.Equal(t, tt.service, gotR.GetService(), tt.name)
 		assert.Equal(t, DefMethod, gotR.GetMethod(), tt.name)
-		f := make(map[string]interface{})
-		json.Unmarshal([]byte(tt.message), &f)
-		header := make(map[string]string)
-		for n, m := range f["__header__"].(map[string]interface{}) {
-			header[n] = fmt.Sprint(m)
-		}
-		header["Client-IP"] = "127.0.0.1"
-		assert.Equal(t, header, gotR.GetHeader(), tt.name)
-		f["__body_"] = tt.message
-		assert.Equal(t, f, gotR.GetForm(), tt.name)
+
+		assert.Equal(t, tt.message, gotR.GetForm()["__body_"], tt.name)
 	}
 }
