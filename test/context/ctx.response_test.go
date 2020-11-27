@@ -38,18 +38,15 @@ func Test_response_Write_ERR(t *testing.T) {
 		{name: "1.5.内容为err,状态码900", status: 900, content: errors.New("err"), wantRs: 900, wantRc: "err", wantCt: "text/plain; charset=utf-8"},
 	}
 
-	confObj := mocks.NewConfBy("context_response_test", "response") //构建对象
-	confObj.API(":8080")                                            //初始化参数
-	serverConf := confObj.GetAPIConf()                              //获取配置
-	meta := conf.NewMeta()
+	confObj := mocks.NewConf()         //构建对象
+	confObj.API(":8080")               //初始化参数
+	serverConf := confObj.GetAPIConf() //获取配置
+
 	global.IsDebug = true
 	for _, tt := range tests {
-		contx := &mocks.TestContxt{HttpHeader: tt.header}
-
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		contx := &mocks.TestContxt{HttpHeader: tt.header}
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -161,15 +158,13 @@ func Test_response_Write_String(t *testing.T) {
 	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
 	confObj.API(":8080")                                              //初始化参数
 	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
 	global.IsDebug = true
+
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
 
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -220,15 +215,12 @@ func Test_response_Write_JSON(t *testing.T) {
 	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
 	confObj.API(":8080")                                              //初始化参数
 	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
+
 	global.IsDebug = true
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
-
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -279,15 +271,13 @@ func Test_response_Write_XML(t *testing.T) {
 	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
 	confObj.API(":8080")                                              //初始化参数
 	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
 	global.IsDebug = true
+
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
 
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -337,16 +327,13 @@ func Test_response_Write_HTML(t *testing.T) {
 
 	confObj := mocks.NewConfBy("context_response_test1", "response1") //构建对象
 	confObj.API(":8080")                                              //初始化参数
-	serverConf := confObj.GetAPIConf()                                //获取配置
-	meta := conf.NewMeta()
+	serverConf := confObj.GetAPIConf()
 	global.IsDebug = true
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
 
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -398,15 +385,12 @@ func Test_response_Write_MAP(t *testing.T) {
 	confObj := mocks.NewConf()         //构建对象
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
-	meta := conf.NewMeta()
 	global.IsDebug = true
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
 
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -461,15 +445,12 @@ func Test_response_Write_Struct(t *testing.T) {
 	confObj := mocks.NewConf()         //构建对象
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
-	meta := conf.NewMeta()
 	global.IsDebug = true
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
 
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -521,15 +502,11 @@ func Test_response_Write_Int(t *testing.T) {
 	confObj := mocks.NewConf()         //构建对象
 	confObj.API(":8080")               //初始化参数
 	serverConf := confObj.GetAPIConf() //获取配置
-	meta := conf.NewMeta()
 	global.IsDebug = true
 	for _, tt := range tests {
 		contx := &mocks.TestContxt{HttpHeader: tt.header}
-
-		log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(contx, "", meta).GetRequestID())
-
 		//构建response对象
-		c := ctx.NewResponse(contx, serverConf, log, meta)
+		c := ctx.NewResponse(contx, serverConf, logger.New("hydra"), conf.NewMeta())
 		err := c.Write(tt.status, tt.content)
 		assert.Equal(t, nil, err, tt.name)
 
@@ -672,15 +649,15 @@ func Test_response_Flush(t *testing.T) {
 		{name: "1.1 状态码200 编码为utf-8", encoding: "utf-8", status: 200},
 		{name: "1.2 状态码200 编码为gbk", encoding: "gbk", status: 200},
 
-		{name: "2.1 状态码301 编码为gbk", encoding: "utf-8", isRedirect: true, status: 301},
+		{name: "2.1 状态码301 编码为utf-8", encoding: "utf-8", isRedirect: true, status: 301},
 		{name: "2.2 状态码301 编码为gbk", encoding: "gbk", isRedirect: true, status: 301},
-		{name: "2.3 状态码302 编码为gbk", encoding: "utf-8", isRedirect: true, status: 302},
+		{name: "2.3 状态码302 编码为utf-8", encoding: "utf-8", isRedirect: true, status: 302},
 		{name: "2.4 状态码302 编码为gbk", encoding: "gbk", isRedirect: true, status: 302},
-		{name: "2.5 状态码303 编码为gbk", encoding: "utf-8", isRedirect: true, status: 303},
+		{name: "2.5 状态码303 编码为utf-8", encoding: "utf-8", isRedirect: true, status: 303},
 		{name: "2.6 状态码303 编码为gbk", encoding: "gbk", isRedirect: true, status: 303},
-		{name: "2.7 状态码307 编码为gbk", encoding: "utf-8", isRedirect: true, status: 307},
+		{name: "2.7 状态码307 编码为utf-8", encoding: "utf-8", isRedirect: true, status: 307},
 		{name: "2.8 状态码307 编码为gbk", encoding: "gbk", isRedirect: true, status: 307},
-		{name: "2.9 状态码308 编码为gbk", encoding: "utf-8", isRedirect: true, status: 308},
+		{name: "2.9 状态码308 编码为utf-8", encoding: "utf-8", isRedirect: true, status: 308},
 		{name: "2.10 状态码308 编码为gbk", encoding: "gbk", isRedirect: true, status: 308},
 
 		{name: "3.1 状态码400 编码为utf-8", encoding: "utf-8", status: 400},
@@ -689,8 +666,6 @@ func Test_response_Flush(t *testing.T) {
 		{name: "3.1 状态码600 编码为utf-8", encoding: "utf-8", status: 600},
 		{name: "3.2 状态码600 编码为gbk", encoding: "gbk", status: 600},
 	}
-
-	//	301 302 303 307 308
 
 	confObj := mocks.NewConfBy("context", "flush") //构建对象
 	confObj.API(":8080")                           //初始化参数
@@ -701,7 +676,7 @@ func Test_response_Flush(t *testing.T) {
 		httpWriter := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(httpWriter)
 
-		//构建请求 方法要与注册方法一致
+		//构建请求
 		r, _ := http.NewRequest("POST", "http://localhost:8080/url?", bytes.NewReader([]byte("")))
 		r.Header.Set("Content-Type", fmt.Sprintf("application/json;charset=%s", tt.encoding))
 		location := "http://localhost:8080/redirect"
@@ -712,7 +687,7 @@ func Test_response_Flush(t *testing.T) {
 		//写入
 		writeContent := `content中文~!@#$%^&*()_+{}:">?+>?=`
 		rsp.Write(tt.status, writeContent)
-		//写入相应流
+		//写入响应流
 		rsp.Flush()
 		s, content, ctp := rsp.GetFinalResponse()
 		if tt.isRedirect {
