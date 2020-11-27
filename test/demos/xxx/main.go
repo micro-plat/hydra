@@ -3,10 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"os/signal"
 	"reflect"
 )
 
 func main() {
+
+	fmt.Println()
+	fmt.Println(os.Getegid())
+	fmt.Println(os.Getppid())
+
+	fmt.Println("----")
+	chanxx := make(chan os.Signal)
+	signal.Notify(chanxx, os.Interrupt)
+
+	<-chanxx
 
 	r := `{"a":"b"}`
 	result := map[string]string{}
