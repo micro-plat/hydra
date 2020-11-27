@@ -27,9 +27,9 @@ func Test_cronSub_GetCRONTaskConf(t *testing.T) {
 		wantErr  bool
 		wantConf *task.Tasks
 	}{
-		{name: "空task获取对象", opts: []*task.Task{}, wantErr: true, wantConf: &task.Tasks{Tasks: []*task.Task{}}},
-		{name: "设置错误数据的task获取对象", opts: []*task.Task{task.NewTask("错误数据", "service1"), task.NewTask("错误数据1", "service2", task.WithDisable())}, wantErr: false, wantConf: nilTask},
-		{name: "设置正确的task对象", opts: []*task.Task{task.NewTask("cron1", "service1"), task.NewTask("cron2", "service2", task.WithDisable())}, wantErr: true,
+		{name: "1. Conf-CronSubGetCRONTaskConf-空task获取对象", opts: []*task.Task{}, wantErr: true, wantConf: &task.Tasks{Tasks: []*task.Task{}}},
+		{name: "2. Conf-CronSubGetCRONTaskConf-设置错误数据的task获取对象", opts: []*task.Task{task.NewTask("错误数据", "service1"), task.NewTask("错误数据1", "service2", task.WithDisable())}, wantErr: false, wantConf: nilTask},
+		{name: "3. Conf-CronSubGetCRONTaskConf-设置正确的task对象", opts: []*task.Task{task.NewTask("cron1", "service1"), task.NewTask("cron2", "service2", task.WithDisable())}, wantErr: true,
 			wantConf: task.NewTasks(task.NewTask("cron1", "service1"), task.NewTask("cron2", "service2", task.WithDisable()))},
 	}
 

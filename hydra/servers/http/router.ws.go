@@ -24,6 +24,7 @@ func (s *Server) addWSRouters(routers ...*router.Router) {
 	s.server.Handler = s.engine
 	return
 }
+
 func (s *Server) addWSRouter(routers ...*router.Router) {
 
 	middleware.InitWSInternalEngine(routers...)

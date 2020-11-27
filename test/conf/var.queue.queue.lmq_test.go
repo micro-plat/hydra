@@ -13,7 +13,7 @@ func TestQueueLMQNew(t *testing.T) {
 		want *lmq.LMQ
 	}{
 		{
-			name: "测试新增 ",
+			name: "1. Conf-QueueLMQNew-测试新增 ",
 			want: &lmq.LMQ{
 				Proto: "lmq",
 				Raw:   nil,

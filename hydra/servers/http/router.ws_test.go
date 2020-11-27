@@ -14,7 +14,9 @@ func TestServer_addWSRouters(t *testing.T) {
 		name    string
 		routers []*router.Router
 	}{
-		{name: "添加ws的中间件和路由", routers: []*router.Router{}},
+		{name: "1. httpserver-添加ws空路由", routers: []*router.Router{}},
+		{name: "2. httpserver-添加ws单条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"})}},
+		{name: "3. httpserver-添加ws多条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"}), router.NewRouter("/rpcserver/taosy/test1", "/rpcserver/taosy/test1", []string{"Post"})}},
 	}
 
 	for _, tt := range tests {
@@ -22,6 +24,7 @@ func TestServer_addWSRouters(t *testing.T) {
 		opt := WithServerType("ws")
 		opt(s.option)
 		s.addWSRouters(tt.routers...)
-		assert.Equal(t, 5, len(s.engine.RouterGroup.Handlers), tt.name)
+		assert.Equalf(t, 5, len(s.engine.RouterGroup.Handlers), tt.name+",中间件数量")
+		assert.Equalf(t, 6, len(s.engine.Routes()), tt.name+",路由数量")
 	}
 }

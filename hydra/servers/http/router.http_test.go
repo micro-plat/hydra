@@ -13,7 +13,9 @@ func TestServer_addHttpRouters(t *testing.T) {
 		name    string
 		routers []*router.Router
 	}{
-		{name: "添加http的中间件和路由", routers: []*router.Router{}},
+		{name: "1. httpserver-添加http空路由", routers: []*router.Router{}},
+		{name: "2. httpserver-添加http单条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"})}},
+		{name: "3. httpserver-添加http多条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"}), router.NewRouter("/rpcserver/taosy/test1", "/rpcserver/taosy/test1", []string{"Post"})}},
 	}
 
 	for _, tt := range tests {
@@ -21,6 +23,7 @@ func TestServer_addHttpRouters(t *testing.T) {
 		opt := WithServerType("api")
 		opt(s.option)
 		s.addHttpRouters(tt.routers...)
-		assert.Equal(t, 18, len(s.engine.RouterGroup.Handlers), tt.name)
+		assert.Equalf(t, 18, len(s.engine.RouterGroup.Handlers), tt.name+",中间件数量")
+		assert.Equalf(t, len(tt.routers), len(s.engine.Routes()), tt.name+",路由数量")
 	}
 }

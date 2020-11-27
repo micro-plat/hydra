@@ -118,8 +118,8 @@ func TestVarConf_GetVersion(t *testing.T) {
 		args    string
 		wantErr bool
 	}{
-		{name: "错误的var路径获取节点版本号", args: "errorPath", wantErr: true},
-		{name: "正确的var路径获取节点版本号", args: vars.NewVarPub(platName).GetVarPath(), wantErr: false},
+		{name: "1. Conf-VarConfGetVersion-错误的var路径获取节点版本号", args: "errorPath", wantErr: true},
+		{name: "2. Conf-VarConfGetVersion-正确的var路径获取节点版本号", args: vars.NewVarPub(platName).GetVarPath(), wantErr: false},
 	}
 
 	for _, tt := range tests {
@@ -155,8 +155,8 @@ func TestVarConf_GetConf(t *testing.T) {
 		want    *conf.RawConf
 		wantErr bool
 	}{
-		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: conf.EmptyRawConf, wantErr: true},
-		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+		{name: "1. Conf-VarConfGetConf-没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", want: conf.EmptyRawConf, wantErr: true},
+		{name: "2. Conf-VarConfGetConf-设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			want: nil, wantErr: true},
 	}
 	for _, tt := range tests {
@@ -201,8 +201,8 @@ func TestVarConf_GetConfVersion(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
-		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+		{name: "1. Conf-VarConfGetConfVersion-没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
+		{name: "2. Conf-VarConfGetConfVersion-设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			wantErr: true},
 	}
 
@@ -244,8 +244,8 @@ func TestVarConf_GetObject(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
-		{name: "设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+		{name: "1. Conf-VarConfGetObject-没有设置节点", isSet: false, varPath: varPath, tp: "db", tpname: "db", wantErr: false},
+		{name: "2. Conf-VarConfGetObject-设置了db节点", isSet: true, varPath: varPath, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			wantErr: true},
 	}
 	for _, tt := range tests {
@@ -294,8 +294,8 @@ func TestVarConf_Has(t *testing.T) {
 		args   args
 		want   bool
 	}{
-		{name: "没有设置节点", isSet: false, tp: "db", tpname: "db", want: false},
-		{name: "设置了db节点", isSet: true, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
+		{name: "1. Conf-VarConfHas-没有设置节点", isSet: false, tp: "db", tpname: "db", want: false},
+		{name: "2. Conf-VarConfHas-设置了db节点", isSet: true, tp: "db", tpname: "db", args: args{uName: "taosy", pwd: "123456", tnsName: "tnsName"},
 			want: true},
 	}
 	for _, tt := range tests {

@@ -23,34 +23,10 @@ func TestWhitelistNew(t *testing.T) {
 		allowReq  string
 		wantallow bool
 	}{
-		{name: "初始化默认白名单配置",
-			opts:      []whitelist.Option{},
-			want:      &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1)},
-			allowIP:   "192.168.0.101",
-			allowReq:  "/t1/t2/t3",
-			wantallow: true,
-		},
-		{name: "初始化Disable白名单配置",
-			opts:      []whitelist.Option{whitelist.WithDisable()},
-			want:      &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1), Disable: true},
-			allowIP:   "192.168.0.101",
-			allowReq:  "/t1/t2/t3",
-			wantallow: true,
-		},
-		{name: "初始化Enable白名单配置",
-			opts:      []whitelist.Option{whitelist.WithEnable()},
-			want:      &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1), Disable: false},
-			allowIP:   "192.168.0.101",
-			allowReq:  "/t1/t2/t3",
-			wantallow: true,
-		},
-		{name: "初始化自定义ip白名单配置",
-			opts:      []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))},
-			want:      &whitelist.WhiteList{IPS: []*whitelist.IPList{&whitelist.IPList{Requests: []string{"/t1/t2/*"}, IPS: []string{"192.168.0.101"}}}},
-			allowIP:   "192.168.0.101",
-			allowReq:  "/t1/t2/t3",
-			wantallow: true,
-		},
+		{name: "1. Conf-WhitelistNew-初始化默认白名单配置", opts: []whitelist.Option{}, want: &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1)}, allowIP: "192.168.0.101", allowReq: "/t1/t2/t3", wantallow: true},
+		{name: "2. Conf-WhitelistNew-初始化Disable白名单配置", opts: []whitelist.Option{whitelist.WithDisable()}, want: &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1), Disable: true}, allowIP: "192.168.0.101", allowReq: "/t1/t2/t3", wantallow: true},
+		{name: "3. Conf-WhitelistNew-初始化Enable白名单配置", opts: []whitelist.Option{whitelist.WithEnable()}, want: &whitelist.WhiteList{IPS: make([]*whitelist.IPList, 0, 1), Disable: false}, allowIP: "192.168.0.101", allowReq: "/t1/t2/t3", wantallow: true},
+		{name: "4. Conf-WhitelistNew-初始化自定义ip白名单配置", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))}, want: &whitelist.WhiteList{IPS: []*whitelist.IPList{&whitelist.IPList{Requests: []string{"/t1/t2/*"}, IPS: []string{"192.168.0.101"}}}}, allowIP: "192.168.0.101", allowReq: "/t1/t2/t3", wantallow: true},
 	}
 	for _, tt := range tests {
 		got := whitelist.New(tt.opts...)
@@ -79,9 +55,7 @@ func TestWhiteList_IsAllow(t *testing.T) {
 		argPath string
 		argIP   string
 		want    bool
-	}{
-		// TODO: Add test cases.
-	}
+	}{}
 	for _, tt := range tests {
 		w := whitelist.New(tt.opts...)
 		got := w.IsAllow(tt.argPath, tt.argIP)
@@ -97,11 +71,9 @@ func TestWhiteListGetConf(t *testing.T) {
 		opts []whitelist.Option
 		want *whitelist.WhiteList
 	}{
-		{name: "节点不存在,获取默认对象", opts: []whitelist.Option{}, want: &whitelist.WhiteList{Disable: true}},
-		{name: "节点为空,获取默认对象", opts: []whitelist.Option{}, want: whitelist.New()},
-		{name: "正常对象获取",
-			opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))},
-			want: whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))},
+		{name: "1. Conf-WhitelistGetConf-节点不存在,获取默认对象", opts: []whitelist.Option{}, want: &whitelist.WhiteList{Disable: true}},
+		{name: "2. Conf-WhitelistGetConf-节点为空,获取默认对象", opts: []whitelist.Option{}, want: whitelist.New()},
+		{name: "3. Conf-WhitelistGetConf-正常对象获取", opts: []whitelist.Option{whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...))}, want: whitelist.New(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))},
 	}
 
 	//初始化服务conf配置对象

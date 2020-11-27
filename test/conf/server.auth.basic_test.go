@@ -27,26 +27,11 @@ func TestNewBasic(t *testing.T) {
 		opts []basic.Option
 		want *basic.BasicAuth
 	}{
-		{name: "初始化空对象",
-			opts: []basic.Option{},
-			want: &basic.BasicAuth{Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)},
-		},
-		{name: "初始化对象disable设置",
-			opts: []basic.Option{basic.WithDisable()},
-			want: &basic.BasicAuth{Disable: true, Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)},
-		},
-		{name: "初始化对象enable设置",
-			opts: []basic.Option{basic.WithEnable()},
-			want: &basic.BasicAuth{Disable: false, Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)},
-		},
-		{name: "添加用户名和密码的对象",
-			opts: []basic.Option{basic.WithUP("t1", "123"), basic.WithUP("t2", "321")},
-			want: &basic.BasicAuth{Excludes: []string{}, Members: map[string]string{"t1": "123", "t2": "321"}, PathMatch: conf.NewPathMatch([]string{}...)},
-		},
-		{name: "添加验证路径的对象",
-			opts: []basic.Option{basic.WithExcludes("/t1/t2", "/t1/t2/*")},
-			want: &basic.BasicAuth{Excludes: []string{"/t1/t2", "/t1/t2/*"}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{"/t1/t2", "/t1/t2/*"}...)},
-		},
+		{name: "1. Conf-NewBasic-初始化空对象", opts: []basic.Option{}, want: &basic.BasicAuth{Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)}},
+		{name: "2. Conf-NewBasic-初始化对象disable设置", opts: []basic.Option{basic.WithDisable()}, want: &basic.BasicAuth{Disable: true, Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)}},
+		{name: "3. Conf-NewBasic-初始化对象enable设置", opts: []basic.Option{basic.WithEnable()}, want: &basic.BasicAuth{Disable: false, Excludes: []string{}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{}...)}},
+		{name: "4. Conf-NewBasic-添加用户名和密码的对象", opts: []basic.Option{basic.WithUP("t1", "123"), basic.WithUP("t2", "321")}, want: &basic.BasicAuth{Excludes: []string{}, Members: map[string]string{"t1": "123", "t2": "321"}, PathMatch: conf.NewPathMatch([]string{}...)}},
+		{name: "5. Conf-NewBasic-添加验证路径的对象", opts: []basic.Option{basic.WithExcludes("/t1/t2", "/t1/t2/*")}, want: &basic.BasicAuth{Excludes: []string{"/t1/t2", "/t1/t2/*"}, Members: map[string]string{}, PathMatch: conf.NewPathMatch([]string{"/t1/t2", "/t1/t2/*"}...)}},
 	}
 	for _, tt := range tests {
 		got := basic.NewBasic(tt.opts...)
@@ -65,9 +50,9 @@ func TestBasicAuth_Verify(t *testing.T) {
 		want   string
 		want1  bool
 	}{
-		{name: "空数据认证", fields: basic.NewBasic(basic.WithUP("", "")), args: createAuth("", ""), want: "", want1: true},
-		{name: "空数据认证1", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("", ""), want: "", want1: false},
-		{name: "数据认证通过", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("t1", "123"), want: "t1", want1: true},
+		{name: "1. Conf-BasicVerify-空数据认证", fields: basic.NewBasic(basic.WithUP("", "")), args: createAuth("", ""), want: "", want1: true},
+		{name: "2. Conf-BasicVerify-空数据认证1", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("", ""), want: "", want1: false},
+		{name: "3. Conf-BasicVerify-数据认证通过", fields: basic.NewBasic(basic.WithUP("t1", "123")), args: createAuth("t1", "123"), want: "t1", want1: true},
 	}
 	for _, tt := range tests {
 		got, got1 := tt.fields.Verify(tt.args)
@@ -83,10 +68,9 @@ func TestBasicGetConf(t *testing.T) {
 		opts []basic.Option
 		want *basic.BasicAuth
 	}{
-		{name: "basic节点不存在", opts: []basic.Option{}, want: &basic.BasicAuth{Disable: true}},
-		{name: "Members==0节点", opts: []basic.Option{}, want: &basic.BasicAuth{Disable: true}},
-		// {name: "Members!=0的空节点", opts: []basic.Option{basic.WithUP("t1", "123")}, want: basic.NewBasic(basic.WithUP("t1", "123"))},
-		{name: "配置参数正确", opts: []basic.Option{basic.WithUP("t1", "123"), basic.WithExcludes("/t1/t12"), basic.WithDisable()},
+		{name: "1. Conf-BasicGetConf-basic节点不存在", opts: []basic.Option{}, want: &basic.BasicAuth{Disable: true}},
+		{name: "2. Conf-BasicGetConf-Members==0节点", opts: []basic.Option{}, want: &basic.BasicAuth{Disable: true}},
+		{name: "3. Conf-BasicGetConf-配置参数正确", opts: []basic.Option{basic.WithUP("t1", "123"), basic.WithExcludes("/t1/t12"), basic.WithDisable()},
 			want: basic.NewBasic(basic.WithUP("t1", "123"), basic.WithExcludes("/t1/t12"), basic.WithDisable())},
 	}
 

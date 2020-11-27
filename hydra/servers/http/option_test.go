@@ -11,8 +11,8 @@ func TestWithServerType(t *testing.T) {
 		name string
 		t    string
 	}{
-		{name: "设置api类型", t: "api"},
-		{name: "设置cron类型", t: "cron"},
+		{name: "1. httpserver-设置api类型", t: "api"},
+		{name: "2. httpserver-设置cron类型", t: "cron"},
 	}
 	for _, tt := range tests {
 		f := WithServerType(tt.t)
@@ -29,9 +29,9 @@ func TestWithTimeout(t *testing.T) {
 		writeTimeout      int
 		readHeaderTimeout int
 	}{
-		{name: "设置读取超时时间", readTimeout: 30},
-		{name: "设置写入超时时间", writeTimeout: 30},
-		{name: "设置头部读取超时时间", readHeaderTimeout: 30},
+		{name: "1. httpserver-设置读取超时时间", readTimeout: 30},
+		{name: "2. httpserver-设置写入超时时间", writeTimeout: 30},
+		{name: "3. httpserver-设置头部读取超时时间", readHeaderTimeout: 30},
 	}
 	for _, tt := range tests {
 		f := WithTimeout(tt.readTimeout, tt.writeTimeout, tt.readHeaderTimeout)
@@ -49,9 +49,9 @@ func TestWithTLS(t *testing.T) {
 		tls     []string
 		wantTLS []string
 	}{
-		{name: "设置空的TLS", tls: []string{}},
-		{name: "设置错误的TLS", tls: []string{"pem"}},
-		{name: "设置争取的TLS", tls: []string{"pem", "key"}, wantTLS: []string{"pem", "key"}},
+		{name: "1. httpserver-设置空的TLS", tls: []string{}},
+		{name: "2. httpserver-设置错误的TLS", tls: []string{"pem"}},
+		{name: "3. httpserver-设置争取的TLS", tls: []string{"pem", "key"}, wantTLS: []string{"pem", "key"}},
 	}
 	for _, tt := range tests {
 		f := WithTLS(tt.tls)
