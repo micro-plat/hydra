@@ -17,8 +17,8 @@ func TestNewProcessor(t *testing.T) {
 		wantP   *Processor
 		wantErr string
 	}{
-		{name: "协议错误", proto: "proto", confRaw: "{}", wantErr: "构建mqc服务失败(proto:proto,raw:{}) mqc: 未知的协议类型 proto"},
-		{name: "协议配置正确", proto: "redis", confRaw: `{"proto":"redis","addrs":["192.168.5.79:6379"]}`, wantP: &Processor{status: unstarted,
+		{name: "1. mqc-NewProcessor-协议错误", proto: "proto", confRaw: "{}", wantErr: "构建mqc服务失败(proto:proto,raw:{}) mqc: 未知的协议类型 proto"},
+		{name: "2. mqc-NewProcessor-协议配置正确", proto: "redis", confRaw: `{"proto":"redis","addrs":["192.168.5.79:6379"]}`, wantP: &Processor{status: unstarted,
 			closeChan: make(chan struct{}),
 			startTime: time.Now(),
 			queues:    cmap.New(4)}},
@@ -41,8 +41,8 @@ func TestProcessor_Add(t *testing.T) {
 		queues     []*queue.Queue
 		wantErr    string
 	}{
-		{name: "添加消息队列", queues: []*queue.Queue{queue.NewQueue("queue1", "services1"), queue.NewQueue("queue2", "services2")}},
-		{name: "再次添加消息队列", queues: []*queue.Queue{queue.NewQueue("queue1", "services1"), queue.NewQueue("queue3", "services3")}},
+		{name: "1. mqc-ProcessorAdd-添加消息队列", queues: []*queue.Queue{queue.NewQueue("queue1", "services1"), queue.NewQueue("queue2", "services2")}},
+		{name: "2. mqc-ProcessorAdd-再次添加消息队列", queues: []*queue.Queue{queue.NewQueue("queue1", "services1"), queue.NewQueue("queue3", "services3")}},
 	}
 	s, _ := NewProcessor("redis", `{"proto":"redis","addrs":["192.168.5.79:6379"]}`)
 	for _, tt := range tests {

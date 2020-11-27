@@ -42,7 +42,7 @@ func init() {
 			return
 		}
 
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 100; i++ {
 			// go func(httpObj http.IClient) {
 			content, status, err := httpObj.Get("http://192.168.0.137:8070/taosy/testapi")
 			if err != nil || status != 200 {

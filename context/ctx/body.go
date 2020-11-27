@@ -116,7 +116,6 @@ func (w *body) GetBody() (s string, err error) {
 	w.fullBody.hasRead = true
 	var buff []byte
 	buff, w.fullBody.err = w.GetRawBody()
-	fmt.Println("cccccccccccc:", string(buff))
 	if w.fullBody.err != nil {
 		return "", w.fullBody.err
 	}

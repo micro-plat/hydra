@@ -37,10 +37,10 @@ func TestStaticNew(t *testing.T) {
 		opts []static.Option
 		want *static.Static
 	}{
-		{name: "初始化nil对象", opts: nil, want: defaultObj},
-		{name: "初始化空对象", opts: []static.Option{}, want: defaultObj},
-		{name: "初始化image对象", opts: []static.Option{static.WithImages()}, want: defaultObj},
-		{name: "初始化设置全量对象", opts: []static.Option{static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+		{name: "1. Conf-StaticNew-初始化nil对象", opts: nil, want: defaultObj},
+		{name: "2. Conf-StaticNew-初始化空对象", opts: []static.Option{}, want: defaultObj},
+		{name: "3. Conf-StaticNew-初始化image对象", opts: []static.Option{static.WithImages()}, want: defaultObj},
+		{name: "4. Conf-StaticNew-初始化设置全量对象", opts: []static.Option{static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 			static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip")},
 			want: enObj},
 	}
@@ -57,16 +57,16 @@ func TestStatic_AllowRequest(t *testing.T) {
 		args   string
 		want   bool
 	}{
-		{name: "Get支持的方法", fields: static.New(), args: http.MethodGet, want: true},
-		{name: "Head支持的方法", fields: static.New(), args: http.MethodHead, want: true},
-		{name: "Post不支持的方法", fields: static.New(), args: http.MethodPost, want: false},
-		{name: "PUT不支持的方法", fields: static.New(), args: http.MethodPut, want: false},
-		{name: "PATCH不支持的方法", fields: static.New(), args: http.MethodPatch, want: false},
-		{name: "DELETE不支持的方法", fields: static.New(), args: http.MethodDelete, want: false},
-		{name: "CONNECT不支持的方法", fields: static.New(), args: http.MethodConnect, want: false},
-		{name: "OPTIONS不支持的方法", fields: static.New(), args: http.MethodOptions, want: false},
-		{name: "TRACE不支持的方法", fields: static.New(), args: http.MethodTrace, want: false},
-		{name: "other不支持的方法", fields: static.New(), args: "other", want: false},
+		{name: "1. Conf-StaticAllowRequest-Get支持的方法", fields: static.New(), args: http.MethodGet, want: true},
+		{name: "2. Conf-StaticAllowRequest-Head支持的方法", fields: static.New(), args: http.MethodHead, want: true},
+		{name: "3. Conf-StaticAllowRequest-Post不支持的方法", fields: static.New(), args: http.MethodPost, want: false},
+		{name: "4. Conf-StaticAllowRequest-PUT不支持的方法", fields: static.New(), args: http.MethodPut, want: false},
+		{name: "5. Conf-StaticAllowRequest-PATCH不支持的方法", fields: static.New(), args: http.MethodPatch, want: false},
+		{name: "6. Conf-StaticAllowRequest-DELETE不支持的方法", fields: static.New(), args: http.MethodDelete, want: false},
+		{name: "7. Conf-StaticAllowRequest-CONNECT不支持的方法", fields: static.New(), args: http.MethodConnect, want: false},
+		{name: "8. Conf-StaticAllowRequest-OPTIONS不支持的方法", fields: static.New(), args: http.MethodOptions, want: false},
+		{name: "9. Conf-StaticAllowRequest-TRACE不支持的方法", fields: static.New(), args: http.MethodTrace, want: false},
+		{name: "10. Conf-StaticAllowRequest-other不支持的方法", fields: static.New(), args: "other", want: false},
 	}
 	for _, tt := range tests {
 		got := tt.fields.AllowRequest(tt.args)
@@ -111,11 +111,11 @@ func TestStatic_IsFavRobot(t *testing.T) {
 		rPath  string
 		wantB  bool
 	}{
-		{name: "/favicon.ico文件", fields: static.New(), rPath: "/favicon.ico", wantB: true},
-		{name: "/robots.txt文件", fields: static.New(), rPath: "/robots.txt", wantB: true},
-		{name: "favicon.ico文件", fields: static.New(), rPath: "favicon.ico", wantB: false},
-		{name: "robots.txt文件", fields: static.New(), rPath: "robots.txt", wantB: false},
-		{name: "other文件", fields: static.New(), rPath: "test", wantB: false},
+		{name: "1. Conf-StaticIsFavRobot-/favicon.ico文件", fields: static.New(), rPath: "/favicon.ico", wantB: true},
+		{name: "2. Conf-StaticIsFavRobot-/robots.txt文件", fields: static.New(), rPath: "/robots.txt", wantB: true},
+		{name: "3. Conf-StaticIsFavRobot-favicon.ico文件", fields: static.New(), rPath: "favicon.ico", wantB: false},
+		{name: "4. Conf-StaticIsFavRobot-robots.txt文件", fields: static.New(), rPath: "robots.txt", wantB: false},
+		{name: "5. Conf-StaticIsFavRobot-other文件", fields: static.New(), rPath: "test", wantB: false},
 	}
 	for _, tt := range tests {
 		gotB := tt.fields.IsFavRobot(tt.rPath)
@@ -130,11 +130,11 @@ func TestStatic_IsExclude(t *testing.T) {
 		rPath  string
 		want   bool
 	}{
-		{name: "空Exclude对象", fields: static.New(), rPath: "/test", want: false},
-		{name: "Exclude对象,路径匹配成功", fields: static.New(static.WithExclude("/test")), rPath: "/test", want: true},
-		{name: "Exclude对象，扩展名匹配成功", fields: static.New(static.WithExclude(".so")), rPath: "/test1.so", want: true},
-		{name: "Exclude对象，路径匹配失败", fields: static.New(static.WithExclude("/test11")), rPath: "/test1", want: false},
-		{name: "Exclude对象，扩展名匹配失败", fields: static.New(static.WithExclude(".so")), rPath: "/test11.txt", want: false},
+		{name: "1. Conf-StaticIsExclude-空Exclude对象", fields: static.New(), rPath: "/test", want: false},
+		{name: "2. Conf-StaticIsExclude-Exclude对象,路径匹配成功", fields: static.New(static.WithExclude("/test")), rPath: "/test", want: true},
+		{name: "3. Conf-StaticIsExclude-Exclude对象，扩展名匹配成功", fields: static.New(static.WithExclude(".so")), rPath: "/test1.so", want: true},
+		{name: "4. Conf-StaticIsExclude-Exclude对象，路径匹配失败", fields: static.New(static.WithExclude("/test11")), rPath: "/test1", want: false},
+		{name: "5. Conf-StaticIsExclude-Exclude对象，扩展名匹配失败", fields: static.New(static.WithExclude(".so")), rPath: "/test11.txt", want: false},
 	}
 	for _, tt := range tests {
 		got := tt.fields.IsExclude(tt.rPath)
@@ -149,10 +149,10 @@ func TestStatic_HasPrefix(t *testing.T) {
 		rPath  string
 		want   bool
 	}{
-		{name: "空Prefix对象", fields: static.New(), rPath: "/test", want: false},
-		{name: "Prefix对象，是前缀", fields: static.New(static.WithPrefix("/t")), rPath: "/test", want: true},
-		{name: "Prefix对象，不是前缀", fields: static.New(static.WithPrefix("xxx")), rPath: "tatest", want: false},
-		{name: "Prefix对象，与前缀相同", fields: static.New(static.WithPrefix("xxx")), rPath: "xxx", want: true},
+		{name: "1. Conf-StaticHasPrefix-空Prefix对象", fields: static.New(), rPath: "/test", want: false},
+		{name: "2. Conf-StaticHasPrefix-Prefix对象，是前缀", fields: static.New(static.WithPrefix("/t")), rPath: "/test", want: true},
+		{name: "3. Conf-StaticHasPrefix-Prefix对象，不是前缀", fields: static.New(static.WithPrefix("xxx")), rPath: "tatest", want: false},
+		{name: "4. Conf-StaticHasPrefix-Prefix对象，与前缀相同", fields: static.New(static.WithPrefix("xxx")), rPath: "xxx", want: true},
 	}
 	for _, tt := range tests {
 		got := tt.fields.HasPrefix(tt.rPath)
@@ -167,12 +167,12 @@ func TestStatic_IsContainExt(t *testing.T) {
 		rPath  string
 		want   bool
 	}{
-		{name: "空exts对象，不限制，错误入参", fields: static.New(), rPath: "/test", want: false},
-		{name: "空exts对象，不限制，正确入参", fields: static.New(), rPath: "/test.xx", want: true},
-		{name: "错误的如参路径,没有扩展数据", fields: static.New(static.WithExts("*")), rPath: "test", want: false},
-		{name: "错误的如参路径,*通配", fields: static.New(static.WithExts("*")), rPath: "test.xxx", want: true},
-		{name: "错误的如参路径,指定扩展对象,匹配失败", fields: static.New(static.WithExts(".xx", ".tt")), rPath: "test.xxw", want: false},
-		{name: "错误的如参路径,指定扩展对象，匹配成功", fields: static.New(static.WithExts(".xx", ".tt")), rPath: "test.xx", want: true},
+		{name: "1. Conf-StaticIsContainExt-空exts对象，不限制，错误入参", fields: static.New(), rPath: "/test", want: false},
+		{name: "2. Conf-StaticIsContainExt-空exts对象，不限制，正确入参", fields: static.New(), rPath: "/test.xx", want: true},
+		{name: "3. Conf-StaticIsContainExt-错误的如参路径,没有扩展数据", fields: static.New(static.WithExts("*")), rPath: "test", want: false},
+		{name: "4. Conf-StaticIsContainExt-错误的如参路径,*通配", fields: static.New(static.WithExts("*")), rPath: "test.xxx", want: true},
+		{name: "5. Conf-StaticIsContainExt-错误的如参路径,指定扩展对象,匹配失败", fields: static.New(static.WithExts(".xx", ".tt")), rPath: "test.xxw", want: false},
+		{name: "6. Conf-StaticIsContainExt-错误的如参路径,指定扩展对象，匹配成功", fields: static.New(static.WithExts(".xx", ".tt")), rPath: "test.xx", want: true},
 	}
 	for _, tt := range tests {
 		got := tt.fields.IsContainExt(tt.rPath)
@@ -187,11 +187,11 @@ func TestStatic_NeedRewrite(t *testing.T) {
 		args   string
 		want   bool
 	}{
-		{name: "空Rewriters对象", fields: static.New(), args: "/test", want: false},
-		{name: "单个Rewriters对象", fields: static.New(static.WithRewriters("sasa")), args: "/test", want: false},
-		{name: "多个Rewriters对象", fields: static.New(static.WithRewriters("sasa", "sasaq")), args: "sasaq", want: true},
-		{name: "单个Rewriters对象,包含路径", fields: static.New(static.WithRewriters("sasa")), args: "sasaa", want: false},
-		{name: "单个Rewriters对象,被包含路径", fields: static.New(static.WithRewriters("sasa")), args: "sa", want: false},
+		{name: "1. Conf-StaticNeedRewrite-空Rewriters对象", fields: static.New(), args: "/test", want: false},
+		{name: "2. Conf-StaticNeedRewrite-单个Rewriters对象", fields: static.New(static.WithRewriters("sasa")), args: "/test", want: false},
+		{name: "3. Conf-StaticNeedRewrite-多个Rewriters对象", fields: static.New(static.WithRewriters("sasa", "sasaq")), args: "sasaq", want: true},
+		{name: "4. Conf-StaticNeedRewrite-单个Rewriters对象,包含路径", fields: static.New(static.WithRewriters("sasa")), args: "sasaa", want: false},
+		{name: "5. Conf-StaticNeedRewrite-单个Rewriters对象,被包含路径", fields: static.New(static.WithRewriters("sasa")), args: "sa", want: false},
 	}
 	for _, tt := range tests {
 		got := tt.fields.NeedRewrite(tt.args)
@@ -212,10 +212,10 @@ func TestStatic_GetGzFile(t *testing.T) {
 		rPath  string
 		want   string
 	}{
-		{name: "空对象获取", fields: defaultObj, rPath: "/test", want: ""},
-		{name: "对象获取，失败", fields: enObj, rPath: "/test", want: ""},
-		{name: "对象获取，成功", fields: enObj, rPath: "t2", want: "t2.gz"},
-		{name: "对象获取，不是压缩文件", fields: enObj, rPath: "t3", want: ""},
+		{name: "1. Conf-StaticGetGzFile-空对象获取", fields: defaultObj, rPath: "/test", want: ""},
+		{name: "2. Conf-StaticGetGzFile-对象获取，失败", fields: enObj, rPath: "/test", want: ""},
+		{name: "3. Conf-StaticGetGzFile-对象获取，成功", fields: enObj, rPath: "t2", want: "t2.gz"},
+		{name: "4. Conf-StaticGetGzFile-对象获取，不是压缩文件", fields: enObj, rPath: "t3", want: ""},
 	}
 	for _, tt := range tests {
 		got := tt.fields.GetGzFile(tt.rPath)
@@ -238,14 +238,14 @@ func TestStatic_IsStatic(t *testing.T) {
 		want      bool
 		wantXname string
 	}{
-		{name: "是IsFavRobot", fields: disableObj, args: args{rPath: "/favicon.ico", method: ""}, want: true, wantXname: filepath.Join(disableObj.Dir, "/favicon.ico")},
-		{name: "是Disable", fields: disableObj, args: args{rPath: "/sdsdsd.ico", method: ""}, want: false, wantXname: ""},
-		{name: "不允许的请求方式", fields: enobj, args: args{rPath: "/sdsdsd.ico", method: "POST"}, want: false, wantXname: ""},
-		{name: "是排除路径", fields: enobj, args: args{rPath: "/views/dd", method: "GET"}, want: false, wantXname: ""},
-		{name: "是允许的扩展文件", fields: enobj, args: args{rPath: "/ttt/dd.html", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, "/ttt/dd.html")},
-		{name: "不允许的扩展文件，但是是指定前缀", fields: enobj, args: args{rPath: "/ssss/dd.xx", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, strings.TrimPrefix("/ssss/dd.xx", enobj.Prefix))},
-		{name: "不允许的扩展文件且不是指定前缀，需要转发", fields: enobj, args: args{rPath: "indextest.htm", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, enobj.FirstPage)},
-		{name: "所有条件都不满足", fields: enobj, args: args{rPath: "test.htm", method: "GET"}, want: false, wantXname: ""},
+		{name: "1. Conf-StaticIsStatic-是IsFavRobot", fields: disableObj, args: args{rPath: "/favicon.ico", method: ""}, want: true, wantXname: filepath.Join(disableObj.Dir, "/favicon.ico")},
+		{name: "2. Conf-StaticIsStatic-是Disable", fields: disableObj, args: args{rPath: "/sdsdsd.ico", method: ""}, want: false, wantXname: ""},
+		{name: "3. Conf-StaticIsStatic-不允许的请求方式", fields: enobj, args: args{rPath: "/sdsdsd.ico", method: "POST"}, want: false, wantXname: ""},
+		{name: "4. Conf-StaticIsStatic-是排除路径", fields: enobj, args: args{rPath: "/views/dd", method: "GET"}, want: false, wantXname: ""},
+		{name: "5. Conf-StaticIsStatic-是允许的扩展文件", fields: enobj, args: args{rPath: "/ttt/dd.html", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, "/ttt/dd.html")},
+		{name: "6. Conf-StaticIsStatic-不允许的扩展文件，但是是指定前缀", fields: enobj, args: args{rPath: "/ssss/dd.xx", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, strings.TrimPrefix("/ssss/dd.xx", enobj.Prefix))},
+		{name: "7. Conf-StaticIsStatic-不允许的扩展文件且不是指定前缀，需要转发", fields: enobj, args: args{rPath: "indextest.htm", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, enobj.FirstPage)},
+		{name: "8. Conf-StaticIsStatic-所有条件都不满足", fields: enobj, args: args{rPath: "test.htm", method: "GET"}, want: false, wantXname: ""},
 	}
 	for _, tt := range tests {
 		gotB, gotXname := tt.fields.IsStatic(tt.args.rPath, tt.args.method)
@@ -258,9 +258,7 @@ func TestStatic_RereshData(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *static.Static
-	}{
-		// TODO: Add test cases.
-	}
+	}{}
 	for _, tt := range tests {
 		tt.fields.RereshData()
 	}

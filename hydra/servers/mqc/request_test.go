@@ -17,8 +17,8 @@ func TestNewRequest(t *testing.T) {
 		hasData   bool
 		errStr    string
 	}{
-		{name: "队列数据格式错误", queueName: "queue", service: "service", message: `message`, hasData: true, errStr: "队列queue中存放的数据不是有效的json:message invalid character 'm' looking for beginning of value"},
-		{name: "添加队列数据", queueName: "queue", service: "service", message: `{"key":"value","__header__":{"Content-Type":"application/json"}}`, hasData: true},
+		{name: "1. mqc-NewRequest-队列数据格式错误", queueName: "queue", service: "service", message: `message`, hasData: true, errStr: "队列queue中存放的数据不是有效的json:message invalid character 'm' looking for beginning of value"},
+		{name: "2. mqc-NewRequest-添加队列数据", queueName: "queue", service: "service", message: `{"key":"value","__header__":{"Content-Type":"application/json"}}`, hasData: true},
 	}
 	for _, tt := range tests {
 		gotR, err := NewRequest(queue.NewQueue(tt.queueName, tt.service), &redis.RedisMessage{Message: tt.message, HasData: tt.hasData})

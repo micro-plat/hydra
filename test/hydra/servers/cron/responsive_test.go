@@ -46,12 +46,11 @@ func TestNewResponsive(t *testing.T) {
 		wantH   *cron.Server
 		wantErr bool
 	}{
-		{name: "初始化实体对象", cnf: confObj.GetCronConf(), wantH: server, wantErr: true},
+		{name: "1. 初始化实体对象", cnf: confObj.GetCronConf(), wantH: server, wantErr: true},
 	}
 	for _, tt := range tests {
 		_, err := cron.NewResponsive(tt.cnf)
 		assert.Equalf(t, tt.wantErr, err == nil, tt.name+",err")
-		// assert.Equal(t, tt.wantH, gotH.Server, tt.name+",server")
 	}
 }
 
@@ -62,8 +61,6 @@ func TestResponsive_Start(t *testing.T) {
 	tests := []struct {
 		name        string
 		cnf         app.IAPPConf
-		serverName  string
-		serverType  string
 		starting    func(app.IAPPConf) error
 		closing     func(app.IAPPConf) error
 		isConfStart bool //禁用服务
@@ -72,40 +69,10 @@ func TestResponsive_Start(t *testing.T) {
 		wantSubErr  string
 		wantLog     string
 	}{
-		{name: "starting报错",
-			cnf:        confObj.GetCronConf(),
-			serverType: "cron",
-			starting:   func(app.IAPPConf) error { return fmt.Errorf("err") },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantErr:    "err",
-		},
-		{name: "禁用服务",
-			cnf:         confObj.GetCronConf(),
-			serverType:  "cron",
-			serverName:  "cronserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return nil },
-			isConfStart: true,
-			wantLog:     "cron被禁用，未启动",
-		},
-		{name: "注册中心服务发布失败",
-			cnf:         confObj.GetCronConf(),
-			serverType:  "cron",
-			serverName:  "cronserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return fmt.Errorf("closing_err") },
-			isServerPub: true,
-			wantSubErr:  "cron服务发布失败 服务发布失败:",
-			wantLog:     "关闭[closing_err]服务,出现错误",
-		},
-		{name: "启动cron服务成功",
-			cnf:        confObj.GetCronConf(),
-			serverType: "cron",
-			serverName: "cronserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(cron,",
-		},
+		{name: "1. 启动cron服务-starting报错", cnf: confObj.GetCronConf(), starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动cron服务-禁用服务", cnf: confObj.GetCronConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "cron被禁用，未启动"},
+		{name: "3. 启动cron服务-注册中心服务发布失败", cnf: confObj.GetCronConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "cron服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "4. 启动cron服务-启动服务成功", cnf: confObj.GetCronConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(cron,"},
 	}
 	for _, tt := range tests {
 		//starting
@@ -116,7 +83,7 @@ func TestResponsive_Start(t *testing.T) {
 
 		//禁用服务
 		if tt.isConfStart {
-			path := fmt.Sprintf("/cronserver_resserivece_test1/%s/%s/testcronsdf1/conf", tt.serverName, tt.serverType)
+			path := "/cronserver_resserivece_test1/cronserver/cron/testcronsdf1/conf"
 			err := reg.Update(path, `{"status":"stop"}`)
 			assert.Equal(t, nil, err, tt.name+"禁用服务")
 			tt.cnf, _ = app.NewAPPConf(path, reg)
@@ -124,10 +91,10 @@ func TestResponsive_Start(t *testing.T) {
 
 		//创建节点使服务发布报错
 		if tt.isServerPub {
-			newConfObj := mocks.NewConfBy("hydra", "test", "fs://./") //构建对象
+			newConfObj := mocks.NewConfBy("cronserver_resserivece_test1", "testcronsdf1", "fs://./") //构建对象
 			newConfObj.CRON()
 			tt.cnf = newConfObj.GetCronConf()
-			path := fmt.Sprintf("./hydra/%s/%s/test/servers", tt.serverName, tt.serverType)
+			path := "./cronserver_resserivece_test1/cronserver/cron/testcronsdf1/servers"
 			os.RemoveAll(path) //删除文件夹
 			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
 		}
@@ -149,11 +116,11 @@ func TestResponsive_Start(t *testing.T) {
 		w.Close()
 		out, _ := ioutil.ReadAll(r)
 		rescueTestStdout(rescueStdout)
-		fmt.Println("xxxx:", string(out))
+		// fmt.Println("xxxx:", string(out))
 
 		//删除节点文件
 		if tt.isServerPub {
-			os.RemoveAll("./hydra") //删除文件夹
+			os.RemoveAll("./cronserver_resserivece_test1") //删除文件夹
 		}
 
 		if tt.wantErr != "" {
