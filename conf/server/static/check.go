@@ -1,6 +1,7 @@
 package static
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -28,6 +29,9 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 	if s.NeedRewrite(rPath) {
 		return true, filepath.Join(s.Dir, s.FirstPage)
 	}
+
+	//不能读取没有扩展名的文件
+	//IsContainExt和HasPrefix，IsContainExt的判断顺序存在问题
 	return false, ""
 }
 
@@ -57,10 +61,12 @@ func (s *Static) IsExclude(rPath string) bool {
 	pExt := filepath.Ext(name)
 	hasExt := strings.Contains(pExt, ".")
 	for _, v := range s.Exclude {
-		if hasExt {
-			return strings.EqualFold(pExt, v)
+		if hasExt && strings.EqualFold(pExt, v) {
+			return true
 		}
-		return strings.EqualFold(rPath, v)
+		if strings.EqualFold(rPath, v) {
+			return true
+		}
 	}
 	return false
 }
@@ -68,12 +74,20 @@ func (s *Static) IsExclude(rPath string) bool {
 //IsContainExt 是否是包含在指定的ext中
 func (s *Static) IsContainExt(rPath string) bool {
 
+	if _, err := os.Stat(filepath.Join(s.Dir, rPath)); err != nil {
+		if os.IsNotExist(err) {
+			//文件不存在   直接返回false
+			return false
+		}
+	}
+
 	name := filepath.Base(rPath)
 	pExt := filepath.Ext(name)
 	hasExt := strings.Contains(pExt, ".")
 	if !hasExt {
 		return false
 	}
+
 	if len(s.Exts) == 0 {
 		return true
 	}

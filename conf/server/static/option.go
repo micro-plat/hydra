@@ -9,7 +9,7 @@ const DefaultSataticDir = "./src"
 const DefaultFirstPage = "index.html"
 
 //DefaultRewriters 默认需要重写的路径
-var DefaultRewriters = []string{"/", "index.htm", "default.html", "default.htm"}
+var DefaultRewriters = []string{"/", "/index.htm", "/default.html", "/default.htm"}
 
 //DefaultExclude 默认需要排除的文件,扩展名,路径
 var DefaultExclude = []string{"/view/", "/views/", "/web/", ".exe", ".so"}
