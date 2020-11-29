@@ -7,7 +7,6 @@ trace.out
 
 launch.json
 apiserver*
-rpcserver*
 mqcserver*
 cronserver*
 flowserver*
