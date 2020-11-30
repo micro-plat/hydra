@@ -7,11 +7,11 @@ import (
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
-//CronExxcuteOnce cron单次执行标识
-const CronExxcuteOnce = "@once"
+//CronExecuteOnce cron单次执行标识
+const CronExecuteOnce = "@once"
 
-//CronExxcuteNow cron单次立即执行标识
-const CronExxcuteNow = "@now"
+//CronExecuteNow cron单次立即执行标识
+const CronExecuteNow = "@now"
 
 //Task cron任务的task明细
 type Task struct {
@@ -40,7 +40,7 @@ func (t *Task) GetUNQ() string {
 
 //IsOnce 是否只需要处理一次
 func (t *Task) IsOnce() bool {
-	return t.Cron == CronExxcuteOnce || t.Cron == CronExxcuteNow
+	return t.Cron == CronExecuteOnce || t.Cron == CronExecuteNow
 }
 
 //Validate 验证任务参数
