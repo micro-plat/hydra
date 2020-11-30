@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -54,7 +55,6 @@ func (r *request) Param(key string) string {
 
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
-
 	//检查输入类型
 	val := reflect.ValueOf(obj)
 	if val.Kind() != reflect.Ptr {
@@ -71,7 +71,15 @@ func (r *request) Bind(obj interface{}) error {
 		return err
 	}
 	if val.Kind() == reflect.Map {
-		obj = mp
+		jsonData, err := json.Marshal(mp)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(jsonData, obj)
+		if err != nil {
+			return err
+		}
+		//obj = mp
 		return nil
 	}
 

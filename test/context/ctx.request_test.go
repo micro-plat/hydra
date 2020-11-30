@@ -39,13 +39,13 @@ func Test_request_Bind(t *testing.T) {
 		{name: "1.1 参数非指针", out: map[string]string{}, wantErrStr: "输入参数非指针 map"},
 		{name: "1.2 参数类型非struct,map", out: &res, wantErrStr: "输入参数非struct,map string"},
 
-		//{name: "2.1 内容为xml,绑定MAP", contentType: "application/xml", isMap: true, body: getTestBody(value, "UTF-8", "xml"), out: &map[string]string{}, want: &map[string]interface{}{"key": value}},
+		{name: "2.1 内容为xml,绑定MAP", contentType: "application/xml", isMap: true, body: getTestBody(value, "UTF-8", "xml"), out: &map[string]interface{}{}, want: &map[string]interface{}{"xml": map[string]interface{}{"key": value}}},
 		{name: "2.2 内容为xml,绑定Struct", contentType: "application/xml", body: getTestBody(value, "UTF-8", "xml"), out: &xmlResult{}, want: &xmlResult{Xml: result{Key: value}}},
-		//{name: "3.1 内容为json,绑定MAP", contentType: "application/json", body: getTestBody(value, "UTF-8", "json"), out: &mapResult, want: &map[string]interface{}{"key": value}},
+		{name: "3.1 内容为json,绑定MAP", contentType: "application/json", body: getTestBody(value, "UTF-8", "json"), out: &map[string]interface{}{}, want: &map[string]interface{}{"key": value}},
 		{name: "3.2 内容为json,绑定Struct", contentType: "application/json", body: getTestBody(value, "UTF-8", "json"), out: &result{}, want: &result{Key: value}},
-		//{name: "4.1 内容为yaml,绑定MAP", contentType: "application/x-yaml", body: getTestBody(value, "UTF-8", "yaml"), out: &mapResult, want: &map[string]interface{}{"key": value}},
+		{name: "4.1 内容为yaml,绑定MAP", contentType: "application/x-yaml", body: getTestBody(value, "UTF-8", "yaml"), out: &map[string]interface{}{}, want: &map[string]interface{}{"key": value}},
 		{name: "4.2 内容为yaml,绑定Struct", contentType: "application/x-yaml", body: getTestBody(value, "UTF-8", "yaml"), out: &result{}, want: &result{Key: value}},
-		//{name: "5.1 内容为form,绑定MAP", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), out: &mapResult, want: &map[string]interface{}{"key": value}},
+		{name: "5.1 内容为form,绑定MAP", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), out: &map[string]interface{}{}, want: &map[string]interface{}{"key": value}},
 		{name: "5.2 内容为form,绑定Struct", contentType: "application/x-www-form-urlencoded", body: getTestBody(value, "UTF-8", "form"), out: &result{}, want: &result{Key: value}},
 	}
 
@@ -56,7 +56,7 @@ func Test_request_Bind(t *testing.T) {
 
 	for _, tt := range tests {
 
-		//构建请求 方法要与注册方法一致
+		//构建请求
 		r, err := http.NewRequest("POST", "http://localhost:8080/url?", bytes.NewReader(tt.body))
 		assert.Equal(t, nil, err, "构建请求")
 
@@ -109,7 +109,7 @@ func Test_request_Check(t *testing.T) {
 
 	for _, tt := range tests {
 
-		//构建请求 方法要与注册方法一致
+		//构建请求
 		r, err := http.NewRequest("POST", "http://localhost:8080/url?"+tt.queryRaw, bytes.NewReader([]byte(tt.body)))
 		assert.Equal(t, nil, err, "构建请求")
 
@@ -157,7 +157,7 @@ func Test_request_GetKeys(t *testing.T) {
 
 	for _, tt := range tests {
 
-		//构建请求 方法要与注册方法一致
+		//构建请求
 		r, err := http.NewRequest("POST", "http://localhost:8080/url?"+tt.queryRaw, bytes.NewReader([]byte(tt.body)))
 		assert.Equal(t, nil, err, "构建请求")
 
