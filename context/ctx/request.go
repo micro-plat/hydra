@@ -190,7 +190,7 @@ func (r *request) IsEmpty(name string) bool {
 
 //GetPlayload 获取trace信息
 func (r *request) GetPlayload() string {
-	raw, _ := r.GetRawBody()
+	raw, _ := r.GetBody()
 	return string(raw)
 }
 
