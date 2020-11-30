@@ -127,8 +127,8 @@ func TestCluster_GetServerType(t *testing.T) {
 		fields *server.Cluster
 		want   string
 	}{
-		{name: "实体对象", fields: obj1, want: "serverType"},
-		{name: "实体对象1", fields: obj2, want: "xxxx"},
+		{name: "1. Cluster-实体对象", fields: obj1, want: "serverType"},
+		{name: "2. Cluster-实体对象1", fields: obj2, want: "xxxx"},
 	}
 	for _, tt := range tests {
 		got := tt.fields.GetServerType()

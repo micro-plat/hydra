@@ -189,10 +189,10 @@ func Test_request_GetCookies(t *testing.T) {
 		want        types.XMap
 	}{
 		//net/http: invalid byte 'Ö' in Cookie.Value; dropping invalid bytes
-		{name: "cookie内容为中文GBK", contentType: "application/json;charset=gbk", cookie: http.Cookie{Name: "cname", Value: Utf8ToGbk("中文")}, want: types.XMap{"cname": ""}},
+		{name: "1. cookie内容为中文GBK", contentType: "application/json;charset=gbk", cookie: http.Cookie{Name: "cname", Value: Utf8ToGbk("中文")}, want: types.XMap{"cname": ""}},
 		//net/http: invalid byte 'ä' in Cookie.Value; dropping invalid bytes
-		{name: "cookie内容为中文UTF-8", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "中文"}, want: types.XMap{"cname": ""}},
-		{name: "cookie内容不存在中文", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "value!@#$%^&*()_+="}, want: types.XMap{"cname": "value!@#$%^\u0026*()_+="}},
+		{name: "2. cookie内容为中文UTF-8", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "中文"}, want: types.XMap{"cname": ""}},
+		{name: "3. cookie内容不存在中文", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "value!@#$%^&*()_+="}, want: types.XMap{"cname": "value!@#$%^\u0026*()_+="}},
 	}
 
 	confObj := mocks.NewConf()         //构建对象
