@@ -21,10 +21,7 @@ func TestNewCtx(t *testing.T) {
 		serverConf := confObj.GetAPIConf()                  //获取配置
 		_, _ = http.NewResponsive(serverConf)
 	}
-	uu, _ := url.Parse("http://192.168.0.1:9090/api")
-	got := ctx.NewCtx(&mocks.TestContxt{
-		URL: uu,
-	}, h.API)
+	got := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
 	assert.NotEqual(t, nil, got, "获取ctx对象")
 }
 
@@ -39,6 +36,8 @@ func TestCtx_Close(t *testing.T) {
 	c := ctx.NewCtx(&mocks.TestContxt{
 		URL: uu,
 	}, h.API)
+
+	c := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
 
 	c.Close()
 
