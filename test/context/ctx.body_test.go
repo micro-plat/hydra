@@ -480,7 +480,7 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 		if tt.isBody && !tt.isQuery {
 			assert.Equal(t, fmt.Sprintf("key=%s", tt.value), gotS, tt.name)
 		}
-		if tt.isQuery && tt.isBody && (tt.method != "GET" && tt.method != "DELETE") { //body和query的数据都有
+		if tt.isQuery && tt.isBody { //body和query的数据都有
 			assert.Equal(t, fmt.Sprintf("key=%s&query=%s", tt.value, tt.value), gotS, tt.name)
 		}
 		gotS2, err := w.GetBody()
