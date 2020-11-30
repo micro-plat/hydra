@@ -236,9 +236,9 @@ func TestPublisher_Update(t *testing.T) {
 		wantChildrenLen int
 		wantValueErr    bool
 	}{
-		{name: "更新已经存在的API节点的不存在值", path: path, k: "key1", v: "value1", wantChildrenLen: 1},
-		{name: "更新已经存在的API节点的存在值", path: path, k: "key1", v: "value1-1", wantChildrenLen: 1},
-		{name: "更新不存在的API节点的值", path: path + "/ss", k: "key1", v: "value1", wantChildrenLen: 0},
+		{name: "1.更新已经存在的节点的不存在值", path: path, k: "key1", v: "value1", wantChildrenLen: 1},
+		{name: "2.更新已经存在的节点的存在值", path: path, k: "key1", v: "value1-1", wantChildrenLen: 1},
+		{name: "3.更新不存在的节点的值", path: path + "/ss", k: "key1", v: "value1", wantChildrenLen: 0},
 	}
 
 	p := pub.New(c)

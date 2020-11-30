@@ -54,8 +54,7 @@ func TestMultiValueWatcher_Start(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "1. Watcher-Start-监控过程中,值未发生改变", path: c.GetServerPubPath(), r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
-		{name: "2. Watcher-Start-监控过程中,值发生改变", path: "/platname/apiserver/api/test/hosts/server1",
-			r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
+		{name: "2. Watcher-Start-监控过程中,值发生改变", path: "/platname/apiserver/api/test/hosts/server1", r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantOp: watcher.ADD, wantErr: false},
 	}
 
 	router, _ := apiconf.GetRouterConf()

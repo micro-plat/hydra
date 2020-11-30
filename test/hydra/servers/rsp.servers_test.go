@@ -158,7 +158,7 @@ func TestRspServers_Start_ServerStartErr(t *testing.T) {
 		isFirst    bool
 		wantErr    bool
 	}{
-		{name: "1. 启动apiServer失败,之后延迟启动成功", serverName: "apiserver", sysType: "api"},
+		{name: "启动Server失败,之后延迟启动成功", serverName: "apiserver", sysType: "api"},
 	}
 
 	platName := "servershydra_test1"

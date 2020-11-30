@@ -51,9 +51,6 @@ func TestChildWatcher_Start(t *testing.T) {
 		wantOp  int
 		wantErr bool
 	}{
-		// {name: "获取错误路径的节点变动", path: "/a/b/c", r: c.GetRegistry(), wantErr: false},  //@watch方法 陷入死循环
-		// {name: "监控过程中,注册中心节点存在,获取子节点发生错误", path: "/platname/apiserver/api/test/hosts1/",
-		// r: mocks.NewTestRegistry("platname", "apiserver", "test", ""), wantErr: false},   //watch方法陷入死循环
 		{name: "1. 深度为1,监控过程中,子节点未改变", path: registry.Join(c.GetServerPubPath(), addr1), deep: 1, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
 		{name: "2. 深度为1,监控过程中,子节点改变", path: registry.Join(c.GetServerPubPath(), addr1), deep: 1, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},
 		{name: "3. 深度为2,监控过程中,子节点未改变", path: c.GetServerPubPath(), deep: 2, r: c.GetRegistry(), wantOp: watcher.ADD, wantErr: false},

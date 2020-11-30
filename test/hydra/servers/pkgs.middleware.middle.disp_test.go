@@ -251,11 +251,7 @@ func Test_dispCtx_ShouldBind(t *testing.T) {
 	}{
 		{name: "GetForm为空", request: getTestCronTask("@every 1h30m", "cron_service"), bind: map[string]interface{}{}, want: map[string]interface{}{}},
 		{name: "mqc,__body_为空", request: getTestMqcQueue("queue_name", "queue_service", `{}`, true), bind: map[string]interface{}{}, want: map[string]interface{}{}},
-		{name: "mqc,__body_不为空", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true),
-			bind: map[string]interface{}{}, want: map[string]interface{}{
-				"__body_": `{"data":"message"}`,
-				"data":    "message",
-			}},
+		{name: "mqc,__body_不为空", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), bind: map[string]interface{}{}, want: map[string]interface{}{"__body_": `{"data":"message"}`, "data": "message"}},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
