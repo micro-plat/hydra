@@ -33,20 +33,13 @@ func TestLimit(t *testing.T) {
 		{name: "1.4 限流-配置存在-未启用-在限流配置内", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{}},
 
 		{name: "2.1 限流-配置存在-启用-无数据", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable()}},
-		{name: "2.2 限流-配置存在-启用-不在限流配置内-不延迟", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
-		{name: "2.3 限流-配置存在-启用-不在限流配置内-延迟-不降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
-		{name: "2.4 限流-配置存在-启用-不在限流配置内-延迟-降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "2.2 限流-配置存在-启用-不在限流配置内-不延迟", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "2.3 限流-配置存在-启用-不在限流配置内-延迟-不降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "2.4 限流-配置存在-启用-不在限流配置内-延迟-降级", requestPath: "/limiter-notin", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
 
-		{name: "3.1 限流-配置存在-启用-在限流配置内-不延迟", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
-		{name: "3.2 限流-配置存在-启用-在限流配置内-延迟-降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})}},
-		{name: "3.3 限流-配置存在-启用-在限流配置内-延迟-不降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit",
-			opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})},
-		},
+		{name: "3.1 限流-配置存在-启用-在限流配置内-不延迟", requestPath: "/limiter", wantStatus: 200, wantContent: "", wantSpecial: "", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 1, MaxWait: 0, Fallback: false, Resp: &limiter.Resp{Status: 510, Content: "fallback"}})}},
+		{name: "3.2 限流-配置存在-启用-在限流配置内-延迟-降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: false, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})}},
+		{name: "3.3 限流-配置存在-启用-在限流配置内-延迟-不降级", requestPath: "/limiter", wantStatus: 410, wantContent: "fallback", wantSpecial: "limit", opts: []limiter.Option{limiter.WithEnable(), limiter.WithRuleList(&limiter.Rule{Path: "/limiter", MaxAllow: 0, MaxWait: 1, Fallback: true, Resp: &limiter.Resp{Status: 410, Content: "fallback"}})}},
 	}
 	for _, tt := range tests {
 		global.Def.ServerTypes = []string{http.API}

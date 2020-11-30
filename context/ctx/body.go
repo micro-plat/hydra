@@ -149,9 +149,8 @@ func (w *body) GetBody() (s string, err error) {
 	}
 
 	//处理编码问题
-	buff, err = encoding.DecodeBytes(buff, w.encoding)
-	if err != nil {
-		w.fullBody.err = fmt.Errorf("GetBody.DecodeBytes.err:%w", err)
+	buff, w.fullBody.err = urlDecode(buff, w.encoding)
+	if w.fullBody.err != nil {
 		return "", w.fullBody.err
 	}
 	w.fullBody.value = string(buff)
@@ -176,10 +175,6 @@ func (w *body) GetRawBody() (s []byte, err error) {
 
 }
 func urlDecode(v []byte, c string) ([]byte, error) {
-	// s, err := url.QueryUnescape(string(v))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("QueryUnescape.err:%w", err)
-	// }
 	if strings.EqualFold(c, encoding.UTF8) {
 		return v, nil
 	}

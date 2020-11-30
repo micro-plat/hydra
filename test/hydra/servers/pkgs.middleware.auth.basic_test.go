@@ -37,24 +37,16 @@ func TestAuthBasic(t *testing.T) {
 		{name: "1.1 basic-配置不存在", isSet: false, requestPath: "", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{}},
 
 		{name: "2.1 basic-配置存在-未启动-无数据", isSet: true, requestPath: "", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithDisable()}},
-		{name: "2.2 basic-配置存在-未启动-路由存在,被排除", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test")}},
-		{name: "2.3 basic-配置存在-未启动-不排除,认证信息为空", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			reqHeadVal: "suibianchuan", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1")}},
-		{name: "2.4 basic-配置存在-未启动-不排除,认证失败", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			reqHeadVal: "suibianchuan", repHeadVal: "", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
-		{name: "2.5 basic-配置存在-未启动-不排除,认证成功", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			user: "", reqHeadVal: "", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
+		{name: "2.2 basic-配置存在-未启动-路由存在,被排除", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test")}},
+		{name: "2.3 basic-配置存在-未启动-不排除,认证信息为空", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", reqHeadVal: "suibianchuan", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1")}},
+		{name: "2.4 basic-配置存在-未启动-不排除,认证失败", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", reqHeadVal: "suibianchuan", repHeadVal: "", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
+		{name: "2.5 basic-配置存在-未启动-不排除,认证成功", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", user: "", reqHeadVal: "", basicOpts: []basic.Option{basic.WithDisable(), basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
 
 		{name: "3.1 basic-配置存在-启动-无数据", isSet: true, requestPath: "", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithEnable()}},
-		{name: "3.2 basic-配置存在-启动-路由存在,被排除", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			basicOpts: []basic.Option{basic.WithExcludes("/basic/test")}},
-		{name: "3.3 basic-配置存在-启动-不排除,认证信息为空", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "",
-			reqHeadVal: "suibianchuan", basicOpts: []basic.Option{basic.WithExcludes("/basic/test1")}},
-		{name: "3.4 basic-配置存在-启动-不排除,认证失败", isSet: true, requestPath: "/basic/test", wantStatus: 401, wantSpecial: "basic",
-			reqHeadVal: "suibianchuan", repHeadVal: "Basic realm=" + strconv.Quote("Authorization Required"), basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
-		{name: "3.5 basic-配置存在-启动-不排除,认证成功", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "basic",
-			user: "taosy", reqHeadVal: "Basic " + base64.Encode("taosy:tpwd"), basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
+		{name: "3.2 basic-配置存在-启动-路由存在,被排除", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", basicOpts: []basic.Option{basic.WithExcludes("/basic/test")}},
+		{name: "3.3 basic-配置存在-启动-不排除,认证信息为空", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "", reqHeadVal: "suibianchuan", basicOpts: []basic.Option{basic.WithExcludes("/basic/test1")}},
+		{name: "3.4 basic-配置存在-启动-不排除,认证失败", isSet: true, requestPath: "/basic/test", wantStatus: 401, wantSpecial: "basic", reqHeadVal: "suibianchuan", repHeadVal: "Basic realm=" + strconv.Quote("Authorization Required"), basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
+		{name: "3.5 basic-配置存在-启动-不排除,认证成功", isSet: true, requestPath: "/basic/test", wantStatus: 200, wantSpecial: "basic", user: "taosy", reqHeadVal: "Basic " + base64.Encode("taosy:tpwd"), basicOpts: []basic.Option{basic.WithExcludes("/basic/test1"), basic.WithUP("taosy", "tpwd")}},
 	}
 
 	for _, tt := range tests {

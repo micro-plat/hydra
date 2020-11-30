@@ -23,36 +23,9 @@ func TestNewCArgsByChange(t *testing.T) {
 		r        registry.IRegistry
 		want     *watcher.ChildChangeArgs
 	}{
-		{name: "1. 构建子节点变动参数,父节点不为空,无后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*", children: []string{"children1", "children2"},
-			v: 1, r: r, want: &watcher.ChildChangeArgs{
-				OP:       1,
-				Registry: r,
-				Parent:   "a/b/c/!@#$%^&*",
-				Version:  1,
-				Children: []string{"children1", "children2"},
-				Deep:     1,
-				Name:     "!@#$%^&*",
-			}},
-		{name: "2. 构建子节点变动参数,父节点不为空,有后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*/", children: []string{"children1", "children2"},
-			v: 1, r: r, want: &watcher.ChildChangeArgs{
-				OP:       1,
-				Registry: r,
-				Parent:   "a/b/c/!@#$%^&*/",
-				Version:  1,
-				Children: []string{"children1", "children2"},
-				Deep:     1,
-				Name:     "!@#$%^&*",
-			}},
-		{name: "3. 构建子节点变动参数,父节点为空", op: 1, deep: 1, parent: "", children: []string{"children1", "children2"},
-			v: 1, r: r, want: &watcher.ChildChangeArgs{
-				OP:       1,
-				Registry: r,
-				Parent:   "",
-				Version:  1,
-				Children: []string{"children1", "children2"},
-				Deep:     1,
-				Name:     "",
-			}},
+		{name: "1. 构建子节点变动参数,父节点不为空,无后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*", children: []string{"children1", "children2"}, v: 1, r: r, want: &watcher.ChildChangeArgs{OP: 1, Registry: r, Parent: "a/b/c/!@#$%^&*", Version: 1, Children: []string{"children1", "children2"}, Deep: 1, Name: "!@#$%^&*"}},
+		{name: "2. 构建子节点变动参数,父节点不为空,有后/", op: 1, deep: 1, parent: "a/b/c/!@#$%^&*/", children: []string{"children1", "children2"}, v: 1, r: r, want: &watcher.ChildChangeArgs{OP: 1, Registry: r, Parent: "a/b/c/!@#$%^&*/", Version: 1, Children: []string{"children1", "children2"}, Deep: 1, Name: "!@#$%^&*"}},
+		{name: "3. 构建子节点变动参数,父节点为空", op: 1, deep: 1, parent: "", children: []string{"children1", "children2"}, v: 1, r: r, want: &watcher.ChildChangeArgs{OP: 1, Registry: r, Parent: "", Version: 1, Children: []string{"children1", "children2"}, Deep: 1, Name: ""}},
 	}
 
 	for _, tt := range tests {
@@ -60,37 +33,3 @@ func TestNewCArgsByChange(t *testing.T) {
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
-
-// func TestValueChangeArgs_IsConf(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		n    *watcher.ValueChangeArgs
-// 		want bool
-// 	}{
-// 		{name: "conf根节点", n: &watcher.ValueChangeArgs{Path: "/conf"}, want: true},
-// 		{name: "非conf根节点", n: &watcher.ValueChangeArgs{Path: "conf/"}, want: false},
-// 		{name: "conf子节点", n: &watcher.ValueChangeArgs{Path: "/conf/!@#%%^&*"}, want: true},
-// 		{name: "非conf子根节点", n: &watcher.ValueChangeArgs{Path: "conf/a/b"}, want: false},
-// 	}
-// 	for _, tt := range tests {
-// 		got := tt.n.IsConf()
-// 		assert.Equal(t, tt.want, got, tt.name)
-// 	}
-// }
-
-// func TestValueChangeArgs_IsVarRoot(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 		n    *watcher.ValueChangeArgs
-// 		want bool
-// 	}{
-// 		{name: "var根节点", n: &watcher.ValueChangeArgs{Path: "/var"}, want: true},
-// 		{name: "非var根节点", n: &watcher.ValueChangeArgs{Path: "var/"}, want: false},
-// 		{name: "var子节点", n: &watcher.ValueChangeArgs{Path: "/var/!@#%%^&*"}, want: true},
-// 		{name: "非var子根节点", n: &watcher.ValueChangeArgs{Path: "var/a/b"}, want: false},
-// 	}
-// 	for _, tt := range tests {
-// 		got := tt.n.IsVarRoot()
-// 		assert.Equal(t, tt.want, got, tt.name)
-// 	}
-// }
