@@ -30,8 +30,8 @@ func TestServer_GetAddress(t *testing.T) {
 		{name: "1. 参数为空", addr: "127.0.0.1:58080", want: "ws://127.0.0.1:58080"},
 		{name: "2. 参数为ip", addr: "127.0.0.1:58080", h: []string{"192.168.0.1"}, want: "ws://192.168.0.1:58080"},
 		{name: "3. 参数为ip", addr: "0.0.0.0:58080", h: []string{}, want: fmt.Sprintf("ws://%s:58080", global.LocalIP())},
-		{name: "4. 参数为域名", addr: "www.baidu.com:5212", h: []string{}, want: fmt.Sprint("ws://www.baidu.com:5212")},
-		{name: "4. 参数为域名1", addr: "www.baidu.com:5212", h: []string{"192.138.0.101"}, want: fmt.Sprint("ws://192.138.0.101:5212")},
+		{name: "4. 参数为域名-不指定", addr: "www.baidu.com:5212", h: []string{}, want: fmt.Sprint("ws://www.baidu.com:5212")},
+		{name: "5. 参数为域名-指定", addr: "www.baidu.com:5212", h: []string{"192.138.0.101"}, want: fmt.Sprint("ws://192.138.0.101:5212")},
 	}
 	for _, tt := range tests {
 		s, _ := http.NewWSServer("ws", tt.addr, []*router.Router{})

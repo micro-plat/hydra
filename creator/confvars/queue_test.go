@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/queue"
 	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/lib4go/types"
@@ -47,7 +47,7 @@ func TestVarqueue_Redis(t *testing.T) {
 			want: nil, wantErr: "请确认已配置/var/redis"},
 		{name: "3. configname不为空,redis节点存在,无configname节点", fields: NewQueue(map[string]map[string]interface{}{"redis": map[string]interface{}{}}), args: args{name: "redis", q: queueredis.New(queueredis.WithConfigName("address"))},
 			want: nil, wantErr: "请确认已配置/var/redis/address"},
-		{name: "4. configname不为空,节点存在", fields: NewQueue(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})}}),
+		{name: "4. configname不为空,节点存在,configname节点", fields: NewQueue(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})}}),
 			args: args{name: "redis", q: queueredis.New(queueredis.WithConfigName("address"))},
 			want: NewQueue(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})},
 				queue.TypeNodeName: map[string]interface{}{"redis": newRedis}}), wantErr: ""},
@@ -64,6 +64,7 @@ func TestVarqueue_Redis(t *testing.T) {
 			got := tt.fields.Redis(tt.args.name, tt.args.q)
 			assert.Equal(t, tt.want, got, tt.name)
 		}()
+
 	}
 }
 
