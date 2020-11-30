@@ -105,8 +105,8 @@ func TestMainConf_IsTrace(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{name: "没有设置trace", opts: []api.Option{}, want: false, wantErr: true},
-		{name: "没有设置trace", opts: []api.Option{api.WithTrace()}, want: true, wantErr: true},
+		{name: "1. Conf-MainConfIsTrace-没有设置trace", opts: []api.Option{}, want: false, wantErr: true},
+		{name: "2. Conf-MainConfIsTrace-没有设置trace", opts: []api.Option{api.WithTrace()}, want: true, wantErr: true},
 	}
 
 	for _, tt := range tests {
@@ -127,9 +127,9 @@ func TestMainConf_IsStarted(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{name: "默认设置status", opts: []api.Option{}, want: true, wantErr: true},
-		{name: "设置statsu==stop", opts: []api.Option{api.WithDisable()}, want: false, wantErr: true},
-		{name: "设置statsu==start", opts: []api.Option{api.WithEnable()}, want: true, wantErr: true},
+		{name: "1. Conf-MainConfIsStarted-默认设置status", opts: []api.Option{}, want: true, wantErr: true},
+		{name: "2. Conf-MainConfIsStarted-设置statsu==stop", opts: []api.Option{api.WithDisable()}, want: false, wantErr: true},
+		{name: "3. Conf-MainConfIsStarted-设置statsu==start", opts: []api.Option{api.WithEnable()}, want: true, wantErr: true},
 	}
 
 	for _, tt := range tests {
@@ -149,7 +149,7 @@ func TestMainConf_GetRegistry(t *testing.T) {
 		address string
 		wantErr bool
 	}{
-		{name: "获取注册中心对象", address: "lm://.", wantErr: true},
+		{name: "1. Conf-MainConfGetRegistry-获取注册中心对象", address: "lm://.", wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -169,7 +169,7 @@ func TestMainConf_GetVersion(t *testing.T) {
 		name    string
 		wantErr bool
 	}{
-		{name: "获取主节点的版本号", wantErr: true},
+		{name: "1. Conf-MainConfGetVersion-获取主节点的版本号", wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -192,8 +192,8 @@ func TestMainConf_GetMainConf(t *testing.T) {
 		opts    []api.Option
 		wantErr bool
 	}{
-		{name: "获取空主节点的数据", opts: []api.Option{}, wantErr: true},
-		{name: "获取主节点的数据", opts: []api.Option{api.WithTrace(), api.WithDNS("192.168.30.11")}, wantErr: true},
+		{name: "1. Conf-MainConfGetMainConf-获取空主节点的数据", opts: []api.Option{}, wantErr: true},
+		{name: "2. Conf-MainConfGetMainConf-获取主节点的数据", opts: []api.Option{api.WithTrace(), api.WithDNS("192.168.30.11")}, wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -216,8 +216,8 @@ func TestMainConf_GetMainObject(t *testing.T) {
 		opts    []api.Option
 		wantErr bool
 	}{
-		{name: "空主节点获取对象", opts: []api.Option{}, wantErr: true},
-		{name: "设置好的主节点获取对象", opts: []api.Option{api.WithDisable(), api.WithDNS("192.168.0.101"), api.WithTrace(), api.WithTimeout(20, 20), api.WithHeaderReadTimeout(15)}, wantErr: true},
+		{name: "1. Conf-MainConfGetMainObject-空主节点获取对象", opts: []api.Option{}, wantErr: true},
+		{name: "2. Conf-MainConfGetMainObject-设置好的主节点获取对象", opts: []api.Option{api.WithDisable(), api.WithDNS("192.168.0.101"), api.WithTrace(), api.WithTimeout(20, 20), api.WithHeaderReadTimeout(15)}, wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -248,8 +248,8 @@ func TestMainConf_GetSubConf(t *testing.T) {
 		opts    []apikey.Option
 		wantErr bool
 	}{
-		{name: "不设置子节点", isSet: false, secert: "", opts: []apikey.Option{}, wantErr: true},
-		{name: "设置好的子节点获取对象", isSet: true, secert: "123456", opts: []apikey.Option{apikey.WithDisable(), apikey.WithExcludes("xxx", "yyy"), apikey.WithSHA1Mode()}, wantErr: true},
+		{name: "1. Conf-MainConfGetSubConf-不设置子节点", isSet: false, secert: "", opts: []apikey.Option{}, wantErr: true},
+		{name: "2. Conf-MainConfGetSubConf-设置好的子节点获取对象", isSet: true, secert: "123456", opts: []apikey.Option{apikey.WithDisable(), apikey.WithExcludes("xxx", "yyy"), apikey.WithSHA1Mode()}, wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -280,7 +280,7 @@ func TestMainConf_GetCluster(t *testing.T) {
 		name    string
 		wantErr bool
 	}{
-		{name: "获取主节点的集群对象", wantErr: true},
+		{name: "1. Conf-MainConfGetCluster-获取主节点的集群对象", wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -302,8 +302,8 @@ func TestMainConf_GetSubObject(t *testing.T) {
 		opts    []apikey.Option
 		wantErr bool
 	}{
-		{name: "不设置子节点", isSet: false, secert: "", opts: []apikey.Option{}, wantErr: true},
-		{name: "设置好的子节点获取对象", isSet: true, secert: "123456", opts: []apikey.Option{apikey.WithDisable(), apikey.WithExcludes("xxx", "yyy"), apikey.WithSHA1Mode()}, wantErr: true},
+		{name: "1. Conf-MainConfGetSubObject-不设置子节点", isSet: false, secert: "", opts: []apikey.Option{}, wantErr: true},
+		{name: "2. Conf-MainConfGetSubObject-设置好的子节点获取对象", isSet: true, secert: "123456", opts: []apikey.Option{apikey.WithDisable(), apikey.WithExcludes("xxx", "yyy"), apikey.WithSHA1Mode()}, wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)
@@ -340,8 +340,8 @@ func TestMainConf_Has(t *testing.T) {
 		subOpts []apikey.Option
 		wantErr bool
 	}{
-		{name: "设置主节点", opts: []api.Option{api.WithDisable()}, subOpts: []apikey.Option{}, wantErr: true},
-		{name: "同时设置了apikey子节点", opts: []api.Option{api.WithDisable(), api.WithTrace(), api.WithTimeout(20, 20)}, subOpts: []apikey.Option{}, wantErr: true},
+		{name: "1. Conf-MainConfHas-设置主节点", opts: []api.Option{api.WithDisable()}, subOpts: []apikey.Option{}, wantErr: true},
+		{name: "2. Conf-MainConfHas-同时设置了apikey子节点", opts: []api.Option{api.WithDisable(), api.WithTrace(), api.WithTimeout(20, 20)}, subOpts: []apikey.Option{}, wantErr: true},
 	}
 	for _, tt := range tests {
 		confM := mocks.NewConfBy(platName, clusterName)

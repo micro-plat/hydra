@@ -13,11 +13,9 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
-	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/test/mocks"
-	"github.com/micro-plat/lib4go/logger"
 )
 
 func TestNewResponsive(t *testing.T) {
@@ -32,9 +30,9 @@ func TestNewResponsive(t *testing.T) {
 		cnf     app.IAPPConf
 		wantErr bool
 	}{
-		{name: "构建ws服务", addr: ":55001", proto: "ws", cnf: confObj.GetWSConf()},
-		{name: "构建web服务", addr: ":55002", proto: "http", cnf: confObj.GetWebConf()},
-		{name: "构建api服务", addr: ":55003", proto: "http", cnf: confObj.GetAPIConf()},
+		{name: "1. 构建ws服务", addr: ":55001", proto: "ws", cnf: confObj.GetWSConf()},
+		{name: "2. 构建web服务", addr: ":55002", proto: "http", cnf: confObj.GetWebConf()},
+		{name: "3. 构建api服务", addr: ":55003", proto: "http", cnf: confObj.GetAPIConf()},
 	}
 	for _, tt := range tests {
 		gotH, err := http.NewResponsive(tt.cnf)
@@ -102,17 +100,13 @@ func (t *testServer) close() {
 	t.s.Close()
 }
 
-func TestResponsive_Start(t *testing.T) {
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":55004")      //初始化参数
-	confObj.WS(":55005")       //初始化参数
-	confObj.Web(":55006")      //初始化参数
+func TestResponsive_StartWS(t *testing.T) {
+	confObj := mocks.NewConfBy("serverhttp_test_respince2", "testhttpserver2") //构建对象
+	confObj.WS(":55005")                                                       //初始化参数
 	reg := confObj.Registry
 	tests := []struct {
 		name          string
 		cnf           app.IAPPConf
-		serverName    string
-		serverType    string
 		starting      func(app.IAPPConf) error
 		closing       func(app.IAPPConf) error
 		isConfStart   bool //禁用服务
@@ -122,65 +116,11 @@ func TestResponsive_Start(t *testing.T) {
 		wantSubErr    string
 		wantLog       string
 	}{
-		{name: "starting报错",
-			cnf:        confObj.GetAPIConf(),
-			serverType: "api",
-			starting:   func(app.IAPPConf) error { return fmt.Errorf("err") },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantErr:    "err",
-		},
-		{name: "禁用服务",
-			cnf:         confObj.GetAPIConf(),
-			serverType:  "api",
-			serverName:  "apiserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return nil },
-			isConfStart: true,
-			wantLog:     "api被禁用，未启动",
-		},
-		{name: "http服务启动失败",
-			cnf:           confObj.GetAPIConf(),
-			serverType:    "api",
-			serverName:    "apiserver",
-			starting:      func(app.IAPPConf) error { return nil },
-			closing:       func(app.IAPPConf) error { return nil },
-			isServerStart: true,
-			wantErr:       "api启动失败 listen tcp 0.0.0.0:55004: bind: address already in use",
-		},
-		{name: "注册中心服务发布失败",
-			cnf:         confObj.GetAPIConf(),
-			serverType:  "api",
-			serverName:  "apiserver",
-			starting:    func(app.IAPPConf) error { return nil },
-			closing:     func(app.IAPPConf) error { return fmt.Errorf("closing_err") },
-			isServerPub: true,
-			wantSubErr:  "api服务发布失败 服务发布失败:",
-			wantLog:     "关闭[closing_err]服务,出现错误",
-		},
-		{name: "启动api服务成功",
-			cnf:        confObj.GetAPIConf(),
-			serverType: "api",
-			serverName: "apiserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(api,http:",
-		},
-		{name: "启动ws服务成功",
-			cnf:        confObj.GetWSConf(),
-			serverType: "ws",
-			serverName: "wsserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(ws,ws:",
-		},
-		{name: "启动web服务成功",
-			cnf:        confObj.GetWebConf(),
-			serverType: "web",
-			serverName: "webserver",
-			starting:   func(app.IAPPConf) error { return nil },
-			closing:    func(app.IAPPConf) error { return nil },
-			wantLog:    "启动成功(web,http:",
-		},
+		{name: "1. 启动ws服务-starting报错", cnf: confObj.GetWSConf(), starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动ws服务-禁用服务", cnf: confObj.GetWSConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "ws被禁用，未启动"},
+		{name: "3. 启动ws服务-服务启动失败", cnf: confObj.GetWSConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isServerStart: true, wantErr: "ws启动失败 listen tcp 0.0.0.0:55005: bind: address already in use"},
+		{name: "4. 启动ws服务-注册中心服务发布失败", cnf: confObj.GetWSConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "ws服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "5. 启动ws服务-启动服务成功", cnf: confObj.GetWSConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(ws,ws:"},
 	}
 	for _, tt := range tests {
 
@@ -193,7 +133,214 @@ func TestResponsive_Start(t *testing.T) {
 
 		//禁用服务
 		if tt.isConfStart {
-			path := fmt.Sprintf("/hydra/%s/%s/test/conf", tt.serverName, tt.serverType)
+			path := "/serverhttp_test_respince2/wsserver/ws/testhttpserver2/conf"
+			err := reg.Update(path, `{"address":":55005","status":"stop"}`)
+			assert.Equal(t, nil, err, tt.name+"禁用服务", err)
+			tt.cnf, _ = app.NewAPPConf(path, reg)
+		}
+
+		//占用端口使服务启动失败
+		var httpServer *testServer
+		if tt.isServerStart {
+			httpServer = &testServer{addr: "127.0.0.1:55005"}
+			go httpServer.testListen()
+		}
+
+		//创建节点使服务发布报错
+		if tt.isServerPub {
+			newConfObj := mocks.NewConfBy("serverhttp_test_respince2", "testhttpserver2", "fs://./") //构建对象
+			newConfObj.WS(":55005")
+			tt.cnf = newConfObj.GetWSConf()
+			path := "./serverhttp_test_respince2/wsserver/ws/testhttpserver2/servers"
+			os.RemoveAll(path) //删除文件夹
+			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
+		}
+
+		//构建服务器
+		rsp, _ := http.NewResponsive(tt.cnf)
+
+		//构建的新的os.Stdout
+		r, w, _ := os.Pipe()
+		rescueStdout := newTestStdOut(r, w)
+
+		//启动服务器
+		err := rsp.Start()
+
+		rsp.Shutdown()
+		//等待日志打印完成
+		time.Sleep(time.Second)
+
+		//获取输出并还原os.Stdout
+		w.Close()
+		out, _ := ioutil.ReadAll(r)
+		rescueTestStdout(rescueStdout)
+
+		//释放端口
+		if tt.isServerStart {
+			httpServer.close()
+			time.Sleep(time.Second)
+		}
+
+		//删除节点文件
+		if tt.isServerPub {
+			os.RemoveAll("./serverhttp_test_respince2") //删除文件夹
+		}
+
+		if tt.wantErr != "" {
+			assert.Equal(t, tt.wantErr, err.Error(), tt.name+"err")
+			continue
+		}
+
+		if tt.wantSubErr != "" {
+			assert.Equal(t, true, strings.Contains(err.Error(), tt.wantSubErr), tt.name, err)
+		} else {
+			assert.Equal(t, nil, err, tt.name)
+		}
+
+		//fmt.Println("xxxx:", string(out))
+		if tt.wantLog != "" {
+			assert.Equalf(t, true, strings.Contains(string(out), tt.wantLog), tt.name+"log")
+		}
+	}
+}
+
+func TestResponsive_StartWeb(t *testing.T) {
+	confObj := mocks.NewConfBy("serverhttp_test_respince1", "testhttpserver1") //构建对象
+	confObj.Web(":55111")                                                      //初始化参数
+	reg := confObj.Registry
+	tests := []struct {
+		name          string
+		cnf           app.IAPPConf
+		starting      func(app.IAPPConf) error
+		closing       func(app.IAPPConf) error
+		isConfStart   bool //禁用服务
+		isServerStart bool //http服务启动失败
+		isServerPub   bool //服务发布失败
+		wantErr       string
+		wantSubErr    string
+		wantLog       string
+	}{
+		{name: "1. 启动web服务-starting报错", cnf: confObj.GetWebConf(), starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动web服务-禁用服务", cnf: confObj.GetWebConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "web被禁用，未启动"},
+		{name: "3. 启动web服务-服务启动失败", cnf: confObj.GetWebConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isServerStart: true, wantErr: "web启动失败 listen tcp 0.0.0.0:55111: bind: address already in use"},
+		{name: "4. 启动web服务-注册中心服务发布失败", cnf: confObj.GetWebConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "web服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "5. 启动web服务-启动服务成功", cnf: confObj.GetWebConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(web,http:"},
+	}
+	for _, tt := range tests {
+
+		//starting
+		testInitServicesDef()
+		services.Def.OnStarting(tt.starting)
+
+		//closing
+		services.Def.OnClosing(tt.closing)
+
+		//禁用服务
+		if tt.isConfStart {
+			path := "/serverhttp_test_respince1/webserver/web/testhttpserver1/conf"
+			err := reg.Update(path, `{"address":":55111","status":"stop"}`)
+			assert.Equal(t, nil, err, tt.name+"禁用服务", err)
+			tt.cnf, _ = app.NewAPPConf(path, reg)
+		}
+
+		//占用端口使服务启动失败
+		var httpServer *testServer
+		if tt.isServerStart {
+			httpServer = &testServer{addr: "127.0.0.1:55111"}
+			go httpServer.testListen()
+		}
+
+		//创建节点使服务发布报错
+		if tt.isServerPub {
+			newConfObj := mocks.NewConfBy("serverhttp_test_respince1", "testhttpserver1", "fs://./") //构建对象
+			newConfObj.Web(":55111")
+			tt.cnf = newConfObj.GetWebConf()
+			path := "./serverhttp_test_respince1/webserver/web/testhttpserver1/servers"
+			os.RemoveAll(path) //删除文件夹
+			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
+		}
+
+		//构建服务器
+		rsp, _ := http.NewResponsive(tt.cnf)
+
+		//构建的新的os.Stdout
+		r, w, _ := os.Pipe()
+		rescueStdout := newTestStdOut(r, w)
+
+		//启动服务器
+		err := rsp.Start()
+
+		rsp.Shutdown()
+		//等待日志打印完成
+		time.Sleep(time.Second)
+
+		//获取输出并还原os.Stdout
+		w.Close()
+		out, _ := ioutil.ReadAll(r)
+		rescueTestStdout(rescueStdout)
+
+		//释放端口
+		if tt.isServerStart {
+			httpServer.close()
+			time.Sleep(time.Second)
+		}
+
+		//删除节点文件
+		if tt.isServerPub {
+			os.RemoveAll("./serverhttp_test_respince1") //删除文件夹
+		}
+
+		if tt.wantErr != "" && err != nil {
+			assert.Equal(t, tt.wantErr, err.Error(), tt.name+"err")
+			continue
+		}
+
+		if tt.wantSubErr != "" {
+			assert.Equal(t, true, strings.Contains(err.Error(), tt.wantSubErr), tt.name, err)
+		} else {
+			assert.Equal(t, nil, err, tt.name)
+		}
+
+		//fmt.Println("xxxx:", string(out))
+		if tt.wantLog != "" {
+			assert.Equalf(t, true, strings.Contains(string(out), tt.wantLog), tt.name+"log")
+		}
+	}
+}
+
+func TestResponsive_StartAPI(t *testing.T) {
+	confObj := mocks.NewConfBy("serverhttp_test_respince", "testhttpserver")
+	confObj.API(":55004") //初始化参数
+	reg := confObj.Registry
+	tests := []struct {
+		name          string
+		cnf           app.IAPPConf
+		starting      func(app.IAPPConf) error
+		closing       func(app.IAPPConf) error
+		isConfStart   bool //禁用服务
+		isServerStart bool //http服务启动失败
+		isServerPub   bool //服务发布失败
+		wantErr       string
+		wantSubErr    string
+		wantLog       string
+	}{
+		{name: "1. 启动api服务-starting报错", cnf: confObj.GetAPIConf(), starting: func(app.IAPPConf) error { return fmt.Errorf("err") }, closing: func(app.IAPPConf) error { return nil }, wantErr: "err"},
+		{name: "2. 启动api服务-禁用服务", cnf: confObj.GetAPIConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isConfStart: true, wantLog: "api被禁用，未启动"},
+		{name: "3. 启动api服务-http服务启动失败", cnf: confObj.GetAPIConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, isServerStart: true, wantErr: "api启动失败 listen tcp 0.0.0.0:55004: bind: address already in use"},
+		{name: "4. 启动api服务-注册中心服务发布失败", cnf: confObj.GetAPIConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return fmt.Errorf("closing_err") }, isServerPub: true, wantSubErr: "api服务发布失败 服务发布失败:", wantLog: "关闭[closing_err]服务,出现错误"},
+		{name: "5. 启动api服务-启动api服务成功", cnf: confObj.GetAPIConf(), starting: func(app.IAPPConf) error { return nil }, closing: func(app.IAPPConf) error { return nil }, wantLog: "启动成功(api,http:"},
+	}
+	for _, tt := range tests {
+		//starting
+		testInitServicesDef()
+		services.Def.OnStarting(tt.starting)
+
+		//closing
+		services.Def.OnClosing(tt.closing)
+
+		//禁用服务
+		if tt.isConfStart {
+			path := "/serverhttp_test_respince/apiserver/api/testhttpserver/conf"
 			err := reg.Update(path, `{"address":":55004","status":"stop"}`)
 			assert.Equal(t, nil, err, tt.name+"禁用服务")
 			tt.cnf, _ = app.NewAPPConf(path, reg)
@@ -208,10 +355,10 @@ func TestResponsive_Start(t *testing.T) {
 
 		//创建节点使服务发布报错
 		if tt.isServerPub {
-			newConfObj := mocks.NewConfBy("hydra", "test", "fs://./") //构建对象
+			newConfObj := mocks.NewConfBy("serverhttp_test_respince", "testhttpserver", "fs://./") //构建对象
 			newConfObj.API(":55004")
 			tt.cnf = newConfObj.GetAPIConf()
-			path := fmt.Sprintf("./hydra/%s/%s/test/servers", tt.serverName, tt.serverType)
+			path := "./serverhttp_test_respince/apiserver/api/testhttpserver/servers"
 			os.RemoveAll(path) //删除文件夹
 			os.Create(path)    //使文件夹节点变成文件节点,让该节点下不能创建文件
 		}
@@ -225,6 +372,7 @@ func TestResponsive_Start(t *testing.T) {
 
 		//启动服务器
 		err := rsp.Start()
+		rsp.Shutdown()
 		//等待日志打印完成
 		time.Sleep(time.Second)
 
@@ -241,10 +389,10 @@ func TestResponsive_Start(t *testing.T) {
 
 		//删除节点文件
 		if tt.isServerPub {
-			os.RemoveAll("./hydra") //删除文件夹
+			os.RemoveAll("./serverhttp_test_respince") //删除文件夹
 		}
 
-		if tt.wantErr != "" {
+		if tt.wantErr != "" && err != nil {
 			assert.Equal(t, tt.wantErr, err.Error(), tt.name+"err")
 			continue
 		}
@@ -263,8 +411,8 @@ func TestResponsive_Start(t *testing.T) {
 }
 
 func TestResponsive_Notify(t *testing.T) {
-	confObj := mocks.NewConf() //构建对象
-	confObj.API(":55501")      //初始化参数
+	confObj := mocks.NewConfBy("hydranotifyddd", "xdfdj") //构建对象
+	confObj.API(":55501")                                 //初始化参数
 	cnf := confObj.GetAPIConf()
 	rsp, err := http.NewResponsive(cnf)
 
@@ -274,27 +422,22 @@ func TestResponsive_Notify(t *testing.T) {
 	assert.Equal(t, nil, err, "通知变动错误")
 	assert.Equal(t, false, tChange, "通知变动判断")
 
-	path := "/hydra/apiserver/api/test/conf"
-	registry, err := registry.NewRegistry("lm://./", logger.New("hydra"))
-	//节点进行值变更 进行启动
-	err = registry.Update(path, `{"status":"start","addr":":55501"}`)
+	path := "/hydranotifyddd/apiserver/api/xdfdj/conf"
+	err = confObj.Registry.Update(path, `{"status":"start","addr":":55501"}`)
 	assert.Equalf(t, false, err != nil, "更新节点2")
 	time.Sleep(time.Second * 1)
-	conf, err := app.NewAPPConf(path, registry)
-	assert.Equalf(t, false, err != nil, "获取最新配置2")
-	tChange, err = rsp.Notify(conf)
+
+	tChange, err = rsp.Notify(confObj.GetAPIConf())
 	time.Sleep(time.Second)
 	assert.Equal(t, nil, err, "通知变动错误2")
 	assert.Equal(t, true, tChange, "通知变动判断2")
 
 	//节点进行值变更 不用重启
 	assert.Equalf(t, false, err != nil, "获取注册中心")
-	err = registry.Update(path, `{"status":"stop","addr":":55501"}`)
+	err = confObj.Registry.Update(path, `{"status":"stop","addr":":55501"}`)
 	assert.Equalf(t, false, err != nil, "更新节点")
 	time.Sleep(time.Second * 1)
-	conf, err = app.NewAPPConf(path, registry)
-	assert.Equalf(t, false, err != nil, "获取最新配置")
-	tChange, err = rsp.Notify(conf)
+	tChange, err = rsp.Notify(confObj.GetAPIConf())
 	time.Sleep(time.Second)
 	assert.Equal(t, nil, err, "通知变动错误")
 	assert.Equal(t, true, tChange, "通知变动判断")

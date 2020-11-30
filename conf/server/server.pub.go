@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
@@ -21,13 +23,13 @@ type ServerPub struct {
 
 //NewServerPub 构建服务发布路径信息
 func NewServerPub(platName string, sysName string, serverType string, clusterName string) *ServerPub {
+
 	return &ServerPub{
 		platName:    platName,
 		sysName:     sysName,
 		serverType:  serverType,
 		clusterName: clusterName,
-		//@bugfix:如果加上时间，conf 由stop变为start 会提示 “当前集群节点不可用”
-		serverID: global.GetMatchineCode(), //+ time.Now().Format("0405"),
+		serverID:    global.GetMatchineCode() + strconv.Itoa(os.Getpid()),
 	}
 }
 

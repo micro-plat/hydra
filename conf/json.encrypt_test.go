@@ -28,8 +28,8 @@ func Test_encrypt(t *testing.T) {
 		name  string
 		input []byte
 	}{
-		{name: "空数据加密", input: []byte{}},
-		{name: "数据加密", input: []byte("taosytaosytaosytaosytaosytaosytaosy")},
+		{name: "1. conf-encrypt-空数据加密", input: []byte{}},
+		{name: "2. conf-encrypt-数据加密", input: []byte("taosytaosytaosytaosytaosytaosytaosy")},
 	}
 	for _, tt := range tests {
 		got := Encrypt(tt.input)
@@ -55,11 +55,11 @@ func Test_decrypt(t *testing.T) {
 		want    []byte
 		wantErr bool
 	}{
-		{name: "空数据解密", data: []byte(nildata), want: []byte{}, wantErr: false},
-		{name: "小于加密前后缀的长度的数据解密", data: []byte("nildata"), want: []byte("nildata"), wantErr: false},
-		{name: "不是由hd开头数据解密", data: []byte("nildatanildatanildatanildata"), want: []byte("nildatanildatanildatanildata"), wantErr: false},
-		{name: "错误数据解密", data: []byte("encryptnildatanildatanildatanildata"), want: nil, wantErr: true},
-		{name: "正确数据数据解密", data: []byte(data1), want: []byte("encryptapsytsetetapsytsetetapsytsetetapsytsete"), wantErr: false},
+		{name: "1. conf-decrypt-空数据解密", data: []byte(nildata), want: []byte{}, wantErr: false},
+		{name: "2. conf-decrypt-小于加密前后缀的长度的数据解密", data: []byte("nildata"), want: []byte("nildata"), wantErr: false},
+		{name: "3. conf-decrypt-不是由hd开头数据解密", data: []byte("nildatanildatanildatanildata"), want: []byte("nildatanildatanildatanildata"), wantErr: false},
+		{name: "4. conf-decrypt-错误数据解密", data: []byte("encryptnildatanildatanildatanildata"), want: nil, wantErr: true},
+		{name: "5. conf-decrypt-正确数据数据解密", data: []byte(data1), want: []byte("encryptapsytsetetapsytsetetapsytsetetapsytsete"), wantErr: false},
 	}
 	for _, tt := range tests {
 		got, err := Decrypt(tt.data)

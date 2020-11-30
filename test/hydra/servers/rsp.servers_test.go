@@ -55,12 +55,13 @@ func TestRspServers_Start(t *testing.T) {
 		name       string
 		serverName string
 		sysType    string
+		addrs      string
 		isFirst    bool
 		wantErr    bool
 	}{
-		{name: "1. 启动cronServer", serverName: "cronserver", sysType: "cron", isFirst: true},
-		{name: "2. 启动apiServer", serverName: "apiserver", sysType: "api"},
-		{name: "3. 启动mqcServer", serverName: "mqcserver", sysType: "mqc"},
+		{name: "1. 启动cronServer", serverName: "cronserver", sysType: "cron", addrs: "redis://xxx", isFirst: true},
+		{name: "2. 启动apiServer", serverName: "apiserver", sysType: "api", addrs: ":50002"},
+		{name: "3. 启动mqcServer", serverName: "mqcserver", sysType: "mqc", addrs: "redis://xxx"},
 		// {name: "4. 启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
 	}
 
@@ -96,7 +97,9 @@ func TestRspServers_Start(t *testing.T) {
 		path := fmt.Sprintf("/servershydra_test/%s/%s/serv_test_go/conf", tt.serverName, tt.sysType)
 		registry, err := registry.NewRegistry(registryAddr, logger.New("hydra"))
 		assert.Equalf(t, false, err != nil, tt.name)
-		err = registry.Update(path, `{"status":"start","addr":"redis://xxx"}`)
+
+		err = registry.Update(path, fmt.Sprintf(`{"status":"start","addr":"%s"}`, tt.addrs))
+
 		assert.Equalf(t, false, err != nil, tt.name)
 		time.Sleep(time.Second * 1)
 
@@ -111,7 +114,7 @@ func TestRspServers_Start(t *testing.T) {
 		//还原os.Stdout
 		os.Stdout = rescueStdout
 
-		// fmt.Println("out:", string(out))
+		fmt.Println("out:", string(out))
 
 		wantLog := fmt.Sprintf("初始化: %s", path)
 		assert.Equalf(t, true, strings.Contains(string(out), wantLog), tt.name+"初始化")

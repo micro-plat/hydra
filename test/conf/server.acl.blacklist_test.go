@@ -23,10 +23,10 @@ func TestBlackListNew(t *testing.T) {
 		denyIP   string
 		wantDeny bool
 	}{
-		{name: "初始化空对象", opts: nil, want: &blacklist.BlackList{IPS: []string{}}, denyIP: "127.0.0.1", wantDeny: false},
-		{name: "初始化单ip对象", opts: []blacklist.Option{blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
-		{name: "初始化多对象Enable", opts: []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{Disable: false, IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
-		{name: "初始化多对象Disable", opts: []blacklist.Option{blacklist.WithDisable(), blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{Disable: true, IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
+		{name: "1. Conf-BlackListNew-初始化空对象", opts: nil, want: &blacklist.BlackList{IPS: []string{}}, denyIP: "127.0.0.1", wantDeny: false},
+		{name: "2. Conf-BlackListNew-初始化单ip对象", opts: []blacklist.Option{blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
+		{name: "3. Conf-BlackListNew-初始化多对象Enable", opts: []blacklist.Option{blacklist.WithEnable(), blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{Disable: false, IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
+		{name: "4. Conf-BlackListNew-初始化多对象Disable", opts: []blacklist.Option{blacklist.WithDisable(), blacklist.WithIP("19.168.0.101")}, want: &blacklist.BlackList{Disable: true, IPS: []string{"19.168.0.101"}}, denyIP: "19.168.0.101", wantDeny: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -53,10 +53,10 @@ func TestBlackList_IsDeny(t *testing.T) {
 		ips  []string
 		want bool
 	}{
-		{name: "空对象ip匹配", ip: "192.168.5.101", ips: []string{}, want: false},
-		{name: "全ip精确匹配", ip: "127.0.0.1", ips: []string{"127.0.0.1"}, want: true},
-		{name: "单级模糊ip匹配", ip: "192.168.0.1", ips: []string{"192.168.0.*"}, want: true},
-		{name: "多级模糊ip匹配", ip: "192.168.0.1", ips: []string{"192.168.**"}, want: true},
+		{name: "1. Conf-BlackListIsDeny-空对象ip匹配", ip: "192.168.5.101", ips: []string{}, want: false},
+		{name: "2. Conf-BlackListIsDeny-全ip精确匹配", ip: "127.0.0.1", ips: []string{"127.0.0.1"}, want: true},
+		{name: "3. Conf-BlackListIsDeny-单级模糊ip匹配", ip: "192.168.0.1", ips: []string{"192.168.0.*"}, want: true},
+		{name: "4. Conf-BlackListIsDeny-多级模糊ip匹配", ip: "192.168.0.1", ips: []string{"192.168.**"}, want: true},
 	}
 	for _, tt := range tests {
 		w := blacklist.New(blacklist.WithIP(tt.ips...))
@@ -71,16 +71,16 @@ func TestBlackListGetConf(t *testing.T) {
 		opts []blacklist.Option
 		want *blacklist.BlackList
 	}{
-		{name: "节点不存在,获取默认对象", opts: []blacklist.Option{}, want: &blacklist.BlackList{Disable: true}},
-		{name: "节点为空,获取默认对象", opts: []blacklist.Option{}, want: blacklist.New()},
-		{name: "正常对象获取", opts: []blacklist.Option{blacklist.WithIP("192.168.0.*", "192.168.1.2")}, want: blacklist.New(blacklist.WithIP("192.168.0.*", "192.168.1.2"))},
+		{name: "1. Conf-BlackListGetConf-节点不存在,获取默认对象", opts: []blacklist.Option{}, want: &blacklist.BlackList{Disable: true}},
+		{name: "2. Conf-BlackListGetConf-节点为空,获取默认对象", opts: []blacklist.Option{}, want: blacklist.New()},
+		{name: "3. Conf-BlackListGetConf-正常对象获取", opts: []blacklist.Option{blacklist.WithIP("192.168.0.*", "192.168.1.2")}, want: blacklist.New(blacklist.WithIP("192.168.0.*", "192.168.1.2"))},
 	}
 
 	//初始化服务conf配置对象
 	conf := mocks.NewConfBy("hydraconf_blacklist_test", "blacklist")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
-		if !strings.EqualFold(tt.name, "节点不存在,获取默认对象") {
+		if !strings.EqualFold(tt.name, "1. Conf-BlackListGetConf-节点不存在,获取默认对象") {
 			confB.BlackList(tt.opts...)
 		}
 		obj, err := blacklist.GetConf(conf.GetAPIConf().GetServerConf())

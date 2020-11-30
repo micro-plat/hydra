@@ -19,7 +19,6 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/kr/pretty v0.2.1
-	github.com/mattn/go-oci8 v0.0.8 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1

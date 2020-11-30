@@ -1,7 +1,6 @@
 package cron
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/task"
@@ -9,28 +8,29 @@ import (
 )
 
 func TestNewServer(t *testing.T) {
-	type args struct {
-		tasks []*task.Task
-	}
 	tests := []struct {
 		name    string
-		args    args
+		tasks   []*task.Task
 		wantT   *Server
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "1. 初始化空对象", tasks: []*task.Task{}, wantT: &Server{Processor: NewProcessor()}, wantErr: true},
+		{name: "2. 初始化单个错误任务对象", tasks: []*task.Task{task.NewTask("错误", "/cron/serve1")}, wantT: &Server{Processor: NewProcessor()}, wantErr: false},
+		{name: "3. 初始化单个正确任务对象", tasks: []*task.Task{task.NewTask("@every 10s", "/cron/serve1")}, wantT: &Server{Processor: NewProcessor()}, wantErr: true},
+		{name: "4. 初始化多个错误任务对象", tasks: []*task.Task{task.NewTask("错误", "/cron/serve1")}, wantT: &Server{Processor: NewProcessor()}, wantErr: false},
+		{name: "5. 初始化多个正确任务对象", tasks: []*task.Task{task.NewTask("@every 10s", "/cron/serve1"), task.NewTask("@every 10s", "/cron/serve2")}, wantT: &Server{Processor: NewProcessor()}, wantErr: true},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotT, err := NewServer(tt.args.tasks...)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewServer() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotT, tt.wantT) {
-				t.Errorf("NewServer() = %v, want %v", gotT, tt.wantT)
-			}
-		})
+		if len(tt.tasks) > 0 {
+			tt.wantT.Add(tt.tasks...)
+		}
+
+		gotT, err := NewServer(tt.tasks...)
+		assert.Equal(t, tt.wantErr, err == nil, tt.name, err)
+		if tt.wantErr {
+			assert.Equalf(t, tt.wantT.span, gotT.span, tt.name+",span")
+			assert.Equalf(t, tt.wantT.length, gotT.length, tt.name+",length")
+		}
 	}
 }
 
@@ -42,8 +42,8 @@ func TestServer_Shutdown(t *testing.T) {
 		addr      string
 		want      bool
 	}{
-		{name: "相同值修改", Processor: NewProcessor(), running: false, addr: "", want: false},
-		{name: "不同值修改", Processor: NewProcessor(), running: true, addr: "", want: false},
+		{name: "1. 关闭服务器-running值西相同", Processor: NewProcessor(), running: false, addr: "", want: false},
+		{name: "2. 关闭服务器-running值西不同", Processor: NewProcessor(), running: true, addr: "", want: false},
 	}
 	for _, tt := range tests {
 		s := &Server{
@@ -65,8 +65,8 @@ func TestServer_Pause(t *testing.T) {
 		want      bool
 		wantErr   bool
 	}{
-		{name: "关闭时暂停", Processor: NewProcessor(), running: false, addr: "", want: true, wantErr: true},
-		{name: "启动时暂停", Processor: NewProcessor(), running: true, addr: "", want: true, wantErr: true},
+		{name: "1. 暂停服务器-关闭时暂停", Processor: NewProcessor(), running: false, addr: "", want: true, wantErr: true},
+		{name: "2. 暂停服务器-启动时暂停", Processor: NewProcessor(), running: true, addr: "", want: true, wantErr: true},
 	}
 	for _, tt := range tests {
 		s := &Server{
@@ -92,8 +92,8 @@ func TestServer_Resume(t *testing.T) {
 		want      bool
 		wantErr   bool
 	}{
-		{name: "关闭时恢复", Processor: NewProcessor(), running: false, addr: "", want: true, wantErr: true},
-		{name: "启动时恢复", Processor: NewProcessor(), running: true, addr: "", want: true, wantErr: true},
+		{name: "1. 恢复服务器-关闭时恢复", Processor: NewProcessor(), running: false, addr: "", want: true, wantErr: true},
+		{name: "2. 恢复服务器-启动时恢复", Processor: NewProcessor(), running: true, addr: "", want: true, wantErr: true},
 	}
 	for _, tt := range tests {
 		s := &Server{
