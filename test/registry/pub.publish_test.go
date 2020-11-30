@@ -62,9 +62,9 @@ func TestPublisher_PubAPIServiceNode(t *testing.T) {
 		name       string
 		serverName string
 	}{
-		{name: "api服务首次发布", serverName: "127.0.0.1:9999"},
-		{name: "api服务再次发布", serverName: "127.0.0.1:8899"},
-		{name: "api服务多次发布", serverName: "127.0.0.1:7799"},
+		{name: "1. PublisherPubAPIServiceNode-api服务首次发布", serverName: "127.0.0.1:9999"},
+		{name: "2. PublisherPubAPIServiceNode-api服务再次发布", serverName: "127.0.0.1:8899"},
+		{name: "3. PublisherPubAPIServiceNode-api服务多次发布", serverName: "127.0.0.1:7799"},
 	}
 	confObj := mocks.NewConfBy("hydra", "test1") //构建对象
 	confObj.API(":8080")
@@ -97,9 +97,9 @@ func TestPublisher_PubServerNode(t *testing.T) {
 		name       string
 		serverName string
 	}{
-		{name: "server服务首次发布", serverName: "127.0.0.1:9999"},
-		{name: "server服务再次发布", serverName: "127.0.0.1:8899"},
-		{name: "server服务多次发布", serverName: "127.0.0.1:7799"},
+		{name: "1. PublisherPubServerNode-server服务首次发布", serverName: "127.0.0.1:9999"},
+		{name: "2. PublisherPubServerNode-server服务再次发布", serverName: "127.0.0.1:8899"},
+		{name: "3. PublisherPubServerNode-server服务多次发布", serverName: "127.0.0.1:7799"},
 	}
 	confObj := mocks.NewConfBy("hydra", "test2") //构建对象
 	confObj.API(":8080")
@@ -132,8 +132,8 @@ func TestPublisher_PubDNSNode_WithDomain(t *testing.T) {
 		name       string
 		serverName string
 	}{
-		{name: "dns发布", serverName: "127.0.0.1:9999"},
-		{name: "dns再次发布", serverName: "127.0.0.1:8899"},
+		{name: "1. dns发布", serverName: "127.0.0.1:9999"},
+		{name: "2. dns再次发布", serverName: "127.0.0.1:8899"},
 	}
 
 	confObj := mocks.NewConfBy("rgst_publish_test1", "publishrgt1") //构建对象

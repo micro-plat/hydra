@@ -31,5 +31,5 @@ func doStop(c *cli.Context) (err error) {
 	}
 
 	err = hydraSrv.Stop()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Stop", err)
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Stop", err)
 }

@@ -35,6 +35,8 @@ func TestCtx_Close(t *testing.T) {
 
 	c := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
 
+	c := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
+
 	c.Close()
 
 	//对ctx.funcs和ctx.context为空不能进行判断

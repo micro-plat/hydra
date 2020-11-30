@@ -24,9 +24,9 @@ func Test_vers_Add(t *testing.T) {
 		name string
 		args args
 	}{
-		{name: "1", args: args{tp: "test", name: "test1", key: "123"}},
-		{name: "2", args: args{tp: "test", name: "test2", key: "123"}},
-		{name: "3", args: args{tp: "test", name: "test1", key: "321"}},
+		{name: "1. VerAdd-添加数据", args: args{tp: "test", name: "test1", key: "123"}},
+		{name: "2. VerAdd-添加数据", args: args{tp: "test", name: "test2", key: "123"}},
+		{name: "3. VerAdd-添加数据", args: args{tp: "test", name: "test1", key: "321"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -68,9 +68,9 @@ func Test_vers_Remove(t *testing.T) {
 		data data
 		args args
 	}{
-		{name: "1", data: data{tp: "test", name: "test1", key: "123"}, args: args{f: f}},
-		{name: "2", data: data{tp: "test", name: "test2", key: "123"}, args: args{f: f}},
-		{name: "3", data: data{tp: "test", name: "test1", key: "321"}, args: args{f: f}},
+		{name: "1. VersRemove-移除数据-数据存在", data: data{tp: "test", name: "test1", key: "123"}, args: args{f: f}},
+		{name: "2. VersRemove-移除数据-数据不存在", data: data{tp: "test", name: "test2", key: "123"}, args: args{f: f}},
+		{name: "3. VersRemove-移除数据-数据存在1", data: data{tp: "test", name: "test1", key: "321"}, args: args{f: f}},
 	}
 
 	for _, tt := range tests {

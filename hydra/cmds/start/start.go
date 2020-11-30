@@ -29,5 +29,5 @@ func doStart(c *cli.Context) (err error) {
 		return err
 	}
 	err = hydraSrv.Start()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Start", err)
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Start", err)
 }

@@ -83,7 +83,7 @@ func TestORouter_Add(t *testing.T) {
 	tests := []*testAdd{}
 
 	//添加错误用例
-	tests = append(tests, &testAdd{name: "action重复", path: "/path", service: "service",
+	tests = append(tests, &testAdd{name: "1. action重复", path: "/path", service: "service",
 		action: []string{"GET", "GET"}, opts: []interface{}{}, wantErr: true})
 
 	//构建测试用例
