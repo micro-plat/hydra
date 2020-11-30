@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -193,6 +194,7 @@ func Test_request_GetCookies(t *testing.T) {
 		//net/http: invalid byte 'ä' in Cookie.Value; dropping invalid bytes
 		{name: "2. cookie内容为中文UTF-8", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "中文"}, want: types.XMap{"cname": ""}},
 		{name: "3. cookie内容不存在中文", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: "value!@#$%^&*()_+="}, want: types.XMap{"cname": "value!@#$%^\u0026*()_+="}},
+		{name: "4. cookie内容为中文UTF-8-Escape", contentType: "application/json;charset=utf-8", cookie: http.Cookie{Name: "cname", Value: url.QueryEscape("中文")}, want: types.XMap{"cname": url.QueryEscape("中文")}},
 	}
 
 	confObj := mocks.NewConf()         //构建对象

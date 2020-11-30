@@ -218,15 +218,15 @@ func (r *MockRequest) GetMap() (types.XMap, error) {
 	return r.MockQueryMap, nil
 }
 
-//GetRawBody 获取请求的body参数
-func (r *MockRequest) GetRawBody() ([]byte, error) {
-	return nil, nil
+//GetRequestParams 获取请求的body参数
+func (r *MockRequest) GetRequestParams() ([]byte, string, error) {
+	return nil, "", nil
 }
 
 //GetBody 获取请求的body参数
-func (r *MockRequest) GetBody() (string, error) {
+func (r *MockRequest) GetBody() ([]byte, error) {
 	bytes, _ := json.Marshal(r.MockBodyMap)
-	return string(bytes), nil
+	return bytes, nil
 }
 
 //GetBodyMap 将body转换为map

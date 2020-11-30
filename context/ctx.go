@@ -131,11 +131,11 @@ type IRequest interface {
 	//GetMap 将当前请求转换为map并返回
 	GetMap() (types.XMap, error)
 
-	//GetRawBody 获取请求的body参数
-	GetRawBody() (s []byte, err error)
+	//GetRquestParams 获取请求的body参数
+	GetRequestParams() (s []byte, c string, err error)
 
 	//GetBody 获取请求的参数
-	GetBody() (string, error)
+	GetBody() ([]byte, error)
 
 	//GetBodyMap 将body转换为map
 	GetBodyMap() (map[string]interface{}, error)

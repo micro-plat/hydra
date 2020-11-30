@@ -62,7 +62,7 @@ func TestRspServers_Start(t *testing.T) {
 		{name: "1. 启动cronServer", serverName: "cronserver", sysType: "cron", addrs: "redis://xxx", isFirst: true},
 		{name: "2. 启动apiServer", serverName: "apiserver", sysType: "api", addrs: ":50002"},
 		{name: "3. 启动mqcServer", serverName: "mqcserver", sysType: "mqc", addrs: "redis://xxx"},
-		// {name: "4. 启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
+		//{name: "4. 启动rpcServer", serverName: "rpcserver", sysType: "rpc"},
 	}
 
 	platName := "servershydra_test"
