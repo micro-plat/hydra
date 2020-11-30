@@ -244,6 +244,9 @@ func (s *systemd) Run() (err error) {
 }
 
 func (s *systemd) Status() (Status, error) {
+	if !s.isInstalled() {
+		return StatusUnknown, ErrNotInstalled
+	}
 	exitCode, out, err := runWithOutput("systemctl", "is-active", s.Name)
 	if exitCode == 0 && err != nil {
 		return StatusUnknown, err
@@ -264,9 +267,7 @@ func (s *systemd) Status() (Status, error) {
 }
 
 func (s *systemd) Start() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
+
 	status, err := s.Status()
 	if err != nil {
 		return err
@@ -278,9 +279,6 @@ func (s *systemd) Start() error {
 }
 
 func (s *systemd) Stop() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
 	status, err := s.Status()
 	if err != nil {
 		return err
