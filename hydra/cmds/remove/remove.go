@@ -31,6 +31,6 @@ func doRemove(c *cli.Context) (err error) {
 		return err
 	}
 	err = hydraSrv.Uninstall()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Remove", err)
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Remove", err)
 
 }

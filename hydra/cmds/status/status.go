@@ -32,7 +32,7 @@ func doStatus(c *cli.Context) (err error) {
 		return err
 	}
 	status, err := hydraSrv.Status()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Status", err, statusMap[status])
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Status", err, statusMap[status])
 }
 
 var statusMap = map[service.Status]string{
