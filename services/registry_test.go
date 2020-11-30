@@ -18,12 +18,12 @@ func Test_regist_get(t *testing.T) {
 		tp   string
 		want *serverServices
 	}{
-		{name: "1.获取api对应的serverServices", tp: global.API, want: Def.servers[global.API]},
-		{name: "2.获取web对应的serverServices", tp: global.Web, want: Def.servers[global.Web]},
-		{name: "3.获取rpc对应的serverServices", tp: global.RPC, want: Def.servers[global.RPC]},
-		{name: "4.获取ws对应的serverServices", tp: global.WS, want: Def.servers[global.WS]},
-		{name: "5.获取cron对应的serverServices", tp: global.CRON, want: Def.servers[global.CRON]},
-		{name: "6.获取mqc对应的serverServices", tp: global.MQC, want: Def.servers[global.MQC]},
+		{name: "1. 获取api对应的serverServices", tp: global.API, want: Def.servers[global.API]},
+		{name: "2. 获取web对应的serverServices", tp: global.Web, want: Def.servers[global.Web]},
+		{name: "3. 获取rpc对应的serverServices", tp: global.RPC, want: Def.servers[global.RPC]},
+		{name: "4. 获取ws对应的serverServices", tp: global.WS, want: Def.servers[global.WS]},
+		{name: "5. 获取cron对应的serverServices", tp: global.CRON, want: Def.servers[global.CRON]},
+		{name: "6. 获取mqc对应的serverServices", tp: global.MQC, want: Def.servers[global.MQC]},
 	}
 	s := Def
 	for _, tt := range tests {
