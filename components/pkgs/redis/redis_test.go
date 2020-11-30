@@ -16,10 +16,9 @@ func TestNew(t *testing.T) {
 		wantR   *Client
 		wantErr bool
 	}{
-		{name: "1", args: args{}, wantErr: true},
-		{name: "2", args: args{opts: []varredis.Option{varredis.WithRaw(`{"addrs":["192.168.0.111:6379","192.168.0.112:6379"]}`)}}, wantErr: false},
-		//{name: "3", args: args{opts: []Option{WithRaw(`{"addrs":["192.168.0.111:6379","192.168.0.116:6379"],"master":"master"}`)}}, wantErr: false}, //redis 的sentinel没有启动
-		{name: "4", args: args{opts: []varredis.Option{varredis.WithRaw(`{"addrs":["192.168.0.111:6379"]}`)}}, wantErr: false},
+		{name: "1. 初始化空redis对象", args: args{}, wantErr: true},
+		{name: "2. 多ip初始化redis对象", args: args{opts: []varredis.Option{varredis.WithRaw(`{"addrs":["192.168.0.111:6379","192.168.0.112:6379"]}`)}}, wantErr: false},
+		{name: "3. 单ip初始化redis对象", args: args{opts: []varredis.Option{varredis.WithRaw(`{"addrs":["192.168.0.111:6379"]}`)}}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

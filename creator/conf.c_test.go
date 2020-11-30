@@ -4,17 +4,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/servers"
-	"github.com/micro-plat/lib4go/types"
-
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/static"
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/types"
 )
 
 func TestNew(t *testing.T) {
@@ -406,7 +405,7 @@ func Test_conf_GetMQC(t *testing.T) {
 	for _, tt := range tests {
 		defer func(name string) {
 			e := recover()
-			if name == "获取未设置mqc对象" {
+			if name == "1. 未设置,获取mqc配置对象" {
 				assert.Equal(t, "未指定mqc服务器配置", types.GetString(e), name+",mqc-panic")
 			} else {
 				assert.Equal(t, true, e == nil, name+",panic1")
@@ -414,6 +413,30 @@ func Test_conf_GetMQC(t *testing.T) {
 		}(tt.name)
 		obj := tt.fields.GetMQC()
 		assert.Equal(t, tt.want[global.CRON], obj, tt.name)
+	}
+}
+
+func Test_conf_GetVar(t *testing.T) {
+	tests := []struct {
+		name     string
+		tp       string
+		tpname   string
+		v        map[string]map[string]interface{}
+		wantBool bool
+		wantStr  interface{}
+	}{
+		{name: "1. 初始化数据为空-获取空key", tp: "", tpname: "", v: map[string]map[string]interface{}{}, wantBool: false, wantStr: nil},
+		{name: "2. 初始化数据不未空-获取空key", tp: "", tpname: "", v: map[string]map[string]interface{}{"test": map[string]interface{}{"test1": "123"}}, wantBool: false, wantStr: nil},
+		{name: "3. 初始化数据不未空-tp不存在", tp: "test1", tpname: "test1", v: map[string]map[string]interface{}{"test": map[string]interface{}{"test1": "123"}}, wantBool: false, wantStr: nil},
+		{name: "4. 初始化数据不未空-tp存在-tpname不存在", tp: "test", tpname: "test", v: map[string]map[string]interface{}{"test": map[string]interface{}{"test1": "123"}}, wantBool: false, wantStr: nil},
+		{name: "5. 初始化数据不未空-tp存在-tpname存在", tp: "test", tpname: "test1", v: map[string]map[string]interface{}{"test": map[string]interface{}{"test1": "123"}}, wantBool: true, wantStr: "123"},
+	}
+	for _, tt := range tests {
+		conf := New()
+		conf.vars = tt.v
+		gotVal, gotOk := conf.GetVar(tt.tp, tt.tpname)
+		assert.Equal(t, tt.wantStr, gotVal, tt.name)
+		assert.Equal(t, tt.wantBool, gotOk, tt.name)
 	}
 }
 

@@ -99,25 +99,16 @@ func TestProxy(t *testing.T) {
 	}
 
 	tests := []*testCase{
-		{name: "1.1 proxy-配置不存在", isSet: false, script: "", requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		{name: "1.2 proxy-配置数据错误,编译失败", isSet: true, script: script3, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 510, wantContent: "acl.proxy脚本错误", wantContentType: "application/xml", wantSpecial: ""},
-		{name: "1.3 proxy-配置数据错误,运行失败", isSet: true, script: script2, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 502, wantContent: "", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "1.1 proxy-配置不存在", isSet: false, script: "", requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml", wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "1.2 proxy-配置数据错误,编译失败", isSet: true, script: script3, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml", wantStatus: 510, wantContent: "acl.proxy脚本错误", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "1.3 proxy-配置数据错误,运行失败", isSet: true, script: script2, requestURL: "", localIP: "", Status: 200, Content: "success", CType: "application/xml", wantStatus: 502, wantContent: "", wantContentType: "application/xml", wantSpecial: "proxy"},
 
-		{name: "2.1 proxy-配置正确,就是当前集群", isSet: true, script: script1, requestURL: "", localIP: "192.167.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		{name: "2.2 proxy-配置正确,上游集群名为空", isSet: true, script: script0, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
-		{name: "2.3 proxy-配置正确,上游集群无服务", isSet: true, script: script4, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 502, wantContent: "重试超过服务器限制", wantContentType: "application/xml", wantSpecial: "proxy"},
-		{name: "2.4 proxy-配置正确,上游集群存在,服务器返回异常", isSet: true, script: script1, requestURL: "/upcluster/err", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 555, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
-		{name: "2.5 proxy-配置正确,上游集群存在,服务不存在", isSet: true, script: script1, requestURL: "/upcluster/xxx", Status: 200, localIP: "192.168.0.111", Content: "success", CType: "application/xml",
-			wantStatus: 404, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
-		{name: "2.6 proxy-配置正确,上游集群存在,服务可用", isSet: true, script: script1, requestURL: "/upcluster/ok", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml",
-			wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "2.1 proxy-配置正确,就是当前集群", isSet: true, script: script1, requestURL: "", localIP: "192.167.0.111", Status: 200, Content: "success", CType: "application/xml", wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "2.2 proxy-配置正确,上游集群名为空", isSet: true, script: script0, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml", wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: ""},
+		{name: "2.3 proxy-配置正确,上游集群无服务", isSet: true, script: script4, requestURL: "", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml", wantStatus: 502, wantContent: "重试超过服务器限制", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "2.4 proxy-配置正确,上游集群存在,服务器返回异常", isSet: true, script: script1, requestURL: "/upcluster/err", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml", wantStatus: 555, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "2.5 proxy-配置正确,上游集群存在,服务不存在", isSet: true, script: script1, requestURL: "/upcluster/xxx", Status: 200, localIP: "192.168.0.111", Content: "success", CType: "application/xml", wantStatus: 404, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
+		{name: "2.6 proxy-配置正确,上游集群存在,服务可用", isSet: true, script: script1, requestURL: "/upcluster/ok", localIP: "192.168.0.111", Status: 200, Content: "success", CType: "application/xml", wantStatus: 200, wantContent: "success", wantContentType: "application/xml", wantSpecial: "proxy"},
 	}
 	for _, tt := range tests {
 		global.Def.ServerTypes = []string{http.API}

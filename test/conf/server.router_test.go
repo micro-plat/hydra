@@ -17,7 +17,7 @@ func TestGetWSHomeRouter(t *testing.T) {
 		name string
 		want *router.Router
 	}{
-		{name: "获取默认对象WS", want: &router.Router{Path: "/", Action: router.Methods, Service: "/"}},
+		{name: "1. Conf-GetWSHomeRouter-获取默认对象WS", want: &router.Router{Path: "/", Action: router.Methods, Service: "/"}},
 	}
 	for _, tt := range tests {
 		got := router.GetWSHomeRouter()
@@ -30,7 +30,7 @@ func TestNewRouters(t *testing.T) {
 		name string
 		want *router.Routers
 	}{
-		{name: "获取默认对象", want: &router.Routers{Routers: make([]*router.Router, 0, 1)}},
+		{name: "1. Conf-NewRouters-获取默认对象", want: &router.Routers{Routers: make([]*router.Router, 0, 1)}},
 	}
 	for _, tt := range tests {
 		got := router.NewRouters()
@@ -50,10 +50,10 @@ func TestNewRouter(t *testing.T) {
 		args args
 		want *router.Router
 	}{
-		{name: "初始化空对象", args: args{path: "", service: "", action: nil, opts: nil}, want: &router.Router{Path: "", Action: nil, Service: "", Encoding: "", Pages: nil}},
-		{name: "初始化可用对象", args: args{path: "/t1", service: "server1", action: []string{"xxx"}, opts: nil},
+		{name: "1. Conf-NewRouter-初始化空对象", args: args{path: "", service: "", action: nil, opts: nil}, want: &router.Router{Path: "", Action: nil, Service: "", Encoding: "", Pages: nil}},
+		{name: "2. Conf-NewRouter-初始化可用对象", args: args{path: "/t1", service: "server1", action: []string{"xxx"}, opts: nil},
 			want: &router.Router{Path: "/t1", Action: []string{"xxx"}, Service: "server1", Encoding: "", Pages: nil}},
-		{name: "初始化全量对象", args: args{path: "/t1", service: "server1", action: []string{"xxx", "yyy"}, opts: []router.Option{router.WithEncoding("gbk2312"), router.WithPages("asas", "sasa")}},
+		{name: "3. Conf-NewRouter-初始化全量对象", args: args{path: "/t1", service: "server1", action: []string{"xxx", "yyy"}, opts: []router.Option{router.WithEncoding("gbk2312"), router.WithPages("asas", "sasa")}},
 			want: &router.Router{Path: "/t1", Action: []string{"xxx", "yyy"}, Service: "server1", Encoding: "gbk2312", Pages: []string{"asas", "sasa"}}},
 	}
 	for _, tt := range tests {
@@ -76,10 +76,10 @@ func TestRouters_String(t *testing.T) {
 		routers []*router.Router
 		want    string
 	}{
-		{name: "空对象获取str", routers: []*router.Router{}, want: f([]*router.Router{})},
-		{name: "单个对象获取str", routers: []*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk"))},
+		{name: "1. Conf-RoutersString-空对象获取str", routers: []*router.Router{}, want: f([]*router.Router{})},
+		{name: "2. Conf-RoutersString-单个对象获取str", routers: []*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk"))},
 			want: f([]*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk"))})},
-		{name: "多个对象获取str", routers: []*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk")), router.NewRouter("/t2", "s2", []string{"post"}, router.WithEncoding("ggg"))},
+		{name: "3. Conf-RoutersString-多个对象获取str", routers: []*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk")), router.NewRouter("/t2", "s2", []string{"post"}, router.WithEncoding("ggg"))},
 			want: f([]*router.Router{router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk")), router.NewRouter("/t2", "s2", []string{"post"}, router.WithEncoding("ggg"))})},
 	}
 	for _, tt := range tests {
@@ -97,8 +97,8 @@ func TestRouter_GetEncoding(t *testing.T) {
 		fields *router.Router
 		want   string
 	}{
-		{name: "获取默认编码方式", fields: router.NewRouter("/t1", "s1", []string{"get"}), want: "utf-8"},
-		{name: "设置编码方式", fields: router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk2312")), want: "gbk2312"},
+		{name: "1. Conf-RoutersGetEncoding-获取默认编码方式", fields: router.NewRouter("/t1", "s1", []string{"get"}), want: "utf-8"},
+		{name: "2. Conf-RoutersGetEncoding-设置编码方式", fields: router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk2312")), want: "gbk2312"},
 	}
 	for _, tt := range tests {
 		got := tt.fields.GetEncoding()
@@ -112,8 +112,8 @@ func TestRouter_IsUTF8(t *testing.T) {
 		fields *router.Router
 		want   bool
 	}{
-		{name: "默认编码是utf8", fields: router.NewRouter("/t1", "s1", []string{"get"}), want: true},
-		{name: "不是utf8", fields: router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk2312")), want: false},
+		{name: "1. Conf-RoutersIsUTF8-默认编码是utf8", fields: router.NewRouter("/t1", "s1", []string{"get"}), want: true},
+		{name: "2. Conf-RoutersIsUTF8-不是utf8", fields: router.NewRouter("/t1", "s1", []string{"get"}, router.WithEncoding("gbk2312")), want: false},
 	}
 	for _, tt := range tests {
 		got := tt.fields.IsUTF8()
@@ -134,11 +134,10 @@ func TestRouters_Append(t *testing.T) {
 		args args
 		want *router.Routers
 	}{
-		{name: "空对象累加", obj: &router.Routers{Routers: []*router.Router{}}, args: args{},
-			want: &router.Routers{Routers: []*router.Router{router.NewRouter("", "", nil)}}},
-		{name: "空对象累加实体", obj: &router.Routers{Routers: []*router.Router{}}, args: args{path: "/p1", service: "s1", action: []string{"22"}, opts: []router.Option{router.WithEncoding("gbk")}},
+		{name: "1. Conf-RoutersAppend-空对象累加", obj: &router.Routers{Routers: []*router.Router{}}, args: args{}, want: &router.Routers{Routers: []*router.Router{router.NewRouter("", "", nil)}}},
+		{name: "2. Conf-RoutersAppend-空对象累加实体", obj: &router.Routers{Routers: []*router.Router{}}, args: args{path: "/p1", service: "s1", action: []string{"22"}, opts: []router.Option{router.WithEncoding("gbk")}},
 			want: &router.Routers{Routers: []*router.Router{router.NewRouter("/p1", "s1", []string{"22"}, []router.Option{router.WithEncoding("gbk")}...)}}},
-		{name: "对象累加实体", obj: &router.Routers{Routers: []*router.Router{router.NewRouter("/p1", "s1", []string{"22"}, []router.Option{router.WithEncoding("gbk")}...)}}, args: args{path: "/p1", service: "s1", action: []string{"22"}, opts: []router.Option{router.WithEncoding("gbk")}},
+		{name: "3. Conf-RoutersAppend-对象累加实体", obj: &router.Routers{Routers: []*router.Router{router.NewRouter("/p1", "s1", []string{"22"}, []router.Option{router.WithEncoding("gbk")}...)}}, args: args{path: "/p1", service: "s1", action: []string{"22"}, opts: []router.Option{router.WithEncoding("gbk")}},
 			want: &router.Routers{Routers: []*router.Router{router.NewRouter("/p1", "s1", []string{"22"}, []router.Option{router.WithEncoding("gbk")}...), router.NewRouter("/p1", "s1", []string{"22"}, []router.Option{router.WithEncoding("gbk")}...)}}},
 	}
 	for _, tt := range tests {
@@ -159,10 +158,10 @@ func TestRouters_Match(t *testing.T) {
 		want   *router.Router
 	}
 	tests := []test{
-		{name: "匹配路径为空", fields: router.NewRouters(), args: args{path: "", method: "GET"}, want: &router.Router{Path: "", Action: []string{"GET"}}},
-		{name: "匹配方法Options", fields: router.NewRouters(), args: args{path: "/1", method: http.MethodOptions}, want: &router.Router{Path: "/1", Action: []string{http.MethodOptions}}},
-		{name: "匹配方法Head", fields: router.NewRouters(), args: args{path: "/1", method: http.MethodHead}, want: &router.Router{Path: "/1", Action: []string{http.MethodHead}}},
-		{name: "存在匹配的路由", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}},
+		{name: "1. Conf-RoutersMatch-匹配路径为空", fields: router.NewRouters(), args: args{path: "", method: "GET"}, want: &router.Router{Path: "", Action: []string{"GET"}}},
+		{name: "2. Conf-RoutersMatch-匹配方法Options", fields: router.NewRouters(), args: args{path: "/1", method: http.MethodOptions}, want: &router.Router{Path: "/1", Action: []string{http.MethodOptions}}},
+		{name: "3. Conf-RoutersMatch-匹配方法Head", fields: router.NewRouters(), args: args{path: "/1", method: http.MethodHead}, want: &router.Router{Path: "/1", Action: []string{http.MethodHead}}},
+		{name: "4. Conf-RoutersMatch-存在匹配的路由", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}},
 			args: args{path: "/t1/t2", method: http.MethodGet}, want: router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))},
 	}
 	for _, tt := range tests {
@@ -175,7 +174,7 @@ func TestRouters_Match(t *testing.T) {
 		assert.NotEqual(t, nil, e, "不存在匹配的路由匹配结果不正常")
 	}()
 
-	test1 := test{name: "不存在匹配的路由", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}},
+	test1 := test{name: "5. Conf-RoutersMatch-不存在匹配的路由", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}},
 		args: args{path: "/t1/t2/tt", method: http.MethodGet}, want: router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}
 	got := test1.fields.Match(test1.args.path, test1.args.method)
 	assert.Equal(t, test1.want, got, test1.name)
@@ -187,9 +186,9 @@ func TestRouters_GetPath(t *testing.T) {
 		fields *router.Routers
 		want   []string
 	}{
-		{name: "空对象获取", fields: router.NewRouters(), want: make([]string, 0)},
-		{name: "单个路径对象获取", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}}, want: []string{"/t1/t2"}},
-		{name: "多个路径对象获取", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312")), router.NewRouter("/t1/t2/t3", "s2", []string{http.MethodGet}, router.WithEncoding("gbk"))}}, want: []string{"/t1/t2", "/t1/t2/t3"}},
+		{name: "1. Conf-RoutersGetPath-空对象获取", fields: router.NewRouters(), want: make([]string, 0)},
+		{name: "2. Conf-RoutersGetPath-单个路径对象获取", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312"))}}, want: []string{"/t1/t2"}},
+		{name: "3. Conf-RoutersGetPath-多个路径对象获取", fields: &router.Routers{Routers: []*router.Router{router.NewRouter("/t1/t2", "s1", []string{http.MethodGet}, router.WithEncoding("gbk2312")), router.NewRouter("/t1/t2/t3", "s2", []string{http.MethodGet}, router.WithEncoding("gbk"))}}, want: []string{"/t1/t2", "/t1/t2/t3"}},
 	}
 	for _, tt := range tests {
 		got := tt.fields.GetPath()

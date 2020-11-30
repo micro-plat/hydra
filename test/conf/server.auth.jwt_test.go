@@ -21,22 +21,10 @@ func TestNewJWT(t *testing.T) {
 		opts []jwt.Option
 		want *jwt.JWTAuth
 	}{
-		{name: "设置secert",
-			opts: []jwt.Option{jwt.WithSecret("12345678")},
-			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
-		},
-		{name: "设置disable",
-			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithDisable()},
-			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: true, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
-		},
-		{name: "设置Enable",
-			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithEnable()},
-			want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: false, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()},
-		},
-		{name: "设置自定义对象",
-			opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111")},
-			want: &jwt.JWTAuth{Name: "test", AuthURL: "1111", Mode: "ES256", Secret: "12345678", ExpireAt: 1000, Source: "HEADER", Excludes: []string{"/t1/**"}, PathMatch: conf.NewPathMatch("/t1/**")},
-		},
+		{name: "1. Conf-NewJWT-设置secert", opts: []jwt.Option{jwt.WithSecret("12345678")}, want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()}},
+		{name: "2. Conf-NewJWT-设置disable", opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithDisable()}, want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: true, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()}},
+		{name: "3. Conf-NewJWT-设置Enable", opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithEnable()}, want: &jwt.JWTAuth{Name: "Authorization-Jwt", Mode: "HS512", Secret: "12345678", Disable: false, ExpireAt: 86400, Source: "COOKIE", PathMatch: conf.NewPathMatch()}},
+		{name: "4. Conf-NewJWT-设置自定义对象", opts: []jwt.Option{jwt.WithSecret("12345678"), jwt.WithHeader(), jwt.WithExcludes("/t1/**"), jwt.WithExpireAt(1000), jwt.WithMode("ES256"), jwt.WithName("test"), jwt.WithAuthURL("1111")}, want: &jwt.JWTAuth{Name: "test", AuthURL: "1111", Mode: "ES256", Secret: "12345678", ExpireAt: 1000, Source: "HEADER", Excludes: []string{"/t1/**"}, PathMatch: conf.NewPathMatch("/t1/**")}},
 	}
 	for _, tt := range tests {
 		got := jwt.NewJWT(tt.opts...)
@@ -52,15 +40,14 @@ func TestJWTGetConf(t *testing.T) {
 		opts []jwt.Option
 		want *jwt.JWTAuth
 	}{
-		{name: "未设置jwt节点", opts: []jwt.Option{}, want: &jwt.JWTAuth{Disable: true}},
-		// {name: "配置参数有误", opts: []jwt.Option{jwt.WithMode("xxxx")}, want: nil},
-		{name: "配置参数正确", opts: []jwt.Option{jwt.WithExpireAt(123), jwt.WithSecret("11111")}, want: jwt.NewJWT(jwt.WithExpireAt(123), jwt.WithSecret("11111"))},
+		{name: "1. Conf-JWTGetConf-未设置jwt节点", opts: []jwt.Option{}, want: &jwt.JWTAuth{Disable: true}},
+		{name: "2. Conf-JWTGetConf-配置参数正确", opts: []jwt.Option{jwt.WithExpireAt(123), jwt.WithSecret("11111")}, want: jwt.NewJWT(jwt.WithExpireAt(123), jwt.WithSecret("11111"))},
 	}
 
 	conf := mocks.NewConfBy("hydraconf_jwt_test2", "jwttest")
 	confB := conf.API(":8081")
 	for _, tt := range tests {
-		if !strings.EqualFold(tt.name, "未设置jwt节点") {
+		if !strings.EqualFold(tt.name, "1. Conf-JWTGetConf-未设置jwt节点") {
 			confB.Jwt(tt.opts...)
 		}
 		got, err := jwt.GetConf(conf.GetAPIConf().GetServerConf())

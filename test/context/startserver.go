@@ -246,18 +246,20 @@ func GbkToUtf8(s string) string {
 	return string(d)
 }
 
-func getTestMIMEMultipartPOSTForm() string {
+func getTestMIMEMultipartPOSTForm(kv url.Values) (string, string) {
 	file, _ := os.Open("upload.test.txt")
 	defer file.Close()
 	body := &bytes.Buffer{}
 	// 文件写入 body
 	writer := multipart.NewWriter(body)
+	for k, v := range kv {
+		writer.WriteField(k, v[0])
+	}
 	part, _ := writer.CreateFormFile("upload", filepath.Base("upload.test.txt"))
 	io.Copy(part, file)
 	writer.Close()
-	return body.String()
+	return body.String(), writer.FormDataContentType()
 }
-
 
 func getUploadBody() string {
 	return "Content-Disposition: form-data; name=\"upload\"; filename=\"upload.test.txt\"\r\nContent-Type: application/octet-stream\r\n\r\nADASDASDASFHNOJM~!@#$%^&*"

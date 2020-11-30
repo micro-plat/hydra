@@ -61,48 +61,12 @@ func Test_ucli_GetFlags(t *testing.T) {
 		fields fields
 		want   []cli.Flag
 	}{
-		{
-			name: "1.1 测试GetFlags-相同的Flag类型",
-			fields: fields{
-				flags: []cli.Flag{
-					cli.StringFlag{
-						Name: "-r",
-					},
-					cli.StringFlag{
-						Name: "-c",
-					},
-				},
-			},
-			want: []cli.Flag{
-				cli.StringFlag{
-					Name: "-r",
-				},
-				cli.StringFlag{
-					Name: "-c",
-				},
-			},
-		},
-		{
-			name: "1.2 测试GetFlags-不同的Flag类型",
-			fields: fields{
-				flags: []cli.Flag{
-					cli.StringFlag{
-						Name: "-r",
-					},
-					cli.StringSliceFlag{
-						Name: "-t",
-					},
-				},
-			},
-			want: []cli.Flag{
-				cli.StringFlag{
-					Name: "-r",
-				},
-				cli.StringSliceFlag{
-					Name: "-t",
-				},
-			},
-		},
+		{name: "1.1 测试GetFlags-相同的Flag类型",
+			fields: fields{flags: []cli.Flag{cli.StringFlag{Name: "-r"}, cli.StringFlag{Name: "-c"}}},
+			want:   []cli.Flag{cli.StringFlag{Name: "-r"}, cli.StringFlag{Name: "-c"}}},
+		{name: "1.2 测试GetFlags-不同的Flag类型",
+			fields: fields{flags: []cli.Flag{cli.StringFlag{Name: "-r"}, cli.StringSliceFlag{Name: "-t"}}},
+			want:   []cli.Flag{cli.StringFlag{Name: "-r"}, cli.StringSliceFlag{Name: "-t"}}},
 	}
 	for _, tt := range tests {
 		c := &ucli{
@@ -139,27 +103,9 @@ func Test_doCliCallback(t *testing.T) {
 		args        args
 		isNillError bool
 	}{
-		{
-			name: "1. 不存在的command名称-完全包含cmdName",
-			args: args{
-				c: newCtx(app, set, "runtest"), //run的完全包含
-			},
-			isNillError: true,
-		},
-		{
-			name: "2. 不存在的command名称-只包含cmdName前缀",
-			args: args{
-				c: newCtx(app, set, "r"), //run的前缀 r
-			},
-			isNillError: true,
-		},
-		{
-			name: "3. 不存在的command名称-完全不包含cmdName",
-			args: args{
-				c: newCtx(app, set, "nonecmd"),
-			},
-			isNillError: true,
-		},
+		{name: "1. 不存在的command名称-完全包含cmdName", args: args{c: newCtx(app, set, "runtest")}, isNillError: true},
+		{name: "2. 不存在的command名称-只包含cmdName前缀", args: args{c: newCtx(app, set, "r")}, isNillError: true},
+		{name: "3. 不存在的command名称-完全不包含cmdName", args: args{c: newCtx(app, set, "nonecmd")}, isNillError: true},
 	}
 	//t.Log("clis的长度：", len(clis))
 	for _, tt := range tests {

@@ -36,8 +36,7 @@ func TestContainer_GetOrCreate(t *testing.T) {
 		want    interface{}
 		wantErr bool
 	}{
-		// TODO: Add test cases.
-		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: nil, wantErr: true},
+		{name: "1. 初始化容器内容db对象", args: args{typ: "db", name: "db", creator: creator}, want: nil, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

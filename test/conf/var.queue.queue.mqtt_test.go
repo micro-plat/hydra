@@ -16,48 +16,9 @@ func TestQueueMQTTNew(t *testing.T) {
 		opts    []mqtt.Option
 		want    *mqtt.MQTT
 	}{
-		{
-			name:    "测试新增-无option",
-			address: "192.168.5.79:6379",
-			want: &mqtt.MQTT{
-				Queue: &queue.Queue{
-					Proto: "mqtt",
-				},
-				Address: "192.168.5.79:6379",
-			},
-		},
-		{
-			name:    "测试新增-WithUP",
-			address: "192.168.5.79:6379",
-			opts: []mqtt.Option{
-				mqtt.WithUP("name", "pwd"),
-			},
-			want: &mqtt.MQTT{
-				Queue: &queue.Queue{
-					Proto: "mqtt",
-				},
-				Address:  "192.168.5.79:6379",
-				UserName: "name",
-				Password: "pwd",
-			},
-		},
-		{
-			name:    "测试新增-WithUP",
-			address: "192.168.5.79:6379",
-			opts: []mqtt.Option{
-				mqtt.WithUP("name", "pwd"),
-				mqtt.WithCert("cert"),
-			},
-			want: &mqtt.MQTT{
-				Queue: &queue.Queue{
-					Proto: "mqtt",
-				},
-				Address:  "192.168.5.79:6379",
-				UserName: "name",
-				Password: "pwd",
-				Cert:     "cert",
-			},
-		},
+		{name: "1. Conf-QueueMQTTNew-测试新增-无option", address: "192.168.5.79:6379", want: &mqtt.MQTT{Queue: &queue.Queue{Proto: "mqtt"}, Address: "192.168.5.79:6379"}},
+		{name: "2. Conf-QueueMQTTNew-测试新增-WithUP", address: "192.168.5.79:6379", opts: []mqtt.Option{mqtt.WithUP("name", "pwd")}, want: &mqtt.MQTT{Queue: &queue.Queue{Proto: "mqtt"}, Address: "192.168.5.79:6379", UserName: "name", Password: "pwd"}},
+		{name: "3. Conf-QueueMQTTNew-测试新增-WithUP", address: "192.168.5.79:6379", opts: []mqtt.Option{mqtt.WithUP("name", "pwd"), mqtt.WithCert("cert")}, want: &mqtt.MQTT{Queue: &queue.Queue{Proto: "mqtt"}, Address: "192.168.5.79:6379", UserName: "name", Password: "pwd", Cert: "cert"}},
 	}
 	for _, tt := range tests {
 		got := mqtt.New(tt.address, tt.opts...)

@@ -55,6 +55,16 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	return p, nil
 }
 
+//Done Done
+func (s *Processor) Done() bool {
+	return s.done
+}
+
+//QueueItems QueueItems
+func (s *Processor) QueueItems() map[string]interface{} {
+	return s.queues.Items()
+}
+
 //Start 所有任务
 func (s *Processor) Start(wait ...bool) error {
 	if err := s.customer.Connect(); err != nil {

@@ -3,6 +3,7 @@ package pkgs
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/micro-plat/cli/logs"
 	"github.com/micro-plat/hydra/global"
@@ -17,6 +18,7 @@ import (
 type HydraService struct {
 	service.Service
 	ServiceName string
+	DisplayName string
 	Description string
 	Arguments   []string
 }
@@ -34,6 +36,7 @@ func GetService(c *cli.Context, args ...string) (hydraSrv *HydraService, err err
 	return &HydraService{
 		Service:     appSrv,
 		ServiceName: cfg.Name,
+		DisplayName: cfg.DisplayName,
 		Description: cfg.Description,
 		Arguments:   cfg.Arguments,
 	}, err
@@ -41,9 +44,13 @@ func GetService(c *cli.Context, args ...string) (hydraSrv *HydraService, err err
 
 //GetSrvConfig SrvCfg
 func GetSrvConfig(args ...string) *service.Config {
+	srvname := global.Def.GetLongAppName()
+	parties := strings.Split(srvname, "_")
+	dispName := fmt.Sprintf("%s(%s)", parties[0], parties[1])
+
 	return &service.Config{
-		Name:        global.Def.GetLongAppName(),
-		DisplayName: global.Def.GetLongAppName(),
+		Name:        srvname,
+		DisplayName: dispName,
 		Description: global.Usage,
 		Arguments:   args,
 	}

@@ -13,9 +13,9 @@ func TestNewVarPub(t *testing.T) {
 		platName string
 		want     string
 	}{
-		{name: "初始化平台名为空", platName: "", want: ""},
-		{name: "初始化平台名1", platName: "nil", want: "nil"},
-		{name: "初始化平台名2", platName: "paltname", want: "paltname"},
+		{name: "1. Conf-NewVarPub-初始化平台名为空", platName: "", want: ""},
+		{name: "2. Conf-NewVarPub-初始化平台名1", platName: "nil", want: "nil"},
+		{name: "3. Conf-NewVarPub-初始化平台名2", platName: "paltname", want: "paltname"},
 	}
 	for _, tt := range tests {
 		got := vars.NewVarPub(tt.platName)
@@ -30,12 +30,12 @@ func Test_varPath_GetVarPath(t *testing.T) {
 		tp       []string
 		want     string
 	}{
-		{name: "入参为nil", platName: "pt1", tp: nil, want: "/pt1/var"},
-		{name: "入参为空", platName: "pt1", tp: []string{}, want: "/pt1/var"},
-		{name: "入参一段", platName: "pt1", tp: []string{"p1"}, want: "/pt1/var/p1"},
-		{name: "入参二段", platName: "pt1", tp: []string{"p1", "p2"}, want: "/pt1/var/p1/p2"},
-		{name: "入参三段", platName: "pt1", tp: []string{"p1", "p2", "p3"}, want: "/pt1/var/p1/p2/p3"},
-		{name: "入参六段", platName: "pt1", tp: []string{"p1", "p2", "p3", "p4", "p5", "p6"}, want: "/pt1/var/p1/p2/p3/p4/p5/p6"},
+		{name: "1. Conf-varPathGetVarPath-入参为nil", platName: "pt1", tp: nil, want: "/pt1/var"},
+		{name: "2. Conf-varPathGetVarPath-入参为空", platName: "pt1", tp: []string{}, want: "/pt1/var"},
+		{name: "3. Conf-varPathGetVarPath-入参一段", platName: "pt1", tp: []string{"p1"}, want: "/pt1/var/p1"},
+		{name: "4. Conf-varPathGetVarPath-入参二段", platName: "pt1", tp: []string{"p1", "p2"}, want: "/pt1/var/p1/p2"},
+		{name: "5. Conf-varPathGetVarPath-入参三段", platName: "pt1", tp: []string{"p1", "p2", "p3"}, want: "/pt1/var/p1/p2/p3"},
+		{name: "6. Conf-varPathGetVarPath-入参六段", platName: "pt1", tp: []string{"p1", "p2", "p3", "p4", "p5", "p6"}, want: "/pt1/var/p1/p2/p3/p4/p5/p6"},
 	}
 	for _, tt := range tests {
 		c := vars.NewVarPub(tt.platName)
@@ -50,9 +50,9 @@ func Test_varPath_GetRLogPath(t *testing.T) {
 		platName string
 		want     string
 	}{
-		{name: "rlog路径获取1", platName: "pt1", want: "/pt1/var/app/rlog"},
-		{name: "rlog路径获取2", platName: "pt2", want: "/pt2/var/app/rlog"},
-		{name: "rlog路径获取3", platName: "pt3", want: "/pt3/var/app/rlog"},
+		{name: "1. Conf-varPathGetRLogPath-rlog路径获取1", platName: "pt1", want: "/pt1/var/app/rlog"},
+		{name: "2. Conf-varPathGetRLogPath-rlog路径获取2", platName: "pt2", want: "/pt2/var/app/rlog"},
+		{name: "3. Conf-varPathGetRLogPath-rlog路径获取3", platName: "pt3", want: "/pt3/var/app/rlog"},
 	}
 	for _, tt := range tests {
 		c := vars.NewVarPub(tt.platName)

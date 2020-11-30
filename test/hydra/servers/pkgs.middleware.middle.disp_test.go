@@ -249,9 +249,9 @@ func Test_dispCtx_ShouldBind(t *testing.T) {
 		wantErr string
 		want    interface{}
 	}{
-		{name: "GetForm为空", request: getTestCronTask("@every 1h30m", "cron_service"), bind: map[string]interface{}{}, want: map[string]interface{}{}},
-		{name: "mqc,__body_为空", request: getTestMqcQueue("queue_name", "queue_service", `{}`, true), bind: map[string]interface{}{}, want: map[string]interface{}{}},
-		{name: "mqc,__body_不为空", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true),
+		{name: "1. GetForm为空", request: getTestCronTask("@every 1h30m", "cron_service"), bind: map[string]interface{}{}, want: map[string]interface{}{}},
+		{name: "2. mqc,__body_为空", request: getTestMqcQueue("queue_name", "queue_service", `{}`, true), bind: map[string]interface{}{}, want: map[string]interface{}{}},
+		{name: "3. mqc,__body_不为空", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true),
 			bind: map[string]interface{}{}, want: map[string]interface{}{
 				"__body_": `{"data":"message"}`,
 				"data":    "message",

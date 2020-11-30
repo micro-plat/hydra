@@ -17,11 +17,11 @@ func TestNewCronTask(t *testing.T) {
 		ok      bool
 		wantErr bool
 	}{
-		{name: "空任务", ok: false, args: &task.Task{}, wantErr: false},
-		{name: "一次性任务", ok: false, args: &task.Task{Cron: task.CronExxcuteOnce, Service: "/servderi1"}, wantErr: true},
-		{name: "一次性任务1", ok: false, args: &task.Task{Cron: task.CronExxcuteNow, Service: "/servderi1"}, wantErr: true},
-		{name: "错误的cron表达式", ok: false, args: &task.Task{Cron: "sdsd", Service: "/servderi1"}, wantErr: false},
-		{name: "正确的任务配置", ok: true, args: &task.Task{Cron: "@every 10s", Service: "/servderi1"}, wantErr: true},
+		{name: "1. cron任务对象-初始化空任务", ok: false, args: &task.Task{}, wantErr: false},
+		{name: "2. cron任务对象-初始化一次性任务", ok: false, args: &task.Task{Cron: task.CronExxcuteOnce, Service: "/servderi1"}, wantErr: true},
+		{name: "3. cron任务对象-初始化一次性任务1", ok: false, args: &task.Task{Cron: task.CronExxcuteNow, Service: "/servderi1"}, wantErr: true},
+		{name: "4. cron任务对象-初始化错误的cron表达式", ok: false, args: &task.Task{Cron: "sdsd", Service: "/servderi1"}, wantErr: false},
+		{name: "5. cron任务对象-初始化正确的任务", ok: true, args: &task.Task{Cron: "@every 10s", Service: "/servderi1"}, wantErr: true},
 	}
 	for _, tt := range tests {
 		m := &CronTask{
@@ -59,11 +59,6 @@ func TestCronTask_GetName(t *testing.T) {
 
 	got := m.GetName()
 	assert.Equal(t, md5.Encrypt(fmt.Sprintf("%s(%s)", m.Task.Service, m.Task.Cron)), got, "获取任务的唯一索引名失败")
-
-	// tmieN := time.Now()
-	// afer := m.NextTime(tmieN)
-	// xTime := tmieN.Add(10 * time.Hour)
-	// assert.Equal(t, afer, xTime, "获取任务执行的下一次时间失败")
 
 	got = m.GetService()
 	assert.Equal(t, "/xxxxx1", got, "获取任务的services失败")

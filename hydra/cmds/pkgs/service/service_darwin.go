@@ -226,10 +226,6 @@ func (s *darwinLaunchdService) Status() (Status, error) {
 }
 
 func (s *darwinLaunchdService) Start() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
-
 	status, err := s.Status()
 	if err != nil {
 		return err
@@ -246,10 +242,6 @@ func (s *darwinLaunchdService) Start() error {
 	return run("launchctl", "load", confPath)
 }
 func (s *darwinLaunchdService) Stop() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
-
 	status, err := s.Status()
 	if err != nil {
 		return err

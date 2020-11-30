@@ -48,5 +48,5 @@ func doInstall(c *cli.Context) (err error) {
 	}
 
 	err = hydraSrv.Install()
-	return pkgs.GetCmdsResult(hydraSrv.ServiceName, "Install", err)
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Install", err)
 }
