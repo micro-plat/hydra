@@ -17,7 +17,7 @@ type IInnerContext interface {
 	Param(string) string        //Context.Param(key)
 	GetRouterPath() string      //Context.FullPath()
 	// ShouldBind(interface{}) error //Context.ShouldBind(&obj)
-	// GetForm() url.Values
+	GetPostForm() url.Values
 	// GetQuery(string) (string, bool)       //context.GetQuery
 	// GetFormValue(k string) (string, bool) //Context.Request.PostForm
 	ContentType() string

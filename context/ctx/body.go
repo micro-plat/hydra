@@ -151,6 +151,11 @@ func (w *body) GetBody() (s []byte, err error) {
 		return w.rawBody.value.([]byte), nil
 	}
 	w.rawBody.hasRead = true
+	if w.ctx.ContentType() == "multipart/form-data" {
+		w.rawBody.value = []byte(w.ctx.GetPostForm().Encode())
+		return w.rawBody.value.([]byte), nil
+	}
+
 	w.rawBody.value, w.rawBody.err = ioutil.ReadAll(w.ctx.GetBody())
 	if w.rawBody.err != nil {
 		return nil, fmt.Errorf("获取body发生错误:%w", w.rawBody.err)

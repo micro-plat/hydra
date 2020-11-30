@@ -75,7 +75,7 @@ func (g *dispCtx) GetFormValue(k string) (string, bool) {
 	return fmt.Sprint(v), ok
 }
 
-func (g *dispCtx) GetForm() url.Values {
+func (g *dispCtx) GetPostForm() url.Values {
 	values := url.Values{}
 	for k, v := range g.Context.Request.GetForm() {
 		values.Set(k, fmt.Sprint(v))

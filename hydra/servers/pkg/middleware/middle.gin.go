@@ -47,6 +47,10 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 
+func (g *ginCtx) GetPostForm() url.Values {
+	g.load()
+	return g.Request.PostForm
+}
 func (g *ginCtx) WStatus(s int) {
 	g.Writer.WriteHeader(s)
 }
