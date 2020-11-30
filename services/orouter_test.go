@@ -121,7 +121,7 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 		errStr       string
 		handleAction []string
 	}{
-		{name: "1.1 同一路径,action被分配完成", path: "/path", testHandler: []interface{}{&testHandler3{}}, wantErr: true, errStr: "服务/path无法注册，所有action已分配"},
+		{name: "1.1 同一路径,action被分配完", path: "/path", testHandler: []interface{}{&testHandler3{}}, wantErr: true, errStr: "服务/path无法注册，所有action已分配"},
 		{name: "1.2 同一路径,有多个需要分配的action的service", path: "/path", testHandler: []interface{}{&testHandler7{}, func(ctx context.IContext) (r interface{}) { return }}, wantErr: true, errStr: `重复注册的服务{"path":"/path","service":"/path","encoding":"utf-8","pages":["pages"]}`},
 
 		{name: "2.1 获取指针所有routers", path: "/path", testHandler: []interface{}{&testHandler2{}}, handleAction: []string{"GET"}},

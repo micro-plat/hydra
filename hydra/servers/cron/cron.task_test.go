@@ -18,8 +18,8 @@ func TestNewCronTask(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "1. cron任务对象-初始化空任务", ok: false, args: &task.Task{}, wantErr: false},
-		{name: "2. cron任务对象-初始化一次性任务", ok: false, args: &task.Task{Cron: task.CronExxcuteOnce, Service: "/servderi1"}, wantErr: true},
-		{name: "3. cron任务对象-初始化一次性任务1", ok: false, args: &task.Task{Cron: task.CronExxcuteNow, Service: "/servderi1"}, wantErr: true},
+		{name: "2. cron任务对象-初始化一次性任务", ok: false, args: &task.Task{Cron: task.CronExecuteOnce, Service: "/servderi1"}, wantErr: true},
+		{name: "3. cron任务对象-初始化一次性任务1", ok: false, args: &task.Task{Cron: task.CronExecuteNow, Service: "/servderi1"}, wantErr: true},
 		{name: "4. cron任务对象-初始化错误的cron表达式", ok: false, args: &task.Task{Cron: "sdsd", Service: "/servderi1"}, wantErr: false},
 		{name: "5. cron任务对象-初始化正确的任务", ok: true, args: &task.Task{Cron: "@every 10s", Service: "/servderi1"}, wantErr: true},
 	}

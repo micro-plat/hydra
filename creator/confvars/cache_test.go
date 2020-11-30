@@ -7,9 +7,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	gocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	memcached "github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	 "github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 )
 
@@ -49,7 +49,7 @@ func TestVarcache_Redis(t *testing.T) {
 			want: nil, wantErr: "请确认已配置/var/redis"},
 		{name: "3. configname不为空,redis节点存在,configname节点不存在", fields: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{}}), args: args{name: "redis", q: cacheredis.New(cacheredis.WithConfigName("address"))},
 			want: nil, wantErr: "请确认已配置/var/redis/address"},
-		{name: "4. configname不为空,节点存在", fields: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})}}),
+		{name: "4. configname不为空,节点存在,configname节点存在", fields: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})}}),
 			args: args{name: "redis", q: cacheredis.New(cacheredis.WithConfigName("address"))},
 			want: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})},
 				cache.TypeNodeName: map[string]interface{}{"redis": newRedis}}), wantErr: ""},

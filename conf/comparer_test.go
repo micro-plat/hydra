@@ -222,17 +222,15 @@ func TestComparer_IsChanged(t *testing.T) {
 		{name: "6. compare-IsChanged-版本号不同,内容相同", fields: fields{oconf: NewTMainConf(0, map[string]interface{}{"xxx": "ww11"}), nconf: NewTMainConf(1, map[string]interface{}{"xxx": "ww11"})}, want: true},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Comparer{
-				oconf:      tt.fields.oconf,
-				nconf:      tt.fields.nconf,
-				valueNames: tt.fields.valueNames,
-				subNames:   tt.fields.subNames,
-			}
-			if got := s.IsChanged(); got != tt.want {
-				t.Errorf("Comparer.IsChanged() = %v, want %v", got, tt.want)
-			}
-		})
+		s := &Comparer{
+			oconf:      tt.fields.oconf,
+			nconf:      tt.fields.nconf,
+			valueNames: tt.fields.valueNames,
+			subNames:   tt.fields.subNames,
+		}
+		if got := s.IsChanged(); got != tt.want {
+			t.Errorf("Comparer.IsChanged() = %v, want %v", got, tt.want)
+		}
 	}
 }
 
@@ -268,17 +266,15 @@ func TestComparer_IsSubConfChanged(t *testing.T) {
 		{name: "2.8. compare-IsSubConfChanged-版本号不同,oldversion < newversion,内容都为空1", fields: fields{oconf: NewTMainConf1(1, map[string]string{}), nconf: NewTMainConf1(0, map[string]string{})}, args: args{names: []string{"xx"}}, wantIsChanged: false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Comparer{
-				oconf:      tt.fields.oconf,
-				nconf:      tt.fields.nconf,
-				valueNames: tt.fields.valueNames,
-				subNames:   tt.fields.subNames,
-			}
-			if gotIsChanged := s.IsSubConfChanged(tt.args.names...); gotIsChanged != tt.wantIsChanged {
-				t.Errorf("Comparer.IsSubConfChanged() = %v, want %v", gotIsChanged, tt.wantIsChanged)
-			}
-		})
+		s := &Comparer{
+			oconf:      tt.fields.oconf,
+			nconf:      tt.fields.nconf,
+			valueNames: tt.fields.valueNames,
+			subNames:   tt.fields.subNames,
+		}
+		if gotIsChanged := s.IsSubConfChanged(tt.args.names...); gotIsChanged != tt.wantIsChanged {
+			t.Errorf("Comparer.IsSubConfChanged() = %v, want %v", gotIsChanged, tt.wantIsChanged)
+		}
 	}
 }
 
@@ -314,17 +310,15 @@ func TestComparer_IsValueChanged(t *testing.T) {
 		{name: "2.8. compare-IsValueChanged-版本号不同,oldversion < newversion,内容都为空1", fields: fields{oconf: NewTMainConf(1, map[string]interface{}{}), nconf: NewTMainConf(0, map[string]interface{}{})}, args: args{names: []string{"xx"}}, wantIsChanged: false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Comparer{
-				oconf:      tt.fields.oconf,
-				nconf:      tt.fields.nconf,
-				valueNames: tt.fields.valueNames,
-				subNames:   tt.fields.subNames,
-			}
-			if gotIsChanged := s.IsValueChanged(tt.args.names...); gotIsChanged != tt.wantIsChanged {
-				t.Errorf("Comparer.IsValueChanged() = %v, want %v", gotIsChanged, tt.wantIsChanged)
-			}
-		})
+		s := &Comparer{
+			oconf:      tt.fields.oconf,
+			nconf:      tt.fields.nconf,
+			valueNames: tt.fields.valueNames,
+			subNames:   tt.fields.subNames,
+		}
+		if gotIsChanged := s.IsValueChanged(tt.args.names...); gotIsChanged != tt.wantIsChanged {
+			t.Errorf("Comparer.IsValueChanged() = %v, want %v", gotIsChanged, tt.wantIsChanged)
+		}
 	}
 }
 
