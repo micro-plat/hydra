@@ -14,12 +14,9 @@ type IInnerContext interface {
 	Header(string, string)      //context.Header
 	GetHeaders() http.Header    //Request.Header
 	GetCookies() []*http.Cookie //Request.Cookies()
-	Param(string) string        //Context.Param(key)
-	GetRouterPath() string      //Context.FullPath()
-	// ShouldBind(interface{}) error //Context.ShouldBind(&obj)
+	GetParams() map[string]interface{}
+	GetRouterPath() string //Context.FullPath()
 	GetPostForm() url.Values
-	// GetQuery(string) (string, bool)       //context.GetQuery
-	// GetFormValue(k string) (string, bool) //Context.Request.PostForm
 	ContentType() string
 
 	Abort()
@@ -29,9 +26,6 @@ type IInnerContext interface {
 	WHeader(string) string    //c.Context.Writer.Header().Get
 	File(string)              //Context.File(path)
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)
-	// XML(int, interface{})
-	// YAML(int, interface{})
-	// JSON(int, interface{})
 	Redirect(int, string)
 
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)

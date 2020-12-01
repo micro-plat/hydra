@@ -3,7 +3,6 @@ package context
 import (
 	"context"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -81,6 +80,9 @@ type IPath interface {
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
+	//Param 路由参数
+	Params() types.XMap
+
 	//GetRouter 获取当前请求对应的路由信息
 	GetRouter() (*router.Router, error)
 
@@ -119,9 +121,6 @@ type IRequest interface {
 	//Path 地址、头、cookie相关信息
 	Path() IPath
 
-	//Param 路由参数
-	Param(string) string
-
 	//Bind 将请求的参数绑定到对象
 	Bind(obj interface{}) error
 
@@ -131,31 +130,23 @@ type IRequest interface {
 	//GetMap 将当前请求转换为map并返回
 	GetMap() (types.XMap, error)
 
-	//GetRquestParams 获取请求的body参数
-	GetRequestParams() (s []byte, c string, err error)
+	//GetFullRaw 获取请求的body参数
+	GetFullRaw() (s []byte, c string, err error)
 
 	//GetBody 获取请求的参数
 	GetBody() ([]byte, error)
 
-	//GetBodyMap 将body转换为map
-	GetBodyMap() (map[string]interface{}, error)
-
 	//GetPlayload
 	GetPlayload() string
 
-	//GetCookie 获取请求Cookie
-	GetCookie(string) string
+	//Headers 获取请求头
+	Headers() types.XMap
 
-	//GetHeader 获取头信息
-	GetHeader(string) string
+	//Cookies 获取cookie信息
+	Cookies() types.XMap
 
-	//GetHeaders 获取请求头
-	GetHeaders() http.Header
+	types.IXMap
 
-	//GetCookies 获取cookie信息
-	GetCookies() types.XMap
-
-	IGetter
 	IFile
 }
 
