@@ -168,7 +168,7 @@ func Test_request_GetKeys(t *testing.T) {
 		c.Request = r
 		req := ctx.NewRequest(middleware.NewGinCtx(c), serverConf, conf.NewMeta())
 
-		got := req.GetKeys()
+		got := req.Keys()
 		assert.Equal(t, len(tt.want), len(got), tt.name)
 		keyMap := map[string]bool{}
 		for _, v := range tt.want {
@@ -214,7 +214,7 @@ func Test_request_GetCookies(t *testing.T) {
 		c.Request = r
 
 		req := ctx.NewRequest(middleware.NewGinCtx(c), serverConf, conf.NewMeta())
-		got := req.GetCookies()
+		got := req.Cookies()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }

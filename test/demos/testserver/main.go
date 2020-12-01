@@ -85,7 +85,7 @@ func init() {
 			}
 
 			ctx.Log().Info("RPC.IP.Result-1:")
-			response, err := request.Request(ctx.Context(), "/testrpc/service1@tcp://192.168.0.137:8888", map[string]interface{}{"rpc": "test"})
+			response, err := request.Request("/testrpc/service1@tcp://192.168.0.137:8888", map[string]interface{}{"rpc": "test"})
 			if err != nil {
 				ctx.Log().Error("RPC.IP.Request异常", err)
 				return
@@ -93,7 +93,7 @@ func init() {
 			ctx.Log().Info("RPC.IP.Result:", response.Result)
 
 			ctx.Log().Info("RPC.PlatName.Result-1:")
-			response, err = request.Request(ctx.Context(), "/test/rpc@taosytest", map[string]interface{}{"rpc": "plattest"})
+			response, err = request.Request("/test/rpc@taosytest", map[string]interface{}{"rpc": "plattest"})
 			if err != nil {
 				ctx.Log().Error("RPC.PlatName.Request异常", err)
 				return
@@ -101,7 +101,7 @@ func init() {
 			ctx.Log().Info("RPC.PlatName.Result:", response.Result)
 
 			ctx.Log().Info("RPC.OLD.Result-1:")
-			response, err = request.Request(ctx.Context(), "/test/rpc@taosytest", map[string]interface{}{"rpc": "plattest"})
+			response, err = request.Request("/test/rpc@taosytest", map[string]interface{}{"rpc": "plattest"})
 			if err != nil {
 				ctx.Log().Error("RPC.OLD.Request异常", err)
 				return

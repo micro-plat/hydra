@@ -119,52 +119,6 @@ func Test_dispCtx_GetHeaders(t *testing.T) {
 	}
 }
 
-func Test_dispCtx_GetQuery(t *testing.T) {
-	tests := []struct {
-		name    string
-		request dispatcher.IRequest
-		k       string
-		want    string
-		wantOK  bool
-	}{
-		{name: "1. cron-ctx-GetQuery获取不到(默认都是空的不能设置)", request: getTestCronTask("@every 1h30m", "cron_service")},
-		{name: "2. mqc-ctx-GetQuery获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), k: "error", want: "", wantOK: false},
-		{name: "3. mqc-ctx-GetQuery获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
-	}
-	for _, tt := range tests {
-		g := middleware.NewDispCtx()
-		g.Request = tt.request
-		got, gotOK := g.GetQuery(tt.k)
-		assert.Equal(t, tt.wantOK, gotOK, tt.name)
-		if gotOK {
-			assert.Equal(t, tt.want, got, tt.name)
-		}
-	}
-}
-
-func Test_dispCtx_GetFormValue(t *testing.T) {
-	tests := []struct {
-		name    string
-		request dispatcher.IRequest
-		k       string
-		want    string
-		wantOK  bool
-	}{
-		{name: "1. cron-ctx-GetFormValue获取不到(默认都是空的不能设置)", request: getTestCronTask("@every 1h30m", "cron_service")},
-		{name: "2. mqc-ctx-GetFormValue获取错误的key", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), k: "error", want: "", wantOK: false},
-		{name: "3. mqc-ctx-GetFormValue获取正确的", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: `{"data":"message"}`, k: "__body_", wantOK: true},
-	}
-	for _, tt := range tests {
-		g := middleware.NewDispCtx()
-		g.Request = tt.request
-		got, gotOK := g.GetFormValue(tt.k)
-		assert.Equal(t, tt.wantOK, gotOK, tt.name)
-		if gotOK {
-			assert.Equal(t, tt.want, got, tt.name)
-		}
-	}
-}
-
 func Test_dispCtx_GetForm(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -177,7 +131,7 @@ func Test_dispCtx_GetForm(t *testing.T) {
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
 		g.Request = tt.request
-		got := g.GetForm()
+		got := g.GetPostForm()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
@@ -239,32 +193,4 @@ func Test_dispCtx_File(t *testing.T) {
 	assert.Equal(t, len(jsonBytes), g.Writer.Size(), "写入数据长度判断")
 	assert.Equal(t, jsonBytes, g.Writer.Data(), "写入数据判断")
 
-}
-
-func Test_dispCtx_ShouldBind(t *testing.T) {
-	tests := []struct {
-		name    string
-		request dispatcher.IRequest
-		bind    interface{}
-		wantErr string
-		want    interface{}
-	}{
-		{name: "1. GetForm为空", request: getTestCronTask("@every 1h30m", "cron_service"), bind: map[string]interface{}{}, want: map[string]interface{}{}},
-		{name: "2. mqc,__body_为空", request: getTestMqcQueue("queue_name", "queue_service", `{}`, true), bind: map[string]interface{}{}, want: map[string]interface{}{}},
-		{name: "3. mqc,__body_不为空", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true),
-			bind: map[string]interface{}{}, want: map[string]interface{}{
-				"__body_": `{"data":"message"}`,
-				"data":    "message",
-			}},
-	}
-	for _, tt := range tests {
-		g := middleware.NewDispCtx()
-		g.Request = tt.request
-		gotErr := g.ShouldBind(&tt.bind)
-		if tt.wantErr != "" {
-			assert.Equal(t, tt.wantErr, gotErr.Error(), tt.name)
-			continue
-		}
-		assert.Equal(t, tt.want, tt.bind, tt.name)
-	}
 }

@@ -8,7 +8,7 @@ import (
 
 func Test_newHistories(t *testing.T) {
 	l := newHistories()
-	if !reflect.DeepEqual(l, &histories{keys: make(map[string]*ver)}) {
+	if !reflect.DeepEqual(l, &histories{records: make(map[string]*history)}) {
 		t.Error("newHistories() didn't return *histories")
 	}
 }
@@ -30,9 +30,9 @@ func Test_histories_Add(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s.Add(tt.args.tp, tt.args.name, tt.args.key)
+			s.Add(fmt.Sprintf("%s_%s", tt.args.tp, tt.args.name), tt.args.key)
 			tps := fmt.Sprintf("%s-%s", tt.args.tp, tt.args.name)
-			if ver, ok := s.keys[tps]; !ok {
+			if ver, ok := s.records[tps]; !ok {
 				t.Errorf("histories.keys[%s] doesn't exist", tps)
 			} else {
 				if ver.current != tt.args.key {
@@ -74,7 +74,7 @@ func Test_histories_Remove(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		s.Add(tt.data.tp, tt.data.name, tt.data.key)
+		s.Add(fmt.Sprintf("%s_%s", tt.data.tp, tt.data.name), tt.data.key)
 	}
 
 	for _, tt := range tests {
@@ -83,7 +83,7 @@ func Test_histories_Remove(t *testing.T) {
 		})
 	}
 
-	for k, v := range s.keys {
+	for k, v := range s.records {
 		t.Logf("当前剩余key %s:%+v", k, v.keys)
 	}
 }
