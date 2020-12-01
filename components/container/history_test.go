@@ -6,20 +6,20 @@ import (
 	"testing"
 )
 
-func Test_newVers(t *testing.T) {
-	l := newVers()
-	if !reflect.DeepEqual(l, &vers{keys: make(map[string]*ver)}) {
-		t.Error("newVers() didn't return *vers")
+func Test_newHistories(t *testing.T) {
+	l := newHistories()
+	if !reflect.DeepEqual(l, &histories{records: make(map[string]*history)}) {
+		t.Error("newHistories() didn't return *histories")
 	}
 }
 
-func Test_vers_Add(t *testing.T) {
+func Test_histories_Add(t *testing.T) {
 	type args struct {
 		tp   string
 		name string
 		key  string
 	}
-	s := newVers()
+	s := newHistories()
 	tests := []struct {
 		name string
 		args args
@@ -30,23 +30,23 @@ func Test_vers_Add(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s.Add(tt.args.tp, tt.args.name, tt.args.key)
+			s.Add(fmt.Sprintf("%s_%s", tt.args.tp, tt.args.name), tt.args.key)
 			tps := fmt.Sprintf("%s-%s", tt.args.tp, tt.args.name)
-			if ver, ok := s.keys[tps]; !ok {
-				t.Errorf("vers.keys[%s] doesn't exist", tps)
+			if ver, ok := s.records[tps]; !ok {
+				t.Errorf("histories.keys[%s] doesn't exist", tps)
 			} else {
 				if ver.current != tt.args.key {
-					t.Errorf("vers.keys[%s].current isn't right", tps)
+					t.Errorf("histories.keys[%s].current isn't right", tps)
 				}
 				if ver.keys[len(ver.keys)-1] != tt.args.key {
-					t.Errorf("vers.keys[%s].keys isn't right", tps)
+					t.Errorf("histories.keys[%s].keys isn't right", tps)
 				}
 			}
 		})
 	}
 }
 
-func Test_vers_Remove(t *testing.T) {
+func Test_histories_Remove(t *testing.T) {
 	type data struct {
 		tp   string
 		name string
@@ -57,7 +57,7 @@ func Test_vers_Remove(t *testing.T) {
 		f func(key string) bool
 	}
 
-	s := newVers()
+	s := newHistories()
 	f := func(key string) bool {
 		t.Log("移除key", key)
 		return true
@@ -68,13 +68,13 @@ func Test_vers_Remove(t *testing.T) {
 		data data
 		args args
 	}{
-		{name: "1. VersRemove-移除数据-数据存在", data: data{tp: "test", name: "test1", key: "123"}, args: args{f: f}},
-		{name: "2. VersRemove-移除数据-数据不存在", data: data{tp: "test", name: "test2", key: "123"}, args: args{f: f}},
-		{name: "3. VersRemove-移除数据-数据存在1", data: data{tp: "test", name: "test1", key: "321"}, args: args{f: f}},
+		{name: "1. historiesRemove-移除数据-数据存在", data: data{tp: "test", name: "test1", key: "123"}, args: args{f: f}},
+		{name: "2. historiesRemove-移除数据-数据不存在", data: data{tp: "test", name: "test2", key: "123"}, args: args{f: f}},
+		{name: "3. historiesRemove-移除数据-数据存在1", data: data{tp: "test", name: "test1", key: "321"}, args: args{f: f}},
 	}
 
 	for _, tt := range tests {
-		s.Add(tt.data.tp, tt.data.name, tt.data.key)
+		s.Add(fmt.Sprintf("%s_%s", tt.data.tp, tt.data.name), tt.data.key)
 	}
 
 	for _, tt := range tests {
@@ -83,7 +83,7 @@ func Test_vers_Remove(t *testing.T) {
 		})
 	}
 
-	for k, v := range s.keys {
+	for k, v := range s.records {
 		t.Logf("当前剩余key %s:%+v", k, v.keys)
 	}
 }

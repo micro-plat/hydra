@@ -73,9 +73,9 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 func getToken(ctx context.IContext, jwt *xjwt.JWTAuth) string {
 	switch strings.ToUpper(jwt.Source) {
 	case xjwt.SourceHeader, xjwt.SourceHeaderShort: // "HEADER", "H":
-		return ctx.Request().GetHeader(jwt.Name)
+		return ctx.Request().Headers().GetString(jwt.Name)
 	default:
-		cookie := ctx.Request().GetCookie(jwt.Name)
+		cookie := ctx.Request().Cookies().GetString(jwt.Name)
 		return cookie
 	}
 }

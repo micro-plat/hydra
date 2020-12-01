@@ -29,14 +29,22 @@ func GetContextWithDefault() context.Context {
 
 //Current 从缓存中获取请求上下文配置
 func Current(g ...string) IContext {
+	if v, ok := GetContext(g...); ok {
+		return v
+	}
+	panic("未获取到当前线程的请求上下文")
+}
+
+//GetContext 获取当前context
+func GetContext(g ...string) (IContext, bool) {
 	gid := types.GetStringByIndex(g, 0)
 	if gid == "" {
 		gid = global.GetGoroutineID()
 	}
 	if c, ok := ctxMap.Get(gid); ok {
-		return c.(IContext)
+		return c.(IContext), true
 	}
-	panic("未获取到当前线程的请求上下文")
+	return nil, false
 }
 
 //Del 删除当前线程的请求上下文缓存

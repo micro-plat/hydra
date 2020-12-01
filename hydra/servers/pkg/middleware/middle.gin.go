@@ -26,8 +26,15 @@ func (g *ginCtx) load() {
 		}
 	})
 }
-
+func (g *ginCtx) GetParams() map[string]interface{} {
+	params := make(map[string]interface{})
+	for _, v := range g.Context.Params {
+		params[v.Key] = v.Value
+	}
+	return params
+}
 func (g *ginCtx) GetRouterPath() string {
+
 	return g.Context.FullPath()
 }
 func (g *ginCtx) GetBody() io.ReadCloser {

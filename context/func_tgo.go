@@ -13,8 +13,8 @@ func GetTGOModules() []*tgo.Module {
 	request := tgo.NewModule("request").
 		Add("getString", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().GetString(input) })).
 		Add("getPath", tgo.FuncARS(func() string { ctx := Current(); return ctx.Request().Path().GetRequestPath() })).
-		Add("getHeader", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().GetHeader(input) })).
-		Add("getCookie", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().GetCookie(input) })).
+		Add("getHeader", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().Headers().GetString(input) })).
+		Add("getCookie", tgo.FuncASRS(func(input string) string { ctx := Current(); return ctx.Request().Cookies().GetString(input) })).
 		Add("getClientIP", tgo.FuncARS(func() string { ctx := Current(); return ctx.User().GetClientIP() })).
 		Add("getRequestID", tgo.FuncARS(func() string { ctx := Current(); return ctx.User().GetRequestID() }))
 

@@ -34,6 +34,9 @@ type dispCtx struct {
 func (g *dispCtx) GetRouterPath() string {
 	return g.Context.Request.GetService()
 }
+func (g *dispCtx) GetParams() map[string]interface{} {
+	return nil
+}
 func (g *dispCtx) GetBody() io.ReadCloser {
 	text := g.Request.GetForm()["__body_"]
 	switch v := text.(type) {
@@ -65,14 +68,6 @@ func (g *dispCtx) GetHeaders() http.Header {
 }
 func (g *dispCtx) GetCookies() []*http.Cookie {
 	return nil
-}
-func (g *dispCtx) GetQuery(k string) (string, bool) {
-	v, ok := g.Context.Request.GetForm()[k]
-	return fmt.Sprint(v), ok
-}
-func (g *dispCtx) GetFormValue(k string) (string, bool) {
-	v, ok := g.Context.Request.GetForm()[k]
-	return fmt.Sprint(v), ok
 }
 
 func (g *dispCtx) GetPostForm() url.Values {
@@ -114,24 +109,6 @@ func (g *dispCtx) File(name string) {
 	g.Context.JSON(200, map[string]interface{}{
 		"__body_": body,
 	})
-}
-func (g *dispCtx) ShouldBind(v interface{}) error {
-	f := g.Context.Request.GetForm()
-	if body, ok := f["__body_"]; ok && len(f) == 1 {
-		switch msg := body.(type) {
-		case json.RawMessage:
-			return json.Unmarshal(msg, v)
-		case []byte:
-			return json.Unmarshal(msg, v)
-		default:
-			return json.Unmarshal([]byte(fmt.Sprint(msg)), v)
-		}
-	}
-	js, err := json.Marshal(f)
-	if err != nil {
-		return fmt.Errorf("ShouldBind将输入的信息转换为JSON时失败 %w", err)
-	}
-	return json.Unmarshal(js, v)
 }
 
 func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {

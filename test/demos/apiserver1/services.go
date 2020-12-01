@@ -22,7 +22,7 @@ var funcAPI1 func(ctx context.IContext) (r interface{}) = func(ctx context.ICont
 var funcAPI2 func(ctx context.IContext) (r interface{}) = func(ctx context.IContext) (r interface{}) {
 	ctx.Log().Info("api-all 接口服务测试")
 
-	ctx.Log().Info("ctx.Request().Param(xxx):", ctx.Request().Param("xxx"))
+	ctx.Log().Info("ctx.Request().Param(xxx):", ctx.Request().Path().Params().GetString("xxx"))
 	res, err := ctx.Request().GetBody()
 	if err != nil {
 		ctx.Log().Errorf("ctx.Request().err:%v", err)
@@ -108,7 +108,7 @@ func (s *apiGetgbk) Handle(ctx context.IContext) (r interface{}) {
 		return err
 	}
 	ctx.Log().Info("ctx.Request().GetMap():", resmap)
-	ctx.Log().Info("ctx.Request().GetHeaders():", ctx.Request().GetHeaders())
+	ctx.Log().Info("ctx.Request().GetHeaders():", ctx.Request().Headers())
 	return "api-GBK-success"
 }
 
@@ -128,6 +128,6 @@ func (s *apiGetgb2312) Handle(ctx context.IContext) (r interface{}) {
 		return err
 	}
 	ctx.Log().Info("ctx.Request().GetMap():", resmap)
-	ctx.Log().Info("ctx.Request().GetHeaders():", ctx.Request().GetHeaders())
+	ctx.Log().Info("ctx.Request().GetHeaders():", ctx.Request().Headers())
 	return "api-GB2312-success"
 }

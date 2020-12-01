@@ -41,7 +41,7 @@ func RASAuth() Handler {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
-		respones, err := components.Def.RPC().GetRegularRPC().Request(ctx.Context(), auth.Service, input)
+		respones, err := components.Def.RPC().GetRegularRPC().Request(auth.Service, input)
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("rpc远程认证异常:err:%v", err))
 			return

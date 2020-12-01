@@ -117,18 +117,8 @@ func Test_ginCtx_Get_WithForm(t *testing.T) {
 	gotBody, _ := ioutil.ReadAll(g.GetBody())
 	assert.Equal(t, "", string(gotBody), "GetBody")
 
-	//GetFormValue
-	gotValue, gotOk := g.GetFormValue("a")
-	assert.Equal(t, true, gotOk, "GetFormValue")
-	assert.Equal(t, "1", gotValue, "GetFormValue")
-
-	//GetFormValue不存在的值
-	gotValue, gotOk = g.GetFormValue("d")
-	assert.Equal(t, false, gotOk, "GetFormValue2")
-	assert.Equal(t, "", gotValue, "GetFormValue2")
-
 	//GetForm
-	gotForm := g.GetForm()
+	gotForm := g.GetPostForm()
 	assert.Equal(t, url.Values{"a": []string{"1"}, "b": []string{"2"}, "c": []string{"3"}}, gotForm, "GetForm")
 }
 

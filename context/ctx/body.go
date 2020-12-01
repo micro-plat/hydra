@@ -38,8 +38,8 @@ func NewBody(c context.IInnerContext, encoding string) *body {
 	return &body{ctx: c, encoding: encoding}
 }
 
-//GetBodyMap 读取body原串并返回map
-func (w *body) GetBodyMap() (map[string]interface{}, error) {
+//GetMap 读取并合并请求参数
+func (w *body) GetMap() (map[string]interface{}, error) {
 
 	//从缓存中读取数据
 	if w.mapBody.hasRead {
@@ -56,7 +56,7 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 	w.mapBody.hasRead = true
 	var body []byte
 
-	if body, _, w.mapBody.err = w.GetRequestParams(); w.mapBody.err != nil {
+	if body, _, w.mapBody.err = w.GetFullRaw(); w.mapBody.err != nil {
 		return nil, w.mapBody.err
 	}
 	if body, w.mapBody.err = urlDecode(body, w.encoding); w.mapBody.err != nil {
@@ -118,8 +118,8 @@ func (w *body) GetBodyMap() (map[string]interface{}, error) {
 	return data, nil
 }
 
-//GetBody 读取所有请求Get,POST,PUT,DELETET等提交的数据
-func (w *body) GetRequestParams() (body []byte, queryString string, err error) {
+//GetFullRaw 读取所有请求Get,POST,PUT,DELETET等提交的数据
+func (w *body) GetFullRaw() (body []byte, queryString string, err error) {
 	//从缓存中读取
 	if w.fullBody.hasRead {
 		if w.fullBody.err != nil {
@@ -151,7 +151,7 @@ func (w *body) GetBody() (s []byte, err error) {
 		return w.rawBody.value.([]byte), nil
 	}
 	w.rawBody.hasRead = true
-	if w.ctx.ContentType() == "multipart/form-data" {
+	if w.ctx.ContentType() == "multipart/form-data" { //文件上专时已经进行了包体转换
 		w.rawBody.value = []byte(w.ctx.GetPostForm().Encode())
 		return w.rawBody.value.([]byte), nil
 	}

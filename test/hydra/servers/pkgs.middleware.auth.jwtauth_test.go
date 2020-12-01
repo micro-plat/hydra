@@ -61,7 +61,7 @@ func TestJWTAuth(t *testing.T) {
 		if tt.isSet {
 			confB.Jwt(tt.jwtOpts...)
 		}
-		headerMap := map[string][]string{}
+		headerMap := map[string]interface{}{}
 		cookieMap := map[string]interface{}{}
 		if tt.isSource == "header" {
 			headerMap[jwt.JWTName] = []string{tt.token}
