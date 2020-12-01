@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"net/http"
 	"strconv"
 	"testing"
 
@@ -62,7 +61,7 @@ func TestAuthBasic(t *testing.T) {
 			MockUser:     &mocks.MockUser{MockClientIP: "192.168.0.1", MockAuth: &octx.Auth{}},
 			MockResponse: &mocks.MockResponse{MockStatus: 200, MockHeader: map[string][]string{}},
 			MockRequest: &mocks.MockRequest{
-				MockHeader: http.Header{"Authorization": []string{tt.reqHeadVal}},
+				MockHeader: map[string]interface{}{"Authorization": []string{tt.reqHeadVal}},
 				MockPath: &mocks.MockPath{
 					MockRequestPath: tt.requestPath,
 				},

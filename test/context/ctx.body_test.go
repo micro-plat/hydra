@@ -599,7 +599,7 @@ func getTestQueryRaw(value, e string) string {
 	return value
 }
 
-func Test_body_GetBodyMap__MIMEXML(t *testing.T) {
+func Test_body_GetMap__MIMEXML(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -676,20 +676,20 @@ func Test_body_GetBodyMap__MIMEXML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBodyMap()
+		gotS, err := w.GetMap()
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, gotS, tt.name)
-		gotS2, err := w.GetBodyMap()
+		gotS2, err := w.GetMap()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetBodyMap__MIMEJSON(t *testing.T) {
+func Test_body_GetMap__MIMEJSON(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -766,20 +766,20 @@ func Test_body_GetBodyMap__MIMEJSON(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBodyMap()
+		gotS, err := w.GetMap()
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, gotS, tt.name)
-		gotS2, err := w.GetBodyMap()
+		gotS2, err := w.GetMap()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetBodyMap__MIMEYAML(t *testing.T) {
+func Test_body_GetMap__MIMEYAML(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -846,20 +846,20 @@ func Test_body_GetBodyMap__MIMEYAML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBodyMap()
+		gotS, err := w.GetMap()
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, gotS, tt.name)
-		gotS2, err := w.GetBodyMap()
+		gotS2, err := w.GetMap()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetBodyMap__MIMEPOSTForm(t *testing.T) {
+func Test_body_GetMap__MIMEPOSTForm(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -934,20 +934,20 @@ func Test_body_GetBodyMap__MIMEPOSTForm(t *testing.T) {
 		//替换gin上下文的请求
 		c.Request = r
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBodyMap()
+		gotS, err := w.GetMap()
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, gotS, tt.name)
-		gotS2, err := w.GetBodyMap()
+		gotS2, err := w.GetMap()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetBodyMap__MIMEMultipartPOSTForm(t *testing.T) {
+func Test_body_GetMap__MIMEMultipartPOSTForm(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -1029,14 +1029,14 @@ func Test_body_GetBodyMap__MIMEMultipartPOSTForm(t *testing.T) {
 		//替换gin上下文的请求
 		c.Request = r
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBodyMap()
+		gotS, err := w.GetMap()
 		if tt.errStr != "" {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, tt.want, gotS, tt.name)
-		gotS2, err := w.GetBodyMap()
+		gotS2, err := w.GetMap()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}

@@ -12,8 +12,8 @@ import (
 func TestNewContainer(t *testing.T) {
 	l := NewContainer()
 	if !reflect.DeepEqual(l, &Container{
-		cache: cmap.New(8),
-		vers:  newVers(),
+		cache:     cmap.New(8),
+		histories: newHistories(),
 	}) {
 		t.Error("NewContainer() didn't return *Container")
 	}
@@ -25,9 +25,9 @@ func TestContainer_GetOrCreate(t *testing.T) {
 	type args struct {
 		typ     string
 		name    string
-		creator func(conf conf.IVarConf) (interface{}, error)
+		creator func(conf *conf.RawConf) (interface{}, error)
 	}
-	creator := func(conf conf.IVarConf) (interface{}, error) {
+	creator := func(conf *conf.RawConf) (interface{}, error) {
 		return nil, nil
 	}
 	tests := []struct {

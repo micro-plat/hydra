@@ -1,6 +1,8 @@
 package caches
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/components/caches/cache"
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/conf"
@@ -37,14 +39,11 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(conf conf.IVarConf) (interface{}, error) {
-
-		js, err := conf.GetConf(cacheNameNode, name)
-		if err != nil {
-			return nil, err
+	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
+		if conf.IsEmpty() {
+			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", cacheTypeNode, name)
 		}
-
-		orgCache, err := cache.New(js.GetString("proto"), string(js.GetRaw()))
+		orgCache, err := cache.New(conf.GetString("proto"), string(conf.GetRaw()))
 		return orgCache, err
 	})
 	if err != nil {
