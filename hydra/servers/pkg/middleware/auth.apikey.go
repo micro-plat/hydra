@@ -68,7 +68,7 @@ func getSecret(ctx context.IContext, auth *apikey.APIKeyAuth) (string, error) {
 
 //getSignRaw 构建原串
 func getSignRaw(r context.IRequest, a string, b string) (string, string) {
-	keys := r.GetKeys()
+	keys := r.Keys()
 	values := net.NewValues()
 	var sign string
 	for _, key := range keys {

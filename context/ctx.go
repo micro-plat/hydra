@@ -80,6 +80,9 @@ type IPath interface {
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
+	//Param 路由参数
+	Params() types.XMap
+
 	//GetRouter 获取当前请求对应的路由信息
 	GetRouter() (*router.Router, error)
 
@@ -117,9 +120,6 @@ type IFile interface {
 type IRequest interface {
 	//Path 地址、头、cookie相关信息
 	Path() IPath
-
-	//Param 路由参数
-	Param(string) string
 
 	//Bind 将请求的参数绑定到对象
 	Bind(obj interface{}) error

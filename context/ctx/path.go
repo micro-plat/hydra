@@ -23,6 +23,7 @@ type rpath struct {
 	isLimit  bool
 	fallback bool
 	encoding string
+	params   types.XMap
 }
 
 func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) *rpath {
@@ -36,6 +37,15 @@ func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) 
 //GetMethod 获取服务请求方式
 func (c *rpath) GetMethod() string {
 	return c.ctx.GetMethod()
+}
+
+// Params 获取路径中的参数
+func (c *rpath) Params() types.XMap {
+	if c.params != nil {
+		return c.params
+	}
+	c.params = c.ctx.GetParams()
+	return c.params
 }
 
 func (c *rpath) GetEncoding() string {

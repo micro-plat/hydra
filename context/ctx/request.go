@@ -1,10 +1,8 @@
 package ctx
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -42,6 +40,9 @@ func NewRequest(c context.IInnerContext, s app.IAPPConf, meta conf.IMeta) *reque
 	if req.XMap == nil {
 		req.XMap = make(map[string]interface{})
 	}
+	if req.readMapErr != nil {
+		req.readMapErr = errs.NewError(http.StatusNotAcceptable, req.readMapErr)
+	}
 	return req
 }
 
@@ -50,51 +51,19 @@ func (r *request) Path() context.IPath {
 	return r.path
 }
 
-//Path 获取请求路径信息
-func (r *request) Param(key string) string {
-	return r.ctx.Param(key)
-}
-
 //Bind 根据输入参数绑定对象
 func (r *request) Bind(obj interface{}) error {
-	//检查输入类型
-	val := reflect.ValueOf(obj)
-	if val.Kind() != reflect.Ptr {
-		return fmt.Errorf("输入参数非指针 %v", val.Kind())
+	if r.readMapErr != nil {
+		return r.readMapErr
 	}
-	val = val.Elem()
-	if val.Kind() != reflect.Struct && val.Kind() != reflect.Map {
-		return fmt.Errorf("输入参数非struct,map %v", val.Kind())
-	}
-
-	//获取body数据
-	mp, err := r.body.GetBodyMap()
-	if err != nil {
-		return err
-	}
-	if val.Kind() == reflect.Map {
-		jsonData, err := json.Marshal(mp)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(jsonData, obj)
-		if err != nil {
-			return err
-		}
-		//obj = mp
-		return nil
-	}
-
 	//处理数据结构转换
-	var xmap types.XMap = mp
-	if err := xmap.ToStruct(obj); err != nil {
-		return err
+	if err := r.XMap.ToStruct(obj); err != nil {
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
 	}
 
 	//验证数据格式
 	if _, err := govalidator.ValidateStruct(obj); err != nil {
-		err = fmt.Errorf("输入参数有误 %v", err)
-		return err
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
 	}
 	return nil
 }

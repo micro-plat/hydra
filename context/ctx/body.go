@@ -151,7 +151,7 @@ func (w *body) GetBody() (s []byte, err error) {
 		return w.rawBody.value.([]byte), nil
 	}
 	w.rawBody.hasRead = true
-	if w.ctx.ContentType() == "multipart/form-data" {
+	if w.ctx.ContentType() == "multipart/form-data" { //文件上专时已经进行了包体转换
 		w.rawBody.value = []byte(w.ctx.GetPostForm().Encode())
 		return w.rawBody.value.([]byte), nil
 	}

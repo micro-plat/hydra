@@ -10,7 +10,7 @@ const xAddDelay = "X-Add-Delay"
 //Delay 处理请求的延时时长
 func Delay() Handler {
 	return func(ctx IMiddleContext) {
-		if delay := ctx.Request().GetHeader(xAddDelay); delay != "" {
+		if delay := ctx.Request().Headers().GetString(xAddDelay); delay != "" {
 			ctx.Response().AddSpecial("delay")
 			delayDuration, err := time.ParseDuration(delay)
 			if err != nil {
