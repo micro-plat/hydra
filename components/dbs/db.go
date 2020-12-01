@@ -41,26 +41,15 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(conf conf.IVarConf) (obj interface{}, err error) {
-
-		js, err := conf.GetConf(dbNameNode, name)
-		if err != nil {
-			return nil, err
+	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(conf *conf.RawConf) (obj interface{}, err error) {
+		if conf.IsEmpty() {
+			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", dbTypeNode, name)
 		}
-
 		var dbConf xdb.DB
-		err = js.ToStruct(&dbConf)
-		if err != nil {
+		if err = conf.ToStruct(&dbConf); err != nil {
 			return nil, fmt.Errorf("数据库[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
-
-		orgdb, err := db.NewDB(dbConf.Provider,
-			dbConf.ConnString,
-			dbConf.MaxOpen,
-			dbConf.MaxIdle,
-			dbConf.LifeTime)
-
-		return orgdb, err
+		return db.NewDB(dbConf.Provider, dbConf.ConnString, dbConf.MaxOpen, dbConf.MaxIdle, dbConf.LifeTime)
 	})
 	if err != nil {
 		return nil, err

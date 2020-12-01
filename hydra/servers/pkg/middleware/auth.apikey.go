@@ -57,7 +57,7 @@ func getSecret(ctx context.IContext, auth *apikey.APIKeyAuth) (string, error) {
 		return secret, nil
 	}
 	if proto == global.ProtoRPC {
-		response, err := components.Def.RPC().GetRegularRPC().RequestByCtx(addr, ctx)
+		response, err := components.Def.RPC().GetRegularRPC().Swap(addr, ctx)
 		if err != nil {
 			return "", err
 		}
