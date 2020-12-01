@@ -43,14 +43,16 @@ func NewContainer() *Container {
 func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error) {
 
 	//1. 获取配置信息
-
 	varConf, err := app.Cache.GetVarConf()
 	if err != nil {
 		return nil, fmt.Errorf("无法获取var.conf:%w", err)
 	}
-	jconf, err := varConf.GetConf(typ, name)
-	if err != nil {
-		jconf = conf.EmptyRawConf
+	jconf := conf.EmptyRawConf
+	if varConf.Has(typ, name) {
+		jconf, err = varConf.GetConf(typ, name)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	//2. 根据配置创建组件
