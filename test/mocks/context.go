@@ -81,11 +81,11 @@ func (t *TestContxt) GetRouterPath() string {
 }
 
 func (t *TestContxt) ShouldBind(v interface{}) error {
-	Body := t.GetForm()["__body_"][0]
+	Body := t.GetPostForm()["__body_"][0]
 	return json.Unmarshal([]byte(fmt.Sprint(Body)), v)
 }
 
-func (t *TestContxt) GetForm() url.Values {
+func (t *TestContxt) GetPostForm() url.Values {
 	return t.Form
 }
 
