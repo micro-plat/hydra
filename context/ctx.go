@@ -3,7 +3,6 @@ package context
 import (
 	"context"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -131,31 +130,23 @@ type IRequest interface {
 	//GetMap 将当前请求转换为map并返回
 	GetMap() (types.XMap, error)
 
-	//GetRquestParams 获取请求的body参数
-	GetRequestParams() (s []byte, c string, err error)
+	//GetFullRaw 获取请求的body参数
+	GetFullRaw() (s []byte, c string, err error)
 
 	//GetBody 获取请求的参数
 	GetBody() ([]byte, error)
 
-	//GetBodyMap 将body转换为map
-	GetBodyMap() (map[string]interface{}, error)
-
 	//GetPlayload
 	GetPlayload() string
 
-	//GetCookie 获取请求Cookie
-	GetCookie(string) string
+	//Headers 获取请求头
+	Headers() types.XMap
 
-	//GetHeader 获取头信息
-	GetHeader(string) string
+	//Cookies 获取cookie信息
+	Cookies() types.XMap
 
-	//GetHeaders 获取请求头
-	GetHeaders() http.Header
+	types.IXMap
 
-	//GetCookies 获取cookie信息
-	GetCookies() types.XMap
-
-	IGetter
 	IFile
 }
 
