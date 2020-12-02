@@ -24,13 +24,13 @@ var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}
 func startTrace(trace, tracePort string) (itrace, error) {
 	switch strings.ToLower(trace) {
 	case "cpu":
-		return profile.Start(profile.CPUProfile, profile.ProfilePath(".")), nil
+		return profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mem":
-		return profile.Start(profile.MemProfile, profile.ProfilePath(".")), nil
+		return profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "block":
-		return profile.Start(profile.BlockProfile, profile.ProfilePath(".")), nil
+		return profile.Start(profile.BlockProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mutex":
-		return profile.Start(profile.MutexProfile, profile.ProfilePath(".")), nil
+		return profile.Start(profile.MutexProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "web":
 		web := &webTrace{port: tracePort}
 		return web, web.Start()
