@@ -113,10 +113,14 @@ func (p *ServiceApp) run() error {
 	}
 
 	globalData := global.Current()
+
 	//4.创建trace性能跟踪
-	if err := startTrace(globalData.GetTrace(), globalData.GetTracePort()); err != nil {
+	trace, err := startTrace(globalData.GetTrace(), globalData.GetTracePort())
+	if err != nil {
 		return err
 	}
+	defer trace.Stop()
+
 	//5. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
 		if err := Pub2Registry(true); err != nil {
