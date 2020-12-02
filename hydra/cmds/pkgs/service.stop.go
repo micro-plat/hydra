@@ -14,8 +14,6 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 	//8. 关闭服务器释放所有资源
 	global.Def.Log().Info(global.AppName, fmt.Sprintf("正在退出..."))
 
-	p.trace.Stop()
-
 	if p.server != nil {
 		//if !reflect.ValueOf(p.server).IsNil() {
 		//关闭服务器
@@ -26,6 +24,8 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 	if err := services.Def.Close(); err != nil {
 		global.Def.Log().Error("err:", err)
 	}
+
+	p.trace.Stop()
 
 	//通知关闭各组件
 	global.Def.Close()
