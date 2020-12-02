@@ -72,11 +72,11 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
 		w.Shutdown()
+		w.conf = c
 
 		app.Cache.Save(c)
 		if !c.GetServerConf().IsStarted() {
 			w.log.Info("rpc服务被禁用，不用重启")
-			w.conf = c
 			return true, nil
 		}
 		w.Server, err = w.getServer(c)
@@ -86,7 +86,6 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 		if err = w.Start(); err != nil {
 			return false, err
 		}
-		w.conf = c
 		return true, nil
 	}
 	app.Cache.Save(c)
