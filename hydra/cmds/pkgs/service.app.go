@@ -67,6 +67,7 @@ func GetSrvApp(c *cli.Context) *ServiceApp {
 type ServiceApp struct {
 	c      *cli.Context
 	server *servers.RspServers
+	trace  itrace
 }
 
 //Start Start
@@ -76,10 +77,12 @@ func (p *ServiceApp) Start(s service.Service) (err error) {
 }
 
 //Stop Stop
-func (p *ServiceApp) Stop(s service.Service) error {
+func (p *ServiceApp) Stop(s service.Service) (err error) {
 
 	//8. 关闭服务器释放所有资源
 	global.Def.Log().Info(global.AppName, fmt.Sprintf("正在退出..."))
+
+	p.trace.Stop()
 
 	if !reflect.ValueOf(p.server).IsNil() {
 		//关闭服务器
@@ -98,7 +101,7 @@ func (p *ServiceApp) Stop(s service.Service) error {
 	return nil
 }
 
-func (p *ServiceApp) run() error {
+func (p *ServiceApp) run() (err error) {
 
 	//1. 绑定应用程序参数
 	if err := global.Def.Bind(p.c); err != nil {
@@ -115,11 +118,10 @@ func (p *ServiceApp) run() error {
 	globalData := global.Current()
 
 	//4.创建trace性能跟踪
-	trace, err := startTrace(globalData.GetTrace(), globalData.GetTracePort())
+	p.trace, err = startTrace(globalData.GetTrace(), globalData.GetTracePort())
 	if err != nil {
 		return err
 	}
-	defer trace.Stop()
 
 	//5. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {

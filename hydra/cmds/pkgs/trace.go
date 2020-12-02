@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/trace"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/lib4go/logger"
@@ -21,15 +22,15 @@ var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}
 
 //startTrace 启用项目性能跟踪
 func startTrace(trace, tracePort string) (itrace, error) {
-	switch trace {
+	switch strings.ToLower(trace) {
 	case "cpu":
-		return profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
+		return profile.Start(profile.CPUProfile, profile.ProfilePath(".")), nil
 	case "mem":
-		return profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
+		return profile.Start(profile.MemProfile, profile.ProfilePath(".")), nil
 	case "block":
-		return profile.Start(profile.BlockProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
+		return profile.Start(profile.BlockProfile, profile.ProfilePath(".")), nil
 	case "mutex":
-		return profile.Start(profile.MutexProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
+		return profile.Start(profile.MutexProfile, profile.ProfilePath(".")), nil
 	case "web":
 		web := &webTrace{port: tracePort}
 		return web, web.Start()
