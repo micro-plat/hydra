@@ -7,46 +7,58 @@ import (
 	"os"
 	"runtime/trace"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/pkg/profile"
 )
 
+type itrace interface {
+	Stop()
+}
+
 var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}
 
 //startTrace 启用项目性能跟踪
-func startTrace(trace, tracePort string) error {
-	switch trace {
+func startTrace(trace, tracePort string) (itrace, error) {
+	switch strings.ToLower(trace) {
 	case "cpu":
-		defer profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+		return profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mem":
-		defer profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+		return profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "block":
-		defer profile.Start(profile.BlockProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+		return profile.Start(profile.BlockProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mutex":
-		defer profile.Start(profile.MutexProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+		return profile.Start(profile.MutexProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "web":
-		return startWebTrace(tracePort)
+		web := &webTrace{port: tracePort}
+		return web, web.Start()
 	case "":
-		return nil
+		return &emptyTrace{}, nil
 	default:
-		return fmt.Errorf("不支持trace命令:%v", trace)
+		return nil, fmt.Errorf("不支持trace命令:%v", trace)
 	}
-	return nil
+	return &emptyTrace{}, nil
 }
-func startWebTrace(tracePort string) error {
+
+type webTrace struct {
+	port string
+}
+
+func (w *webTrace) Start() error {
 	errChan := make(chan error, 1)
-	go startTraceServer(tracePort, errChan)
+	go startServer(w.port, errChan)
 	select {
 	case err := <-errChan:
 		return err
 	case <-time.After(time.Millisecond * 200):
 		return nil
 	}
+	return nil
 }
 
-func startTraceServer(tracePort string, errChan chan error) {
+func startServer(tracePort string, errChan chan error) {
 	f, err := os.Create("trace.out")
 	if err != nil {
 		errChan <- fmt.Errorf("启动pprof，创建监控输出文件错误：%w", err)
@@ -75,4 +87,15 @@ func startTraceServer(tracePort string, errChan chan error) {
 	if err != nil {
 		errChan <- fmt.Errorf("启动pprof监控服务错误：%w", err)
 	}
+}
+
+func (w *webTrace) Stop() {
+	return
+}
+
+type emptyTrace struct {
+}
+
+func (e *emptyTrace) Stop() {
+	return
 }
