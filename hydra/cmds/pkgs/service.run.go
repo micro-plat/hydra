@@ -38,12 +38,11 @@ func (p *ServiceApp) run() (err error) {
 		}
 	}
 	//6. 创建服务器
-	server := servers.NewRspServers(globalData.GetRegistryAddr(),
+	p.server = servers.NewRspServers(globalData.GetRegistryAddr(),
 		globalData.GetPlatName(), globalData.GetSysName(),
 		globalData.GetServerTypes(), globalData.GetClusterName())
-	if err := server.Start(); err != nil {
+	if err := p.server.Start(); err != nil {
 		return err
 	}
-	p.server = server
 	return nil
 }
