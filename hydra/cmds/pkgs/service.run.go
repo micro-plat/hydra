@@ -17,7 +17,7 @@ func (p *ServiceApp) run() (err error) {
 		cli.ShowCommandHelp(p.c, p.c.Command.Name)
 		return nil
 	}
-	//3. 注册远程日志组件
+	//2. 注册远程日志组件
 	if err := rlog.Registry(global.Def.PlatName, global.Def.RegistryAddr); err != nil {
 		logs.Log.Error(err)
 		return nil
@@ -25,19 +25,19 @@ func (p *ServiceApp) run() (err error) {
 
 	globalData := global.Current()
 
-	//4.创建trace性能跟踪
+	//3.创建trace性能跟踪
 	p.trace, err = startTrace(globalData.GetTrace(), globalData.GetTracePort())
 	if err != nil {
 		return err
 	}
 
-	//5. 处理本地内存作为注册中心的服务发布问题
+	//4. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
 		if err := Pub2Registry(true); err != nil {
 			return err
 		}
 	}
-	//6. 创建服务器
+	//5. 创建服务器
 	p.server = servers.NewRspServers(globalData.GetRegistryAddr(),
 		globalData.GetPlatName(), globalData.GetSysName(),
 		globalData.GetServerTypes(), globalData.GetClusterName())
