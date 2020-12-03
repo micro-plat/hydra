@@ -55,6 +55,12 @@ func WithAuthCreds(username, password string) Option {
 	}
 }
 
+func WithMetadata(i map[string]string) Option {
+	return func(o *Options) {
+		o.Metadata = i
+	}
+}
+
 func WithLogger(log logger.ILogging) Option {
 	return func(o *Options) {
 		o.Logger = log
@@ -70,7 +76,7 @@ func Metadata(key, val string) Option {
 	}
 }
 
-func Domain(domain string) Option {
+func WithDomain(domain string) Option {
 	return func(o *Options) {
 		o.Domain = domain
 	}
