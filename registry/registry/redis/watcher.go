@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/lib4go/utility"
 )
 
+//WatchValue 监控值变化
 func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
 
 	//为当前监听分配编号
@@ -65,6 +66,8 @@ func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err er
 	return watcher, nil
 
 }
+
+//notifyValueChange 通知订阅者值已发生变化
 func (r *Redis) notifyValueChange(path string, value *value) {
 	key := swapKey(path, "watch") //保存所有watcher编号
 	m, err := r.client.HGetAll(key).Result()
@@ -76,6 +79,8 @@ func (r *Redis) notifyValueChange(path string, value *value) {
 		r.client.RPush(nkey, value.String()).Result()
 	}
 }
+
+//WatchChildren 监控子节点变化，保存订阅者信息
 func (r *Redis) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
 	//为当前监听分配编号
 	id := utility.GetGUID()
@@ -121,6 +126,7 @@ func (r *Redis) WatchChildren(path string) (data chan registry.ChildrenWatcher, 
 	return watcher, nil
 }
 
+//notifyParentChange 通知订阅者值已发生变化
 func (r *Redis) notifyParentChange(path string, version int32) {
 
 	//获取父级

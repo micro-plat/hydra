@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/registry"
 )
 
+//GetValue 获取节点值
 func (r *Redis) GetValue(path string) (data []byte, version int32, err error) {
 	buff, err := r.client.Get(swapKey(path)).Result()
 	if err != nil {
@@ -21,6 +22,8 @@ func (r *Redis) GetValue(path string) (data []byte, version int32, err error) {
 	}
 	return []byte(value.Data), value.Version, nil
 }
+
+//GetChildren 获取所有子节点
 func (r *Redis) GetChildren(path string) (paths []string, version int32, err error) {
 	key := swapKey(path)
 	npaths, err := r.client.Keys(key + ":*").Result()

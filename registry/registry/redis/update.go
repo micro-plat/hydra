@@ -4,12 +4,13 @@ import (
 	"fmt"
 )
 
+//Update 更新节点值
 func (r *Redis) Update(path string, data string) (err error) {
 
 	//获取原数据
 	b, err := r.Exists(path)
 	if err != nil {
-		return fmt.Errorf("查询出错:%w", err)
+		return fmt.Errorf("检查节点出错:%w", err)
 	}
 	if !b {
 		return fmt.Errorf("节点不存在%s", swapKey(path))
@@ -44,18 +45,4 @@ func (r *Redis) Update(path string, data string) (err error) {
 	r.notifyValueChange(path, value)
 	return nil
 
-}
-
-//Delete 删除节点
-func (r *Redis) Delete(path string) error {
-	key := swapKey(path)
-	keys := []string{key, swapKey(key, "seq")}
-	for _, k := range keys {
-		_, err := r.client.Del(k).Result()
-		if err != nil {
-			return fmt.Errorf("%v(%s)", err, k)
-		}
-	}
-	r.notifyParentChange(path, 0)
-	return nil
 }

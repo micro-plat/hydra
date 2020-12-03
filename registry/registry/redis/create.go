@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+//CreatePersistentNode 创建永久节点
 func (r *Redis) CreatePersistentNode(path string, data string) (err error) {
 	key := swapKey(path)
 	value := newValue(data, false)
@@ -16,6 +17,7 @@ func (r *Redis) CreatePersistentNode(path string, data string) (err error) {
 	return nil
 }
 
+//CreateTempNode 创建临时节点
 func (r *Redis) CreateTempNode(path string, data string) (err error) {
 	key := swapKey(path)
 	value := newValue(data, true)
@@ -27,6 +29,8 @@ func (r *Redis) CreateTempNode(path string, data string) (err error) {
 	r.notifyParentChange(key, value.Version)
 	return nil
 }
+
+//CreateSeqNode 创建序列节点
 func (r *Redis) CreateSeqNode(path string, data string) (rpath string, err error) {
 
 	nid, err := r.getSeq()
