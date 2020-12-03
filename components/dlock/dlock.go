@@ -45,18 +45,18 @@ func (d *DLock) TryLock() (err error) {
 		}
 	}()
 
-	path := registry.Join("dlock", global.Current().GetPlatName(), d.name, "dlock_")
-	d.path, err = d.registry.CreateSeqNode(path,
+	path := registry.Join("dlock", global.Current().GetPlatName(), d.name)
+	d.path, err = d.registry.CreateSeqNode(path+"/dlock_",
 		fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
 		return fmt.Errorf("创建分布式锁%s失败:%v", path, err)
 	}
 
-	cldrs, _, err := d.registry.GetChildren(d.name)
+	cldrs, _, err := d.registry.GetChildren(path)
 	if err != nil {
 		return err
 	}
-	if isMaster(d.path, d.name, cldrs) {
+	if isMaster(d.path, path, cldrs) {
 		return nil
 	}
 	return fmt.Errorf("未获取到分布式锁")
@@ -69,22 +69,23 @@ func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 			d.registry.Delete(d.path)
 		}
 	}()
-	path := registry.Join("dlock", global.Current().GetPlatName(), d.name, "dlock_")
-	d.path, err = d.registry.CreateSeqNode(path, fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
+
+	path := registry.Join("dlock", global.Current().GetPlatName(), d.name)
+	d.path, err = d.registry.CreateSeqNode(path+"/dlock_", fmt.Sprintf(`{"time":%d}`, time.Now().Unix()))
 	if err != nil {
 		return fmt.Errorf("创建锁%s失败:%v", path, err)
 	}
 
-	cldrs, _, err := d.registry.GetChildren(d.name)
+	cldrs, _, err := d.registry.GetChildren(path)
 	if err != nil {
 		return err
 	}
-	if isMaster(d.path, d.name, cldrs) {
+	if isMaster(d.path, path, cldrs) {
 		return nil
 	}
 
 	//监控子节点变化
-	ch, err := d.registry.WatchChildren(d.name)
+	ch, err := d.registry.WatchChildren(path)
 	if err != nil {
 		return err
 	}
@@ -101,14 +102,14 @@ func (d *DLock) Lock(timeout ...time.Duration) (err error) {
 			return fmt.Errorf("服务关闭，未获取到分布式锁")
 		case cldWatcher := <-ch:
 			if cldWatcher.GetError() == nil {
-				cldrs, _, _ := d.registry.GetChildren(d.name)
-				d.master = isMaster(d.path, d.name, cldrs)
+				cldrs, _, _ := d.registry.GetChildren(path)
+				d.master = isMaster(d.path, path, cldrs)
 				if d.master {
 					return nil
 				}
 			}
 		LOOP:
-			ch, err = d.registry.WatchChildren(d.name)
+			ch, err = d.registry.WatchChildren(path)
 			if err != nil {
 				if d.done {
 					return fmt.Errorf("服务关闭，未获取到分布式锁")
