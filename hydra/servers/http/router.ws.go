@@ -16,7 +16,8 @@ func (s *Server) addWSRouters(routers ...*router.Router) {
 
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
-	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
+	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
+	s.engine.Use(middleware.Recovery().GinFunc())
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
 	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
 	s.engine.Use(middleware.Limit().GinFunc())     //限流处理
