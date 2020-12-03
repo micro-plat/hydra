@@ -28,6 +28,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(RPC))
 	p.Engine.Use(middleware.Logging().DispFunc())
+	p.Engine.Use(middleware.Recovery().DispFunc())
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
 	middleware.AddMiddlewareHook(rpcmiddlewares, func(item middleware.Handler) {

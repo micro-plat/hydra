@@ -77,7 +77,7 @@ func TestParse(t *testing.T) {
 		{name: "9. Parse-解析带有用户名和密码的地址", args: args{address: "redis://root:123456@192.168.0.101:6379"}, wantProto: "redis", wantRaddr: []string{"192.168.0.101:6379"}, wantU: "root", wantP: "123456", wantErr: false},
 	}
 	for _, tt := range tests {
-		gotProto, gotRaddr, gotU, gotP, err := registry.Parse(tt.args.address)
+		gotProto, gotRaddr, gotU, gotP, _, err := registry.Parse(tt.args.address)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			continue

@@ -18,6 +18,9 @@ func (c *Auth) Response(v ...interface{}) interface{} {
 	if len(v) > 0 {
 		c.response = v[0]
 	}
+	if c.response == nil {
+		return c.request
+	}
 	return c.response
 }
 

@@ -1,4 +1,4 @@
-package confvars
+package internal
 
 import (
 	"testing"

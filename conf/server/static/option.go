@@ -3,7 +3,7 @@ package static
 import "strings"
 
 //DefaultSataticDir 默认静态文件存放路径
-const DefaultSataticDir = "./src"
+const DefaultSataticDir = "./static"
 
 //DefaultFirstPage 默认首页文件名
 const DefaultFirstPage = "index.html"

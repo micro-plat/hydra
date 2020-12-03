@@ -3,6 +3,7 @@ package ctx
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -100,7 +101,7 @@ func (r *request) Headers() types.XMap {
 	hds := r.ctx.GetHeaders()
 	r.headers = make(map[string]interface{})
 	for k, v := range hds {
-		r.headers[k] = v
+		r.headers[k] = strings.Join(v, ",")
 	}
 	return r.headers
 }
