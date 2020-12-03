@@ -15,19 +15,19 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/conf/vars/rpc"
-	"github.com/micro-plat/hydra/creator/confvars"
+	"github.com/micro-plat/hydra/creator/internal"
 	"github.com/micro-plat/hydra/test/assert"
 )
 
 func Test_vars_DB(t *testing.T) {
 	tests := []struct {
 		name string
-		v    *confvars.Vardb
-		want *confvars.Vardb
+		v    *internal.Vardb
+		want *internal.Vardb
 	}{
-		{name: "1. 初始化mysqldb对象", v: vars{}.DB().MySQL("mysql", mysql.New("contion")), want: confvars.NewDB(vars{}).MySQL("mysql", mysql.New("contion"))},
-		{name: "2. 初始化oracledb对象", v: vars{}.DB().Oracle("oracle", oracle.New("contion")), want: confvars.NewDB(vars{}).MySQL("oracle", oracle.New("contion"))},
-		{name: "3. 初始化cutomdb对象", v: vars{}.DB().Custom("customer", mysql.New("contion")), want: confvars.NewDB(vars{}).Custom("customer", mysql.New("contion"))},
+		{name: "1. 初始化mysqldb对象", v: vars{}.DB().MySQL("mysql", mysql.New("contion")), want: internal.NewDB(vars{}).MySQL("mysql", mysql.New("contion"))},
+		{name: "2. 初始化oracledb对象", v: vars{}.DB().Oracle("oracle", oracle.New("contion")), want: internal.NewDB(vars{}).MySQL("oracle", oracle.New("contion"))},
+		{name: "3. 初始化cutomdb对象", v: vars{}.DB().Custom("customer", mysql.New("contion")), want: internal.NewDB(vars{}).Custom("customer", mysql.New("contion"))},
 	}
 	for _, tt := range tests {
 		assert.Equal(t, tt.want, tt.v, tt.name)
@@ -37,14 +37,14 @@ func Test_vars_DB(t *testing.T) {
 func Test_vars_Cache(t *testing.T) {
 	tests := []struct {
 		name string
-		v    *confvars.Varcache
-		want *confvars.Varcache
+		v    *internal.Varcache
+		want *internal.Varcache
 	}{
 		{name: "1. 初始化redis对象", v: vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}.Cache().Redis("redisname", cacheredis.New(cacheredis.WithConfigName("redis"))),
-			want: confvars.NewCache(vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}).Redis("redisname", cacheredis.New(cacheredis.WithConfigName("redis")))},
-		{name: "2. 初始化gocache对象", v: vars{}.Cache().GoCache("GoCache", gocache.New()), want: confvars.NewCache(vars{}).GoCache("GoCache", gocache.New())},
-		{name: "3. 初始化Memcache对象", v: vars{}.Cache().Memcache("Memcache", memcached.New()), want: confvars.NewCache(vars{}).Memcache("Memcache", memcached.New())},
-		{name: "4. 初始化customer对象", v: vars{}.Cache().Custom("Custom", "sdsdsd"), want: confvars.NewCache(vars{}).Custom("Custom", "sdsdsd")},
+			want: internal.NewCache(vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}).Redis("redisname", cacheredis.New(cacheredis.WithConfigName("redis")))},
+		{name: "2. 初始化gocache对象", v: vars{}.Cache().GoCache("GoCache", gocache.New()), want: internal.NewCache(vars{}).GoCache("GoCache", gocache.New())},
+		{name: "3. 初始化Memcache对象", v: vars{}.Cache().Memcache("Memcache", memcached.New()), want: internal.NewCache(vars{}).Memcache("Memcache", memcached.New())},
+		{name: "4. 初始化customer对象", v: vars{}.Cache().Custom("Custom", "sdsdsd"), want: internal.NewCache(vars{}).Custom("Custom", "sdsdsd")},
 	}
 	for _, tt := range tests {
 		assert.Equal(t, tt.want, tt.v, tt.name)
@@ -54,14 +54,14 @@ func Test_vars_Cache(t *testing.T) {
 func Test_vars_Queue(t *testing.T) {
 	tests := []struct {
 		name string
-		v    *confvars.Varqueue
-		want *confvars.Varqueue
+		v    *internal.Varqueue
+		want *internal.Varqueue
 	}{
 		{name: "1. 初始化redis对象", v: vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}.Queue().Redis("redis", queueredis.New(queueredis.WithConfigName("redis"))),
-			want: confvars.NewQueue(vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}).Redis("redis", queueredis.New(queueredis.WithConfigName("redis")))},
-		{name: "2. 初始化MQTT对象", v: vars{}.Queue().MQTT("mqtt", queuemqtt.New("192.168.0.101:8017")), want: confvars.NewQueue(vars{}).MQTT("mqtt", queuemqtt.New("192.168.0.101:8017"))},
-		{name: "3. 初始化LMQ对象", v: vars{}.Queue().LMQ("lmq", queuelmq.New()), want: confvars.NewQueue(vars{}).LMQ("lmq", queuelmq.New())},
-		{name: "4. 初始化Custom对象", v: vars{}.Queue().Custom("custom", "dddddd"), want: confvars.NewQueue(vars{}).Custom("custom", "dddddd")},
+			want: internal.NewQueue(vars{"redis": map[string]interface{}{"redis": redis.New([]string{"192.196.0.1"})}}).Redis("redis", queueredis.New(queueredis.WithConfigName("redis")))},
+		{name: "2. 初始化MQTT对象", v: vars{}.Queue().MQTT("mqtt", queuemqtt.New("192.168.0.101:8017")), want: internal.NewQueue(vars{}).MQTT("mqtt", queuemqtt.New("192.168.0.101:8017"))},
+		{name: "3. 初始化LMQ对象", v: vars{}.Queue().LMQ("lmq", queuelmq.New()), want: internal.NewQueue(vars{}).LMQ("lmq", queuelmq.New())},
+		{name: "4. 初始化Custom对象", v: vars{}.Queue().Custom("custom", "dddddd"), want: internal.NewQueue(vars{}).Custom("custom", "dddddd")},
 	}
 	for _, tt := range tests {
 		assert.Equal(t, tt.want, tt.v, tt.name)
