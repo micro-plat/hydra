@@ -9,7 +9,7 @@ import (
 type value struct {
 	IsTemp  bool   `json:"is_temp"`
 	Data    []byte `json:"data"`
-	Version int32  `json:"version`
+	Version int32  `json:"version"`
 }
 
 var s20200101, _ = time.Parse("20060102", "20200101")
