@@ -20,7 +20,6 @@ type Redis struct {
 	maxExpiration time.Duration
 	tmpExpiration time.Duration
 	checkTicker   time.Duration
-	nodes         map[string]*value
 	tmpNodes      cmap.ConcurrentMap
 	client        *internal.Client
 }
@@ -49,7 +48,6 @@ func NewRedis(c *internal.ClientConf) (*Redis, error) {
 		maxSeq:        9999999999,
 		tmpNodes:      cmap.New(4),
 		closeCh:       make(chan struct{}),
-		nodes:         make(map[string]*value),
 		seqPath:       swapKey(fmt.Sprintf("hydra/%s/seq", global.Version)),
 	}
 	go redis.keepalive()
@@ -67,6 +65,7 @@ func (r *Redis) Close() error {
 	r.once.Do(func() {
 		close(r.closeCh)
 		r.client.Close()
+		r.tmpNodes.Clear()
 	})
 	return nil
 }
