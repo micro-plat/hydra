@@ -46,13 +46,23 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(MQC))
 	p.Engine.Use(middleware.Logging().DispFunc())
+	p.Engine.Use(middleware.Recovery().DispFunc())
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
-	p.Engine.Use(middleware.Delay().DispFunc()) //
 	middleware.AddMiddlewareHook(mqcmiddlewares, func(item middleware.Handler) {
 		p.Engine.Use(item.DispFunc())
 	})
 
 	return p, nil
+}
+
+//Done Done
+func (s *Processor) Done() bool {
+	return s.done
+}
+
+//QueueItems QueueItems
+func (s *Processor) QueueItems() map[string]interface{} {
+	return s.queues.Items()
 }
 
 //Start 所有任务

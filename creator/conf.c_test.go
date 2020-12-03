@@ -440,7 +440,7 @@ func Test_conf_GetVar(t *testing.T) {
 	}
 }
 
-func Test_conf_Custome(t *testing.T) {
+func Test_conf_Custom(t *testing.T) {
 	cuurConfC := func() *conf {
 		cuurConf := New()
 		cuurConf.Custom("redis", "测试")

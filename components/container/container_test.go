@@ -12,8 +12,8 @@ import (
 func TestNewContainer(t *testing.T) {
 	l := NewContainer()
 	if !reflect.DeepEqual(l, &Container{
-		cache: cmap.New(8),
-		vers:  newVers(),
+		cache:     cmap.New(8),
+		histories: newHistories(),
 	}) {
 		t.Error("NewContainer() didn't return *Container")
 	}
@@ -25,9 +25,9 @@ func TestContainer_GetOrCreate(t *testing.T) {
 	type args struct {
 		typ     string
 		name    string
-		creator func(conf conf.IVarConf) (interface{}, error)
+		creator func(conf *conf.RawConf) (interface{}, error)
 	}
-	creator := func(conf conf.IVarConf) (interface{}, error) {
+	creator := func(conf *conf.RawConf) (interface{}, error) {
 		return nil, nil
 	}
 	tests := []struct {
@@ -36,7 +36,7 @@ func TestContainer_GetOrCreate(t *testing.T) {
 		want    interface{}
 		wantErr bool
 	}{
-		{name: "1", args: args{typ: "db", name: "db", creator: creator}, want: nil, wantErr: true},
+		{name: "1. 初始化容器内容db对象", args: args{typ: "db", name: "db", creator: creator}, want: nil, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

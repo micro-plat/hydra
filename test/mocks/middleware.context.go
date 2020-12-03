@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	extcontext "github.com/micro-plat/hydra/context"
 
@@ -149,6 +148,11 @@ func (p *MockPath) GetURL() string {
 	return p.MockURL
 }
 
+//Params 获取请求的URL信息
+func (p *MockPath) Params() types.XMap {
+	return make(map[string]interface{})
+}
+
 //Limit 设置限流信息
 func (p *MockPath) Limit(isLimit bool, fallback bool) {
 	p.MockIsLimit = isLimit
@@ -173,10 +177,9 @@ type MockRequest struct {
 	MockBindObj  interface{}
 	MockParamMap map[string]string
 	MockQueryMap map[string]interface{}
-	MockBodyMap  map[string]interface{}
-	MockCookies  map[string]interface{}
-	MockHeader   http.Header
-	extcontext.IGetter
+	types.XMap
+	MockCookies map[string]interface{}
+	MockHeader  types.XMap
 	extcontext.IFile
 }
 
@@ -198,11 +201,8 @@ func (r *MockRequest) Bind(obj interface{}) error {
 
 //Check 检查指定的字段是否有值
 func (r *MockRequest) Check(field ...string) error {
-	if len(field) == 0 {
-		return nil
-	}
 	for _, str := range field {
-		res, ok := r.Get(str)
+		res, ok := r.XMap.Get(str)
 		if !ok || types.IsEmpty(res) {
 			return fmt.Errorf("[%s]数据不存在", str)
 		}
@@ -218,147 +218,30 @@ func (r *MockRequest) GetMap() (types.XMap, error) {
 	return r.MockQueryMap, nil
 }
 
-//GetRawBody 获取请求的body参数
-func (r *MockRequest) GetRawBody() ([]byte, error) {
-	return nil, nil
+//GetFullRaw 获取请求的body参数
+func (r *MockRequest) GetFullRaw() ([]byte, string, error) {
+	return nil, "", nil
 }
 
 //GetBody 获取请求的body参数
-func (r *MockRequest) GetBody() (string, error) {
-	bytes, _ := json.Marshal(r.MockBodyMap)
-	return string(bytes), nil
+func (r *MockRequest) GetBody() ([]byte, error) {
+	bytes, _ := json.Marshal(r.XMap)
+	return bytes, nil
 }
 
-//GetBodyMap 将body转换为map
-func (r *MockRequest) GetBodyMap() (map[string]interface{}, error) {
-	return r.MockBodyMap, nil
-}
-
-//GetBodyMap 将body转换为map
-func (r *MockRequest) GetRawBodyMap(encoding ...string) (map[string]interface{}, error) {
-	return nil, nil
-}
-
-//GetTrace 获取请求的trace信息
+//GetPlayload 获取请求的trace信息
 func (r *MockRequest) GetPlayload() string {
 	return ""
 }
 
-//GetCookie 获取请求Cookie
-func (p *MockRequest) GetCookie(name string) string {
-	if v, ok := p.MockCookies[name]; ok {
-		return fmt.Sprint(v)
-	}
-	return ""
-}
-
-//GetHeader 获取头信息
-func (p *MockRequest) GetHeader(name string) string {
-	return p.MockHeader.Get(name)
-}
-
-//GetHeaders 获取请求头
-func (p *MockRequest) GetHeaders() http.Header {
+//Headers 获取请求头
+func (p *MockRequest) Headers() types.XMap {
 	return p.MockHeader
 }
 
-//GetCookies 获取cookie信息
-func (p *MockRequest) GetCookies() types.XMap {
+//Cookies 获取cookie信息
+func (p *MockRequest) Cookies() types.XMap {
 	return p.MockCookies
-}
-
-//GetKeys 获取字段名称
-func (r *MockRequest) GetKeys() []string {
-	keys := make([]string, 0, 1)
-	keyMap := map[string]string{}
-	for k, _ := range r.MockParamMap {
-		if _, ok := keyMap[k]; !ok {
-			keyMap[k] = k
-		}
-	}
-	for k, _ := range r.MockQueryMap {
-		if _, ok := keyMap[k]; !ok {
-			keyMap[k] = k
-		}
-	}
-	for k, _ := range r.MockBodyMap {
-		if _, ok := keyMap[k]; !ok {
-			keyMap[k] = k
-		}
-	}
-
-	for _, v := range keyMap {
-		keys = append(keys, v)
-	}
-
-	return keys
-}
-
-//Get 获取字段的值
-func (r *MockRequest) Get(name string) (result string, ok bool) {
-
-	v, b := r.MockParamMap[name]
-	if b {
-		return fmt.Sprint(v), b
-	}
-
-	q, b := r.MockQueryMap[name]
-	if b {
-		return fmt.Sprint(q), b
-	}
-
-	m, b := r.MockBodyMap[name]
-	if b {
-		return fmt.Sprint(m), b
-	}
-
-	return "", false
-}
-
-//GetString 获取字符串
-func (r *MockRequest) GetString(name string, def ...string) string {
-	if v, ok := r.Get(name); ok {
-		return v
-	}
-	return types.GetStringByIndex(def, 0, "")
-}
-
-func (r *MockRequest) GetInt(name string, def ...int) int {
-	v, _ := r.Get(name)
-	return types.GetInt(v, def...)
-}
-
-func (r *MockRequest) GetMax(name string, o ...int) int {
-	v := r.GetInt(name, o...)
-	return types.GetMax(v, o...)
-}
-func (r *MockRequest) GetMin(name string, o ...int) int {
-	v := r.GetInt(name, o...)
-	return types.GetMin(v, o...)
-}
-func (r *MockRequest) GetInt64(name string, def ...int64) int64 {
-	v, _ := r.Get(name)
-	return types.GetInt64(v, def...)
-}
-func (r *MockRequest) GetFloat32(name string, def ...float32) float32 {
-	v, _ := r.Get(name)
-	return types.GetFloat32(v, def...)
-}
-func (r *MockRequest) GetFloat64(name string, def ...float64) float64 {
-	v, _ := r.Get(name)
-	return types.GetFloat64(v, def...)
-}
-func (r *MockRequest) GetBool(name string, def ...bool) bool {
-	v, _ := r.Get(name)
-	return types.GetBool(v, def...)
-}
-func (r *MockRequest) GetDatetime(name string, format ...string) (time.Time, error) {
-	v, _ := r.Get(name)
-	return types.GetDatetime(v, format...)
-}
-func (r *MockRequest) IsEmpty(name string) bool {
-	_, ok := r.Get(name)
-	return ok
 }
 
 //SaveFile 保存上传文件到指定路径

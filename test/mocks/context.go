@@ -1,12 +1,13 @@
 package mocks
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/micro-plat/lib4go/types"
 )
 
 type Read struct {
@@ -35,7 +36,7 @@ type TestContxt struct {
 	URL             *url.URL
 	HttpHeader      http.Header
 	Cookie          []*http.Cookie
-	Params          string
+	params          map[string]interface{}
 	Routerpath      string
 	Form            url.Values
 	HttpContentType string
@@ -73,34 +74,20 @@ func (t *TestContxt) GetHeaders() http.Header {
 func (t *TestContxt) GetCookies() []*http.Cookie {
 	return t.Cookie
 }
-func (t *TestContxt) Param(string) string {
-	return t.Params
+func (t *TestContxt) GetParams() map[string]interface{} {
+	return t.params
 }
 func (t *TestContxt) GetRouterPath() string {
 	return t.Routerpath
 }
 
-func (t *TestContxt) ShouldBind(v interface{}) error {
-	Body := t.GetForm()["__body_"][0]
-	return json.Unmarshal([]byte(fmt.Sprint(Body)), v)
-}
-
-func (t *TestContxt) GetForm() url.Values {
+func (t *TestContxt) GetPostForm() url.Values {
 	return t.Form
 }
 
-func (t *TestContxt) GetQuery(string) (string, bool) {
-	return "", false
-}
-func (t *TestContxt) GetFormValue(k string) (string, bool) {
-	if v, ok := t.Form[k]; ok {
-		return v[0], ok
-	}
-	return "", false
-}
 func (t *TestContxt) ContentType() string {
 	if v, ok := t.HttpHeader["Content-Type"]; ok {
-		return v[0]
+		return types.GetString(v)
 	}
 	return ""
 }
@@ -120,7 +107,7 @@ func (t *TestContxt) Written() bool {
 }
 func (t *TestContxt) WHeader(k string) string {
 	if v, ok := t.HttpHeader[k]; ok {
-		return v[0]
+		return fmt.Sprint(v)
 	}
 	return ""
 }

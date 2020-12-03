@@ -26,11 +26,11 @@ func NewRequest(request *pb.RequestContext) (r *Request, err error) {
 		return nil, fmt.Errorf("rpc请求头转换失败 %s %w", request.Header, err)
 	}
 
-	//处理正常请求参数
-	if err = json.Unmarshal([]byte(request.Input), &r.form); err != nil {
-		return nil, fmt.Errorf("rpc请求参数转换失败:%s %w", request.Input, err)
-	}
+	//外部直接通过form读取
+	r.header["Content-Type"] = "/json"
 
+	//缓存数据用于body直接获取
+	r.form["__body_"] = request.Input
 	return r, nil
 }
 

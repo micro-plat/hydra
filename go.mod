@@ -29,14 +29,18 @@ require (
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
 	github.com/pkg/sftp v1.12.0
+	github.com/russross/blackfriday/v2 v2.0.1 // indirect
+	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
 	github.com/shopspring/decimal v1.2.0
 	github.com/ugorji/go/codec v1.1.7
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/urfave/cli v1.22.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
+	github.com/yosssi/gmq v0.0.1 // indirect
 	github.com/zkfy/cron v0.0.0-20170309132418-df38d32658d8
 	github.com/zkfy/go-cache v2.1.0+incompatible
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
+	github.com/zkfy/jwt-go v3.0.0+incompatible // indirect
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 	github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a

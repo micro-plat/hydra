@@ -1,6 +1,7 @@
 package context
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -15,24 +16,24 @@ import (
 
 func TestNewCtx(t *testing.T) {
 	if _, err := app.Cache.GetAPPConf(h.API); err != nil {
-		confObj := mocks.NewConfBy("context_context_test", "contextctx") //构建对象
-		confObj.API(":8080")                                             //初始化参数
-		serverConf := confObj.GetAPIConf()                               //获取配置
+		confObj := mocks.NewConfBy("context_new_test", "t") //构建对象
+		confObj.API(":8080")                                //初始化参数
+		serverConf := confObj.GetAPIConf()                  //获取配置
 		_, _ = http.NewResponsive(serverConf)
 	}
-	got := ctx.NewCtx(&mocks.TestContxt{}, h.API)
+	got := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
 	assert.NotEqual(t, nil, got, "获取ctx对象")
 }
 
 func TestCtx_Close(t *testing.T) {
 	if _, err := app.Cache.GetAPPConf(h.API); err != nil {
-		confObj := mocks.NewConfBy("context_context_test1", "contextctx1") //构建对象
-		confObj.API(":8080")                                               //初始化参数
-		serverConf := confObj.GetAPIConf()                                 //获取配置
+		confObj := mocks.NewConfBy("context_close_test1", "t") //构建对象
+		confObj.API(":8080")                                   //初始化参数
+		serverConf := confObj.GetAPIConf()                     //获取配置
 		_, _ = http.NewResponsive(serverConf)
 	}
 
-	c := ctx.NewCtx(&mocks.TestContxt{}, h.API)
+	c := ctx.NewCtx(&mocks.TestContxt{URL: &url.URL{}}, h.API)
 
 	c.Close()
 

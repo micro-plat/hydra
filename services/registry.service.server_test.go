@@ -21,8 +21,8 @@ func Test_serverServices_handleExt(t *testing.T) {
 		wantErr bool
 		errStr  string
 	}{
-		{name: "extHandle为空", f: nil, g: &Unit{}},
-		{name: "extHandle报错", f: func(u *Unit, ext ...interface{}) error { return fmt.Errorf("错误") }, g: &Unit{}, wantErr: true, errStr: "错误"},
+		{name: "1. extHandle为空", f: nil, g: &Unit{}},
+		{name: "2. extHandle报错", f: func(u *Unit, ext ...interface{}) error { return fmt.Errorf("错误") }, g: &Unit{}, wantErr: true, errStr: "错误"},
 	}
 	for _, tt := range tests {
 		err := newServerServices(tt.f).handleExt(tt.g, tt.ext...)

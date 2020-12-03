@@ -204,6 +204,9 @@ func (s *upstart) Run() (err error) {
 }
 
 func (s *upstart) Status() (Status, error) {
+	if !s.isInstalled() {
+		return StatusUnknown, ErrNotInstalled
+	}
 	exitCode, out, err := runWithOutput("initctl", "status", s.Name)
 	if exitCode == 0 && err != nil {
 		return StatusUnknown, err
@@ -220,9 +223,7 @@ func (s *upstart) Status() (Status, error) {
 }
 
 func (s *upstart) Start() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
+
 	status, err := s.Status()
 	if err != nil {
 		return err
@@ -234,9 +235,6 @@ func (s *upstart) Start() error {
 }
 
 func (s *upstart) Stop() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
 	status, err := s.Status()
 	if err != nil {
 		return err

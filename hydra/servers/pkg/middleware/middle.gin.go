@@ -21,15 +21,20 @@ func NewGinCtx(c *gin.Context) *ginCtx {
 
 func (g *ginCtx) load() {
 	g.once.Do(func() {
-		g.Context.Request.ParseForm()
-		if g.Context.ContentType() == binding.MIMEPOSTForm ||
-			g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
+		if g.Context.ContentType() == binding.MIMEMultipartPOSTForm {
 			g.Context.Request.ParseMultipartForm(32 << 20)
 		}
 	})
 }
-
+func (g *ginCtx) GetParams() map[string]interface{} {
+	params := make(map[string]interface{})
+	for _, v := range g.Context.Params {
+		params[v.Key] = v.Value
+	}
+	return params
+}
 func (g *ginCtx) GetRouterPath() string {
+
 	return g.Context.FullPath()
 }
 func (g *ginCtx) GetBody() io.ReadCloser {
@@ -48,20 +53,11 @@ func (g *ginCtx) GetHeaders() http.Header {
 func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
-func (g *ginCtx) GetFormValue(k string) (string, bool) {
-	g.load()
-	values := g.Request.Form[k]
-	if len(values) > 0 {
-		return values[0], true
-	}
-	return "", false
-}
 
-func (g *ginCtx) GetForm() url.Values {
+func (g *ginCtx) GetPostForm() url.Values {
 	g.load()
-	return g.Request.Form
+	return g.Request.PostForm
 }
-
 func (g *ginCtx) WStatus(s int) {
 	g.Writer.WriteHeader(s)
 }

@@ -28,22 +28,12 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(RPC))
 	p.Engine.Use(middleware.Logging().DispFunc())
-	p.Engine.Use(middleware.BlackList().DispFunc()) //黑名单控制
-	p.Engine.Use(middleware.WhiteList().DispFunc()) //白名单控制
-	p.Engine.Use(middleware.Trace().DispFunc())     //跟踪信息
-	p.Engine.Use(middleware.Delay().DispFunc())     //
-	p.Engine.Use(middleware.Options().DispFunc())   //处理option响应
-	p.Engine.Use(middleware.Static().DispFunc())    //处理静态文件
-	p.Engine.Use(middleware.Header().DispFunc())    //设置请求头
-	p.Engine.Use(middleware.BasicAuth().DispFunc()) //
-	p.Engine.Use(middleware.APIKeyAuth().DispFunc())
-	p.Engine.Use(middleware.RASAuth().DispFunc())
-	p.Engine.Use(middleware.JwtAuth().DispFunc()) //jwt安全认证
+	p.Engine.Use(middleware.Recovery().DispFunc())
+	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
+	p.Engine.Use(middleware.Delay().DispFunc())
 	middleware.AddMiddlewareHook(rpcmiddlewares, func(item middleware.Handler) {
 		p.Engine.Use(item.DispFunc())
 	})
-	p.Engine.Use(middleware.Render().DispFunc())    //响应渲染组件
-	p.Engine.Use(middleware.JwtWriter().DispFunc()) //设置jwt回写
 	p.addRouter(routers...)
 	return p
 }

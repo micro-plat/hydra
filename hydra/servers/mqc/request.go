@@ -43,16 +43,14 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 		}
 	}
 
+	//内容为json
+	r.header["Content-Type"] = "/json"
+
 	//将所有非"__""参数加到form列表
 	for k, v := range input {
 		if !strings.HasPrefix(k, "__") {
 			r.form[k] = v
 		}
-	}
-
-	//检查是否有专门存储数据的节点，并覆盖外部节点
-	if v, ok := input["__raw__"].(map[string]interface{}); ok {
-		r.form = v
 	}
 
 	r.form["__body_"] = m.GetMessage()

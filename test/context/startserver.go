@@ -60,11 +60,11 @@ func startServer() {
 }
 
 func GetBodyMap(ctx hydra.IContext) interface{} {
-	raw, err := ctx.Request().GetBodyMap()
+	raw, err := ctx.Request().GetMap()
 	if err != nil {
 		return fmt.Errorf("getBody出错")
 	}
-	header := ctx.Request().GetHeader("Content-Type")
+	header := ctx.Request().Headers().GetString("Content-Type")
 	ctx.Response().Header("Content-Type", header)
 	return raw
 }
@@ -93,7 +93,7 @@ func GetBodyEncodingUTF8(ctx hydra.IContext) interface{} {
 }
 
 func GetCookiesEncoding(ctx hydra.IContext) interface{} {
-	r := ctx.Request().GetCookies()
+	r := ctx.Request().Cookies()
 	if r == nil {
 		return fmt.Errorf("GetCookies出错")
 	}
@@ -101,7 +101,7 @@ func GetCookiesEncoding(ctx hydra.IContext) interface{} {
 }
 
 func GetHeaderEncoding(ctx hydra.IContext) interface{} {
-	r := ctx.Request().GetHeader("Hname")
+	r := ctx.Request().Headers().GetString("Hname")
 	if r == "" {
 		return fmt.Errorf("GetHeaders出错")
 	}
@@ -109,7 +109,7 @@ func GetHeaderEncoding(ctx hydra.IContext) interface{} {
 }
 
 func GetHeaderEncodingGBK(ctx hydra.IContext) interface{} {
-	r := ctx.Request().GetHeader("Hname")
+	r := ctx.Request().Headers().GetString("Hname")
 	if r == "" {
 		return fmt.Errorf("GetHeaders出错")
 	}
@@ -117,7 +117,7 @@ func GetHeaderEncodingGBK(ctx hydra.IContext) interface{} {
 }
 
 func GetHeaderEncodingUtf8(ctx hydra.IContext) interface{} {
-	r := ctx.Request().GetHeader("Hname")
+	r := ctx.Request().Headers().GetString("Hname")
 	if r == "" {
 		return fmt.Errorf("GetHeaders出错")
 	}
@@ -246,18 +246,20 @@ func GbkToUtf8(s string) string {
 	return string(d)
 }
 
-func getTestMIMEMultipartPOSTForm() string {
+func getTestMIMEMultipartPOSTForm(kv url.Values) (string, string) {
 	file, _ := os.Open("upload.test.txt")
 	defer file.Close()
 	body := &bytes.Buffer{}
 	// 文件写入 body
 	writer := multipart.NewWriter(body)
+	for k, v := range kv {
+		writer.WriteField(k, v[0])
+	}
 	part, _ := writer.CreateFormFile("upload", filepath.Base("upload.test.txt"))
 	io.Copy(part, file)
 	writer.Close()
-	return body.String()
+	return body.String(), writer.FormDataContentType()
 }
-
 
 func getUploadBody() string {
 	return "Content-Disposition: form-data; name=\"upload\"; filename=\"upload.test.txt\"\r\nContent-Type: application/octet-stream\r\n\r\nADASDASDASFHNOJM~!@#$%^&*"

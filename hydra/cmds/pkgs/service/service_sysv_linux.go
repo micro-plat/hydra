@@ -154,6 +154,10 @@ func (s *sysv) Run() (err error) {
 }
 
 func (s *sysv) Status() (Status, error) {
+	if !s.isInstalled() {
+		return StatusUnknown, ErrNotInstalled
+	}
+
 	_, out, err := runWithOutput("service", s.Name, "status")
 	if err != nil {
 		return StatusUnknown, err
@@ -170,9 +174,7 @@ func (s *sysv) Status() (Status, error) {
 }
 
 func (s *sysv) Start() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
+
 	status, err := s.Status()
 	if err != nil {
 		return err
@@ -184,9 +186,6 @@ func (s *sysv) Start() error {
 }
 
 func (s *sysv) Stop() error {
-	if !s.isInstalled() {
-		return ErrNotInstalled
-	}
 	status, err := s.Status()
 	if err != nil {
 		return err

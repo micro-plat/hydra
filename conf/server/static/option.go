@@ -3,13 +3,13 @@ package static
 import "strings"
 
 //DefaultSataticDir 默认静态文件存放路径
-const DefaultSataticDir = "./src"
+const DefaultSataticDir = "./static"
 
 //DefaultFirstPage 默认首页文件名
 const DefaultFirstPage = "index.html"
 
 //DefaultRewriters 默认需要重写的路径
-var DefaultRewriters = []string{"/", "index.htm", "default.html", "default.htm"}
+var DefaultRewriters = []string{"/", "/index.htm", "/default.html", "/default.htm"}
 
 //DefaultExclude 默认需要排除的文件,扩展名,路径
 var DefaultExclude = []string{"/view/", "/views/", "/web/", ".exe", ".so"}

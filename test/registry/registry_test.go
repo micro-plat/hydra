@@ -66,18 +66,18 @@ func TestParse(t *testing.T) {
 		wantP     string
 		wantErr   bool
 	}{
-		{name: "地址带有多个://", args: args{address: "zk://192.://168.0.101"}, wantU: "", wantP: "", wantErr: true},
-		{name: "解析zk地址", args: args{address: "zk://192.168.0.101"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析zk地址", args: args{address: "zk://192.168.0.101"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析多个zk地址", args: args{address: "zk://192.168.0.101,192.168.0.102"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101", "192.168.0.102"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析lm地址", args: args{address: "lm://."}, wantProto: "lm", wantRaddr: []string{"."}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析fs地址", args: args{address: "fs://../a/b/c"}, wantProto: "fs", wantRaddr: []string{"../a/b/c"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析etcd地址", args: args{address: "etcd://192.168.0.101:9099"}, wantProto: "etcd", wantRaddr: []string{"192.168.0.101:9099"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析redis地址", args: args{address: "redis://192.168.0.101:6379"}, wantProto: "redis", wantRaddr: []string{"192.168.0.101:6379"}, wantU: "", wantP: "", wantErr: false},
-		{name: "解析带有用户名和密码的地址", args: args{address: "redis://root:123456@192.168.0.101:6379"}, wantProto: "redis", wantRaddr: []string{"192.168.0.101:6379"}, wantU: "root", wantP: "123456", wantErr: false},
+		{name: "1. Parse-地址带有多个://", args: args{address: "zk://192.://168.0.101"}, wantU: "", wantP: "", wantErr: true},
+		{name: "2. Parse-解析zk地址", args: args{address: "zk://192.168.0.101"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101"}, wantU: "", wantP: "", wantErr: false},
+		{name: "3. Parse-解析zk地址", args: args{address: "zk://192.168.0.101"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101"}, wantU: "", wantP: "", wantErr: false},
+		{name: "4. Parse-解析多个zk地址", args: args{address: "zk://192.168.0.101,192.168.0.102"}, wantProto: "zk", wantRaddr: []string{"192.168.0.101", "192.168.0.102"}, wantU: "", wantP: "", wantErr: false},
+		{name: "5. Parse-解析lm地址", args: args{address: "lm://."}, wantProto: "lm", wantRaddr: []string{"."}, wantU: "", wantP: "", wantErr: false},
+		{name: "6. Parse-解析fs地址", args: args{address: "fs://../a/b/c"}, wantProto: "fs", wantRaddr: []string{"../a/b/c"}, wantU: "", wantP: "", wantErr: false},
+		{name: "7. Parse-解析etcd地址", args: args{address: "etcd://192.168.0.101:9099"}, wantProto: "etcd", wantRaddr: []string{"192.168.0.101:9099"}, wantU: "", wantP: "", wantErr: false},
+		{name: "8. Parse-解析redis地址", args: args{address: "redis://192.168.0.101:6379"}, wantProto: "redis", wantRaddr: []string{"192.168.0.101:6379"}, wantU: "", wantP: "", wantErr: false},
+		{name: "9. Parse-解析带有用户名和密码的地址", args: args{address: "redis://root:123456@192.168.0.101:6379"}, wantProto: "redis", wantRaddr: []string{"192.168.0.101:6379"}, wantU: "root", wantP: "123456", wantErr: false},
 	}
 	for _, tt := range tests {
-		gotProto, gotRaddr, gotU, gotP, err := registry.Parse(tt.args.address)
+		gotProto, gotRaddr, gotU, gotP, _, err := registry.Parse(tt.args.address)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			continue
@@ -95,15 +95,15 @@ func TestJoin(t *testing.T) {
 		elem []string
 		want string
 	}{
-		{name: "参数的以/开头", elem: []string{"/", "path", "\\"}, want: "/path"},
-		{name: "参数的以/结尾", elem: []string{"/", "path", "/"}, want: "/path"},
-		{name: "参数的以/结尾,最后参数为空", elem: []string{"/", "path/", ""}, want: "/path"},
-		{name: "参数的以转义符开头", elem: []string{"\\", "/!@#$%^&*()_+{}:><?, }}", "/dsd"}, want: "/!@#$%^&*()_+{}:><?, }}/dsd"},
-		{name: "参数均为空,地址拼接", elem: []string{"", ""}, want: ""},
-		{name: "参数第一个为空,地址拼接", elem: []string{"", "a/"}, want: "/a"},
-		{name: "参数带有特殊符号,地址拼接", elem: []string{"a", "b", "!@#$%^&*c"}, want: "/a/b/!@#$%^&*c"},
-		{name: "参数带有相对地址,地址拼接", elem: []string{"..", "a/b", "c/"}, want: "/../a/b/c"},
-		{name: "参数带有转义符,地址拼接", elem: []string{"..", "", "\\", "c/"}, want: "/../c"},
+		{name: "1. Join-参数的以/开头", elem: []string{"/", "path", "\\"}, want: "/path"},
+		{name: "2. Join-参数的以/结尾", elem: []string{"/", "path", "/"}, want: "/path"},
+		{name: "3. Join-参数的以/结尾,最后参数为空", elem: []string{"/", "path/", ""}, want: "/path"},
+		{name: "4. Join-参数的以转义符开头", elem: []string{"\\", "/!@#$%^&*()_+{}:><?, }}", "/dsd"}, want: "/!@#$%^&*()_+{}:><?, }}/dsd"},
+		{name: "5. Join-参数均为空,地址拼接", elem: []string{"", ""}, want: ""},
+		{name: "6. Join-参数第一个为空,地址拼接", elem: []string{"", "a/"}, want: "/a"},
+		{name: "7. Join-参数带有特殊符号,地址拼接", elem: []string{"a", "b", "!@#$%^&*c"}, want: "/a/b/!@#$%^&*c"},
+		{name: "8. Join-参数带有相对地址,地址拼接", elem: []string{"..", "a/b", "c/"}, want: "/../a/b/c"},
+		{name: "9. Join-参数带有转义符,地址拼接", elem: []string{"..", "", "\\", "c/"}, want: "/../c"},
 	}
 	for _, tt := range tests {
 		got := registry.Join(tt.elem...)
@@ -122,10 +122,10 @@ func TestNewRegistry(t *testing.T) {
 		wantErr bool
 		err     string
 	}{
-		{name: "获取不支持的注册中心", args: args{address: "cloud://../"}, wantErr: true, err: "不支持的协议类型[cloud]"},
-		{name: "获取zk的注册中心", args: args{address: "zk://192.168.0.101"}, wantErr: false},
-		{name: "获取lm的注册中心", args: args{address: "lm://."}, wantErr: false},
-		{name: "获取fs的注册中心", args: args{address: "fs://../"}, wantErr: false},
+		{name: "1. NewRegistry-获取不支持的注册中心", args: args{address: "cloud://../"}, wantErr: true, err: "不支持的协议类型[cloud]"},
+		{name: "2. NewRegistry-获取zk的注册中心", args: args{address: "zk://192.168.0.101"}, wantErr: false},
+		{name: "3. NewRegistry-获取lm的注册中心", args: args{address: "lm://."}, wantErr: false},
+		{name: "4. NewRegistry-获取fs的注册中心", args: args{address: "fs://../"}, wantErr: false},
 	}
 
 	confObj := mocks.NewConfBy("hydra_rgst_test", "rgsttest") //构建对象
