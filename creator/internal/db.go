@@ -1,4 +1,4 @@
-package confvars
+package internal
 
 import (
 	"github.com/micro-plat/hydra/conf/vars/db"
@@ -10,9 +10,9 @@ type Vardb struct {
 	vars vars
 }
 
-func NewDB(confVars map[string]map[string]interface{}) *Vardb{
+func NewDB(internal map[string]map[string]interface{}) *Vardb {
 	return &Vardb{
-		vars:confVars,
+		vars: internal,
 	}
 }
 

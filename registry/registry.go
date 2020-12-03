@@ -62,7 +62,7 @@ func Register(name string, builder IFactory) {
 
 //NewRegistry 根据协议地址创建注册中心
 func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
-	proto, addrs, u, p, err := Parse(address)
+	proto, addrs, u, p, mt, err := Parse(address)
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +75,11 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 		rsvr := input[0].(IFactory)
 		srvs := input[1].([]string)
 		log := input[2].(logger.ILogging)
-		//addrs []string, userName string, password string, log logger.ILogging
 
 		return rsvr.Create(Addrs(srvs...),
 			WithAuthCreds(u, p),
 			WithLogger(log),
-			Domain(global.Def.PlatName))
+			WithDomain(global.Def.PlatName), WithMetadata(mt))
 
 	}, resolver, addrs, log)
 	if err != nil {
@@ -92,32 +91,32 @@ func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 
 //GetProto 获取协议名称
 func GetProto(addr string) string {
-	p, _, _, _, _ := Parse(addr)
+	p, _, _, _, _, _ := Parse(addr)
 	return p
 }
 
 //GetAddrs 获取地址信息
 func GetAddrs(addr string) []string {
-	_, addrs, _, _, _ := Parse(addr)
+	_, addrs, _, _, _, _ := Parse(addr)
 	return addrs
 }
 
 //Parse 解析地址
 //如:zk://192.168.0.155:2181 或 fs://../
-func Parse(address string) (proto string, raddr []string, u string, p string, err error) {
+func Parse(address string) (proto string, raddr []string, u string, p string, mt map[string]string, err error) {
 	if strings.Count(address, "://") != 1 {
-		return "", nil, "", "", fmt.Errorf("%s，包含多个://。格式:[proto]://[address]", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，包含多个://。格式:[proto]://[address]", address)
 	}
 
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
-		return "", nil, "", "", fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)
 	}
 	if len(addr[0]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s，协议名不能为空。格式:[proto]://[address]", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，协议名不能为空。格式:[proto]://[address]", address)
 	}
 	if len(addr[1]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s，地址不能为空。格式:[proto]://[address]", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，地址不能为空。格式:[proto]://[address]", address)
 	}
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")

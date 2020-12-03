@@ -1,12 +1,12 @@
-package confvars
+package internal
 
 import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	gocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	memcached "github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	 "github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
@@ -14,9 +14,9 @@ type Varcache struct {
 	vars vars
 }
 
-func NewCache(confVars map[string]map[string]interface{}) *Varcache {
+func NewCache(internal map[string]map[string]interface{}) *Varcache {
 	return &Varcache{
-		vars: confVars,
+		vars: internal,
 	}
 }
 

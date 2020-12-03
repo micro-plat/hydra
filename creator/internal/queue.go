@@ -1,4 +1,4 @@
-package confvars
+package internal
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/queue"
 	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
@@ -14,9 +14,9 @@ type Varqueue struct {
 	vars vars
 }
 
-func NewQueue(confVars map[string]map[string]interface{}) *Varqueue {
+func NewQueue(internal map[string]map[string]interface{}) *Varqueue {
 	return &Varqueue{
-		vars: confVars,
+		vars: internal,
 	}
 }
 

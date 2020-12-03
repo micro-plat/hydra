@@ -3,7 +3,7 @@ package creator
 import (
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rpc"
-	"github.com/micro-plat/hydra/creator/confvars"
+	"github.com/micro-plat/hydra/creator/internal"
 
 	"github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
@@ -12,16 +12,16 @@ import (
 type vars map[string]map[string]interface{}
 
 //DB 添加db配置
-func (v vars) DB() *confvars.Vardb {
-	return confvars.NewDB(v)
+func (v vars) DB() *internal.Vardb {
+	return internal.NewDB(v)
 }
 
-func (v vars) Cache() *confvars.Varcache {
-	return confvars.NewCache(v)
+func (v vars) Cache() *internal.Varcache {
+	return internal.NewCache(v)
 }
 
-func (v vars) Queue() *confvars.Varqueue {
-	return confvars.NewQueue(v)
+func (v vars) Queue() *internal.Varqueue {
+	return internal.NewQueue(v)
 }
 
 func (v vars) RLog(service string, opts ...rlog.Option) vars {
@@ -54,5 +54,14 @@ func (v vars) Redis(name string, r *redis.Redis) vars {
 		v[redis.TypeNodeName] = make(map[string]interface{})
 	}
 	v[redis.TypeNodeName][name] = r
+	return v
+}
+
+//Custom 自定义配置
+func (v vars) Custom(typ string, name string, i interface{}) vars {
+	if _, ok := v[typ]; !ok {
+		v[typ] = make(map[string]interface{})
+	}
+	v[typ][name] = i
 	return v
 }
