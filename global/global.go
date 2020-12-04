@@ -181,6 +181,8 @@ func (m *global) check() (err error) {
 	m.SysName = types.GetString(FlagVal.SysName, m.SysName)
 	m.ServerTypeNames = types.GetString(FlagVal.ServerTypeNames, m.ServerTypeNames)
 	m.ClusterName = types.GetString(FlagVal.ClusterName, m.ClusterName)
+	IsDebug = types.GetBool(FlagVal.IsDebug, IsDebug)
+
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
