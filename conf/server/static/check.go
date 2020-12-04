@@ -20,14 +20,16 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 	if s.IsExclude(rPath) {
 		return false, ""
 	}
-	if s.IsContainExt(rPath) {
-		return true, filepath.Join(s.Dir, rPath)
-	}
+
 	if s.HasPrefix(rPath) {
 		return true, filepath.Join(s.Dir, strings.TrimPrefix(rPath, s.Prefix))
 	}
 	if s.NeedRewrite(rPath) {
 		return true, filepath.Join(s.Dir, s.FirstPage)
+	}
+
+	if s.IsContainExt(rPath) {
+		return true, filepath.Join(s.Dir, rPath)
 	}
 
 	//不能读取没有扩展名的文件
