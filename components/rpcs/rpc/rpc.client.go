@@ -114,7 +114,7 @@ func (c *Client) connect() (err error) {
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(c.ConntTimeout)*time.Second)
 	c.conn, err = grpc.DialContext(ctx,
-		c.address+"/mockrpc",
+		c.address+"/rpcsrv",
 		grpc.WithInsecure(),
 		grpc.WithBalancerName(c.Balancer),
 		grpc.WithResolvers(rb))
