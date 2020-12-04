@@ -10,6 +10,7 @@ import (
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
+	"github.com/micro-plat/lib4go/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -69,11 +70,11 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 		switch {
 		case strings.Contains(ctp, "/xml"):
 			mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
-			data, w.mapBody.err = mxj.NewMapXml([]byte(body))
+			data, w.mapBody.err = mxj.NewMapXml(body)
 		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
-			w.mapBody.err = yaml.Unmarshal([]byte(body), &data)
+			w.mapBody.err = yaml.Unmarshal(body), &data)
 		case strings.Contains(ctp, "/json"):
-			w.mapBody.err = json.Unmarshal([]byte(body), &data)
+			w.mapBody.err = json.Unmarshal(body), &data)
 		case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
 			var values url.Values
 			values, w.mapBody.err = url.ParseQuery(string(body))
@@ -87,7 +88,7 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 				if w.mapBody.err != nil {
 					break
 				}
-				data[k] = string(buff)
+				data[k] = types.BytesToString((buff)
 			}
 		}
 	}
@@ -112,7 +113,7 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 			vs = append(vs, []byte(",")...)
 			vs = append(vs, []byte(x.(string))...)
 		}
-		data[k] = string(vs)
+		data[k] = types.BytesToString(vs)
 	}
 	w.mapBody.value = data
 	return data, nil
