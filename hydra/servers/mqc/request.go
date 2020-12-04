@@ -36,15 +36,15 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 		return nil, fmt.Errorf("队列%s中存放的数据不是有效的json:%s %w", queue.Queue, m.GetMessage(), err)
 	}
 
+	//内容为json
+	r.header["Content-Type"] = "application/json"
+
 	//检查是否包含头信息
 	if v, ok := input["__header__"].(map[string]interface{}); ok {
 		for n, m := range v {
 			r.header[n] = fmt.Sprint(m)
 		}
 	}
-
-	//内容为json
-	r.header["Content-Type"] = "/json"
 
 	//将所有非"__""参数加到form列表
 	for k, v := range input {

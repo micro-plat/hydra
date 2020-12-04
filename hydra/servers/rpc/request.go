@@ -22,7 +22,7 @@ func NewRequest(request *pb.RequestContext) (r *Request, err error) {
 		header:  make(map[string]string),
 	}
 	//外部直接通过form读取
-	r.header["Content-Type"] = "/json"
+	r.header["Content-Type"] = "application/json"
 
 	//处理请求头
 	if err = json.Unmarshal([]byte(request.Header), &r.header); err != nil {
