@@ -2,6 +2,7 @@ package global
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -113,7 +114,7 @@ type ICli interface {
 func doCliCallback(c *cli.Context) error {
 	name := c.Command.FullName()
 	for _, cli := range clis {
-		if name == cli.Name {
+		if strings.HasPrefix(name, cli.Name) {
 			return cli.Callback(c)
 		}
 	}

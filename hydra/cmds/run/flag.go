@@ -11,7 +11,7 @@ func getFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
 	flags = append(flags, cli.BoolFlag{
 		Name:        "debug,d",
-		Destination: &global.IsDebug,
+		Destination: &global.IsDebugByCli,
 		Usage:       `-调试模式，打印更详细的系统运行日志，避免将详细的错误信息返回给调用方`,
 	})
 	flags = append(flags, cli.StringFlag{
