@@ -3,12 +3,6 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
-	"time"
-
-	"github.com/micro-plat/lib4go/security/md5"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -24,11 +18,14 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	if err := c.Load(); err != nil {
 		return err
 	}
-	proto := registry.GetProto(registryAddr)
-	if !global.IsLocal(proto) && cover {
-		backdirName = fmt.Sprintf("conf_%s", md5.Encrypt(time.Now().Format("02150405"))[:8])
-		os.Mkdir(backdirName, os.ModePerm)
-	}
+	/*
+		@todo:处理安装家 cover=true 的时候参数备份
+		proto := registry.GetProto(registryAddr)
+		if !global.IsLocal(proto) && cover {
+			backdirName = fmt.Sprintf("conf_%s", md5.Encrypt(time.Now().Format("02150405"))[:8])
+			os.Mkdir(backdirName, os.ModePerm)
+		}
+	*/
 	//本地文件系统则直接使用toml序列化方式进行发布
 	// proto := registry.GetProto(registryAddr)
 	// if proto == registry.FileSystem {
@@ -133,13 +130,16 @@ func getJSON(v interface{}) (value string, err error) {
 }
 
 func confBackup(regst registry.IRegistry, path string) {
-	if backdirName == "" {
-		return
-	}
-	databytes, _, _ := regst.GetValue(path)
-	if len(databytes) <= 0 {
-		return
-	}
-	filepath := fmt.Sprintf("%s/%s.data", backdirName, strings.Trim(strings.Replace(path, "/", "_", -1), "_"))
-	ioutil.WriteFile(filepath, databytes, os.FileMode(0444)) //os.ModePerm
+	/*
+		@todo:处理安装家 cover=true 的时候参数备份
+		if backdirName == "" {
+			return
+		}
+		databytes, _, _ := regst.GetValue(path)
+		if len(databytes) <= 0 {
+			return
+		}
+		filepath := fmt.Sprintf("%s/%s.data", backdirName, strings.Trim(strings.Replace(path, "/", "_", -1), "_"))
+		ioutil.WriteFile(filepath, databytes, os.FileMode(0444)) //os.ModePerm
+	*/
 }
