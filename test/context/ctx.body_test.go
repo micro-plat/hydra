@@ -18,6 +18,11 @@ import (
 )
 
 func Test_body_GetRawBody(t *testing.T) {
+
+	content, contentType := getTestMIMEMultipartPOSTForm(url.Values{"body": []string{"123456"}})
+	data, _ := encoding.Encode(content, "utf-8")
+	body := string(data)
+
 	tests := []struct {
 		name        string
 		method      string
@@ -61,17 +66,17 @@ func Test_body_GetRawBody(t *testing.T) {
 		{name: "6.4 content-type为text/plain,方法为GET", contentType: "text/plain", method: "GET", body: `body`, want: `body`},
 		{name: "6.5 content-type为text/plain,方法为PATCH", contentType: "text/plain", method: "PATCH", body: `body`, want: `body`},
 
-		{name: "7.1 content-type为application/x-www-form-urlencoded,方法为POST", contentType: "application/x-www-form-urlencoded", method: "POST", body: `body`, want: ``},
-		{name: "7.2 content-type为application/x-www-form-urlencoded,方法为PUT", contentType: "application/x-www-form-urlencoded", method: "PUT", body: `body`, want: ``},
+		{name: "7.1 content-type为application/x-www-form-urlencoded,方法为POST", contentType: "application/x-www-form-urlencoded", method: "POST", body: `body`, want: `body`},
+		{name: "7.2 content-type为application/x-www-form-urlencoded,方法为PUT", contentType: "application/x-www-form-urlencoded", method: "PUT", body: `body`, want: `body`},
 		{name: "7.3 content-type为application/x-www-form-urlencoded,方法为DELETE", contentType: "application/x-www-form-urlencoded", method: "DELETE", body: `body`, want: `body`},
 		{name: "7.4 content-type为application/x-www-form-urlencoded,方法为GET", contentType: "application/x-www-form-urlencoded", method: "GET", body: `body`, want: `body`},
-		{name: "7.5 content-type为application/x-www-form-urlencoded,方法为PATCH", contentType: "application/x-www-form-urlencoded", method: "PATCH", body: `body`, want: ``},
+		{name: "7.5 content-type为application/x-www-form-urlencoded,方法为PATCH", contentType: "application/x-www-form-urlencoded", method: "PATCH", body: `body`, want: `body`},
 
-		{name: "8.1 content-type为multipart/form-data,方法为POST", contentType: "multipart/form-data", method: "POST", body: "body", want: "body"},
-		{name: "8.2 content-type为multipart/form-data,方法为PUT", contentType: "multipart/form-data", method: "PUT", body: "body", want: "body"},
-		{name: "8.3 content-type为multipart/form-data,方法为DELETE", contentType: "multipart/form-data", method: "DELETE", body: "body", want: "body"},
-		{name: "8.4 content-type为multipart/form-data,方法为GET", contentType: "multipart/form-data", method: "GET", body: "body", want: "body"},
-		{name: "8.5 content-type为multipart/form-data,方法为PATCH", contentType: "multipart/form-data", method: "PATCH", body: "body", want: "body"},
+		{name: "8.1 content-type为multipart/form-data,方法为POST", contentType: contentType, method: "POST", body: body, want: "body=123456"},
+		{name: "8.2 content-type为multipart/form-data,方法为PUT", contentType: contentType, method: "PUT", body: body, want: "body=123456"},
+		{name: "8.3 content-type为multipart/form-data,方法为DELETE", contentType: contentType, method: "DELETE", body: body, want: "body=123456"},
+		{name: "8.4 content-type为multipart/form-data,方法为GET", contentType: contentType, method: "GET", body: body, want: "body=123456"},
+		{name: "8.5 content-type为multipart/form-data,方法为PATCH", contentType: contentType, method: "PATCH", body: body, want: "body=123456"},
 
 		{name: "9.1 content-type为text/html,方法为POST", contentType: "text/plain", method: "POST", body: `body`, want: `body`},
 		{name: "9.2 content-type为text/html,方法为PUT", contentType: "text/plain", method: "PUT", body: `body`, want: `body`},
@@ -107,13 +112,14 @@ func Test_body_GetRawBody(t *testing.T) {
 
 var value = `中文~!@#$%^&*()_+{}:"<>?=`
 
-func Test_body_GetBody_MIMEXML(t *testing.T) {
+func Test_body_GetRequestParams_MIMEXML(t *testing.T) {
 
 	tests := []struct {
 		name        string
 		method      string
 		encoding    string
 		contentType string
+		queryRaw    string
 		value       string
 		body        string
 		want        string
@@ -155,8 +161,9 @@ func Test_body_GetBody_MIMEXML(t *testing.T) {
 		})
 
 		data, _ := encoding.EncodeBytes(bodyRaw, tt.encoding)
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader(data))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader(data))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -166,17 +173,19 @@ func Test_body_GetBody_MIMEXML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-		assert.Equal(t, string(bodyRaw), gotS, tt.name)
-		gotS2, err := w.GetBody()
+		assert.Equal(t, string(data), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 
 }
 
-func Test_body_GetBody_MIMEJSON(t *testing.T) {
+func Test_body_GetRequestParams_MIMEJSON(t *testing.T) {
 
 	tests := []struct {
 		name        string
@@ -223,8 +232,9 @@ func Test_body_GetBody_MIMEJSON(t *testing.T) {
 		bodyRaw, _ := json.Marshal(map[string]string{
 			"key": string(data),
 		})
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader(bodyRaw))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader(bodyRaw))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -234,17 +244,19 @@ func Test_body_GetBody_MIMEJSON(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-		assert.Equal(t, string(bodyRaw), gotS, tt.name)
-		gotS2, err := w.GetBody()
+		assert.Equal(t, string(bodyRaw), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 
 }
 
-func Test_body_GetBody_MIMEYAML(t *testing.T) {
+func Test_body_GetRequestParams_MIMEYAML(t *testing.T) {
 
 	tests := []struct {
 		name        string
@@ -274,8 +286,9 @@ func Test_body_GetBody_MIMEYAML(t *testing.T) {
 		bodyRaw := []byte("key: " + tt.value)
 		bodyRaw, _ = encoding.EncodeBytes(bodyRaw, tt.encoding)
 
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader(bodyRaw))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader(bodyRaw))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -285,16 +298,18 @@ func Test_body_GetBody_MIMEYAML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-		assert.Equal(t, "key: "+tt.value, gotS, tt.name)
-		gotS2, err := w.GetBody()
+		assert.Equal(t, string(bodyRaw), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetBody_MIMEPlain(t *testing.T) {
+func Test_body_GetRequestParams_MIMEPlain(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -323,8 +338,9 @@ func Test_body_GetBody_MIMEPlain(t *testing.T) {
 
 		data := []byte(tt.value)
 		data, _ = encoding.EncodeBytes(data, tt.encoding)
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader(data))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader(data))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -334,17 +350,19 @@ func Test_body_GetBody_MIMEPlain(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-		assert.Equal(t, tt.value, gotS, tt.name)
-		gotS2, err := w.GetBody()
+		assert.Equal(t, string(data), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 
 }
 
-func Test_body_GetBody_MIMEHTML(t *testing.T) {
+func Test_body_GetRequestParams_MIMEHTML(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -373,8 +391,9 @@ func Test_body_GetBody_MIMEHTML(t *testing.T) {
 
 		data := []byte(tt.value)
 		data, _ = encoding.EncodeBytes(data, tt.encoding)
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader(data))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader(data))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -384,17 +403,19 @@ func Test_body_GetBody_MIMEHTML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-		assert.Equal(t, tt.value, gotS, tt.name)
-		gotS2, err := w.GetBody()
+		assert.Equal(t, string(data), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 
 }
 
-func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
+func Test_body_GetRequestParams_MIMEPOSTForm(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -473,27 +494,23 @@ func Test_body_GetBody_MIMEPOSTForm(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
-
-		// if tt.isQuery && !tt.isBody {
-		// 	assert.Equal(t, fmt.Sprintf("query=%s", tt.value), gotS, tt.name)
-		// }
-		// if tt.isBody && !tt.isQuery {
-		// 	assert.Equal(t, fmt.Sprintf("key=%s", tt.value), gotS, tt.name)
-		// }
-		// if tt.isQuery && tt.isBody { //body和query的数据都有
-		// 	assert.Equal(t, fmt.Sprintf("key=%s&query=%s", tt.value, tt.value), gotS, tt.name)
-		// }
-
-		gotS2, err := w.GetBody()
+		assert.Equal(t, body, string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
+
+		// gotS2, err := w.GetBody()
+		// assert.Equal(t, nil, err, tt.name)
+		// assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 	}
 
 }
 
-func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
+func Test_body_GetRequestParams_MIMEMultipartPOSTForm(t *testing.T) {
 	tests := []struct {
 		name     string
 		method   string
@@ -523,8 +540,9 @@ func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
 		content, contentType := getTestMIMEMultipartPOSTForm(tt.value)
 		data, _ := encoding.Encode(content, tt.encoding)
 		body := string(data)
+		queryRaw := getTestQueryRaw(value, tt.encoding)
 		//构建请求 方法要与注册方法一致
-		r, err := http.NewRequest(tt.method, "http://localhost:8080/url", bytes.NewReader([]byte(body)))
+		r, err := http.NewRequest(tt.method, "http://localhost:8080/url?"+queryRaw, bytes.NewReader([]byte(body)))
 		assert.Equal(t, nil, err, "构建请求")
 
 		//设置content-type
@@ -534,13 +552,15 @@ func Test_body_GetBody_MIMEMultipartPOSTForm(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, err := w.GetBody()
-		want, _ := url.QueryUnescape(tt.value.Encode())
-		assert.Equal(t, want, gotS, tt.name)
-
-		gotS2, err := w.GetBody()
+		gotS, query, err := w.GetRequestParams()
+		assert.Equal(t, nil, err, tt.name)
+		s, _ := encoding.Encode(value, tt.encoding)
+		assert.Equal(t, "key="+url.QueryEscape(string(s)), string(gotS), tt.name)
+		assert.Equal(t, queryRaw, query, tt.name)
+		gotS2, query2, err := w.GetRequestParams()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
+		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 
 }
