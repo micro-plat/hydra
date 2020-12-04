@@ -72,12 +72,12 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 			mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
 			data, w.mapBody.err = mxj.NewMapXml(body)
 		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
-			w.mapBody.err = yaml.Unmarshal(body), &data)
+			w.mapBody.err = yaml.Unmarshal(body, &data)
 		case strings.Contains(ctp, "/json"):
-			w.mapBody.err = json.Unmarshal(body), &data)
+			w.mapBody.err = json.Unmarshal(body, &data)
 		case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
 			var values url.Values
-			values, w.mapBody.err = url.ParseQuery(string(body))
+			values, w.mapBody.err = url.ParseQuery(types.BytesToString(body))
 			if w.mapBody.err != nil {
 				break
 			}
@@ -88,7 +88,7 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 				if w.mapBody.err != nil {
 					break
 				}
-				data[k] = types.BytesToString((buff)
+				data[k] = types.BytesToString(buff)
 			}
 		}
 	}
