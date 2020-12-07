@@ -64,7 +64,7 @@ func (c *response) Header(k string, v string) {
 
 //Header 获取头信息
 func (c *response) GetHeaders() map[string][]string {
-	return c.ctx.GetHeaders()
+	return c.ctx.WHeaders()
 }
 
 //ContentType 设置contentType

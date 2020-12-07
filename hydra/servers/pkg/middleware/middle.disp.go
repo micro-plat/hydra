@@ -87,6 +87,9 @@ func (g *dispCtx) Status() int {
 func (g *dispCtx) Written() bool {
 	return g.Context.Writer.Written()
 }
+func (g *dispCtx) WHeaders() http.Header {
+	return g.Context.Writer.Header()
+}
 func (g *dispCtx) WHeader(k string) string {
 	return g.Context.Writer.Header().Get(k)
 }
