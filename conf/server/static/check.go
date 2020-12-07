@@ -22,7 +22,7 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 		return true, filepath.Join(s.Dir, strings.TrimPrefix(rPath, s.Prefix))
 	}
 	if s.NeedRewrite(rPath) {
-		return true, filepath.Join(s.Dir, s.FirstPage)
+		return true, filepath.Join(s.Dir, s.HomePage)
 	}
 	if s.IsContainExt(rPath) {
 		return true, filepath.Join(s.Dir, rPath)

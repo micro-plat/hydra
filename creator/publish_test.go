@@ -147,7 +147,7 @@ func Test_conf_Pub1(t *testing.T) {
 	data := map[string]string{
 		"/platname3/systemname3/api/clustername3/conf":                `{"address":":8585","status":"start"}`,
 		"/platname3/systemname3/api/clustername3/conf/acl/white.list": `{"disable":true}`,
-		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"first-page":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
+		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"homePage":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
 		"/platname3/var/http/httpclient":                              `{"connectionTimeout":10,"requestTimeout":10,"certs":null,"ca":"","proxy":"","keepAlive":true,"trace":false}`,
 		"/platname3/var/rpc/rpcclinent":                               `{"connectionTimeout":20,"log":"","sortPrefix":"","tls":null,"balancer":"localfirst"}`,
 	}
