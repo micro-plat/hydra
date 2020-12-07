@@ -58,7 +58,7 @@ func request(ctx context.IContext) (r interface{}) {
 
 	queueClient := hydra.C.Queue().GetRegularQueue()
 	data := fmt.Sprintf(`{"name":"%d"}`, time.Now().Unix())
-	queueClient.Push(fmt.Sprintf("service:%s", queueName), data)
+	queueClient.Send(fmt.Sprintf("service:%s", queueName), data)
 
 	return data
 }
