@@ -5,8 +5,8 @@ import "strings"
 //DefaultSataticDir 默认静态文件存放路径
 const DefaultSataticDir = "./static"
 
-//DefaultFirstPage 默认首页文件名
-const DefaultFirstPage = "index.html"
+//DefaultHomePage 默认首页文件名
+const DefaultHomePage = "index.html"
 
 //DefaultRewriters 默认需要重写的路径
 var DefaultRewriters = []string{"/", "/index.htm", "/default.html", "/default.htm"}
@@ -23,7 +23,7 @@ func newStatic() *Static {
 		FileMap: map[string]FileInfo{},
 	}
 	a.Dir = DefaultSataticDir
-	a.FirstPage = DefaultFirstPage
+	a.HomePage = DefaultHomePage
 	a.Rewriters = DefaultRewriters
 	a.Exclude = DefaultExclude
 	a.Exts = []string{}
@@ -59,10 +59,10 @@ func WithRoot(dir string) Option {
 	}
 }
 
-//WithFirstPage 设置静首页地址
-func WithFirstPage(firstPage string) Option {
+//WithHomePage 设置静首页地址
+func WithHomePage(firstPage string) Option {
 	return func(s *Static) {
-		s.FirstPage = firstPage
+		s.HomePage = firstPage
 	}
 }
 

@@ -40,7 +40,7 @@ func NewLockByRegistry(lockName string, r registry.IRegistry) (lk *DLock) {
 //TryLock 偿试获取分布式锁
 func (d *DLock) TryLock() (err error) {
 	defer func() {
-		if err != nil {
+		if err != nil && d.path != "" {
 			d.registry.Delete(d.path)
 		}
 	}()

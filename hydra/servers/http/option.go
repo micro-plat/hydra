@@ -14,7 +14,6 @@ type option struct {
 	readHeaderTimeout int
 	metric            *middleware.Metric
 	serverType        string
-	tls               []string
 }
 
 //Option 配置选项
@@ -33,14 +32,5 @@ func WithTimeout(readTimeout int, writeTimeout int, readHeaderTimeout int) Optio
 		o.readTimeout = readTimeout
 		o.writeTimeout = writeTimeout
 		o.readHeaderTimeout = readHeaderTimeout
-	}
-}
-
-//WithTLS 设置TLS证书(pem,key)
-func WithTLS(tls []string) Option {
-	return func(o *option) {
-		if len(tls) == 2 {
-			o.tls = tls
-		}
 	}
 }

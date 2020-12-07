@@ -31,7 +31,7 @@ type Static struct {
 	Prefix    string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
 	Exts      []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
 	Exclude   []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
-	FirstPage string              `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
+	HomePage  string              `json:"homePage ,omitempty" valid:"ascii" toml:"homePage,omitempty"`
 	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
 	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
 	FileMap   map[string]FileInfo `json:"-"`

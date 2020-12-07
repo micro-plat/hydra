@@ -80,22 +80,13 @@ func new(name string, addr string, opts ...Option) (t *Server, err error) {
 func (s *Server) Start() error {
 	s.running = true
 	errChan := make(chan error, 1)
-	switch len(s.tls) {
-	case 2:
-		s.proto = "https"
-		go func(ch chan error) {
-			if err := s.server.ListenAndServeTLS(s.tls[0], s.tls[1]); err != nil {
-				ch <- err
-			}
-		}(errChan)
-	default:
-		go func(ch chan error) {
-			if err := s.server.ListenAndServe(); err != nil {
-				ch <- err
-			}
-		}(errChan)
 
-	}
+	go func(ch chan error) {
+		if err := s.server.ListenAndServe(); err != nil {
+			ch <- err
+		}
+	}(errChan)
+
 	select {
 	case <-time.After(time.Millisecond * 500):
 		return nil

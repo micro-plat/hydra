@@ -47,6 +47,7 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	p.Engine.Use(middleware.Recovery().DispFunc(MQC))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
+	p.Engine.Use(middleware.DispServiceExistsCheck(p.Engine).DispFunc())
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	middleware.AddMiddlewareHook(mqcmiddlewares, func(item middleware.Handler) {
 		p.Engine.Use(item.DispFunc())

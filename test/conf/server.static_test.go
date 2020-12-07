@@ -16,7 +16,7 @@ func TestStaticNew(t *testing.T) {
 	defaultObj := &static.Static{
 		FileMap:   map[string]static.FileInfo{},
 		Dir:       static.DefaultSataticDir,
-		FirstPage: static.DefaultFirstPage,
+		HomePage: static.DefaultHomePage,
 		Rewriters: static.DefaultRewriters,
 		Exclude:   static.DefaultExclude,
 		Exts:      []string{},
@@ -24,7 +24,7 @@ func TestStaticNew(t *testing.T) {
 	enObj := &static.Static{
 		FileMap:   map[string]static.FileInfo{},
 		Dir:       "./test",
-		FirstPage: "index1.html",
+		HomePage: "index1.html",
 		Rewriters: []string{"/", "indextest.htm", "defaulttest.html"},
 		Exclude:   []string{"/views/", ".exe", ".so", ".zip"},
 		Exts:      []string{".htm", ".js"},
@@ -40,7 +40,7 @@ func TestStaticNew(t *testing.T) {
 		{name: "1. Conf-StaticNew-初始化nil对象", opts: nil, want: defaultObj},
 		{name: "2. Conf-StaticNew-初始化空对象", opts: []static.Option{}, want: defaultObj},
 		{name: "3. Conf-StaticNew-初始化image对象", opts: []static.Option{static.WithImages()}, want: defaultObj},
-		{name: "4. Conf-StaticNew-初始化设置全量对象", opts: []static.Option{static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+		{name: "4. Conf-StaticNew-初始化设置全量对象", opts: []static.Option{static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 			static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip")},
 			want: enObj},
 	}
@@ -224,7 +224,7 @@ func TestStatic_GetGzFile(t *testing.T) {
 }
 
 func TestStatic_IsStatic(t *testing.T) {
-	enobj := static.New(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+	enobj := static.New(static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".html"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("/ssss"), static.WithExclude("/views/", ".exe", ".so", ".zip"))
 	disableObj := static.New(static.WithDisable())
 	type args struct {
@@ -244,7 +244,7 @@ func TestStatic_IsStatic(t *testing.T) {
 		{name: "4. Conf-StaticIsStatic-是排除路径", fields: enobj, args: args{rPath: "/views/dd", method: "GET"}, want: false, wantXname: ""},
 		{name: "5. Conf-StaticIsStatic-是允许的扩展文件", fields: enobj, args: args{rPath: "/ttt/dd.html", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, "/ttt/dd.html")},
 		{name: "6. Conf-StaticIsStatic-不允许的扩展文件，但是是指定前缀", fields: enobj, args: args{rPath: "/ssss/dd.xx", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, strings.TrimPrefix("/ssss/dd.xx", enobj.Prefix))},
-		{name: "7. Conf-StaticIsStatic-不允许的扩展文件且不是指定前缀，需要转发", fields: enobj, args: args{rPath: "indextest.htm", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, enobj.FirstPage)},
+		{name: "7. Conf-StaticIsStatic-不允许的扩展文件且不是指定前缀，需要转发", fields: enobj, args: args{rPath: "indextest.htm", method: "GET"}, want: true, wantXname: filepath.Join(enobj.Dir, enobj.HomePage)},
 		{name: "8. Conf-StaticIsStatic-所有条件都不满足", fields: enobj, args: args{rPath: "test.htm", method: "GET"}, want: false, wantXname: ""},
 	}
 	for _, tt := range tests {
