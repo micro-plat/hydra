@@ -31,6 +31,13 @@ func WithTLS(tls []string) Option {
 	}
 }
 
+//WithBalancer 配置为负载均衡器
+func WithBalancer(balancer string) Option {
+	return func(o *RPCConf) {
+		o.Balancer = balancer
+	}
+}
+
 //WithRoundRobin 配置为轮询负载均衡器
 func WithRoundRobin() Option {
 	return func(o *RPCConf) {
@@ -47,11 +54,9 @@ func WithLocalFirst() Option {
 
 //WithRaw 根据json串设置配置信息
 func WithRaw(raw []byte) Option {
-	c := &RPCConf{}
-	if err := json.Unmarshal(raw, c); err != nil {
-		panic(fmt.Errorf("rpc配置节点解析异常,%v", err))
-	}
 	return func(o *RPCConf) {
-		o = c
+		if err := json.Unmarshal(raw, o); err != nil {
+			panic(fmt.Errorf("rpc配置节点解析异常,%v", err))
+		}
 	}
 }
