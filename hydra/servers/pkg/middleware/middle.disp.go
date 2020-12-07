@@ -38,7 +38,7 @@ func (g *dispCtx) GetParams() map[string]interface{} {
 	return nil
 }
 func (g *dispCtx) GetBody() io.ReadCloser {
-	text := g.Request.GetForm()["__body_"]
+	text := g.Request.GetForm()["__body__"]
 	switch v := text.(type) {
 	case json.RawMessage:
 		b := bytes.NewBuffer([]byte(v))
@@ -107,7 +107,7 @@ func (g *dispCtx) File(name string) {
 	body := base64.StdEncoding.EncodeToString(ff)
 	g.Context.Header("file", name)
 	g.Context.JSON(200, map[string]interface{}{
-		"__body_": body,
+		"__body__": body,
 	})
 }
 

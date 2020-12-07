@@ -116,7 +116,7 @@ func Test_body_GetBody_MIMEPlain(t *testing.T) {
 		body        string
 		want        string
 	}{
-		{name: "text/plain", contentType: "text/plain; charset=utf-8", body: `body`, want: "map[__body_:body]"},
+		{name: "text/plain", contentType: "text/plain; charset=utf-8", body: `body`, want: "map[__body__:body]"},
 	}
 	startServer()
 	for _, tt := range tests {

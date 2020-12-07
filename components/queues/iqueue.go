@@ -1,12 +1,16 @@
 package queues
 
 import (
+	"github.com/micro-plat/hydra/components/pkgs"
 	"github.com/micro-plat/hydra/components/queues/mq"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 )
 
 //IQueue 消息队列
-type IQueue = mq.IMQP
+type IQueue interface {
+	Send(key string, value interface{}) error
+}
 
 //IComponentQueue Component Queue
 type IComponentQueue interface {
@@ -24,15 +28,16 @@ func newQueue(proto string, confRaw string) (q *queue, err error) {
 	q.q, err = mq.NewMQP(proto, confRaw)
 	return q, err
 }
-func (q *queue) Push(key string, value string) error {
-	return q.q.Push(global.MQConf.GetQueueName(key), value)
+
+//Send 发送消息
+func (q *queue) Send(key string, value interface{}) error {
+	hd := make([]string, 0, 2)
+	if ctx, ok := context.GetContext(); ok {
+		hd = append(hd, context.XRequestID, ctx.User().GetRequestID())
+	}
+	return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(value, hd...))
 }
-func (q *queue) Pop(key string) (string, error) {
-	return q.q.Pop((global.MQConf.GetQueueName(key)))
-}
-func (q *queue) Count(key string) (int64, error) {
-	return q.q.Count(global.MQConf.GetQueueName(key))
-}
+
 func (q *queue) Close() error {
 	return q.q.Close()
 }

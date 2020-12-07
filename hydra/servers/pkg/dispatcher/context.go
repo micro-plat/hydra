@@ -316,7 +316,7 @@ func (c *Context) GetHeader(key string) string {
 
 // GetRawData return stream data.
 func (c *Context) GetRawData() (interface{}, error) {
-	return c.Request.GetForm()["__body_"], nil
+	return c.Request.GetForm()["__body__"], nil
 }
 
 func (c *Context) Render(code int, r render.Render) {
