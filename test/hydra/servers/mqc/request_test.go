@@ -5,9 +5,8 @@ import (
 
 	"github.com/micro-plat/hydra/components/queues/mq/redis"
 	"github.com/micro-plat/hydra/conf/server/queue"
-	"github.com/micro-plat/hydra/test/assert"
 	"github.com/micro-plat/hydra/hydra/servers/mqc"
-
+	"github.com/micro-plat/hydra/test/assert"
 )
 
 func TestNewRequest(t *testing.T) {
@@ -32,6 +31,6 @@ func TestNewRequest(t *testing.T) {
 		assert.Equal(t, tt.service, gotR.GetService(), tt.name)
 		assert.Equal(t, mqc.DefMethod, gotR.GetMethod(), tt.name)
 
-		assert.Equal(t, tt.message, gotR.GetForm()["__body_"], tt.name)
+		assert.Equal(t, tt.message, gotR.GetForm()["__body__"], tt.name)
 	}
 }

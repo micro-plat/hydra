@@ -47,7 +47,7 @@ func (m *CronTask) GetName() string {
 
 //NextTime 下次执行时间
 func (m *CronTask) NextTime(t time.Time) time.Time {
-	if m.IsOnce() {
+	if m.IsImmediately() {
 		return time.Now()
 	}
 	return m.schedule.Next(t)

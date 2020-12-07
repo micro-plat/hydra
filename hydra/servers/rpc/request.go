@@ -29,8 +29,13 @@ func NewRequest(request *pb.RequestContext) (r *Request, err error) {
 		return nil, fmt.Errorf("rpc请求头转换失败 %s %w", request.Header, err)
 	}
 
+	//外部直接通过form读取
+	if _, ok := r.header["Content-Type"]; !ok {
+		r.header["Content-Type"] = "/json"
+	}
+
 	//缓存数据用于body直接获取
-	r.form["__body_"] = request.Input
+	r.form["__body__"] = request.Input
 	return r, nil
 }
 

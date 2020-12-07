@@ -126,7 +126,7 @@ func Test_dispCtx_GetForm(t *testing.T) {
 		want    url.Values
 	}{
 		{name: "1. cron-ctx-GetForm(默认是空，不能进行设置)", request: getTestCronTask("@every 1h30m", "cron_service"), want: url.Values{}},
-		{name: "2. mqc-ctx-GetForm", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: url.Values{"__body_": []string{`{"data":"message"}`}, "data": []string{"message"}}},
+		{name: "2. mqc-ctx-GetForm", request: getTestMqcQueue("queue_name", "queue_service", `{"data":"message"}`, true), want: url.Values{"__body__": []string{`{"data":"message"}`}, "data": []string{"message"}}},
 	}
 	for _, tt := range tests {
 		g := middleware.NewDispCtx()
@@ -189,7 +189,7 @@ func Test_dispCtx_File(t *testing.T) {
 
 	//写入数据判断
 	content, _ := ioutil.ReadFile(fileName)
-	jsonBytes, _ := json.Marshal(map[string]string{"__body_": base64.StdEncoding.EncodeToString(content)})
+	jsonBytes, _ := json.Marshal(map[string]string{"__body__": base64.StdEncoding.EncodeToString(content)})
 	assert.Equal(t, len(jsonBytes), g.Writer.Size(), "写入数据长度判断")
 	assert.Equal(t, jsonBytes, g.Writer.Data(), "写入数据判断")
 
