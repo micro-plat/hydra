@@ -103,5 +103,5 @@ func (c *Component) UUID() uuid.UUID {
 		panic(fmt.Errorf("获取集群信息失败:%w", err))
 	}
 	id := cluster.Current().GetNodeID()
-	return uuid.Get(id)
+	return uuid.GetSUUID(id).Get()
 }
