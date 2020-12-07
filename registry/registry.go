@@ -70,7 +70,7 @@ func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error
 	if !ok {
 		return nil, fmt.Errorf("不支持的协议类型[%s]", proto)
 	}
-	return resolver.Create(Addrs(addrs..),
+	return resolver.Create(Addrs(addrs...),
 		WithAuthCreds(u, p),
 		WithLogger(log),
 		WithDomain(global.Def.PlatName), WithMetadata(mt))
