@@ -200,14 +200,16 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 }
 
 func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interface{}) string {
-	if tpkind != reflect.Map && tpkind != reflect.Struct {
+	if tpkind != reflect.Map && tpkind != reflect.Struct && tpkind != reflect.Slice && tpkind != reflect.Array {
 		return fmt.Sprint(content)
 	}
 
 	switch {
 	case strings.Contains(ctp, "xml"):
-		if s, ok := content.(map[string]interface{}); ok {
-			var m mxj.Map = s
+		if tpkind == reflect.Slice || tpkind == reflect.Array {
+			panic("转化为xml必须是struct或者map,内容格式不正确")
+		}
+		if m := c.toMap(content); m != nil {
 			if str, err := m.Xml(); err != nil {
 				panic(err)
 			} else {
@@ -235,6 +237,17 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	default:
 		return fmt.Sprint(content)
 	}
+}
+
+func (c *response) toMap(content interface{}) mxj.Map {
+	v := reflect.ValueOf(content)
+	r := mxj.Map{}
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			r[types.GetString(key)] = v.MapIndex(key)
+		}
+	}
+	return r
 }
 
 //writeNow 将状态码、内容写入到响应流中
