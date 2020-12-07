@@ -7,10 +7,10 @@ import (
 	"github.com/micro-plat/lib4go/security/md5"
 )
 
-//CronExecuteOnce cron单次执行标识
-const CronExecuteOnce = "@once"
+//CronExecuteImmediately 立即执行
+const CronExecuteImmediately = "@immediately"
 
-//CronExecuteNow cron单次立即执行标识
+//CronExecuteNow 立即执行
 const CronExecuteNow = "@now"
 
 //Task cron任务的task明细
@@ -38,9 +38,9 @@ func (t *Task) GetUNQ() string {
 	return md5.Encrypt(fmt.Sprintf("%s(%s)", t.Service, t.Cron))
 }
 
-//IsOnce 是否只需要处理一次
-func (t *Task) IsOnce() bool {
-	return t.Cron == CronExecuteOnce || t.Cron == CronExecuteNow
+//IsImmediately 是否立即
+func (t *Task) IsImmediately() bool {
+	return t.Cron == CronExecuteNow || t.Cron == CronExecuteImmediately
 }
 
 //Validate 验证任务参数
