@@ -37,8 +37,13 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	for i, v := range header {
 		req.Header.Set(i, strings.Join(v, ","))
 	}
-	if id := c.requestID; id != "" {
-		req.Header.Set("X-Request-Id", id)
+
+	requestID := context.NewRequestID()
+	if ctx, ok := context.GetContext(); ok {
+		requestID = ctx.User().GetRequestID()
+	}
+	if requestID != "" {
+		req.Header.Set("X-Request-Id", requestID)
 	}
 	c.Response, err = c.client.Do(req)
 	if c.Response != nil {
