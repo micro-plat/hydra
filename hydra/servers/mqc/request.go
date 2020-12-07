@@ -3,7 +3,6 @@ package mqc
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
@@ -32,10 +31,9 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	}
 
 	//将消息原串转换为map
-	data := make(map[string]interface{})
 	input := make(map[string]interface{})
 	message := m.GetMessage()
-	if err = json.Unmarshal(types.StringToBytes(messge)), &input); err != nil {
+	if err = json.Unmarshal(types.StringToBytes(message), &input); err != nil {
 		return nil, fmt.Errorf("队列%s中存放的数据不是有效的json:%s %w", queue.Queue, m.GetMessage(), err)
 	}
 
@@ -58,8 +56,6 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 		r.form["__body__"] = string(v)
 	}
 
-	
-
 	// //将所有非"__""参数加到form列表
 	// for k, v := range input {
 	// 	if !strings.HasPrefix(k, "__") {
@@ -68,7 +64,7 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	// }
 
 	// //处理data数据
-	// for k, v := range data {	
+	// for k, v := range data {
 	// 	r.form[k] = v
 	// }
 	return r, nil
