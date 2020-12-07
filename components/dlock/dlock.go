@@ -125,6 +125,7 @@ func (d *DLock) Unlock() {
 	d.done = true
 	close(d.closeChan)
 	d.registry.Delete(d.path)
+	d.registry.Close()
 }
 
 func isMaster(path string, root string, cldrs []string) bool {
