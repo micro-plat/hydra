@@ -87,6 +87,11 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 
 func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
 
+	//rpc
+	if strings.HasPrefix(name, "rpc://") {
+		return path, name, []string{}
+	}
+
 	//替换注册路径中最后一个*
 	lastIndex := strings.LastIndex(path, "*")
 	if lastIndex > -1 {
