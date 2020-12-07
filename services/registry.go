@@ -296,13 +296,13 @@ func init() {
 	})
 	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			CRON.Add(t.(string), g.Service)
+			CRON.Static(t.(string), g.Service)
 		}
 		return nil
 	})
 	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			MQC.Add(t.(string), g.Service)
+			MQC.Static(t.(string), g.Service)
 		}
 		return nil
 	})
