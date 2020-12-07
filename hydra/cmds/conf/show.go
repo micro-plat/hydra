@@ -47,7 +47,7 @@ func newShow(addr string, plat string, sysName string, types []string, cluster s
 	}
 }
 func (s *show) Show() error {
-	rgst, err := registry.NewRegistry(s.addr, global.Current().Log())
+	rgst, err := registry.GetRegistry(s.addr, global.Current().Log())
 	if err != nil {
 		return err
 	}

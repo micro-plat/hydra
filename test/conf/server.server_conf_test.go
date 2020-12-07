@@ -25,7 +25,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/conf/vars"
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -38,7 +38,7 @@ func TestNewEmptyServerConf(t *testing.T) {
 	sysName := "sysName1"
 	serverType := global.API
 	clusterName := "cluster1"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -131,7 +131,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	sysName := "sysName2"
 	serverType := global.API
 	clusterName := "cluster2"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -256,7 +256,7 @@ func TestNewRPCServerConf(t *testing.T) {
 	sysName := "sysName3"
 	serverType := global.RPC
 	clusterName := "cluster3"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -282,7 +282,7 @@ func TestNewMQCServerConf(t *testing.T) {
 	sysName := "sysName4"
 	serverType := global.MQC
 	clusterName := "cluster4"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -316,7 +316,7 @@ func TestNewCRONServerConf(t *testing.T) {
 	sysName := "sysName5"
 	serverType := global.CRON
 	clusterName := "cluster5"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -348,7 +348,7 @@ func TestNewVARServerConf(t *testing.T) {
 	sysName := "sysName6"
 	serverType := global.MQC
 	clusterName := "cluster6"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)

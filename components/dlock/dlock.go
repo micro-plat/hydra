@@ -24,7 +24,7 @@ type DLock struct {
 
 //NewLock 构建分布式锁
 func NewLock(lockName string, registryAddr string, l logger.ILogging) (lk *DLock, err error) {
-	r, err := registry.NewRegistry(registryAddr, l)
+	r, err := registry.GetRegistry(registryAddr, l)
 	if err != nil {
 		return nil, err
 	}

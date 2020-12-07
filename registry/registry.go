@@ -60,8 +60,8 @@ func Register(name string, builder IFactory) {
 	registries[name] = builder
 }
 
-//NewRegistry 根据协议地址创建注册中心
-func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
+//GetRegistry 根据地址获得缓存的注册中心
+func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	proto, addrs, u, p, mt, err := Parse(address)
 	if err != nil {
 		return nil, err

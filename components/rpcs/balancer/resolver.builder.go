@@ -62,7 +62,7 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 	addresses := []string{addr}
 	//兼容直接传服务器ip来进行访问
 	if len(plat) > 0 {
-		regst, err := registry.NewRegistry(address, logging)
+		regst, err := registry.GetRegistry(address, logging)
 		if err != nil {
 			return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 		}
