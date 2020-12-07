@@ -28,17 +28,20 @@ type ICRON interface {
 }
 
 type cron struct {
-	tasks       *task.Tasks
-	subscribers []*subscriber
-	lock        sync.Mutex
-	signalChan  chan struct{}
+	dynamicTasks *task.Tasks
+	staticTasks  *task.Tasks
+	subscribers  []*subscriber
+	lock         sync.Mutex
+	staticLock   sync.Mutex
+	signalChan   chan struct{}
 }
 
 func newCron() *cron {
 	c := &cron{
-		tasks:       task.NewEmptyTasks(),
-		subscribers: make([]*subscriber, 0, 0),
-		signalChan:  make(chan struct{}, 100),
+		dynamicTasks: task.NewEmptyTasks(),
+		staticTasks:  task.NewEmptyTasks(),
+		subscribers:  make([]*subscriber, 0, 0),
+		signalChan:   make(chan struct{}, 100),
 	}
 	go c.notify()
 	return c
@@ -46,7 +49,16 @@ func newCron() *cron {
 
 //GetTasks 获取任务列表
 func (c *cron) GetTasks() *task.Tasks {
-	return c.tasks
+	return c.staticTasks
+}
+
+//Add 添加任务
+func (c *cron) Static(cron string, service string) ICRON {
+	c.staticLock.Lock()
+	defer c.staticLock.Unlock()
+	task := task.NewTask(cron, service)
+	c.staticTasks.Append(task)
+	return c
 }
 
 //Add 添加任务
@@ -54,7 +66,7 @@ func (c *cron) Add(cron string, service string) ICRON {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
-	_, notifyTasks := c.tasks.Append(task)
+	_, notifyTasks := c.dynamicTasks.Append(task)
 	for _, t := range notifyTasks {
 		for _, s := range c.subscribers {
 			s.taskChan <- t
@@ -70,7 +82,7 @@ func (c *cron) Remove(cron string, service string) ICRON {
 	defer c.lock.Unlock()
 	task := task.NewTask(cron, service)
 	task.Disable = true
-	_, notifyTasks := c.tasks.Append(task)
+	_, notifyTasks := c.dynamicTasks.Append(task)
 	for _, t := range notifyTasks {
 		for _, s := range c.subscribers {
 			s.taskChan <- t
@@ -88,7 +100,7 @@ func (c *cron) Subscribe(callback func(t *task.Task)) {
 		callback: callback,
 		taskChan: make(chan *task.Task, 255),
 	}
-	for _, t := range c.tasks.Tasks {
+	for _, t := range c.dynamicTasks.Tasks {
 		subscriber.taskChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
