@@ -97,7 +97,7 @@ func (c *mqc) add(mqName string, service string, disable bool, concurrency ...in
 		c.lock.Lock()
 		defer c.lock.Unlock()
 		mqName = global.MQConf.GetQueueName(mqName)
-		queue := queue.NewQueueByConcurrency(mqName, service, types.GetIntByIndex(concurrency, 0, 10))
+		queue := queue.NewQueue(mqName, service, queue.WithConcurrency(types.GetIntByIndex(concurrency, 0, 10)))
 		queue.Disable = disable
 		_, notifyQueues := c.queues.Append(queue)
 		for _, q := range notifyQueues {

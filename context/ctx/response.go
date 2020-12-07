@@ -192,7 +192,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			return context.PLAINF, text
 		}
 
-	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map {
+	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map || vtpKind == reflect.Slice || vtpKind == reflect.Array {
 		return context.JSONF, c.getStringByCP(context.JSONF, vtpKind, content)
 	}
 	return context.PLAINF, c.getStringByCP(context.JSONF, vtpKind, content)
@@ -200,14 +200,29 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 }
 
 func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interface{}) string {
-	if tpkind != reflect.Map && tpkind != reflect.Struct {
+	if tpkind != reflect.Map && tpkind != reflect.Struct && tpkind != reflect.Slice && tpkind != reflect.Array {
 		return fmt.Sprint(content)
 	}
 
 	switch {
 	case strings.Contains(ctp, "xml"):
-		if s, ok := content.(map[string]interface{}); ok {
-			var m mxj.Map = s
+		if tpkind == reflect.Slice || tpkind == reflect.Array {
+			panic("XML格式暂不支持Slice和Array类型数据")
+		}
+
+		if tpkind == reflect.Map {
+			objMap, ok := content.(map[string]interface{})
+			if !ok {
+				objMap = map[string]interface{}{} 
+				valOf := reflect.ValueOf(content)
+				newVal := reflect.ValueOf(objMap)
+				keys := valOf.MapKeys()
+				for _, k := range keys {
+					v := valOf.MapIndex(k)
+					newVal.SetMapIndex(k, v)
+				}
+			}
+ 			var m mxj.Map = objMap
 			if str, err := m.Xml(); err != nil {
 				panic(err)
 			} else {

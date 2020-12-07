@@ -46,6 +46,8 @@ func NewProcessor() (p *Processor) {
 	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
+	p.Engine.Use(middleware.DispServiceExistsCheck(p.Engine).DispFunc())
+
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 
 	middleware.AddMiddlewareHook(cronmiddlewares, func(item middleware.Handler) {
