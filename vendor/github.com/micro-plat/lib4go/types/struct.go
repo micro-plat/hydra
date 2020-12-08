@@ -134,67 +134,82 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		return false, nil
 	}
 
-	// switch value.Kind() {
-	// case reflect.Slice:
-	// 	if !ok {
-	// 		vs = []string{opt.defaultValue}
-	// 	}
-	// 	return true, setSlice(vs, value, field)
-	// case reflect.Array:
-	// 	if !ok {
-	// 		vs = []string{opt.defaultValue}
-	// 	}
-	// 	if len(vs) != value.Len() {
-	// 		return false, fmt.Errorf("%q is not valid value for %s", vs, value.Type().String())
-	// 	}
-	// 	return true, setArray(vs, value, field)
-	// default:
-	return true, setWithProperType(fmt.Sprint(vs), value, field)
-	// }
+	switch value.Kind() {
+	case reflect.Slice:
+		if !ok {
+			vs = []string{opt.defaultValue}
+		}
+		ls := make([]string, 0, 1)
+		s := reflect.ValueOf(vs)
+		for i := 0; i < s.Len(); i++ {
+			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
+		}
+		return true, setSlice(ls, value, field)
+	case reflect.Array:
+		if !ok {
+			vs = []string{opt.defaultValue}
+		}
+		ls := make([]string, 0, 1)
+		s := reflect.ValueOf(vs)
+		for i := 0; i < s.Len(); i++ {
+			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
+		}
+		return true, setArray(ls, value, field)
+	default:
+		return true, setWithProperType(vs, value, field)
+	}
 }
 
-func setWithProperType(val string, value reflect.Value, field reflect.StructField) error {
+func setWithProperType(val interface{}, value reflect.Value, field reflect.StructField) error {
 	switch value.Kind() {
 	case reflect.Int:
-		return setIntField(val, 0, value)
+		return setIntField(fmt.Sprint(val), 0, value)
 	case reflect.Int8:
-		return setIntField(val, 8, value)
+		return setIntField(fmt.Sprint(val), 8, value)
 	case reflect.Int16:
-		return setIntField(val, 16, value)
+		return setIntField(fmt.Sprint(val), 16, value)
 	case reflect.Int32:
-		return setIntField(val, 32, value)
+		return setIntField(fmt.Sprint(val), 32, value)
 	case reflect.Int64:
 		switch value.Interface().(type) {
 		case time.Duration:
-			return setTimeDuration(val, value, field)
+			return setTimeDuration(fmt.Sprint(val), value, field)
 		}
-		return setIntField(val, 64, value)
+		return setIntField(fmt.Sprint(val), 64, value)
 	case reflect.Uint:
-		return setUintField(val, 0, value)
+		return setUintField(fmt.Sprint(val), 0, value)
 	case reflect.Uint8:
-		return setUintField(val, 8, value)
+		return setUintField(fmt.Sprint(val), 8, value)
 	case reflect.Uint16:
-		return setUintField(val, 16, value)
+		return setUintField(fmt.Sprint(val), 16, value)
 	case reflect.Uint32:
-		return setUintField(val, 32, value)
+		return setUintField(fmt.Sprint(val), 32, value)
 	case reflect.Uint64:
-		return setUintField(val, 64, value)
+		return setUintField(fmt.Sprint(val), 64, value)
 	case reflect.Bool:
-		return setBoolField(val, value)
+		return setBoolField(fmt.Sprint(val), value)
 	case reflect.Float32:
-		return setFloatField(val, 32, value)
+		return setFloatField(fmt.Sprint(val), 32, value)
 	case reflect.Float64:
-		return setFloatField(val, 64, value)
+		return setFloatField(fmt.Sprint(val), 64, value)
 	case reflect.String:
-		value.SetString(val)
+		value.SetString(fmt.Sprint(val))
 	case reflect.Struct:
 		switch value.Interface().(type) {
 		case time.Time:
-			return setTimeField(val, field, value)
+			return setTimeField(fmt.Sprint(val), field, value)
 		}
-		return json.Unmarshal(StringToBytes(val), value.Addr().Interface())
+		buff, err := json.Marshal(val)
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal(buff, value.Addr().Interface())
 	case reflect.Map:
-		return json.Unmarshal(StringToBytes(val), value.Addr().Interface())
+		buff, err := json.Marshal(val)
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal(buff, value.Addr().Interface())
 	default:
 		return errUnknownType
 	}

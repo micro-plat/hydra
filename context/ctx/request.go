@@ -59,7 +59,7 @@ func (r *request) Bind(obj interface{}) error {
 	}
 
 	//处理数据结构转换
-	if err := r.XMap.ToStruct(obj); err != nil {
+	if err := r.XMap.ToSimpleStruct(obj); err != nil {
 		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
 	}
 
