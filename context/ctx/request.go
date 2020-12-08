@@ -60,7 +60,7 @@ func (r *request) Bind(obj interface{}) error {
 
 	//处理数据结构转换
 	if err := r.XMap.ToAnyStruct(obj); err != nil {
-		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("对象转换有误 %v", err))
 	}
 
 	//验证数据格式
