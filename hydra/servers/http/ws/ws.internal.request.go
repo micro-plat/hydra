@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
@@ -41,9 +40,14 @@ func NewRequest(method string, content []byte, uuid string, clientip string, opt
 	for _, o := range opts {
 		o(r)
 	}
-	if err = json.Unmarshal(content, &r.form); err != nil {
-		return nil, fmt.Errorf("ws请求数据不是有效的json:%s %w", content, err)
+
+	json.Unmarshal(content, &r.form)
+
+	//内容为json
+	if _, ok := r.header["Content-Type"]; !ok {
+		r.header["Content-Type"] = "application/json"
 	}
+	r.form["__body__"] = types.BytesToString(content)
 	return r, nil
 }
 

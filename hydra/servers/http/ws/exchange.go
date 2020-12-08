@@ -27,7 +27,7 @@ func Conf(queueName string) {
 
 //IDataExchange 数据交换接口
 type IDataExchange interface {
-	SendMessage(uuid string, msg string) error
+	Notify(uuid string, msg string) error
 }
 
 //Exchange 数据交换中心
@@ -65,9 +65,13 @@ func (e *Exchange) Unsubscribe(uuid string) {
 	hydra.MQC.Remove(e.getQueueName(uuid), e.service) //关闭队列
 }
 
-//SendMessage 发送消息
-func (e *Exchange) SendMessage(uuid string, msg string) error {
-	return hydra.C.Queue().GetRegularQueue(queueConfName).Send(e.getQueueName(uuid), msg)
+//Notify 发送通知消息
+func (e *Exchange) Notify(uuid string, msg string) error {
+	queue, err := hydra.C.Queue().GetQueue(queueConfName)
+	if err != nil {
+		return err
+	}
+	return queue.Send(e.getQueueName(uuid), msg)
 }
 
 //handle 业务回调处理
