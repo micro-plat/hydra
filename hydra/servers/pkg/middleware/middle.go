@@ -24,7 +24,6 @@ type IMiddleContext interface {
 }
 
 //MiddleContext 中间件转换器，在context.IContext中扩展next函数
-
 type MiddleContext struct {
 	context.IContext
 	imiddle
@@ -62,7 +61,6 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 			nctx.Meta().SetValue("__context_", c)
 			v = newMiddleContext(nctx, rawCtx, c.Request, c.Writer)
 			c.Set("__middle_context__", v)
-
 		}
 		h(v.(IMiddleContext))
 	}
@@ -71,7 +69,6 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 //DispFunc 返回disp对应的处理函数
 func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 	return func(c *dispatcher.Context) {
-
 		v, ok := c.Get("__middle_context__")
 		if !ok {
 			nctx := ctx.NewCtx(&dispCtx{Context: c}, tps[0])
