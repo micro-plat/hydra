@@ -1,12 +1,9 @@
 package pkgs
 
 import (
-	"time"
-
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/service"
 	"github.com/micro-plat/hydra/services"
-	"github.com/micro-plat/lib4go/logger"
 )
 
 //Stop Stop
@@ -36,7 +33,5 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 	global.Def.Log().Info(global.AppName, "已安全退出")
 
 	//关闭日志
-	logger.Close()
-	time.Sleep(time.Millisecond * 1000)
 	return nil
 }
