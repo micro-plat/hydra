@@ -1,6 +1,8 @@
 package static
 
-import "strings"
+import (
+	"path"
+)
 
 //DefaultSataticDir 默认静态文件存放路径
 const DefaultSataticDir = "./static"
@@ -76,7 +78,7 @@ func WithExts(exts ...string) Option {
 //WithArchive 设置静态文件跟目录
 func WithArchive(archive string) Option {
 	return func(s *Static) {
-		if !strings.Contains(archive, ".") {
+		if ext := path.Ext(archive); ext == "" {
 			s.Archive = archive + ".zip"
 			return
 		}

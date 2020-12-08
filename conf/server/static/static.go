@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/mholt/archiver"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/lib4go/archiver"
 )
 
 //TempDirName 临时目录创建名
@@ -91,31 +91,19 @@ func unarchive(dir string, path string) (string, error) {
 		return dir, nil
 	}
 
-	reader, err := os.Open(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return dir, nil
-		}
-		return "", fmt.Errorf("无法打开文件:%w", err)
-	}
-	archive := archiver.MatchingFormat(path)
-	if archive == nil {
-		return "", fmt.Errorf("指定的文件不是归档文件:%s", path)
-	}
 	rootPath := filepath.Dir(os.Args[0])
 	tmpDir, err := ioutil.TempDir(rootPath, TempDirName)
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
-
-	defer reader.Close()
-	ndir := filepath.Join(tmpDir, dir)
-	err = archive.Read(reader, ndir)
+	//	ndir := filepath.Join(dir, tmpDir)
+	err = archiver.Unarchive(path, tmpDir)
 	if err != nil {
-		return "", fmt.Errorf("读取归档文件失败:%v", err)
+		return "", fmt.Errorf("指定的文件%s解压失败:%v", path, err)
 	}
+
 	waitRemoveDir = append(waitRemoveDir, tmpDir)
-	return ndir, nil
+	return tmpDir, nil
 }
 func init() {
 	global.Def.AddCloser(func() error {
