@@ -42,6 +42,7 @@ func (p *ServiceApp) run() (err error) {
 			return err
 		}
 	}
+
 	//5. 创建服务器
 	p.server = servers.NewRspServers(globalData.GetRegistryAddr(),
 		globalData.GetPlatName(), globalData.GetSysName(),
