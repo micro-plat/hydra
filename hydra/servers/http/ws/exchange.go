@@ -66,7 +66,7 @@ func (e *Exchange) Unsubscribe(uuid string) {
 }
 
 //Notify 发送通知消息
-func (e *Exchange) Notify(uuid string, msg string) error {
+func (e *Exchange) Notify(uuid string, msg interface{}) error {
 	queue, err := hydra.C.Queue().GetQueue(queueConfName)
 	if err != nil {
 		return err
