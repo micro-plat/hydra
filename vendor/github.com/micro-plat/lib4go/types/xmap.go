@@ -409,7 +409,7 @@ func (q XMap) ToStruct(out interface{}) error {
 	return err
 }
 
-//ToAnyStruct 转换为不包含复杂属性的结构体
+//ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
 	return Any2Struct(out, q)
 }
