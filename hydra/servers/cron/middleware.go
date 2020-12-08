@@ -4,13 +4,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-var cronmiddlewares []middleware.Handler
+var middlewares = make(middleware.Handlers, 0, 1)
 
-func init() {
-	cronmiddlewares = make([]middleware.Handler, 0)
-}
-
-//Use 添加对Cron处理的中间件
-func Use(handler middleware.Handler) {
-	cronmiddlewares = append(cronmiddlewares, handler)
-}
+//Middlewares 用户自定义中间件
+var Middlewares middleware.ICustomMiddleware = middlewares

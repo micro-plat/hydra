@@ -36,6 +36,7 @@ type rspns struct {
 
 type response struct {
 	ctx         context.IInnerContext
+	headers     types.XMap
 	conf        app.IAPPConf
 	path        *rpath
 	raw         rawrspns
@@ -63,8 +64,16 @@ func (c *response) Header(k string, v string) {
 }
 
 //Header 获取头信息
-func (c *response) GetHeaders() map[string][]string {
-	return c.ctx.WHeaders()
+func (c *response) GetHeaders() types.XMap {
+	if c.headers != nil {
+		return c.headers
+	}
+	hds := c.ctx.WHeaders()
+	c.headers = make(map[string]interface{})
+	for k, v := range hds {
+		c.headers[k] = strings.Join(v, ",")
+	}
+	return c.headers
 }
 
 //ContentType 设置contentType
@@ -320,6 +329,9 @@ func (c *response) GetFinalResponse() (int, string, string) {
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
 	if c.noneedWrite || c.asyncWrite == nil || c.ctx.Written() {
+		if c.final.status == 0 { //处理外部框架直接写入到流中,且输出日志状态为0的问题
+			c.final.status = c.ctx.Status()
+		}
 		return
 	}
 	if err := c.asyncWrite(); err != nil {

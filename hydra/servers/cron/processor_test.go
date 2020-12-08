@@ -21,13 +21,13 @@ func TestNewProcessor(t *testing.T) {
 			wantP: &Processor{status: unstarted, span: time.Second, length: 60, slots: cMap(60)}},
 	}
 	for _, tt := range tests {
-		cronmiddlewares = tt.handles
+		middlewares = tt.handles
 		gotP := NewProcessor()
 		assert.Equalf(t, 4+len(tt.handles), len(gotP.Engine.RouterGroup.Handlers), tt.name+",中间件数量")
 		assert.Equalf(t, tt.wantP.slots, gotP.slots, tt.name+",slots")
 		assert.Equalf(t, tt.wantP.span, gotP.span, tt.name+",span")
 		assert.Equalf(t, tt.wantP.length, gotP.length, tt.name+",length")
-		cronmiddlewares = []middleware.Handler{}
+		middlewares = []middleware.Handler{}
 	}
 }
 

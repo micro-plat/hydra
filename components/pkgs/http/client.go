@@ -43,7 +43,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		requestID = ctx.User().GetRequestID()
 	}
 	if requestID != "" {
-		req.Header.Set("X-Request-Id", requestID)
+		req.Header.Set(context.XRequestID, requestID)
 	}
 	c.Response, err = c.client.Do(req)
 	if c.Response != nil {

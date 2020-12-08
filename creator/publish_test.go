@@ -87,7 +87,7 @@ func Test_conf_Pub(t *testing.T) {
 			for tp, subs := range c.data {
 				pub := server.NewServerPub(tt.args.platName, tt.args.systemName, tp, tt.args.clusterName)
 				data, _, err := rgt.GetValue(pub.GetServerPath())
-				assert.Equalf(t, true, err == nil, tt.name+",err3", err)
+				assert.Equal(t, true, err == nil, tt.name+",err3", err)
 				data1, _ := json.Marshal(subs.Map()["main"])
 				assert.Equal(t, string(data), string(data1)[1:len(string(data1))-1], tt.name+",data")
 				for name, value := range subs.Map() {

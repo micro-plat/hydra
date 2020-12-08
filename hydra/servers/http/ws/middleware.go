@@ -1,4 +1,4 @@
-package mqc
+package ws
 
 import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"

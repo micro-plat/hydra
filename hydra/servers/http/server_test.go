@@ -22,7 +22,7 @@ func TestNewServer(t *testing.T) {
 		wantErr    string
 	}{
 		{name: "1. NewServer-地址不合法", serverName: "api", addr: "xxxllsd", wantErr: "端口不合法 xxxllsd"},
-		{name: "2. NewServer-构建http服务", serverName: "api", addr: "127.0.0.1:8080", opts: []Option{WithServerType("api"), WithTimeout(30, 30, 30), WithTLS([]string{"pem", "key"})}},
+		{name: "2. NewServer-构建http服务", serverName: "api", addr: "127.0.0.1:8080", opts: []Option{WithServerType("api"), WithTimeout(30, 30, 30)}},
 	}
 	for _, tt := range tests {
 		gotT, err := NewServer(tt.serverName, tt.addr, tt.routers, tt.opts...)
@@ -39,7 +39,6 @@ func TestNewServer(t *testing.T) {
 		assert.Equal(t, o.readTimeout, gotT.option.readTimeout, tt.name)
 		assert.Equal(t, o.readHeaderTimeout, gotT.option.readHeaderTimeout, tt.name)
 		assert.Equal(t, o.writeTimeout, gotT.option.writeTimeout, tt.name)
-		assert.Equal(t, o.tls, gotT.option.tls, tt.name)
 
 		host, port, _ := global.GetHostPort(tt.addr)
 		assert.Equal(t, xnet.JoinHostPort(host, port), gotT.server.Addr, tt.name)
@@ -60,7 +59,7 @@ func TestNewWSServer(t *testing.T) {
 		wantErr    string
 	}{
 		{name: "1. NewWSServer-地址不合法", serverName: "ws", addr: "xxxllsd", wantErr: "端口不合法 xxxllsd"},
-		{name: "2. NewWSServer-构建ws服务", serverName: "ws", addr: "127.0.0.1:8080", opts: []Option{WithServerType("api"), WithTimeout(30, 30, 30), WithTLS([]string{"pem", "key"})}},
+		{name: "2. NewWSServer-构建ws服务", serverName: "ws", addr: "127.0.0.1:8080", opts: []Option{WithServerType("api"), WithTimeout(30, 30, 30)}},
 	}
 	for _, tt := range tests {
 		gotT, err := NewWSServer(tt.serverName, tt.addr, tt.routers, tt.opts...)
@@ -77,7 +76,6 @@ func TestNewWSServer(t *testing.T) {
 		assert.Equal(t, o.readTimeout, gotT.option.readTimeout, tt.name)
 		assert.Equal(t, o.readHeaderTimeout, gotT.option.readHeaderTimeout, tt.name)
 		assert.Equal(t, o.writeTimeout, gotT.option.writeTimeout, tt.name)
-		assert.Equal(t, o.tls, gotT.option.tls, tt.name)
 
 		host, port, _ := global.GetHostPort(tt.addr)
 		assert.Equal(t, host, gotT.host, tt.name)

@@ -1,8 +1,6 @@
 package rpcs
 
 import (
-	"fmt"
-
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/conf"
 	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
@@ -41,7 +39,7 @@ func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
 	name := types.GetStringByIndex(names, 0, rpcconf.RPCNameNode)
 	v, err := s.c.GetOrCreate(rpcconf.RPCTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
 		if conf.IsEmpty() {
-			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", rpcconf.RPCTypeNode, name)
+			return NewRequest(0, rpcconf.New()), nil
 		}
 		opt := rpcconf.WithRaw(conf.GetRaw())
 		return NewRequest(conf.GetVersion(), rpcconf.New(opt)), nil
