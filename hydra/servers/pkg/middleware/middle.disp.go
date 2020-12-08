@@ -32,7 +32,7 @@ type dispCtx struct {
 
 //
 func (g *dispCtx) GetRouterPath() string {
-	return g.Context.Request.GetService()
+	return g.Context.Request.GetName()
 }
 func (g *dispCtx) GetParams() map[string]interface{} {
 	return nil
