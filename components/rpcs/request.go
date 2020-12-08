@@ -103,7 +103,7 @@ func (r *Request) RequestByCtx(ctx context.Context, service string, input interf
 	client := c.(*rpc.Client)
 	nopts := make([]rpc.RequestOption, 0, len(opts)+1)
 	nopts = append(nopts, opts...)
-	if reqid := types.GetString(ctx.Value("X-Request-Id")); reqid != "" {
+	if reqid := types.GetString(ctx.Value(rc.XRequestID)); reqid != "" {
 		nopts = append(nopts, rpc.WithXRequestID(reqid))
 	}
 	fm := pkgs.GetString(input)
