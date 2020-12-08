@@ -1,8 +1,10 @@
-package middleware
+package ws
 
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/micro-plat/hydra/context"
 )
 
 //Request 处理任务请求
@@ -15,7 +17,7 @@ type WSOption func(*Request)
 
 func WithUUID(uuid string) WSOption {
 	return func(req *Request) {
-		req.header["X-Request-Id"] = uuid
+		req.header[context.XRequestID] = uuid
 	}
 }
 
@@ -31,8 +33,8 @@ func NewRequest(method string, content []byte, uuid string, clientip string, opt
 		method: method,
 		form:   make(map[string]interface{}),
 		header: map[string]string{
-			"X-Request-Id": uuid,
-			"Client-IP":    clientip,
+			context.XRequestID: uuid,
+			"Client-IP":        clientip,
 		},
 	}
 	for _, o := range opts {
