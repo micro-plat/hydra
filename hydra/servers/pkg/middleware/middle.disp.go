@@ -38,7 +38,7 @@ func (g *dispCtx) GetParams() map[string]interface{} {
 	return nil
 }
 func (g *dispCtx) GetBody() io.ReadCloser {
-	text := g.Request.GetForm()["__body_"]
+	text := g.Request.GetForm()["__body__"]
 	switch v := text.(type) {
 	case json.RawMessage:
 		b := bytes.NewBuffer([]byte(v))
@@ -87,6 +87,9 @@ func (g *dispCtx) Status() int {
 func (g *dispCtx) Written() bool {
 	return g.Context.Writer.Written()
 }
+func (g *dispCtx) WHeaders() http.Header {
+	return g.Context.Writer.Header()
+}
 func (g *dispCtx) WHeader(k string) string {
 	return g.Context.Writer.Header().Get(k)
 }
@@ -107,7 +110,7 @@ func (g *dispCtx) File(name string) {
 	body := base64.StdEncoding.EncodeToString(ff)
 	g.Context.Header("file", name)
 	g.Context.JSON(200, map[string]interface{}{
-		"__body_": body,
+		"__body__": body,
 	})
 }
 

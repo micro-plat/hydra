@@ -31,7 +31,9 @@ func Render() Handler {
 		if !enable {
 			return
 		}
-
+		if rd.ContentType != "" {
+			ctx.Response().ContentType(rd.ContentType)
+		}
 		ctx.Response().AddSpecial("render")
 		ctx.Response().Write(rd.Status, rd.Content)
 	}

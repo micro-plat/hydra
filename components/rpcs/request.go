@@ -2,10 +2,9 @@ package rpcs
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"reflect"
 
+	"github.com/micro-plat/hydra/components/pkgs"
 	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	rc "github.com/micro-plat/hydra/context"
@@ -107,7 +106,7 @@ func (r *Request) RequestByCtx(ctx context.Context, service string, input interf
 	if reqid := types.GetString(ctx.Value("X-Request-Id")); reqid != "" {
 		nopts = append(nopts, rpc.WithXRequestID(reqid))
 	}
-	fm := getRequestForm(input)
+	fm := pkgs.GetString(input)
 	return client.RequestByString(ctx, rservice, fm, nopts...)
 }
 
@@ -119,38 +118,4 @@ func (r *Request) Close() error {
 		return true
 	})
 	return nil
-}
-func getRequestForm(content interface{}) string {
-	if content == nil {
-		return ""
-	}
-	switch v := content.(type) {
-	case []byte:
-		return string(v)
-	case string:
-		return v
-	}
-
-	//反射检查
-	tp := reflect.TypeOf(content).Kind()
-	value := reflect.ValueOf(content)
-	if tp == reflect.Ptr {
-		value = value.Elem()
-	}
-	switch tp {
-	case reflect.String:
-		return content.(string)
-	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
-		return fmt.Sprint(content)
-	default:
-		buff, err := json.Marshal(content)
-		if err != nil {
-			panic(fmt.Errorf("将请求转换为json串时错误%w", err))
-		}
-		if len(buff) == 0 {
-			buff = []byte("{}")
-		}
-
-		return string(buff)
-	}
 }

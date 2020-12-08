@@ -20,6 +20,13 @@ func WithCert(cert string) Option {
 	}
 }
 
+//WithDialTimeout 设置连接超时
+func WithDialTimeout(timeout int64) Option {
+	return func(a *MQTT) {
+		a.DialTimeout = timeout
+	}
+}
+
 //WithRaw 通过json原串初始化
 func WithRaw(raw string) Option {
 	return func(o *MQTT) {

@@ -29,7 +29,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 	val := reflect.ValueOf(h)
 	if val.Kind() == reflect.String {
 		if _, ok := global.IsProto(h.(string), global.ProtoRPC); ok {
-			current.AddHandle("", nil)
+			current.AddHandle(h.(string), nil)
 			return current, nil
 		}
 	}

@@ -17,9 +17,8 @@ import (
 //Client HTTP客户端
 type Client struct {
 	*varhttp.HTTPConf
-	client    *http.Client
-	requestID string
-	Response  *http.Response
+	client *http.Client
+	Response *http.Response
 }
 
 //ClientRequest  http请求
@@ -33,14 +32,14 @@ type ClientRequest struct {
 }
 
 // NewClient 构建HTTP客户端，用于发送GET POST等请求
-func NewClient(requestID string, opts ...varhttp.Option) (client *Client, err error) {
+func NewClient(opts ...varhttp.Option) (client *Client, err error) {
 	httpconf := varhttp.New(opts...)
-	return NewClientByConf(requestID, httpconf)
+	return NewClientByConf(httpconf)
 }
 
 //NewClientByConf 通过配置对象获取客户端
-func NewClientByConf(requestID string, conf *varhttp.HTTPConf) (client *Client, err error) {
-	client = &Client{requestID: requestID}
+func NewClientByConf(conf *varhttp.HTTPConf) (client *Client, err error) {
+	client = &Client{}
 	client.HTTPConf = conf
 	tlsConf, err := getCert(client.HTTPConf)
 	if err != nil {

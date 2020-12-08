@@ -64,7 +64,7 @@ func (c *response) Header(k string, v string) {
 
 //Header 获取头信息
 func (c *response) GetHeaders() map[string][]string {
-	return c.ctx.GetHeaders()
+	return c.ctx.WHeaders()
 }
 
 //ContentType 设置contentType
@@ -207,22 +207,9 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	switch {
 	case strings.Contains(ctp, "xml"):
 		if tpkind == reflect.Slice || tpkind == reflect.Array {
-			panic("XML格式暂不支持Slice和Array类型数据")
+			panic("转化为xml必须是struct或者map,内容格式不正确")
 		}
-
-		if tpkind == reflect.Map {
-			objMap, ok := content.(map[string]interface{})
-			if !ok {
-				objMap = map[string]interface{}{} 
-				valOf := reflect.ValueOf(content)
-				newVal := reflect.ValueOf(objMap)
-				keys := valOf.MapKeys()
-				for _, k := range keys {
-					v := valOf.MapIndex(k)
-					newVal.SetMapIndex(k, v)
-				}
-			}
- 			var m mxj.Map = objMap
+		if m := c.toMap(content); m != nil {
 			if str, err := m.Xml(); err != nil {
 				panic(err)
 			} else {
@@ -250,6 +237,17 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	default:
 		return fmt.Sprint(content)
 	}
+}
+
+func (c *response) toMap(content interface{}) mxj.Map {
+	v := reflect.ValueOf(content)
+	r := mxj.Map{}
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			r[types.GetString(key)] = v.MapIndex(key)
+		}
+	}
+	return r
 }
 
 //writeNow 将状态码、内容写入到响应流中

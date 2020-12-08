@@ -210,6 +210,9 @@ func (m *global) check() (err error) {
 	if m.Trace != "" && !types.StringContains(traces, m.Trace) {
 		return fmt.Errorf("trace名称只能是%v", traces)
 	}
+	if IsDebugByCli {
+		IsDebug = IsDebugByCli
+	}
 	//增加调试参数
 	if IsDebug {
 		m.PlatName += "_debug"

@@ -106,6 +106,9 @@ type IXMap interface {
 	//ToStruct 将当前map转换为结构值对象
 	ToStruct(o interface{}) error
 
+	//ToSimpleStruct 转换为不包含复杂属性的结构体
+	ToSimpleStruct(out interface{}) error
+
 	//ToMap 转换为map[string]interface{}
 	ToMap() map[string]interface{}
 
@@ -153,7 +156,7 @@ func NewXMapBySMap(i map[string]string) XMap {
 //NewXMapByJSON 根据json创建XMap
 func NewXMapByJSON(j string) (XMap, error) {
 	var query XMap
-	d := json.NewDecoder(bytes.NewBuffer([]byte(j)))
+	d := json.NewDecoder(bytes.NewBuffer(StringToBytes(j)))
 	d.UseNumber()
 	err := d.Decode(&query)
 	return query, err
@@ -163,7 +166,7 @@ func NewXMapByJSON(j string) (XMap, error) {
 func NewXMapByXML(j string) (XMap, error) {
 	mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
 	var m map[string]interface{}
-	m, err := mxj.NewMapXml([]byte(j))
+	m, err := mxj.NewMapXml(StringToBytes(j))
 	if err != nil {
 		return nil, err
 	}
@@ -244,31 +247,6 @@ func (q XMap) GetValue(name string) interface{} {
 
 //GetString 从对象中获取数据值，如果不是字符串则返回空
 func (q XMap) GetString(name string, def ...string) string {
-	// parties := strings.Split(name, ":")
-	// if len(parties) == 1 {
-	// 	return GetString(q[name], def...)
-	// }
-	// tmpv := q[parties[0]]
-	// for i, cnt := 1, len(parties); i < cnt; i++ {
-	// 	if v, ok := tmpv.(map[string]interface{}); ok {
-	// 		tmpv = v[parties[i]]
-	// 		continue
-	// 	}
-	// 	if v, ok := tmpv.(XMap); ok {
-	// 		tmpv = v[parties[i]]
-	// 		continue
-	// 	}
-	// 	if v, ok := tmpv.(*XMap); ok {
-	// 		tmpv = v.GetValue(parties[i])
-	// 		continue
-	// 	}
-	// 	if v, ok := tmpv.(string); ok {
-	// 		tmp := map[string]interface{}{}
-	// 		json.Unmarshal([]byte(v), &tmp)
-	// 		tmpv = tmp[parties[i]]
-	// 		continue
-	// 	}
-	// }
 	return GetString(q[name], def...)
 }
 
@@ -423,20 +401,17 @@ func (q XMap) MustFloat64(name string) (float64, bool) {
 
 //ToStruct 将当前对象转换为指定的struct
 func (q XMap) ToStruct(out interface{}) error {
-	val := reflect.ValueOf(out)
-
-	if val.Kind() != reflect.Interface && val.Kind() != reflect.Ptr {
-		return fmt.Errorf("function only accepts interface or ptr; got %s", val.Kind())
-	}
-
 	buff, err := json.Marshal(q)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buff, out); err != nil {
-		return err
-	}
-	return nil
+	err = json.Unmarshal(buff, &out)
+	return err
+}
+
+//ToSimpleStruct 转换为不包含复杂属性的结构体
+func (q XMap) ToSimpleStruct(out interface{}) error {
+	return Any2Struct(out, q)
 }
 
 //ToMap 转换为map[string]interface{}

@@ -23,6 +23,7 @@ type IInnerContext interface {
 	WStatus(int)              //c.Context.Writer.WriteHeader(s)
 	Status() int              //Context.Writer.Status()
 	Written() bool            //Context.Writer.Written()
+	WHeaders() http.Header    //c.Context.Writer.Header()
 	WHeader(string) string    //c.Context.Writer.Header().Get
 	File(string)              //Context.File(path)
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)

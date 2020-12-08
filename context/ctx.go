@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	XRequestID = "X-Request-Id"
+
 	JSONF  = "application/json; charset=%s"
 	XMLF   = "application/xml; charset=%s"
 	YAMLF  = "text/yaml; charset=%s"

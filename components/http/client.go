@@ -7,7 +7,6 @@ import (
 	"github.com/micro-plat/hydra/components/pkgs/http"
 	"github.com/micro-plat/hydra/conf"
 	httpconf "github.com/micro-plat/hydra/conf/vars/http"
-	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -37,13 +36,7 @@ func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 		if conf.IsEmpty() {
 			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", httpconf.HttpTypeNode, name)
 		}
-
-		opt := httpconf.WithRaw(conf.GetRaw())
-		requestID := context.NewRequestID()
-		if ctx, ok := context.GetContext(); ok {
-			requestID = ctx.User().GetRequestID()
-		}
-		return http.NewClient(requestID, opt)
+		return http.NewClient(httpconf.WithRaw(conf.GetRaw()))
 	})
 	if err != nil {
 		return nil, err
