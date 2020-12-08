@@ -42,10 +42,9 @@ func ginServiceExistsCheck(engine *gin.Engine) func(context.IPath) bool {
 			return val.(bool)
 		}
 		routers := engine.Routes()
-		found := false
 		for _, r := range routers {
-			found = checkExists(&syncMap, key, r.Method, r.Path, path.GetMethod(), path.GetRequestPath())
-			if found {
+			if checkExists(r.Method, r.Path, path.GetMethod(), path.GetRequestPath()) {
+				syncMap.Store(key, true)
 				return true
 			}
 		}
@@ -62,10 +61,9 @@ func dispServiceExistsCheck(engine *dispatcher.Engine) func(context.IPath) bool 
 			return val.(bool)
 		}
 		routers := engine.Routes()
-		found := false
 		for _, r := range routers {
-			found = checkExists(&syncMap, key, r.Method, r.Path, path.GetMethod(), path.GetRequestPath())
-			if found {
+			if checkExists(r.Method, r.Path, path.GetMethod(), path.GetRequestPath()) {
+				syncMap.Store(key, true)
 				return true
 			}
 		}
@@ -74,7 +72,7 @@ func dispServiceExistsCheck(engine *dispatcher.Engine) func(context.IPath) bool 
 	}
 }
 
-func checkExists(cache *sync.Map, key, routeMethod, routePath, reqMethod, reqPath string) (found bool) {
+func checkExists(routeMethod, routePath, reqMethod, reqPath string) (found bool) {
 	found = false
 	if !strings.EqualFold(routeMethod, reqMethod) {
 		return
@@ -82,7 +80,6 @@ func checkExists(cache *sync.Map, key, routeMethod, routePath, reqMethod, reqPat
 
 	if routePath == reqPath {
 		found = true
-		cache.Store(key, true)
 		return
 	}
 	routepts := strings.Split(routePath, "/")
@@ -102,7 +99,6 @@ func checkExists(cache *sync.Map, key, routeMethod, routePath, reqMethod, reqPat
 	}
 	if ismatch {
 		found = true
-		cache.Store(key, true)
 		return
 	}
 	return

@@ -25,23 +25,24 @@ func ResolvePath(address string, defPlatName string) (isip bool, service string,
 	if len(addrs) > 1 && addrs[1] != "" {
 		platName = addrs[1]
 	}
-	if isIPPort(platName) {
-		return true, service, platName, nil
+
+	if newAddr, b := isIPPort(platName); b {
+		return true, service, newAddr, nil
 	}
 	return false, service, platName, nil
 }
-func isIPPort(s string) bool {
+func isIPPort(s string) (string, bool) {
 	if strings.Contains(s, "://") {
 		parties := strings.Split(s, "://")
 		if len(parties) != 2 {
-			return false
+			return "", false
 		}
 		s = parties[1]
 	}
 
 	host, port, err := net.SplitHostPort(s)
 	if err != nil {
-		return false
+		return "", false
 	}
-	return govalidator.IsIP(host) && govalidator.IsPort(port)
+	return "tcp://" + host + ":" + port, govalidator.IsIP(host) && govalidator.IsPort(port)
 }
