@@ -22,7 +22,7 @@ type HTTPConf struct {
 //New 构建http 客户端配置信息
 func New(opts ...Option) *HTTPConf {
 	httpConf := &HTTPConf{
-		ConnectionTimeout: 30,
+		ConnectionTimeout: 10,
 		RequestTimeout:    10,
 	}
 	for _, opt := range opts {
