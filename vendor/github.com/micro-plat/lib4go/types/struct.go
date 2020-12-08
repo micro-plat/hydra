@@ -12,7 +12,7 @@ import (
 
 var errUnknownType = errors.New("unknown type")
 
-//AnyType2Struct 将form参数转换为C对象
+//Any2Struct 将form参数转换为C对象
 func Any2Struct(ptr interface{}, form map[string]interface{}) error {
 	return mapFormByTag(ptr, form, "json")
 }
