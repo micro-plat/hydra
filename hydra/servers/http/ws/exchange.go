@@ -26,7 +26,7 @@ func Conf(queueName string) {
 
 //IDataExchange 数据交换接口
 type IDataExchange interface {
-	Notify(uuid string, msg string) error
+	Notify(uuid string, data interface{}) error
 }
 
 //Exchange 数据交换中心
