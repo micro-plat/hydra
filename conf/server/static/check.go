@@ -28,10 +28,6 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 		return true, filepath.Join(s.Dir, rPath)
 	}
 
-	if s.IsContainExt(rPath) {
-		return true, filepath.Join(s.Dir, rPath)
-	}
-
 	//不能读取没有扩展名的文件
 	//IsContainExt和HasPrefix，IsContainExt的判断顺序存在问题
 	//按照现在的逻辑，先判断文件是否存在，容易对io造成攻击，所以以后可以优化文件索引缓存
