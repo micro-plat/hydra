@@ -24,7 +24,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Delay().GinFunc())     //
 	s.engine.Use(middleware.Limit().GinFunc())     //限流处理
 	s.engine.Use(middleware.Static().GinFunc())    //处理静态文件
-	s.engine.Use(middleware.GinServiceExistsCheck(s.engine).GinFunc())
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头
 	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
 	s.engine.Use(middleware.BasicAuth().GinFunc()) //
