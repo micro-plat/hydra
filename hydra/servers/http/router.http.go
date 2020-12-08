@@ -17,7 +17,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
 	s.engine.Use(middleware.Recovery().GinFunc())
-	s.engine.Use(middleware.GinServiceExistsCheck(s.engine).GinFunc())
 	s.engine.Use(middleware.Trace().GinFunc())     //跟踪信息
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
 	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
@@ -25,6 +24,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Delay().GinFunc())     //
 	s.engine.Use(middleware.Limit().GinFunc())     //限流处理
 	s.engine.Use(middleware.Static().GinFunc())    //处理静态文件
+	s.engine.Use(middleware.GinServiceExistsCheck(s.engine).GinFunc())
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头
 	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
 	s.engine.Use(middleware.BasicAuth().GinFunc()) //
