@@ -17,11 +17,11 @@ var exchange = NewExchange()
 //DataExchange 数据交换处理
 var DataExchange IDataExchange = exchange
 
-var queueConfName = "queue"
+var confName = "queue"
 
 //Conf 配置管理
-func Conf(queueName string) {
-	queueConfName = queueName
+func Conf(queueConfName string) {
+	confName = queueConfName
 }
 
 //IDataExchange 数据交换接口
@@ -66,7 +66,7 @@ func (e *Exchange) Unsubscribe(uuid string) {
 
 //Notify 发送通知消息
 func (e *Exchange) Notify(uuid string, msg interface{}) error {
-	queue, err := hydra.C.Queue().GetQueue(queueConfName)
+	queue, err := hydra.C.Queue().GetQueue(confName)
 	if err != nil {
 		return err
 	}
