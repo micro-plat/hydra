@@ -106,8 +106,8 @@ type IXMap interface {
 	//ToStruct 将当前map转换为结构值对象
 	ToStruct(o interface{}) error
 
-	//ToSimpleStruct 转换为不包含复杂属性的结构体
-	ToSimpleStruct(out interface{}) error
+	//ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
+	ToAnyStruct(out interface{}) error
 
 	//ToMap 转换为map[string]interface{}
 	ToMap() map[string]interface{}
@@ -409,8 +409,8 @@ func (q XMap) ToStruct(out interface{}) error {
 	return err
 }
 
-//ToSimpleStruct 转换为不包含复杂属性的结构体
-func (q XMap) ToSimpleStruct(out interface{}) error {
+//ToAnyStruct 转换为不包含复杂属性的结构体
+func (q XMap) ToAnyStruct(out interface{}) error {
 	return Any2Struct(out, q)
 }
 
