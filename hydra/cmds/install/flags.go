@@ -2,6 +2,7 @@ package install
 
 import (
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+	"github.com/micro-plat/hydra/global"
 	"github.com/urfave/cli"
 )
 
@@ -14,6 +15,21 @@ func getFlags() []cli.Flag {
 		Name:        "cover,v",
 		Destination: &coverIfExists,
 		Usage:       `-覆盖安装，本地已安装服务`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "debug,d",
+		Destination: &global.FlagVal.IsDebug,
+		Usage:       `-调试模式，打印更详细的系统运行日志，避免将详细的错误信息返回给调用方`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "trace,t",
+		Destination: &global.Def.Trace,
+		Usage:       `-性能分析。支持:cpu,mem,block,mutex,web`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "tport,tp",
+		Destination: &global.Def.TracePort,
+		Usage:       `-性能分析服务端口号。用于trace为web模式时的端口号。默认：19999`,
 	})
 	return flags
 }

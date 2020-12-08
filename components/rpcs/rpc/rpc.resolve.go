@@ -44,5 +44,5 @@ func isIPPort(s string) (string, bool) {
 	if err != nil {
 		return "", false
 	}
-	return "tcp://" + host + ":" + port, govalidator.IsIP(host) && govalidator.IsPort(port)
+	return fmt.Sprintf("tcp://%s:%s", host, port), govalidator.IsIP(host) && govalidator.IsPort(port)
 }
