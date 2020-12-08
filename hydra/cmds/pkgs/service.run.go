@@ -18,8 +18,11 @@ func (p *ServiceApp) run() (err error) {
 		cli.ShowCommandHelp(p.c, p.c.Command.Name)
 		return nil
 	}
+	if !global.IsDebug {
+		logger.AddWriteThread(99)
+	}
+
 	//2. 注册远程日志组件
-	logger.AddWriteThread(99)
 	if err := rlog.Registry(global.Def.PlatName, global.Def.RegistryAddr); err != nil {
 		logs.Log.Error(err)
 		return nil
