@@ -7,7 +7,6 @@ import (
 
 	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/errs"
 )
@@ -90,5 +89,5 @@ func (e *Exchange) handle(ctx context.IContext) interface{} {
 
 }
 func (e *Exchange) getQueueName(id string) string {
-	return fmt.Sprintf(e.queueFormatName, global.Def.PlatName, id)
+	return fmt.Sprintf(e.queueFormatName, id)
 }
