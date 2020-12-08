@@ -33,9 +33,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
-	middleware.AddMiddlewareHook(rpcmiddlewares, func(item middleware.Handler) {
-		p.Engine.Use(item.DispFunc())
-	})
+	p.Engine.Use(Middlewares.DispFunc()...)
 	p.addRouter(routers...)
 	return p
 }

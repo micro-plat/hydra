@@ -17,7 +17,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
 	s.engine.Use(middleware.Recovery().GinFunc())
-	s.engine.Use(middleware.GinServiceExistsCheck(s.engine).GinFunc())
 	s.engine.Use(middleware.Trace().GinFunc())     //跟踪信息
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
 	s.engine.Use(middleware.WhiteList().GinFunc()) //白名单控制
@@ -31,10 +30,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.APIKeyAuth().GinFunc())
 	s.engine.Use(middleware.RASAuth().GinFunc())
 	s.engine.Use(middleware.JwtAuth().GinFunc()) //jwt安全认证
-
-	middleware.AddMiddlewareHook(httpmiddlewares, func(item middleware.Handler) {
-		s.engine.Use(item.GinFunc())
-	})
+	s.engine.Use(Middlewares.GinFunc()...)
 
 	s.engine.Use(middleware.Render().GinFunc())    //响应渲染组件
 	s.engine.Use(middleware.JwtWriter().GinFunc()) //设置jwt回写

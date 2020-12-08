@@ -12,6 +12,7 @@ import (
 
 type imiddle interface {
 	Next()
+	Find(path string) bool
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数
@@ -56,9 +57,10 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
-			nctx := ctx.NewCtx(&ginCtx{Context: c}, tps[0])
+			rawCtx := &ginCtx{Context: c}
+			nctx := ctx.NewCtx(rawCtx, tps[0])
 			nctx.Meta().SetValue("__context_", c)
-			v = newMiddleContext(nctx, c, c.Request, c.Writer)
+			v = newMiddleContext(nctx, rawCtx, c.Request, c.Writer)
 			c.Set("__middle_context__", v)
 
 		}
@@ -78,11 +80,5 @@ func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 			c.Set("__middle_context__", v)
 		}
 		h(v.(IMiddleContext))
-	}
-}
-
-func AddMiddlewareHook(handlers []Handler, callback func(Handler)) {
-	for i := range handlers {
-		callback(handlers[i])
 	}
 }

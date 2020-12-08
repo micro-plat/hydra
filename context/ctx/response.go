@@ -320,6 +320,9 @@ func (c *response) GetFinalResponse() (int, string, string) {
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
 	if c.noneedWrite || c.asyncWrite == nil || c.ctx.Written() {
+		if c.final.status == 0 { //处理外部框架直接写入到流中，输出日志状态为0的问题
+			c.final.status = c.ctx.Status()
+		}
 		return
 	}
 	if err := c.asyncWrite(); err != nil {
