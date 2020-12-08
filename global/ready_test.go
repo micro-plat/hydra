@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 var lock sync.Mutex

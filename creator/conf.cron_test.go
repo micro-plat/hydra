@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/services"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_newCron(t *testing.T) {

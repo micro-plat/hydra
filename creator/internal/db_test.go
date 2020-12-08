@@ -6,7 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/db"
 	dbmysql "github.com/micro-plat/hydra/conf/vars/db/mysql"
 	dboracle "github.com/micro-plat/hydra/conf/vars/db/oracle"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestNewDB(t *testing.T) {

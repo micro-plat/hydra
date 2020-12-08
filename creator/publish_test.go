@@ -18,7 +18,7 @@ import (
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_conf_Pub(t *testing.T) {

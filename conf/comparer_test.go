@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/types"
 )

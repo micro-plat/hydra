@@ -3,7 +3,7 @@ package mqc
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )

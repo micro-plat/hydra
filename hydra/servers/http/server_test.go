@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/net"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/router"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestServer_addHttpRouters(t *testing.T) {

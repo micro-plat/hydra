@@ -3,7 +3,7 @@ package http
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestWithServerType(t *testing.T) {
