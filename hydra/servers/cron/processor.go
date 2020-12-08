@@ -194,7 +194,7 @@ func (s *Processor) handle(task *CronTask) error {
 		task.Counter.Increase()
 		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
-	if task.IsOnce() {
+	if task.IsImmediately() {
 		return nil
 	}
 	_, _, err := s.add(task)

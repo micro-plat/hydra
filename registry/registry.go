@@ -60,8 +60,25 @@ func Register(name string, builder IFactory) {
 	registries[name] = builder
 }
 
-//NewRegistry 根据协议地址创建注册中心
-func NewRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
+//CreateRegistry 创建新的的注册中心
+func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
+	proto, addrs, u, p, mt, err := Parse(address)
+	if err != nil {
+		return nil, err
+	}
+	resolver, ok := registries[proto]
+	if !ok {
+		return nil, fmt.Errorf("不支持的协议类型[%s]", proto)
+	}
+	return resolver.Create(Addrs(addrs...),
+		WithAuthCreds(u, p),
+		WithLogger(log),
+		WithDomain(global.Def.PlatName), WithMetadata(mt))
+
+}
+
+//GetRegistry 获取缓存的注册中心
+func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	proto, addrs, u, p, mt, err := Parse(address)
 	if err != nil {
 		return nil, err

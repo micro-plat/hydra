@@ -38,7 +38,7 @@ func Test_zookeeperFactory_Create(t *testing.T) {
 	log := logger.GetSession(apiconf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", conf.NewMeta()).GetRequestID())
 
 	for _, tt := range tests {
-		z, err := registry.NewRegistry(tt.addr, log)
+		z, err := registry.GetRegistry(tt.addr, log)
 		assert.Equal(t, tt.wantErr1, err != nil, tt.name)
 		if tt.wantErr1 {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)

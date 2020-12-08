@@ -24,7 +24,7 @@ type DLock struct {
 
 //NewLock 构建分布式锁
 func NewLock(lockName string, registryAddr string, l logger.ILogging) (lk *DLock, err error) {
-	r, err := registry.NewRegistry(registryAddr, l)
+	r, err := registry.CreateRegistry(registryAddr, l)
 	if err != nil {
 		return nil, err
 	}
@@ -126,6 +126,7 @@ func (d *DLock) Unlock() {
 	d.done = true
 	close(d.closeChan)
 	d.registry.Delete(d.path)
+	d.registry.Close()
 }
 
 func isMaster(path string, root string, cldrs []string) bool {

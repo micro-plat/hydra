@@ -112,7 +112,7 @@ func Test_body_GetRawBody(t *testing.T) {
 
 var value = `中文~!@#$%^&*()_+{}:"<>?=`
 
-func Test_body_GetRequestParams_MIMEXML(t *testing.T) {
+func Test_body_GetFullRaw_MIMEXML(t *testing.T) {
 
 	tests := []struct {
 		name        string
@@ -173,11 +173,11 @@ func Test_body_GetRequestParams_MIMEXML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, string(data), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
@@ -185,7 +185,7 @@ func Test_body_GetRequestParams_MIMEXML(t *testing.T) {
 
 }
 
-func Test_body_GetRequestParams_MIMEJSON(t *testing.T) {
+func Test_body_GetFullRaw_MIMEJSON(t *testing.T) {
 
 	tests := []struct {
 		name        string
@@ -244,11 +244,11 @@ func Test_body_GetRequestParams_MIMEJSON(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, string(bodyRaw), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
@@ -256,7 +256,7 @@ func Test_body_GetRequestParams_MIMEJSON(t *testing.T) {
 
 }
 
-func Test_body_GetRequestParams_MIMEYAML(t *testing.T) {
+func Test_body_GetFullRaw_MIMEYAML(t *testing.T) {
 
 	tests := []struct {
 		name        string
@@ -298,18 +298,18 @@ func Test_body_GetRequestParams_MIMEYAML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, string(bodyRaw), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
 	}
 }
 
-func Test_body_GetRequestParams_MIMEPlain(t *testing.T) {
+func Test_body_GetFullRaw_MIMEPlain(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -350,11 +350,11 @@ func Test_body_GetRequestParams_MIMEPlain(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, string(data), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
@@ -362,7 +362,7 @@ func Test_body_GetRequestParams_MIMEPlain(t *testing.T) {
 
 }
 
-func Test_body_GetRequestParams_MIMEHTML(t *testing.T) {
+func Test_body_GetFullRaw_MIMEHTML(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -403,11 +403,11 @@ func Test_body_GetRequestParams_MIMEHTML(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, string(data), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
@@ -415,7 +415,7 @@ func Test_body_GetRequestParams_MIMEHTML(t *testing.T) {
 
 }
 
-func Test_body_GetRequestParams_MIMEPOSTForm(t *testing.T) {
+func Test_body_GetFullRaw_MIMEPOSTForm(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -494,11 +494,11 @@ func Test_body_GetRequestParams_MIMEPOSTForm(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, body, string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")
@@ -510,7 +510,7 @@ func Test_body_GetRequestParams_MIMEPOSTForm(t *testing.T) {
 
 }
 
-func Test_body_GetRequestParams_MIMEMultipartPOSTForm(t *testing.T) {
+func Test_body_GetFullRaw_MIMEMultipartPOSTForm(t *testing.T) {
 	tests := []struct {
 		name     string
 		method   string
@@ -552,12 +552,12 @@ func Test_body_GetRequestParams_MIMEMultipartPOSTForm(t *testing.T) {
 		c.Request = r
 
 		w := ctx.NewBody(middleware.NewGinCtx(c), tt.encoding)
-		gotS, query, err := w.GetRequestParams()
+		gotS, query, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		s, _ := encoding.Encode(value, tt.encoding)
 		assert.Equal(t, "key="+url.QueryEscape(string(s)), string(gotS), tt.name)
 		assert.Equal(t, queryRaw, query, tt.name)
-		gotS2, query2, err := w.GetRequestParams()
+		gotS2, query2, err := w.GetFullRaw()
 		assert.Equal(t, nil, err, tt.name)
 		assert.Equal(t, gotS, gotS2, tt.name+"再次读取body")
 		assert.Equal(t, query, query2, tt.name+"再次读取body")

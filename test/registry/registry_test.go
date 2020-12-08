@@ -135,7 +135,7 @@ func TestNewRegistry(t *testing.T) {
 	log := logger.GetSession(serverConf.GetServerConf().GetServerName(), ctx.NewUser(&mocks.TestContxt{}, "", meta).GetRequestID())
 
 	for _, tt := range tests {
-		gotR, err := registry.NewRegistry(tt.args.address, log)
+		gotR, err := registry.GetRegistry(tt.args.address, log)
 		if tt.wantErr {
 			assert.Equal(t, tt.err, err.Error(), tt.name)
 		}

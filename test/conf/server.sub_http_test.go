@@ -23,7 +23,7 @@ import (
 )
 
 func newReady(t *testing.T, platName, sysName, serverType, clusterName string) (string, string, string, string, registry.IRegistry) {
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 	return platName, sysName, serverType, clusterName, rgst
 }

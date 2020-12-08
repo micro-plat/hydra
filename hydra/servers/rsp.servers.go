@@ -52,7 +52,7 @@ func (r *RspServers) Start() (err error) {
 	r.log.Info("初始化:", r.mpath)
 
 	//初始化注册中心
-	r.registry, err = registry.NewRegistry(r.registryAddr, r.log)
+	r.registry, err = registry.GetRegistry(r.registryAddr, r.log)
 	if err != nil {
 		err = fmt.Errorf("注册中心初始化失败 %w", err)
 		return

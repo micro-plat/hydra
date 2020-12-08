@@ -60,7 +60,7 @@ func TestTask_IsOnce(t *testing.T) {
 		{name: "4. Conf-TaskIsOnce-@now,对象执行次数判定", fields: task.NewTask("@now", "yyy"), want: true},
 	}
 	for _, tt := range tests {
-		got := tt.fields.IsOnce()
+		got := tt.fields.IsImmediately()
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
