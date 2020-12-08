@@ -42,9 +42,7 @@ func newWriter(path string, layout *Layout) (fa *writer, err error) {
 //Write 写入日志
 func (f *writer) Write(event *LogEvent) {
 	if event.IsClose() {
-		f.onceNotify.Do(func() {
-			close(f.notifyChan)
-		})
+		f.Close()
 		return
 	}
 	if f.Level > GetLevel(event.Level) {
@@ -59,17 +57,10 @@ func (f *writer) Write(event *LogEvent) {
 
 //Close 关闭当前appender
 func (f *writer) Close() {
-
-	//等待日志被关闭
-	select {
-	case <-f.notifyChan:
-	case <-time.After(time.Second):
-	}
-
-	f.lock.Lock()
-	defer f.lock.Unlock()
-	f.writer.WriteString("\n---------------------end-------------------------\n")
-	f.ticker.Stop()
+	f.onceNotify.Do(func() {
+		close(f.notifyChan)
+		f.ticker.Stop()
+	})
 }
 
 //writeTo 定时写入文件
@@ -77,16 +68,19 @@ func (f *writer) writeTo() {
 START:
 	for {
 		select {
-		case _, ok := <-f.ticker.C:
+		case <-f.notifyChan:
+			f.lock.Lock()
+			f.writer.WriteString("\n---------------------end-------------------------\n")
+			f.writer.Flush()
+			f.file.Close()
+			f.lock.Unlock()
+			break START
+		case <-f.ticker.C:
 			f.lock.Lock()
 			if err := f.writer.Flush(); err != nil {
 				SysLog.Error("file.write.err:", err)
 			}
 			f.lock.Unlock()
-			if !ok {
-				f.file.Close()
-				break START
-			}
 		}
 	}
 }

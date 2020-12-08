@@ -47,8 +47,8 @@ func (a *FileAppender) clean() {
 			for v := range writerChan {
 				w := v.Val.(*writer)
 				if time.Since(w.lastWrite) < 5*time.Minute {
-					w.Write(EndWriteEvent) //向日志发送结速写入事件
-					w.Close()              //等待所有日志被写入文件
+					w.Write(GetEndWriteEvent()) //向日志发送结速写入事件
+					w.Close()                   //等待所有日志被写入文件
 					a.writers.Remove(v.Key)
 				}
 			}
@@ -61,7 +61,7 @@ func (a *FileAppender) clean() {
 func (a *FileAppender) Close() error {
 	close(a.done)
 	a.writers.RemoveIterCb(func(key string, w interface{}) bool {
-		w.(*writer).Write(EndWriteEvent)
+		w.(*writer).Write(GetEndWriteEvent())
 		w.(*writer).Close()
 		return true
 	})

@@ -18,13 +18,12 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 		p.server.Shutdown()
 	}
 
+	if p.trace != nil {
+		p.trace.Stop()
+	}
 	//关闭各服务
 	if err := services.Def.Close(); err != nil {
 		global.Def.Log().Error("关闭服务失败:", err)
-	}
-
-	if p.trace != nil {
-		p.trace.Stop()
 	}
 
 	//通知关闭各组件
@@ -32,6 +31,5 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 
 	global.Def.Log().Info(global.AppName, "已安全退出")
 
-	//关闭日志
 	return nil
 }
