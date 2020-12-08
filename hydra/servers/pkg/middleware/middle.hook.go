@@ -5,8 +5,10 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 )
 
+//Handlers 中间件处理函数
 type Handlers []Handler
 
+//DispFunc 返回DispFunc
 func (c Handlers) DispFunc() []dispatcher.HandlerFunc {
 	list := make([]dispatcher.HandlerFunc, 0, len(c))
 	for _, item := range c {
@@ -15,6 +17,7 @@ func (c Handlers) DispFunc() []dispatcher.HandlerFunc {
 	return list
 }
 
+//GinFunc 返回GinFunc
 func (c Handlers) GinFunc() []gin.HandlerFunc {
 	list := make([]gin.HandlerFunc, 0, len(c))
 	for _, item := range c {
@@ -22,6 +25,8 @@ func (c Handlers) GinFunc() []gin.HandlerFunc {
 	}
 	return list
 }
-func (c Handlers) Use(handler Handler) {
-	c = append(c, handler)
+
+//Add 添加组件
+func (c Handlers) Add(handler ...Handler) {
+	c = append(c, handler...)
 }

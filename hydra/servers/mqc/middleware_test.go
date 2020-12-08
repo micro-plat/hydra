@@ -19,10 +19,10 @@ func TestUse(t *testing.T) {
 		{name: "3. mqc服务中间件添加-多个中间件", handler: []middleware.Handler{func(middleware.IMiddleContext) {}, func(middleware.IMiddleContext) {}}, wantLen: 2},
 	}
 	for _, tt := range tests {
-		mqcmiddlewares = make([]middleware.Handler, 0)
+		Middlewares = make([]middleware.Handler, 0)
 		for _, h := range tt.handler {
-			Use(h)
+			Middlewares.Add(h)
 		}
-		assert.Equalf(t, tt.wantLen, len(mqcmiddlewares), tt.name)
+		assert.Equalf(t, tt.wantLen, len(Middlewares), tt.name)
 	}
 }

@@ -29,7 +29,6 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p.Engine.Use(middleware.Recovery().DispFunc(RPC))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
-	p.Engine.Use(middleware.DispServiceExistsCheck(p.Engine).DispFunc())
 
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
