@@ -41,7 +41,7 @@ type Exchange struct {
 func NewExchange() *Exchange {
 	return &Exchange{
 		uuid:            cmap.New(8),
-		queueFormatName: "%s:ws:exchange:%s",
+		queueFormatName: "ws:exchange:%s",
 		service:         "/ws/handle",
 	}
 }
