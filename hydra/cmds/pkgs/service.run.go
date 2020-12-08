@@ -6,6 +6,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/rlog"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/logger"
 	"github.com/urfave/cli"
 )
 
@@ -18,6 +19,7 @@ func (p *ServiceApp) run() (err error) {
 		return nil
 	}
 	//2. 注册远程日志组件
+	logger.AddWriteThread(99)
 	if err := rlog.Registry(global.Def.PlatName, global.Def.RegistryAddr); err != nil {
 		logs.Log.Error(err)
 		return nil

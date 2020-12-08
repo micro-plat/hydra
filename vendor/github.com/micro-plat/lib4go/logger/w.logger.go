@@ -285,7 +285,7 @@ func Close() {
 	done = true
 	close(loggerEventChan)
 	<-closeChan
-	logNow(EndWriteEvent)
+	logNow(GetEndWriteEvent())
 	defWriter.Close()
 }
 
