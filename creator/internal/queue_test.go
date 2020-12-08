@@ -8,7 +8,7 @@ import (
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
 	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/types"
 )
 

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 
 	"github.com/urfave/cli"
 )
@@ -72,7 +72,7 @@ func Test_ucli_GetFlags(t *testing.T) {
 		c := &ucli{
 			flags: tt.fields.flags,
 		}
-		assert.Equalf(t, tt.want, c.GetFlags(), tt.name)
+		assert.Equal(t, tt.want, c.GetFlags(), tt.name)
 	}
 }
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 

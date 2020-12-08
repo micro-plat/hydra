@@ -3,7 +3,7 @@ package global
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_messageQueueConf_GetQueueName(t *testing.T) {

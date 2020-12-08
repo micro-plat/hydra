@@ -16,7 +16,7 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/conf/vars/rpc"
 	"github.com/micro-plat/hydra/creator/internal"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_vars_DB(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 // &Unit{Group: g, Path: path, Service: service, Actions: actions, Handle: h}

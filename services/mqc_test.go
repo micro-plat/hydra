@@ -11,7 +11,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_mqc_Subscribe(t *testing.T) {

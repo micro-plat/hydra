@@ -3,7 +3,7 @@ package http
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestWithServerType(t *testing.T) {
@@ -40,23 +40,5 @@ func TestWithTimeout(t *testing.T) {
 		assert.Equal(t, tt.readTimeout, o.readTimeout, tt.name)
 		assert.Equal(t, tt.writeTimeout, o.writeTimeout, tt.name)
 		assert.Equal(t, tt.readHeaderTimeout, o.readHeaderTimeout, tt.name)
-	}
-}
-
-func TestWithTLS(t *testing.T) {
-	tests := []struct {
-		name    string
-		tls     []string
-		wantTLS []string
-	}{
-		{name: "1. httpserver-设置空的TLS", tls: []string{}},
-		{name: "2. httpserver-设置错误的TLS", tls: []string{"pem"}},
-		{name: "3. httpserver-设置争取的TLS", tls: []string{"pem", "key"}, wantTLS: []string{"pem", "key"}},
-	}
-	for _, tt := range tests {
-		f := WithTLS(tt.tls)
-		o := &option{}
-		f(o)
-		assert.Equal(t, tt.wantTLS, o.tls, tt.name)
 	}
 }

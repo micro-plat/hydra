@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestCounter_Get(t *testing.T) {
