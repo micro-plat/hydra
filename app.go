@@ -47,7 +47,7 @@ func NewApp(opts ...Option) (m *MicroApp) {
 
 //Start 启动服务器
 func (m *MicroApp) Start() {
-	logger.Close()
+	defer logger.Close()
 	m.app = cli.New(cli.WithVersion(global.Version), cli.WithUsage(global.Usage))
 	m.app.Start()
 }
