@@ -130,7 +130,7 @@ func (w writeHandler) Write(p []byte) (n int, err error) {
 func Registry(platName string, addr string) error {
 
 	//初始化注册中心
-	registry, err := registry.NewRegistry(addr, global.Def.Log())
+	registry, err := registry.GetRegistry(addr, global.Def.Log())
 	if err != nil {
 		return err
 	}

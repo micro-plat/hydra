@@ -1,8 +1,6 @@
 package pkgs
 
 import (
-	"fmt"
-
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/service"
 	"github.com/micro-plat/hydra/services"
@@ -12,7 +10,7 @@ import (
 func (p *ServiceApp) Stop(s service.Service) (err error) {
 
 	//8. 关闭服务器释放所有资源
-	global.Def.Log().Info(global.AppName, fmt.Sprintf("正在退出..."))
+	global.Def.Log().Info(global.AppName, "正在退出...")
 
 	if p.server != nil {
 		//if !reflect.ValueOf(p.server).IsNil() {
@@ -22,10 +20,12 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 
 	//关闭各服务
 	if err := services.Def.Close(); err != nil {
-		global.Def.Log().Error("err:", err)
+		global.Def.Log().Error("关闭服务失败:", err)
 	}
 
-	p.trace.Stop()
+	if p.trace != nil {
+		p.trace.Stop()
+	}
 
 	//通知关闭各组件
 	global.Def.Close()

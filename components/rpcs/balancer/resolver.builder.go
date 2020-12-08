@@ -62,7 +62,7 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 	addresses := []string{addr}
 	//兼容直接传服务器ip来进行访问
 	if len(plat) > 0 {
-		regst, err := registry.NewRegistry(address, logging)
+		regst, err := registry.GetRegistry(address, logging)
 		if err != nil {
 			return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 		}
@@ -101,7 +101,7 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 
 		address, err := b.getGrpcAddress()
 		if err != nil {
-			b.logger.Errorf("getGrpcAddress:%+v", err)
+			b.logger.Errorf("获取grpc地址错误:%+v", err)
 			return
 		}
 		var needUpdate = false
@@ -194,7 +194,7 @@ func (b *ResolverBuilder) getRealPath() (string, error) {
 	//精确路径没有找到  现在需要获取模糊匹配路径
 	sp := strings.Split(strings.Trim(b.service, "/"), "/")
 	if len(sp) == 0 {
-		return "", fmt.Errorf("service服务路径错误, %s", b.service)
+		return "", fmt.Errorf("service服务路径错误：%s", b.service)
 	}
 
 	//递归获取真实的路径
@@ -204,7 +204,7 @@ func (b *ResolverBuilder) getRealPath() (string, error) {
 	}
 
 	if !ok {
-		return "", fmt.Errorf("没有找到有效的服务路径, %s", b.service)
+		return "", fmt.Errorf("未找到服务提供程序：%s", b.service)
 	}
 
 	rpath = registry.Join(path, "providers")

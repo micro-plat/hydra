@@ -6,7 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/pkgs/metrics"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/net"
 )
 
 //Metric 服务器处理能力统计
@@ -36,7 +36,7 @@ func (m *Metric) onceDo(ctx IMiddleContext) {
 		}
 
 		m.currentRegistry = metrics.NewRegistry()
-		m.ip = global.LocalIP() // net.GetLocalIPAddress()
+		m.ip = net.GetLocalIPAddress()
 		m.logger = logger.New("metric")
 
 		//2. 创建上报服务
@@ -94,7 +94,6 @@ func (m *Metric) Handle() Handler {
 		statusCode, _, _ := ctx.Response().GetRawResponse()
 		responseName := metrics.MakeName(ctx.APPConf().GetServerConf().GetServerType()+".server.response", metrics.METER, "server", ctx.APPConf().GetServerConf().GetServerName(), "host", m.ip,
 			"url", url, "status", fmt.Sprintf("%d", statusCode)) //完成数
-
 		//7. 对服务处理结果的状态码进行上报
 		metrics.GetOrRegisterMeter(responseName, m.currentRegistry).Mark(1)
 	}

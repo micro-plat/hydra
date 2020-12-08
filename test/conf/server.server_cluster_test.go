@@ -18,7 +18,7 @@ import (
 func Test_NewCluster(t *testing.T) {
 
 	//初始化注册中心
-	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	clusterName := "cluster1"
@@ -87,7 +87,7 @@ func Test_NewCluster(t *testing.T) {
 }
 
 func TestCluster_Current(t *testing.T) {
-	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	clusterName := "cluster2"
@@ -111,7 +111,7 @@ func TestCluster_Current(t *testing.T) {
 
 func TestCluster_GetServerType(t *testing.T) {
 	clusterName := "cluster3"
-	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	pub := server.NewServerPub("platName", "sysName", "serverType", clusterName)
@@ -139,7 +139,7 @@ func TestCluster_GetServerType(t *testing.T) {
 func TestCluster_Next(t *testing.T) {
 
 	clusterName := "cluster4"
-	rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "初始化集群对象,获取注册中心对象失败")
 
 	pub := server.NewServerPub("platName", "sysName", "serverType", clusterName)

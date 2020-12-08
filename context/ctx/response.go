@@ -192,7 +192,7 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			return context.PLAINF, text
 		}
 
-	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map {
+	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map || vtpKind == reflect.Slice || vtpKind == reflect.Array {
 		return context.JSONF, c.getStringByCP(context.JSONF, vtpKind, content)
 	}
 	return context.PLAINF, c.getStringByCP(context.JSONF, vtpKind, content)

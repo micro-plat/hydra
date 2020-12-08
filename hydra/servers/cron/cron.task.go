@@ -29,13 +29,13 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 		form:    make(map[string]interface{}),
 		header:  map[string]string{"Client-IP": "127.0.0.1"},
 	}
-	if t.IsOnce() {
+	if t.IsImmediately() {
 		return r, nil
 	}
 
 	r.schedule, err = cron.ParseStandard(t.Cron)
 	if err != nil {
-		return r, fmt.Errorf("%s的cron表达式(%s)配置有误", t.Service, t.Cron)
+		return r, fmt.Errorf("%s的cron表达式(%s)配置有误 %w", t.Service, t.Cron, err)
 	}
 	return r, nil
 }

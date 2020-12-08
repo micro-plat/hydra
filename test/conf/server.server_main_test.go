@@ -157,7 +157,7 @@ func TestMainConf_GetRegistry(t *testing.T) {
 		confM.Conf().Pub(platName, systemName, clusterName, "lm://.", true)
 		mainConf, err := server.NewServerConf(confM.PlatName, systemName, global.API, confM.ClusterName, confM.Registry)
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
-		rgst, err := registry.NewRegistry(tt.address, global.Def.Log())
+		rgst, err := registry.GetRegistry(tt.address, global.Def.Log())
 		assert.Equal(t, true, err == nil, tt.name+",err")
 		assert.Equal(t, rgst, mainConf.GetRegistry(), tt.name+"Started")
 	}

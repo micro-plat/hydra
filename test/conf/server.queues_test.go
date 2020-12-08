@@ -32,9 +32,9 @@ func TestNewQueues(t *testing.T) {
 		{name: "2. Conf-NewQueues-初始化空对象,如参nil", args: nil, want: &queue.Queues{Queues: make([]*queue.Queue, 0)}},
 		{name: "3. Conf-NewQueues-初始化单个队列对象", args: []*queue.Queue{queue.NewQueue("queue1", "service1")}, want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueue("queue1", "service1")}}},
 		{name: "4. Conf-NewQueues-初始化多个队列对象", args: []*queue.Queue{queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2")}, want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueue("queue1", "service1"), queue.NewQueue("queue2", "service2")}}},
-		{name: "5. Conf-NewQueues-初始化单个队列对象", args: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1)}, want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1)}}},
-		{name: "6. Conf-NewQueues-初始化多个队列对象", args: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueueByConcurrency("queue2", "service2", 1)},
-			want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueueByConcurrency("queue2", "service2", 1)}}},
+		{name: "5. Conf-NewQueues-初始化单个队列对象", args: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1))}, want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1))}}},
+		{name: "6. Conf-NewQueues-初始化多个队列对象", args: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1)), queue.NewQueue("queue2", "service2", queue.WithConcurrency(1))},
+			want: &queue.Queues{Queues: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1)), queue.NewQueue("queue2", "service2", queue.WithConcurrency(1))}}},
 	}
 	for _, tt := range tests {
 		got := queue.NewQueues(tt.args...)
@@ -52,8 +52,8 @@ func TestQueues_Append(t *testing.T) {
 		{name: "1. Conf-QueuesAppend-添加空对象", fields: queue.NewEmptyQueues(), args: []*queue.Queue{}, want: queue.NewEmptyQueues()},
 		{name: "2. Conf-QueuesAppend-添加nil对象", fields: queue.NewEmptyQueues(), args: nil, want: queue.NewEmptyQueues()},
 		{name: "3. Conf-QueuesAppend-添加单个队列对象", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueue("queue1", "service1")}, want: queue.NewQueues(queue.NewQueue("queue1", "service1"))},
-		{name: "4. Conf-QueuesAppend-添加单个队列对象c", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1)}, want: queue.NewQueues(queue.NewQueueByConcurrency("queue1", "service1", 1))},
-		{name: "5. Conf-QueuesAppend-添加多个个队列对象", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueue("queue2", "service2")}, want: queue.NewQueues(queue.NewQueueByConcurrency("queue1", "service1", 1), queue.NewQueue("queue2", "service2"))},
+		{name: "4. Conf-QueuesAppend-添加单个队列对象c", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1))}, want: queue.NewQueues(queue.NewQueue("queue1", "service1", queue.WithConcurrency(1)))},
+		{name: "5. Conf-QueuesAppend-添加多个个队列对象", fields: queue.NewEmptyQueues(), args: []*queue.Queue{queue.NewQueue("queue1", "service1", queue.WithConcurrency(1)), queue.NewQueue("queue2", "service2")}, want: queue.NewQueues(queue.NewQueue("queue1", "service1", queue.WithConcurrency(1)), queue.NewQueue("queue2", "service2"))},
 	}
 	for _, tt := range tests {
 		got, _ := tt.fields.Append(tt.args...)

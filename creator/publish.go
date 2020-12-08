@@ -33,7 +33,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	// }
 
 	//创建注册中心，根据注册中心提供的接口进行配置发布
-	r, err := registry.NewRegistry(registryAddr, global.Def.Log())
+	r, err := registry.GetRegistry(registryAddr, global.Def.Log())
 	if err != nil {
 		return err
 	}

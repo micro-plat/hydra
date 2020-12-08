@@ -76,11 +76,11 @@ func init() {
 			}
 			ctx.Log().Info("api-static请求结果:", content)
 
-			if err = queueObj.Push("queue1", `{"mqvc":"queue1-succ"}`); err != nil {
+			if err = queueObj.Send("queue1", `{"mqvc":"queue1-succ"}`); err != nil {
 				ctx.Log().Errorf("发送queue1队列消息异常,err:%v", err)
 			}
 
-			if err = queueObj.Push("queue2", `{"mqvc":"queue2-succ"}`); err != nil {
+			if err = queueObj.Send("queue2", `{"mqvc":"queue2-succ"}`); err != nil {
 				ctx.Log().Errorf("发送queue2队列消息异常, err:%v", err)
 			}
 

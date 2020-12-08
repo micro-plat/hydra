@@ -17,7 +17,7 @@ func Test_cronSub_GetCRONTaskConf(t *testing.T) {
 	sysName := "sysName1"
 	serverType := global.CRON
 	clusterName := "cluster1"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	var nilTask *task.Tasks

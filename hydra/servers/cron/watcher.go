@@ -24,6 +24,7 @@ START:
 	watcher := cluster.Watch()
 	notify := watcher.Notify()
 
+	unavailableCount := 0
 	//循环监控集群变化
 LOOP:
 	for {
@@ -38,7 +39,11 @@ LOOP:
 				continue
 			}
 			if !cluster.Current().IsAvailable() {
-				w.log.Error("当前集群节点不可用")
+				unavailableCount++
+				time.Sleep(500 * time.Millisecond)
+				if unavailableCount >= 3 {
+					w.log.Warn("当前集群节点不可用")
+				}
 				continue
 			}
 
@@ -49,6 +54,7 @@ LOOP:
 					continue
 				}
 				if ok {
+					unavailableCount = 0
 					w.update("run-mode", "master")
 					w.log.Debugf("this cron server is started as master")
 				}
@@ -60,9 +66,11 @@ LOOP:
 				continue
 			}
 			if ok {
+				unavailableCount = 0
 				w.update("run-mode", "slave")
 				w.log.Debugf("this cron server is started as slave")
 			}
+
 		}
 	}
 }

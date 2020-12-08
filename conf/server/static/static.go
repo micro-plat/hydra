@@ -31,7 +31,7 @@ type Static struct {
 	Prefix    string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
 	Exts      []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
 	Exclude   []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
-	FirstPage string              `json:"first-page,omitempty" valid:"ascii" toml:"first-page,omitempty"`
+	HomePage  string              `json:"homePage ,omitempty" valid:"ascii" toml:"homePage,omitempty"`
 	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
 	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
 	FileMap   map[string]FileInfo `json:"-"`
@@ -61,22 +61,19 @@ func (s *Static) AllowRequest(m string) bool {
 //GetConf 设置static
 func GetConf(cnf conf.IServerConf) (*Static, error) {
 	//设置静态文件路由
-	static := Static{
-		FileMap: map[string]FileInfo{},
-	}
-	_, err := cnf.GetSubObject(TypeNodeName, &static)
+	static := newStatic()
+	_, err := cnf.GetSubObject(TypeNodeName, static)
 	if err == conf.ErrNoSetting {
 		static.Disable = true
-		return &static, nil
+		return static, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
-
 	if static.Exts == nil {
 		static.Exts = []string{}
 	}
-	if b, err := govalidator.ValidateStruct(&static); !b {
+	if b, err := govalidator.ValidateStruct(static); !b {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
@@ -84,7 +81,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
 	static.RereshData()
-	return &static, nil
+	return static, nil
 }
 
 var waitRemoveDir = make([]string, 0, 1)

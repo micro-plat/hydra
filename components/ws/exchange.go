@@ -52,7 +52,7 @@ func (e *Exchange) Unsubscribe(uuid string) {
 
 //Notify 消息通知
 func (e *Exchange) Notify(name string, msg string) error {
-	hydra.C.Queue().GetRegularQueue().Push(e.getQueueName(name), msg)
+	hydra.C.Queue().GetRegularQueue().Send(e.getQueueName(name), msg)
 	return nil
 }
 

@@ -81,7 +81,7 @@ func Test_conf_Pub(t *testing.T) {
 		err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, tt.args.cover)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err1")
 
-		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+		rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 		assert.Equal(t, true, err == nil, tt.name+",err2")
 		if !tt.isExsit || tt.args.cover {
 			for tp, subs := range c.data {
@@ -147,7 +147,7 @@ func Test_conf_Pub1(t *testing.T) {
 	data := map[string]string{
 		"/platname3/systemname3/api/clustername3/conf":                `{"address":":8585","status":"start"}`,
 		"/platname3/systemname3/api/clustername3/conf/acl/white.list": `{"disable":true}`,
-		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"first-page":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
+		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"homePage":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
 		"/platname3/var/http/httpclient":                              `{"connectionTimeout":10,"requestTimeout":10,"certs":null,"ca":"","proxy":"","keepAlive":true,"trace":false}`,
 		"/platname3/var/rpc/rpcclinent":                               `{"connectionTimeout":20,"log":"","sortPrefix":"","tls":null,"balancer":"localfirst"}`,
 	}
@@ -169,7 +169,7 @@ func Test_conf_Pub1(t *testing.T) {
 	for _, tt := range tests {
 		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
 		assert.Equal(t, tt.wantErr, err == nil, "发布异常", err)
-		r, err := registry.NewRegistry(tt.regstType, global.Def.Log())
+		r, err := registry.GetRegistry(tt.regstType, global.Def.Log())
 		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
 		err = checkData(r, registry.Join("platname3"), data)
 		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
@@ -224,7 +224,7 @@ func Test_publish(t *testing.T) {
 		{name: "4. 实体对象,覆盖数据", path: "/path/x4/y4", v: `{"testdata":"4"}`, isExsit: true, cover: true, wantErr: false},
 	}
 	for _, tt := range tests {
-		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+		rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 		assert.Equal(t, true, err == nil, "注册中心初始化失败")
 		if tt.isExsit {
 			err := rgt.CreatePersistentNode(tt.path, "{}")
@@ -259,7 +259,7 @@ func Test_deleteAll(t *testing.T) {
 		{name: "3. 多级节点存在,删除所有节点", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, wantErr: false},
 	}
 	for _, tt := range tests {
-		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+		rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 		assert.Equal(t, true, err == nil, "注册中心初始化失败")
 		for _, str := range tt.subList {
 			rgt.CreatePersistentNode(str, "{}")
@@ -286,7 +286,7 @@ func Test_getAllPath(t *testing.T) {
 		{name: "3. 有多级子节点节点,获取所有的路径", path: "/path1", subList: []string{"/path1/cx1", "/path1/cx2", "/path1/cx1/cc", "/path1/cx1/cc/xx"}, want: []string{"/path1/cx1/cc/xx", "/path1/cx1/cc", "/path1/cx1", "/path1/cx2", "/path1"}, wantErr: false},
 	}
 	for _, tt := range tests {
-		rgt, err := registry.NewRegistry("lm://.", global.Def.Log())
+		rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
 		assert.Equal(t, true, err == nil, "注册中心初始化失败")
 		for _, str := range tt.subList {
 			rgt.CreatePersistentNode(str, "{}")

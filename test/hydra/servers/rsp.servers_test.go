@@ -95,7 +95,7 @@ func TestRspServers_Start(t *testing.T) {
 
 		//注册中心节点值发生变化
 		path := fmt.Sprintf("/servershydra_test/%s/%s/serv_test_go/conf", tt.serverName, tt.sysType)
-		registry, err := registry.NewRegistry(registryAddr, logger.New("hydra"))
+		registry, err := registry.GetRegistry(registryAddr, logger.New("hydra"))
 		assert.Equalf(t, false, err != nil, tt.name)
 
 		err = registry.Update(path, fmt.Sprintf(`{"status":"start","addr":"%s"}`, tt.addrs))

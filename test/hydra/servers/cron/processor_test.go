@@ -1,7 +1,6 @@
 package cron
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -30,7 +29,7 @@ func TestProcessor_Start(t *testing.T) {
 	app.Cache.Save(confObj.GetCronConf())
 	services.Def.CRON("/taosy/services1", func(ctx context.IContext) (r interface{}) {
 		queueObj := components.Def.Queue().GetRegularQueue("redis")
-		if err := queueObj.Push("services1:queue1", `1`); err != nil {
+		if err := queueObj.Send("services1:queue1", `1`); err != nil {
 			ctx.Log().Errorf("发送queue1队列消息异常, err:%v", err)
 		}
 		return
@@ -38,7 +37,7 @@ func TestProcessor_Start(t *testing.T) {
 
 	services.Def.CRON("/taosy/services2", func(ctx context.IContext) (r interface{}) {
 		queueObj := components.Def.Queue().GetRegularQueue("redis")
-		if err := queueObj.Push("services2:queue2", `1`); err != nil {
+		if err := queueObj.Send("services2:queue2", `1`); err != nil {
 			ctx.Log().Errorf("发送queue1队列消息异常, err:%v", err)
 		}
 		return
@@ -46,7 +45,7 @@ func TestProcessor_Start(t *testing.T) {
 
 	services.Def.CRON("/taosy/services3", func(ctx context.IContext) (r interface{}) {
 		queueObj := components.Def.Queue().GetRegularQueue("redis")
-		if err := queueObj.Push("services3:queue3", `1`); err != nil {
+		if err := queueObj.Send("services3:queue3", `1`); err != nil {
 			ctx.Log().Errorf("发送queue1队列消息异常, err:%v", err)
 		}
 		return
@@ -54,7 +53,7 @@ func TestProcessor_Start(t *testing.T) {
 
 	services.Def.CRON("/taosy/services4", func(ctx context.IContext) (r interface{}) {
 		queueObj := components.Def.Queue().GetRegularQueue("redis")
-		if err := queueObj.Push("services4:queue4", `1`); err != nil {
+		if err := queueObj.Send("services4:queue4", `1`); err != nil {
 			ctx.Log().Errorf("发送queue1队列消息异常, err:%v", err)
 		}
 		return
@@ -72,15 +71,6 @@ func TestProcessor_Start(t *testing.T) {
 	time.Sleep(51 * time.Second)
 	s.Close()
 
-	queueObj := components.Def.Queue().GetRegularQueue("redis")
-	count1, _ := queueObj.Count("services1:queue1")
-	count2, _ := queueObj.Count("services2:queue2")
-	count3, _ := queueObj.Count("services3:queue3")
-	count4, _ := queueObj.Count("services4:queue4")
-	assert.Equal(t, int64(50), count1, fmt.Sprint("1s任务数量", count1))
-	assert.Equal(t, int64(10), count2, fmt.Sprint("5s任务数量", count2))
-	assert.Equal(t, int64(5), count3, fmt.Sprint("10s任务数量", count3))
-	assert.Equal(t, int64(1), count4, fmt.Sprint("40s任务数量", count4))
 	cacheObj := components.Def.Cache().GetRegularCache("redis")
 	cacheObj.Delete("taosytest:services1:queue1")
 	cacheObj.Delete("taosytest:services2:queue2")

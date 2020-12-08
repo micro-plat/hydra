@@ -46,6 +46,8 @@ func NewProcessor() (p *Processor) {
 	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
+	p.Engine.Use(middleware.DispServiceExistsCheck(p.Engine).DispFunc())
+
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 
 	middleware.AddMiddlewareHook(cronmiddlewares, func(item middleware.Handler) {
@@ -192,7 +194,7 @@ func (s *Processor) handle(task *CronTask) error {
 		task.Counter.Increase()
 		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
-	if task.IsOnce() {
+	if task.IsImmediately() {
 		return nil
 	}
 	_, _, err := s.add(task)

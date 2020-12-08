@@ -25,7 +25,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/conf/vars"
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -38,7 +38,7 @@ func TestNewEmptyServerConf(t *testing.T) {
 	sysName := "sysName1"
 	serverType := global.API
 	clusterName := "cluster1"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -131,7 +131,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	sysName := "sysName2"
 	serverType := global.API
 	clusterName := "cluster2"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -147,7 +147,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	confN.Ras(ras.WithDisable(), ras.WithAuths(ras.New("service1", ras.WithRequest("/t1/t2"), ras.WithRequired("taofield"), ras.WithUIDAlias("userID"), ras.WithTimestampAlias("timespan"), ras.WithSignAlias("signname"),
 		ras.WithCheckTimestamp(false), ras.WithDecryptName("duser"), ras.WithParam("key1", "v1"), ras.WithParam("key2", "v2"), ras.WithAuthDisable())))
 	//confN.Render(render.WithDisable(), render.WithTmplt("/path1", "success", render.WithStatus("500"), render.WithContentType("tpltm1")))
-	confN.Static(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+	confN.Static(static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
 	confN.WhiteList(whitelist.WithIPList(whitelist.NewIPList([]string{"/t1/t2/*"}, []string{"192.168.0.101"}...)))
 	confM.Conf().Pub(platName, sysName, clusterName, "lm://.", true)
@@ -182,7 +182,7 @@ func TestNewAPIServerConf(t *testing.T) {
 	assert.Equal(t, metricC, metricConf, "测试conf初始化,判断metric节点对象")
 
 	staticConf, err := gotS.GetStaticConf()
-	staticC := static.New(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+	staticC := static.New(static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 		static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取static对象失败")
 	assert.Equal(t, staticC, staticConf, "测试conf初始化,判断static节点对象")
@@ -256,7 +256,7 @@ func TestNewRPCServerConf(t *testing.T) {
 	sysName := "sysName3"
 	serverType := global.RPC
 	clusterName := "cluster3"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -282,7 +282,7 @@ func TestNewMQCServerConf(t *testing.T) {
 	sysName := "sysName4"
 	serverType := global.MQC
 	clusterName := "cluster4"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -316,7 +316,7 @@ func TestNewCRONServerConf(t *testing.T) {
 	sysName := "sysName5"
 	serverType := global.CRON
 	clusterName := "cluster5"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)
@@ -348,7 +348,7 @@ func TestNewVARServerConf(t *testing.T) {
 	sysName := "sysName6"
 	serverType := global.MQC
 	clusterName := "cluster6"
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 
 	confM := mocks.NewConfBy(platName, clusterName)

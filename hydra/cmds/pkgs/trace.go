@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
-	"runtime/trace"
 	"strconv"
 	"strings"
 	"time"
@@ -59,23 +57,12 @@ func (w *webTrace) Start() error {
 }
 
 func startServer(tracePort string, errChan chan error) {
-	f, err := os.Create("trace.out")
-	if err != nil {
-		errChan <- fmt.Errorf("启动pprof，创建监控输出文件错误：%w", err)
-		return
-	}
-	defer f.Close()
-	err = trace.Start(f)
-	if err != nil {
-		errChan <- fmt.Errorf("启动pprof，trace.Start错误：%w", err)
-		return
-	}
-	defer trace.Stop()
+
 	if tracePort == "" {
 		tracePort = "19999"
 	}
 
-	_, err = strconv.ParseInt(tracePort, 10, 32)
+	_, err := strconv.ParseInt(tracePort, 10, 32)
 	if err != nil {
 		errChan <- fmt.Errorf("参数：traceport/tp错误：%w", err)
 		return

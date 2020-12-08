@@ -23,7 +23,7 @@ import (
 )
 
 func newReady(t *testing.T, platName, sysName, serverType, clusterName string) (string, string, string, string, registry.IRegistry) {
-	rgst, err := registry.NewRegistry("lm://.", global.Def.Log())
+	rgst, err := registry.GetRegistry("lm://.", global.Def.Log())
 	assert.Equal(t, true, err == nil, "测试conf初始化,获取注册中心对象失败")
 	return platName, sysName, serverType, clusterName, rgst
 }
@@ -129,11 +129,11 @@ func Test_httpSub_GetStaticConf(t *testing.T) {
 		wantConf *static.Static
 	}{
 		{name: "1. Conf-HttpSubGetStaticConf-不设置static节点", opts: []static.Option{}, wantErr: true, wantConf: &static.Static{FileMap: map[string]static.FileInfo{}, Disable: true}},
-		{name: "2. Conf-HttpSubGetStaticConf-设置错误的static节点", opts: []static.Option{static.WithRoot("错误的数据"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+		{name: "2. Conf-HttpSubGetStaticConf-设置错误的static节点", opts: []static.Option{static.WithRoot("错误的数据"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 			static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip")}, wantErr: false, wantConf: nilstatic},
-		{name: "3. Conf-HttpSubGetStaticConf-设置正确的static节点", opts: []static.Option{static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+		{name: "3. Conf-HttpSubGetStaticConf-设置正确的static节点", opts: []static.Option{static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 			static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip")}, wantErr: true,
-			wantConf: static.New(static.WithRoot("./test"), static.WithFirstPage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
+			wantConf: static.New(static.WithRoot("./test"), static.WithHomePage("index1.html"), static.WithRewriters("/", "indextest.htm", "defaulttest.html"),
 				static.WithExts(".htm"), static.WithArchive("testsss"), static.AppendExts(".js"), static.WithPrefix("ssss"), static.WithDisable(), static.WithExclude("/views/", ".exe", ".so", ".zip"))},
 	}
 

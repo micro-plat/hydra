@@ -9,7 +9,7 @@ import (
 
 //NewChildWatcher 构建值监控,监控指定路径的值变化
 func NewChildWatcher(registryAddr string, path []string, l logger.ILogging) (IChildWatcher, error) {
-	r, err := registry.NewRegistry(registryAddr, l)
+	r, err := registry.GetRegistry(registryAddr, l)
 	if err != nil {
 		return nil, err
 	}

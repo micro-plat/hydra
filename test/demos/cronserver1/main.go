@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra"
+	confqueue "github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/context"
@@ -20,16 +21,17 @@ var app = hydra.NewApp(
 
 func main() {
 
-	const redisServer = "192.168.0.101"
+	const redisServer = "192.168.5.79:6379"
 
 	hydra.Conf.Vars().Redis("0.101", redis.New(nil, redis.WithAddrs(redisServer)))
 	hydra.Conf.Vars().Queue().Redis("mqcqueue", queueredis.New(queueredis.WithConfigName("0.101")))
-	hydra.Conf.MQC("redis://mqcqueue")
+	hydra.Conf.MQC("redis://mqcqueue").Queue(confqueue.NewQueue("service:queue6", "/testmqc/proc6"))
 	hydra.Conf.API(":59001")
 
 	app.CRON("/testcron/proc1", &cronService{}, "@every 10s")
 	app.CRON("/testcron/proc2", func(ctx context.IContext) interface{} {
 		fmt.Println("ONCE---")
+
 		return nil
 	}, "@once")
 	app.CRON("/testcron/proc3", func(ctx context.IContext) interface{} {
@@ -58,7 +60,7 @@ func request(ctx context.IContext) (r interface{}) {
 
 	queueClient := hydra.C.Queue().GetRegularQueue()
 	data := fmt.Sprintf(`{"name":"%d"}`, time.Now().Unix())
-	queueClient.Push(fmt.Sprintf("service:%s", queueName), data)
+	queueClient.Send(fmt.Sprintf("service:%s", queueName), data)
 
 	return data
 }

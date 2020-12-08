@@ -63,7 +63,7 @@ func NewConfBy(platName, clusterName string, addr ...string) *SConf {
 
 	c.IConf = creator.NewByLoader(c.getRouter)
 	var err error
-	c.Registry, err = registry.NewRegistry(c.registryAddr, global.Def.Log())
+	c.Registry, err = registry.GetRegistry(c.registryAddr, global.Def.Log())
 	if err != nil {
 		panic(err)
 	}

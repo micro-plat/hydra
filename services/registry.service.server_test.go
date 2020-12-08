@@ -150,6 +150,6 @@ func Test_serverServices_Register(t *testing.T) {
 	assert.Equal(t, 10, len(r.Routers), "ws的services数量")
 	r, _ = RPC.GetRouters()
 	assert.Equal(t, 10, len(r.Routers), "rpc的services数量")
-	assert.Equal(t, 10, len(CRON.tasks.Tasks), "cron数量")
-	assert.Equal(t, 4, len(MQC.queues.Queues), "MQC数量")
+	assert.Equal(t, 10, len(CRON.dynamicTasks.Tasks), "cron数量")
+	assert.Equal(t, 4, len(MQC.dynamicQueues.Queues), "MQC数量")
 }

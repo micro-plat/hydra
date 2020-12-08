@@ -234,7 +234,7 @@ func TestResponsive_Notify(t *testing.T) {
 	assert.Equal(t, false, tChange, "通知变动判断")
 
 	path := "/hydra/mqcserver/mqc/test/conf"
-	registry, err := registry.NewRegistry("lm://./", logger.New("hydra"))
+	registry, err := registry.GetRegistry("lm://./", logger.New("hydra"))
 	//节点进行值变更 进行启动
 	err = registry.Update(path, `{"stat11us":"start","addr":"redis://xxx"}`)
 	assert.Equalf(t, false, err != nil, "更新节点2")
