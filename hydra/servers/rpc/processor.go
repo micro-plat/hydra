@@ -32,7 +32,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
-	p.Engine.Use(Middlewares.DispFunc()...)
+	p.Engine.Use(middlewares.DispFunc()...)
 	p.addRouter(routers...)
 	return p
 }

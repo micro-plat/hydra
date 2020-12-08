@@ -8,6 +8,11 @@ import (
 //Handlers 中间件处理函数
 type Handlers []Handler
 
+//ICustomMiddleware 用户自定义组件
+type ICustomMiddleware interface {
+	Add(handler ...Handler)
+}
+
 //DispFunc 返回DispFunc
 func (c Handlers) DispFunc() []dispatcher.HandlerFunc {
 	list := make([]dispatcher.HandlerFunc, 0, len(c))
