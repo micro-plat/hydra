@@ -270,6 +270,7 @@ func (engine *Engine) Routes() (routes RoutesInfo) {
 	for _, tree := range engine.trees {
 		routes = iterate("", tree.method, routes, tree.root)
 	}
+
 	return routes
 }
 

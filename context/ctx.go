@@ -196,7 +196,7 @@ type IResponse interface {
 	Flush()
 
 	//GetHeaders 获取返回数据
-	GetHeaders() map[string][]string
+	GetHeaders() types.XMap
 }
 
 //IAuth 认证信息

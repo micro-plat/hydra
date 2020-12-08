@@ -4,13 +4,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-var httpmiddlewares []middleware.Handler
+var middlewares = make(middleware.Handlers, 0, 1)
 
-func init() {
-	httpmiddlewares = make([]middleware.Handler, 0)
-}
-
-//Use 添加对Http处理的中间件
-func Use(handler middleware.Handler) {
-	httpmiddlewares = append(httpmiddlewares, handler)
-}
+//Middlewares 用户自定义中间件
+var Middlewares middleware.ICustomMiddleware = middlewares

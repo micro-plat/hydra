@@ -54,7 +54,14 @@ func (g *ginCtx) GetHeaders() http.Header {
 func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
+func (g *ginCtx) Find(path string) bool {
+	return true
 
+}
+func (g *ginCtx) Next() {
+	g.Context.Next()
+
+}
 func (g *ginCtx) GetPostForm() url.Values {
 	g.load()
 	return g.Request.PostForm

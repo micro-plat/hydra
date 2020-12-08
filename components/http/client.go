@@ -1,8 +1,6 @@
 package http
 
 import (
-	"fmt"
-
 	"github.com/micro-plat/hydra/components/container"
 	"github.com/micro-plat/hydra/components/pkgs/http"
 	"github.com/micro-plat/hydra/conf"
@@ -34,7 +32,7 @@ func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 	name := types.GetStringByIndex(names, 0, httpconf.HttpNameNode)
 	obj, err := s.c.GetOrCreate(httpconf.HttpTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
 		if conf.IsEmpty() {
-			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", httpconf.HttpTypeNode, name)
+			return http.NewClient()
 		}
 		return http.NewClient(httpconf.WithRaw(conf.GetRaw()))
 	})

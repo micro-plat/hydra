@@ -64,6 +64,11 @@ func (c *Context) Next() {
 	}
 }
 
+//Find 查找指定的路由是否存在
+func (c *Context) Find(path string) bool {
+	return c.engine.Find(path)
+}
+
 // IsAborted returns true if the current context was aborted.
 func (c *Context) IsAborted() bool {
 	return c.index >= abortIndex
