@@ -103,20 +103,20 @@ func (h *Routers) Append(path string, service string, action []string, opts ...O
 }
 
 //Match 根据请求路径匹配指定的路由配置
-func (h *Routers) Match(path string, method string) *Router {
+func (h *Routers) Match(path string, method string) (*Router, error) {
 	if path == "" || method == http.MethodOptions || method == http.MethodHead {
 		return &Router{
 			Path:   path,
 			Action: []string{method},
-		}
+		}, nil
 	}
 
 	for _, r := range h.Routers {
 		if r.Path == path && types.StringContains(r.Action, method) {
-			return r
+			return r, nil
 		}
 	}
-	panic(fmt.Sprintf("未找到与[%s][%s]匹配的路由", path, method))
+	return nil, fmt.Errorf("未找到与[%s][%s]匹配的路由", path, method)
 }
 
 //GetPath 获取所有路由信息
