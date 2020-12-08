@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/task"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestNewServer(t *testing.T) {

@@ -21,6 +21,13 @@ var appName string = filepath.Base(os.Args[0])
 //EndWriteEvent 关闭日志事件
 var EndWriteEvent = &LogEvent{isCloseEvent: true, Level: SLevel_ALL}
 
+//GetEndWriteEvent 获取EndWriteEvent
+func GetEndWriteEvent() *LogEvent {
+	event := *EndWriteEvent
+	event.Now = time.Now()
+	return &event
+}
+
 func init() {
 	eventPool = &sync.Pool{
 		New: func() interface{} {

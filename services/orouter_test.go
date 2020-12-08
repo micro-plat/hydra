@@ -12,7 +12,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_pathRouter_Add_WithPanic(t *testing.T) {

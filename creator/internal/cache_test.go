@@ -3,7 +3,7 @@ package internal
 import (
 	"testing"
 
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"

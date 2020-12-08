@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/test/assert"
+	"github.com/micro-plat/lib4go/assert"
 )
 
 func TestUnitGroup_getPaths(t *testing.T) {
