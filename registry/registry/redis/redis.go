@@ -56,8 +56,19 @@ func NewRedis(c *internal.ClientConf) (*Redis, error) {
 
 //Exists 检查节点是否存在
 func (r *Redis) Exists(path string) (bool, error) {
-	e, err := r.client.Exists(swapKey(path)).Result()
-	return err == nil && e == 1, err
+	key := swapKey(path)
+	e, err := r.client.Exists(key).Result()
+	if err != nil {
+		return false, err
+	}
+	if err == nil && e == 1 {
+		return true, nil
+	}
+	npaths, err := r.client.Keys(key + ":*").Result()
+	if err != nil {
+		return false, err
+	}
+	return len(npaths) > 0, err
 }
 
 //Close 关闭当前服务
