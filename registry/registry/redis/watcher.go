@@ -24,8 +24,8 @@ func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err er
 	watcher := make(chan registry.ValueWatcher, 1)
 	go func() {
 
+		defer r.client.HDel(key, id)
 		defer r.Delete(nwatch)
-		defer r.client.HDel(key, id).Result()
 
 		//拉取数据
 		var v []string
@@ -46,7 +46,6 @@ func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err er
 				}
 			}
 		}
-
 		//数据错误
 		if len(v) == 0 {
 			watcher <- &valueEntity{Err: fmt.Errorf("未收到任何数据")}
@@ -61,7 +60,6 @@ func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err er
 		}
 		//通知变更
 		watcher <- &valueEntity{path: path, version: nv.Version, Value: nv.Data, Err: err}
-
 	}()
 	return watcher, nil
 
@@ -92,8 +90,8 @@ func (r *Redis) WatchChildren(path string) (data chan registry.ChildrenWatcher, 
 	watcher := make(chan registry.ChildrenWatcher, 1)
 
 	go func() {
+		defer r.client.HDel(key, id)
 		defer r.Delete(nwatch)
-		defer r.client.HDel(key, id).Result()
 
 		var v []string
 		var err error
