@@ -20,7 +20,7 @@ func WithConfigName(configName string) Option {
 func WithAddrs(addrs ...string) Option {
 	return func(a *Redis) {
 		check(a)
-		a.Addrs = addrs
+		a.Addrs = append(a.Addrs, addrs...)
 	}
 }
 
@@ -61,6 +61,6 @@ func WithRaw(raw string) Option {
 
 func check(o *Redis) {
 	if o.Redis == nil {
-		o.Redis = redis.New(nil)
+		o.Redis = redis.New("")
 	}
 }

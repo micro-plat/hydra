@@ -404,3 +404,11 @@ func StringToBytes(s string) (b []byte) {
 func BytesToString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
+
+//Split 拆分字符串，当输入字符串为空时返回结果为空
+func Split(s string, sep string) []string {
+	if len(s) == 0 {
+		return nil
+	}
+	return strings.Split(s, sep)
+}

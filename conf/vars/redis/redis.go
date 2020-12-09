@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/lib4go/types"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -23,9 +24,9 @@ type Redis struct {
 }
 
 //New 构建redis消息队列配置
-func New(addrs []string, opts ...Option) *Redis {
+func New(addrs string, opts ...Option) *Redis {
 	r := &Redis{
-		Addrs:        addrs,
+		Addrs:        types.Split(addrs, ","),
 		DbIndex:      0,
 		DialTimeout:  10,
 		ReadTimeout:  10,
@@ -41,7 +42,7 @@ func New(addrs []string, opts ...Option) *Redis {
 //NewByRaw 通过json原串初始化
 func NewByRaw(raw string) *Redis {
 
-	org := New(nil, WithRaw(raw))
+	org := New("", WithRaw(raw))
 
 	if b, err := govalidator.ValidateStruct(org); !b {
 		panic(fmt.Errorf("redis配置数据有误:%v %+v", err, org))

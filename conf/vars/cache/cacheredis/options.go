@@ -60,6 +60,6 @@ func WithRaw(raw string) Option {
 }
 func check(o *Redis) {
 	if o.Redis == nil {
-		o.Redis = redis.New(nil)
+		o.Redis = redis.New("")
 	}
 }
