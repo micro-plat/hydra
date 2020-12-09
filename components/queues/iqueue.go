@@ -32,9 +32,7 @@ func newQueue(proto string, confRaw string) (q *queue, err error) {
 //Send 发送消息
 func (q *queue) Send(key string, value interface{}) error {
 	hd := make([]string, 0, 2)
-	if ctx, ok := context.GetContext(); ok {
-		hd = append(hd, context.XRequestID, ctx.User().GetRequestID())
-	}
+	hd = append(hd, context.XRequestID, global.RID.GetXRequestID())
 	return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(value, hd...))
 }
 

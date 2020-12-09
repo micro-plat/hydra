@@ -4,7 +4,6 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/lib4go/types"
 )
 
 var _ context.IUser = &user{}
@@ -18,6 +17,7 @@ type user struct {
 	jwtToken  interface{}
 }
 
+//NewUser 用户信息
 func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
 	return &user{
 		ctx:  ctx,
@@ -29,12 +29,10 @@ func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
 
 //GetRequestID 获取请求编号
 func (c *user) GetRequestID() string {
-	ids := c.ctx.GetHeaders()[context.XRequestID]
-	c.requestID = types.GetStringByIndex(ids, 0, c.requestID)
-	if c.requestID == "" {
-		c.requestID = context.NewRequestID()
+	if ids, ok := c.ctx.GetHeaders()[context.XRequestID]; ok {
+		global.RID.Add(ids)
 	}
-	return c.requestID
+	return global.RID.GetXRequestID()
 }
 
 //GetGID 获取当前处理的goroutine id

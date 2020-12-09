@@ -1,8 +1,6 @@
 package context
 
 import (
-	"context"
-
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
@@ -14,17 +12,9 @@ var ctxMap = cmap.New(6)
 
 //Cache 将当前上下文配置保存到当前线程编号对应的缓存
 func Cache(s IContext) string {
-	tid := global.GetGoroutineID()
+	tid := global.RID.GetXRequestID()
 	ctxMap.SetIfAbsent(tid, s)
 	return tid
-}
-
-//GetContextWithDefault 获取可用的context.Context
-func GetContextWithDefault() context.Context {
-	if c, ok := ctxMap.Get(global.GetGoroutineID()); ok {
-		return c.(IContext).Context()
-	}
-	return context.WithValue(context.Background(), "X-Request-Id", global.Def.Log().GetSessionID())
 }
 
 //Current 从缓存中获取请求上下文配置
@@ -48,6 +38,7 @@ func GetContext(g ...string) (IContext, bool) {
 }
 
 //Del 删除当前线程的请求上下文缓存
-func Del(tid string) {
-	ctxMap.Remove(tid)
+func Del(id string) {
+	ctxMap.Remove(id)
+	global.RID.Remove()
 }
