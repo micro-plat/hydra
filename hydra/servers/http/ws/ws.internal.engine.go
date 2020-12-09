@@ -12,8 +12,8 @@ import (
 var wsInternalEngine *wsEngine
 var metric = middleware.NewMetric()
 
-//InitWSInternalEngine 创建默认的WS引擎
-func InitWSInternalEngine(routers ...*router.Router) {
+//InitWSEngine 创建默认的WS引擎
+func InitWSEngine(routers ...*router.Router) {
 	wsInternalEngine = newWSEngine(routers...)
 }
 
@@ -26,6 +26,7 @@ func newWSEngine(routers ...*router.Router) *wsEngine {
 	s := &wsEngine{Engine: dispatcher.New(), metric: metric}
 	s.Engine.Use(middleware.Recovery().DispFunc(global.WS))
 	s.Engine.Use(middleware.Logging().DispFunc()) //记录请求日志
+	s.Engine.Use(middleware.Recovery().DispFunc())
 	s.Engine.Use(middleware.Tag().DispFunc())
 	s.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	s.Engine.Use(middleware.Limit().DispFunc()) //限流处理

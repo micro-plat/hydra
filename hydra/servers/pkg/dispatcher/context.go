@@ -11,6 +11,7 @@ import (
 const abortIndex int8 = math.MaxInt8 / 2
 
 type IRequest interface {
+	GetName() string
 	GetService() string
 	GetMethod() string
 	GetForm() map[string]interface{}

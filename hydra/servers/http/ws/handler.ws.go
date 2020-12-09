@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/micro-plat/hydra/components/ws"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
@@ -29,8 +28,8 @@ func WSExecuteHandler(service string) middleware.Handler {
 
 		//构建处理函数
 		h := newWSHandler(conn, ctx.User().GetRequestID(), ctx.User().GetClientIP())
-		ws.WSExchange.Subscribe(ctx.User().GetRequestID(), h.recvNotify(c))
-		defer ws.WSExchange.Unsubscribe(ctx.User().GetRequestID())
+		exchange.Subscribe(ctx.User().GetRequestID(), h.recvNotify(c))
+		defer exchange.Unsubscribe(ctx.User().GetRequestID())
 
 		//异步读取与写入
 		go h.readPump()

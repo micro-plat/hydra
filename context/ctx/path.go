@@ -1,7 +1,6 @@
 package ctx
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -56,7 +55,7 @@ func (c *rpath) GetEncoding() string {
 	//从router配置获取
 	routerObj, err := c.GetRouter()
 	if err != nil {
-		panic(fmt.Errorf("url.Router配置错误:%w", err))
+		return c.encoding
 	}
 	if c.encoding = routerObj.Encoding; c.encoding != "" {
 		return c.encoding
@@ -86,7 +85,7 @@ func (c *rpath) GetRouter() (*router.Router, error) {
 		if err != nil {
 			return nil, err
 		}
-		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod()), nil
+		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
 	default:
 		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8")), nil
 	}
