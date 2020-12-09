@@ -20,8 +20,8 @@ const Zookeeper = "zk"
 //FileSystem 本地文件系统
 const FileSystem = "fs"
 
-//Etcd Etcd
-const Etcd = "etcd"
+//Consul Consul
+const Consul = "consul"
 
 //Redis redis
 const Redis = "redis"

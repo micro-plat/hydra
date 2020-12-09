@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -32,7 +31,7 @@ func Test_regist_get(t *testing.T) {
 	}
 
 	//获取不支持的类型
-	assert.Panic(t, "不支持的服务器类型:xxx", func() { s.get("xxx") }, "获取不支持的类型")
+	assert.Panics(t, func() { s.get("xxx") }, "获取不支持的类型")
 }
 
 func Test_regist_RegisterServer(t *testing.T) {
@@ -53,7 +52,7 @@ func Test_regist_RegisterServer(t *testing.T) {
 	}
 
 	//注册已经存在的服务类型
-	assert.Panic(t, errors.New("服务api已存在，不能重复注册"), func() { s.RegisterServer(global.API) }, "注册已经存在的服务类型")
+	assert.Panics(t, func() { s.RegisterServer(global.API) }, "注册已经存在的服务类型")
 }
 
 func Test_regist_OnStarting(t *testing.T) {
@@ -86,7 +85,7 @@ func Test_regist_OnStarting(t *testing.T) {
 	}
 
 	//h为空 panic
-	assert.Panic(t, errors.New("api OnServerStarting 启动服务不能为空"), func() { s.OnStarting(nil, []string{global.API}...) }, "handle为空")
+	assert.Panics(t, func() { s.OnStarting(nil, []string{global.API}...) }, "handle为空")
 }
 
 func Test_regist_OnClosing(t *testing.T) {
@@ -119,7 +118,7 @@ func Test_regist_OnClosing(t *testing.T) {
 	}
 
 	//h为空 panic
-	assert.Panic(t, errors.New("api OnServerClosing 关闭服务不能为空"), func() { s.OnClosing(nil, []string{global.API}...) }, "handle为空")
+	assert.Panics(t, func() { s.OnClosing(nil, []string{global.API}...) }, "handle为空")
 }
 
 func Test_regist_OnHandleExecuting(t *testing.T) {

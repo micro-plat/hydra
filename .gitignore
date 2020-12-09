@@ -16,3 +16,4 @@ wsserver*
 jwtserver*
 examples/conf
 logger.toml
+consul*
