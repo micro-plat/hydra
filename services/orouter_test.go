@@ -28,7 +28,7 @@ func Test_pathRouter_Add_WithPanic(t *testing.T) {
 	}
 	p := newPathRouter("path")
 	for _, tt := range tests {
-		assert.Panic(t, tt.wantPanic, func() {
+		assert.Panics(t, func() {
 			p.Add(tt.service, tt.action, tt.opts...)
 		}, tt.name)
 	}

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -50,7 +49,8 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		assert.Panic(t, errors.New(tt.errStr), func() {
+		assert.Panics(t, func() {
+			//errors.New(tt.errStr),
 			s := newServerServices(tt.f)
 			s.Register(tt.pName, tt.h, tt.ext...)
 		}, tt.name)

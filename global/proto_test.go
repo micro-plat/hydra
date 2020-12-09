@@ -49,7 +49,7 @@ func TestParseProto(t *testing.T) {
 
 		assert.Equal(t, tt.wantProto, gotproto, tt.name)
 		assert.Equal(t, tt.wantAddr, gotAddr, tt.name)
-		assert.IsNil(t, tt.isNilErr, err, tt.name)
+		assert.Nil(t, tt.isNilErr, err, tt.name)
 	}
 }
 

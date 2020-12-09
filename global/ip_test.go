@@ -30,6 +30,6 @@ func TestGetHostPort(t *testing.T) {
 
 		assert.Equal(t, tt.wantHost, gotHost, tt.name)
 		assert.Equal(t, tt.wantPort, gotPort, tt.name)
-		assert.IsNil(t, tt.IsNilErr, err, tt.name)
+		assert.Nil(t, tt.IsNilErr, err, tt.name)
 	}
 }

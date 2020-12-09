@@ -52,7 +52,7 @@ func TestOnReady_Panic(t *testing.T) {
 		{name: "2. 参数类型为不匹配", isReady: true, funcs: nil, args: args{fs: []interface{}{func(x int) error { return nil }}}, wantPanic: "函数签名格式不正确，支持的格式有func(){} 或 func()error{}"},
 	}
 	for _, tt := range tests {
-		assert.Panic(t, tt.wantPanic, func() {
+		assert.Panics(t, func() {
 			isReady = tt.isReady
 			funcs = tt.funcs
 			OnReady(tt.args.fs...)
