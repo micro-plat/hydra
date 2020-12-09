@@ -134,10 +134,10 @@ type IRequest interface {
 	GetMap() (types.XMap, error)
 
 	//GetFullRaw 获取请求的body参数
-	GetFullRaw() (s []byte, c string, err error)
+	GetFullRaw() (body []byte, query string, err error)
 
 	//GetBody 获取请求的参数
-	GetBody() ([]byte, error)
+	GetBody() (body []byte, err error)
 
 	//GetPlayload
 	GetPlayload() string
