@@ -141,14 +141,18 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		}
 		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
-		for i := 0; i < s.Len(); i++ {
-			var kind = s.Index(i).Kind()
-			if s.Index(i).Kind() == reflect.Ptr {
-				kind = s.Index(i).Elem().Kind()
+		if s.Len() > 0 {
+			var kind = s.Index(0).Kind()
+			if s.Index(0).Kind() == reflect.Ptr {
+				kind = s.Index(0).Elem().Kind()
 			}
-			if kind == reflect.Struct {
+			if kind == reflect.Struct || kind == reflect.Map {
 				return true, setWithProperType(vs, value, field)
 			}
+		}
+
+		for i := 0; i < s.Len(); i++ {
+
 			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
 		}
 		return true, setSlice(ls, value, field)
@@ -158,15 +162,18 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		}
 		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
-		for i := 0; i < s.Len(); i++ {
-			var kind = s.Index(i).Kind()
-			if s.Index(i).Kind() == reflect.Ptr {
-				kind = s.Index(i).Elem().Kind()
+
+		if s.Len() > 0 {
+			var kind = s.Index(0).Kind()
+			if s.Index(0).Kind() == reflect.Ptr {
+				kind = s.Index(0).Elem().Kind()
 			}
-			if kind == reflect.Struct {
+			if kind == reflect.Struct || kind == reflect.Map {
 				return true, setWithProperType(vs, value, field)
 			}
+		}
 
+		for i := 0; i < s.Len(); i++ {
 			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
 		}
 		return true, setArray(ls, value, field)
