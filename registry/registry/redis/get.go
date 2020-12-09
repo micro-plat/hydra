@@ -33,13 +33,29 @@ func (r *Redis) GetChildren(path string) (paths []string, version int32, err err
 
 	exclude := swapKey(path, "watch")
 	paths = make([]string, 0, len(npaths))
+	cache := map[string]bool{}
+
 	for _, p := range npaths {
+
 		if strings.HasPrefix(p, exclude) {
 			continue
 		}
-		rpath := registry.Trim(swapPath(strings.TrimPrefix(p, key)))
-		paths = append(paths, rpath)
+
+		p = strings.TrimPrefix(p, key+":")
+		if idx := strings.Index(p, ":"); idx > 0 {
+			p = p[:idx]
+		}
+		if p == "" {
+			continue
+		}
+
+		if ok, _ := cache[p]; ok {
+			continue
+		}
+		cache[p] = true
+		paths = append(paths, p)
 	}
+
 	return paths, 0, nil
 }
 
