@@ -17,6 +17,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
+	github.com/hashicorp/consul/api v1.8.0
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
