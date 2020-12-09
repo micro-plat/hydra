@@ -35,9 +35,7 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	//将消息原串转换为map
 	input := make(map[string]interface{})
 	message := m.GetMessage()
-	if err = json.Unmarshal(types.StringToBytes(message), &input); err != nil {
-		return nil, fmt.Errorf("队列%s中存放的数据不是有效的json:%s %w", queue.Queue, m.GetMessage(), err)
-	}
+	json.Unmarshal(types.StringToBytes(message), &input)
 
 	//检查是否包含头信息
 	r.form["__body__"] = message
