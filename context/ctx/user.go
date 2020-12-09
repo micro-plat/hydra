@@ -30,7 +30,7 @@ func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
 //GetRequestID 获取请求编号
 func (c *user) GetRequestID() string {
 	if ids, ok := c.ctx.GetHeaders()[context.XRequestID]; ok {
-		global.RID.Add(ids)
+		global.RID.Add(ids[0])
 	}
 	return global.RID.GetXRequestID()
 }
