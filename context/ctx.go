@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
-	"github.com/micro-plat/lib4go/utility"
 )
 
 const (
@@ -253,9 +252,4 @@ type IContext interface {
 
 	//Close 关闭并释放资源
 	Close()
-}
-
-//NewRequestID 获取请求编号
-func NewRequestID() string {
-	return utility.GetGUID()[0:9]
 }

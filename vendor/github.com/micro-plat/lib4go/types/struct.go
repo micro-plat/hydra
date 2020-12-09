@@ -141,7 +141,18 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		}
 		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
+		if s.Len() > 0 {
+			var kind = s.Index(0).Kind()
+			if s.Index(0).Kind() == reflect.Ptr {
+				kind = s.Index(0).Elem().Kind()
+			}
+			if kind == reflect.Struct || kind == reflect.Map {
+				return true, setWithProperType(vs, value, field)
+			}
+		}
+
 		for i := 0; i < s.Len(); i++ {
+
 			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
 		}
 		return true, setSlice(ls, value, field)
@@ -151,6 +162,17 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		}
 		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
+
+		if s.Len() > 0 {
+			var kind = s.Index(0).Kind()
+			if s.Index(0).Kind() == reflect.Ptr {
+				kind = s.Index(0).Elem().Kind()
+			}
+			if kind == reflect.Struct || kind == reflect.Map {
+				return true, setWithProperType(vs, value, field)
+			}
+		}
+
 		for i := 0; i < s.Len(); i++ {
 			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
 		}
@@ -194,7 +216,7 @@ func setWithProperType(val interface{}, value reflect.Value, field reflect.Struc
 		return setFloatField(fmt.Sprint(val), 64, value)
 	case reflect.String:
 		value.SetString(fmt.Sprint(val))
-	case reflect.Struct:
+	case reflect.Struct, reflect.Slice, reflect.Array:
 		switch value.Interface().(type) {
 		case time.Time:
 			return setTimeField(fmt.Sprint(val), field, value)

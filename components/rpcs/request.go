@@ -49,9 +49,7 @@ func (r *Request) Request(service string, input interface{}, opts ...rpc.Request
 	//处理链路跟踪
 	nopts := make([]rpc.RequestOption, 0, 2)
 	nopts = append(nopts, opts...)
-	if ctx, ok := rc.GetContext(); ok {
-		nopts = append(opts, rpc.WithXRequestID(ctx.User().GetRequestID()))
-	}
+	nopts = append(opts, rpc.WithXRequestID(global.RID.GetXRequestID()))
 
 	//发送请求
 	return r.RequestByCtx(context.Background(), service, input, opts...)

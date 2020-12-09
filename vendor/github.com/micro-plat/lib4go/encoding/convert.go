@@ -17,8 +17,8 @@ const UTF8 = "utf-8"
 //GBK gbk
 const GBK = "gbk"
 
-//GB2312  gbk2312
-const GB2312 = "gbk2312"
+//GB2312  gb2312
+const GB2312 = "gb2312"
 
 //Encode 将UTF8字符串编码为gbk或gb2312格式
 func Encode(content string, e string) (result []byte, err error) {

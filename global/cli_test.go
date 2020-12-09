@@ -111,7 +111,7 @@ func Test_doCliCallback(t *testing.T) {
 	for _, tt := range tests {
 		//t.Log("cmd.Name:", tt.args.c.Command.Name)
 		err := doCliCallback(tt.args.c)
-		assert.IsNil(t, tt.isNillError, err, tt.name)
+		assert.Nil(t, tt.isNillError, err, tt.name)
 	}
 }
 func newCtx(app *cli.App, set *flag.FlagSet, name string) *cli.Context {

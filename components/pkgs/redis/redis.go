@@ -16,7 +16,7 @@ type Client struct {
 
 //NewByOpts 构建客户端
 func NewByOpts(opts ...varredis.Option) (r *Client, err error) {
-	redisOpts := varredis.New(nil)
+	redisOpts := varredis.New("")
 	for i := range opts {
 		opts[i](redisOpts)
 	}

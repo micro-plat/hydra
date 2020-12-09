@@ -20,8 +20,8 @@ type Client struct {
 }
 
 // NewByOpts 根据配置文件创建一个memcache连接
-func NewByOpts(opts ...memcached.Option) (m *Client, err error) {
-	opt := memcached.New(opts...)
+func NewByOpts(addr string, opts ...memcached.Option) (m *Client, err error) {
+	opt := memcached.New(addr, opts...)
 	return NewByConfig(opt)
 }
 
@@ -159,7 +159,7 @@ type mresolver struct {
 }
 
 func (s *mresolver) Resolve(conf string) (cache.ICache, error) {
-	return NewByOpts(memcached.WithRaw(conf))
+	return NewByOpts("", memcached.WithRaw(conf))
 }
 func init() {
 	cache.Register("memcached", &mresolver{})
