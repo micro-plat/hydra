@@ -26,7 +26,9 @@ func (r *Redis) GetValue(path string) (data []byte, version int32, err error) {
 //GetChildren 获取所有子节点
 func (r *Redis) GetChildren(path string) (paths []string, version int32, err error) {
 	key := swapKey(path)
-	npaths, err := r.client.Keys(key + ":*").Result()
+
+	//npaths, err := r.client.Keys(key + ":*").Result()
+	npaths, err := r.client.SearchChildren(key + ":*")
 	if err != nil {
 		return nil, 0, err
 	}
