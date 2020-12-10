@@ -6,6 +6,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
+	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -32,6 +33,7 @@ type HttpSub struct {
 	blackList *Loader
 	limit     *Loader
 	proxy     *Loader
+	apm       *Loader
 }
 
 func NewHttpSub(cnf conf.IServerConf) *HttpSub {
@@ -49,6 +51,7 @@ func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s.blackList = GetLoader(cnf, s.getBlacklistFunc())
 	s.limit = GetLoader(cnf, s.getLimiterFunc())
 	s.proxy = GetLoader(cnf, s.getProxyFunc())
+	s.apm = GetLoader(cnf, s.getAPMFunc())
 	return s
 }
 
@@ -140,6 +143,13 @@ func (s HttpSub) getLimiterFunc() func(cnf conf.IServerConf) (interface{}, error
 func (s HttpSub) getProxyFunc() func(cnf conf.IServerConf) (interface{}, error) {
 	return func(cnf conf.IServerConf) (interface{}, error) {
 		return proxy.GetConf(cnf)
+	}
+}
+
+//getGrayFunc 获取gray配置信息
+func (s HttpSub) getAPMFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
+		return apm.GetConf(cnf)
 	}
 }
 
@@ -264,4 +274,13 @@ func (s *HttpSub) GetProxyConf() (*proxy.Proxy, error) {
 	}
 
 	return proxyObj.(*proxy.Proxy), nil
+}
+
+//GetAPMConf 获取APM配置
+func (s *HttpSub) GetAPMConf() (*apm.APM, error) {
+	apmc, err := s.apm.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return apmc.(*apm.APM), nil
 }

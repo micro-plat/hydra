@@ -82,6 +82,9 @@ type IPath interface {
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
+	//GetService 获取服务名称
+	GetService() string
+
 	//Param 路由参数
 	Params() types.XMap
 
@@ -250,6 +253,37 @@ type IContext interface {
 	//Log 日志组件
 	Log() logger.ILogger
 
+	//链路跟踪器
+	Tracer() ITracer
+
 	//Close 关闭并释放资源
 	Close()
+}
+
+//ITracer 链路跟踪器
+type ITracer interface {
+	ITraceSpan
+
+	//Root 根结点Tracer
+	Root() ITraceSpan
+}
+
+//ITraceSpan 跟踪处理器
+type ITraceSpan interface {
+	IEnd
+
+	//Available 是否可用
+	Available() bool
+
+	//Start 开发跟踪
+	Start() IEnd
+
+	//NewSpan 新的时间片
+	NewSpan(opertor string) ITraceSpan
+}
+
+//IEnd 关闭
+type IEnd interface {
+	//End 结束跟踪
+	End()
 }

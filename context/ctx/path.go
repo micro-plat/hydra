@@ -47,6 +47,10 @@ func (c *rpath) Params() types.XMap {
 	return c.params
 }
 
+//GetService 获取服务名称
+func (c *rpath) GetService() string {
+	return c.ctx.GetService()
+}
 func (c *rpath) GetEncoding() string {
 	if c.encoding != "" {
 		return c.encoding

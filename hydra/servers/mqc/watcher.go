@@ -38,7 +38,7 @@ LOOP:
 				unavailableCount++
 				time.Sleep(500 * time.Millisecond)
 				if unavailableCount >= 3 {
-					w.log.Warn("当前集群节点不可用")
+					w.log.Warn("mqc-当前集群节点不可用")
 				}
 				continue
 			}

@@ -32,6 +32,7 @@ type Ctx struct {
 	response   *response
 	user       *user
 	appConf    app.IAPPConf
+	tracer     *tracer
 	cancelFunc func()
 }
 
@@ -51,6 +52,7 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	timeout := time.Duration(ctx.appConf.GetServerConf().GetMainConf().GetInt("", 30))
 	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
+	ctx.tracer = newTracer(c.GetURL().Path, ctx.log, ctx.appConf)
 	return ctx
 }
 
@@ -89,6 +91,11 @@ func (c *Ctx) APPConf() app.IAPPConf {
 	return c.appConf
 }
 
+//Tracer 链路跟踪器
+func (c *Ctx) Tracer() context.ITracer {
+	return c.tracer
+}
+
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
 	context.Del(c.user.gid) //从当前请求上下文中删除
@@ -102,6 +109,7 @@ func (c *Ctx) Close() {
 	c.request = nil
 	c.response = nil
 	c.user = nil
+	c.tracer = nil
 
 	contextPool.Put(c)
 }
