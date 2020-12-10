@@ -13,6 +13,7 @@ import (
 type imiddle interface {
 	Next()
 	Find(path string) bool
+	Service(string)
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数
@@ -71,9 +72,10 @@ func (h Handler) DispFunc(tps ...string) dispatcher.HandlerFunc {
 	return func(c *dispatcher.Context) {
 		v, ok := c.Get("__middle_context__")
 		if !ok {
-			nctx := ctx.NewCtx(&dispCtx{Context: c}, tps[0])
+			rawCtx := &dispCtx{Context: c}
+			nctx := ctx.NewCtx(rawCtx, tps[0])
 			nctx.Meta().SetValue("__context_", c)
-			v = newMiddleContext(nctx, c, nil, nil)
+			v = newMiddleContext(nctx, rawCtx, nil, nil)
 			c.Set("__middle_context__", v)
 		}
 		h(v.(IMiddleContext))

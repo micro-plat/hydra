@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/limiter"
 	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
+	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -49,6 +50,7 @@ type IAPPConf interface {
 	GetBlackListConf() (*blacklist.BlackList, error)
 	GetLimiterConf() (*limiter.Limiter, error)
 	GetProxyConf() (*proxy.Proxy, error)
+	GetAPMConf() (*apm.APM, error)
 	//获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
 	Close() error

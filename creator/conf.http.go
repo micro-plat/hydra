@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
+	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -121,5 +122,11 @@ func (b *httpBuilder) Proxy(script string) *httpBuilder {
 //Render 响应渲染配置
 func (b *httpBuilder) Render(script string) *httpBuilder {
 	b.CustomerBuilder[render.TypeNodeName] = script
+	return b
+}
+
+//APM 构建APM配置
+func (b *httpBuilder) APM(address string) *httpBuilder {
+	b.CustomerBuilder[apm.TypeNodeName] = apm.New(address)
 	return b
 }
