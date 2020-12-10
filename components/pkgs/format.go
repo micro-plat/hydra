@@ -13,8 +13,13 @@ var def = ""
 
 //GetStringByHeader 设置头信息
 func GetStringByHeader(content interface{}, hd ...string) string {
-	header := types.NewXMap()
-	header.Append(hd)
+
+	header := make(map[string]string, 0)
+	if len(hd)%2 == 0 {
+		for i := 0; i < len(hd)/2; i++ {
+			header[fmt.Sprint(hd[i])] = hd[i+1]
+		}
+	}
 
 	out := types.NewXMap()
 	out.SetValue("__data__", types.StringToBytes(GetString(content)))

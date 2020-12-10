@@ -8,7 +8,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/pkgs/influxdb"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/zkfy/cron"
+	"github.com/robfig/cron"
 	"github.com/zkfy/go-metrics"
 )
 

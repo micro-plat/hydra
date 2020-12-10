@@ -1,7 +1,6 @@
 package static
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -24,10 +23,6 @@ func (s *Static) IsStatic(rPath string, method string) (b bool, xname string) {
 	if s.NeedRewrite(rPath) {
 		return true, filepath.Join(s.Dir, s.HomePage)
 	}
-	if s.IsContainExt(rPath) {
-		return true, filepath.Join(s.Dir, rPath)
-	}
-
 	if s.IsContainExt(rPath) {
 		return true, filepath.Join(s.Dir, rPath)
 	}
@@ -76,13 +71,6 @@ func (s *Static) IsExclude(rPath string) bool {
 
 //IsContainExt 是否是包含在指定的ext中
 func (s *Static) IsContainExt(rPath string) bool {
-
-	if _, err := os.Stat(filepath.Join(s.Dir, rPath)); err != nil {
-		if os.IsNotExist(err) {
-			//文件不存在   直接返回false
-			return false
-		}
-	}
 
 	name := filepath.Base(rPath)
 	pExt := filepath.Ext(name)

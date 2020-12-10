@@ -26,20 +26,38 @@ func (r *Redis) GetValue(path string) (data []byte, version int32, err error) {
 //GetChildren 获取所有子节点
 func (r *Redis) GetChildren(path string) (paths []string, version int32, err error) {
 	key := swapKey(path)
-	npaths, err := r.client.Keys(key + ":*").Result()
+
+	//npaths, err := r.client.Keys(key + ":*").Result()
+	npaths, err := r.client.SearchChildren(key + ":*")
 	if err != nil {
 		return nil, 0, err
 	}
 
 	exclude := swapKey(path, "watch")
 	paths = make([]string, 0, len(npaths))
+	cache := map[string]bool{}
+
 	for _, p := range npaths {
+
 		if strings.HasPrefix(p, exclude) {
 			continue
 		}
-		rpath := registry.Trim(swapPath(strings.TrimPrefix(p, key)))
-		paths = append(paths, rpath)
+
+		p = strings.TrimPrefix(p, key+":")
+		if idx := strings.Index(p, ":"); idx > 0 {
+			p = p[:idx]
+		}
+		if p == "" {
+			continue
+		}
+
+		if ok, _ := cache[p]; ok {
+			continue
+		}
+		cache[p] = true
+		paths = append(paths, p)
 	}
+
 	return paths, 0, nil
 }
 

@@ -24,6 +24,7 @@ type Redis struct {
 	client        *internal.Client
 }
 
+//NewRedisBy 构建redis注册中心
 func NewRedisBy(master string, pwd string, addrs []string, db int, poolSize int) (*Redis, error) {
 	return NewRedis(&internal.ClientConf{
 		MasterName: master,
@@ -56,8 +57,20 @@ func NewRedis(c *internal.ClientConf) (*Redis, error) {
 
 //Exists 检查节点是否存在
 func (r *Redis) Exists(path string) (bool, error) {
-	e, err := r.client.Exists(swapKey(path)).Result()
-	return err == nil && e == 1, err
+	key := swapKey(path)
+	e, err := r.client.Exists(key).Result()
+	if err != nil {
+		return false, err
+	}
+	if err == nil && e == 1 {
+		return true, nil
+	}
+	//npaths, err := r.client.Keys(key + ":*").Result()
+	exists, err := r.client.ExistsChildren(key + ":*")
+	if err != nil {
+		return false, err
+	}
+	return exists, err
 }
 
 //Close 关闭当前服务
@@ -70,13 +83,13 @@ func (r *Redis) Close() error {
 	return nil
 }
 
-//zkRegistry 基于zookeeper的注册中心
-type lmFactory struct {
+//redisFactory 基于redis的注册中心
+type redisFactory struct {
 	opts *r.Options
 }
 
 //Build 根据配置生成文件系统注册中心
-func (z *lmFactory) Create(opts ...r.Option) (r.IRegistry, error) {
+func (z *redisFactory) Create(opts ...r.Option) (r.IRegistry, error) {
 	for i := range opts {
 		opts[i](z.opts)
 	}
@@ -91,7 +104,7 @@ func (z *lmFactory) Create(opts ...r.Option) (r.IRegistry, error) {
 }
 
 func init() {
-	r.Register(r.Redis, &lmFactory{
+	r.Register(r.Redis, &redisFactory{
 		opts: &r.Options{},
 	})
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/micro-plat/lib4go/encoding/base64"
+
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/lib4go/types"
@@ -33,12 +35,7 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	//将消息原串转换为map
 	input := make(map[string]interface{})
 	message := m.GetMessage()
-	if err = json.Unmarshal(types.StringToBytes(message), &input); err != nil {
-		return nil, fmt.Errorf("队列%s中存放的数据不是有效的json:%s %w", queue.Queue, m.GetMessage(), err)
-	}
-
-	//内容为json
-	r.header["Content-Type"] = "application/json"
+	json.Unmarshal(types.StringToBytes(message), &input)
 
 	//检查是否包含头信息
 	r.form["__body__"] = message
@@ -51,25 +48,13 @@ func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	//处理头信息
 	r.header["__all__"] = message
 	if _, ok := r.header["Content-Type"]; !ok {
-		r.header["Content-Type"] = "/json"
+		r.header["Content-Type"] = "application/json"
 	}
 
-	if v, ok := input["__data__"].([]byte); ok {
-		// json.Unmarshal(v, &data)
-		r.form["__body__"] = string(v)
+	if v, ok := input["__data__"].(string); ok {
+		buff, _ := base64.DecodeBytes(v)
+		r.form["__body__"] = string(buff)
 	}
-
-	// //将所有非"__""参数加到form列表
-	// for k, v := range input {
-	// 	if !strings.HasPrefix(k, "__") {
-	// 		r.form[k] = v
-	// 	}
-	// }
-
-	// //处理data数据
-	// for k, v := range data {
-	// 	r.form[k] = v
-	// }
 	return r, nil
 }
 

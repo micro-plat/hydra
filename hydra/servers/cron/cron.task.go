@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf/server/task"
-	"github.com/zkfy/cron"
+	"github.com/robfig/cron"
 )
 
 //CronTask 定时任务
