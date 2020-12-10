@@ -14,18 +14,15 @@ require (
 	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-gonic/gin v1.6.2
+	github.com/gmallard/stompngo v1.0.13 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/hashicorp/consul/api v1.8.0 // indirect
-	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.0.2
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
@@ -47,7 +44,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98 // indirect
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
 
