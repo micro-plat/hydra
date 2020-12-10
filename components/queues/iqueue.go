@@ -5,11 +5,12 @@ import (
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //IQueue 消息队列
 type IQueue interface {
-	Send(key string, value interface{}) error
+	Send(key string, value interface{}, requestID ...string) error
 }
 
 //IComponentQueue Component Queue
@@ -30,11 +31,20 @@ func newQueue(proto string, confRaw string) (q *queue, err error) {
 }
 
 //Send 发送消息
-func (q *queue) Send(key string, value interface{}) error {
+func (q *queue) Send(key string, value interface{}, requestID ...string) error {
+
 	hd := make([]string, 0, 2)
-	if ctx, ok := context.GetContext(); ok {
-		hd = append(hd, context.XRequestID, ctx.User().GetRequestID())
+	XRequestID := types.GetStringByIndex(requestID, 0)
+	if XRequestID != "" {
+		hd = append(hd, context.XRequestID, XRequestID)
+		return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(value, hd...))
 	}
+
+	if ctx, ok := context.GetContext(); ok {
+		XRequestID = ctx.User().GetRequestID()
+		hd = append(hd, context.XRequestID, XRequestID)
+	}
+
 	return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(value, hd...))
 }
 
