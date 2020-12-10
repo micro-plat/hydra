@@ -82,6 +82,9 @@ type IPath interface {
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
+	//GetService 获取服务名称
+	GetService() string
+
 	//Param 路由参数
 	Params() types.XMap
 

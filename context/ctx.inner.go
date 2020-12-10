@@ -28,6 +28,6 @@ type IInnerContext interface {
 	File(string)              //Context.File(path)
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)
 	Redirect(int, string)
-
+	GetService() string
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 }
