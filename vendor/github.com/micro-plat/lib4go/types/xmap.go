@@ -306,13 +306,16 @@ func (q XMap) GetStrings(name string, def ...string) (r []string) {
 //GetArray 获取数组对象
 func (q XMap) GetArray(name string, def ...interface{}) (r []interface{}) {
 	v, ok := q.Get(name)
-	if !ok && len(def) > 0 {
+	if !ok && len(def) > 0 || v == nil {
 		return def
 	}
-	if r, ok := v.([]interface{}); ok {
-		return r
+
+	s := reflect.ValueOf(v)
+	r = make([]interface{}, 0, s.Len())
+	for i := 0; i < s.Len(); i++ {
+		r = append(r, s.Index(i).Interface())
 	}
-	return nil
+	return r
 }
 
 //Marshal 转换为json数据

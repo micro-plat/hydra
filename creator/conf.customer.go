@@ -31,6 +31,7 @@ func newCustomerBuilder(s ...interface{}) CustomerBuilder {
 	return b
 }
 
+//Sub 子配置
 func (b CustomerBuilder) Sub(name string, s ...interface{}) ISUB {
 	if len(s) == 0 {
 		panic(fmt.Sprintf("配置：%s值不能为空", name))
