@@ -33,7 +33,7 @@ func NewRASAuth(opts ...Option) *RASAuth {
 //Match 检查指定的路径是否有对应的认证服务
 func (a RASAuth) Match(p string) (bool, *Auth) {
 	for _, auth := range a.Auth {
-		if ok, _ := auth.Match(p); ok {
+		if ok, _ := auth.Match(p); ok && !auth.Disable {
 			return true, auth
 		}
 	}
