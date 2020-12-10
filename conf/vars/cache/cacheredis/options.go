@@ -1,7 +1,9 @@
 package cacheredis
 
 import (
+	"fmt"
 	"encoding/json"
+	"github.com/micro-plat/hydra/conf/app"
 
 	"github.com/micro-plat/hydra/conf/vars/redis"
 )
@@ -53,8 +55,20 @@ func WithPoolSize(i int) Option {
 //WithRaw 通过json原串初始化
 func WithRaw(raw string) Option {
 	return func(o *Redis) {
+		check(o)
 		if err := json.Unmarshal([]byte(raw), o); err != nil {
-			panic(err)
+			panic(fmt.Errorf("cacheredis.WithRaw:%w", err))
+		}
+		if o.ConfigName!="" {
+			varConf, err:=app.Cache.GetVarConf()
+			if err!=nil{
+				panic(fmt.Errorf("app.Cache.GetVarConf:%w", err)) 
+			}
+			varredis, err := redis.GetConf(varConf,o.ConfigName)
+			if err!=nil{
+				panic(fmt.Errorf("redis.GetConf:%w", err))
+			}
+			o.Redis = varredis
 		}
 	}
 }
