@@ -28,6 +28,7 @@ func NewDispCtx() *dispCtx {
 
 type dispCtx struct {
 	*dispatcher.Context
+	service string
 }
 
 //
@@ -50,7 +51,12 @@ func (g *dispCtx) GetBody() io.ReadCloser {
 		b := bytes.NewBufferString(types.GetString(text))
 		return &buffer{Buffer: b}
 	}
-
+}
+func (g *dispCtx) GetService() string {
+	return g.Context.Request.GetService()
+}
+func (g *dispCtx) Service(service string) {
+	g.service = service
 }
 func (g *dispCtx) GetMethod() string {
 	return g.Context.Request.GetMethod()

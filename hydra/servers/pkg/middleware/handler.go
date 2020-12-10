@@ -15,6 +15,7 @@ func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
 
 		//检查是否被限流
+		ctx.Service(service) //保存服务信息
 		if ctx.Request().Path().IsLimited() {
 			//降级处理
 			fallback(ctx, service)

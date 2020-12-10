@@ -12,7 +12,8 @@ import (
 
 type ginCtx struct {
 	*gin.Context
-	once sync.Once
+	once    sync.Once
+	service string
 }
 
 func NewGinCtx(c *gin.Context) *ginCtx {
@@ -36,6 +37,13 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 func (g *ginCtx) GetRouterPath() string {
 
 	return g.Context.FullPath()
+}
+
+func (g *ginCtx) GetService() string {
+	return g.service
+}
+func (g *ginCtx) Service(service string) {
+	g.service = service
 }
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()

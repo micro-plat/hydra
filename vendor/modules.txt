@@ -1,6 +1,16 @@
 # github.com/BurntSushi/toml v0.3.1
 ## explicit
 github.com/BurntSushi/toml
+# github.com/SkyAPM/go2sky v0.6.0
+## explicit
+github.com/SkyAPM/go2sky
+github.com/SkyAPM/go2sky/internal/idgen
+github.com/SkyAPM/go2sky/internal/tool
+github.com/SkyAPM/go2sky/propagation
+github.com/SkyAPM/go2sky/reporter
+github.com/SkyAPM/go2sky/reporter/grpc/common
+github.com/SkyAPM/go2sky/reporter/grpc/language-agent
+github.com/SkyAPM/go2sky/reporter/grpc/management
 # github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 ## explicit
 github.com/asaskevich/govalidator
@@ -47,6 +57,8 @@ github.com/gin-gonic/gin/binding
 github.com/gin-gonic/gin/internal/bytesconv
 github.com/gin-gonic/gin/internal/json
 github.com/gin-gonic/gin/render
+# github.com/gmallard/stompngo v1.0.13
+## explicit
 # github.com/go-playground/locales v0.13.0
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
@@ -63,7 +75,7 @@ github.com/go-redis/redis/internal/hashtag
 github.com/go-redis/redis/internal/pool
 github.com/go-redis/redis/internal/proto
 github.com/go-redis/redis/internal/util
-# github.com/golang/protobuf v1.4.2
+# github.com/golang/protobuf v1.4.3
 ## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -73,13 +85,12 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.2
 ## explicit
 github.com/golang/snappy
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket
-# github.com/hashicorp/consul/api v1.8.0
-## explicit
 # github.com/json-iterator/go v1.1.10
-## explicit
 github.com/json-iterator/go
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
 github.com/keybase/go-ps/darwincgo
@@ -103,7 +114,6 @@ github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
 # github.com/micro-plat/lib4go v1.0.2 => ../../../github.com/micro-plat/lib4go
 ## explicit
-github.com/micro-plat/lib4go/archiver
 github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
 github.com/micro-plat/lib4go/db
@@ -130,10 +140,8 @@ github.com/micro-plat/lib4go/types
 github.com/micro-plat/lib4go/utility
 github.com/micro-plat/lib4go/zk
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
-## explicit
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
-## explicit
 github.com/modern-go/reflect2
 # github.com/nwaples/rardecode v1.1.0
 ## explicit
@@ -197,7 +205,7 @@ github.com/zkfy/log
 # github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
 ## explicit
 github.com/zkfy/stompngo
-# golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+# golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 ## explicit
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/chacha20
@@ -220,7 +228,7 @@ golang.org/x/net/internal/timeseries
 golang.org/x/net/proxy
 golang.org/x/net/trace
 golang.org/x/net/websocket
-# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
+# golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
@@ -321,8 +329,6 @@ google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15
-## explicit
 # gopkg.in/yaml.v2 v2.3.0
 ## explicit
 gopkg.in/yaml.v2
