@@ -10,7 +10,7 @@ type Option func(*Memcache)
 //WithAddress 设置哨兵服务器
 func WithAddress(address ...string) Option {
 	return func(o *Memcache) {
-		o.Address = address
+		o.Address = append(o.Address, address...)
 	}
 }
 

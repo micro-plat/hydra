@@ -25,43 +25,31 @@ func (v vars) Queue() *internal.Varqueue {
 }
 
 func (v vars) RLog(service string, opts ...rlog.Option) vars {
-	if _, ok := v[rlog.TypeNodeName]; !ok {
-		v[rlog.TypeNodeName] = make(map[string]interface{})
-	}
-	v[rlog.TypeNodeName][rlog.LogName] = rlog.New(service, opts...)
+	v.Custom(rlog.TypeNodeName, rlog.LogName, rlog.New(service, opts...))
 	return v
 }
 
-func (v vars) HTTP(name string, opts ...http.Option) vars {
-	if _, ok := v[http.HttpTypeNode]; !ok {
-		v[http.HttpTypeNode] = make(map[string]interface{})
-	}
-	v[http.HttpTypeNode][name] = http.New(opts...)
+func (v vars) HTTP(nodeName string, opts ...http.Option) vars {
+	v.Custom(http.HttpTypeNode, nodeName, http.New(opts...))
 	return v
 }
 
-func (v vars) RPC(name string, opts ...rpc.Option) vars {
-	if _, ok := v[rpc.RPCTypeNode]; !ok {
-		v[rpc.RPCTypeNode] = make(map[string]interface{})
-	}
-	v[rpc.RPCTypeNode][name] = rpc.New(opts...)
+func (v vars) RPC(nodeName string, opts ...rpc.Option) vars {
+	v.Custom(rpc.RPCTypeNode, nodeName, rpc.New(opts...))
 	return v
 }
 
 //Redis 添加Redis配置
-func (v vars) Redis(name string, r *redis.Redis) vars {
-	if _, ok := v[redis.TypeNodeName]; !ok {
-		v[redis.TypeNodeName] = make(map[string]interface{})
-	}
-	v[redis.TypeNodeName][name] = r
+func (v vars) Redis(nodeName string, address string, opts ...redis.Option) vars {
+	v.Custom(redis.TypeNodeName, nodeName, redis.New(address, opts...))
 	return v
 }
 
 //Custom 自定义配置
-func (v vars) Custom(typ string, name string, i interface{}) vars {
+func (v vars) Custom(typ string, nodeName string, i interface{}) vars {
 	if _, ok := v[typ]; !ok {
 		v[typ] = make(map[string]interface{})
 	}
-	v[typ][name] = i
+	v[typ][nodeName] = i
 	return v
 }

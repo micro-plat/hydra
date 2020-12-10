@@ -13,6 +13,7 @@ import (
 
 	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/encoding"
 )
 
@@ -38,13 +39,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		req.Header.Set(i, strings.Join(v, ","))
 	}
 
-	requestID := context.NewRequestID()
-	if ctx, ok := context.GetContext(); ok {
-		requestID = ctx.User().GetRequestID()
-	}
-	if requestID != "" {
-		req.Header.Set(context.XRequestID, requestID)
-	}
+	req.Header.Set(context.XRequestID, global.RID.GetXRequestID())
 	c.Response, err = c.client.Do(req)
 	if c.Response != nil {
 		defer c.Response.Body.Close()

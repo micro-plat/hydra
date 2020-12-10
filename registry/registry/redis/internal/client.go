@@ -3,6 +3,8 @@ package internal
 import (
 	"encoding/json"
 	"errors"
+
+	//	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -131,4 +133,57 @@ func HasConnectionError(err error) bool {
 		return true
 	}
 	return false
+}
+
+//ExistsChildren ExistsChildren
+func (c *Client) ExistsChildren(path string) (exists bool, err error) {
+
+	defer func() {
+		//fmt.Println("ExistsChildren:", path,exists)
+
+	}()
+
+	cur := uint64(0)
+	for {
+		var keys []string
+		scanCmd := c.Scan(cur, path, 50)
+		keys, cur, err = scanCmd.Result()
+		if err != nil {
+			return
+		}
+		if cur <= 0 {
+			break
+		}
+		if len(keys) > 0 {
+			exists = true
+			break
+		}
+	}
+	return
+}
+
+//SearchChildren 根据路径查找
+func (c *Client) SearchChildren(path string) (children []string, err error) {
+	defer func() {
+		//	fmt.Println("SearchChildren:", path,children,err)
+
+	}()
+
+	cur := uint64(0)
+	children = []string{}
+	for {
+		var keys []string
+		scanCmd := c.Scan(cur, path, 50)
+		keys, cur, err = scanCmd.Result()
+		if err != nil {
+			return
+		}
+		if cur <= 0 {
+			break
+		}
+		if len(keys) > 0 {
+			children = append(children, keys...)
+		}
+	}
+	return children, nil
 }

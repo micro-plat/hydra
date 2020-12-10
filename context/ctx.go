@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
-	"github.com/micro-plat/lib4go/utility"
 )
 
 const (
@@ -134,10 +133,10 @@ type IRequest interface {
 	GetMap() (types.XMap, error)
 
 	//GetFullRaw 获取请求的body参数
-	GetFullRaw() (s []byte, c string, err error)
+	GetFullRaw() (body []byte, query string, err error)
 
 	//GetBody 获取请求的参数
-	GetBody() ([]byte, error)
+	GetBody() (body []byte, err error)
 
 	//GetPlayload
 	GetPlayload() string
@@ -253,9 +252,4 @@ type IContext interface {
 
 	//Close 关闭并释放资源
 	Close()
-}
-
-//NewRequestID 获取请求编号
-func NewRequestID() string {
-	return utility.GetGUID()[0:9]
 }

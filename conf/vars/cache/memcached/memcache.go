@@ -7,6 +7,7 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Memcache memcache客户端配置
@@ -18,9 +19,10 @@ type Memcache struct {
 }
 
 //New x
-func New(opts ...Option) *Memcache {
+func New(address string, opts ...Option) *Memcache {
 	opt := Memcache{
-		Timeout:      1,
+		Address:      types.Split(address, ","),
+		Timeout:      3,
 		MaxIdleConns: 10,
 		Cache:        &cache.Cache{Proto: "memcache"},
 	}
@@ -33,7 +35,7 @@ func New(opts ...Option) *Memcache {
 //NewByRaw 通过json原串初始化
 func NewByRaw(raw string) *Memcache {
 
-	org := New()
+	org := &Memcache{}
 	if err := json.Unmarshal([]byte(raw), org); err != nil {
 		panic(err)
 	}
