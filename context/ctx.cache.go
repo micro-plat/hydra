@@ -33,8 +33,6 @@ func GetContext(g ...string) (IContext, bool) {
 	if gid == "" {
 		gid = global.RID.GetXRequestID()
 	}
-	fmt.Println("gid:", gid)
-	fmt.Println("ctxMap:", ctxMap.Items())
 	if c, ok := ctxMap.Get(gid); ok {
 		return c.(IContext), true
 	}
