@@ -8,7 +8,6 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/clbanning/mxj v1.8.4
-	github.com/clbanning/mxj/v2 v2.3.2
 	github.com/d5/tengo/v2 v2.6.2
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
@@ -45,7 +44,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98 // indirect
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
