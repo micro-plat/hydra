@@ -179,6 +179,21 @@ type IResponse interface {
 	//Write 向响应流中写入状态码与内容(不会立即写入)
 	Write(s int, v ...interface{}) error
 
+	//JSON json输出响应内容
+	JSON(code int, data interface{}) interface{}
+
+	//XML xml输出响应内容
+	XML(code int, data interface{}) interface{}
+
+	//YAML yaml输出响应内容
+	YAML(code int, data interface{}) interface{}
+
+	//Data 根据内容匹配响应内容
+	Data(code int, contentType string, data interface{}) interface{}
+
+	//Any 根据内容匹配响应内容与状态码
+	Any(data interface{}) interface{}
+
 	//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
 	WriteAny(v interface{}) error
 

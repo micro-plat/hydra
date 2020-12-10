@@ -107,6 +107,38 @@ func (c *response) NoNeedWrite(status int) {
 	c.final.status = status
 }
 
+//JSON json输出响应内容
+func (c *response) JSON(code int, data interface{}) interface{} {
+	return c.Data(code, fmt.Sprintf(context.JSONF, c.path.GetEncoding()), data)
+}
+
+//XML xml输出响应内容
+func (c *response) XML(code int, data interface{}) interface{} {
+	return c.Data(code, fmt.Sprintf(context.XMLF, c.path.GetEncoding()), data)
+}
+
+//YAML yaml输出响应内容
+func (c *response) YAML(code int, data interface{}) interface{} {
+	return c.Data(code, fmt.Sprintf(context.YAMLF, c.path.GetEncoding()), data)
+}
+
+//Data 根据内容匹配响应内容
+func (c *response) Data(code int, contentType string, data interface{}) interface{} {
+	c.ContentType(contentType)
+	if err := c.Write(code, data); err != nil {
+		return err
+	}
+	return c.final.content
+}
+
+//Any 根据内容匹配响应内容与状态码
+func (c *response) Any(data interface{}) interface{} {
+	if err := c.Write(200, data); err != nil {
+		return err
+	}
+	return c.final.content
+}
+
 //Write 检查内容并处理状态码,数据未写入响应流
 func (c *response) Write(status int, ct ...interface{}) error {
 	if c.noneedWrite {
