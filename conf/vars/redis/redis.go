@@ -14,7 +14,7 @@ const TypeNodeName = "redis"
 
 //Redis redis缓存配置
 type Redis struct {
-	Addrs        []string `json:"addrs" toml:"addrs"`
+	Addrs        []string `json:"addrs,omitempty" toml:"addrs,omitempty"`
 	Password     string   `json:"password,omitempty" toml:"password,omitempty"`
 	DbIndex      int      `json:"db,omitempty" toml:"db,omitempty"`
 	DialTimeout  int      `json:"dial_timeout,omitempty" toml:"dial_timeout,omitempty"`
