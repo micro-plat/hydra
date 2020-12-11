@@ -195,14 +195,11 @@ func (c *response) getContentType() string {
 	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
 		return ctp
 	}
-	headerObj, err := c.conf.GetHeaderConf()
+	headers, err := c.conf.GetHeaderConf()
 	if err != nil {
 		return ""
 	}
-	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
-		return ct
-	}
-	return ""
+	return headers["Content-Type"]
 }
 
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
