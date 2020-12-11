@@ -3,7 +3,6 @@ package creator
 import (
 	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/hydra/conf/vars/rpc"
-	"github.com/micro-plat/hydra/creator/internal"
 
 	"github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
@@ -12,16 +11,16 @@ import (
 type vars map[string]map[string]interface{}
 
 //DB 添加db配置
-func (v vars) DB() *internal.Vardb {
-	return internal.NewDB(v)
+func (v vars) DB() *Vardb {
+	return NewDB(v)
 }
 
-func (v vars) Cache() *internal.Varcache {
-	return internal.NewCache(v)
+func (v vars) Cache() *Varcache {
+	return NewCache(v)
 }
 
-func (v vars) Queue() *internal.Varqueue {
-	return internal.NewQueue(v)
+func (v vars) Queue() *Varqueue {
+	return NewQueue(v)
 }
 
 func (v vars) RLog(service string, opts ...rlog.Option) vars {
