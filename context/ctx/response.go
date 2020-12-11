@@ -78,6 +78,13 @@ func (c *response) GetHeaders() types.XMap {
 
 //ContentType 设置contentType
 func (c *response) ContentType(v string) {
+	if v == "" {
+		return
+	}
+	//如果返回用户没有设置charset  需要自动给加上
+	if !strings.Contains(strings.ToLower(v), "charset") {
+		v = fmt.Sprint(strings.TrimRight(v, ";"), ";charset=", c.path.GetEncoding())
+	}
 	c.ctx.Header("Content-Type", v)
 }
 
@@ -198,7 +205,6 @@ func (c *response) getContentType() string {
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
 	//处理状态码与响应内容的默认
 	rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
-
 	switch v := content.(type) {
 	case errs.IError:
 		c.log.Error(content)
@@ -260,13 +266,14 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 		if tpkind == reflect.Slice || tpkind == reflect.Array {
 			panic("转化为xml必须是struct或者map,内容格式不正确")
 		}
-		if m := c.toMap(content); m != nil {
+		if m := c.toMap(content); len(m) != 0 {
 			if str, err := m.Xml(); err != nil {
 				panic(err)
 			} else {
 				return string(str)
 			}
 		}
+
 		if buff, err := xml.Marshal(content); err != nil {
 			panic(err)
 		} else {
