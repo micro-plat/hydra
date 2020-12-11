@@ -211,10 +211,20 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	switch v := content.(type) {
 	case errs.IError:
 		c.log.Error(content)
-		rs, rc = v.GetCode(), types.DecodeString(global.IsDebug, false, "Internal Server Error", v.GetError().Error())
+
+		if global.IsDebug {
+			rs, rc = v.GetCode(), v.GetError().Error()
+		} else {
+			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(status), "", v.GetError().Error())
+		}
 	case error:
 		c.log.Error(content)
-		rc = types.DecodeString(global.IsDebug, false, "Internal Server Error", v.Error())
+
+		if global.IsDebug {
+			rc = v.Error()
+		} else {
+			rc = types.DecodeString(http.StatusText(status), "", v.Error())
+		}
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}
