@@ -1,8 +1,8 @@
 package install
 
 import (
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
 
@@ -16,7 +16,7 @@ func getFlags() []cli.Flag {
 		Destination: &coverIfExists,
 		Usage:       `-覆盖安装，本地已安装服务`,
 	})
-	flags = append(flags, cli.StringFlag{
+	flags = append(flags, cli.BoolFlag{
 		Name:        "debug,d",
 		Destination: &global.FlagVal.IsDebug,
 		Usage:       `-调试模式，打印更详细的系统运行日志，避免将详细的错误信息返回给调用方`,

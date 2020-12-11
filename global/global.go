@@ -181,7 +181,7 @@ func (m *global) check() (err error) {
 	m.SysName = types.GetString(FlagVal.SysName, m.SysName)
 	m.ServerTypeNames = types.GetString(FlagVal.ServerTypeNames, m.ServerTypeNames)
 	m.ClusterName = types.GetString(FlagVal.ClusterName, m.ClusterName)
-	IsDebug = types.GetBool(FlagVal.IsDebug, IsDebug)
+	IsDebug = types.DecodeBool(FlagVal.IsDebug, true, true, IsDebug)
 
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
@@ -209,9 +209,6 @@ func (m *global) check() (err error) {
 	}
 	if m.Trace != "" && !types.StringContains(traces, m.Trace) {
 		return fmt.Errorf("trace名称只能是%v", traces)
-	}
-	if IsDebugByCli {
-		IsDebug = IsDebugByCli
 	}
 	//增加调试参数
 	if IsDebug {

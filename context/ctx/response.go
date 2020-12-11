@@ -43,17 +43,18 @@ type response struct {
 	hasWrite    bool
 	noneedWrite bool
 	log         logger.ILogger
-	asyncWrite  func() error
 	specials    []string
 }
 
 //NewResponse 构建响应信息
 func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
+	path := NewRpath(ctx, conf, meta)
 	return &response{
-		ctx:  ctx,
-		conf: conf,
-		path: NewRpath(ctx, conf, meta),
-		log:  log,
+		ctx:   ctx,
+		conf:  conf,
+		path:  path,
+		final: rspns{contentType: fmt.Sprintf(context.PLAINF, path.GetEncoding())},
+		log:   log,
 	}
 }
 
@@ -166,6 +167,9 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	if len(ct) > 0 {
 		content = ct[0]
 	}
+	if content == nil { //对于空值一律不处理
+		return nil
+	}
 
 	//2. 修改当前结果状态码与内容
 	var ncontent interface{}
@@ -181,9 +185,6 @@ func (c *response) Write(status int, ct ...interface{}) error {
 
 	//3. 保存初始状态与结果
 	c.raw.status, c.raw.content, c.hasWrite, c.raw.contentType = status, content, true, c.final.contentType
-	c.asyncWrite = func() error {
-		return c.writeNow(c.final.status, c.final.contentType, c.final.content)
-	}
 	return nil
 }
 
@@ -321,8 +322,27 @@ func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 	return
 }
 
+//Flush 调用异步写入将状态码、内容写入到响应流中
+func (c *response) Flush() {
+	if c.noneedWrite || c.ctx.Written() {
+		c.final.status = types.DecodeInt(c.final.status, 0, c.ctx.Status())
+		//处理外部框架直接写入到流中,且输出日志状态为0的问题
+		return
+	}
+	if err := c.writeNow(); err != nil {
+		panic(err)
+	}
+	c.noneedWrite = true
+}
+
 //writeNow 将状态码、内容写入到响应流中
-func (c *response) writeNow(status int, ctyp string, content string) error {
+func (c *response) writeNow() error {
+
+	c.final.status = types.DecodeInt(types.DecodeInt(c.final.status, 0, c.ctx.Status()), 0, http.StatusNoContent)
+
+	status := c.final.status
+	ctyp := c.final.contentType
+	content := c.final.content
 	//301 302 303 307 308 这个地方会强制跳转到content 的路径。
 	if status == http.StatusMovedPermanently || status == http.StatusFound || status == http.StatusSeeOther ||
 		status == http.StatusTemporaryRedirect || status == http.StatusPermanentRedirect {
@@ -381,20 +401,6 @@ func (c *response) GetRawResponse() (int, interface{}, string) {
 //GetFinalResponse 获取响应内容信息
 func (c *response) GetFinalResponse() (int, string, string) {
 	return c.final.status, c.final.content, c.final.contentType
-}
-
-//Flush 调用异步写入将状态码、内容写入到响应流中
-func (c *response) Flush() {
-	if c.noneedWrite || c.asyncWrite == nil || c.ctx.Written() {
-		if c.final.status == 0 { //处理外部框架直接写入到流中,且输出日志状态为0的问题
-			c.final.status = c.ctx.Status()
-		}
-		return
-	}
-	if err := c.asyncWrite(); err != nil {
-		panic(err)
-	}
-	c.noneedWrite = true
 }
 
 func getTypeKind(c interface{}) reflect.Kind {
