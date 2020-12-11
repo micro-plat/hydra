@@ -2,7 +2,6 @@ package ctx
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -260,18 +259,24 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 		if tpkind == reflect.Slice || tpkind == reflect.Array {
 			panic("转化为xml必须是struct或者map,内容格式不正确")
 		}
-		if m := c.toMap(content); m != nil {
-			if str, err := m.Xml(); err != nil {
-				panic(err)
-			} else {
-				return string(str)
-			}
-		}
-		if buff, err := xml.Marshal(content); err != nil {
+
+		m, err := c.toMap(content)
+		if err != nil {
 			panic(err)
-		} else {
-			return string(buff)
 		}
+
+		str, err := m.Xml()
+		if err != nil {
+			panic(err)
+		}
+
+		return string(str)
+
+		// if buff, err := xml.Marshal(content); err != nil {
+		// 	panic(err)
+		// } else {
+		// 	return string(buff)
+		// }
 	case strings.Contains(ctp, "yaml"):
 		if buff, err := yaml.Marshal(content); err != nil {
 			panic(err)
@@ -290,15 +295,24 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	}
 }
 
-func (c *response) toMap(content interface{}) mxj.Map {
+func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 	v := reflect.ValueOf(content)
-	r := mxj.Map{}
+	r = mxj.Map{}
 	if v.Kind() == reflect.Map {
 		for _, key := range v.MapKeys() {
 			r[types.GetString(key)] = v.MapIndex(key).Interface()
 		}
 	}
-	return r
+
+	if v.Kind() == reflect.Struct {
+		buff, err := json.Marshal(content)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(buff, &r)
+	}
+
+	return
 }
 
 //writeNow 将状态码、内容写入到响应流中
