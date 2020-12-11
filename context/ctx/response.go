@@ -253,7 +253,7 @@ func (c *response) toMap(content interface{}) mxj.Map {
 	r := mxj.Map{}
 	if v.Kind() == reflect.Map {
 		for _, key := range v.MapKeys() {
-			r[types.GetString(key)] = v.MapIndex(key)
+			r[types.GetString(key)] = v.MapIndex(key).Interface()
 		}
 	}
 	return r

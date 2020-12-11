@@ -1,6 +1,8 @@
 package context
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
@@ -29,7 +31,7 @@ func Current(g ...string) IContext {
 func GetContext(g ...string) (IContext, bool) {
 	gid := types.GetStringByIndex(g, 0)
 	if gid == "" {
-		gid = global.GetGoroutineID()
+		gid = global.RID.GetXRequestID()
 	}
 	if c, ok := ctxMap.Get(gid); ok {
 		return c.(IContext), true

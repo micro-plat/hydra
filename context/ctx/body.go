@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"reflect"
 	"strings"
 
 	"github.com/clbanning/mxj"
@@ -70,7 +71,23 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 		switch {
 		case strings.Contains(ctp, "/xml"):
 			mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
-			data, w.mapBody.err = mxj.NewMapXml(body)
+			m := make(map[string]interface{})
+			m, w.mapBody.err = mxj.NewMapXml(body)
+			j := 0
+			keys := make([]string, len(m))
+			for k := range m {
+				keys[j] = k
+				j++
+			}
+			root := keys[0]
+			value := reflect.ValueOf(m[root])
+			if value.Kind() != reflect.Map {
+				data = m
+				break
+			}
+			for _, key := range value.MapKeys() {
+				data[types.GetString(key)] = value.MapIndex(key)
+			}
 		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
 			w.mapBody.err = yaml.Unmarshal(body, &data)
 		case strings.Contains(ctp, "/json"):
