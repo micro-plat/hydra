@@ -70,7 +70,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		//转换函数签名
 		nf, ok := swapFunc(method.Interface())
 		if !ok {
-			err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}", mName, suffixList)
+			err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}或者func(context.IContext)", mName, suffixList)
 			return
 		}
 		switch {
