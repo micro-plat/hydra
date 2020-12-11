@@ -22,7 +22,7 @@ type CliFlagObject struct {
 	SysName         string
 	ServerTypeNames string
 	ClusterName     string
-	IsDebug         string
+	IsDebug         bool
 }
 
 var FlagVal = &CliFlagObject{}

@@ -183,6 +183,14 @@ func MustInt(v interface{}) (int, bool) {
 	return 0, false
 }
 
+//MustBool 获取bool值，不是有效bool值则返回false
+func MustBool(v interface{}) (bool, bool) {
+	if value, ok := v.(bool); ok {
+		return value, true
+	}
+	return false, false
+}
+
 //MustInt32 获取int32，不是有效的数字则返回false
 func MustInt32(v interface{}) (int32, bool) {
 	if value, ok := v.(int32); ok {

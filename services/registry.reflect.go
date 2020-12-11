@@ -19,7 +19,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 
 	//输入参数为函数
 	current := newUnitGroup(path)
-	if vv, ok := h.(func(context.IContext) interface{}); ok {
+	if vv, ok := swapFunc(h); ok {
 		current.AddHandle("", context.Handler(vv))
 		return current, nil
 	}
@@ -63,19 +63,16 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		}
 
 		hasSuffix := checkSuffix(mName)
-
-		//处理handling,handle,handled,fallback
-		nfx, ok := method.Interface().(func(context.IContext) interface{})
-		if !ok {
-			if hasSuffix {
-				err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}", mName, suffixList)
-				return
-			}
+		if !hasSuffix {
 			continue
 		}
 
-		//检查函数名是否符合特定要求
-		var nf context.Handler = nfx
+		//转换函数签名
+		nf, ok := swapFunc(method.Interface())
+		if !ok {
+			err = fmt.Errorf("函数【%s】是钩子类型（%v）,但签名不是func(context.IContext) interface{}", mName, suffixList)
+			return
+		}
 		switch {
 		case strings.HasSuffix(mName, defHandling):
 			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
@@ -110,4 +107,17 @@ func checkSuffix(mName string) bool {
 		}
 	}
 	return false
+}
+func swapFunc(i interface{}) (context.Handler, bool) {
+	//有返回值
+	nfx, ok := i.(func(context.IContext) interface{})
+	if ok {
+		return nfx, true
+	}
+	//处理无返回值情况
+	vnfx, ok := i.(func(context.IContext))
+	if ok {
+		return context.VoidHandler(vnfx).Handle, true
+	}
+	return nil, false
 }

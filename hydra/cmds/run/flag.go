@@ -9,7 +9,7 @@ import (
 //getFlags 获取运行时的参数
 func getFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
-	flags = append(flags, cli.StringFlag{
+	flags = append(flags, cli.BoolFlag{
 		Name:        "debug,d",
 		Destination: &global.FlagVal.IsDebug,
 		Usage:       `-调试模式，打印更详细的系统运行日志，避免将详细的错误信息返回给调用方`,

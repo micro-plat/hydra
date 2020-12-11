@@ -36,6 +36,15 @@ func (h Handler) Handle(c IContext) interface{} {
 	return h(c)
 }
 
+//VoidHandler 无返回值的Handler处理
+type VoidHandler func(IContext)
+
+//Handle 处理业务流程
+func (h VoidHandler) Handle(c IContext) interface{} {
+	h(c)
+	return nil
+}
+
 //IHandler 业务处理接口
 type IHandler interface {
 	//Handle 业务处理
