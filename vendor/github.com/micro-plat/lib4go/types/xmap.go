@@ -95,7 +95,7 @@ type IXMap interface {
 	IsXMap(name string) bool
 
 	//GetXMap 将指定的键的值转换为xmap
-	GetXMap(name string) (c XMap, err error)
+	GetXMap(name string) (c XMap)
 
 	//IsEmpty 是否是空结构
 	IsEmpty() bool
@@ -164,13 +164,28 @@ func NewXMapByJSON(j string) (XMap, error) {
 
 //NewXMapByXML 将xml转换为xmap
 func NewXMapByXML(j string) (XMap, error) {
+	data := make(map[string]interface{})
 	mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
-	var m map[string]interface{}
 	m, err := mxj.NewMapXml(StringToBytes(j))
 	if err != nil {
 		return nil, err
 	}
-	return NewXMapByMap(m), nil
+	if len(m) != 1 {
+		return nil, fmt.Errorf("xml根节点错误:%s", j)
+	}
+	root := ""
+	for k := range m {
+		root = k
+	}
+	value := reflect.ValueOf(m[root])
+	if value.Kind() != reflect.Map {
+		data = m
+		return data, nil
+	}
+	for _, key := range value.MapKeys() {
+		data[GetString(key)] = value.MapIndex(key).Interface()
+	}
+	return data, nil
 }
 
 //Merge 合并
@@ -349,16 +364,15 @@ func (q XMap) IsXMap(name string) bool {
 }
 
 //GetXMap 指定节点名称获取JSONConf
-func (q XMap) GetXMap(name string) (c XMap, err error) {
+func (q XMap) GetXMap(name string) (c XMap) {
 	v, ok := q.Get(name)
 	if !ok {
-		err = fmt.Errorf("%s不存在或值为空", name)
-		return
+		return map[string]interface{}{}
 	}
 	if data, ok := v.(map[string]interface{}); ok {
-		return data, nil
+		return data
 	}
-	return nil, fmt.Errorf("%s不是有效的map", name)
+	return map[string]interface{}{}
 }
 
 //SetValue 获取时间字段
@@ -414,7 +428,7 @@ func (q XMap) ToStruct(out interface{}) error {
 
 //ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
-	return Any2Struct(out, q)
+	return Map2Struct(out, q, "json")
 }
 
 //ToMap 转换为map[string]interface{}

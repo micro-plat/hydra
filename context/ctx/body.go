@@ -102,7 +102,7 @@ func (w *body) GetMap() (data map[string]interface{}, err error) {
 	//处理URL参数
 	values := w.ctx.GetURL().Query()
 	for k, v := range values {
-		vs := make([]string, 0, 10)
+		vs := make([]string, 0, 1)
 		for _, tp := range v {
 			if x, err := urlDecode([]byte(tp), w.encoding); err == nil {
 				vs = append(vs, types.BytesToString(x))

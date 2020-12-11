@@ -16,6 +16,11 @@ func getInstallFlags() []cli.Flag {
 		Destination: &coverIfExists,
 		Usage:       `-覆盖配置，覆盖配置中心和本地服务`,
 	})
+	flags = append(flags, cli.BoolFlag{
+		Name:        "debug,d",
+		Destination: &global.FlagVal.IsDebug,
+		Usage:       `-调试模式，打印更详细的系统运行日志，避免将详细的错误信息返回给调用方`,
+	})
 	flags = append(flags, global.ConfCli.GetFlags()...)
 	return flags
 }
