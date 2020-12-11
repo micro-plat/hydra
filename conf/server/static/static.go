@@ -91,6 +91,14 @@ func unarchive(dir string, path string) (string, error) {
 		return dir, nil
 	}
 
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return dir, nil
+		}
+		return "", fmt.Errorf("无法打开文件:%s,%w", path, err)
+	}
+
 	rootPath := filepath.Dir(os.Args[0])
 	tmpDir, err := ioutil.TempDir(rootPath, TempDirName)
 	if err != nil {
