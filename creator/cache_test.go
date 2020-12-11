@@ -30,29 +30,22 @@ func TestNewCache(t *testing.T) {
 
 func TestVarcache_Redis(t *testing.T) {
 
-	newRedis := cacheredis.New(cacheredis.WithConfigName("address"))
-	newRedis.Redis = redis.New([]string{"192.196.0.1"})
+	newRedis := cacheredis.New("", cacheredis.WithConfigName("address"))
+	newRedis.Redis = redis.New("192.196.0.1")
 	type args struct {
-		name string
-		q    *cacheredis.Redis
+		name    string
+		address string
+		opts    []cacheredis.Option
 	}
 	tests := []struct {
 		name    string
 		fields  *Varcache
 		args    args
-		want    *Varcache
+		want    vars
 		wantErr string
 	}{
-		{name: "1. configname是空", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "redis", q: cacheredis.New(cacheredis.WithAddrs("address"))},
-			want: NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"redis": cacheredis.New(cacheredis.WithAddrs("address"))}})},
-		{name: "2. configname不为空,无redis节点", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "redis", q: cacheredis.New(cacheredis.WithConfigName("address"))},
-			want: nil, wantErr: "请确认已配置/var/redis"},
-		{name: "3. configname不为空,redis节点存在,configname节点不存在", fields: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{}}), args: args{name: "redis", q: cacheredis.New(cacheredis.WithConfigName("address"))},
-			want: nil, wantErr: "请确认已配置/var/redis/address"},
-		{name: "4. configname不为空,节点存在,configname节点存在", fields: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})}}),
-			args: args{name: "redis", q: cacheredis.New("", cacheredis.WithConfigName("address"))},
-			want: NewCache(map[string]map[string]interface{}{"redis": map[string]interface{}{"address": redis.New([]string{"192.196.0.1"})},
-				cache.TypeNodeName: map[string]interface{}{"redis": newRedis}}), wantErr: ""},
+		{name: "1. configname是空", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "redis", address: "address"},
+			want: map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"redis": cacheredis.New("address")}}},
 	}
 
 	for _, tt := range tests {
@@ -64,7 +57,7 @@ func TestVarcache_Redis(t *testing.T) {
 				}
 			}()
 
-			got := tt.fields.Redis(tt.args.name, tt.args.q)
+			got := tt.fields.Redis(tt.args.name, tt.args.address, tt.args.opts...)
 			assert.Equal(t, tt.want, got, tt.name)
 		}()
 	}
@@ -73,16 +66,16 @@ func TestVarcache_Redis(t *testing.T) {
 func TestVarcache_GoCache(t *testing.T) {
 	type args struct {
 		name string
-		q    *gocache.GoCache
+		q    gocache.Option
 	}
 	tests := []struct {
 		name   string
 		fields *Varcache
 		args   args
-		want   *Varcache
+		want   vars
 	}{
-		{name: "1. 初始化GoCache对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "gocache", q: gocache.New(gocache.WithCleanupInterval(10))},
-			want: NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"gocache": gocache.New(gocache.WithCleanupInterval(10))}})},
+		{name: "1. 初始化GoCache对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "gocache", q: gocache.WithCleanupInterval(10)},
+			want: map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"gocache": gocache.New(gocache.WithCleanupInterval(10))}}},
 	}
 	for _, tt := range tests {
 		got := tt.fields.GoCache(tt.args.name, tt.args.q)
@@ -93,19 +86,20 @@ func TestVarcache_GoCache(t *testing.T) {
 func TestVarcache_Memcache(t *testing.T) {
 	type args struct {
 		name string
-		q    *memcached.Memcache
+		addr string
+		opts memcached.Option
 	}
 	tests := []struct {
 		name   string
 		fields *Varcache
 		args   args
-		want   *Varcache
+		want   vars
 	}{
-		{name: "1. 初始化Memcache对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "memcached", q: memcached.New(memcached.WithTimeout(10))},
-			want: NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"memcached": memcached.New(memcached.WithTimeout(10))}})},
+		{name: "1. 初始化Memcache对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "memcached", opts: memcached.WithTimeout(10)},
+			want: map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"memcached": memcached.New("", memcached.WithTimeout(10))}}},
 	}
 	for _, tt := range tests {
-		got := tt.fields.Memcache(tt.args.name, tt.args.q)
+		got := tt.fields.Memcache(tt.args.name, tt.args.addr, tt.args.opts)
 		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
@@ -120,16 +114,16 @@ func TestVarcache_Custom(t *testing.T) {
 		fields *Varcache
 		args   args
 		repeat *args
-		want   *Varcache
+		want   vars
 	}{
 		{name: "1. 初始化空Custom对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "", q: map[string]interface{}{}},
-			want: NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"": map[string]interface{}{}}})},
+			want: map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"": map[string]interface{}{}}}},
 		{name: "2. 初始化自定义Custom对象", fields: NewCache(map[string]map[string]interface{}{}), args: args{name: "customer", q: map[string]interface{}{"sss": "sdfdsfsdf"}},
-			want: NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"sss": "sdfdsfsdf"}}})},
+			want: map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"sss": "sdfdsfsdf"}}}},
 		{name: "3. 重复初始化Custom对象", fields: NewCache(map[string]map[string]interface{}{}),
 			args:   args{name: "customer", q: map[string]interface{}{"sss": "sdfdsfsdf"}},
 			repeat: &args{name: "customer", q: map[string]interface{}{"www": "54dfdf"}},
-			want:   NewCache(map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"www": "54dfdf"}}})},
+			want:   map[string]map[string]interface{}{cache.TypeNodeName: map[string]interface{}{"customer": map[string]interface{}{"www": "54dfdf"}}}},
 	}
 	for _, tt := range tests {
 		got := tt.fields.Custom(tt.args.name, tt.args.q)

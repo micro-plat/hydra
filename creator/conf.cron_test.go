@@ -37,7 +37,7 @@ func Test_cronBuilder_Load(t *testing.T) {
 	}{
 		{name: "1. 加载空任务对象", addlist: map[string]string{}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{}}, want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": task.NewEmptyTasks()}}},
 		{name: "2. 加载实体对象", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks1}},
-			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks2}}},
+			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks1}}},
 		{name: "3. 加载重复的任务对象", addlist: map[string]string{"cron1": "server1"}, obj: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks2}},
 			want: &cronBuilder{CustomerBuilder: map[string]interface{}{"task": tasks3}}},
 	}
