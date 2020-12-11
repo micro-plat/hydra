@@ -14,6 +14,7 @@ flowserver*
 webserver*
 wsserver*
 jwtserver*
+testserver*
 examples/conf
 logger.toml
 consul*
