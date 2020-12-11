@@ -1,152 +1,117 @@
 package redis
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
 
+	"github.com/micro-plat/hydra/registry/registry/redis/internal"
 	"github.com/micro-plat/lib4go/registry"
-	"github.com/micro-plat/lib4go/utility"
 )
+
+type valueWatcher struct {
+	watcher chan registry.ValueWatcher
+}
+
+type childrenWatcher struct {
+	watcher chan registry.ChildrenWatcher
+}
 
 //WatchValue 监控值变化
 func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
+	watchkey := internal.SwapKey(path, "watch")
 
-	//为当前监听分配编号
-	id := utility.GetGUID()
-	key := swapKey(path, "watch") //保存所有watcher编号
-	_, err = r.client.HSet(key, id, "watch.value").Result()
-	if err != nil {
-		return nil, err
+	if watcher, ok := r.valueWatcherMaps[watchkey]; ok {
+		return watcher.watcher, nil
+	}
+	watcher := make(chan registry.ValueWatcher, 1)
+
+	r.valueWatcherMaps[watchkey] = &valueWatcher{
+		watcher: watcher,
 	}
 
+	pubsub := r.client.Subscribe(watchkey)
+	msgChan := pubsub.Channel()
+
 	//等待值变化
-	nwatch := swapKey(key, id)
-	watcher := make(chan registry.ValueWatcher, 1)
+
 	go func() {
-
-		defer r.client.HDel(key, id)
-		defer r.Delete(nwatch)
-
-		//拉取数据
-		var v []string
-		var err error
-	LOOP:
 		for {
 			select {
 			case <-r.closeCh: //系统退出
 				return
-			default:
-				v, err = r.client.BLPop(time.Second, nwatch).Result() //获取数据
-				if err == nil {                                       //有数据，返回
-					break LOOP
-				}
-				if err != nil && err.Error() != "redis: nil" { //有错误，退出
+			case msg := <-msgChan:
+				fmt.Println("WatchValue:", msg.Channel, msg.Pattern, msg.Payload)
+				nv, err := newValueByJSON(msg.Payload)
+				if err != nil { //有错误，退出
 					watcher <- &valueEntity{Err: err}
-					return
+					continue
 				}
+				watcher <- &valueEntity{path: path, version: nv.Version, Value: nv.Data, Err: err}
 			}
 		}
-		//数据错误
-		if len(v) == 0 {
-			watcher <- &valueEntity{Err: fmt.Errorf("未收到任何数据")}
-			return
-		}
 
-		//数据错误
-		nv, err := newValueByJSON(v[len(v)-1])
-		if err != nil {
-			watcher <- &valueEntity{Err: err}
-			return
-		}
-		//通知变更
-		watcher <- &valueEntity{path: path, version: nv.Version, Value: nv.Data, Err: err}
 	}()
 	return watcher, nil
-
 }
 
 //notifyValueChange 通知订阅者值已发生变化
 func (r *Redis) notifyValueChange(path string, value *value) {
-	key := swapKey(path, "watch") //保存所有watcher编号
-	m, err := r.client.HGetAll(key).Result()
-	if err != nil {
-		return
-	}
-	for k := range m {
-		nkey := swapKey(key, k)
-		r.client.RPush(nkey, value.String()).Result()
-	}
+	key := internal.SwapKey(path, "watch") //保存所有watcher编号
+	r.client.Publish(key, value.String())
 }
 
 //WatchChildren 监控子节点变化，保存订阅者信息
 func (r *Redis) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-	//为当前监听分配编号
-	id := utility.GetGUID()
-	key := swapKey(path, "watch") //保存所有watcher编号
-	r.client.HSet(key, id, "watch.children")
 
+
+	watchkey := internal.SwapKey(path, "watch") //保存所有watcher编号
+
+	if watcher, ok := r.childrenWatcherMaps[watchkey]; ok {
+		return watcher.watcher, nil
+	}
 	//等待值变化
-	nwatch := swapKey(key, id)
 	watcher := make(chan registry.ChildrenWatcher, 1)
 
-	go func() {
-		defer r.client.HDel(key, id)
-		defer r.Delete(nwatch)
+	r.childrenWatcherMaps[watchkey] = &childrenWatcher{
+		watcher: watcher,
+	}
 
-		var v []string
-		var err error
-	LOOP:
+	pubsub := r.client.Subscribe(watchkey)
+	msgChan := pubsub.Channel()
+
+	go func() {
 		for {
 			select {
 			case <-r.closeCh: //系统退出
 				return
-			default:
-				v, err = r.client.BLPop(time.Second, nwatch).Result() //获取数据
-				if err == nil {                                       //有数据，返回
-					break LOOP
-				}
-				if err != nil && err.Error() != "redis: nil" { //有错误，退出
+			case <-msgChan:
+				children, ver, err := r.GetChildren(path)
+				if err != nil { //有错误，退出
 					watcher <- &childrenEntity{Err: err}
-					return
+					continue
 				}
+				watcher <- &childrenEntity{path: path, version: ver, children: children, Err: err}
 			}
 		}
 
-		//数据错误
-		if len(v) == 0 {
-			watcher <- &childrenEntity{Err: fmt.Errorf("未收到任何数据")}
-			return
-		}
-
-		children, ver, err := r.GetChildren(path)
-		watcher <- &childrenEntity{path: path, version: ver, children: children, Err: err}
 	}()
 	return watcher, nil
 }
 
 //notifyParentChange 通知订阅者值已发生变化
 func (r *Redis) notifyParentChange(path string, version int32) {
-
-	//获取父级
-	npath := splitKey(path)
-	parent := swapKey(npath[:len(npath)-1]...)
-
-	//获取数据
-	buff, err := r.client.Get(parent).Result()
-	if err != nil {
+	npath := internal.SplitKey(path)
+	parent := internal.SwapKey(npath[:len(npath)-1]...)
+	_, ok := r.childrenWatcherMaps[parent]
+	if !ok {
 		return
 	}
+	fmt.Println("notifyParentChange:", parent)
 
-	//获取所有通知对象
-	key := swapKey(parent, "watch") //保存所有watcher编号
-	m, err := r.client.HGetAll(key).Result()
-	if err != nil {
-		return
-	}
+	bytes, _ := json.Marshal(map[string]string{
+		"path": parent,
+	})
 
-	//开始通知
-	for k := range m {
-		nkey := swapKey(key, k)
-		r.client.RPush(nkey, buff).Result()
-	}
+	r.client.Publish(parent, string(bytes))
+	return
 }

@@ -2,12 +2,13 @@ package redis
 
 import (
 	"fmt"
-	"time"
+
+	"github.com/micro-plat/hydra/registry/registry/redis/internal"
 )
 
 //CreatePersistentNode 创建永久节点
 func (r *Redis) CreatePersistentNode(path string, data string) (err error) {
-	key := swapKey(path)
+	key := internal.SwapKey(path)
 	value := newValue(data, false)
 	_, err = r.client.Set(key, value.String(), r.maxExpiration).Result()
 	if err != nil {
@@ -19,7 +20,7 @@ func (r *Redis) CreatePersistentNode(path string, data string) (err error) {
 
 //CreateTempNode 创建临时节点
 func (r *Redis) CreateTempNode(path string, data string) (err error) {
-	key := swapKey(path)
+	key := internal.SwapKey(path)
 	value := newValue(data, true)
 	_, err = r.client.Set(key, value.String(), r.tmpExpiration).Result()
 	if err != nil {
@@ -37,15 +38,15 @@ func (r *Redis) CreateSeqNode(path string, data string) (rpath string, err error
 	if err != nil {
 		return "", err
 	}
-	key := fmt.Sprintf("%s_%d", swapKey(path), nid)
+	key := fmt.Sprintf("%s_%d", internal.SwapKey(path), nid)
 	value := newValue(data, true)
 	_, err = r.client.Set(key, value.String(), r.tmpExpiration).Result()
 	if err != nil {
-		return swapPath(key), err
+		return internal.SwapPath(key), err
 	}
 	r.tmpNodes.Set(key, 0)
 	r.notifyParentChange(key, value.Version)
-	return swapPath(key), nil
+	return internal.SwapPath(key), nil
 }
 
 //getSeq 处理seq最大值问题
@@ -61,24 +62,4 @@ func (r *Redis) getSeq() (int64, error) {
 	}
 	return nid, nil
 
-}
-func (r *Redis) keepalive() {
-	tk := time.NewTicker(r.checkTicker)
-	for {
-		select {
-		case <-r.closeCh:
-			r.tmpNodes.RemoveIterCb(func(key string, v interface{}) bool {
-				r.Delete(key)
-				return true
-			})
-			return
-		case <-tk.C:
-			items := r.tmpNodes.Items()
-			for k := range items {
-				if ok, err := r.Exists(k); ok && err == nil {
-					r.client.Expire(k, r.tmpExpiration).Result()
-				}
-			}
-		}
-	}
 }
