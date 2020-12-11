@@ -62,7 +62,7 @@ func (s *Static) IsExclude(rPath string) bool {
 		if hasExt && strings.EqualFold(pExt, v) {
 			return true
 		}
-		if strings.EqualFold(rPath, v) {
+		if strings.Contains(rPath, v) {
 			return true
 		}
 	}
