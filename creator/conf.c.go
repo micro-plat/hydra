@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/rpc"
-	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/services"
@@ -148,7 +147,7 @@ func (c *conf) GetAPI() *httpBuilder {
 //Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
 	web := newHTTP(global.Web, address, c.routerLoader, opts...)
-	web.Static(static.WithArchive(global.AppName))
+	web.Static()
 	c.data[global.Web] = web
 	return web
 }
@@ -164,7 +163,6 @@ func (c *conf) GetWeb() *httpBuilder {
 //Ws websocket服务器配置
 func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
 	ws := newHTTP(global.WS, address, c.routerLoader, opts...)
-	//ws.Static(static.WithArchive(global.AppName))
 	c.data[global.WS] = ws
 	return ws
 }
