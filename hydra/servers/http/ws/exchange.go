@@ -70,7 +70,7 @@ func (e *Exchange) Notify(uuid string, msg interface{}) error {
 	if err != nil {
 		return err
 	}
-	return queue.Send(e.getQueueName(uuid), msg)
+	return queue.Send(e.getQueueName(uuid), msg, uuid)
 }
 
 //handle 业务回调处理
@@ -85,9 +85,9 @@ func (e *Exchange) handle(ctx context.IContext) interface{} {
 	if err != nil {
 		return err
 	}
-	return callback(body)
-
+	return callback(string(body))
 }
+
 func (e *Exchange) getQueueName(id string) string {
 	return fmt.Sprintf(e.queueFormatName, id)
 }

@@ -17,7 +17,7 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var _ context.IResponse = &response{}
