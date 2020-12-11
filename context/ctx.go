@@ -28,6 +28,8 @@ const (
 	UTF8PLAIN = "text/plain; charset=utf-8"
 )
 
+var emptyResult = &EmptyResult{}
+
 type EmptyResult struct{}
 
 //Handler 业务处理Handler
@@ -44,7 +46,7 @@ type VoidHandler func(IContext)
 //Handle 处理业务流程
 func (h VoidHandler) Handle(c IContext) interface{} {
 	h(c)
-	return &EmptyResult{}
+	return emptyResult
 }
 
 //IHandler 业务处理接口
