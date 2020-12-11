@@ -18,8 +18,6 @@ type setOptions struct {
 func setWithProperType(val interface{}, value reflect.Value, field reflect.StructField) error {
 
 	switch value.Kind() {
-	// case reflect.Ptr:
-	// 	return setWithProperType(val, value.Elem(), field)
 	case reflect.Int:
 		return setIntField(fmt.Sprint(val), 0, value)
 	case reflect.Int8:
