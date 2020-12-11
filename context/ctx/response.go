@@ -167,8 +167,11 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	if len(ct) > 0 {
 		content = ct[0]
 	}
-	if content == nil { //对于空值一律不处理
+
+	switch content.(type) {
+	case context.EmptyResult:
 		return nil
+
 	}
 
 	//2. 修改当前结果状态码与内容
