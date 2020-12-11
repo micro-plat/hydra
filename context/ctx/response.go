@@ -305,7 +305,7 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 	v := reflect.ValueOf(content)
 	if v.Kind() == reflect.Ptr {
-		v = value.Elem()
+		v = v.Elem()
 	}
 	r = mxj.Map{}
 	if v.Kind() == reflect.Map {
