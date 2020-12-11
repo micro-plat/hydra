@@ -107,22 +107,33 @@ func (c *response) NoNeedWrite(status int) {
 	c.final.status = status
 }
 
-//JSON json输出响应内容
+//JSON 以application/json输出响应内容
 func (c *response) JSON(code int, data interface{}) interface{} {
 	return c.Data(code, fmt.Sprintf(context.JSONF, c.path.GetEncoding()), data)
 }
 
-//XML xml输出响应内容
+//XML 以application/xml输出响应内容
 func (c *response) XML(code int, data interface{}) interface{} {
 	return c.Data(code, fmt.Sprintf(context.XMLF, c.path.GetEncoding()), data)
 }
 
-//YAML yaml输出响应内容
+//YAML 以text/yaml输出响应内容
 func (c *response) YAML(code int, data interface{}) interface{} {
 	return c.Data(code, fmt.Sprintf(context.YAMLF, c.path.GetEncoding()), data)
 }
 
-//Data 根据内容匹配响应内容
+//HTML 以text/html输出响应内容
+func (c *response) HTML(code int, data string) interface{} {
+	return c.Data(code, fmt.Sprintf(context.YAMLF, c.path.GetEncoding()), data)
+}
+
+//Plain 以text/plain格式输出响应内容
+func (c *response) Plain(code int, data string) interface{} {
+	return c.Data(code, fmt.Sprintf(context.PLAINF, c.path.GetEncoding()), data)
+}
+
+//Data 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+//格式输出内容
 func (c *response) Data(code int, contentType string, data interface{}) interface{} {
 	c.ContentType(contentType)
 	if err := c.Write(code, data); err != nil {
@@ -131,15 +142,14 @@ func (c *response) Data(code int, contentType string, data interface{}) interfac
 	return c.final.content
 }
 
-//Any 根据内容匹配响应内容与状态码
-func (c *response) Any(data interface{}) interface{} {
-	if err := c.Write(200, data); err != nil {
-		return err
-	}
-	return c.final.content
+//WriteAny 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+//格式输出内容
+func (c *response) WriteAny(v interface{}) error {
+	return c.Write(http.StatusOK, v)
 }
 
-//Write 检查内容并处理状态码,数据未写入响应流
+//Write 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+//格式输出内容
 func (c *response) Write(status int, ct ...interface{}) error {
 	if c.noneedWrite {
 		return fmt.Errorf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status)
@@ -317,11 +327,6 @@ func (c *response) writeNow(status int, ctyp string, content string) error {
 	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
-}
-
-//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
-func (c *response) WriteAny(v interface{}) error {
-	return c.Write(http.StatusOK, v)
 }
 
 //Redirect 转跳g刚才gc
