@@ -86,7 +86,7 @@ func (w *body) GetMap() (map[string]interface{}, error) {
 				break
 			}
 			for _, key := range value.MapKeys() {
-				data[types.GetString(key)] = value.MapIndex(key)
+				data[types.GetString(key)] = value.MapIndex(key).Interface()
 			}
 		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
 			w.mapBody.err = yaml.Unmarshal(body, &data)
