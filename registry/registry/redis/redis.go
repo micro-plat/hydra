@@ -22,6 +22,9 @@ type Redis struct {
 	checkTicker   time.Duration
 	tmpNodes      cmap.ConcurrentMap
 	client        *internal.Client
+
+	valueWatcherMaps    map[string]*valueWatcher
+	childrenWatcherMaps map[string]*childrenWatcher
 }
 
 //NewRedisBy 构建redis注册中心
@@ -43,35 +46,21 @@ func NewRedis(c *internal.ClientConf) (*Redis, error) {
 	}
 	redis := &Redis{
 		client:        rds,
-		maxExpiration: time.Hour * 24 * 365 * 10,
+		maxExpiration: -1, //time.Hour * 24 * 365 * 10,
 		tmpExpiration: time.Second * 5,
 		checkTicker:   time.Second * 2,
 		maxSeq:        9999999999,
 		tmpNodes:      cmap.New(4),
 		closeCh:       make(chan struct{}),
-		seqPath:       swapKey(fmt.Sprintf("hydra/%s/seq", global.Version)),
+		seqPath:       internal.SwapKey(fmt.Sprintf("hydra/%s/seq", global.Version)),
 	}
+	redis.valueWatcherMaps = make(map[string]*valueWatcher)
+	redis.childrenWatcherMaps = make(map[string]*childrenWatcher)
+
 	go redis.keepalive()
 	return redis, nil
 }
 
-//Exists 检查节点是否存在
-func (r *Redis) Exists(path string) (bool, error) {
-	key := swapKey(path)
-	e, err := r.client.Exists(key).Result()
-	if err != nil {
-		return false, err
-	}
-	if err == nil && e == 1 {
-		return true, nil
-	}
-	//npaths, err := r.client.Keys(key + ":*").Result()
-	exists, err := r.client.ExistsChildren(key + ":*")
-	if err != nil {
-		return false, err
-	}
-	return exists, err
-}
 
 //Close 关闭当前服务
 func (r *Redis) Close() error {
@@ -81,6 +70,28 @@ func (r *Redis) Close() error {
 		r.tmpNodes.Clear()
 	})
 	return nil
+}
+
+func (r *Redis) keepalive() {
+	tk := time.NewTicker(r.checkTicker)
+	for {
+		select {
+		case <-r.closeCh:
+			r.tmpNodes.RemoveIterCb(func(key string, v interface{}) bool {
+				r.Delete(key)
+				return true
+			})
+			return
+		case <-tk.C:
+			items := r.tmpNodes.Items()
+			for k := range items {
+				exists, err := r.client.Exists(k).Result()
+				if exists > 0 && err == nil {
+					r.client.Expire(k, r.tmpExpiration).Result()
+				}
+			}
+		}
+	}
 }
 
 //redisFactory 基于redis的注册中心

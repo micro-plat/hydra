@@ -176,11 +176,32 @@ type IResponse interface {
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
 
-	//Write 向响应流中写入状态码与内容(不会立即写入)
-	Write(s int, v ...interface{}) error
+	//JSON json输出响应内容
+	JSON(code int, data interface{}) interface{}
 
-	//WriteAny 向响应流中写入内容,状态码根据内容进行判断(不会立即写入)
+	//XML xml输出响应内容
+	XML(code int, data interface{}) interface{}
+
+	//以text/html输出响应内容
+	HTML(code int, data string) interface{}
+
+	//YAML yaml输出响应内容
+	YAML(code int, data interface{}) interface{}
+
+	//以text/plain格式输出响应内容
+	Plain(code int, data string) interface{}
+
+	//Data 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+	//格式输出内容
+	Data(code int, contentType string, data interface{}) interface{}
+
+	//WriteAny 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+	//格式输出内容
 	WriteAny(v interface{}) error
+
+	//Write 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+	//格式输出内容
+	Write(s int, v ...interface{}) error
 
 	//File 向响应流中写入文件(立即写入)
 	File(path string)

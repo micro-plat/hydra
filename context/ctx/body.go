@@ -12,7 +12,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/types"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type params struct {
