@@ -1,7 +1,7 @@
 package hydra
 
 import (
-	"github.com/micro-plat/cli"
+	"github.com/lib4dev/cli"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/services"
@@ -54,5 +54,10 @@ func (m *MicroApp) Start() {
 
 //Close 关闭服务器
 func (m *MicroApp) Close() {
+	Close()
+}
+
+//Close 关闭服务器
+func Close() {
 	compatible.AppClose()
 }

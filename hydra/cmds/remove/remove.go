@@ -1,7 +1,7 @@
 package remove
 
 import (
-	"github.com/micro-plat/cli/cmds"
+	"github.com/lib4dev/cli/cmds"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 
