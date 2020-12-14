@@ -2,7 +2,6 @@ package ctx
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -279,20 +278,12 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			panic("转化为xml必须是struct或者map,内容格式不正确")
 		}
 
-		if tpkind == reflect.Struct {
-			buff, err := xml.Marshal(content)
-			if err != nil {
-				panic(err)
-			}
-			return string(buff)
-		}
-
 		m, err := c.toMap(content)
 		if err != nil {
 			panic(err)
 		}
 
-		str, err := any.XmlIndent(m, "", " ")
+		str, err := any.XmlIndent(m, "", " ", "xml")
 		if err != nil {
 			panic(err)
 		}
@@ -320,9 +311,20 @@ func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+
 	r = mxj.Map{}
-	for _, key := range v.MapKeys() {
-		r[types.GetString(key)] = v.MapIndex(key).Interface()
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			r[types.GetString(key)] = v.MapIndex(key).Interface()
+		}
+	}
+
+	if v.Kind() == reflect.Struct {
+		buff, err := json.Marshal(content)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(buff, &r)
 	}
 
 	return
