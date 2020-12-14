@@ -11,7 +11,7 @@ func Translate(args ...tengo.Object) (ret tengo.Object, err error) {
 		return nil, tengo.ErrWrongNumArguments
 	}
 
-	//获取第二个参数
+	//获取第一个参数
 	format, ok := tengo.ToString(args[0])
 	if !ok {
 		return nil, tengo.ErrInvalidArgumentType{
@@ -21,7 +21,7 @@ func Translate(args ...tengo.Object) (ret tengo.Object, err error) {
 		}
 	}
 
-	//获取第一个参数
+	//获取第二个参数
 	second := tengo.ToInterface(args[1])
 
 	mapArgs, ok := second.(map[string]interface{})
