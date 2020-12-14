@@ -2,6 +2,8 @@ package gocache
 
 import (
 	"fmt"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/micro-plat/hydra/components/caches/cache"
@@ -15,6 +17,7 @@ const Proto = "gocache"
 
 // Client redis配置文件
 type Client struct {
+	lock    sync.Mutex
 	servers []string
 	client  *gocache.Cache
 }
@@ -56,12 +59,36 @@ func (c *Client) Get(key string) (string, error) {
 
 //Decrement 增加变量的值
 func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.procInt64val(key)
 	return c.client.DecrementInt64(key, delta)
 }
 
 //Increment 减少变量的值
 func (c *Client) Increment(key string, delta int64) (n int64, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.procInt64val(key)
 	return c.client.IncrementInt64(key, delta)
+}
+
+func (c *Client) procInt64val(key string) (err error) {
+	val, exp, ok := c.client.GetWithExpiration(key)
+	if !ok {
+		c.client.SetDefault(key, int64(0))
+	}
+	if _, ok := val.(int64); ok {
+		return
+	}
+	newval, err := strconv.ParseInt(fmt.Sprint(val), 10, 64)
+	if err != nil {
+		err = fmt.Errorf("%v:不是有效的数字", val)
+		return
+	}
+	c.client.Set(key, newval, exp.Sub(time.Now()))
+	return
+
 }
 
 //Gets 获取多条数据
