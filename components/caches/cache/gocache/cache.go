@@ -61,7 +61,10 @@ func (c *Client) Get(key string) (string, error) {
 func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.procInt64val(key)
+	err = c.procInt64val(key)
+	if err != nil {
+		return
+	}
 	return c.client.DecrementInt64(key, delta)
 }
 
@@ -69,7 +72,10 @@ func (c *Client) Decrement(key string, delta int64) (n int64, err error) {
 func (c *Client) Increment(key string, delta int64) (n int64, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.procInt64val(key)
+	err = c.procInt64val(key)
+	if err != nil {
+		return
+	}
 	return c.client.IncrementInt64(key, delta)
 }
 
@@ -83,7 +89,7 @@ func (c *Client) procInt64val(key string) (err error) {
 	}
 	newval, err := strconv.ParseInt(fmt.Sprint(val), 10, 64)
 	if err != nil {
-		err = fmt.Errorf("%v:不是有效的数字", val)
+		err = fmt.Errorf("%s的值：%v,不是有效的数字", key, val)
 		return
 	}
 	c.client.Set(key, newval, exp.Sub(time.Now()))
