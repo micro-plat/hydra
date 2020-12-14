@@ -130,19 +130,17 @@ func tryToSetValue(value reflect.Value, field reflect.StructField, setter setter
 
 func setByForm(value reflect.Value, field reflect.StructField, form map[string]interface{}, tagValue string, opt setOptions) (isSetted bool, err error) {
 	vs, ok := form[tagValue]
-	if !ok || vs == nil {
+	if !ok && !opt.isDefaultExists {
 		return false, nil
 	}
 
-	switch value.Kind() { //目标类型
+	switch value.Kind() {
 	case reflect.Slice:
 		if !ok {
-			vs = []interface{}{opt.defaultValue}
+			vs = []string{opt.defaultValue}
 		}
-		ls := make([]interface{}, 0, 1)
+		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
-		fmt.Println("s:", s.Kind().String(), s.Len())
-
 		if s.Len() > 0 {
 			var kind = s.Index(0).Kind()
 			if s.Index(0).Kind() == reflect.Ptr {
@@ -154,14 +152,15 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 		}
 
 		for i := 0; i < s.Len(); i++ {
+
 			ls = append(ls, fmt.Sprint(s.Index(i).Interface()))
 		}
 		return true, setSlice(ls, value, field)
 	case reflect.Array:
 		if !ok {
-			vs = []interface{}{opt.defaultValue}
+			vs = []string{opt.defaultValue}
 		}
-		ls := make([]interface{}, 0, 1)
+		ls := make([]string, 0, 1)
 		s := reflect.ValueOf(vs)
 
 		if s.Len() > 0 {
@@ -184,7 +183,6 @@ func setByForm(value reflect.Value, field reflect.StructField, form map[string]i
 }
 
 func setWithProperType(val interface{}, value reflect.Value, field reflect.StructField) error {
-
 	switch value.Kind() {
 	case reflect.Int:
 		return setIntField(fmt.Sprint(val), 0, value)
@@ -235,7 +233,7 @@ func setWithProperType(val interface{}, value reflect.Value, field reflect.Struc
 		}
 		return json.Unmarshal(buff, value.Addr().Interface())
 	default:
-		return fmt.Errorf("%s %s %+v", errUnknownType.Error(), value.Kind().String(), value)
+		return errUnknownType
 	}
 	return nil
 }
@@ -335,7 +333,7 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 	return nil
 }
 
-func setArray(vals []interface{}, value reflect.Value, field reflect.StructField) error {
+func setArray(vals []string, value reflect.Value, field reflect.StructField) error {
 	for i, s := range vals {
 		err := setWithProperType(s, value.Index(i), field)
 		if err != nil {
@@ -345,7 +343,7 @@ func setArray(vals []interface{}, value reflect.Value, field reflect.StructField
 	return nil
 }
 
-func setSlice(vals []interface{}, value reflect.Value, field reflect.StructField) error {
+func setSlice(vals []string, value reflect.Value, field reflect.StructField) error {
 	slice := reflect.MakeSlice(value.Type(), len(vals), len(vals))
 	err := setArray(vals, slice, field)
 	if err != nil {

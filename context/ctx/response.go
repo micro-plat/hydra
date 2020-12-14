@@ -2,11 +2,13 @@ package ctx
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
 
+	any "github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
@@ -277,30 +279,31 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			panic("转化为xml必须是struct或者map,内容格式不正确")
 		}
 
+		if tpkind == reflect.Struct {
+			buff, err := xml.Marshal(content)
+			if err != nil {
+				panic(err)
+			}
+			return string(buff)
+		}
+
 		m, err := c.toMap(content)
 		if err != nil {
 			panic(err)
 		}
 
-		str, err := m.Xml()
+		str, err := any.XmlIndent(m, "", " ")
 		if err != nil {
 			panic(err)
 		}
 
 		return string(str)
-
-		// if buff, err := xml.Marshal(content); err != nil {
-		// 	panic(err)
-		// } else {
-		// 	return string(buff)
-		// }
 	case strings.Contains(ctp, "yaml"):
 		if buff, err := yaml.Marshal(content); err != nil {
 			panic(err)
 		} else {
 			return string(buff)
 		}
-
 	case strings.Contains(ctp, "json"):
 		if buff, err := json.Marshal(content); err != nil {
 			panic(err)
@@ -318,18 +321,8 @@ func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 		v = v.Elem()
 	}
 	r = mxj.Map{}
-	if v.Kind() == reflect.Map {
-		for _, key := range v.MapKeys() {
-			r[types.GetString(key)] = v.MapIndex(key).Interface()
-		}
-	}
-
-	if v.Kind() == reflect.Struct {
-		buff, err := json.Marshal(content)
-		if err != nil {
-			return nil, err
-		}
-		err = json.Unmarshal(buff, &r)
+	for _, key := range v.MapKeys() {
+		r[types.GetString(key)] = v.MapIndex(key).Interface()
 	}
 
 	return
