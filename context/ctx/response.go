@@ -283,7 +283,7 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			panic(err)
 		}
 
-		str, err := any.XmlIndent(m, "", "   ", "xml")
+		str, err := any.XmlIndent(m, "", " ", "xml")
 		if err != nil {
 			panic(err)
 		}
@@ -312,6 +312,7 @@ func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+
 	r = mxj.Map{}
 	if v.Kind() == reflect.Map {
 		for _, key := range v.MapKeys() {
