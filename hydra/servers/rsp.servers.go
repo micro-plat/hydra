@@ -126,7 +126,7 @@ func (r *RspServers) checkServer(path string) error {
 	//拉取配置信息
 	conf, err := app.NewAPPConf(path, r.registry)
 	if err != nil {
-		r.log.Errorf("获取%s配置发生错误:%v", path, err)
+		return fmt.Errorf("获取%s配置发生错误:%v", path, err)
 	}
 
 	//同一时间只允许一个流程处理配置变更
@@ -166,8 +166,7 @@ func (r *RspServers) checkServer(path string) error {
 			}
 			r.servers[serverType] = srvr
 		} else {
-			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
-			return nil
+			return fmt.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
 		}
 	}
 

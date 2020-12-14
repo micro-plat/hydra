@@ -188,6 +188,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	if err != nil {
 		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
 	}
+
 	rdata, err := conf.Decrypt(data)
 	if err != nil {
 		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)
@@ -195,6 +196,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 	if len(rdata) == 0 {
 		rdata = []byte("{}")
 	}
+
 	childConf, err := conf.NewByText(rdata, version)
 	if err != nil {
 		err = fmt.Errorf("%s[%s]配置有误:%w", path, data, err)
