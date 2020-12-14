@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/cli/logs"
+	"github.com/lib4dev/cli/cmds"
+	"github.com/lib4dev/cli/logs"
 	"github.com/urfave/cli"
 )
 
@@ -14,14 +14,14 @@ var VERSION = "0.0.1"
 
 //App  cli app
 type App struct {
-	app *cli.App
+	*cli.App
 	log *logs.Logger
 	*option
 }
 
 //Start 启动应用程序
 func (a *App) Start() {
-	if err := a.app.Run(os.Args); err != nil {
+	if err := a.Run(os.Args); err != nil {
 		a.log.Error(err)
 	}
 }
@@ -34,10 +34,10 @@ func New(opts ...Option) *App {
 		opt(app.option)
 	}
 
-	app.app = cli.NewApp()
-	app.app.Name = filepath.Base(os.Args[0])
-	app.app.Version = app.version
-	app.app.Usage = app.usage
+	app.App = cli.NewApp()
+	app.App.Name = filepath.Base(os.Args[0])
+	app.App.Version = app.version
+	app.App.Usage = app.usage
 	cli.HelpFlag = cli.BoolFlag{
 		Name:  "help,h",
 		Usage: "查看帮助信息",
@@ -46,6 +46,6 @@ func New(opts ...Option) *App {
 		Name:  "version,v",
 		Usage: "查看版本信息",
 	}
-	app.app.Commands = cmds.GetCmds()
+	app.App.Commands = cmds.GetCmds()
 	return app
 }

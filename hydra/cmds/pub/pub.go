@@ -1,9 +1,9 @@
 package pub
 
 import (
-	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/hydra/global/compatible"
+	"github.com/lib4dev/cli/cmds"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/urfave/cli"
 )
 

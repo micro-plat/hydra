@@ -1,4 +1,4 @@
-module github.com/micro-plat/cli
+module github.com/lib4dev/cli
 
 go 1.14
 

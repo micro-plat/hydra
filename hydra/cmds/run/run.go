@@ -3,7 +3,7 @@ package run
 import (
 	"os"
 
-	"github.com/micro-plat/cli/cmds"
+	"github.com/lib4dev/cli/cmds"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
 )
@@ -26,6 +26,8 @@ func doRun(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+
+	c.App.Metadata["app"] = hydraSrv.Service
 	err = hydraSrv.Run()
 	return nil
 }

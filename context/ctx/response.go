@@ -195,14 +195,11 @@ func (c *response) getContentType() string {
 	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
 		return ctp
 	}
-	headerObj, err := c.conf.GetHeaderConf()
+	headers, err := c.conf.GetHeaderConf()
 	if err != nil {
 		return ""
 	}
-	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
-		return ct
-	}
-	return ""
+	return headers["Content-Type"]
 }
 
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
@@ -215,7 +212,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if global.IsDebug {
 			rs, rc = v.GetCode(), v.GetError().Error()
 		} else {
-			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(status), "", v.GetError().Error())
+			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(status), "", "Internal Server Error")
 		}
 	case error:
 		c.log.Error(content)
@@ -223,7 +220,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if global.IsDebug {
 			rc = v.Error()
 		} else {
-			rc = types.DecodeString(http.StatusText(status), "", v.Error())
+			rc = types.DecodeString(http.StatusText(status), "", "Internal Server Error")
 		}
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
