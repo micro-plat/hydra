@@ -41,7 +41,7 @@ func GetService(c *cli.Context, args ...string) (hydraSrv *HydraService, err err
 func GetSrvConfig(args ...string) *service.Config {
 	srvname := global.Def.GetLongAppName()
 	parties := strings.Split(srvname, "_")
-	dispName := fmt.Sprintf("%s(%s)", parties[0], parties[1])
+	dispName := fmt.Sprintf("%s(%s)", strings.Join(parties[:len(parties)-1], "_"), parties[len(parties)-1])
 
 	return &service.Config{
 		Name:        srvname,
