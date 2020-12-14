@@ -2,6 +2,8 @@ package pkgs
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/micro-plat/hydra/global"
@@ -43,12 +45,15 @@ func GetSrvConfig(args ...string) *service.Config {
 	parties := strings.Split(srvname, "_")
 	dispName := fmt.Sprintf("%s(%s)", strings.Join(parties[:len(parties)-1], "_"), parties[len(parties)-1])
 
-	return &service.Config{
+	cfg := &service.Config{
 		Name:        srvname,
 		DisplayName: dispName,
 		Description: global.Usage,
 		Arguments:   args,
 	}
+	path, _ := filepath.Abs(os.Args[0])
+	cfg.WorkingDirectory = filepath.Dir(path)
+	return cfg
 }
 
 //GetSrvApp SrvCfg
