@@ -56,8 +56,7 @@ func NewByText(message []byte, version int32) (c *RawConf, err error) {
 	switch {
 	case bytes.HasPrefix(message, []byte("<?xml")):
 		c.XMap, err = types.NewXMapByXML(string(message))
-	case json.Valid(message) && (bytes.HasPrefix(message, []byte("{")) ||
-		bytes.HasPrefix(message, []byte("["))):
+	case bytes.HasPrefix(message, []byte("{")) || bytes.HasPrefix(message, []byte("[")):
 		c.XMap, err = types.NewXMapByJSON(string(message))
 	}
 	return c, err
