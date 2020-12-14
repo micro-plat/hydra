@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	any "github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
@@ -282,25 +283,18 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			panic(err)
 		}
 
-		str, err := m.Xml()
+		str, err := any.XmlIndent(m, "", "   ")
 		if err != nil {
 			panic(err)
 		}
 
 		return string(str)
-
-		// if buff, err := xml.Marshal(content); err != nil {
-		// 	panic(err)
-		// } else {
-		// 	return string(buff)
-		// }
 	case strings.Contains(ctp, "yaml"):
 		if buff, err := yaml.Marshal(content); err != nil {
 			panic(err)
 		} else {
 			return string(buff)
 		}
-
 	case strings.Contains(ctp, "json"):
 		if buff, err := json.Marshal(content); err != nil {
 			panic(err)

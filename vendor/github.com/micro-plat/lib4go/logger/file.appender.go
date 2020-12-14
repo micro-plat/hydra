@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -48,7 +47,6 @@ func (a *FileAppender) clean() {
 			for v := range writerChan {
 				w := v.Val.(*writer)
 				if time.Since(w.lastWrite) < 5*time.Minute {
-					fmt.Println("---------------end-----------------")
 					w.Write(GetEndWriteEvent()) //向日志发送结速写入事件
 					w.Close()                   //等待所有日志被写入文件
 					a.writers.Remove(v.Key)
