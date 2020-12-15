@@ -1,8 +1,8 @@
 package conf
 
 import (
-	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/cli/logs"
+	"github.com/lib4dev/cli/cmds"
+	"github.com/lib4dev/cli/logs"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
@@ -36,9 +36,9 @@ func showNow(c *cli.Context) (err error) {
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(c); err != nil {
-		logs.Log.Error(err)
+		//logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return nil
+		return err
 	}
 
 	//2. 处理本地内存作为注册中心的服务发布问题
@@ -60,9 +60,9 @@ func installNow(c *cli.Context) (err error) {
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(c); err != nil {
-		logs.Log.Error(err)
+		//logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return nil
+		return err
 	}
 
 	//fmt.Println("global.Current().GetRegistryAddr()", global.Current().GetRegistryAddr())

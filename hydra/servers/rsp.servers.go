@@ -69,45 +69,44 @@ func (r *RspServers) Start() (err error) {
 	if err != nil {
 		return err
 	}
+	go r.freeOSMemory()
 	go r.loopRecvNotify()
 	return nil
 }
 
+func (r *RspServers) freeOSMemory() {
+	tk := time.NewTicker(time.Second * 120)
+	for {
+		select {
+		case <-tk.C:
+			debug.FreeOSMemory()
+		case <-r.closeChan:
+			return
+		}
+	}
+}
+
 //loopRecvNotify 接收注册中心配置变更消息
 func (r *RspServers) loopRecvNotify() {
-	go func() {
-		tk := time.NewTicker(time.Second * 120)
-	LOOP:
-		for {
-			select {
-			case <-tk.C:
-				debug.FreeOSMemory()
-			case <-r.closeChan:
-				break LOOP
-			}
-		}
-
-	}()
 	waitTimeout := time.After(time.Second)
-LOOP:
 	for {
 		select {
 		case <-r.closeChan:
-			break LOOP
+			return
 		case <-waitTimeout:
 			if len(r.servers) == 0 {
 				r.log.Debug("监听服务器配置...")
 			}
 		case p := <-r.delayChan:
 			if r.done {
-				break LOOP
+				return
 			}
 			if err := r.checkServer(p); err != nil {
 				r.log.Error(err)
 			}
 		case u := <-r.notify:
 			if r.done {
-				break LOOP
+				return
 			}
 			if err := r.checkServer(u.Path); err != nil {
 				r.log.Error(err)
@@ -126,7 +125,7 @@ func (r *RspServers) checkServer(path string) error {
 	//拉取配置信息
 	conf, err := app.NewAPPConf(path, r.registry)
 	if err != nil {
-		r.log.Errorf("获取%s配置发生错误:%v", path, err)
+		return fmt.Errorf("获取%s配置发生错误:%v", path, err)
 	}
 
 	//同一时间只允许一个流程处理配置变更
@@ -166,8 +165,7 @@ func (r *RspServers) checkServer(path string) error {
 			}
 			r.servers[serverType] = srvr
 		} else {
-			r.log.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
-			return nil
+			return fmt.Errorf("服务器类型[%s]不支持或未注册", conf.GetServerConf().GetServerPath())
 		}
 	}
 

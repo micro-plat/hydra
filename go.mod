@@ -7,6 +7,7 @@ require (
 	github.com/SkyAPM/go2sky v0.6.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
+	github.com/clbanning/anyxml v1.2.2
 	github.com/clbanning/mxj v1.8.4
 	github.com/d5/tengo/v2 v2.6.2
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -19,8 +20,8 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
+	github.com/lib4dev/cli v1.2.3
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/micro-plat/cli v1.1.0
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.0.2
 	github.com/nwaples/rardecode v1.1.0 // indirect
@@ -48,3 +49,5 @@ require (
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+
+// replace github.com/lib4dev/cli=> ../../../github.com/lib4dev/cli

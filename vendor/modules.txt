@@ -17,6 +17,9 @@ github.com/asaskevich/govalidator
 # github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 ## explicit
 github.com/bradfitz/gomemcache/memcache
+# github.com/clbanning/anyxml v1.2.2
+## explicit
+github.com/clbanning/anyxml
 # github.com/clbanning/mxj v1.8.4
 ## explicit
 github.com/clbanning/mxj
@@ -98,16 +101,16 @@ github.com/keybase/go-ps/darwincgo
 github.com/kr/fs
 # github.com/leodido/go-urn v1.2.0
 github.com/leodido/go-urn
+# github.com/lib4dev/cli v1.2.3
+## explicit
+github.com/lib4dev/cli
+github.com/lib4dev/cli/cmds
+github.com/lib4dev/cli/logs
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mholt/archiver v3.1.1+incompatible
 ## explicit
 github.com/mholt/archiver
-# github.com/micro-plat/cli v1.1.0
-## explicit
-github.com/micro-plat/cli
-github.com/micro-plat/cli/cmds
-github.com/micro-plat/cli/logs
 # github.com/micro-plat/gmq v1.0.1
 ## explicit
 github.com/micro-plat/gmq/mqtt

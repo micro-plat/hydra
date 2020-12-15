@@ -19,8 +19,8 @@ var CmdsUpdateProcessSignal = syscall.SIGUSR2
 
 //AppClose AppClose
 func AppClose() {
-	parent := syscall.Getppid()
-	syscall.Kill(parent, syscall.SIGUSR2)
+	parent := syscall.Getpid()
+	syscall.Kill(parent, syscall.SIGTERM)
 }
 
 const (

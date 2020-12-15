@@ -31,6 +31,7 @@ func NewResponsive(cnf app.IAPPConf) (h *Responsive, err error) {
 		pub:      pub.New(cnf.GetServerConf()),
 		comparer: conf.NewComparer(cnf.GetServerConf(), api.MainConfName, api.SubConfName...),
 	}
+
 	app.Cache.Save(cnf)
 	h.Server, err = h.getServer(cnf)
 	return h, err
@@ -70,18 +71,20 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	}
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
+		server, err := w.getServer(c)
+		if err != nil {
+			return false, err
+		}
+
 		w.Shutdown()
 		w.conf = c
-
 		app.Cache.Save(c)
 		if !c.GetServerConf().IsStarted() {
 			w.log.Info("api服务被禁用，不用重启")
 			return true, nil
 		}
-		w.Server, err = w.getServer(c)
-		if err != nil {
-			return false, err
-		}
+
+		w.Server = server
 		if err = w.Start(); err != nil {
 			return false, err
 		}

@@ -3,9 +3,8 @@ package install
 import (
 	"os"
 
-	"github.com/micro-plat/cli/cmds"
-	"github.com/micro-plat/cli/logs"
-	"github.com/micro-plat/hydra/global"
+	"github.com/lib4dev/cli/cmds"
+ 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/urfave/cli"
@@ -32,9 +31,9 @@ func doInstall(c *cli.Context) (err error) {
 
 	//2. 绑定应用程序参数
 	if err := global.Def.Bind(c); err != nil {
-		logs.Log.Error(err)
+		//logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return nil
+		return err
 	}
 	args := []string{"run"}
 	args = append(args, os.Args[2:]...)

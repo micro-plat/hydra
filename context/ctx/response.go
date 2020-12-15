@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	any "github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
@@ -167,8 +168,11 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	if len(ct) > 0 {
 		content = ct[0]
 	}
-	if content == nil { //对于空值一律不处理
+
+	switch content.(type) {
+	case context.EmptyResult:
 		return nil
+
 	}
 
 	//2. 修改当前结果状态码与内容
@@ -192,14 +196,11 @@ func (c *response) getContentType() string {
 	if ctp := c.ctx.WHeader("Content-Type"); ctp != "" {
 		return ctp
 	}
-	headerObj, err := c.conf.GetHeaderConf()
+	headers, err := c.conf.GetHeaderConf()
 	if err != nil {
 		return ""
 	}
-	if ct, ok := headerObj["Content-Type"]; ok && ct != "" {
-		return ct
-	}
-	return ""
+	return headers["Content-Type"]
 }
 
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
@@ -208,10 +209,20 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	switch v := content.(type) {
 	case errs.IError:
 		c.log.Error(content)
-		rs, rc = v.GetCode(), types.DecodeString(global.IsDebug, false, "Internal Server Error", v.GetError().Error())
+
+		if global.IsDebug {
+			rs, rc = v.GetCode(), v.GetError().Error()
+		} else {
+			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(status), "", "Internal Server Error")
+		}
 	case error:
 		c.log.Error(content)
-		rc = types.DecodeString(global.IsDebug, false, "Internal Server Error", v.Error())
+
+		if global.IsDebug {
+			rc = v.Error()
+		} else {
+			rc = types.DecodeString(http.StatusText(status), "", "Internal Server Error")
+		}
 		if status >= http.StatusOK && status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}
@@ -272,25 +283,18 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			panic(err)
 		}
 
-		str, err := m.Xml()
+		str, err := any.XmlIndent(m, "", " ", "xml")
 		if err != nil {
 			panic(err)
 		}
 
 		return string(str)
-
-		// if buff, err := xml.Marshal(content); err != nil {
-		// 	panic(err)
-		// } else {
-		// 	return string(buff)
-		// }
 	case strings.Contains(ctp, "yaml"):
 		if buff, err := yaml.Marshal(content); err != nil {
 			panic(err)
 		} else {
 			return string(buff)
 		}
-
 	case strings.Contains(ctp, "json"):
 		if buff, err := json.Marshal(content); err != nil {
 			panic(err)
@@ -303,10 +307,12 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 }
 
 func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
+
 	v := reflect.ValueOf(content)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+
 	r = mxj.Map{}
 	if v.Kind() == reflect.Map {
 		for _, key := range v.MapKeys() {
