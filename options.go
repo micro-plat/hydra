@@ -20,8 +20,11 @@ func WithRegistry(addr string) Option {
 }
 
 //WithPlatName 设置平台名称
-func WithPlatName(platName string) Option {
+func WithPlatName(platName string, cnPlatName ...string) Option {
 	return func() {
+		if len(cnPlatName) > 0 {
+			global.Def.CNPlatName = cnPlatName[0]
+		}
 		global.Def.PlatName = platName
 	}
 }
