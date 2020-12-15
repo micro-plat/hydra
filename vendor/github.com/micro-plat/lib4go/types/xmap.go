@@ -428,7 +428,7 @@ func (q XMap) ToStruct(out interface{}) error {
 
 //ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
-	return Any2Struct(out, q)
+	return Map2Struct(out, q, "json")
 }
 
 //ToMap 转换为map[string]interface{}

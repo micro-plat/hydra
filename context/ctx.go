@@ -183,8 +183,10 @@ type IResponse interface {
 	//GetRaw 获取未经处理的响应内容
 	GetRaw() interface{}
 
-	//ContentType 设置Content-Type响应头
-	ContentType(v string)
+	//ContentType 设置Content-Type响应头,自动增加charset或编码值,如指定值为:application/json;或application/json; charset=%s
+	//最终输出结果为 application/json; charset=utf-8 或 application/json; charset=gbk
+	//具体的charset值与服务配置和请求的Content-Type中指定的charset有关
+	ContentType(v string, xmlRoot ...string)
 
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
@@ -193,7 +195,7 @@ type IResponse interface {
 	JSON(code int, data interface{}) interface{}
 
 	//XML xml输出响应内容
-	XML(code int, data interface{}) interface{}
+	XML(code int, data interface{}, header string, rootNode ...string) interface{}
 
 	//以text/html输出响应内容
 	HTML(code int, data string) interface{}
