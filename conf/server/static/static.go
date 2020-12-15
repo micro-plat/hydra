@@ -80,11 +80,32 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
+	if err := restoreAssets(static.Dir); err != nil {
+		return nil, fmt.Errorf("dns静态文件解压:%v", err)
+	}
 	static.RereshData()
 	return static, nil
 }
 
 var waitRemoveDir = make([]string, 0, 1)
+
+func restoreAssets(dir string) error {
+	err := os.MkdirAll(filepath.Join(dir, "dns"), 0700)
+	if err != nil {
+		return err
+	}
+	for _, v := range AssetNames() {
+		buff, err := Asset(v)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(filepath.Join(dir, v), buff, 0700)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func unarchive(dir string, path string) (string, error) {
 	if path == "" {
