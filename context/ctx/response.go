@@ -191,8 +191,6 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	//2. 修改当前结果状态码与内容
 	var ncontent interface{}
 	c.final.status, ncontent = c.swapBytp(status, content)
-	fmt.Println("s:", c.final.status)
-	fmt.Println("ncontent:", ncontent)
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 	if strings.Contains(c.final.contentType, "%s") {
 		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
@@ -313,8 +311,6 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
-	fmt.Println("s:", c.final.status)
-	fmt.Println("c:", c.final.content)
 	if c.noneedWrite || c.ctx.Written() {
 		c.final.status = types.DecodeInt(c.final.status, 0, c.ctx.Status())
 		//处理外部框架直接写入到流中,且输出日志状态为0的问题

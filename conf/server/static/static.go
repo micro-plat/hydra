@@ -77,13 +77,11 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if b, err := govalidator.ValidateStruct(static); !b {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
+	fmt.Println("static.Archive:", static.Archive)
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
-	// if err := restoreAssets(static.Dir); err != nil {
-	// 	return nil, fmt.Errorf("dns静态文件解压:%v", err)
-	// }
 	static.RereshData()
 	return static, nil
 }
@@ -98,6 +96,7 @@ func unarchive(dir string, path string) (string, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
+			fmt.Println("xxxxxxxxx")
 			return dir, nil
 		}
 		return "", fmt.Errorf("无法打开文件:%s,%w", path, err)
@@ -109,9 +108,10 @@ func unarchive(dir string, path string) (string, error) {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
 
+	fmt.Println("path;", filepath.Base(path))
 	if filepath.Base(path) == "assert.so" {
 		fmt.Println("path;", path)
-		return tmpDir, restoreAssets(tmpDir)
+		return tmpDir, restoreAssets(path, tmpDir)
 	}
 
 	//	ndir := filepath.Join(dir, tmpDir)
@@ -124,8 +124,8 @@ func unarchive(dir string, path string) (string, error) {
 	return tmpDir, nil
 }
 
-func restoreAssets(dir string) error {
-	p, err := plugin.Open(dir)
+func restoreAssets(path, dir string) error {
+	p, err := plugin.Open(path)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func restoreAssets(dir string) error {
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(path, buff, 0700)
+		err = ioutil.WriteFile(path, buff, 0777)
 		if err != nil {
 			return err
 		}
