@@ -89,24 +89,6 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 
 var waitRemoveDir = make([]string, 0, 1)
 
-func restoreAssets(dir string) error {
-	err := os.MkdirAll(filepath.Join(dir, "dns"), 0700)
-	if err != nil {
-		return err
-	}
-	for _, v := range AssetNames() {
-		buff, err := Asset(v)
-		if err != nil {
-			return err
-		}
-		err = ioutil.WriteFile(filepath.Join(dir, v), buff, 0700)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func unarchive(dir string, path string) (string, error) {
 	if path == "" {
 		return dir, nil
@@ -134,6 +116,26 @@ func unarchive(dir string, path string) (string, error) {
 	waitRemoveDir = append(waitRemoveDir, tmpDir)
 	return tmpDir, nil
 }
+
+func restoreAssets(dir string) error {
+	for _, v := range AssetNames() {
+		path := filepath.Join(dir, v)
+		err := os.MkdirAll(filepath.Dir(path), 0777)
+		if err != nil {
+			return err
+		}
+		buff, err := Asset(v)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(path, buff, 0700)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func init() {
 	global.Def.AddCloser(func() error {
 		for _, d := range waitRemoveDir {
