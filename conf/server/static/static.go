@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"plugin"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mholt/archiver"
@@ -77,7 +76,6 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if b, err := govalidator.ValidateStruct(static); !b {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}
-	fmt.Println("static.Archive:", static.Archive)
 	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
@@ -106,10 +104,6 @@ func unarchive(dir string, path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
-	if filepath.Base(path) == "assert.so" {
-		return tmpDir, restoreAssets(path, tmpDir)
-	}
-
 	err = archiver.Unarchive(path, tmpDir)
 	if err != nil {
 		return "", fmt.Errorf("指定的文件%s解压失败:%v", path, err)
@@ -117,39 +111,6 @@ func unarchive(dir string, path string) (string, error) {
 
 	waitRemoveDir = append(waitRemoveDir, tmpDir)
 	return tmpDir, nil
-}
-
-func restoreAssets(path, dir string) error {
-	p, err := plugin.Open(path)
-	if err != nil {
-		return err
-	}
-	AssetNames, err := p.Lookup("AssetNames")
-	if err != nil {
-		return err
-	}
-
-	Asset, err := p.Lookup("Asset")
-	if err != nil {
-		return err
-	}
-
-	for _, v := range AssetNames.(func() []string)() {
-		path := filepath.Join(dir, v)
-		err := os.MkdirAll(filepath.Dir(path), 0777)
-		if err != nil {
-			return err
-		}
-		buff, err := Asset.(func(name string) ([]byte, error))(v)
-		if err != nil {
-			return err
-		}
-		err = ioutil.WriteFile(path, buff, 0777)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func init() {
