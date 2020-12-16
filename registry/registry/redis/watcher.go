@@ -2,7 +2,6 @@ package redis
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/micro-plat/hydra/registry/registry/redis/internal"
 	"github.com/micro-plat/lib4go/registry"
@@ -40,7 +39,6 @@ func (r *Redis) WatchValue(path string) (data chan registry.ValueWatcher, err er
 			case <-r.closeCh: //系统退出
 				return
 			case msg := <-msgChan:
-				fmt.Println("WatchValue:", msg.Channel, msg.Pattern, msg.Payload)
 				nv, err := newValueByJSON(msg.Payload)
 				if err != nil { //有错误，退出
 					watcher <- &valueEntity{Err: err}
@@ -62,7 +60,6 @@ func (r *Redis) notifyValueChange(path string, value *value) {
 
 //WatchChildren 监控子节点变化，保存订阅者信息
 func (r *Redis) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-
 
 	watchkey := internal.SwapKey(path, "watch") //保存所有watcher编号
 
@@ -106,7 +103,6 @@ func (r *Redis) notifyParentChange(path string, version int32) {
 	if !ok {
 		return
 	}
-	fmt.Println("notifyParentChange:", parent)
 
 	bytes, _ := json.Marshal(map[string]string{
 		"path": parent,
