@@ -96,7 +96,6 @@ func unarchive(dir string, path string) (string, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Println("xxxxxxxxx")
 			return dir, nil
 		}
 		return "", fmt.Errorf("无法打开文件:%s,%w", path, err)
@@ -107,14 +106,10 @@ func unarchive(dir string, path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
-
-	fmt.Println("path;", filepath.Base(path))
 	if filepath.Base(path) == "assert.so" {
-		fmt.Println("path;", path)
 		return tmpDir, restoreAssets(path, tmpDir)
 	}
 
-	//	ndir := filepath.Join(dir, tmpDir)
 	err = archiver.Unarchive(path, tmpDir)
 	if err != nil {
 		return "", fmt.Errorf("指定的文件%s解压失败:%v", path, err)
