@@ -13,7 +13,7 @@ func Trace() Handler {
 		ctx.Response().AddSpecial("trace")
 
 		//1.打印请求参数
-		input, _ := ctx.Request().GetMap()
+		input := ctx.Request().GetMap()
 		ctx.Log().Debug("> trace.request:", input)
 
 		//2. 业务处理

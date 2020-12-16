@@ -31,7 +31,8 @@ func RASAuth() Handler {
 		}
 
 		ctx.Response().AddSpecial("ras")
-		input, err := ctx.Request().GetMap()
+		err = ctx.Request().GetError()
+		input := ctx.Request().GetMap()
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return

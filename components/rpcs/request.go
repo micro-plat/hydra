@@ -59,11 +59,7 @@ func (r *Request) Request(service string, input interface{}, opts ...rpc.Request
 func (r *Request) Swap(service string, ctx rc.IContext) (res *rpc.Response, err error) {
 
 	//获取内容
-	input, err := ctx.Request().GetMap()
-	if err != nil {
-		return nil, err
-	}
-
+	input := ctx.Request().GetMap()
 	//处理链路跟踪
 	opts := make([]rpc.RequestOption, 0, 2)
 	opts = append(opts, rpc.WithXRequestID(ctx.User().GetRequestID()))

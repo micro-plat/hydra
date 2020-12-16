@@ -70,6 +70,14 @@ func (g *ginCtx) Next() {
 	g.Context.Next()
 
 }
+func (g *ginCtx) GetRawForm() map[string]interface{} {
+	g.load()
+	fm := make(map[string]interface{})
+	for k, v := range g.Request.PostForm {
+		fm[k] = v
+	}
+	return fm
+}
 func (g *ginCtx) GetPostForm() url.Values {
 	g.load()
 	return g.Request.PostForm
