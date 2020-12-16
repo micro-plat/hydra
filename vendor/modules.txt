@@ -19,7 +19,6 @@ github.com/asaskevich/govalidator
 github.com/bradfitz/gomemcache/memcache
 # github.com/clbanning/anyxml v1.2.2
 ## explicit
-github.com/clbanning/anyxml
 # github.com/clbanning/mxj v1.8.4
 ## explicit
 github.com/clbanning/mxj

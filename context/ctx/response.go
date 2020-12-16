@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	any "github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
@@ -36,6 +35,8 @@ type rspns struct {
 
 type response struct {
 	ctx         context.IInnerContext
+	xmlRoot     string
+	xmlHeader   string
 	headers     types.XMap
 	conf        app.IAPPConf
 	path        *rpath
@@ -51,11 +52,12 @@ type response struct {
 func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
 	path := NewRpath(ctx, conf, meta)
 	return &response{
-		ctx:   ctx,
-		conf:  conf,
-		path:  path,
-		final: rspns{contentType: fmt.Sprintf(context.PLAINF, path.GetEncoding())},
-		log:   log,
+		ctx:     ctx,
+		conf:    conf,
+		path:    path,
+		xmlRoot: "xml",
+		final:   rspns{contentType: fmt.Sprintf(context.PLAINF, path.GetEncoding())},
+		log:     log,
 	}
 }
 
@@ -78,9 +80,16 @@ func (c *response) GetHeaders() types.XMap {
 }
 
 //ContentType 设置contentType
-func (c *response) ContentType(v string) {
+func (c *response) ContentType(v string, xmlRoot ...string) {
 	if v == "" {
 		return
+	}
+	if len(xmlRoot) > 0 {
+		c.xmlRoot = types.GetStringByIndex(xmlRoot, 0)
+	}
+	//处理编码问题
+	if strings.Contains(v, "%s") {
+		v = fmt.Sprintf(v, c.path.GetEncoding())
 	}
 	//如果返回用户没有设置charset  需要自动给加上
 	if !strings.Contains(strings.ToLower(v), "charset") {
@@ -121,7 +130,11 @@ func (c *response) JSON(code int, data interface{}) interface{} {
 }
 
 //XML 以application/xml输出响应内容
-func (c *response) XML(code int, data interface{}) interface{} {
+func (c *response) XML(code int, data interface{}, header string, rootNode ...string) interface{} {
+	c.xmlHeader = header
+	if len(rootNode) > 0 {
+		c.xmlRoot = types.GetStringByIndex(rootNode, 0)
+	}
 	return c.Data(code, fmt.Sprintf(context.XMLF, c.path.GetEncoding()), data)
 }
 
@@ -274,21 +287,11 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 
 	switch {
 	case strings.Contains(ctp, "xml"):
-		if tpkind == reflect.Slice || tpkind == reflect.Array {
-			panic("转化为xml必须是struct或者map,内容格式不正确")
-		}
-
-		m, err := c.toMap(content)
+		str, err := types.Any2XML(content, c.xmlHeader, c.xmlRoot)
 		if err != nil {
 			panic(err)
 		}
-
-		str, err := any.XmlIndent(m, "", " ", "xml")
-		if err != nil {
-			panic(err)
-		}
-
-		return string(str)
+		return str
 	case strings.Contains(ctp, "yaml"):
 		if buff, err := yaml.Marshal(content); err != nil {
 			panic(err)
@@ -304,31 +307,6 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	default:
 		return fmt.Sprint(content)
 	}
-}
-
-func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
-
-	v := reflect.ValueOf(content)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	r = mxj.Map{}
-	if v.Kind() == reflect.Map {
-		for _, key := range v.MapKeys() {
-			r[types.GetString(key)] = v.MapIndex(key).Interface()
-		}
-	}
-
-	if v.Kind() == reflect.Struct {
-		buff, err := json.Marshal(content)
-		if err != nil {
-			return nil, err
-		}
-		err = json.Unmarshal(buff, &r)
-	}
-
-	return
 }
 
 //Flush 调用异步写入将状态码、内容写入到响应流中
