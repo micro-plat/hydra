@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"plugin"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mholt/archiver"
@@ -80,9 +81,9 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
-	if err := restoreAssets(static.Dir); err != nil {
-		return nil, fmt.Errorf("dns静态文件解压:%v", err)
-	}
+	// if err := restoreAssets(static.Dir); err != nil {
+	// 	return nil, fmt.Errorf("dns静态文件解压:%v", err)
+	// }
 	static.RereshData()
 	return static, nil
 }
@@ -107,6 +108,12 @@ func unarchive(dir string, path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建临时文件失败:%v", err)
 	}
+
+	if filepath.Base(path) == "assert.so" {
+		fmt.Println("path;", path)
+		return tmpDir, restoreAssets(tmpDir)
+	}
+
 	//	ndir := filepath.Join(dir, tmpDir)
 	err = archiver.Unarchive(path, tmpDir)
 	if err != nil {
@@ -118,13 +125,27 @@ func unarchive(dir string, path string) (string, error) {
 }
 
 func restoreAssets(dir string) error {
-	for _, v := range AssetNames() {
+	p, err := plugin.Open(dir)
+	if err != nil {
+		return err
+	}
+	AssetNames, err := p.Lookup("AssetNames")
+	if err != nil {
+		return err
+	}
+
+	Asset, err := p.Lookup("Asset")
+	if err != nil {
+		return err
+	}
+
+	for _, v := range AssetNames.(func() []string)() {
 		path := filepath.Join(dir, v)
 		err := os.MkdirAll(filepath.Dir(path), 0777)
 		if err != nil {
 			return err
 		}
-		buff, err := Asset(v)
+		buff, err := Asset.(func(name string) ([]byte, error))(v)
 		if err != nil {
 			return err
 		}

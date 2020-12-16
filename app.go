@@ -1,8 +1,6 @@
 package hydra
 
 import (
-	"fmt"
-
 	"github.com/lib4dev/cli"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
@@ -57,7 +55,7 @@ func (m *MicroApp) Start() {
 
 //Close 关闭服务器
 func (m *MicroApp) Close() {
-	fmt.Println("app.close:", m.app.Metadata["app"].(service.Service))
+	// fmt.Println("app.close:", m.app.Metadata["app"].(service.Service))
 	if s, ok := m.app.Metadata["app"].(service.Service); ok {
 		s.Stop()
 	}

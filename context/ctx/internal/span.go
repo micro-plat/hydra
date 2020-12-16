@@ -2,7 +2,6 @@ package internal
 
 import (
 	r "context"
-	"fmt"
 	"sync"
 
 	"github.com/SkyAPM/go2sky"
@@ -62,7 +61,7 @@ func (s *Span) Available() bool {
 func (s *Span) End() {
 	s.once.Do(func() {
 		if s.span != nil {
-			fmt.Println("end:", s.operator)
+			// fmt.Println("end:", s.operator)
 			s.span.End()
 		}
 		for _, v := range s.subs {

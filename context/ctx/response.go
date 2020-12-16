@@ -178,6 +178,8 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	//2. 修改当前结果状态码与内容
 	var ncontent interface{}
 	c.final.status, ncontent = c.swapBytp(status, content)
+	fmt.Println("s:", c.final.status)
+	fmt.Println("ncontent:", ncontent)
 	c.final.contentType, c.final.content = c.swapByctp(ncontent)
 	if strings.Contains(c.final.contentType, "%s") {
 		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
@@ -213,18 +215,18 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if global.IsDebug {
 			rs, rc = v.GetCode(), v.GetError().Error()
 		} else {
-			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(status), "", "Internal Server Error")
+			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(v.GetCode()), "", "Internal Server Error")
 		}
 	case error:
 		c.log.Error(content)
 
+		if status >= http.StatusOK && status < http.StatusBadRequest {
+			rs = http.StatusBadRequest
+		}
 		if global.IsDebug {
 			rc = v.Error()
 		} else {
-			rc = types.DecodeString(http.StatusText(status), "", "Internal Server Error")
-		}
-		if status >= http.StatusOK && status < http.StatusBadRequest {
-			rs = http.StatusBadRequest
+			rc = types.DecodeString(http.StatusText(rs), "", "Internal Server Error")
 		}
 	}
 	if content == nil {
@@ -333,6 +335,8 @@ func (c *response) toMap(content interface{}) (r mxj.Map, err error) {
 
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
+	fmt.Println("s:", c.final.status)
+	fmt.Println("c:", c.final.content)
 	if c.noneedWrite || c.ctx.Written() {
 		c.final.status = types.DecodeInt(c.final.status, 0, c.ctx.Status())
 		//处理外部框架直接写入到流中,且输出日志状态为0的问题
