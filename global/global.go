@@ -32,6 +32,9 @@ type global struct {
 	//PlatName 平台名称
 	PlatName string
 
+	//CNPlatName 平台中文名称
+	CNPlatName string
+
 	//SysName 系统名称
 	SysName string
 
