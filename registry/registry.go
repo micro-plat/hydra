@@ -77,6 +77,12 @@ func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error
 
 }
 
+//GetCurrent 获取当前注册中心
+func GetCurrent() IRegistry {
+	r, _ := GetRegistry(global.Def.RegistryAddr, global.Def.Log())
+	return r
+}
+
 //GetRegistry 获取缓存的注册中心
 func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	proto, addrs, u, p, mt, err := Parse(address)
