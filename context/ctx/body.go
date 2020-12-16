@@ -56,7 +56,11 @@ func (w *body) GetMap() (data map[string]interface{}, err error) {
 	//从body中读取原处理流
 	w.mapBody.hasRead = true
 	var body []byte
+	ctp := strings.ToLower(w.ctx.ContentType())
 
+	if strings.Contains(ctp, "__raw__") {
+		return w.ctx.GetRawForm(), nil
+	}
 	if body, _, w.mapBody.err = w.GetFullRaw(); w.mapBody.err != nil {
 		return nil, w.mapBody.err
 	}
@@ -66,7 +70,6 @@ func (w *body) GetMap() (data map[string]interface{}, err error) {
 	//处理body数据
 	data = make(map[string]interface{})
 	if len(body) != 0 {
-		ctp := strings.ToLower(w.ctx.ContentType())
 		switch {
 		case strings.Contains(ctp, "/xml"):
 			data, err = types.NewXMapByXML(types.BytesToString(body))

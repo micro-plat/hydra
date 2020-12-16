@@ -76,6 +76,9 @@ func (g *dispCtx) GetCookies() []*http.Cookie {
 	return nil
 }
 
+func (g *dispCtx) GetRawForm() map[string]interface{} {
+	return g.Context.Request.GetForm()
+}
 func (g *dispCtx) GetPostForm() url.Values {
 	values := url.Values{}
 	for k, v := range g.Context.Request.GetForm() {

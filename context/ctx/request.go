@@ -81,16 +81,19 @@ func (r *request) Check(field ...string) error {
 }
 
 //GetMap 获取请求的参数信息
-func (r *request) GetMap() (types.XMap, error) {
-	return r.XMap, r.readMapErr
+func (r *request) GetMap() types.XMap {
+	return r.XMap
+}
+func (r *request) GetError() error {
+	return r.readMapErr
 }
 
 //GetPlayload 获取trace信息
 func (r *request) GetPlayload() string {
-	body, err := r.GetMap()
-	if err != nil {
-		return fmt.Errorf("err:%w", err).Error()
+	if r.readMapErr != nil {
+		return fmt.Errorf("err:%w", r.readMapErr).Error()
 	}
+	body := r.GetMap()
 	return fmt.Sprintf("%+v", body)
 }
 
