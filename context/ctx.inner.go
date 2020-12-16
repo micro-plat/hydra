@@ -17,6 +17,7 @@ type IInnerContext interface {
 	GetParams() map[string]interface{}
 	GetRouterPath() string //Context.FullPath()
 	GetPostForm() url.Values
+	GetRawForm() map[string]interface{}
 	ContentType() string
 
 	Abort()

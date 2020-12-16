@@ -146,10 +146,13 @@ type IRequest interface {
 	Check(field ...string) error
 
 	//GetMap 将当前请求转换为map并返回
-	GetMap() (types.XMap, error)
+	GetMap() types.XMap
 
 	//GetFullRaw 获取请求的body参数
 	GetFullRaw() (body []byte, query string, err error)
+
+	//GetError 请求解析过程中发生的异常
+	GetError() error
 
 	//GetBody 获取请求的参数
 	GetBody() (body []byte, err error)
