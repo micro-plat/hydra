@@ -105,7 +105,7 @@ func (p *Publisher) Publish(serverName string, serviceAddr string, clusterID str
 	}
 	switch p.c.GetServerType() {
 	case global.API, global.Web:
-		if _, err := p.PubDNSNode(serverName); err != nil {
+		if _, err := p.PubDNSNode(serverName, serviceAddr); err != nil {
 			return err
 		}
 		_, err := p.PubAPIServiceNode(serverName, data)
@@ -179,7 +179,7 @@ func (p *Publisher) PubAPIServiceNode(serverName string, data string) (map[strin
 }
 
 //PubDNSNode 发布DNS服务节点
-func (p *Publisher) PubDNSNode(serverName string) (map[string]string, error) {
+func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[string]string, error) {
 	//获取服务嚣配置
 	server, err := api.GetConf(p.c)
 	if err != nil {
@@ -190,12 +190,15 @@ func (p *Publisher) PubDNSNode(serverName string) (map[string]string, error) {
 	}
 
 	input := map[string]interface{}{
-		"plat_name":    p.c.GetPlatName(),
-		"cn_plat_name": global.Def.CNPlatName,
-		"system_name":  p.c.GetSysName(),
-		"server_type":  p.c.GetServerType(),
-		"cluster_name": p.c.GetClusterName(),
-		"server_name":  p.c.GetServerName(),
+		"plat_name":       p.c.GetPlatName(),
+		"plat_cn_name":    global.Def.PlatCNName,
+		"system_name":     p.c.GetSysName(),
+		"system_cn_name":  global.Def.SysCNName,
+		"server_type":     p.c.GetServerType(),
+		"cluster_name":    p.c.GetClusterName(),
+		"server_name":     serverName,
+		"service_address": serviceAddr,
+		"ip":              global.LocalIP(),
 	}
 	buff, err := jsons.Marshal(input)
 	if err != nil {
