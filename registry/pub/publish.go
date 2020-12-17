@@ -212,12 +212,25 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		return nil, err
 	}
 	path := registry.Join(p.c.GetDNSPubPath(server.Domain), fmt.Sprintf("%s:%s", ip, port))
-	err = p.c.GetRegistry().CreateTempNode(path, ndata)
+	exist, err := p.c.GetRegistry().Exists(path)
 	if err != nil {
-		err = fmt.Errorf("DNS[IP]服务发布失败:(%s)[%v]", path, err)
+		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
 		return nil, err
 	}
-	p.appendPub(path, "")
+
+	if exist {
+		err = p.c.GetRegistry().Update(path, ndata)
+	} else {
+		err = p.c.GetRegistry().CreateTempNode(path, ndata)
+	}
+
+	if err != nil {
+		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
+		return nil, err
+	}
+
+	//加入节点检查
+	p.appendPub(path, ndata)
 	return p.pubs, nil
 }
 
