@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 //Any2XML 将任意类型转换为xml
@@ -18,7 +19,6 @@ func Any2XML(v interface{}, header string, root ...string) (string, error) {
 
 //any2XML 将任意类型转换为xml
 func any2XML(v interface{}, root ...string) (string, error) {
-
 	//1. 处理类型，及空值
 	value := reflect.ValueOf(v)
 	vt := reflect.TypeOf(v)
@@ -124,11 +124,14 @@ func slice2xml(v reflect.Value, root ...string) (string, error) {
 	var builder = &strings.Builder{}
 	len := v.Len()
 	for i := 0; i < len; i++ {
+		if i == 0 {
+			builder.Write(StringToBytes(fmt.Sprintf("<%s>", GetStringByIndex(root, 0, "xml"))))
+		}
 		value := v.Index(i)
 		if !value.IsValid() || value.IsZero() {
 			continue
 		}
-		str, err := any2XML(value.Interface(), GetStringByIndex(root, 0, "item"))
+		str, err := any2XML(value.Interface(), "item")
 		if err != nil {
 			return "", err
 		}
@@ -137,12 +140,27 @@ func slice2xml(v reflect.Value, root ...string) (string, error) {
 		}
 		builder.Write(StringToBytes(str))
 	}
+	if len > 0 {
+		builder.Write(StringToBytes(fmt.Sprintf("</%s>", GetStringByIndex(root, 0, "xml"))))
+	}
 	return builder.String(), nil
 
 }
 func struct2xml(value reflect.Value, tag string, root ...string) (string, error) {
 	var builder = &strings.Builder{}
+	var newValue interface{}
 	vt := reflect.TypeOf(value.Interface())
+	if value.Type().String() == "time.Time" {
+		//获取字段的标签值
+		newValue = (value.Interface().(time.Time)).String()
+		str, err := any2XML(newValue)
+		if err != nil {
+			return "", err
+		}
+
+		builder.Write(StringToBytes(str))
+		return builder.String(), nil
+	}
 	for i := 0; i < value.NumField(); i++ {
 		tfield := vt.Field(i)
 		vfield := value.Field(i)
@@ -167,5 +185,6 @@ func struct2xml(value reflect.Value, tag string, root ...string) (string, error)
 		}
 		builder.Write(StringToBytes(str))
 	}
+
 	return builder.String(), nil
 }

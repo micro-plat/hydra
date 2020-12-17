@@ -20,6 +20,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/lib4dev/cli v1.2.3
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
