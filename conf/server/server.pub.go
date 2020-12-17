@@ -62,7 +62,7 @@ func (c *ServerPub) GetServicePubPath() string {
 
 //GetDNSPubPath 获取DNS服务路径
 func (c *ServerPub) GetDNSPubPath(svName string) string {
-	return registry.Join("/dns", svName)
+	return registry.Join(global.Def.GetDNSRoot(), svName)
 }
 
 //GetServerPubPath 获取服务器发布的跟路径

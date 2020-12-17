@@ -206,21 +206,13 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 	}
 	ndata := string(buff)
 
-	//创建DNS域名节点
-	domainPath := registry.Join(p.c.GetDNSPubPath(server.Domain))
-	err = p.c.GetRegistry().CreatePersistentNode(domainPath, ndata)
-	if err != nil {
-		err = fmt.Errorf("DNS[域名]服务发布失败:(%s)[%v]", domainPath, err)
-		return nil, err
-	}
-
 	//创建DNSIP节点
 	ip, port, err := net.SplitHostPort(serverName)
 	if err != nil {
 		return nil, err
 	}
 	path := registry.Join(p.c.GetDNSPubPath(server.Domain), fmt.Sprintf("%s:%s", ip, port))
-	err = p.c.GetRegistry().CreateTempNode(path, "")
+	err = p.c.GetRegistry().CreateTempNode(path, ndata)
 	if err != nil {
 		err = fmt.Errorf("DNS[IP]服务发布失败:(%s)[%v]", path, err)
 		return nil, err

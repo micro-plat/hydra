@@ -94,6 +94,8 @@ github.com/google/uuid
 github.com/gorilla/websocket
 # github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
+# github.com/jteeuwen/go-bindata v3.0.7+incompatible
+## explicit
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
 github.com/keybase/go-ps/darwincgo
 # github.com/kr/fs v0.1.0

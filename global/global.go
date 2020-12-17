@@ -18,6 +18,7 @@ var isReady = false
 
 //Def 默认appliction
 var Def = &global{
+	DNSRoot:       "/dns",
 	log:           logger.New("hydra"),
 	LocalConfName: "./" + filepath.Base(os.Args[0]) + ".conf.toml",
 	close:         make(chan struct{}),
@@ -52,6 +53,9 @@ type global struct {
 
 	//Name 服务器请求名称
 	Name string
+
+	//DNSRoot DNS根节点
+	DNSRoot string
 
 	//Trace 用于生成pprof的性能分析数据,支持的模式有:cpu,mem,block,mutex,web
 	Trace string
@@ -142,6 +146,11 @@ func (m *global) GetServerTypes() []string {
 //GetClusterName 获取集群名称
 func (m *global) GetClusterName() string {
 	return m.ClusterName
+}
+
+//GetDNSRoot 获取dns根节点
+func (m *global) GetDNSRoot() string {
+	return m.DNSRoot
 }
 
 //GetTrace 获取当前启动的pprof类型
