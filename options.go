@@ -20,19 +20,18 @@ func WithRegistry(addr string) Option {
 }
 
 //WithPlatName 设置平台名称
-func WithPlatName(platName string, cnPlatName ...string) Option {
+func WithPlatName(platName string, platCNName ...string) Option {
 	return func() {
-		if len(cnPlatName) > 0 {
-			global.Def.CNPlatName = cnPlatName[0]
-		}
 		global.Def.PlatName = platName
+		global.Def.PlatCNName = types.GetStringByIndex(platCNName, 0, platName)
 	}
 }
 
 //WithSystemName 设置系统名称
-func WithSystemName(sysName string) Option {
+func WithSystemName(sysName string, platCNName ...string) Option {
 	return func() {
 		global.Def.SysName = sysName
+		global.Def.SysCNName = types.GetStringByIndex(platCNName, 0, sysName)
 	}
 }
 
