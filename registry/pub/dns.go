@@ -12,6 +12,9 @@ type DNSConf struct {
 	ServerType     string `json:"server_type"`
 	ServerName     string `json:"server_name"`
 	ServiceAddress string `json:"service_address"`
+	Proto          string `json:"proto"`
+	Host           string `json:"host"`
+	Port           string `json:"port"`
 	IPAddress      string `json:"ip"`
 }
 
