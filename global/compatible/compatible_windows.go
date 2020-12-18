@@ -2,6 +2,7 @@
 package compatible
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 )
@@ -19,7 +20,25 @@ var CmdsUpdateProcessSignal = syscall.SIGINT
 
 //AppClose AppClose
 func AppClose() {
-	syscall.Exit(0)
+	pid := syscall.Getpid()
+
+	dll, err := syscall.LoadDLL("kernel32.dll")
+	if err != nil {
+		fmt.Println("LoadDLL:kernel32.dll", err)
+		return
+	}
+
+	p, err := dll.FindProc("GenerateConsoleCtrlEvent")
+	if err != nil {
+		fmt.Println("FindProc:", err)
+		return
+	}
+
+	r, _, err := p.Call(syscall.CTRL_BREAK_EVENT, uintptr(pid))
+	if r == 0 {
+		fmt.Println("GenerateConsoleCtrlEvent:", err)
+		return
+	}
 }
 
 const (
