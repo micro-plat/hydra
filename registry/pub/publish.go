@@ -196,6 +196,12 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 	if err != nil {
 		return nil, err
 	}
+	prefix := ""
+	domain := server.Domain
+	if strings.HasPrefix(server.Domain, "www.") {
+		prefix = "www."
+		domain = strings.TrimPrefix(server.Domain, "www.")
+	}
 
 	input := map[string]interface{}{
 		"plat_name":       p.c.GetPlatName(),
@@ -210,6 +216,7 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		"host":            host,
 		"port":            port,
 		"ip":              global.LocalIP(),
+		"prefix":          prefix,
 	}
 	buff, err := jsons.Marshal(input)
 	if err != nil {
@@ -223,7 +230,6 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		return nil, err
 	}
 
-	domain := strings.Trim(strings.TrimPrefix(server.Domain, "www"), ".")
 	path := registry.Join(p.c.GetDNSPubPath(domain), fmt.Sprintf("%s:%s", ip, port))
 	exist, err := p.c.GetRegistry().Exists(path)
 	if err != nil {
