@@ -77,8 +77,7 @@ func (l *fs) Start() {
 					defer l.watchLock.Unlock()
 					dataPath := l.formatPath(event.Name)
 					path := filepath.Dir(dataPath)
-					key := l.restoreColon(path)
-					watcher, ok := l.valueWatcherMaps[key]
+					watcher, ok := l.valueWatcherMaps[path]
 					if !ok {
 						return
 					}
@@ -145,7 +144,7 @@ func (l *fs) Update(path string, data string) (err error) {
 	}
 
 	rpath := l.formatPath(path)
-	return ioutil.WriteFile(l.getDataPath(rpath), []byte(data), fileMode)
+	return ioutil.WriteFile(l.replaceColon(l.getDataPath(rpath)), []byte(data), fileMode)
 
 }
 func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
@@ -164,13 +163,14 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 		if strings.HasSuffix(f.Name(), ".swp") || strings.HasPrefix(f.Name(), "~") || strings.HasPrefix(f.Name(), ".init") {
 			continue
 		}
-		paths = append(paths, f.Name())
+		paths = append(paths, l.restoreColon(f.Name()))
 	}
 	return paths, version, nil
 }
 
 func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
 	realPath := l.replaceColon(l.formatPath(path))
+	fmt.Println("realpATH:",realPath)
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
