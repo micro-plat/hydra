@@ -289,7 +289,6 @@ func (p *Publisher) check() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	for path, data := range p.pubs {
-		//fmt.Println("------------------:", path)
 		if p.done {
 			break
 		}
@@ -317,7 +316,6 @@ func (p *Publisher) Close() {
 	p.done = true
 	close(p.closeChan)
 	p.Clear()
-	// p.c.GetRegistry().Close()
 }
 
 //Clear 清除所有发布节点
@@ -331,11 +329,3 @@ func (p *Publisher) Clear() {
 	p.pubs = make(map[string]string)
 	p.watchChan = make(chan struct{})
 }
-
-// if len(service)%2 > 0 {
-// 	return fmt.Errorf("发布服务的扩展参数必须成对出现：%d", len(service))
-// }
-
-// for i := 0; i+1 < len(service); i = i + 2 {
-// 	input[service[i]] = service[i+1]
-// }
