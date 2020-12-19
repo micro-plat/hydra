@@ -8,8 +8,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/zkfy/log"
@@ -48,18 +46,8 @@ func newShow(addr string, plat string, sysName string, types []string, cluster s
 	}
 }
 func (s *show) Show() error {
-	rgst, err := registry.GetRegistry(s.addr, global.Current().Log())
-	if err != nil {
-		return err
-	}
 
-	if registry.GetProto(global.Def.GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
-			return err
-		}
-	}
-
-	s.rgst = rgst
+	s.rgst = registry.GetCurrent()
 	if err := s.printMainConf(); err != nil {
 		return err
 	}
