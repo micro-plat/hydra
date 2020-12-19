@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/zkfy/log"
@@ -51,12 +52,24 @@ func (s *show) Show() error {
 	if err != nil {
 		return err
 	}
+
+	if registry.GetProto(global.Def.GetRegistryAddr()) == registry.LocalMemory {
+		if err := pkgs.Pub2Registry(true); err != nil {
+			return err
+		}
+	}
+
 	s.rgst = rgst
 	if err := s.printMainConf(); err != nil {
 		return err
 	}
 	if err := s.printVarConf(); err != nil {
 		return err
+	}
+	if extNode != "" {
+		if err := s.printAnyConf(registry.Join(extNode)); err != nil {
+			return err
+		}
 	}
 	return s.readPrint()
 }
@@ -122,6 +135,28 @@ func (s *show) printVarConf() error {
 
 	s.printNodes(s.vars, 0)
 	return nil
+}
+func (s *show) printAnyConf(root string) error {
+
+	nodes := make(map[string]interface{})
+	getNode(root, root, nodes)
+
+	s.printNodes(map[string]interface{}{root: nodes}, 0)
+	return nil
+}
+func getNode(path string, p string, node map[string]interface{}) {
+	r := registry.GetCurrent()
+	paths, _, _ := r.GetChildren(path)
+	if len(paths) > 0 {
+		for _, p := range paths {
+			nnode := make(map[string]interface{})
+			getNode(registry.Join(path, p), p, nnode)
+			node[p] = nnode
+		}
+	} else {
+		v, _, _ := r.GetValue(path)
+		node[p] = v
+	}
 }
 func (s *show) getNodes(path string, v *conf.RawConf, input map[string]interface{}) {
 	li := strings.SplitN(strings.Trim(path, "/"), "/", 2)
