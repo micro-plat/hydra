@@ -77,7 +77,8 @@ func (l *fs) Start() {
 					defer l.watchLock.Unlock()
 					dataPath := l.formatPath(event.Name)
 					path := filepath.Dir(dataPath)
-					watcher, ok := l.valueWatcherMaps[path]
+					key := l.restoreColon(path)
+					watcher, ok := l.valueWatcherMaps[key]
 					if !ok {
 						return
 					}
@@ -88,6 +89,14 @@ func (l *fs) Start() {
 		}
 		l.watcher.Close()
 	}()
+}
+
+func (l *fs) replaceColon(path string) string {
+	return strings.ReplaceAll(path, ":", "@@@")
+}
+
+func (l *fs) restoreColon(path string) string {
+	return strings.ReplaceAll(path, "@@@", ":")
 }
 
 //formatPath 将rootDir 构建到路径中去
@@ -107,13 +116,14 @@ func (l *fs) getDataPath(path string) string {
 }
 
 func (l *fs) Exists(path string) (bool, error) {
-	_, err := os.Stat(l.formatPath(path))
+	p := l.replaceColon(l.formatPath(path))
+	_, err := os.Stat(p)
 	return err == nil || os.IsExist(err), nil
 }
 
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 
-	rpath := l.formatPath(path)
+	rpath := l.replaceColon(l.formatPath(path))
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
@@ -130,7 +140,7 @@ func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 }
 
 func (l *fs) Update(path string, data string) (err error) {
-	if b, _ := l.Exists(path); !b {
+	if b, _ := l.Exists(l.replaceColon(path)); !b {
 		return errors.New(path + "不存在")
 	}
 
@@ -139,7 +149,7 @@ func (l *fs) Update(path string, data string) (err error) {
 
 }
 func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
-	rpath := l.formatPath(path)
+	rpath := l.replaceColon(l.formatPath(path))
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
 		return nil, 0, errors.New(path + "不存在")
@@ -160,7 +170,7 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 }
 
 func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	realPath := l.formatPath(path)
+	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
@@ -226,7 +236,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 }
 
 func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-	realPath := l.formatPath(path)
+	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
@@ -296,10 +306,11 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 }
 
 func (l *fs) Delete(path string) error {
-	return os.RemoveAll(l.formatPath(path))
+	return os.RemoveAll(l.replaceColon(l.formatPath(path)))
 }
 
 func (l *fs) CreatePersistentNode(path string, data string) (err error) {
+	path = l.replaceColon(path)
 	err = l.createDirPath(path)
 	if err != nil {
 		return
@@ -327,6 +338,7 @@ func (l *fs) createNodeData(path, data string) error {
 }
 
 func (l *fs) CreateTempNode(path string, data string) (err error) {
+	path = l.replaceColon(path)
 	if err = l.CreatePersistentNode(path, data); err != nil {
 		return err
 	}
