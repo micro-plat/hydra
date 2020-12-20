@@ -18,6 +18,7 @@ type Processor struct {
 	*dispatcher.Engine
 	done      bool
 	closeChan chan struct{}
+	metric    *middleware.Metric
 }
 
 //NewProcessor 创建processor
@@ -32,6 +33,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
+	p.Engine.Use(p.metric.Handle().DispFunc())
 	p.Engine.Use(middlewares.DispFunc()...)
 	p.addRouter(routers...)
 	return p
@@ -79,4 +81,9 @@ func (s *Processor) Request(context context.Context, request *pb.RequestContext)
 	}
 	p.Header = string(h)
 	return p, nil
+}
+
+//Close 关闭处理程序
+func (s *Processor) Close() {
+	s.metric.Stop()
 }
