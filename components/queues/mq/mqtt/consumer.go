@@ -10,11 +10,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/global"
+
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 	"github.com/zkfy/stompngo"
@@ -124,7 +125,7 @@ func (consumer *Consumer) connect() (mqtt.Client, bool, error) {
 	opts := mqtt.NewClientOptions().AddBroker(consumer.getAddr())
 	opts.SetUsername(consumer.confOpts.UserName)
 	opts.SetPassword(consumer.confOpts.Password)
-	opts.SetClientID(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), consumer.uid))
+	opts.SetClientID(fmt.Sprintf("%s-%s", global.LocalIP(), consumer.uid))
 	opts.SetTLSConfig(cert)
 	opts.SetKeepAlive(10)
 	opts.SetAutoReconnect(false)

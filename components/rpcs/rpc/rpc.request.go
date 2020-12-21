@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/global"
 	"golang.org/x/net/context"
 )
 
@@ -67,7 +67,7 @@ func WithHost(s ...string) RequestOption {
 		if len(s) > 0 {
 			o.headers["Host"] = strings.Join(s, ",")
 		} else {
-			o.headers["Host"] = net.GetLocalIPAddress()
+			o.headers["Host"] = global.LocalIP()
 		}
 	}
 }
