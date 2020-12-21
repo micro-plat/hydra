@@ -25,6 +25,7 @@ type Processor struct {
 func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p = &Processor{
 		closeChan: make(chan struct{}),
+		metric:    middleware.NewMetric(),
 	}
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(RPC))
