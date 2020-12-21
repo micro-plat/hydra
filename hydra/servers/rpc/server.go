@@ -116,6 +116,7 @@ func GetAddress(addr string) (string, error) {
 
 //Shutdown 关闭服务器
 func (s *Server) Shutdown() {
+	defer s.Processor.Close()
 	if s.running {
 		s.running = false
 		s.engine.GracefulStop()
