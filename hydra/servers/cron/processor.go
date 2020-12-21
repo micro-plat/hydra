@@ -158,6 +158,19 @@ func (s *Processor) Close() {
 	}
 }
 
+//TaskCount 获取当前启用的Task数量
+func (s *Processor) TaskCount() int {
+	count := 0
+	for i := range s.slots {
+		for item := range s.slots[i].IterBuffered() {
+			if !item.Val.(*CronTask).Disable {
+				count++
+			}
+		}
+	}
+	return count
+}
+
 //-------------------------------------内部处理------------------------------------
 
 func (s *Processor) getOffset(now time.Time, next time.Time) (pos int, circle int) {
