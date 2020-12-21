@@ -24,6 +24,11 @@ func getFlags() []cli.Flag {
 		Destination: &global.Def.TracePort,
 		Usage:       `-性能分析服务端口号。用于trace为web模式时的端口号。默认：19999`,
 	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "mask,msk",
+		Destination: &global.FlagVal.IPMask,
+		Usage:       `-子网掩码。多个网卡情况下根据mask获取本机IP`,
+	})
 	flags = append(flags, global.RunCli.GetFlags()...)
 	return flags
 }

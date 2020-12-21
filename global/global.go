@@ -196,6 +196,8 @@ func (m *global) check() (err error) {
 	m.SysName = types.GetString(FlagVal.SysName, m.SysName)
 	m.ServerTypeNames = types.GetString(FlagVal.ServerTypeNames, m.ServerTypeNames)
 	m.ClusterName = types.GetString(FlagVal.ClusterName, m.ClusterName)
+	m.IPMask = types.GetString(FlagVal.IPMask, m.IPMask)
+
 	IsDebug = types.DecodeBool(FlagVal.IsDebug, true, true, IsDebug)
 
 	if m.ServerTypeNames != "" {
