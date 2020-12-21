@@ -51,14 +51,17 @@ func NewFileSystem(rootDir string) (*fs, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &fs{
-		rootDir:             strings.TrimRight(rootDir, "/"),
+	registryfs := &fs{
+		rootDir:             strings.Trim(strings.TrimRight(rootDir, "/"), "./"),
 		watcher:             w,
 		valueWatcherMaps:    make(map[string]*fsValueWatcher),
 		childrenWatcherMaps: make(map[string]*fsChildrenWatcher),
 		tempNodes:           make(map[string]bool),
 		closeCh:             make(chan struct{}),
-	}, nil
+	}
+	registryfs.Start()
+
+	return registryfs, nil
 }
 
 //Start 启动文件监控
@@ -77,17 +80,31 @@ func (l *fs) Start() {
 					defer l.watchLock.Unlock()
 					dataPath := l.formatPath(event.Name)
 					path := filepath.Dir(dataPath)
-					watcher, ok := l.valueWatcherMaps[path]
-					if !ok {
+					valueWatcher, ok := l.valueWatcherMaps[path]
+					if ok {
+						valueWatcher.event <- event
 						return
 					}
-					watcher.event <- event
+					l.bubblingChildrenEvent(path, event)
 				}(event)
 
 			}
 		}
 		l.watcher.Close()
 	}()
+}
+
+//bubblingChildrenEvent 冒泡父节点的监控事件
+func (l *fs) bubblingChildrenEvent(path string, event fsnotify.Event) {
+	for len(path) > 1 {
+		fmt.Println("bubblingChildrenEvent:", event.Op, path)
+		childrenWatcher, ok := l.childrenWatcherMaps[path]
+		if ok {
+			childrenWatcher.event <- event
+			return
+		}
+		path = filepath.Dir(path)
+	}
 }
 
 func (l *fs) replaceColon(path string) string {
@@ -102,6 +119,14 @@ func (l *fs) restoreColon(path string) string {
 func (l *fs) formatPath(path string) string {
 	if !strings.HasPrefix(path, l.rootDir) {
 		return l.rootDir + r.Join("/", path)
+	}
+	return path
+}
+
+//exposePath 将rootDir 去除
+func (l *fs) exposePath(path string) string {
+	if strings.HasPrefix(path, l.rootDir) {
+		return strings.TrimLeft(path, l.rootDir)
 	}
 	return path
 }
@@ -132,6 +157,10 @@ func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
 	}
+	if err != nil {
+		return
+	}
+
 	data, err = ioutil.ReadFile(dataPath)
 	version = int32(fs.ModTime().Unix())
 	return
@@ -170,7 +199,6 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 
 func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
 	realPath := l.replaceColon(l.formatPath(path))
-	fmt.Println("realpATH:",realPath)
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
@@ -211,7 +239,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 					}
 					if len(path) > 0 {
 						ett := &valueEntity{
-							path: rpath,
+							path: l.exposePath(rpath),
 						}
 						evtw.watcher <- ett
 					}
@@ -236,6 +264,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 }
 
 func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
+
 	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
@@ -277,8 +306,9 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 					}
 					if len(path) > 0 {
 						vals, version, err := l.GetChildren(rpath)
+						//fmt.Println("child.send.notify:", vals, version, err, l.exposePath(rpath))
 						ett := &valuesEntity{
-							path:    rpath,
+							path:    l.exposePath(rpath),
 							values:  vals,
 							version: version,
 							Err:     err,
@@ -294,7 +324,7 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 			case <-l.closeCh:
 				return
 			case event := <-v.event:
-				if event.Op == fsnotify.Chmod || event.Op == fsnotify.Rename {
+				if event.Op == fsnotify.Chmod {
 					break
 				}
 				v.syncChan <- event
