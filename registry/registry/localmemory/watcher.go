@@ -2,7 +2,6 @@ package localmemory
 
 import (
 	"fmt"
-	"strings"
 
 	r "github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/errs"
@@ -49,32 +48,32 @@ func (l *localMemory) WatchChildren(path string) (data chan registry.ChildrenWat
 func (l *localMemory) notifyParentChange(cPath string, version int32) {
 	l.clock.Lock()
 	defer l.clock.Unlock()
-	path, _, err := l.getParentForNotify(cPath)
+
+	paths, err := l.getParentForNotify(cPath)
 	if err != nil { //未找到父节点，无需通知
 		return
 	}
 
-	if v, ok := l.childrenWatchs[path]; ok {
-		select {
-		case v <- &childrenEntity{path: path, children: []string{cPath}, version: version}:
-		default:
-		}
-	}
-	delete(l.childrenWatchs, path)
-}
-func (l *localMemory) getParentForNotify(path string) (string, int32, error) {
-	npath := r.Format(path)
-	for k := range l.childrenWatchs {
-		if strings.HasPrefix(npath, r.Format(k)+"/") && len(npath) > len(k) {
-			list := r.Split(npath)
-			if r.Join(k, list[len(list)-1]) == npath {
-				if v, ok := l.nodes[k]; ok {
-					return k, v.version, nil
-				}
-				return k, 0, nil
+	for _, p := range paths {
+		if v, ok := l.childrenWatchs[p]; ok {
+			select {
+			case v <- &childrenEntity{path: p, children: []string{cPath}, version: 0}:
+			default:
 			}
+			// delete(l.childrenWatchs, p)
 		}
 	}
-	return "", 0, fmt.Errorf("节点[%s]的父节点%w", path, errs.ErrNotExist)
+}
 
+func (l *localMemory) getParentForNotify(path string) ([]string, error) {
+	npath := r.Format(path)
+	res := []string{}
+	list := r.Split(npath)
+	if len(list) == 1 {
+		return nil, fmt.Errorf("节点[%s]的父节点%w", path, errs.ErrNotExist)
+	}
+	for i := 0; i < len(list)-1; i++ {
+		res = append(res, r.Join(list[:i+1]...))
+	}
+	return res, nil
 }
