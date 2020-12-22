@@ -59,8 +59,6 @@ func NewFileSystem(rootDir string) (*fs, error) {
 		tempNodes:           make(map[string]bool),
 		closeCh:             make(chan struct{}),
 	}
-	registryfs.Start()
-
 	return registryfs, nil
 }
 
@@ -70,6 +68,7 @@ func (l *fs) Start() {
 		for {
 			select {
 			case <-l.closeCh:
+				l.watcher.Close() 
 				return
 			case event := <-l.watcher.Events:
 				if l.done {
@@ -90,14 +89,12 @@ func (l *fs) Start() {
 
 			}
 		}
-		l.watcher.Close()
 	}()
 }
 
 //bubblingChildrenEvent 冒泡父节点的监控事件
 func (l *fs) bubblingChildrenEvent(path string, event fsnotify.Event) {
 	for len(path) > 1 {
-		fmt.Println("bubblingChildrenEvent:", event.Op, path)
 		childrenWatcher, ok := l.childrenWatcherMaps[path]
 		if ok {
 			childrenWatcher.event <- event
