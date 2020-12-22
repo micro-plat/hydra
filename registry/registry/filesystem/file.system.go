@@ -51,8 +51,13 @@ func NewFileSystem(rootDir string) (*fs, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	rootDir = strings.TrimRight(rootDir, "/")
+	if strings.HasPrefix(rootDir, "./") {
+		rootDir = rootDir[2:]
+	}
 	registryfs := &fs{
-		rootDir:             strings.Trim(strings.TrimRight(rootDir, "/"), "./"),
+		rootDir:             rootDir,
 		watcher:             w,
 		valueWatcherMaps:    make(map[string]*fsValueWatcher),
 		childrenWatcherMaps: make(map[string]*fsChildrenWatcher),
@@ -68,7 +73,7 @@ func (l *fs) Start() {
 		for {
 			select {
 			case <-l.closeCh:
-				l.watcher.Close() 
+				l.watcher.Close()
 				return
 			case event := <-l.watcher.Events:
 				if l.done {
@@ -351,6 +356,7 @@ func (l *fs) CreatePersistentNode(path string, data string) (err error) {
 
 func (l *fs) createDirPath(path string) error {
 	realPath := l.formatPath(path)
+	fmt.Println("realPath", realPath, l.rootDir)
 	_, err := os.Stat(realPath)
 	if os.IsNotExist(err) {
 		return os.MkdirAll(realPath, dirMode)
