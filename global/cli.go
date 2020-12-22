@@ -22,6 +22,7 @@ type CliFlagObject struct {
 	SysName         string
 	ServerTypeNames string
 	ClusterName     string
+	IPMask          string
 	IsDebug         bool
 }
 

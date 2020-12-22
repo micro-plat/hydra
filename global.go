@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
 )
 
@@ -51,3 +52,12 @@ func CurrentContext() context.IContext {
 
 //ICli 终端命令参数
 type ICli = global.ICli
+
+func init() {
+	OnReady(func() error {
+		if !registry.Support(global.Def.RegistryAddr) {
+			return fmt.Errorf("不支持%s作为注册中心", global.Def.RegistryAddr)
+		}
+		return nil
+	})
+}

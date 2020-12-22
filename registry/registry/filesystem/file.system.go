@@ -51,14 +51,15 @@ func NewFileSystem(rootDir string) (*fs, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &fs{
-		rootDir:             strings.TrimRight(rootDir, "/"),
+	registryfs := &fs{
+		rootDir:             strings.Trim(strings.TrimRight(rootDir, "/"), "./"),
 		watcher:             w,
 		valueWatcherMaps:    make(map[string]*fsValueWatcher),
 		childrenWatcherMaps: make(map[string]*fsChildrenWatcher),
 		tempNodes:           make(map[string]bool),
 		closeCh:             make(chan struct{}),
-	}, nil
+	}
+	return registryfs, nil
 }
 
 //Start 启动文件监控
@@ -67,6 +68,7 @@ func (l *fs) Start() {
 		for {
 			select {
 			case <-l.closeCh:
+				l.watcher.Close() 
 				return
 			case event := <-l.watcher.Events:
 				if l.done {
@@ -77,23 +79,51 @@ func (l *fs) Start() {
 					defer l.watchLock.Unlock()
 					dataPath := l.formatPath(event.Name)
 					path := filepath.Dir(dataPath)
-					watcher, ok := l.valueWatcherMaps[path]
-					if !ok {
+					valueWatcher, ok := l.valueWatcherMaps[path]
+					if ok {
+						valueWatcher.event <- event
 						return
 					}
-					watcher.event <- event
+					l.bubblingChildrenEvent(path, event)
 				}(event)
 
 			}
 		}
-		l.watcher.Close()
 	}()
+}
+
+//bubblingChildrenEvent 冒泡父节点的监控事件
+func (l *fs) bubblingChildrenEvent(path string, event fsnotify.Event) {
+	for len(path) > 1 {
+		childrenWatcher, ok := l.childrenWatcherMaps[path]
+		if ok {
+			childrenWatcher.event <- event
+			return
+		}
+		path = filepath.Dir(path)
+	}
+}
+
+func (l *fs) replaceColon(path string) string {
+	return strings.ReplaceAll(path, ":", "@@@")
+}
+
+func (l *fs) restoreColon(path string) string {
+	return strings.ReplaceAll(path, "@@@", ":")
 }
 
 //formatPath 将rootDir 构建到路径中去
 func (l *fs) formatPath(path string) string {
 	if !strings.HasPrefix(path, l.rootDir) {
 		return l.rootDir + r.Join("/", path)
+	}
+	return path
+}
+
+//exposePath 将rootDir 去除
+func (l *fs) exposePath(path string) string {
+	if strings.HasPrefix(path, l.rootDir) {
+		return strings.TrimLeft(path, l.rootDir)
 	}
 	return path
 }
@@ -107,13 +137,14 @@ func (l *fs) getDataPath(path string) string {
 }
 
 func (l *fs) Exists(path string) (bool, error) {
-	_, err := os.Stat(l.formatPath(path))
+	p := l.replaceColon(l.formatPath(path))
+	_, err := os.Stat(p)
 	return err == nil || os.IsExist(err), nil
 }
 
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 
-	rpath := l.formatPath(path)
+	rpath := l.replaceColon(l.formatPath(path))
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
@@ -123,6 +154,10 @@ func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
 	}
+	if err != nil {
+		return
+	}
+
 	data, err = ioutil.ReadFile(dataPath)
 	version = int32(fs.ModTime().Unix())
 	return
@@ -130,16 +165,16 @@ func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 }
 
 func (l *fs) Update(path string, data string) (err error) {
-	if b, _ := l.Exists(path); !b {
+	if b, _ := l.Exists(l.replaceColon(path)); !b {
 		return errors.New(path + "不存在")
 	}
 
 	rpath := l.formatPath(path)
-	return ioutil.WriteFile(l.getDataPath(rpath), []byte(data), fileMode)
+	return ioutil.WriteFile(l.replaceColon(l.getDataPath(rpath)), []byte(data), fileMode)
 
 }
 func (l *fs) GetChildren(path string) (paths []string, version int32, err error) {
-	rpath := l.formatPath(path)
+	rpath := l.replaceColon(l.formatPath(path))
 	fs, err := os.Stat(rpath)
 	if os.IsNotExist(err) {
 		return nil, 0, errors.New(path + "不存在")
@@ -154,13 +189,13 @@ func (l *fs) GetChildren(path string) (paths []string, version int32, err error)
 		if strings.HasSuffix(f.Name(), ".swp") || strings.HasPrefix(f.Name(), "~") || strings.HasPrefix(f.Name(), ".init") {
 			continue
 		}
-		paths = append(paths, f.Name())
+		paths = append(paths, l.restoreColon(f.Name()))
 	}
 	return paths, version, nil
 }
 
 func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error) {
-	realPath := l.formatPath(path)
+	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
@@ -201,7 +236,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 					}
 					if len(path) > 0 {
 						ett := &valueEntity{
-							path: rpath,
+							path: l.exposePath(rpath),
 						}
 						evtw.watcher <- ett
 					}
@@ -226,7 +261,8 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 }
 
 func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err error) {
-	realPath := l.formatPath(path)
+
+	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
 		err = fmt.Errorf("Watch path:%s 不存在", path)
@@ -267,8 +303,9 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 					}
 					if len(path) > 0 {
 						vals, version, err := l.GetChildren(rpath)
+						//fmt.Println("child.send.notify:", vals, version, err, l.exposePath(rpath))
 						ett := &valuesEntity{
-							path:    rpath,
+							path:    l.exposePath(rpath),
 							values:  vals,
 							version: version,
 							Err:     err,
@@ -284,7 +321,7 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 			case <-l.closeCh:
 				return
 			case event := <-v.event:
-				if event.Op == fsnotify.Chmod || event.Op == fsnotify.Rename {
+				if event.Op == fsnotify.Chmod {
 					break
 				}
 				v.syncChan <- event
@@ -296,10 +333,11 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 }
 
 func (l *fs) Delete(path string) error {
-	return os.RemoveAll(l.formatPath(path))
+	return os.RemoveAll(l.replaceColon(l.formatPath(path)))
 }
 
 func (l *fs) CreatePersistentNode(path string, data string) (err error) {
+	path = l.replaceColon(path)
 	err = l.createDirPath(path)
 	if err != nil {
 		return
@@ -327,6 +365,7 @@ func (l *fs) createNodeData(path, data string) error {
 }
 
 func (l *fs) CreateTempNode(path string, data string) (err error) {
+	path = l.replaceColon(path)
 	if err = l.CreatePersistentNode(path, data); err != nil {
 		return err
 	}

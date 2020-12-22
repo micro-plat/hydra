@@ -97,6 +97,7 @@ github.com/json-iterator/go
 # github.com/jteeuwen/go-bindata v3.0.7+incompatible
 ## explicit
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
+## explicit
 github.com/keybase/go-ps/darwincgo
 # github.com/kr/fs v0.1.0
 github.com/kr/fs
@@ -116,7 +117,7 @@ github.com/mholt/archiver
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.0.2 => ../../../github.com/micro-plat/lib4go
+# github.com/micro-plat/lib4go v1.0.9
 ## explicit
 github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -338,4 +339,3 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 ## explicit
 gopkg.in/yaml.v3
-# github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

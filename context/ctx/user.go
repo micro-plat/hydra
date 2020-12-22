@@ -9,8 +9,8 @@ import (
 var _ context.IUser = &user{}
 
 type user struct {
-	gid       string
-	meta      conf.IMeta
+	gid string
+	conf.IMeta
 	ctx       context.IInnerContext
 	requestID string
 	auth      *Auth
@@ -20,10 +20,10 @@ type user struct {
 //NewUser 用户信息
 func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
 	return &user{
-		ctx:  ctx,
-		gid:  gid,
-		auth: &Auth{},
-		meta: meta,
+		ctx:   ctx,
+		gid:   gid,
+		auth:  &Auth{},
+		IMeta: meta,
 	}
 }
 
@@ -38,6 +38,11 @@ func (c *user) GetRequestID() string {
 //GetGID 获取当前处理的goroutine id
 func (c *user) GetGID() string {
 	return c.gid
+}
+
+//GetUserName 获取用户名(basic认证启动后有效)
+func (c *user) GetUserName() string {
+	return c.GetString(context.UserName)
 }
 
 //GetClientIP 获取客户端IP地址

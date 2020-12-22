@@ -224,13 +224,13 @@ func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ..
 
 	//cron
 	if tp == global.CRON {
-		assert.Equal(t, len(ext)*len(m.services), len(CRON.dynamicTasks.Tasks), testName+" cron")
+		assert.Equal(t, len(ext)*len(m.services), len(CRON.staticTasks.Tasks), testName+" cron")
 		return
 	}
 
 	//mqc
 	if tp == global.MQC {
-		assert.Equal(t, len(ext), len(MQC.dynamicQueues.Queues), testName+" mqc")
+		assert.Equal(t, len(ext), len(MQC.staticQueues.Queues), testName+" mqc")
 		return
 	}
 

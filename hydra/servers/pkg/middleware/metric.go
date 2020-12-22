@@ -6,7 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/pkgs/metrics"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/global"
 )
 
 //Metric 服务器处理能力统计
@@ -36,7 +36,7 @@ func (m *Metric) onceDo(ctx IMiddleContext) {
 		}
 
 		m.currentRegistry = metrics.NewRegistry()
-		m.ip = net.GetLocalIPAddress()
+		m.ip = global.LocalIP()
 		m.logger = logger.New("metric")
 
 		//2. 创建上报服务

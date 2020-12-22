@@ -104,6 +104,10 @@ LOOP:
 				goto LOOP
 			}
 			data, version := content.GetValue()
+			if len(data) == 0 {
+				w.deleted()
+				goto LOOP
+			}
 			w.changed(data, version)
 			//继续监控值变化
 			dataChan, err = w.registry.WatchChildren(path)

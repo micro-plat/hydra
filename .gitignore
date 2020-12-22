@@ -18,3 +18,5 @@ testserver*
 examples/conf
 logger.toml
 consul*
+mqctestserver*
+rpctestservre*

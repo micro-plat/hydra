@@ -77,6 +77,16 @@ func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error
 
 }
 
+//Support 检查注册中心地址是否支持
+func Support(address string) bool {
+	proto, _, _, _, _, err := Parse(address)
+	if err != nil {
+		return false
+	}
+	_, ok := registries[proto]
+	return ok
+}
+
 //GetCurrent 获取当前注册中心
 func GetCurrent() IRegistry {
 	r, _ := GetRegistry(global.Def.RegistryAddr, global.Def.Log())

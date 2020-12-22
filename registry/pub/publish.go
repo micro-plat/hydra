@@ -188,7 +188,14 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 	if server.Domain == "" {
 		return p.pubs, nil
 	}
-
+	proto, addr, err := global.ParseProto(serviceAddr)
+	if err != nil {
+		return nil, err
+	}
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return nil, err
+	}
 	input := map[string]interface{}{
 		"plat_name":       p.c.GetPlatName(),
 		"plat_cn_name":    global.Def.PlatCNName,
@@ -198,6 +205,9 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		"cluster_name":    p.c.GetClusterName(),
 		"server_name":     serverName,
 		"service_address": serviceAddr,
+		"proto":           proto,
+		"host":            host,
+		"port":            port,
 		"ip":              global.LocalIP(),
 	}
 	buff, err := jsons.Marshal(input)
@@ -205,19 +215,26 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		return nil, fmt.Errorf("更新dns服务器发布数据失败:%w", err)
 	}
 	ndata := string(buff)
+	path := registry.Join(p.c.GetDNSPubPath(server.Domain), fmt.Sprintf("%s:%s", host, port))
+	exist, err := p.c.GetRegistry().Exists(path)
+	if err != nil {
+		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
+		return nil, err
+	}
 
-	//创建DNSIP节点
-	ip, port, err := net.SplitHostPort(serverName)
+	if exist {
+		err = p.c.GetRegistry().Update(path, ndata)
+	} else {
+		err = p.c.GetRegistry().CreateTempNode(path, ndata)
+	}
+
 	if err != nil {
+		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
 		return nil, err
 	}
-	path := registry.Join(p.c.GetDNSPubPath(server.Domain), fmt.Sprintf("%s:%s", ip, port))
-	err = p.c.GetRegistry().CreateTempNode(path, ndata)
-	if err != nil {
-		err = fmt.Errorf("DNS[IP]服务发布失败:(%s)[%v]", path, err)
-		return nil, err
-	}
-	p.appendPub(path, "")
+
+	//加入节点检查
+	p.appendPub(path, ndata)
 	return p.pubs, nil
 }
 
@@ -264,7 +281,6 @@ func (p *Publisher) check() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	for path, data := range p.pubs {
-		//fmt.Println("------------------:", path)
 		if p.done {
 			break
 		}
@@ -292,7 +308,6 @@ func (p *Publisher) Close() {
 	p.done = true
 	close(p.closeChan)
 	p.Clear()
-	// p.c.GetRegistry().Close()
 }
 
 //Clear 清除所有发布节点
@@ -306,11 +321,3 @@ func (p *Publisher) Clear() {
 	p.pubs = make(map[string]string)
 	p.watchChan = make(chan struct{})
 }
-
-// if len(service)%2 > 0 {
-// 	return fmt.Errorf("发布服务的扩展参数必须成对出现：%d", len(service))
-// }
-
-// for i := 0; i+1 < len(service); i = i + 2 {
-// 	input[service[i]] = service[i+1]
-// }

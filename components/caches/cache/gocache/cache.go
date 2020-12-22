@@ -8,7 +8,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/caches/cache"
 	vargocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
-	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/hydra/global"
 	gocache "github.com/zkfy/go-cache"
 )
 
@@ -33,7 +33,7 @@ func NewByConfig(opt *vargocache.GoCache) (m *Client, err error) {
 	m = &Client{}
 	m.client = gocache.New(opt.Expiration, opt.CleanupInterval)
 	m.servers = []string{
-		net.GetLocalIPAddress(),
+		global.LocalIP(),
 	}
 	return
 }

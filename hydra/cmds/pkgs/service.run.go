@@ -15,7 +15,6 @@ func (p *ServiceApp) run() (err error) {
 
 	//1. 绑定应用程序参数
 	if err := global.Def.Bind(p.c); err != nil {
-		//logs.Log.Error(err)
 		cli.ShowCommandHelp(p.c, p.c.Command.Name)
 		return err
 	}

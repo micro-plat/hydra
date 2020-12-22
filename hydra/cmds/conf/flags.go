@@ -25,9 +25,16 @@ func getInstallFlags() []cli.Flag {
 	return flags
 }
 
+var extNode string
+
 //getShowFlags 获取运行时的参数
 func getShowFlags() []cli.Flag {
 	flags := pkgs.GetBaseFlags()
+	flags = append(flags, cli.StringFlag{
+		Name:        "node",
+		Destination: &extNode,
+		Usage:       `-扩展节点名称`,
+	})
 	flags = append(flags, global.ConfCli.GetFlags()...)
 	return flags
 }

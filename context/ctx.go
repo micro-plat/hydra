@@ -13,6 +13,8 @@ import (
 )
 
 const (
+	UserName = "UserName"
+
 	XRequestID = "X-Request-Id"
 
 	JSONF  = "application/json; charset=%s"
@@ -257,6 +259,9 @@ type IUser interface {
 
 	//GetGID 获取当前处理的goroutine id
 	GetGID() string
+
+	//GetUserName 获取用户名
+	GetUserName() string
 
 	//GetClientIP 获取客户端请求IP
 	GetClientIP() string

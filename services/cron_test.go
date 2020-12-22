@@ -40,7 +40,7 @@ func Test_cron_Add(t *testing.T) {
 	}
 
 	//获取任务
-	tasks := c.GetTasks().Tasks
+	tasks := c.dynamicTasks.Tasks
 	assert.Equal(t, len(tests)-1, len(tasks), "任务长度")
 	keyMap := map[string]*task.Task{}
 	for _, v := range tasks {
@@ -83,7 +83,7 @@ func Test_cron_Add_WithMultithread(t *testing.T) {
 	}
 	time.Sleep(time.Second * 2)
 	//获取任务
-	tasks := c.GetTasks().Tasks
+	tasks := c.dynamicTasks.Tasks
 	assert.Equal(t, coroutine, len(tasks), "任务长度")
 	for _, v := range tasks {
 		assert.Equal(t, false, v.Disable, "任务状态")
@@ -171,7 +171,7 @@ func Test_cron_Remove(t *testing.T) {
 		}
 	}
 	//获取任务
-	tasks := c.GetTasks().Tasks
+	tasks := c.dynamicTasks.Tasks
 	assert.Equal(t, nonExist+addTasksLen, len(tasks), "任务长度")
 
 	for _, v := range tasks {

@@ -30,6 +30,7 @@ type Processor struct {
 	span      time.Duration
 	slots     []cmap.ConcurrentMap //time slots
 	startTime time.Time
+	metric    *middleware.Metric
 	status    int
 }
 
@@ -41,12 +42,14 @@ func NewProcessor() (p *Processor) {
 		span:      time.Second,
 		length:    60,
 		startTime: time.Now(),
+		metric:    middleware.NewMetric(),
 	}
 	p.Engine = dispatcher.New()
 	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
+	p.Engine.Use(p.metric.Handle().DispFunc())
 	p.Engine.Use(middlewares.DispFunc()...)
 
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
@@ -146,12 +149,26 @@ func (s *Processor) Resume() (bool, error) {
 
 //Close 退出
 func (s *Processor) Close() {
+	defer s.metric.Stop()
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if !s.done {
 		s.done = true
 		close(s.closeChan)
 	}
+}
+
+//TaskCount 获取当前启用的Task数量
+func (s *Processor) TaskCount() int {
+	count := 0
+	for i := range s.slots {
+		for item := range s.slots[i].IterBuffered() {
+			if !item.Val.(*CronTask).Disable {
+				count++
+			}
+		}
+	}
+	return count
 }
 
 //-------------------------------------内部处理------------------------------------

@@ -11,8 +11,8 @@ import (
 
 	"github.com/micro-plat/hydra/components/queues/mq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/lib4go/net"
 	"github.com/micro-plat/lib4go/utility"
 
 	"github.com/micro-plat/gmq/mqtt"
@@ -111,7 +111,7 @@ func (c *Producer) connect() (*client.Client, bool, error) {
 			Address:         addr + ":" + port,
 			UserName:        []byte(c.confOpts.UserName),
 			Password:        []byte(c.confOpts.Password),
-			ClientID:        []byte(fmt.Sprintf("%s-%s", net.GetLocalIPAddress(), utility.GetGUID()[0:6])),
+			ClientID:        []byte(fmt.Sprintf("%s-%s", global.LocalIP(), utility.GetGUID()[0:6])),
 			TLSConfig:       cert,
 			PINGRESPTimeout: 3,
 			KeepAlive:       10,

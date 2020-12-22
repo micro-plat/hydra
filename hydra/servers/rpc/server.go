@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 
 	"github.com/asaskevich/govalidator"
@@ -94,7 +95,7 @@ func GetAddress(addr string) (string, error) {
 	}
 	switch host {
 	case "0.0.0.0", "":
-		host = net.GetLocalIPAddress()
+		host = global.LocalIP()
 	case "127.0.0.1", "localhost":
 		break
 	default:
@@ -116,6 +117,7 @@ func GetAddress(addr string) (string, error) {
 
 //Shutdown 关闭服务器
 func (s *Server) Shutdown() {
+	defer s.Processor.Close()
 	if s.running {
 		s.running = false
 		s.engine.GracefulStop()

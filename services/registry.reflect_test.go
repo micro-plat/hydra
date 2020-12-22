@@ -27,11 +27,11 @@ func Test_reflectHandle(t *testing.T) {
 		{name: "1.6 注册对象为map", path: "path", h: map[string]string{}, wantErr: "只能接收引用类型或struct; 实际是 map"},
 		{name: "1.7 注册对象为结构体指针,但没有可用于注册的处理函数", path: "path", h: &testHandler1{}, wantErr: "path中，未找到可用于注册的处理函数"},
 		{name: "1.8 注册对象为结构体指针,无Handle函数", path: "path", h: &testHandler6{}, wantErr: "path中,未指定[/path/order]的Handle函数"},
-		{name: "1.9 注册对象为结构体指针,函数签名不正确", path: "path", h: &testHandlerSuffix{}, wantErr: "函数【XxxHandle】是钩子类型（[Handling Handle Handled Fallback]）,但签名不是func(context.IContext) interface{}"},
+		{name: "1.9 注册对象为结构体指针,函数签名不正确", path: "path", h: &testHandlerSuffix{}, wantErr: "函数【XxxHandle】是钩子类型（[Handling Handle Handled Fallback]）,但签名不是func(context.IContext) interface{}或者func(context.IContext)"},
 		{name: "1.10 注册对象为构建函数,函数签名不正确", path: "/path/*/request", h: func() int32 { return 0 }, wantErr: "输出参数第一个参数必须是结构体"},
 
 		{name: "2.1 注册对象为func(context.IContext) interface{}", path: "path", h: func(context.IContext) interface{} { return nil }, wantService: []string{"path"}, wantServicePath: []string{"path"}, wantServiceAction: [][]string{[]string{}}},
-		{name: "2.2 注册对象为rpc协议", path: "path", h: "rpc://192.168.0.1:9091", wantService: []string{"path"}, wantServicePath: []string{"path"}, wantServiceAction: [][]string{[]string{}}},
+		{name: "2.2 注册对象为rpc协议", path: "path", h: "rpc://192.168.0.1:9091", wantService: []string{"rpc://192.168.0.1:9091"}, wantServicePath: []string{"path"}, wantServiceAction: [][]string{[]string{}}},
 		{name: "2.3 注册对象为结构体指针,且有用于注册的处理函数", path: "/path", h: &testHandler{}, wantService: []string{"/path/$get", "/path/$post", "/path/order"}, wantServicePath: []string{"/path", "/path", "/path/order"}, wantServiceAction: [][]string{[]string{"GET"}, []string{"POST"}, []string{"GET", "POST"}}},
 		{name: "2.4 注册对象为结构体指针,且需要对注册服务进行替换", path: "/path/*/request", h: &testHandler5{}, wantService: []string{"/path/order/request", "/path/post/request/$post"}, wantServicePath: []string{"/path/order/request", "/path/post/request"}, wantServiceAction: [][]string{[]string{"GET", "POST"}, []string{"POST"}}},
 		{name: "2.5 注册对象为结构体指针,且需要对服务进行默认替换", path: "/path/*", h: &testHandler4{}, wantService: []string{"/path/handle"}, wantServicePath: []string{"/path/handle"}, wantServiceAction: [][]string{[]string{}}},

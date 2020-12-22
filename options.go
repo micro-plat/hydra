@@ -28,10 +28,10 @@ func WithPlatName(platName string, platCNName ...string) Option {
 }
 
 //WithSystemName 设置系统名称
-func WithSystemName(sysName string, platCNName ...string) Option {
+func WithSystemName(sysName string, sysCNName ...string) Option {
 	return func() {
 		global.Def.SysName = sysName
-		global.Def.SysCNName = types.GetStringByIndex(platCNName, 0, sysName)
+		global.Def.SysCNName = types.GetStringByIndex(sysCNName, 0, sysName)
 	}
 }
 
