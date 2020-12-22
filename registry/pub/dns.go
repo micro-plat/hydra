@@ -16,7 +16,6 @@ type DNSConf struct {
 	Host           string `json:"host"`
 	Port           string `json:"port"`
 	IPAddress      string `json:"ip"`
-	Prefix         string `json:"prefix"`
 }
 
 //GetDNSConf 获取DNS配置信息
