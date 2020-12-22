@@ -60,7 +60,7 @@ func Test_mqc_Add(t *testing.T) {
 
 	//验证结果
 	keyMap := map[string]*queue.Queue{}
-	for _, v := range c.GetQueues().Queues {
+	for _, v := range c.dynamicQueues.Queues {
 		keyMap[v.Queue] = v
 	}
 
@@ -103,7 +103,7 @@ func Test_mqc_Add_WithMultithread(t *testing.T) {
 	time.Sleep(time.Second * 2)
 
 	//获取队列
-	queues := c.GetQueues().Queues
+	queues := c.dynamicQueues.Queues
 	assert.Equal(t, coroutine, len(queues), "队列长度")
 
 	time.Sleep(time.Second)
@@ -166,7 +166,7 @@ func Test_mqc_Remove(t *testing.T) {
 		}
 	}
 	//获取队列
-	queues := c.GetQueues().Queues
+	queues := c.dynamicQueues.Queues
 	assert.Equal(t, nonExist+addQueuesLen, len(queues), "队列长度")
 
 	for _, v := range queues {

@@ -24,7 +24,7 @@ func Test_pathRouter_Add_WithPanic(t *testing.T) {
 		wantPanic error
 	}{
 		{name: "1.1 opts不是router.Option", service: "service", action: []string{"POST"}, opts: []interface{}{"opt1", "opt2"}, wantPanic: fmt.Errorf("%s注册的服务类型必须是router.Option", "service")},
-		{name: "1.2 opts为空", service: "service", action: []string{"POST"}, opts: []interface{}{}, wantPanic: nil},
+		//{name: "1.2 opts为空", service: "service", action: []string{"POST"}, opts: []interface{}{}, wantPanic: nil},
 	}
 	p := newPathRouter("path")
 	for _, tt := range tests {
