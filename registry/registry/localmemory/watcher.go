@@ -60,7 +60,7 @@ func (l *localMemory) notifyParentChange(cPath string, version int32) {
 			case v <- &childrenEntity{path: p, children: []string{cPath}, version: 0}:
 			default:
 			}
-			// delete(l.childrenWatchs, p)
+			delete(l.childrenWatchs, p)
 		}
 	}
 }
