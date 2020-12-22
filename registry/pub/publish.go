@@ -204,6 +204,7 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		"server_type":     p.c.GetServerType(),
 		"cluster_name":    p.c.GetClusterName(),
 		"server_name":     serverName,
+		"server_cn_name":  server.ServerCNName,
 		"service_address": serviceAddr,
 		"proto":           proto,
 		"host":            host,

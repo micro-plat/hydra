@@ -11,6 +11,7 @@ type DNSConf struct {
 	SystemCNName   string `json:"system_cn_name"`
 	ServerType     string `json:"server_type"`
 	ServerName     string `json:"server_name"`
+	ServerCNName   string `json:"server_cn_name"`
 	ServiceAddress string `json:"service_address"`
 	Proto          string `json:"proto"`
 	Host           string `json:"host"`
