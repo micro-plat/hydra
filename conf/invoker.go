@@ -32,7 +32,7 @@ func (i *Invoker) Allow() bool {
 func (i *Invoker) Invoke(call FnInvoker) (interface{}, error) {
 	result := call(i.addr)
 	if err := errs.GetError(result); err != nil {
-		return result, err
+		return result, err.GetError()
 	}
 	return result, nil
 }
