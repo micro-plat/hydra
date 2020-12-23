@@ -84,9 +84,9 @@ func (c *response) ContentType(v string, xmlRoot ...string) {
 	if v == "" {
 		return
 	}
-	if len(xmlRoot) > 0 {
-		c.xmlRoot = types.GetStringByIndex(xmlRoot, 0)
-	}
+
+	c.xmlRoot = types.DecodeString(types.GetStringByIndex(xmlRoot, 0), "", c.xmlRoot)
+
 	//处理编码问题
 	if strings.Contains(v, "%s") {
 		v = fmt.Sprintf(v, c.path.GetEncoding())

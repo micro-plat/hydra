@@ -129,11 +129,11 @@ func Test_conf_Load(t *testing.T) {
 			switch k {
 			case global.API, global.WS, global.Web:
 				assert.Equal(t, (tt.want[k].(*httpBuilder)).tp, (tt.fields.data[k].(*httpBuilder)).tp, tt.name+",http-tp")
-				assert.Equal(t, (tt.want[k].(*httpBuilder)).CustomerBuilder, (tt.fields.data[k].(*httpBuilder)).CustomerBuilder, tt.name+",http-CustomerBuilder")
+				assert.Equal(t, (tt.want[k].(*httpBuilder)).BaseBuilder, (tt.fields.data[k].(*httpBuilder)).BaseBuilder, tt.name+",http-CustomerBuilder")
 				assert.Equal(t, reflect.TypeOf((tt.want[k].(*httpBuilder)).fnGetRouter), reflect.TypeOf((tt.fields.data[k].(*httpBuilder)).fnGetRouter), tt.name+",http-fnGetRouter")
 			case global.RPC:
 				assert.Equal(t, (tt.want[k].(*rpcBuilder)).tp, (tt.fields.data[k].(*rpcBuilder)).tp, tt.name+",rpc-tp")
-				assert.Equal(t, (tt.want[k].(*rpcBuilder)).CustomerBuilder, (tt.fields.data[k].(*rpcBuilder)).CustomerBuilder, tt.name+",rpc-CustomerBuilder")
+				assert.Equal(t, (tt.want[k].(*rpcBuilder)).BaseBuilder, (tt.fields.data[k].(*rpcBuilder)).BaseBuilder, tt.name+",rpc-CustomerBuilder")
 				assert.Equal(t, reflect.TypeOf((tt.want[k].(*rpcBuilder)).fnGetRouter), reflect.TypeOf((tt.fields.data[k].(*rpcBuilder)).fnGetRouter), tt.name+",rpc-fnGetRouter")
 			case global.MQC:
 				assert.Equal(t, tt.want[k], tt.fields.data[k], tt.name+",mqc-CustomerBuilder")
@@ -168,7 +168,7 @@ func Test_conf_API(t *testing.T) {
 		want := newHTTP(global.API, tt.address, cuurConf.routerLoader, tt.opts...)
 		obj := cuurConf.API(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, want.CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -188,7 +188,7 @@ func Test_conf_GetAPI(t *testing.T) {
 	for _, tt := range tests {
 		obj := tt.fields.GetAPI()
 		assert.Equal(t, (tt.want[global.API].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, (tt.want[global.API].(*httpBuilder)).CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, (tt.want[global.API].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf((tt.want[global.API].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -212,7 +212,7 @@ func Test_conf_Web(t *testing.T) {
 		want.Static(static.WithArchive(global.AppName))
 		obj := tt.fields.Web(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, want.CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -232,7 +232,7 @@ func Test_conf_GetWeb(t *testing.T) {
 	for _, tt := range tests {
 		obj := tt.fields.GetWeb()
 		assert.Equal(t, (tt.want[global.Web].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, (tt.want[global.Web].(*httpBuilder)).CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, (tt.want[global.Web].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf((tt.want[global.Web].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -255,7 +255,7 @@ func Test_conf_WS(t *testing.T) {
 		want := newHTTP(global.WS, tt.address, tt.fields.routerLoader, tt.opts...)
 		obj := tt.fields.WS(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, want.CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -275,7 +275,7 @@ func Test_conf_GetWS(t *testing.T) {
 	for _, tt := range tests {
 		obj := tt.fields.GetWS()
 		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf((tt.want[global.WS].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -298,7 +298,7 @@ func Test_conf_RPC(t *testing.T) {
 		want := newRPC(tt.address, tt.fields.routerLoader, tt.opts...)
 		obj := tt.fields.RPC(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, want.CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
@@ -318,7 +318,7 @@ func Test_conf_GetRPC(t *testing.T) {
 	for _, tt := range tests {
 		obj := tt.fields.GetRPC()
 		assert.Equal(t, (tt.want[global.RPC].(*rpcBuilder)).tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, (tt.want[global.RPC].(*rpcBuilder)).CustomerBuilder, obj.CustomerBuilder, tt.name+",CustomerBuilder")
+		assert.Equal(t, (tt.want[global.RPC].(*rpcBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 		assert.Equal(t, reflect.TypeOf((tt.want[global.RPC].(*rpcBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }

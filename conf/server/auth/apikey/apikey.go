@@ -33,10 +33,11 @@ const (
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
-	Secret   string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
-	Mode     string   `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
-	Excludes []string `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
-	Disable  bool     `json:"disable,omitempty" toml:"disable,omitempty"`
+	Secret   string        `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
+	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
+	Excludes []string      `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
+	Disable  bool          `json:"disable,omitempty" toml:"disable,omitempty"`
+	invoker  *conf.Invoker `json:"-"`
 	*conf.PathMatch
 }
 
@@ -51,11 +52,18 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 		opt(f)
 	}
 	f.PathMatch = conf.NewPathMatch(f.Excludes...)
+	f.invoker = conf.NewInvoker(f.Secret)
 	return f
 }
 
 //Verify 验证签名是否通过
-func (a *APIKeyAuth) Verify(raw string, sign string) error {
+func (a *APIKeyAuth) Verify(raw string, sign string, invoke conf.FnInvoker) error {
+	//检查并执行本地服务调用
+	if ok, _, err := a.invoker.CheckAndInvoke(invoke); ok {
+		return err
+	}
+
+	//根据配置进行签名验证
 	var expect string
 	switch strings.ToUpper(a.Mode) {
 	case ModeMD5:
@@ -88,6 +96,7 @@ func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 		return nil, fmt.Errorf("apikey配置数据有误:%v", err)
 	}
 	fsa.PathMatch = conf.NewPathMatch(fsa.Excludes...)
+	fsa.invoker = conf.NewInvoker(fsa.Secret)
 	return &fsa, nil
 }
 

@@ -7,7 +7,6 @@ import (
 )
 
 // var ctxMap sync.Map
-
 var ctxMap = cmap.New(6)
 
 //Cache 将当前上下文配置保存到当前线程编号对应的缓存
