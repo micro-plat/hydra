@@ -52,7 +52,7 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 		opt(f)
 	}
 	f.PathMatch = conf.NewPathMatch(f.Excludes...)
-	fsa.invoker = conf.NewInvoker(f.Secret)
+	f.invoker = conf.NewInvoker(f.Secret)
 	return f
 }
 
