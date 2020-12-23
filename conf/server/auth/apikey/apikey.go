@@ -60,7 +60,8 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 func (a *APIKeyAuth) Verify(raw string, sign string, invoke func(s string) interface{}) error {
 	//检查并执行本地服务调用
 	if ok := a.invoker.Allow(); ok {
-		return a.invoker.Invoke(invoke)
+		_, err := a.invoker.Invoke(invoke)
+		return err
 	}
 
 	//根据配置进行签名验证

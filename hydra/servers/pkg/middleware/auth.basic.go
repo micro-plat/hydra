@@ -34,7 +34,7 @@ func BasicAuthForRealm() Handler {
 
 		//验证当前请求的用户名密码是否有效
 		ctx.Response().AddSpecial("basic")
-		if user, ok := basic.Verify(ctx.Request().Headers().GetString("Authorization")); ok {
+		if user, ok := basic.Verify(ctx.Request().Headers().GetString("Authorization"), ctx.Invoke); ok {
 			ctx.Meta().SetValue(context.UserName, user)
 			ctx.User().Auth().Request(map[string]interface{}{
 				context.UserName: user,

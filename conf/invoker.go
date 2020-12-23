@@ -5,6 +5,9 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 )
 
+//FnInvoker 调用函数，用于指定调用本地服务的函数签名格式
+type FnInvoker func(s string) interface{}
+
 //Invoker 本地调用配置
 type Invoker struct {
 	allow bool
@@ -26,10 +29,19 @@ func (i *Invoker) Allow() bool {
 }
 
 //Invoke 调用指定的函数并检查返回结果，返回结果不包含error则认为成功
-func (i *Invoker) Invoke(call func(s string) interface{}) error {
+func (i *Invoker) Invoke(call FnInvoker) (interface{}, error) {
 	result := call(i.addr)
 	if err := errs.GetError(result); err != nil {
-		return err
+		return result, err
 	}
-	return nil
+	return result, nil
+}
+
+//CheckAndInvoke 检查是否可以调用服务，可以则直接调用并返回结果
+func (i *Invoker) CheckAndInvoke(call FnInvoker) (bool, interface{}, error) {
+	if !i.Allow() {
+		return false, nil, nil
+	}
+	r, err := i.Invoke(call)
+	return true, r, err
 }
