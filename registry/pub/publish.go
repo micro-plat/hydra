@@ -219,7 +219,6 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 	ndata := string(buff)
 	domain := strings.TrimPrefix(server.Domain, "www.")
 	path := registry.Join(p.c.GetDNSPubPath(domain), fmt.Sprintf("%s:%s", host, port))
-	fmt.Println(path)
 	exist, err := p.c.GetRegistry().Exists(path)
 	if err != nil {
 		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)
