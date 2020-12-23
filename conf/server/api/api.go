@@ -43,14 +43,15 @@ var validTypes = map[string]bool{"api": true, "web": true, "ws": true}
 
 //Server api server配置信息
 type Server struct {
-	Address   string `json:"address,omitempty" toml:"address,omitempty"`
-	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
-	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
-	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
-	Host      string `json:"host,omitempty" toml:"host,omitempty"`
-	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
-	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	Address      string `json:"address,omitempty" toml:"address,omitempty"`
+	Status       string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	RTimeout     int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
+	WTimeout     int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
+	RHTimeout    int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
+	Host         string `json:"host,omitempty" toml:"host,omitempty"`
+	Domain       string `json:"dn,omitempty" toml:"dn,omitempty"`
+	Trace        bool   `json:"trace,omitempty" toml:"trace,omitempty"`
+	ServerCNName string `json:"serverCNName,omitempty" toml:"serverCNName,omitempty"`
 }
 
 //New 构建api server配置信息

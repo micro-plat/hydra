@@ -55,3 +55,10 @@ func WithDNS(ip ...string) Option {
 		}
 	}
 }
+
+//WithServerCNName 服务器名称
+func WithServerCNName(ServerCNName string) Option {
+	return func(a *Server) {
+		a.ServerCNName = ServerCNName
+	}
+}
