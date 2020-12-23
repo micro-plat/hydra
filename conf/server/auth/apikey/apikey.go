@@ -9,9 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/security/md5"
 	"github.com/micro-plat/lib4go/security/sha1"
 	"github.com/micro-plat/lib4go/security/sha256"
@@ -35,12 +33,11 @@ const (
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
-	Secret      string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
-	Mode        string   `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
-	Excludes    []string `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
-	Disable     bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	localInvoke bool     `json:"-"`
-	invokeAddr  string   `json:"-"`
+	Secret   string        `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
+	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
+	Excludes []string      `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
+	Disable  bool          `json:"disable,omitempty" toml:"disable,omitempty"`
+	invoker  *conf.Invoker `json:"-"`
 	*conf.PathMatch
 }
 
@@ -60,13 +57,12 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 
 //Verify 验证签名是否通过
 func (a *APIKeyAuth) Verify(raw string, sign string, invoke func(s string) interface{}) error {
-	if a.localInvoke {
-		result := invoke(a.invokeAddr)
-		if err := errs.GetError(result); err != nil {
-			return err
-		}
-		return nil
+	//检查并执行本地服务调用
+	if ok := a.invoker.Allow(); ok {
+		return a.invoker.Invoke(invoke)
 	}
+
+	//根据配置进行签名验证
 	var expect string
 	switch strings.ToUpper(a.Mode) {
 	case ModeMD5:
@@ -95,11 +91,11 @@ func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("apikey配置格式有误:%v", err)
 	}
-	fsa.invokeAddr, fsa.localInvoke = global.IsProto(fsa.Secret, global.ProtoInvoker)
 	if b, err := govalidator.ValidateStruct(&fsa); !b {
 		return nil, fmt.Errorf("apikey配置数据有误:%v", err)
 	}
 	fsa.PathMatch = conf.NewPathMatch(fsa.Excludes...)
+	fsa.invoker = conf.NewInvoker(fsa.Secret)
 	return &fsa, nil
 }
 
