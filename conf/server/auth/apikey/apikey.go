@@ -57,7 +57,7 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 }
 
 //Verify 验证签名是否通过
-func (a *APIKeyAuth) Verify(raw string, sign string, invoke func(s string) interface{}) error {
+func (a *APIKeyAuth) Verify(raw string, sign string, invoke conf.FnInvoker) error {
 	//检查并执行本地服务调用
 	if ok, _, err := a.invoker.CheckAndInvoke(invoke); ok {
 		return err
