@@ -36,9 +36,14 @@ func ParseProto(address string) (string, string, error) {
 }
 
 //IsProto 是否是指定的协议
-func IsProto(addr string, proto string) (string, bool) {
-	p, addrs, _ := ParseProto(addr)
-	return addrs, p == proto
+func IsProto(addr string, proto ...string) (string, bool) {
+	for _, prt := range proto {
+		p, addrs, _ := ParseProto(addr)
+		if p == prt {
+			return addrs, true
+		}
+	}
+	return "", false
 }
 
 //IsLocal 是否是本地服务

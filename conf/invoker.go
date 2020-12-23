@@ -16,7 +16,7 @@ type Invoker struct {
 
 //NewInvoker 构建本地调用配置
 func NewInvoker(p string) *Invoker {
-	addr, allow := global.IsProto(p, global.ProtoInvoker)
+	addr, allow := global.IsProto(p, global.ProtoInvoker, global.ProtoRPC)
 	return &Invoker{
 		allow: allow,
 		addr:  addr,
