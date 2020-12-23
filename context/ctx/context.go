@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -94,6 +95,11 @@ func (c *Ctx) APPConf() app.IAPPConf {
 //Tracer 链路跟踪器
 func (c *Ctx) Tracer() context.ITracer {
 	return c.tracer
+}
+
+//Invoke 调用本地服务
+func (c *Ctx) Invoke(service string) interface{} {
+	return services.Def.Call(c, service)
 }
 
 //Close 关闭并释放所有资源

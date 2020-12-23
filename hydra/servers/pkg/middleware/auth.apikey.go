@@ -41,7 +41,7 @@ func APIKeyAuth() Handler {
 
 		//验证签名
 		sign, raw := getSignRaw(ctx.Request(), "", "")
-		if err := auth.Verify(raw, sign); err != nil {
+		if err := auth.Verify(raw, sign, ctx.Invoke); err != nil {
 			ctx.Response().Abort(http.StatusForbidden, err)
 			return
 		}
