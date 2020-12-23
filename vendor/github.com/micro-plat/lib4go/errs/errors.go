@@ -12,6 +12,7 @@ var ErrNotExist = errors.New("不存在")
 
 //IError 包含错误码的error
 type IError interface {
+	Error() string
 	GetError() error
 	GetCode() int
 }

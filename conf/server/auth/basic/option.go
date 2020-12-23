@@ -10,6 +10,13 @@ func WithUP(userName string, pwd string) Option {
 	}
 }
 
+//WithInvoker 排除的服务或请求
+func WithInvoker(v string) Option {
+	return func(b *BasicAuth) {
+		b.Invoker = v
+	}
+}
+
 //WithExcludes 排除的服务或请求
 func WithExcludes(p ...string) Option {
 	return func(b *BasicAuth) {

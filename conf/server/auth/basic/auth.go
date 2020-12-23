@@ -4,6 +4,7 @@ import "github.com/micro-plat/lib4go/encoding/base64"
 
 type auth struct {
 	userName string
+	password string
 	auth     string
 }
 
@@ -14,6 +15,7 @@ func newAuthorization(m map[string]string) []*auth {
 		value := createAuth(user, password)
 		pairs = append(pairs, &auth{
 			userName: user,
+			password: password,
 			auth:     value,
 		})
 	}

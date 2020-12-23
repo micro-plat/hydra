@@ -300,6 +300,9 @@ type IContext interface {
 	//链路跟踪器
 	Tracer() ITracer
 
+	//Invoke 调用本地服务
+	Invoke(service string) interface{}
+
 	//Close 关闭并释放资源
 	Close()
 }

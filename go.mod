@@ -7,7 +7,6 @@ require (
 	github.com/SkyAPM/go2sky v0.6.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
-	github.com/clbanning/anyxml v1.2.2 // indirect
 	github.com/clbanning/mxj v1.8.4
 	github.com/d5/tengo/v2 v2.6.2
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -20,8 +19,6 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
-	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect
 	github.com/lib4dev/cli v1.2.3
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
@@ -49,3 +46,5 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
+
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

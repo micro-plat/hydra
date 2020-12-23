@@ -2,13 +2,16 @@ package ctx
 
 import (
 	r "context"
-	"sync"
-	"time"
-
+	"fmt"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/context/ctx/internal"
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
+	"sync"
+	"time"
 )
 
 var _ context.IContext = &Ctx{}
@@ -94,6 +97,22 @@ func (c *Ctx) APPConf() app.IAPPConf {
 //Tracer 链路跟踪器
 func (c *Ctx) Tracer() context.ITracer {
 	return c.tracer
+}
+
+//Invoke 调用本地服务
+func (c *Ctx) Invoke(service string) interface{} {
+	proto, addr, err := global.ParseProto(service)
+	if err != nil {
+		return err
+	}
+	switch proto {
+	case global.ProtoRPC:
+		return internal.CallRPC(c, addr)
+	case global.ProtoInvoker:
+		return services.Def.Call(c, addr)
+	}
+	return fmt.Errorf("不支持%s的服务调用%s", proto, service)
+
 }
 
 //Close 关闭并释放所有资源
