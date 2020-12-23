@@ -2,7 +2,7 @@ package conf
 
 import (
 	"github.com/lib4dev/cli/cmds"
-	"github.com/lib4dev/cli/logs"
+	logs "github.com/lib4dev/cli/logger"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
