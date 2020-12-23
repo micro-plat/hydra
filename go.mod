@@ -21,10 +21,11 @@ require (
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
+	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect
 	github.com/lib4dev/cli v1.2.3
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.0.2
+	github.com/micro-plat/lib4go v1.0.9
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/profile v1.4.0
@@ -48,7 +49,3 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
-
-replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
-
-// replace github.com/lib4dev/cli=> ../../../github.com/lib4dev/cli

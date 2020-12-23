@@ -8,7 +8,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/vars/cache"
 	"github.com/micro-plat/hydra/conf/vars/redis"
-	"github.com/micro-plat/lib4go/types"
 )
 
 //Redis redis缓存配置
@@ -22,8 +21,9 @@ type Redis struct {
 func New(address string, opts ...Option) (org *Redis) {
 	org = &Redis{
 		Cache: &cache.Cache{Proto: "redis"},
-		Redis: &redis.Redis{Addrs: types.Split(address, ",")},
+		Redis: redis.New(address),
 	}
+
 	for _, opt := range opts {
 		opt(org)
 	}
