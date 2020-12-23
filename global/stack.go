@@ -24,19 +24,6 @@ func GetGoroutineID() string {
 	return string(b)
 }
 
-// func GetGoroutineID() string {
-// 	defer func() {
-// 		if err := recover(); err != nil {
-// 			fmt.Printf("panic recover:panic info:%v\n", err)
-// 		}
-// 	}()
-
-// 	var buf [64]byte
-// 	n := runtime.Stack(buf[:], false)
-// 	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
-// 	return idField
-// }
-
 //GetStack 获取当前stack信息
 func GetStack() string {
 	return string(stack(5))
