@@ -10,6 +10,13 @@ func WithSecret(secret string) Option {
 	}
 }
 
+//WithMode 设置为验证模式
+func WithMode(m string) Option {
+	return func(a *APIKeyAuth) {
+		a.Mode = m
+	}
+}
+
 //WithMD5Mode 设置为MD5验证模式
 func WithMD5Mode() Option {
 	return func(a *APIKeyAuth) {

@@ -29,12 +29,15 @@ const (
 	ModeSHA1 = "SHA1"
 	//ModeSHA256 SHA256加密模式
 	ModeSHA256 = "SHA256"
+
+	//ModeSRVC 服务service模式
+	ModeSRVC = "SRVC"
 )
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
-	Secret   string        `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"`
-	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256),required" toml:"mode,omitempty"`
+	Secret   string        `json:"secret,omitempty" valid:"ascii,required,stringlength(8|64)" toml:"secret,omitempty"`
+	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256|SVS),required" toml:"mode,omitempty"`
 	Excludes []string      `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
 	Disable  bool          `json:"disable,omitempty" toml:"disable,omitempty"`
 	invoker  *conf.Invoker `json:"-"`
@@ -53,6 +56,9 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 	}
 	f.PathMatch = conf.NewPathMatch(f.Excludes...)
 	f.invoker = conf.NewInvoker(f.Secret)
+	if f.invoker.Allow() {
+		f.Mode = ModeSRVC
+	}
 	return f
 }
 
@@ -84,20 +90,24 @@ func (a *APIKeyAuth) Verify(raw string, sign string, invoke conf.FnInvoker) erro
 
 //GetConf 获取APIKeyAuth
 func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
-	fsa := APIKeyAuth{}
-	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &fsa)
+	f := APIKeyAuth{}
+	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &f)
 	if err == conf.ErrNoSetting {
 		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("apikey配置格式有误:%v", err)
 	}
-	if b, err := govalidator.ValidateStruct(&fsa); !b {
+	f.invoker = conf.NewInvoker(f.Secret)
+	if f.invoker.Allow() {
+		f.Mode = ModeSRVC
+	}
+	if b, err := govalidator.ValidateStruct(&f); !b {
 		return nil, fmt.Errorf("apikey配置数据有误:%v", err)
 	}
-	fsa.PathMatch = conf.NewPathMatch(fsa.Excludes...)
-	fsa.invoker = conf.NewInvoker(fsa.Secret)
-	return &fsa, nil
+	f.PathMatch = conf.NewPathMatch(f.Excludes...)
+
+	return &f, nil
 }
 
 //CreateSecret 创建Secret

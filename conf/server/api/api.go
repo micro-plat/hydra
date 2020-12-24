@@ -10,13 +10,13 @@ import (
 )
 
 //DefaultAPIAddress api服务默认端口号
-const DefaultAPIAddress = ":8080"
+const DefaultAPIAddress = "8080"
 
 //DefaultWSAddress ws服务默认端口号
-const DefaultWSAddress = ":8070"
+const DefaultWSAddress = "8070"
 
 //DefaultWEBAddress web服务默认端口号
-const DefaultWEBAddress = ":8089"
+const DefaultWEBAddress = "8089"
 
 //DefaultRTimeOut 默认读取超时时间
 const DefaultRTimeOut = 30
@@ -43,21 +43,23 @@ var validTypes = map[string]bool{"api": true, "web": true, "ws": true}
 
 //Server api server配置信息
 type Server struct {
-	Address   string `json:"address,omitempty" toml:"address,omitempty"`
+	Address   string `json:"address,omitempty" valid:"port,required" toml:"address,omitempty"`
 	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
-	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
-	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
-	Host      string `json:"host,omitempty" toml:"host,omitempty"`
-	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
+	RTimeout  int    `json:"rTimeout,omitempty" valid:"range(3|3600)" toml:"rTimeout,omitzero"`
+	WTimeout  int    `json:"wTimeout,omitempty" valid:"range(3|3600)" toml:"wTimeout,omitzero"`
+	RHTimeout int    `json:"rhTimeout,omitempty" valid:"range(3|3600)" toml:"rhTimeout,omitzero"`
+	Domain    string `json:"dns,omitempty" valid:"dns" toml:"dns,omitempty"`
 	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
 //New 构建api server配置信息
 func New(address string, opts ...Option) *Server {
 	a := &Server{
-		Address: address,
-		Status:  StartStatus,
+		Address:   address,
+		Status:    StartStatus,
+		RTimeout:  DefaultRTimeOut,
+		WTimeout:  DefaultWTimeOut,
+		RHTimeout: DefaultRHTimeOut,
 	}
 	for _, opt := range opts {
 		opt(a)

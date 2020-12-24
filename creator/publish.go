@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
@@ -105,15 +104,9 @@ func getJSON(path string, v interface{}) (value string, err error) {
 	if err := checkAndInput(path, v, map[string]interface{}{}); err != nil {
 		return "", err
 	}
-
 	if x, ok := v.(string); ok {
 		return x, nil
 	}
-
-	if b, err := govalidator.ValidateStruct(v); !b {
-		return "", fmt.Errorf("配置有误:%w", err)
-	}
-
 	buff, err := json.Marshal(&v)
 	if err != nil {
 		return "", err
