@@ -1,4 +1,20 @@
 {
     "go.testFlags": ["-v","-timeout=100s"],
-    "go.buildFlags": ["-mod=mod"],
+    "go.inferGopath": false,
+        "go.buildOnSave": "workspace",
+        "go.lintOnSave": "package",
+        "go.vetOnSave": "package",
+        "go.buildTags": "",
+        "go.buildFlags": [],
+        "go.lintFlags": [],
+        "go.vetFlags": [],
+        "go.coverOnSave": false,
+        "go.useCodeSnippetsOnFunctionSuggest": false,
+        "go.formatTool": "goreturns",
+        "go.gocodeAutoBuild": false,
+        "[go]": {
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            },
+        }
 }

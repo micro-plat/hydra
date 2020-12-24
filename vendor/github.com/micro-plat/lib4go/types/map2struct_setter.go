@@ -15,7 +15,8 @@ type setOptions struct {
 	defaultValue    string
 }
 
-func setWithProperType(val interface{}, value reflect.Value, field reflect.StructField) error {
+//SetWithProperType 设置字段的值
+func SetWithProperType(val interface{}, value reflect.Value, field reflect.StructField) error {
 
 	switch value.Kind() {
 	case reflect.Int:
@@ -169,7 +170,7 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 
 func setArray(vals []interface{}, value reflect.Value, field reflect.StructField) error {
 	for i, s := range vals {
-		err := setWithProperType(s, value.Index(i), field)
+		err := SetWithProperType(s, value.Index(i), field)
 		if err != nil {
 			return err
 		}

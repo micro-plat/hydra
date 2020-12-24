@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 	"unsafe"
-
+	"encoding/json"
 	"github.com/shopspring/decimal"
 )
 
@@ -419,4 +419,17 @@ func Split(s string, sep string) []string {
 		return nil
 	}
 	return strings.Split(s, sep)
+}
+
+//Struct2Map 将struct 转换成map[string]interface{}
+func Struct2Map(i interface{}) (map[string]interface{}, error) {
+	buff, err := json.Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]interface{})
+	if err := json.Unmarshal(buff, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

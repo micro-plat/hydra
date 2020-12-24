@@ -322,7 +322,7 @@ func Test_getJSON(t *testing.T) {
 		{name: "6. 参数是byte", args: []byte("d"), wantValue: `"ZA=="`, wantErr: false},
 	}
 	for _, tt := range tests {
-		got, err := getJSON(tt.args)
+		got, err := getJSON("", tt.args)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
 		assert.Equal(t, tt.wantValue, got, tt.name+",value")
 	}

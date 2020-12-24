@@ -47,6 +47,13 @@ func WithEnable() Option {
 	}
 }
 
+//WithStatus 服务器状态
+func WithStatus(p string) Option {
+	return func(a *Server) {
+		a.Status = p
+	}
+}
+
 //WithDNS 设置请求域名
 func WithDNS(ip ...string) Option {
 	return func(a *Server) {

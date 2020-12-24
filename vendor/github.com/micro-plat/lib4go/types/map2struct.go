@@ -63,14 +63,14 @@ func Map2Struct(v interface{}, input map[string]interface{}, tag string) (err er
 		case reflect.Struct:
 			v, ok := sourceValue.(map[string]interface{})
 			if !ok {
-				if err = setWithProperType(sourceValue, vfield, tfield); err != nil {
+				if err = SetWithProperType(sourceValue, vfield, tfield); err != nil {
 					return fmt.Errorf("向字段%s赋值失败%w，值是:%+v", tfield.Name, err, sourceValue)
 				}
 				continue
 			}
 			return Map2Struct(vfield.Addr().Interface(), v, tag)
 		default: //目标字段为非数组，直接符值
-			if err = setWithProperType(sourceValue, vfield, tfield); err != nil {
+			if err = SetWithProperType(sourceValue, vfield, tfield); err != nil {
 				return fmt.Errorf("向字段%s赋值失败%w，值是:%+v", tfield.Name, err, sourceValue)
 			}
 		}

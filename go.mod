@@ -20,6 +20,7 @@ require (
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/lib4dev/cli v1.2.6
+	github.com/manifoldco/promptui v0.8.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.0.9

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
@@ -47,9 +48,9 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 }
 
 func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
-	value, err := getJSON(v)
+	value, err := getJSON(path, v)
 	if err != nil {
-		return fmt.Errorf("将%s配置信息转化为json时出错:%w", path, err)
+		return err
 	}
 	if !cover {
 		if b, _ := r.Exists(path); b {
@@ -73,7 +74,6 @@ func deleteAll(r registry.IRegistry, path string) error {
 		return err
 	}
 	for _, v := range list {
-		confBackup(r, v)
 		if err := r.Delete(v); err != nil {
 			return err
 		}
@@ -101,9 +101,17 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 }
 
 //getJSON 将对象序列化为json字符串
-func getJSON(v interface{}) (value string, err error) {
+func getJSON(path string, v interface{}) (value string, err error) {
+	if err := checkAndInput(path, v, map[string]interface{}{}); err != nil {
+		return "", err
+	}
+
 	if x, ok := v.(string); ok {
 		return x, nil
+	}
+
+	if b, err := govalidator.ValidateStruct(v); !b {
+		return "", fmt.Errorf("配置有误:%w", err)
 	}
 
 	buff, err := json.Marshal(&v)
