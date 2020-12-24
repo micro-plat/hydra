@@ -2,15 +2,12 @@ package creator
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/manifoldco/promptui"
 	"github.com/micro-plat/lib4go/types"
-	"github.com/zkfy/log"
 )
 
 //检查输入参数，并处理用户输入
@@ -93,37 +90,10 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 		if err := types.SetWithProperType(v, vfield, tfield); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }
 
-var once sync.Once
-var logger = log.New(os.Stdout, "", log.Lall|log.Llongcolor)
-
-func readFromCli2(path string, tname, fname string) (string, error) {
-	once.Do(func() {
-		logger.Println()
-		logger.Printf(`----------------------------------------------------------------`)
-		logger.Println()
-		logger.Printf(` 配置中使用了"#"占位符，需要输入对应的值才能完成安装`)
-		logger.Println()
-		logger.Printf(` 按回车进行下一个配置的设置 Q:退出`)
-		logger.Printf(`----------------------------------------------------------------`)
-	})
-	rname := strings.Join([]string{tname, fname}, ".")
-	logger.Println()
-	logger.Warnf("? 请输入%s的值(%s):", rname, path)
-	var value string
-	fmt.Scan(&value)
-	if strings.ToUpper(value) == "Q" {
-		return "", fmt.Errorf("未设置%s(%s)值", rname, path)
-	}
-	if value == "" {
-		return readFromCli2(path, tname, fname)
-	}
-	return value, nil
-}
 func readFromCli(path string, tname, fname string, tagName string, v reflect.Value) (string, error) {
 	rname := strings.Join([]string{tname, fname}, ".")
 	validate := func(input string) error {
