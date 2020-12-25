@@ -5,13 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf/server/router"
-	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http/ws"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
 func (s *Server) addWSRouters(routers ...*router.Router) {
-	if !global.IsDebug {
+	if !s.ginTrace {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

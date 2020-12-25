@@ -9,7 +9,9 @@ import (
 )
 
 func (s *Server) addHttpRouters(routers ...*router.Router) {
-	gin.SetMode(gin.ReleaseMode)
+	if !s.ginTrace {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志

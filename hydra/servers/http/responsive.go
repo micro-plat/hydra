@@ -148,19 +148,22 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 			apiConf.GetWSAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
-			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
+			WithGinTrace(apiConf.Trace))
 	case Web:
 		return NewServer(tp,
 			apiConf.GetWEBAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
-			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
+			WithGinTrace(apiConf.Trace))
 	default:
 		return NewServer(tp,
 			apiConf.GetAPIAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
-			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()))
+			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
+			WithGinTrace(apiConf.Trace))
 	}
 }
 

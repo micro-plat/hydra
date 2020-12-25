@@ -1,9 +1,5 @@
 package middleware
 
-import (
-	"github.com/gin-gonic/gin"
-)
-
 //Trace 系统跟踪日志
 func Trace() Handler {
 	return func(ctx IMiddleContext) {
@@ -15,7 +11,6 @@ func Trace() Handler {
 		}
 
 		ctx.Response().AddSpecial("trace")
-		gin.SetMode(gin.DebugMode)
 
 		//1.打印请求参数
 		input := ctx.Request().GetMap()

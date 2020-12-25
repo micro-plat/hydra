@@ -14,6 +14,7 @@ type option struct {
 	readHeaderTimeout int
 	metric            *middleware.Metric
 	serverType        string
+	ginTrace          bool
 }
 
 //Option 配置选项
@@ -32,5 +33,12 @@ func WithTimeout(readTimeout int, writeTimeout int, readHeaderTimeout int) Optio
 		o.readTimeout = readTimeout
 		o.writeTimeout = writeTimeout
 		o.readHeaderTimeout = readHeaderTimeout
+	}
+}
+
+//WithGinTrace 是否启用gin注册跟踪
+func WithGinTrace(b bool) Option {
+	return func(o *option) {
+		o.ginTrace = b
 	}
 }
