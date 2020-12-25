@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
 )
@@ -49,6 +51,13 @@ func install(c *cli.Context) (err error) {
 		return fmt.Errorf("未指定SQL或安装程序")
 	}
 
+	//2.检查是否安装注册中心配置
+	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
+		if err := pkgs.Pub2Registry(true); err != nil {
+			return err
+		}
+	}
+
 	//3. 拉取注册中心配置
 	if err := app.PullAndSave(); err != nil {
 		return err
@@ -61,9 +70,8 @@ func install(c *cli.Context) (err error) {
 			return err
 		}
 		for _, sql := range sqls {
-			_, _, _, err := db.Execute(sql, nil)
-			if err != nil {
-				return fmt.Errorf("%w %s", err, sql)
+			if _, _, _, err := db.Execute(sql, nil); !skip && err != nil {
+				return err
 			}
 		}
 	}

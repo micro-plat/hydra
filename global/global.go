@@ -188,6 +188,9 @@ func parsePath(p string) (platName string, systemName string, serverTypes []stri
 	clusterName = fs[3]
 	return
 }
+func (m *global) IsDebug() bool {
+	return IsDebug
+}
 
 //check 检查参数
 func (m *global) check() (err error) {

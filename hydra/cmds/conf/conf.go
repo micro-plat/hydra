@@ -62,6 +62,7 @@ func installNow(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
+
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {

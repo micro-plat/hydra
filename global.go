@@ -37,8 +37,17 @@ var C = components.Def
 //Installer 安装程序
 var Installer = global.Installer
 
+//RunCli 执行运行相关的终端参数管理
+var RunCli = global.RunCli
+
+//ConfCli 配置处理相关的终端参数
+var ConfCli = global.ConfCli
+
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady
+
+//IAPPConf 服务器配置信息
+type IAPPConf = app.IAPPConf
 
 //ByInstall 通过安装设置
 const ByInstall = conf.ByInstall

@@ -93,6 +93,10 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 			if err := checkStruct(path, vfield, input); err != nil {
 				return err
 			}
+		case reflect.Ptr:
+			if err := checkStruct(path, vfield.Elem(), input); err != nil {
+				return err
+			}
 		default:
 			if err := setFieldValue(path, vfield, tfield, input); err != nil {
 				return err
@@ -132,7 +136,19 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, in
 }
 
 func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (err error) {
-	v, err := getValues(path, vfield, tfield, input)
+
+	//处理多个数据值问题
+	var v interface{}
+	if vfield.Len() > 0 {
+		listValue := make([]string, 0, 1)
+		for i := 0; i < vfield.Len(); i++ {
+			listValue = append(listValue, fmt.Sprint(vfield.Index(i).Interface()))
+		}
+		v, err = getValues(path, reflect.ValueOf(strings.Join(listValue, "")), tfield, input)
+	} else {
+		v, err = getValues(path, vfield, tfield, input)
+	}
+
 	if err != nil || v == nil {
 		return err
 	}

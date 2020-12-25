@@ -74,7 +74,7 @@ func (c *cache) GetVarConf() (conf.IVarConf, error) {
 	//获取配置版本号
 	varVerion, ok := c.currentVarVersion.Get(varNodeName)
 	if !ok {
-		return nil, fmt.Errorf("未找到var缓存配置信息")
+		return nil, fmt.Errorf("未找到var缓存配置信息,或配置信息未准备好")
 	}
 
 	//获取配置信息
