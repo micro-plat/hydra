@@ -62,3 +62,10 @@ func WithDNS(ip ...string) Option {
 		}
 	}
 }
+
+//WithServerName 服务器名称
+func WithServerName(name string) Option {
+	return func(a *Server) {
+		a.Name = name
+	}
+}

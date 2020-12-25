@@ -308,7 +308,6 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 					}
 					if len(path) > 0 {
 						vals, version, err := l.GetChildren(rpath)
-						//fmt.Println("child.send.notify:", vals, version, err, l.exposePath(rpath))
 						ett := &valuesEntity{
 							path:    l.exposePath(rpath),
 							values:  vals,
@@ -356,7 +355,6 @@ func (l *fs) CreatePersistentNode(path string, data string) (err error) {
 
 func (l *fs) createDirPath(path string) error {
 	realPath := l.formatPath(path)
-	fmt.Println("realPath", realPath, l.rootDir)
 	_, err := os.Stat(realPath)
 	if os.IsNotExist(err) {
 		return os.MkdirAll(realPath, dirMode)

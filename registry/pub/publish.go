@@ -14,6 +14,7 @@ import (
 	"github.com/micro-plat/hydra/registry/watcher"
 	"github.com/micro-plat/lib4go/jsons"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //IPublisher 服务发布程序
@@ -196,11 +197,12 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 	if err != nil {
 		return nil, err
 	}
+
 	input := map[string]interface{}{
 		"plat_name":       p.c.GetPlatName(),
 		"plat_cn_name":    global.Def.PlatCNName,
 		"system_name":     p.c.GetSysName(),
-		"system_cn_name":  global.Def.SysCNName,
+		"system_cn_name":  types.GetString(server.ServerCNName, global.Def.SysCNName),
 		"server_type":     p.c.GetServerType(),
 		"cluster_name":    p.c.GetClusterName(),
 		"server_name":     serverName,
@@ -215,7 +217,8 @@ func (p *Publisher) PubDNSNode(serverName string, serviceAddr string) (map[strin
 		return nil, fmt.Errorf("更新dns服务器发布数据失败:%w", err)
 	}
 	ndata := string(buff)
-	path := registry.Join(p.c.GetDNSPubPath(server.Domain), fmt.Sprintf("%s:%s", host, port))
+	domain := strings.TrimPrefix(server.Domain, "www.")
+	path := registry.Join(p.c.GetDNSPubPath(domain), fmt.Sprintf("%s:%s", host, port))
 	exist, err := p.c.GetRegistry().Exists(path)
 	if err != nil {
 		err = fmt.Errorf("DNS服务发布失败:(%s)[%v]", path, err)

@@ -10,16 +10,18 @@ type FnInvoker func(s string) interface{}
 
 //Invoker 本地调用配置
 type Invoker struct {
-	allow bool
-	addr  string
+	allow   bool
+	service string
+	addr    string
 }
 
 //NewInvoker 构建本地调用配置
 func NewInvoker(p string) *Invoker {
 	addr, allow := global.IsProto(p, global.ProtoInvoker, global.ProtoRPC)
 	return &Invoker{
-		allow: allow,
-		addr:  addr,
+		allow:   allow,
+		service: p,
+		addr:    addr,
 	}
 }
 
@@ -30,9 +32,9 @@ func (i *Invoker) Allow() bool {
 
 //Invoke 调用指定的函数并检查返回结果，返回结果不包含error则认为成功
 func (i *Invoker) Invoke(call FnInvoker) (interface{}, error) {
-	result := call(i.addr)
+	result := call(i.service)
 	if err := errs.GetError(result); err != nil {
-		return result, err
+		return result, err.GetError()
 	}
 	return result, nil
 }

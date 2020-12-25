@@ -3,6 +3,9 @@ package ctx
 import (
 	r "context"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
@@ -10,8 +13,6 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
-	"sync"
-	"time"
 )
 
 var _ context.IContext = &Ctx{}
@@ -103,6 +104,7 @@ func (c *Ctx) Tracer() context.ITracer {
 func (c *Ctx) Invoke(service string) interface{} {
 	proto, addr, err := global.ParseProto(service)
 	if err != nil {
+		c.Log().Errorf("调用服务出错:%s,%+v", service, err)
 		return err
 	}
 	switch proto {

@@ -1,14 +1,6 @@
 package creator
 
-import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-)
-
-type ISUB interface {
-	Sub(name string, s ...interface{}) ISUB
-}
+import "github.com/micro-plat/lib4go/errs"
 
 type iCustomerBuilder interface {
 	Load()
@@ -16,43 +8,37 @@ type iCustomerBuilder interface {
 	Map() map[string]interface{}
 }
 
-var _ iCustomerBuilder = CustomerBuilder{}
+var _ iCustomerBuilder = &CustomerBuilder{}
 
-type CustomerBuilder map[string]interface{}
+type CustomerBuilder struct {
+	httpBuilder
+	loader func() (string, interface{})
+}
 
-//newHTTP 构建http生成器
-func newCustomerBuilder(s ...interface{}) CustomerBuilder {
-	b := make(map[string]interface{})
+//newCustomerBuilder 构建http生成器
+func newCustomerBuilder(s ...interface{}) *CustomerBuilder {
+	b := &CustomerBuilder{httpBuilder: httpBuilder{BaseBuilder: BaseBuilder{}}}
 	if len(s) == 0 {
-		b[ServerMainNodeName] = make(map[string]interface{})
+		b.httpBuilder.BaseBuilder[ServerMainNodeName] = make(map[string]interface{})
 		return b
 	}
-	b[ServerMainNodeName] = s[0]
+	b.httpBuilder.BaseBuilder[ServerMainNodeName] = s[0]
 	return b
 }
 
-//Sub 子配置
-func (b CustomerBuilder) Sub(name string, s ...interface{}) ISUB {
-	if len(s) == 0 {
-		panic(fmt.Sprintf("配置：%s值不能为空", name))
-	}
-	tp := reflect.TypeOf(s[0])
-	val := reflect.ValueOf(s[0])
-	if tp.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-	switch tp.Kind() {
-	case reflect.String:
-		b[name] = json.RawMessage([]byte(val.Interface().(string)))
-	case reflect.Struct, reflect.Ptr, reflect.Map:
-		b[name] = val.Interface()
-	default:
-		panic(fmt.Sprintf("配置：%s值类型不支持", name))
-	}
-	return b
+//AddLoader 添加加载函数
+func (b *CustomerBuilder) AddLoader(loader func() (string, interface{})) {
+	b.loader = loader
 }
-func (b CustomerBuilder) Map() map[string]interface{} {
-	return b
-}
-func (b CustomerBuilder) Load() {
+
+//Load 加载配置
+func (b *CustomerBuilder) Load() {
+	if b.loader == nil {
+		return
+	}
+	node, data := b.loader()
+	if err := errs.GetError(data); err != nil {
+		panic(err)
+	}
+	b.BaseBuilder[node] = data
 }

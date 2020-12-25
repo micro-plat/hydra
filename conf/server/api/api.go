@@ -49,6 +49,7 @@ type Server struct {
 	WTimeout  int    `json:"wTimeout,omitempty" valid:"range(3|3600)" toml:"wTimeout,omitzero"`
 	RHTimeout int    `json:"rhTimeout,omitempty" valid:"range(3|3600)" toml:"rhTimeout,omitzero"`
 	Domain    string `json:"dns,omitempty" valid:"dns" toml:"dns,omitempty"`
+	Name      string `json:"name,omitempty" toml:"name,omitempty"`
 	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
