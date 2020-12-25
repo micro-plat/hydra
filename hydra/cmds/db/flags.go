@@ -27,5 +27,6 @@ func getInstallFlags() []cli.Flag {
 		Destination: &skip,
 		Usage:       `-跳过执行失败的SQL语句`,
 	})
+	flags = append(flags, global.DBCli.GetFlags()...)
 	return flags
 }
