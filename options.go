@@ -102,6 +102,13 @@ func WithDBFlag(flags ...FlagOption) Option {
 	}
 }
 
+//WithInstallFlag 添加install命令扩展参数
+func WithInstallFlag(flags ...FlagOption) Option {
+	return func() {
+		global.InstallCli.AddFlags(flags...)
+	}
+}
+
 //WithIPMask 设置获取本地IP的掩码
 func WithIPMask(mask string) Option {
 	return func() {

@@ -15,6 +15,9 @@ var ConfCli = newCli("conf")
 //DBCli 配置处理相关的终端参数
 var DBCli = newCli("db")
 
+//InstallCli 配置处理相关的终端参数
+var InstallCli = newCli("install")
+
 var clis = make(map[string]*ucli)
 
 type CliFlagObject struct {
@@ -108,6 +111,7 @@ func init() {
 	clis[RunCli.Name] = RunCli
 	clis[ConfCli.Name] = ConfCli
 	clis[DBCli.Name] = DBCli
+	clis[InstallCli.Name] = InstallCli
 }
 
 //GetFlags 获取当前命令对应的参数
