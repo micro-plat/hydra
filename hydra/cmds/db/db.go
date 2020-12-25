@@ -49,27 +49,26 @@ func install(c *cli.Context) (err error) {
 		return fmt.Errorf("未指定SQL或安装程序")
 	}
 
-	//接取配置信息
+	//3. 拉取注册中心配置
 	if err := app.PullAndSave(); err != nil {
 		return err
 	}
 
-	//3. 执行SQL语句
+	//4. 执行SQL语句
 	if len(sqls) > 0 {
 		db, err := components.Def.DB().GetDB(types.GetString(dbName, "db"))
 		if err != nil {
 			return err
 		}
-
 		for _, sql := range sqls {
 			_, _, _, err := db.Execute(sql, nil)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w %s", err, sql)
 			}
 		}
 	}
 
-	//4. 执行处理函数
+	//5. 执行处理函数
 	for _, handle := range handlers {
 		if err := handle(); err != nil {
 			return err

@@ -7,5 +7,5 @@ type installer struct {
 
 //Installer 安装程序
 var Installer = &installer{
-	DB: &db{sqls: make([]string, 0, 1), handlers: make([]func() error, 0)},
+	DB: &db{sqls: make([]string, 0, 1), handlers: make([]func() error, 0, 1)},
 }

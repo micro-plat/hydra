@@ -1,6 +1,10 @@
 package global
 
-import "github.com/micro-plat/lib4go/types"
+import (
+	"strings"
+
+	"github.com/micro-plat/lib4go/types"
+)
 
 //db 数据库处理逻辑
 type db struct {
@@ -11,13 +15,27 @@ type db struct {
 //AddBSQL 添加执行SQL
 func (d *db) AddBSQL(sqls ...[]byte) {
 	for _, sql := range sqls {
-		d.sqls = append(d.sqls, types.BytesToString(sql))
+		nsql := strings.Split(strings.Trim(types.BytesToString(sql), ";"), ";")
+		for _, m := range nsql {
+			if strings.TrimSpace(m) != "" {
+				d.sqls = append(d.sqls, strings.TrimSpace(m))
+			}
+		}
 	}
 }
 
 //AddBSQL 添加执行SQL
 func (d *db) AddSQL(sqls ...string) {
-	d.sqls = append(d.sqls, sqls...)
+	for _, sql := range sqls {
+		nsql := strings.Split(strings.Trim(sql, ";"), ";")
+		for _, m := range nsql {
+			if strings.TrimSpace(m) != "" {
+				d.sqls = append(d.sqls, strings.TrimSpace(m))
+			}
+		}
+
+	}
+
 }
 
 //AddHandler 添加处理函数
