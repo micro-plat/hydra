@@ -55,6 +55,31 @@ func (q XMaps) ToStructs(o interface{}) error {
 	return nil
 }
 
+//ToAnyStructs 将当前对象转换为指定的struct
+func (q XMaps) ToAnyStructs(o interface{}) error {
+	fval := reflect.ValueOf(o)
+	if fval.Kind() == reflect.Interface || fval.Kind() == reflect.Ptr {
+		fval = fval.Elem()
+	} else {
+		return fmt.Errorf("输入参数必须是指针:%v", fval.Kind())
+	}
+	// we only accept structs
+	if fval.Kind() != reflect.Slice {
+		return fmt.Errorf("传入参数错误，必须是切片类型:%v", fval.Kind())
+	}
+	val := reflect.Indirect(reflect.ValueOf(o))
+	typ := val.Type()
+	for _, r := range q {
+		mVal := reflect.Indirect(reflect.New(typ.Elem().Elem())).Addr()
+		if err := r.ToAnyStruct(mVal.Interface()); err != nil {
+			return err
+		}
+		val = reflect.Append(val, mVal)
+	}
+	DeepCopy(o, val.Interface())
+	return nil
+}
+
 //IsEmpty 当前数据集是否为空
 func (q XMaps) IsEmpty() bool {
 	return q == nil || len(q) == 0
