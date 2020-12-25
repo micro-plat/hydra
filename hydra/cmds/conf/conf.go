@@ -36,7 +36,6 @@ func showNow(c *cli.Context) (err error) {
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(c); err != nil {
-		//logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
@@ -60,12 +59,9 @@ func installNow(c *cli.Context) (err error) {
 	//1. 绑定应用程序参数
 	global.Current().Log().Pause()
 	if err := global.Def.Bind(c); err != nil {
-		//logs.Log.Error(err)
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
-
-	//fmt.Println("global.Current().GetRegistryAddr()", global.Current().GetRegistryAddr())
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
 		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
