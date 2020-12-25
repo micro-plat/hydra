@@ -15,7 +15,7 @@ func Trace() Handler {
 		}
 
 		ctx.Response().AddSpecial("trace")
-		gin.SetMode(gin.ReleaseMode)
+		gin.SetMode(gin.DebugMode)
 
 		//1.打印请求参数
 		input := ctx.Request().GetMap()
