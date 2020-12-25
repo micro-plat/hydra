@@ -72,6 +72,21 @@ func (c *ucli) AddFlag(name string, usage string) error {
 	return nil
 }
 
+//AddBoolFlag 添加命令行参数
+func (c *ucli) AddBoolFlag(name string, usage string) error {
+	if c.hasFlag(name) {
+		return fmt.Errorf("flag名称%s已存在", name)
+	}
+
+	flag := cli.BoolFlag{
+		Name:  name,
+		Usage: usage,
+	}
+	c.flags = append(c.flags, flag)
+	c.flagNames[name] = true
+	return nil
+}
+
 //AddSliceFlag 添加命令行参数
 func (c *ucli) AddSliceFlag(name string, usage string) error {
 	if c.hasFlag(name) {

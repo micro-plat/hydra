@@ -88,10 +88,38 @@ func WithRunFlag(name string, usage string) Option {
 	}
 }
 
+//WithRunBoolFlag 添加run命令扩展参数
+func WithRunBoolFlag(name string, usage string) Option {
+	return func() {
+		global.RunCli.AddBoolFlag(name, usage)
+	}
+}
+
+//WithRunSliceFlag 添加run命令扩展参数
+func WithRunSliceFlag(name string, usage string) Option {
+	return func() {
+		global.RunCli.AddSliceFlag(name, usage)
+	}
+}
+
 //WithConfFlag 添加conf命令扩展参数
 func WithConfFlag(name string, usage string) Option {
 	return func() {
 		global.ConfCli.AddFlag(name, usage)
+	}
+}
+
+//WithConfBoolFlag 添加conf命令扩展参数
+func WithConfBoolFlag(name string, usage string) Option {
+	return func() {
+		global.ConfCli.AddBoolFlag(name, usage)
+	}
+}
+
+//WithConfSliceFlag 添加conf命令扩展参数
+func WithConfSliceFlag(name string, usage string) Option {
+	return func() {
+		global.ConfCli.AddSliceFlag(name, usage)
 	}
 }
 
