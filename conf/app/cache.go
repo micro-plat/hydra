@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -151,6 +153,21 @@ LOOP:
 //getKey 获取缓存key
 func getKey(tp string, version interface{}) string {
 	return fmt.Sprintf("%s-%v", tp, version)
+}
+
+//PullAndSave 拉取注册中心的服务器配置，并缓存
+func PullAndSave() error {
+	//接取配置信息
+	for _, tp := range global.Def.ServerTypes {
+		pub := server.NewServerPub(global.Def.GetPlatName(), global.Def.SysName, tp, global.Def.ClusterName)
+		conf, err := NewAPPConf(pub.GetServerPath(), registry.GetCurrent())
+		if err != nil {
+			return fmt.Errorf("获取%s配置发生错误:%v", pub.GetServerPath(), err)
+		}
+		//保存配置缓存
+		Cache.Save(conf)
+	}
+	return nil
 }
 
 //定时清理缓存

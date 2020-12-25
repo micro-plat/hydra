@@ -9,6 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/manifoldco/promptui"
+	vc "github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -119,7 +120,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, in
 		return v, nil
 	}
 	switch {
-	case strings.HasPrefix(svalue, "#"):
+	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
 		return check()
 	case isRequire(vfield, validTagName) && (!vfield.IsValid() || vfield.IsZero()):
 		return check()

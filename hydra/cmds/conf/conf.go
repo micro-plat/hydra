@@ -68,7 +68,7 @@ func installNow(c *cli.Context) (err error) {
 			logs.Log.Error("安装到配置中心:", compatible.FAILED)
 			return err
 		}
-		logs.Log.Info("安装到配置中心:" + compatible.SUCCESS)
+		logs.Log.Info("安装到配置中心:", compatible.SUCCESS)
 		return
 	}
 	return nil

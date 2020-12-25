@@ -9,6 +9,12 @@ import (
 //ErrNoSetting 未配置
 var ErrNoSetting = errors.New("未配置")
 
+//ByInstall 通过安装设置
+const ByInstall = "#"
+
+//ByInstallI 通过安装设置
+const ByInstallI = -2 << 31
+
 //IServerConf 主配置信息
 type IServerConf interface {
 	IServerPub

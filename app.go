@@ -17,6 +17,7 @@ import (
 	_ "github.com/micro-plat/hydra/hydra/cmds/run"
 	_ "github.com/micro-plat/hydra/hydra/cmds/update"
 
+	_ "github.com/micro-plat/hydra/hydra/cmds/db"
 	_ "github.com/micro-plat/hydra/hydra/cmds/start"
 	_ "github.com/micro-plat/hydra/hydra/cmds/status"
 	_ "github.com/micro-plat/hydra/hydra/cmds/stop"

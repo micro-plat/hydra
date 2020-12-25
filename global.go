@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components"
+	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/creator"
@@ -33,8 +34,17 @@ type IContext = context.IContext
 //C 基础组件
 var C = components.Def
 
+//Installer 安装程序
+var Installer = global.Installer
+
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady
+
+//ByInstall 通过安装设置
+const ByInstall = conf.ByInstall
+
+//ByInstallI 通过安装设置
+const ByInstallI = conf.ByInstallI
 
 //Server 通过服务类型从全局缓存中获取服务配置
 func Server(tp string) app.IAPPConf {
