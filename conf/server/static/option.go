@@ -2,6 +2,8 @@ package static
 
 import (
 	"path"
+
+	"github.com/micro-plat/hydra/conf"
 )
 
 //DefaultSataticDir 默认静态文件存放路径
@@ -29,6 +31,7 @@ func newStatic() *Static {
 	a.Rewriters = DefaultRewriters
 	a.Exclude = DefaultExclude
 	a.Exts = []string{}
+	a.RewritersMatch = conf.NewPathMatch(a.Rewriters...)
 	return a
 }
 
@@ -44,6 +47,7 @@ func WithImages() Option {
 func WithRewriters(rewriters ...string) Option {
 	return func(s *Static) {
 		s.Rewriters = rewriters
+		s.RewritersMatch = conf.NewPathMatch(s.Rewriters...)
 	}
 }
 

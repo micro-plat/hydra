@@ -93,10 +93,8 @@ func (s *Static) IsContainExt(rPath string) bool {
 
 //NeedRewrite 是否需要重写请求
 func (s *Static) NeedRewrite(p string) bool {
-	for _, c := range s.Rewriters {
-		if c == p {
-			return true
-		}
+	if b, _ := s.RewritersMatch.Match(p); b {
+		return true
 	}
 	return false
 }

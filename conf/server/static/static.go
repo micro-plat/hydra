@@ -26,15 +26,16 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
-	Dir       string              `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
-	Archive   string              `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
-	Prefix    string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
-	Exts      []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
-	Exclude   []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
-	HomePage  string              `json:"homePage ,omitempty" valid:"ascii" toml:"homePage,omitempty"`
-	Rewriters []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
-	Disable   bool                `json:"disable,omitempty" toml:"disable,omitempty"`
-	FileMap   map[string]FileInfo `json:"-"`
+	Dir            string              `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty"`
+	Archive        string              `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty"`
+	Prefix         string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty"`
+	Exts           []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
+	Exclude        []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty"`
+	HomePage       string              `json:"homePage ,omitempty" valid:"ascii" toml:"homePage,omitempty"`
+	Rewriters      []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty"`
+	Disable        bool                `json:"disable,omitempty" toml:"disable,omitempty"`
+	FileMap        map[string]FileInfo `json:"-"`
+	RewritersMatch *conf.PathMatch     `json:"-"`
 }
 
 //FileInfo 压缩文件保存
@@ -81,6 +82,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
 	}
 	static.RereshData()
+	static.RewritersMatch = conf.NewPathMatch(static.Rewriters...)
 	return static, nil
 }
 
