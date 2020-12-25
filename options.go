@@ -82,44 +82,30 @@ func WithUsage(usage string) Option {
 }
 
 //WithRunFlag 添加run命令扩展参数
-func WithRunFlag(name string, usage string) Option {
+func WithRunFlag(flags ...FlagOption) Option {
 	return func() {
-		global.RunCli.AddFlag(name, usage)
-	}
-}
-
-//WithRunBoolFlag 添加run命令扩展参数
-func WithRunBoolFlag(name string, usage string) Option {
-	return func() {
-		global.RunCli.AddBoolFlag(name, usage)
-	}
-}
-
-//WithRunSliceFlag 添加run命令扩展参数
-func WithRunSliceFlag(name string, usage string) Option {
-	return func() {
-		global.RunCli.AddSliceFlag(name, usage)
+		global.RunCli.AddFlags(flags...)
 	}
 }
 
 //WithConfFlag 添加conf命令扩展参数
-func WithConfFlag(name string, usage string) Option {
+func WithConfFlag(flags ...FlagOption) Option {
 	return func() {
-		global.ConfCli.AddFlag(name, usage)
+		global.ConfCli.AddFlags(flags...)
 	}
 }
 
-//WithConfBoolFlag 添加conf命令扩展参数
-func WithConfBoolFlag(name string, usage string) Option {
+//WithDBFlag 添加db命令扩展参数
+func WithDBFlag(flags ...FlagOption) Option {
 	return func() {
-		global.ConfCli.AddBoolFlag(name, usage)
+		global.DBCli.AddFlags(flags...)
 	}
 }
 
-//WithConfSliceFlag 添加conf命令扩展参数
-func WithConfSliceFlag(name string, usage string) Option {
+//WithInstallFlag 添加install命令扩展参数
+func WithInstallFlag(flags ...FlagOption) Option {
 	return func() {
-		global.ConfCli.AddSliceFlag(name, usage)
+		global.InstallCli.AddFlags(flags...)
 	}
 }
 

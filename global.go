@@ -55,6 +55,18 @@ const ByInstall = conf.ByInstall
 //ByInstallI 通过安装设置
 const ByInstallI = conf.ByInstallI
 
+//FlagOption 配置选项
+type FlagOption = global.FlagOption
+
+//WithFlag 添加字符串flag
+var WithFlag = global.WithFlag
+
+//WithBoolFlag 设置bool参数
+var WithBoolFlag = global.WithBoolFlag
+
+//WithSliceFlag 设置数组参数
+var WithSliceFlag = global.WithSliceFlag
+
 //Server 通过服务类型从全局缓存中获取服务配置
 func Server(tp string) app.IAPPConf {
 	s, err := app.Cache.GetAPPConf(tp)

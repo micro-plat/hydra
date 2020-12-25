@@ -36,5 +36,6 @@ func getFlags() []cli.Flag {
 		Destination: &global.FlagVal.IPMask,
 		Usage:       `-子网掩码。多个网卡情况下根据mask获取本机IP`,
 	})
+	flags = append(flags, global.InstallCli.GetFlags()...)
 	return flags
 }
