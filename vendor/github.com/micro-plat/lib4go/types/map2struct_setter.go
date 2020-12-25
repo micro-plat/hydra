@@ -168,7 +168,8 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 	return nil
 }
 
-func setArray(vals []interface{}, value reflect.Value, field reflect.StructField) error {
+//SetArray 设置数组的值
+func SetArray(vals []interface{}, value reflect.Value, field reflect.StructField) error {
 	for i, s := range vals {
 		err := SetWithProperType(s, value.Index(i), field)
 		if err != nil {
@@ -178,9 +179,10 @@ func setArray(vals []interface{}, value reflect.Value, field reflect.StructField
 	return nil
 }
 
-func setSlice(vals []interface{}, value reflect.Value, field reflect.StructField) error {
+//SetSlice 设置slice的值
+func SetSlice(vals []interface{}, value reflect.Value, field reflect.StructField) error {
 	slice := reflect.MakeSlice(value.Type(), len(vals), len(vals))
-	err := setArray(vals, slice, field)
+	err := SetArray(vals, slice, field)
 	if err != nil {
 		return err
 	}

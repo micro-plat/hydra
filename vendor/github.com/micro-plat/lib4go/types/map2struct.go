@@ -50,13 +50,13 @@ func Map2Struct(v interface{}, input map[string]interface{}, tag string) (err er
 				for i := 0; i < rvalue.Len(); i++ {
 					array = append(array, rvalue.Index(i).Interface())
 				}
-				if err = setSlice(array, value.Field(i), tfield); err != nil {
+				if err = SetSlice(array, value.Field(i), tfield); err != nil {
 					return fmt.Errorf("向字段%s赋值失败%w，值是:%+v", tfield.Name, err, array)
 				}
 			case reflect.Chan, reflect.Func:
 				return fmt.Errorf("无法将chan,func等放入数组字段：%s", tfield.Name)
 			default:
-				if err = setSlice([]interface{}{rvalue.Interface()}, value.Field(i), tfield); err != nil {
+				if err = SetSlice([]interface{}{rvalue.Interface()}, value.Field(i), tfield); err != nil {
 					return fmt.Errorf("向字段%s赋值失败%w，值是:%+v", tfield.Name, err, []interface{}{rvalue.Interface()})
 				}
 			}
