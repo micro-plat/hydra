@@ -47,12 +47,12 @@ var validTypes = map[string]bool{"api": true, "web": true, "ws": true}
 type Server struct {
 	Address   string `json:"address,omitempty" valid:"port,required" lable:"端口号|请输入正确的端口号(1-655535)"`
 	Status    string `json:"status,omitempty" valid:"in(start|stop)"  lable:"服务器状态"`
-	RTimeout  int    `json:"rTimeout,omitempty" valid:"range(3|3600)" lable:"读取流超时时长(秒)|请输入正确的超时时长(3-3600)"`
-	WTimeout  int    `json:"wTimeout,omitempty" valid:"range(3|3600)" lable:"写入流超时时长(秒)|请输入正确的超时时长(3-3600)"`
-	RHTimeout int    `json:"rhTimeout,omitempty" valid:"range(3|3600)" lable:"读取头超时时长(秒)|请输入正确的超时时长(3-3600)"`
+	RTimeout  int    `json:"rTimeout,omitempty" valid:"range(3|3600)"`
+	WTimeout  int    `json:"wTimeout,omitempty" valid:"range(3|3600)"`
+	RHTimeout int    `json:"rhTimeout,omitempty" valid:"range(3|3600)"`
 	Domain    string `json:"dns,omitempty" valid:"dns" toml:"dns,omitempty" lable:"域名"`
 	Name      string `json:"name,omitempty" toml:"name,omitempty" lable:"服务器名称"`
-	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty" lable:"打印跟踪日志"`
+	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
 //New 构建api server配置信息
