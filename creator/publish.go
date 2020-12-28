@@ -3,6 +3,7 @@ package creator
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -101,7 +102,8 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 
 //getJSON 将对象序列化为json字符串
 func getJSON(path string, v interface{}) (value string, err error) {
-	if err := checkAndInput(path, v, map[string]interface{}{}); err != nil {
+	fmt.Println("path:", path)
+	if err := checkAndInput(path, reflect.ValueOf(v), map[string]interface{}{}); err != nil {
 		return "", err
 	}
 	if x, ok := v.(string); ok {

@@ -14,14 +14,11 @@ import (
 )
 
 //检查输入参数，并处理用户输入
-func checkAndInput(path string, v interface{}, input map[string]interface{}) error {
+func checkAndInput(path string, value reflect.Value, input map[string]interface{}) error {
 
 	//处理参数类型
-	value := reflect.ValueOf(v)
-	vt := reflect.TypeOf(v)
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
-		vt = vt.Elem()
 	}
 	if value.Kind() == reflect.Interface {
 		value = reflect.ValueOf(value.Interface())
@@ -60,14 +57,12 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 		v, ok := input[skey]
 		if !ok {
 			fname := getFullName(path, skey, "")
-			v, err = readFromCli(fname, skey, fname, "")
+			v, err = readFromCli(fname, "-", fname, "")
 			if err != nil {
 				return err
 			}
 		}
 		m.SetMapIndex(key, reflect.ValueOf(v))
-		continue
-
 	}
 	return nil
 }
@@ -109,9 +104,11 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 }
 
 func getValues(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (value interface{}, err error) {
-
 	validTagName := tfield.Tag.Get("valid")
 	label, msg := getLable(tfield)
+	if label == "Action" {
+		return nil, nil
+	}
 	fname := getFullName(path, label, tfield.Name)
 	svalue := fmt.Sprint(vfield.Interface())
 	check := func() (interface{}, error) {
@@ -143,7 +140,12 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	if vfield.Len() > 0 {
 		listValue := make([]string, 0, 1)
 		for i := 0; i < vfield.Len(); i++ {
-			listValue = append(listValue, fmt.Sprint(vfield.Index(i).Interface()))
+			t := vfield.Index(i)
+			err := checkAndInput(path, t, input)
+			if err != nil {
+				return err
+			}
+			listValue = append(listValue, fmt.Sprint(t.Interface()))
 		}
 		v, err = getValues(path, reflect.ValueOf(strings.Join(listValue, "")), tfield, input)
 	} else {
@@ -179,6 +181,9 @@ func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField
 }
 
 func readFromCli(name string, tagName string, label string, msg string) (string, error) {
+	if tagName == "-" {
+		return "", nil
+	}
 
 	//检查in参数，包括in则使用select,否则为input
 	ps := regexp.MustCompile(`^in\((.*)\)`).FindStringSubmatch(tagName)
