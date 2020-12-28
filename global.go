@@ -13,6 +13,9 @@ import (
 	"github.com/micro-plat/hydra/services"
 )
 
+//C 基础组件
+var C = components.Def
+
 //G 全局应用程序配置
 var G = global.Def
 
@@ -31,17 +34,20 @@ var MQC services.IMQC = services.MQC
 //IContext 请求上下文
 type IContext = context.IContext
 
-//C 基础组件
-var C = components.Def
-
 //Installer 安装程序
 var Installer = global.Installer
 
-//RunCli 执行运行相关的终端参数管理
+//InstallCli  配置处理相关的终端参数
+var InstallCli = global.InstallCli
+
+//RunCli 配置处理相关的终端参数
 var RunCli = global.RunCli
 
 //ConfCli 配置处理相关的终端参数
 var ConfCli = global.ConfCli
+
+//DBCli 配置处理相关的终端参数
+var DBCli = global.DBCli
 
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady
@@ -67,6 +73,9 @@ var WithBoolFlag = global.WithBoolFlag
 //WithSliceFlag 设置数组参数
 var WithSliceFlag = global.WithSliceFlag
 
+//ICli 终端命令参数
+type ICli = global.ICli
+
 //Server 通过服务类型从全局缓存中获取服务配置
 func Server(tp string) app.IAPPConf {
 	s, err := app.Cache.GetAPPConf(tp)
@@ -80,9 +89,6 @@ func Server(tp string) app.IAPPConf {
 func CurrentContext() context.IContext {
 	return context.Current()
 }
-
-//ICli 终端命令参数
-type ICli = global.ICli
 
 func init() {
 	OnReady(func() error {
