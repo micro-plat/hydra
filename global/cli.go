@@ -18,6 +18,12 @@ var DBCli = newCli("db")
 //InstallCli 配置处理相关的终端参数
 var InstallCli = newCli("install")
 
+//ICustomCli 用户可用的cli操作函数
+type ICustomCli interface {
+	AddFlags(opts ...FlagOption) error
+	OnStarting(callback func(ICli) error)
+}
+
 var clis = make(map[string]*ucli)
 
 type CliFlagObject struct {

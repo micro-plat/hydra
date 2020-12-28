@@ -38,16 +38,16 @@ type IContext = context.IContext
 var Installer = global.Installer
 
 //InstallCli  配置处理相关的终端参数
-var InstallCli = global.InstallCli
+var InstallCli global.ICustomCli = global.InstallCli
 
 //RunCli 配置处理相关的终端参数
-var RunCli = global.RunCli
+var RunCli global.ICustomCli = global.RunCli
 
 //ConfCli 配置处理相关的终端参数
-var ConfCli = global.ConfCli
+var ConfCli global.ICustomCli = global.ConfCli
 
 //DBCli 配置处理相关的终端参数
-var DBCli = global.DBCli
+var DBCli global.ICustomCli = global.DBCli
 
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady
