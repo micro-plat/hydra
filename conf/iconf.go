@@ -13,7 +13,7 @@ var ErrNoSetting = errors.New("未配置")
 const ByInstall = "###"
 
 //ByInstallI 通过安装设置
-const ByInstallI = -2 << 31
+const ByInstallI = -2<<31 - 1
 
 //IServerConf 主配置信息
 type IServerConf interface {
