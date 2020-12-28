@@ -53,7 +53,8 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 		if !reflect.ValueOf(value).IsValid() || reflect.ValueOf(value).IsZero() {
 			continue
 		}
-		if !strings.HasPrefix(fmt.Sprint(value.Interface()), "#") {
+		svalue := fmt.Sprint(value.Interface())
+		if !strings.HasPrefix(svalue, vc.ByInstall) && !strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)) {
 			continue
 		}
 		v, ok := input[skey]
