@@ -14,7 +14,7 @@ import (
 )
 
 //检查输入参数，并处理用户输入
-func checkAndInput(path string, value reflect.Value, input map[string]interface{}) error {
+func checkAndInput(path string, value reflect.Value, tnames []string, input map[string]interface{}) error {
 
 	//处理参数类型
 	if value.Kind() == reflect.Ptr {
@@ -30,7 +30,7 @@ func checkAndInput(path string, value reflect.Value, input map[string]interface{
 		if !reflect.ValueOf(value).IsValid() || reflect.ValueOf(value).IsZero() {
 			return nil
 		}
-		return checkStruct(path, value, input)
+		return checkStruct(path, value, tnames, input)
 	case reflect.Map:
 		return checkMap(path, value, input)
 	default:
@@ -56,7 +56,7 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 		}
 		v, ok := input[skey]
 		if !ok {
-			fname := getFullName(path, skey, "")
+			fname := getFullName(path, skey, skey)
 			v, err = readFromCli(fname, "-", fname, "")
 			if err != nil {
 				return err
@@ -66,19 +66,18 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 	}
 	return nil
 }
-func checkStruct(path string, value reflect.Value, input map[string]interface{}) (err error) {
+func checkStruct(path string, value reflect.Value, tnames []string, input map[string]interface{}) (err error) {
 	vt := reflect.TypeOf(value.Interface())
 	for i := 0; i < value.NumField(); i++ {
 		tfield := vt.Field(i)
 		vfield := value.Field(i)
-
 		//私有字段
 		if tfield.PkgPath != "" && !tfield.Anonymous { // unexported
 			continue
 		}
 		switch vfield.Kind() {
 		case reflect.Array, reflect.Slice: //目标字段为数组，将数据源为非数据转化为数组
-			if err := setSliceValue(path, vfield, tfield, input); err != nil {
+			if err := setSliceValue(path, vfield, tfield, tnames, input); err != nil {
 				return err
 			}
 		case reflect.Map:
@@ -86,15 +85,17 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 				return err
 			}
 		case reflect.Struct:
-			if err := checkStruct(path, vfield, input); err != nil {
+			tnames = append(tnames, tfield.Name)
+			if err := checkStruct(path, vfield, tnames, input); err != nil {
 				return err
 			}
 		case reflect.Ptr:
-			if err := checkStruct(path, vfield.Elem(), input); err != nil {
+			tnames = append(tnames, tfield.Name)
+			if err := checkStruct(path, vfield.Elem(), tnames, input); err != nil {
 				return err
 			}
 		default:
-			if err := setFieldValue(path, vfield, tfield, input); err != nil {
+			if err := setFieldValue(path, vfield, tfield, tnames, input); err != nil {
 				return err
 			}
 		}
@@ -103,16 +104,19 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 	return nil
 }
 
-func getValues(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (value interface{}, err error) {
+func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (value interface{}, err error) {
 	validTagName := tfield.Tag.Get("valid")
 	label, msg := getLable(tfield)
 	if label == "Action" {
 		return nil, nil
 	}
-	fname := getFullName(path, label, tfield.Name)
+	tnames = append(tnames, tfield.Name)
+	tnames = append(tnames, path)
+	a := strings.Join(tnames, ",")
+	fname := getFullName(path, label, a)
 	svalue := fmt.Sprint(vfield.Interface())
 	check := func() (interface{}, error) {
-		v, ok := input[tfield.Name]
+		v, ok := input[a]
 		if !ok {
 			v, err = readFromCli(fname, validTagName, label, msg)
 			if err != nil {
@@ -133,7 +137,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, in
 
 }
 
-func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (err error) {
+func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
 
 	//处理多个数据值问题
 	var v interface{}
@@ -141,15 +145,16 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 		listValue := make([]string, 0, 1)
 		for i := 0; i < vfield.Len(); i++ {
 			t := vfield.Index(i)
-			err := checkAndInput(path, t, input)
+			tnames = append(tnames, tfield.Name)
+			err := checkAndInput(path, t, tnames, input)
 			if err != nil {
 				return err
 			}
 			listValue = append(listValue, fmt.Sprint(t.Interface()))
 		}
-		v, err = getValues(path, reflect.ValueOf(strings.Join(listValue, "")), tfield, input)
+		v, err = getValues(path, reflect.ValueOf(strings.Join(listValue, "")), tfield, tnames, input)
 	} else {
-		v, err = getValues(path, vfield, tfield, input)
+		v, err = getValues(path, vfield, tfield, tnames, input)
 	}
 
 	if err != nil || v == nil {
@@ -169,8 +174,8 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	return types.SetSlice([]interface{}{v}, vfield, tfield)
 }
 
-func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (err error) {
-	v, err := getValues(path, vfield, tfield, input)
+func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
+	v, err := getValues(path, vfield, tfield, tnames, input)
 	if err != nil || v == nil {
 		return err
 	}
@@ -230,7 +235,7 @@ func validate(input string, tagName string, label string, msg string) error {
 }
 
 func getFullName(path string, name string, tname string) string {
-	return fmt.Sprintf("%s(%s)", name, strings.Join([]string{tname, path}, ","))
+	return fmt.Sprintf("%s(%s)", name, tname)
 }
 
 func getLable(tfield reflect.StructField) (string, string) {

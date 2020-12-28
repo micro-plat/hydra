@@ -102,8 +102,7 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 
 //getJSON 将对象序列化为json字符串
 func getJSON(path string, v interface{}) (value string, err error) {
-	fmt.Println("path:", path)
-	if err := checkAndInput(path, reflect.ValueOf(v), map[string]interface{}{}); err != nil {
+	if err := checkAndInput(path, reflect.ValueOf(v), []string{}, map[string]interface{}{}); err != nil {
 		return "", err
 	}
 	if x, ok := v.(string); ok {
