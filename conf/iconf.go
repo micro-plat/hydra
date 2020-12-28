@@ -10,7 +10,7 @@ import (
 var ErrNoSetting = errors.New("未配置")
 
 //ByInstall 通过安装设置
-const ByInstall = "#"
+const ByInstall = "###"
 
 //ByInstallI 通过安装设置
 const ByInstallI = -2 << 31
