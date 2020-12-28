@@ -13,6 +13,7 @@ const (
 	ProtoFS      = "fs"
 	ProtoLMQ     = "lmq"
 	ProtoREDIS   = "redis"
+	ProtoMQTT    = "mqtt"
 	ProtoInvoker = "ivk"
 )
 

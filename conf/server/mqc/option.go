@@ -1,5 +1,11 @@
 package mqc
 
+import (
+	"fmt"
+
+	"github.com/micro-plat/hydra/global"
+)
+
 //Option 配置选项
 type Option func(*Server)
 
@@ -43,4 +49,19 @@ func WithEnable() Option {
 	return func(a *Server) {
 		a.Status = StartStatus
 	}
+}
+
+//WithRedis 返回redis地址名称
+func WithRedis(name string) string {
+	return fmt.Sprintf("%s://%s", global.ProtoREDIS, name)
+}
+
+//WithMQTT 返回mqtt地址名称
+func WithMQTT(name string) string {
+	return fmt.Sprintf("%s://%s", global.ProtoMQTT, name)
+}
+
+//WithLMQ 返回lmq地址名称
+func WithLMQ() string {
+	return fmt.Sprintf("%s://.", global.ProtoLMQ)
 }

@@ -226,7 +226,6 @@ func validate(input string, tagName string, lable string, msg string) error {
 
 func getFullName(path string, name string, tname string) string {
 	return fmt.Sprintf("%s(%s)", name, strings.Join([]string{tname, path}, ","))
-
 }
 
 func getLable(tfield reflect.StructField) (string, string) {

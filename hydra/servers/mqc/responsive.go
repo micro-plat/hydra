@@ -151,7 +151,6 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器地址有误:%w", err)
 	}
-	// fmt.Println("proto:", proto)
 	queueObj, err := cnf.GetMQCQueueConf()
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器监听队列配置有误:%w", err)

@@ -83,6 +83,7 @@ func (s *regist) Micro(name string, h interface{}, r ...router.Option) {
 	s.API(name, h, r...)
 	s.Web(name, h, r...)
 	s.WS(name, h, r...)
+	s.RPC(name, h, r...)
 }
 
 //Flow 注册为流程服务，包括mqc,cron
