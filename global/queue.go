@@ -28,7 +28,7 @@ func (m *messageQueueConf) NeedAddPrefix() bool {
 	return m.platNameAsPrefix
 }
 
-//GetQueueName 获取队列名称
+//GetQueueName 获取带有平台名称的完整队列名
 func (m *messageQueueConf) GetQueueName(n string) string {
 	if m.platNameAsPrefix {
 		return fmt.Sprintf("%s%s%s", Def.PlatName, m.separate, n)
