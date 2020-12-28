@@ -111,13 +111,13 @@ func checkStruct(path string, value reflect.Value, input map[string]interface{})
 func getValues(path string, vfield reflect.Value, tfield reflect.StructField, input map[string]interface{}) (value interface{}, err error) {
 
 	validTagName := tfield.Tag.Get("valid")
-	lable, msg := getLable(tfield)
-	fname := getFullName(path, lable, tfield.Name)
+	label, msg := getLable(tfield)
+	fname := getFullName(path, label, tfield.Name)
 	svalue := fmt.Sprint(vfield.Interface())
 	check := func() (interface{}, error) {
 		v, ok := input[tfield.Name]
 		if !ok {
-			v, err = readFromCli(fname, validTagName, lable, msg)
+			v, err = readFromCli(fname, validTagName, label, msg)
 			if err != nil {
 				return nil, err
 			}
@@ -129,7 +129,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, in
 		return check()
 	case isRequire(vfield, validTagName) && (!vfield.IsValid() || vfield.IsZero()):
 		return check()
-	case vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, lable, msg) != nil:
+	case vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
 		return check()
 	}
 	return nil, nil
@@ -178,7 +178,7 @@ func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField
 	return nil
 }
 
-func readFromCli(name string, tagName string, lable string, msg string) (string, error) {
+func readFromCli(name string, tagName string, label string, msg string) (string, error) {
 
 	//检查in参数，包括in则使用select,否则为input
 	ps := regexp.MustCompile(`^in\((.*)\)`).FindStringSubmatch(tagName)
@@ -187,7 +187,7 @@ func readFromCli(name string, tagName string, lable string, msg string) (string,
 		//input输入项
 		prompt := promptui.Prompt{
 			Label:    name,
-			Validate: func(input string) error { return validate(input, tagName, lable, msg) },
+			Validate: func(input string) error { return validate(input, tagName, label, msg) },
 		}
 		result, err := prompt.Run()
 		return result, err
@@ -209,7 +209,7 @@ func isRequire(input reflect.Value, tagName string) bool {
 }
 
 //validate 验证值是否合法
-func validate(input string, tagName string, lable string, msg string) error {
+func validate(input string, tagName string, label string, msg string) error {
 	if tagName == "" || tagName == "-" {
 		return nil
 	}
@@ -219,7 +219,7 @@ func validate(input string, tagName string, lable string, msg string) error {
 	in := map[string]interface{}{"name": input}
 	ck := map[string]interface{}{"name": tagName}
 	if ok, err := govalidator.ValidateMap(in, ck); !ok {
-		return fmt.Errorf("%s (%w)", types.GetString(msg, fmt.Sprintf("请输入正确的%s", lable)), err)
+		return fmt.Errorf("%s (%w)", types.GetString(msg, fmt.Sprintf("请输入正确的%s", label)), err)
 	}
 	return nil
 }
@@ -229,7 +229,7 @@ func getFullName(path string, name string, tname string) string {
 }
 
 func getLable(tfield reflect.StructField) (string, string) {
-	tagName := tfield.Tag.Get("lable")
+	tagName := tfield.Tag.Get("label")
 	if tagName == "" || tagName == "-" {
 		return tfield.Name, ""
 	}
