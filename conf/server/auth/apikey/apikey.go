@@ -36,8 +36,8 @@ const (
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
-	Secret   string        `json:"secret,omitempty" valid:"ascii,required,stringlength(8|64)" toml:"secret,omitempty"`
-	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256|SVS|SRVC),required" toml:"mode,omitempty"`
+	Secret   string        `json:"secret,omitempty" valid:"ascii,required,stringlength(8|64)" toml:"secret,omitempty" label:"密钥验证服务secret"`
+	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256|SVS|SRVC),required" toml:"mode,omitempty" label:"密钥验证服务模式"`
 	Excludes []string      `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径
 	Disable  bool          `json:"disable,omitempty" toml:"disable,omitempty"`
 	Invoker  string        `json:"invoker,omitempty" toml:"invoker,omitempty"`

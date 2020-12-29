@@ -16,7 +16,7 @@ type IAPM interface {
 
 //APM APM
 type APM struct {
-	Address string `json:"address,omitempty" valid:"required" toml:"address,omitempty"`
+	Address string `json:"address,omitempty" valid:"required" toml:"address,omitempty" label:"应用程序性能监控地址"`
 	Version int32  `json:"-"`
 	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }

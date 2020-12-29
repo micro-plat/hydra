@@ -16,7 +16,7 @@ const (
 
 //Server api server配置信息
 type Server struct {
-	Address string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty"`
+	Address string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty" label:"ws服务地址"`
 	*option
 }
 

@@ -2,8 +2,8 @@ package queue
 
 //Queue 配置参数
 type Queue struct {
-	Queue       string `json:"queue,omitempty" valid:"ascii,required" toml:"queue,omitempty"`
-	Service     string `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
+	Queue       string `json:"queue,omitempty" valid:"ascii,required" toml:"queue,omitempty" label:"队列名"`
+	Service     string `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty" label:"队列服务"`
 	Concurrency int    `json:"concurrency,omitempty" toml:"concurrency,omitempty"`
 	Disable     bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
