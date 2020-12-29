@@ -1,7 +1,7 @@
 package app
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/server"
@@ -24,6 +24,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -93,10 +94,15 @@ func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst regist
 
 }
 
-//NewAPPConf 构建服务器配置
+// NewAPPConf 构建服务器配置
 func NewAPPConf(mainConfpath string, rgst registry.IRegistry) (s *APPConf, err error) {
-	sections := strings.Split(strings.Trim(mainConfpath, "/"), "/")
-	return NewAPPConfBy(sections[0], sections[1], sections[2], sections[3], rgst)
+	list := registry.Split(registry.Trim(mainConfpath))
+	tp := list[len(list)-3]
+	pub := server.NewServerPub(global.Def.PlatName, global.Def.SysName, tp, global.Def.ClusterName)
+	if pub.GetServerPath() != mainConfpath {
+		return nil, fmt.Errorf("非当前平台、系统、集群的服务不支持获取APPConf")
+	}
+	return NewAPPConfBy(global.Def.PlatName, global.Def.SysName, tp, global.Def.ClusterName, rgst)
 
 }
 
