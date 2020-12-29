@@ -208,12 +208,12 @@ func (m *global) check() (err error) {
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
-	if m.Name != "" {
-		m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
-		if err != nil {
-			return err
-		}
-	}
+	// if m.Name != "" {
+	// 	m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 	for _, s := range m.ServerTypes {
 		if !types.StringContains(ServerTypes, s) {
 			return fmt.Errorf("%s不支持，只能是%v", s, ServerTypes)
