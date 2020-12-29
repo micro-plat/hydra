@@ -1,6 +1,7 @@
 package static
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,6 +10,11 @@ import (
 const embedArchiveTag = ":EMBED:"
 
 var embedArchive []byte
+var embedExt string
+
+func getEmbedFileName() string {
+	return fmt.Sprintf("%s%s", TempArchiveName, embedExt)
+}
 
 //saveArchive 保存归档文件
 func saveArchive() (string, error) {
@@ -17,7 +23,7 @@ func saveArchive() (string, error) {
 	}
 
 	rootPath := filepath.Dir(os.Args[0])
-	file, err := ioutil.TempFile(rootPath, TempDirName)
+	file, err := ioutil.TempFile(rootPath, getEmbedFileName())
 	if err != nil {
 		return "", err
 	}

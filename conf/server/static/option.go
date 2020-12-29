@@ -80,9 +80,10 @@ func WithExts(exts ...string) Option {
 }
 
 //WithArchiveByEmbed 通过嵌入的方式指定压缩文件
-func WithArchiveByEmbed(a []byte) Option {
+func WithArchiveByEmbed(a []byte, ext string) Option {
 	return func(s *Static) {
 		embedArchive = a
+		embedExt = ext
 		s.Archive = embedArchiveTag
 	}
 }

@@ -16,6 +16,9 @@ import (
 //TempDirName 临时目录创建名
 const TempDirName = "hydra"
 
+//TempArchiveName 临时压缩文件创建名
+const TempArchiveName = "hydra*"
+
 //TypeNodeName static分类节点名
 const TypeNodeName = "static"
 
