@@ -121,7 +121,7 @@ func Test_global_check(t *testing.T) {
 		{name: "8.ServerTypeNames-多个", fields: fields{PlatName: "p"}, wantErr: false, expect: CliFlagObject{ServerTypeNames: "api-mqc"}, flagVal: CliFlagObject{ServerTypeNames: "api-mqc"}},
 		{name: "9.ServerTypeNames-存在不包含", fields: fields{PlatName: "p"}, wantErr: false, expect: CliFlagObject{}, flagVal: CliFlagObject{ServerTypeNames: "api-mqc"}},
 
-		{name: "10.Name-为空", fields: fields{Name: "", RegistryAddr: "RegistryAddr", PlatName: "PlatName", SysName: "SysName", ServerTypeNames: "api-mqc", ClusterName: "ClusterName"}, wantErr: false, expect: CliFlagObject{}, flagVal: CliFlagObject{RegistryAddr: "", Name: "", PlatName: "", SysName: "", ServerTypeNames: "", ClusterName: ""}},
+		{name: "10.Name-为空", fields: fields{Name: "", RegistryAddr: "RegistryAddr", PlatName: "PlatName", SysName: "SysName", ServerTypeNames: "api-mqc", ClusterName: "ClusterName"}, wantErr: false, expect: CliFlagObject{}, flagVal: CliFlagObject{RegistryAddr: "", PlatName: "", SysName: "", ServerTypeNames: "", ClusterName: ""}},
 		{name: "11.Name-不为空", fields: fields{Name: "/PlatName/SysName/api-mqc/ClusterName"}, wantErr: false, expect: CliFlagObject{RegistryAddr: "zk://192.168.0.1"}, flagVal: CliFlagObject{RegistryAddr: "zk://192.168.0.1"}},
 
 		{name: "12.Trace不为空-在trace列表内", fields: fields{Trace: "cpu"}, wantErr: false, expect: CliFlagObject{RegistryAddr: "zk://192.168.0.1", PlatName: "PlatName", SysName: "SysName", ServerTypeNames: "api", ClusterName: "ClusterName"}, flagVal: CliFlagObject{RegistryAddr: "zk://192.168.0.1", PlatName: "PlatName", SysName: "SysName", ServerTypeNames: "api", ClusterName: "ClusterName"}},
@@ -140,7 +140,6 @@ func Test_global_check(t *testing.T) {
 			ServerTypes:     tt.fields.ServerTypes,
 			ServerTypeNames: tt.fields.ServerTypeNames,
 			ClusterName:     tt.fields.ClusterName,
-			Name:            tt.fields.Name,
 			Trace:           tt.fields.Trace,
 		}
 		//初始化测试用例参数
