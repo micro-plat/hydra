@@ -53,9 +53,6 @@ type global struct {
 	//ClusterName 集群名称
 	ClusterName string
 
-	//Name 服务器请求名称
-	Name string
-
 	//DNSRoot DNS根节点
 	DNSRoot string
 
@@ -196,7 +193,6 @@ func (m *global) IsDebug() bool {
 func (m *global) check() (err error) {
 
 	m.RegistryAddr = types.GetString(FlagVal.RegistryAddr, m.RegistryAddr)
-	m.Name = types.GetString(FlagVal.Name, m.Name)
 	m.PlatName = types.GetString(FlagVal.PlatName, m.PlatName)
 	m.SysName = types.GetString(FlagVal.SysName, m.SysName)
 	m.ServerTypeNames = types.GetString(FlagVal.ServerTypeNames, m.ServerTypeNames)
@@ -208,12 +204,6 @@ func (m *global) check() (err error) {
 	if m.ServerTypeNames != "" {
 		m.ServerTypes = strings.Split(strings.ToLower(m.ServerTypeNames), "-")
 	}
-	// if m.Name != "" {
-	// 	m.PlatName, m.SysName, m.ServerTypes, m.ClusterName, err = parsePath(m.Name)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
 	for _, s := range m.ServerTypes {
 		if !types.StringContains(ServerTypes, s) {
 			return fmt.Errorf("%s不支持，只能是%v", s, ServerTypes)

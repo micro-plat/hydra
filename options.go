@@ -53,13 +53,6 @@ func WithClusterName(clusterName string) Option {
 	}
 }
 
-//WithName 设置系统全名 格式:/[platName]/[sysName]/[typeName]/[clusterName]
-func WithName(name string) Option {
-	return func() {
-		global.Def.Name = name
-	}
-}
-
 //WithDebug 设置dubug模式
 func WithDebug() Option {
 	return func() {
