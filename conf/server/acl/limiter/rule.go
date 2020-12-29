@@ -9,7 +9,7 @@ import (
 
 //Resp 限流器
 type Resp struct {
-	Status  int    `json:"status" valid:"required" toml:"status,omitempty" label:"限流返回状态"`
+	Status  int    `json:"status" valid:"range(100|1000),required" toml:"status,omitempty" label:"限流返回状态"`
 	Content string `json:"content" valid:"required" toml:"content,omitempty" label:"限流返回内容"`
 }
 

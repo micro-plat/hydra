@@ -124,13 +124,11 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 	}
 	svalue := getSValue(vfield, isArray)
 	switch {
-	case isRequire(vfield, validTagName) && vfield.Len() < 1 && isArray:
-		return check()
 	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
 		return check()
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
 		return check()
-	case isRequire(vfield, validTagName) && (!vfield.IsValid() || vfield.IsZero()):
+	case isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()):
 		return check()
 	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
 		return check()
@@ -139,26 +137,65 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 
 }
 
+func initializeStruct(t reflect.Type, v reflect.Value) {
+	if v.Type().Kind() != reflect.Struct {
+		return
+	}
+
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		ft := t.Field(i)
+		validTagName := ft.Tag.Get("valid")
+		if !isRequire(validTagName) {
+			continue
+		}
+		switch ft.Type.Kind() {
+		case reflect.Map:
+			f.Set(reflect.MakeMap(ft.Type))
+		case reflect.Slice:
+			fmt.Println(ft)
+			f.Set(reflect.MakeSlice(ft.Type, 0, 0))
+		case reflect.Chan:
+			f.Set(reflect.MakeChan(ft.Type, 0))
+		case reflect.Struct:
+			initializeStruct(ft.Type, f)
+		case reflect.Ptr:
+			fv := reflect.New(ft.Type.Elem())
+			initializeStruct(ft.Type.Elem(), fv.Elem())
+			f.Set(fv)
+		default:
+		}
+	}
+}
+
 func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
 
 	//处理多个数据值问题
-	var v interface{}
-	if vfield.Len() > 0 {
-		listValue := make([]string, 0, 1)
-		for i := 0; i < vfield.Len(); i++ {
-			t := vfield.Index(i)
-			rootNames := append(tnames, fmt.Sprintf("%s[%d]", tfield.Name, i))
-			err := checkAndInput(path, t, rootNames, input)
-			if err != nil {
-				return err
-			}
-			rootNames = tnames
-			listValue = append(listValue, fmt.Sprint(t.Interface()))
+	if vfield.Len() == 0 {
+		t := tfield.Type.Elem()
+		if t.Kind() == reflect.Ptr {
+			t = t.Elem()
 		}
-		v, err = getValues(path, reflect.ValueOf(listValue), tfield, tnames, input)
-	} else {
-		v, err = getValues(path, vfield, tfield, tnames, input)
+		if t.Kind() == reflect.Struct {
+			v := reflect.New(t)
+			initializeStruct(t, v.Elem())
+			vfield.Set(reflect.Append(vfield, v))
+		}
 	}
+
+	var v interface{}
+	listValue := make([]string, 0, 1)
+	for i := 0; i < vfield.Len(); i++ {
+		t := vfield.Index(i)
+		rootNames := append(tnames, fmt.Sprintf("%s[%d]", tfield.Name, i))
+		err := checkAndInput(path, t, rootNames, input)
+		if err != nil {
+			return err
+		}
+		rootNames = tnames
+		listValue = append(listValue, fmt.Sprint(t.Interface()))
+	}
+	v, err = getValues(path, reflect.ValueOf(listValue), tfield, tnames, input)
 
 	if err != nil || v == nil {
 		return err
@@ -226,7 +263,7 @@ func readFromCli(name string, tagName string, label string, msg string, isArray 
 
 }
 
-func isRequire(input reflect.Value, tagName string) bool {
+func isRequire(tagName string) bool {
 	return strings.Contains(tagName, "required")
 }
 
