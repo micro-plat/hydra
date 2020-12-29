@@ -28,7 +28,7 @@ require (
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
-	github.com/robfig/cron v1.2.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/ugorji/go/codec v1.2.2
 	github.com/ulikunitz/xz v0.5.9 // indirect
 	github.com/urfave/cli v1.22.5
