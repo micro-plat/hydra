@@ -58,3 +58,10 @@ func WithEnable() Option {
 		a.Disable = false
 	}
 }
+
+//WithInvoker 排除的服务或请求
+func WithInvoker(v string) Option {
+	return func(b *APIKeyAuth) {
+		b.Invoker = v
+	}
+}

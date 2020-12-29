@@ -6,10 +6,10 @@ const TypeNodeName = "db"
 //DB 数据库配置
 type DB struct {
 	Provider   string `json:"provider" valid:"required"`
-	ConnString string `json:"connString" valid:"required" lable:"连接字符串"`
-	MaxOpen    int    `json:"maxOpen" valid:"required" lable:"最大打开连接数"`
-	MaxIdle    int    `json:"maxIdle" valid:"required" lable:"最大空闲连接数"`
-	LifeTime   int    `json:"lifeTime" valid:"required" lable:"单个连接时长(秒)"`
+	ConnString string `json:"connString" valid:"required" label:"连接字符串"`
+	MaxOpen    int    `json:"maxOpen" valid:"required" label:"最大打开连接数"`
+	MaxIdle    int    `json:"maxIdle" valid:"required" label:"最大空闲连接数"`
+	LifeTime   int    `json:"lifeTime" valid:"required" label:"单个连接时长(秒)"`
 }
 
 //New 构建DB连接信息
