@@ -153,7 +153,6 @@ func initializeStruct(t reflect.Type, v reflect.Value) {
 		case reflect.Map:
 			f.Set(reflect.MakeMap(ft.Type))
 		case reflect.Slice:
-			fmt.Println(ft)
 			f.Set(reflect.MakeSlice(ft.Type, 0, 0))
 		case reflect.Chan:
 			f.Set(reflect.MakeChan(ft.Type, 0))
@@ -171,7 +170,7 @@ func initializeStruct(t reflect.Type, v reflect.Value) {
 func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
 
 	//处理多个数据值问题
-	if vfield.Len() == 0 {
+	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
 		t := tfield.Type.Elem()
 		if t.Kind() == reflect.Ptr {
 			t = t.Elem()
