@@ -23,7 +23,6 @@ type ServerPub struct {
 
 //NewServerPub 构建服务发布路径信息
 func NewServerPub(platName string, sysName string, serverType string, clusterName string) *ServerPub {
-
 	return &ServerPub{
 		platName:    platName,
 		sysName:     sysName,

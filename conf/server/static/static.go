@@ -74,6 +74,18 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if static.Exts == nil {
 		static.Exts = []string{}
 	}
+
+	//处理嵌入档案文件
+	if static.Archive == embedArchiveTag {
+		archivePath, err := saveArchive()
+		if err != nil {
+			return nil, err
+		}
+		static.Archive = archivePath
+		defer removeArchive(archivePath) //移除archive
+	}
+
+	//验证配置信息
 	if b, err := govalidator.ValidateStruct(static); !b {
 		return nil, fmt.Errorf("static配置数据有误:%v", err)
 	}

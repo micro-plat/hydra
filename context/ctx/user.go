@@ -18,26 +18,22 @@ type user struct {
 }
 
 //NewUser 用户信息
-func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
-	return &user{
+func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
+	u := &user{
 		ctx:   ctx,
-		gid:   gid,
 		auth:  &Auth{},
 		IMeta: meta,
 	}
+	if ids, ok := ctx.GetHeaders()[context.XRequestID]; ok {
+		global.RID.Add(ids[0])
+	}
+	u.requestID = global.RID.GetXRequestID()
+	return u
 }
 
 //GetRequestID 获取请求编号
 func (c *user) GetRequestID() string {
-	if ids, ok := c.ctx.GetHeaders()[context.XRequestID]; ok {
-		global.RID.Add(ids[0])
-	}
-	return global.RID.GetXRequestID()
-}
-
-//GetGID 获取当前处理的goroutine id
-func (c *user) GetGID() string {
-	return c.gid
+	return c.requestID
 }
 
 //GetUserName 获取用户名(basic认证启动后有效)
