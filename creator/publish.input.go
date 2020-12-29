@@ -132,7 +132,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 		return check()
 	case isRequire(vfield, validTagName) && (!vfield.IsValid() || vfield.IsZero()):
 		return check()
-	case vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
+	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
 		return check()
 	}
 	return nil, nil
@@ -231,7 +231,9 @@ func isRequire(input reflect.Value, tagName string) bool {
 }
 
 func validateArray(input string, tagName string, label string, msg string) error {
-
+	if input == "" {
+		return nil
+	}
 	//数据元素重复
 	items := map[string]bool{}
 	for _, data := range strings.Split(input, "|") {
