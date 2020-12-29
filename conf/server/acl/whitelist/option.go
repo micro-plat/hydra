@@ -11,7 +11,7 @@ func WithIPList(list ...*IPList) Option {
 		for _, ip := range list {
 			ip.ipm = conf.NewPathMatch(ip.IPS...)
 			ip.rqm = conf.NewPathMatch(ip.Requests...)
-			a.IPS = append(a.IPS, ip)
+			a.WhiteList = append(a.WhiteList, ip)
 		}
 	}
 }
