@@ -18,13 +18,14 @@ type user struct {
 }
 
 //NewUser 用户信息
-func NewUser(ctx context.IInnerContext, gid string, meta conf.IMeta) *user {
-	return &user{
+func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
+	u := &user{
 		ctx:   ctx,
-		gid:   gid,
 		auth:  &Auth{},
 		IMeta: meta,
 	}
+	u.gid = u.GetRequestID()
+	return u
 }
 
 //GetRequestID 获取请求编号
