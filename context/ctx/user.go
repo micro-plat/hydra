@@ -24,7 +24,7 @@ func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 		auth:  &Auth{},
 		IMeta: meta,
 	}
-	if ids, ok := ctx.GetHeaders()[context.XRequestID]; ok {
+	if ids, ok := ctx.GetHeaders()[context.XRequestID]; ok && len(ids) > 0 && ids[0] != "" {
 		global.RID.Add(ids[0])
 	}
 	u.requestID = global.RID.GetXRequestID()
