@@ -7,7 +7,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/security/md5"
-	"github.com/robfig/cron"
+	cron "github.com/robfig/cron/v3"
 )
 
 func TestNewCronTask(t *testing.T) {
