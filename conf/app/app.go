@@ -96,8 +96,13 @@ func NewAPPConfBy(platName, sysName, serverType, clusterName string, rgst regist
 
 // NewAPPConf 构建服务器配置
 func NewAPPConf(mainConfpath string, rgst registry.IRegistry) (s *APPConf, err error) {
+
+	//处理平台名、系统名包含多段问题
+	//获取服务器类型
 	list := registry.Split(registry.Trim(mainConfpath))
 	tp := list[len(list)-3]
+
+	//无法准确获得平台、系统名，只能通过当前应用配置获得，再比较
 	pub := server.NewServerPub(global.Def.PlatName, global.Def.SysName, tp, global.Def.ClusterName)
 	if pub.GetServerPath() != mainConfpath {
 		return nil, fmt.Errorf("非当前平台、系统、集群的服务不支持获取APPConf")
