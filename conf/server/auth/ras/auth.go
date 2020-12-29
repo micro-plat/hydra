@@ -10,10 +10,10 @@ import (
 type Auth struct {
 
 	//远程验证服务名
-	Service string `json:"service,omitempty" valid:"required" toml:"service,omitempty"`
+	Service string `json:"service,omitempty" valid:"required" toml:"service,omitempty" label:"远程验证服务名"`
 
 	//指定需要远程验证的请求列表
-	Requests []string `json:"requests,omitempty" valid:"required" toml:"requests,omitempty"`
+	Requests []string `json:"requests,omitempty" valid:"required" toml:"requests,omitempty" label:"远程验证的请求列表"`
 
 	//必须传入的字段列表
 	Required []string `json:"required,omitempty" toml:"required,omitempty"`

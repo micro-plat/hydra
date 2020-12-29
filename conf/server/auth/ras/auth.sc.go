@@ -16,16 +16,16 @@ type SecretOption func(*SecretConnect)
 type SecretConnect struct {
 
 	//为密钥指定的键名
-	Name string `json:"name,omitempty" valid:"ascii" toml:"name,omitempty"`
+	Name string `json:"name,omitempty" valid:"ascii" toml:"name,omitempty" label:"远程验证密钥拼接串键名"`
 
 	//密钥键与密钥值连接符
-	KeyValue string `json:"kv,omitempty" valid:"ascii" toml:"kv,omitempty"`
+	KeyValue string `json:"kv,omitempty" valid:"ascii" toml:"kv,omitempty" label:"远程验证密钥键与密钥值连接符"`
 
 	//密钥与其它串的连接符
-	Chain string `json:"chain,omitempty" valid:"ascii" toml:"chain,omitempty"`
+	Chain string `json:"chain,omitempty" valid:"ascii" toml:"chain,omitempty" label:"远程验证密钥与其它串的连接符"`
 
 	//密钥连接方式
-	Mode string `json:"mode,omitempty" valid:"in(head|tail|headTail)" toml:"mode,omitempty"`
+	Mode string `json:"mode,omitempty" valid:"in(head|tail|headTail)" toml:"mode,omitempty" label:"远程验证密钥连接方式`
 }
 
 //WithSecretName 设置secrect的键名称

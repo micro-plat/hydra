@@ -23,9 +23,9 @@ var SubConfName = []string{"queue"}
 
 //Server mqc服务配置
 type Server struct {
-	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty" label:"mqc服务状态"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
-	Addr     string `json:"addr,omitempty" valid:"required"  toml:"addr,omitempty"`
+	Addr     string `json:"addr,omitempty" valid:"required"  toml:"addr,omitempty" label:"mqc服务地址"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 

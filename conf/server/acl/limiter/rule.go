@@ -9,13 +9,13 @@ import (
 
 //Resp 限流器
 type Resp struct {
-	Status  int    `json:"status" valid:"required" toml:"status,omitempty"`
-	Content string `json:"content" valid:"required" toml:"content,omitempty"`
+	Status  int    `json:"status" valid:"required" toml:"status,omitempty" label:"限流返回状态"`
+	Content string `json:"content" valid:"required" toml:"content,omitempty" label:"限流返回内容"`
 }
 
 //Rule 按请求设定的限流器
 type Rule struct {
-	Path     string `json:"path" valid:"ascii,required" toml:"path,omitempty"`
+	Path     string `json:"path" valid:"ascii,required" toml:"path,omitempty" label:"限流路径"`
 	MaxAllow int    `json:"maxAllow"  toml:"maxAllow,omitempty"`
 	MaxWait  int    `json:"maxWait,omitempty"  toml:"maxWait,omitempty"`
 	Fallback bool   `json:"fallback,omitempty"  toml:"fallback,omitempty"`

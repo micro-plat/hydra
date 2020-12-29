@@ -23,7 +23,7 @@ var SubConfName = []string{"task"}
 
 //Server 服务嚣配置信息
 type Server struct {
-	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty" label:"cron服务状态"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }

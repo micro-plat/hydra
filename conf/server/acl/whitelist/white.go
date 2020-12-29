@@ -17,8 +17,8 @@ const (
 
 //IPList ip列表
 type IPList struct {
-	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty"`
-	IPS      []string `json:"ips,omitempty" valid:"ascii,required" toml:"ips,omitempty"`
+	Requests []string `json:"requests,omitempty" valid:"ascii,required" toml:"requests,omitempty" label:"白名单请求路径列表"`
+	IPS      []string `json:"ips,omitempty" valid:"ascii,required" toml:"ips,omitempty" label:"白名单请求ip列表"`
 	ipm      *conf.PathMatch
 	rqm      *conf.PathMatch
 }

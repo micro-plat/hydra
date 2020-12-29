@@ -33,7 +33,7 @@ var SubConfName = []string{"router", "metric"}
 //Server rpc server配置信息
 type Server struct {
 	Address        string `json:"address,omitempty" toml:"address,omitempty"`
-	Status         string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	Status         string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty" label:"rpc服务状态"`
 	Host           string `json:"host,omitempty" toml:"host,omitempty"`
 	Domain         string `json:"dn,omitempty" toml:"dn,omitempty"`
 	Trace          bool   `json:"trace,omitempty" toml:"trace,omitempty"`
