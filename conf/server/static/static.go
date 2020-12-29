@@ -81,9 +81,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		if err != nil {
 			return nil, err
 		}
-		if archivePath != "" {
-			static.Archive = archivePath
-		}
+		static.Archive = archivePath
 		defer removeArchive(archivePath) //移除archive
 	}
 
