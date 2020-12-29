@@ -57,7 +57,7 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 		v, ok := input[skey]
 		if !ok {
 			fname := getFullName(path, skey, skey)
-			v, err = readFromCli(fname, "-", fname, "")
+			v, err = readFromCli(fname, "-", fname, "", false)
 			if err != nil {
 				return err
 			}
@@ -66,6 +66,7 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 	}
 	return nil
 }
+
 func checkStruct(path string, value reflect.Value, tnames []string, input map[string]interface{}) (err error) {
 	vt := reflect.TypeOf(value.Interface())
 	for i := 0; i < value.NumField(); i++ {
@@ -107,25 +108,26 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (value interface{}, err error) {
 	validTagName := tfield.Tag.Get("valid")
 	label, msg := getLable(tfield)
-	if label == "Action" {
-		return nil, nil
-	}
 	tnames = append(tnames, tfield.Name)
-	tnames = append(tnames, path)
-	a := strings.Join(tnames, ",")
-	fname := getFullName(path, label, a)
-	svalue := fmt.Sprint(vfield.Interface())
+	fname := getFullName(path, label, strings.Join(tnames, "."))
+
+	isArray := vfield.Kind() == reflect.Array || vfield.Kind() == reflect.Slice
 	check := func() (interface{}, error) {
-		v, ok := input[a]
+		v, ok := input[fname]
 		if !ok {
-			v, err = readFromCli(fname, validTagName, label, msg)
+			v, err = readFromCli(fname, validTagName, label, msg, isArray)
 			if err != nil {
 				return nil, err
 			}
 		}
 		return v, nil
 	}
+	svalue := getSValue(vfield, isArray)
 	switch {
+	case isRequire(vfield, validTagName) && vfield.Len() < 1 && isArray:
+		return check()
+	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
+		return check()
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
 		return check()
 	case isRequire(vfield, validTagName) && (!vfield.IsValid() || vfield.IsZero()):
@@ -145,14 +147,15 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 		listValue := make([]string, 0, 1)
 		for i := 0; i < vfield.Len(); i++ {
 			t := vfield.Index(i)
-			tnames = append(tnames, tfield.Name)
-			err := checkAndInput(path, t, tnames, input)
+			rootNames := append(tnames, fmt.Sprintf("%s[%d]", tfield.Name, i))
+			err := checkAndInput(path, t, rootNames, input)
 			if err != nil {
 				return err
 			}
+			rootNames = tnames
 			listValue = append(listValue, fmt.Sprint(t.Interface()))
 		}
-		v, err = getValues(path, reflect.ValueOf(strings.Join(listValue, "")), tfield, tnames, input)
+		v, err = getValues(path, reflect.ValueOf(listValue), tfield, tnames, input)
 	} else {
 		v, err = getValues(path, vfield, tfield, tnames, input)
 	}
@@ -185,15 +188,24 @@ func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField
 	return nil
 }
 
-func readFromCli(name string, tagName string, label string, msg string) (string, error) {
+func readFromCli(name string, tagName string, label string, msg string, isArray bool) (string, error) {
 	if tagName == "-" {
 		return "", nil
+	}
+
+	if isArray {
+		//input数组输入项
+		prompt := promptui.Prompt{
+			Label:    name,
+			Validate: func(input string) error { return validateArray(input, tagName, label, msg) },
+		}
+		result, err := prompt.Run()
+		return result, err
 	}
 
 	//检查in参数，包括in则使用select,否则为input
 	ps := regexp.MustCompile(`^in\((.*)\)`).FindStringSubmatch(tagName)
 	if len(ps) == 0 {
-
 		//input输入项
 		prompt := promptui.Prompt{
 			Label:    name,
@@ -218,6 +230,24 @@ func isRequire(input reflect.Value, tagName string) bool {
 	return strings.Contains(tagName, "required")
 }
 
+func validateArray(input string, tagName string, label string, msg string) error {
+
+	//数据元素重复
+	items := map[string]bool{}
+	for _, data := range strings.Split(input, "|") {
+		if _, ok := items[data]; ok {
+			return fmt.Errorf("%s", types.GetString(msg, fmt.Sprintf("请输入不重复的%s", label)))
+		}
+		items[data] = true
+		err := validate(data, tagName, label, msg)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 //validate 验证值是否合法
 func validate(input string, tagName string, label string, msg string) error {
 	if tagName == "" || tagName == "-" {
@@ -234,8 +264,21 @@ func validate(input string, tagName string, label string, msg string) error {
 	return nil
 }
 
+func getSValue(vfield reflect.Value, isArray bool) string {
+	svalue := fmt.Sprint(vfield.Interface())
+	if isArray {
+		listValue := make([]string, 0, 1)
+		for i := 0; i < vfield.Len(); i++ {
+			t := vfield.Index(i)
+			listValue = append(listValue, fmt.Sprint(t.Interface()))
+		}
+		svalue = strings.Join(listValue, "|")
+	}
+	return svalue
+}
+
 func getFullName(path string, name string, tname string) string {
-	return fmt.Sprintf("%s(%s)", name, tname)
+	return fmt.Sprintf("%s(%s,%s)", name, tname, path)
 }
 
 func getLable(tfield reflect.StructField) (string, string) {

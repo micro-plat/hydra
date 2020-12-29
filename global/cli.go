@@ -28,7 +28,6 @@ var clis = make(map[string]*ucli)
 
 type CliFlagObject struct {
 	RegistryAddr    string
-	Name            string
 	PlatName        string
 	SysName         string
 	ServerTypeNames string
