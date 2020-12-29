@@ -26,8 +26,6 @@ func doRun(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-
-	c.App.Metadata["app"] = hydraSrv.Service
 	err = hydraSrv.Run()
 	return err
 }
