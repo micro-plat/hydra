@@ -12,7 +12,11 @@ func (r *Redis) GetValue(path string) (data []byte, version int32, err error) {
 	buff, err := r.client.Get(internal.SwapKey(path)).Result()
 	if err != nil {
 		if err.Error() == "redis: nil" {
-			return nil, 0, fmt.Errorf("数据不存在")
+			existsChild, err := r.client.ExistsChildren(internal.SwapKey(path) + ":*")
+			if !existsChild || err != nil {
+				return nil, 0, fmt.Errorf("数据不存在")
+			}
+			return []byte{}, 0, nil
 		}
 		return nil, 0, err
 	}
