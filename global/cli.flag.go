@@ -90,19 +90,3 @@ func WithSliceFlag(name string, usage string) FlagOption {
 		c.flagNames[name] = true
 	}
 }
-
-//WithSliceFlagByDst 设置数组参数
-func WithSliceFlagByDst(name string, dst *[]string, usage string) FlagOption {
-	return func(c *ucli) {
-		if c.hasFlag(name) {
-			panic(fmt.Errorf("flag名称%s已存在", name))
-		}
-		flag := cli.StringSliceFlag{
-			Name:        name,
-			Destination: dst,
-			Usage:       usage,
-		}
-		c.flags = append(c.flags, flag)
-		c.flagNames[name] = true
-	}
-}
