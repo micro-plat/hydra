@@ -25,6 +25,23 @@ func WithFlag(name string, usage string) FlagOption {
 	}
 }
 
+//WithFlagByDst 设置字符串参数
+func WithFlagByDst(name string, dst *string, usage string) FlagOption {
+	return func(c *ucli) {
+		if c.hasFlag(name) {
+			panic(fmt.Errorf("flag名称%s已存在", name))
+		}
+
+		flag := cli.StringFlag{
+			Name:        name,
+			Destination: dst,
+			Usage:       usage,
+		}
+		c.flags = append(c.flags, flag)
+		c.flagNames[name] = true
+	}
+}
+
 //WithBoolFlag 设置bool参数
 func WithBoolFlag(name string, usage string) FlagOption {
 	return func(c *ucli) {
@@ -33,8 +50,26 @@ func WithBoolFlag(name string, usage string) FlagOption {
 		}
 
 		flag := cli.BoolFlag{
-			Name:  name,
+			Name: name,
+
 			Usage: usage,
+		}
+		c.flags = append(c.flags, flag)
+		c.flagNames[name] = true
+	}
+}
+
+//WithBoolFlagByDst 设置bool参数
+func WithBoolFlagByDst(name string, dst *bool, usage string) FlagOption {
+	return func(c *ucli) {
+		if c.hasFlag(name) {
+			panic(fmt.Errorf("flag名称%s已存在", name))
+		}
+
+		flag := cli.BoolFlag{
+			Name:        name,
+			Destination: dst,
+			Usage:       usage,
 		}
 		c.flags = append(c.flags, flag)
 		c.flagNames[name] = true
@@ -50,6 +85,22 @@ func WithSliceFlag(name string, usage string) FlagOption {
 		flag := cli.StringSliceFlag{
 			Name:  name,
 			Usage: usage,
+		}
+		c.flags = append(c.flags, flag)
+		c.flagNames[name] = true
+	}
+}
+
+//WithSliceFlagByDst 设置数组参数
+func WithSliceFlagByDst(name string, dst *[]string, usage string) FlagOption {
+	return func(c *ucli) {
+		if c.hasFlag(name) {
+			panic(fmt.Errorf("flag名称%s已存在", name))
+		}
+		flag := cli.StringSliceFlag{
+			Name:        name,
+			Destination: dst,
+			Usage:       usage,
 		}
 		c.flags = append(c.flags, flag)
 		c.flagNames[name] = true
