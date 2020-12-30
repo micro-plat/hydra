@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -99,7 +100,7 @@ func (e *LogEvent) Transform(tpl string) (result string) {
 		case "ss":
 			return e.Now.Format("05")
 		case "ms":
-			return fmt.Sprintf("%06d", e.Now.Nanosecond()/1e3)
+			return strconv.Itoa(e.Now.Nanosecond() / 1e3)
 		case "level":
 			return strings.ToLower(e.Level)
 		case "l":
