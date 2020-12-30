@@ -99,7 +99,7 @@ func NewJWT(opts ...Option) *JWTAuth {
 //CheckJWT 检查jwt合法性
 func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 	if token == "" {
-		return nil, errs.NewError(JWTStatusTokenNotExsit, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
+		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
 	}
 	//2. 解密jwt判断是否有效，是否过期
 	data, er := jwt.Decrypt(token, j.Secret)
