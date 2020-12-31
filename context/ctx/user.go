@@ -9,7 +9,6 @@ import (
 var _ context.IUser = &user{}
 
 type user struct {
-	gid string
 	conf.IMeta
 	ctx       context.IInnerContext
 	requestID string
