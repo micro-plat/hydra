@@ -19,7 +19,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/lib4dev/cli v1.2.6
+	github.com/lib4dev/cli v1.2.7
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1

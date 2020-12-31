@@ -3,12 +3,8 @@ package logs
 import (
 	"os"
 
-	"github.com/micro-plat/lib4go/logger"
 	"github.com/zkfy/log"
 )
-
-//Log 日志
-var Log logger.ILogging = New()
 
 //Logger 日志组件
 type Logger struct {

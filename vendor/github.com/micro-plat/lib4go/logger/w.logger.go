@@ -51,6 +51,7 @@ func AddWriteThread(count int) {
 
 //New 根据一个或多个日志名称构建日志对象，该日志对象具有新的session id系统不会缓存该日志组件
 func New(names string, tags ...string) (logger *Logger) {
+	initConf()
 	logger = &Logger{index: 100}
 	logger.names = names
 	logger.sessions = CreateSession()
