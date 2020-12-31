@@ -103,7 +103,7 @@ github.com/keybase/go-ps/darwincgo
 github.com/kr/fs
 # github.com/leodido/go-urn v1.2.0
 github.com/leodido/go-urn
-# github.com/lib4dev/cli v1.2.7
+# github.com/lib4dev/cli v1.2.8
 ## explicit
 github.com/lib4dev/cli
 github.com/lib4dev/cli/cmds
