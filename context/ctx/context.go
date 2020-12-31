@@ -120,7 +120,7 @@ func (c *Ctx) Invoke(service string) interface{} {
 
 //Close 关闭并释放所有资源
 func (c *Ctx) Close() {
-	context.Del(c.user.GetRequestID()) //从当前请求上下文中删除
+	context.Del() //从当前请求上下文中删除
 	c.appConf = nil
 	c.cancelFunc()
 	c.cancelFunc = nil

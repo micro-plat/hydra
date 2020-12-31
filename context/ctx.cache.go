@@ -37,7 +37,7 @@ func GetContext(g ...string) (IContext, bool) {
 }
 
 //Del 删除当前线程的请求上下文缓存
-func Del(id string) {
-	ctxMap.Remove(id)
+func Del() {
+	ctxMap.Remove(global.RID.GetXRequestID())
 	global.RID.Remove()
 }
