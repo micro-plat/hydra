@@ -219,7 +219,7 @@ func (c *conf) GetMQC() *mqcBuilder {
 	if mqc, ok := c.data[global.MQC]; ok {
 		return mqc.(*mqcBuilder)
 	}
-	panic("未指定mqc服务器配置")
+	panic("未指定mqc服务器配置,请通过hydra.Conf.MQC...指定")
 }
 
 //Vars 平台变量配置
