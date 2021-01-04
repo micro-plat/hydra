@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/BurntSushi/toml"
 	"github.com/micro-plat/lib4go/file"
@@ -75,15 +76,24 @@ func init() {
 	AddAppender("file", NewFileAppender())
 	AddAppender("stdout", NewStudoutAppender())
 
-	path, err := Encode(loggerPath...)
-	if err != nil {
-		SysLog.Errorf("创建日志配置文件失败 %v", err)
-		return
-	}
-	layouts, err := Decode(path)
-	if err != nil {
-		SysLog.Errorf("读取配置文件失败 %v", err)
-		return
-	}
-	AddLayout(layouts.Layouts...)
+}
+
+var once sync.Once
+
+func initConf() {
+	once.Do(func() {
+		path, err := Encode(loggerPath...)
+		if err != nil {
+			SysLog.Errorf("创建日志配置文件失败 %v", err)
+			return
+		}
+		layouts, err := Decode(path)
+		if err != nil {
+			SysLog.Errorf("读取配置文件失败 %v", err)
+			return
+		}
+		AddLayout(layouts.Layouts...)
+
+	})
+
 }
