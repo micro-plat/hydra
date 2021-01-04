@@ -49,6 +49,9 @@ var ConfCli global.ICustomCli = global.ConfCli
 //DBCli 配置处理相关的终端参数
 var DBCli global.ICustomCli = global.DBCli
 
+//OnReadyByInsert 在列表头部注册处理函数，在系统准备好后执行
+var OnReadyByInsert = global.OnReadyByInsert
+
 //OnReady 系统准备好后执行
 var OnReady = global.OnReady
 

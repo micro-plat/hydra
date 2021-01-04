@@ -71,7 +71,7 @@ func install(c *cli.Context) (err error) {
 			return err
 		}
 		for _, sql := range sqls {
-			if _, _, _, err := db.Execute(sql, nil); err != nil {
+			if _, err := db.Execute(sql, nil); err != nil {
 				err = fmt.Errorf("%32s\t%w", getMessage(sql), err)
 				if !skip {
 					return err
