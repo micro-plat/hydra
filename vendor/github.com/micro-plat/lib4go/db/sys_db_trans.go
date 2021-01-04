@@ -8,23 +8,23 @@ type SysDBTransaction struct {
 }
 
 //Query 执行查询
-func (t *SysDBTransaction) Query(query string, args ...interface{}) (dataRows QueryRows, colus []string, err error) {
+func (t *SysDBTransaction) Query(query string, args ...interface{}) (dataRows QueryRows, err error) {
 	rows, err := t.tx.Query(query, args...)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	dataRows, colus, err = resolveRows(rows, 0)
+	dataRows, _, err = resolveRows(rows, 0)
 	return
 }
 
 //Executes 执行SQL操作语句
-func (t *SysDBTransaction) Executes(query string, args ...interface{}) (lastInsertId, affectedRow int64, err error) {
+func (t *SysDBTransaction) Executes(query string, args ...interface{}) (lastInsertID, affectedRow int64, err error) {
 	result, err := t.tx.Exec(query, args...)
 	if err != nil {
 		return
 	}
-	lastInsertId, err = result.LastInsertId()
+	lastInsertID, err = result.LastInsertId()
 	affectedRow, err = result.RowsAffected()
 	return
 }

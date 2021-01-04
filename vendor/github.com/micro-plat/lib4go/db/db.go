@@ -9,7 +9,7 @@ import (
 //IDB 数据库操作接口,安装可需能需要执行export LD_LIBRARY_PATH=/usr/local/lib
 type IDB interface {
 	IDBExecuter
-	ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error)
+	ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, err error)
 	Begin() (IDBTrans, error)
 	Close()
 }
@@ -23,10 +23,10 @@ type IDBTrans interface {
 
 //IDBExecuter 数据库操作对象集合
 type IDBExecuter interface {
-	Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error)
-	Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error)
-	Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error)
-	Executes(sql string, input map[string]interface{}) (lastInsertId int64, affectedRow int64, query string, args []interface{}, err error)
+	Query(sql string, input map[string]interface{}) (data QueryRows, err error)
+	Scalar(sql string, input map[string]interface{}) (data interface{}, err error)
+	Execute(sql string, input map[string]interface{}) (row int64, err error)
+	Executes(sql string, input map[string]interface{}) (lastInsertID int64, affectedRow int64, err error)
 }
 
 //DB 数据库操作类
@@ -52,42 +52,57 @@ func (db *DB) GetTPL() tpl.ITPLContext {
 }
 
 //Query 查询数据
-func (db *DB) Query(sql string, input map[string]interface{}) (data QueryRows, query string, args []interface{}, err error) {
-	query, args = db.tpl.GetSQLContext(sql, input)
-	data, _, err = db.db.Query(query, args...)
+func (db *DB) Query(sql string, input map[string]interface{}) (data QueryRows, err error) {
+	query, args := db.tpl.GetSQLContext(sql, input)
+	data, err = db.db.Query(query, args...)
+	if err != nil {
+		return nil, getDBError(err, query, args)
+	}
 	return
 }
 
 //Scalar 根据包含@名称占位符的查询语句执行查询语句
-func (db *DB) Scalar(sql string, input map[string]interface{}) (data interface{}, query string, args []interface{}, err error) {
-	query, args = db.tpl.GetSQLContext(sql, input)
-	result, colus, err := db.db.Query(query, args...)
-	if err != nil || len(result) == 0 || len(result[0]) == 0 || len(colus) == 0 {
-		return
+func (db *DB) Scalar(sql string, input map[string]interface{}) (data interface{}, err error) {
+	query, args := db.tpl.GetSQLContext(sql, input)
+	result, err := db.db.Query(query, args...)
+	if err != nil {
+		return nil, getDBError(err, query, args)
 	}
-	data = result[0][colus[0]]
+	if result.Len() == 0 || result[0].Len() == 0 || len(result[0].Keys()) == 0 {
+		return nil, nil
+	}
+	data, _ = result[0].Get(result[0].Keys()[0])
 	return
 }
 
 //Executes 根据包含@名称占位符的语句执行查询语句
-func (db *DB) Executes(sql string, input map[string]interface{}) (insertID int64, row int64, query string, args []interface{}, err error) {
-	query, args = db.tpl.GetSQLContext(sql, input)
+func (db *DB) Executes(sql string, input map[string]interface{}) (insertID int64, row int64, err error) {
+	query, args := db.tpl.GetSQLContext(sql, input)
 	insertID, row, err = db.db.Executes(query, args...)
+	if err != nil {
+		return 0, 0, getDBError(err, query, args)
+	}
 	return
 }
 
 //Execute 根据包含@名称占位符的语句执行查询语句
-func (db *DB) Execute(sql string, input map[string]interface{}) (row int64, query string, args []interface{}, err error) {
-	query, args = db.tpl.GetSQLContext(sql, input)
+func (db *DB) Execute(sql string, input map[string]interface{}) (row int64, err error) {
+	query, args := db.tpl.GetSQLContext(sql, input)
 	row, err = db.db.Execute(query, args...)
+	if err != nil {
+		return 0, getDBError(err, query, args)
+	}
 	return
 }
 
 //ExecuteSP 根据包含@名称占位符的语句执行查询语句
-func (db *DB) ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, query string, err error) {
+func (db *DB) ExecuteSP(procName string, input map[string]interface{}, output ...interface{}) (row int64, err error) {
 	query, args := db.tpl.GetSPContext(procName, input)
 	ni := append(args, output...)
 	row, err = db.db.Execute(query, ni...)
+	if err != nil {
+		return 0, getDBError(err, query, args)
+	}
 	return
 }
 
