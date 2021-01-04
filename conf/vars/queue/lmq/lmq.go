@@ -11,4 +11,4 @@ func New() *LMQ {
 }
 
 //MQ LMQ地址
-const MQ = "lmq://"
+const MQ = "lmq://."
