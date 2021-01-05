@@ -2,7 +2,7 @@ package global
 
 var funcs = make([]func() error, 0, 1)
 
-//OnReady 注册后处理函数，函数将在系统准备好后执行
+//OnReady 系统准备好后稍后执行
 func OnReady(fs ...interface{}) {
 	for _, fn := range fs {
 		nfunc := getFuncs(fn)
@@ -16,7 +16,7 @@ func OnReady(fs ...interface{}) {
 	}
 }
 
-//OnReadying 在列表头部注册处理函数，在系统准备好后执行
+//OnReadying 在系统准备好后首先执行
 func OnReadying(fs ...interface{}) {
 	for _, fn := range fs {
 		nfunc := getFuncs(fn)
