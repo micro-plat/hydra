@@ -117,8 +117,6 @@ github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/leodido/go-urn v1.2.0 h1:hpXL4XnriNwQ/ABnpepYM/1vCLWNDfUNts8dX3xTG6Y=
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
-github.com/lib4dev/cli v1.2.7 h1:EdNfN/CMk2EYqWmxkjBTZNc9dKTzzMC+lpuJSewv5ZA=
-github.com/lib4dev/cli v1.2.7/go.mod h1:4HCmudtF7dMkHp8RoRdLLR76xO9IfITYGERgyFatsx8=
 github.com/lib4dev/cli v1.2.8 h1:ZyaSWY8aizrQ2yXOHYOoSfI+PZ/l2YU43gkHoLeG49U=
 github.com/lib4dev/cli v1.2.8/go.mod h1:4HCmudtF7dMkHp8RoRdLLR76xO9IfITYGERgyFatsx8=
 github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a h1:weJVJJRzAJBFRlAiJQROKQs8oC9vOxvm4rZmBBk0ONw=
@@ -138,6 +136,8 @@ github.com/mholt/archiver v3.1.1+incompatible h1:1dCVxuqs0dJseYEhi5pl7MYPH9zDa1w
 github.com/mholt/archiver v3.1.1+incompatible/go.mod h1:Dh2dOXnSdiLxRiPoVfIr/fI1TwETms9B8CTWfeh7ROU=
 github.com/micro-plat/gmq v1.0.1 h1:ai1PiCEfgBmiqzmZ4iWE3l2Vuz7rOTWOakqRWqi/Hgo=
 github.com/micro-plat/gmq v1.0.1/go.mod h1:93NeUjbgul5ywP+cm4eXERv6Zk0J8zZyrzYrY3q8GVQ=
+github.com/micro-plat/lib4go v1.0.10 h1:2KfLjWIzXiRfugKhgwWtXyC41hwPi64/OORbon3p/vg=
+github.com/micro-plat/lib4go v1.0.10/go.mod h1:svEFcpefzbKSjaRBzv0OWZHWOj6abM0/95c112Yu8/8=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 h1:ZqeYNhU3OHLH3mGKHDcjJRFFRrJa6eAM5H+CtDdOsPc=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 h1:Esafd1046DLDQ0W1YjYsBW+p8U2u7vzgW2SQVmlNazg=
