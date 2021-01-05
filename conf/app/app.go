@@ -19,7 +19,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/server/render"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/conf/vars"
@@ -38,7 +37,6 @@ type IAPPConf interface {
 
 	GetCRONTaskConf() (*task.Tasks, error)
 
-	GetRouterConf() (*router.Routers, error)
 	GetJWTConf() (*jwt.JWTAuth, error)
 	GetHeaderConf() (header.Headers, error)
 	GetMetricConf() (*metric.Metric, error)

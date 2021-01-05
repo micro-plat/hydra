@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
-	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -126,20 +124,4 @@ func (h *Routers) GetPath() []string {
 		list = append(list, v.Path)
 	}
 	return list
-}
-
-//GetConf 设置路由
-func GetConf(cnf conf.IServerConf) (router *Routers, err error) {
-	router = new(Routers)
-	_, err = cnf.GetSubObject(TypeNodeName, router)
-	if err == conf.ErrNoSetting || len(router.Routers) == 0 {
-		return NewRouters(), nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("获取路由(%s)失败:%w", cnf.GetServerPath(), err)
-	}
-	if b, err := govalidator.ValidateStruct(router); !b {
-		return nil, fmt.Errorf("路由(%s)配置有误:%w", cnf.GetServerPath(), err)
-	}
-	return router, nil
 }

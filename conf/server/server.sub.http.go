@@ -14,7 +14,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/static"
 )
 
@@ -24,7 +23,6 @@ type HttpSub struct {
 	jwt       *Loader
 	metric    *Loader
 	static    *Loader
-	router    *Loader
 	apikey    *Loader
 	ras       *Loader
 	basic     *Loader
@@ -42,7 +40,6 @@ func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s.jwt = GetLoader(cnf, s.getJWTConfFunc())
 	s.metric = GetLoader(cnf, s.getMetricConfFunc())
 	s.static = GetLoader(cnf, s.getStaticConfFunc())
-	s.router = GetLoader(cnf, s.getRouterConfFunc())
 	s.apikey = GetLoader(cnf, s.getAPIKeyConfFunc())
 	s.ras = GetLoader(cnf, s.getRasFunc())
 	s.basic = GetLoader(cnf, s.getBasicFunc())
@@ -80,13 +77,6 @@ func (s HttpSub) getMetricConfFunc() func(cnf conf.IServerConf) (interface{}, er
 func (s HttpSub) getStaticConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
 	return func(cnf conf.IServerConf) (interface{}, error) {
 		return static.GetConf(cnf)
-	}
-}
-
-//getRouterConfFunc 获取router配置信息
-func (s HttpSub) getRouterConfFunc() func(cnf conf.IServerConf) (interface{}, error) {
-	return func(cnf conf.IServerConf) (interface{}, error) {
-		return router.GetConf(cnf)
 	}
 }
 
@@ -188,16 +178,6 @@ func (s *HttpSub) GetStaticConf() (*static.Static, error) {
 		return nil, err
 	}
 	return staticObj.(*static.Static), nil
-}
-
-//GetRouterConf 获取路由信息
-func (s *HttpSub) GetRouterConf() (*router.Routers, error) {
-	routerObj, err := s.router.GetConf()
-	if err != nil {
-		return nil, err
-	}
-
-	return routerObj.(*router.Routers), nil
 }
 
 //GetAPIKeyConf 获取apikey配置

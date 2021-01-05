@@ -1,10 +1,7 @@
 package creator
 
 import (
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/rpc"
-	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/services"
 )
 
 type rpcBuilder struct {
@@ -12,11 +9,10 @@ type rpcBuilder struct {
 }
 
 //newHTTP 构建http生成器
-func newRPC(address string, fnGetRouter func(string) *services.ORouter, opts ...rpc.Option) *rpcBuilder {
+func newRPC(address string, opts ...rpc.Option) *rpcBuilder {
 	b := &rpcBuilder{
 		httpBuilder: &httpBuilder{
 			BaseBuilder: make(map[string]interface{}),
-			fnGetRouter: fnGetRouter,
 		},
 	}
 	b.BaseBuilder[ServerMainNodeName] = rpc.New(address, opts...)
@@ -25,10 +21,5 @@ func newRPC(address string, fnGetRouter func(string) *services.ORouter, opts ...
 
 //Load 加载路由
 func (b *rpcBuilder) Load() {
-	routers, err := b.fnGetRouter(global.RPC).GetRouters()
-	if err != nil {
-		panic(err)
-	}
-	b.BaseBuilder[router.TypeNodeName] = routers
 	return
 }

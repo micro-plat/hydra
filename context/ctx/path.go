@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/encoding"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -83,9 +84,10 @@ func (c *rpath) GetEncoding() string {
 
 //GetRouter 获取路由信息
 func (c *rpath) GetRouter() (*router.Router, error) {
-	switch c.appConf.GetServerConf().GetServerType() {
+	tp := c.appConf.GetServerConf().GetServerType()
+	switch tp {
 	case global.API, global.Web, global.WS:
-		routerObj, err := c.appConf.GetRouterConf()
+		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
 			return nil, err
 		}

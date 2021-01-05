@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/api"
@@ -11,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
-	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/assert"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -22,34 +20,14 @@ func TestNew(t *testing.T) {
 		want *conf
 	}{
 		{name: "1. 初始化默认对象", want: &conf{
-			data:         make(map[string]iCustomerBuilder),
-			vars:         make(map[string]map[string]interface{}),
-			routerLoader: services.GetRouter}},
+			data: make(map[string]iCustomerBuilder),
+			vars: make(map[string]map[string]interface{}),
+		}},
 	}
 	for _, tt := range tests {
 		got := New()
 		assert.Equal(t, tt.want.data, got.data, tt.name+",data")
 		assert.Equal(t, tt.want.vars, got.vars, tt.name+",vars")
-		assert.Equal(t, reflect.TypeOf(tt.want.routerLoader), reflect.TypeOf(got.routerLoader), tt.name+",routerLoader")
-	}
-}
-
-func TestNewByLoader(t *testing.T) {
-	tests := []struct {
-		name         string
-		routerLoader func(string) *services.ORouter
-		want         *conf
-	}{
-		{name: "1. 初始化Loader默认对象", routerLoader: func(string) *services.ORouter { return &services.ORouter{} }, want: &conf{
-			data:         make(map[string]iCustomerBuilder),
-			vars:         make(map[string]map[string]interface{}),
-			routerLoader: func(string) *services.ORouter { return &services.ORouter{} }}},
-	}
-	for _, tt := range tests {
-		got := NewByLoader(tt.routerLoader)
-		assert.Equal(t, tt.want.data, got.data, tt.name+",data")
-		assert.Equal(t, tt.want.vars, got.vars, tt.name+",vars")
-		assert.Equal(t, reflect.TypeOf(tt.want.routerLoader), reflect.TypeOf(got.routerLoader), tt.name+",routerLoader")
 	}
 }
 
@@ -85,17 +63,17 @@ func Test_conf_Load(t *testing.T) {
 		want        map[string]iCustomerBuilder
 		wantErr     bool
 	}{
-		{name: "1.1 没有设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress, cuurConfDefault.routerLoader)}, wantErr: true},
-		{name: "1.2 已经设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122", cuurConfAPI.routerLoader)}, wantErr: true},
+		{name: "1.1 没有设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress)}, wantErr: true},
+		{name: "1.2 已经设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122")}, wantErr: true},
 
-		{name: "2.1 没有设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress, cuurConfDefault.routerLoader)}, wantErr: true},
-		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1123", cuurConfWS.routerLoader)}, wantErr: true},
+		{name: "2.1 没有设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}, wantErr: true},
+		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1123")}, wantErr: true},
 
-		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress, cuurConfDefault.routerLoader).Static(static.WithArchive(global.AppName))}, wantErr: true},
-		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1124", cuurConfWEB.routerLoader).Static(static.WithArchive(global.AppName))}, wantErr: true},
+		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithArchive(global.AppName))}, wantErr: true},
+		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1124").Static(static.WithArchive(global.AppName))}, wantErr: true},
 
-		{name: "4.1 没有设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress, cuurConfDefault.routerLoader)}, wantErr: true},
-		{name: "4.2 已经设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1125", cuurConfRPC.routerLoader)}, wantErr: true},
+		{name: "4.1 没有设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress)}, wantErr: true},
+		{name: "4.2 已经设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1125")}, wantErr: true},
 
 		{name: "5.1 没有设置MQC节点,加载默认节点", serverTypes: []string{global.MQC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.MQC: newMQC("redis://192.168.0.101")}, wantErr: true},
 		{name: "5.2 已经设置MQC节点,加载默认节点", serverTypes: []string{global.MQC}, fields: cuurConfMQC, want: map[string]iCustomerBuilder{global.MQC: newMQC("redis://192.168.0.102")}, wantErr: true},
@@ -106,8 +84,8 @@ func Test_conf_Load(t *testing.T) {
 		{name: "7.1 没有设置任何节点", serverTypes: []string{}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{}, wantErr: true},
 		{name: "7.2 已经设置自定义节点节点-test", serverTypes: []string{"test"}, fields: cuurConfCustom, want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置")}, wantErr: true},
 		{name: "7.3 同时加载所有服务节点", serverTypes: []string{global.API, global.WS, global.Web, global.RPC, global.CRON, "test"}, fields: cuurConfAll,
-			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, ":1122", cuurConfAPI.routerLoader), global.WS: newHTTP(global.WS, ":1123", cuurConfWS.routerLoader),
-				global.Web: newHTTP(global.Web, ":1124", cuurConfWEB.routerLoader).Static(static.WithArchive(global.AppName)), global.RPC: newRPC(":1125", cuurConfRPC.routerLoader),
+			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, ":1122"), global.WS: newHTTP(global.WS, ":1123"),
+				global.Web: newHTTP(global.Web, ":1124").Static(static.WithArchive(global.AppName)), global.RPC: newRPC(":1125"),
 				global.MQC: newMQC("redis://192.168.0.102"), global.CRON: newCron()}, wantErr: true},
 	}
 	for _, tt := range tests {
@@ -130,11 +108,11 @@ func Test_conf_Load(t *testing.T) {
 			case global.API, global.WS, global.Web:
 				assert.Equal(t, (tt.want[k].(*httpBuilder)).tp, (tt.fields.data[k].(*httpBuilder)).tp, tt.name+",http-tp")
 				assert.Equal(t, (tt.want[k].(*httpBuilder)).BaseBuilder, (tt.fields.data[k].(*httpBuilder)).BaseBuilder, tt.name+",http-CustomerBuilder")
-				assert.Equal(t, reflect.TypeOf((tt.want[k].(*httpBuilder)).fnGetRouter), reflect.TypeOf((tt.fields.data[k].(*httpBuilder)).fnGetRouter), tt.name+",http-fnGetRouter")
+
 			case global.RPC:
 				assert.Equal(t, (tt.want[k].(*rpcBuilder)).tp, (tt.fields.data[k].(*rpcBuilder)).tp, tt.name+",rpc-tp")
 				assert.Equal(t, (tt.want[k].(*rpcBuilder)).BaseBuilder, (tt.fields.data[k].(*rpcBuilder)).BaseBuilder, tt.name+",rpc-CustomerBuilder")
-				assert.Equal(t, reflect.TypeOf((tt.want[k].(*rpcBuilder)).fnGetRouter), reflect.TypeOf((tt.fields.data[k].(*rpcBuilder)).fnGetRouter), tt.name+",rpc-fnGetRouter")
+
 			case global.MQC:
 				assert.Equal(t, tt.want[k], tt.fields.data[k], tt.name+",mqc-CustomerBuilder")
 			case global.CRON:
@@ -165,11 +143,10 @@ func Test_conf_API(t *testing.T) {
 
 	for _, tt := range tests {
 		cuurConf := New()
-		want := newHTTP(global.API, tt.address, cuurConf.routerLoader, tt.opts...)
+		want := newHTTP(global.API, tt.address, tt.opts...)
 		obj := cuurConf.API(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 
@@ -181,15 +158,14 @@ func Test_conf_GetAPI(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取api配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress, cuurConfDefault.routerLoader)}},
-		{name: "2. 已设置,获取api配置对象", fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122", cuurConfAPI.routerLoader)}},
+		{name: "1. 未设置,获取api配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress)}},
+		{name: "2. 已设置,获取api配置对象", fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122")}},
 	}
 
 	for _, tt := range tests {
 		obj := tt.fields.GetAPI()
 		assert.Equal(t, (tt.want[global.API].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, (tt.want[global.API].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf((tt.want[global.API].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 
@@ -208,12 +184,11 @@ func Test_conf_Web(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		want := newHTTP(global.Web, tt.address, tt.fields.routerLoader, tt.opts...)
+		want := newHTTP(global.Web, tt.address, tt.opts...)
 		want.Static(static.WithArchive(global.AppName))
 		obj := tt.fields.Web(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 
@@ -225,15 +200,15 @@ func Test_conf_GetWeb(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress, cuurConfDefault.routerLoader).Static(static.WithArchive(global.AppName))}},
-		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1122", cuurConfWeb.routerLoader).Static(static.WithArchive(global.AppName))}},
+		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithArchive(global.AppName))}},
+		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1122").Static(static.WithArchive(global.AppName))}},
 	}
 
 	for _, tt := range tests {
 		obj := tt.fields.GetWeb()
 		assert.Equal(t, (tt.want[global.Web].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, (tt.want[global.Web].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf((tt.want[global.Web].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
+
 	}
 }
 
@@ -252,11 +227,10 @@ func Test_conf_WS(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		want := newHTTP(global.WS, tt.address, tt.fields.routerLoader, tt.opts...)
+		want := newHTTP(global.WS, tt.address, tt.opts...)
 		obj := tt.fields.WS(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 
@@ -268,15 +242,15 @@ func Test_conf_GetWS(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress, cuurConfDefault.routerLoader)}},
-		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1122", cuurConfWs.routerLoader)}},
+		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}},
+		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1122")}},
 	}
 
 	for _, tt := range tests {
 		obj := tt.fields.GetWS()
 		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf((tt.want[global.WS].(*httpBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
+
 	}
 }
 
@@ -295,11 +269,10 @@ func Test_conf_RPC(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		want := newRPC(tt.address, tt.fields.routerLoader, tt.opts...)
+		want := newRPC(tt.address, tt.opts...)
 		obj := tt.fields.RPC(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf(want.fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 
@@ -311,15 +284,14 @@ func Test_conf_GetRPC(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取rpc配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress, cuurConfDefault.routerLoader)}},
-		{name: "2. 已设置,获取rpc配置对象", fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1122", cuurConfRPC.routerLoader)}},
+		{name: "1. 未设置,获取rpc配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress)}},
+		{name: "2. 已设置,获取rpc配置对象", fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1122")}},
 	}
 
 	for _, tt := range tests {
 		obj := tt.fields.GetRPC()
 		assert.Equal(t, (tt.want[global.RPC].(*rpcBuilder)).tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, (tt.want[global.RPC].(*rpcBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
-		assert.Equal(t, reflect.TypeOf((tt.want[global.RPC].(*rpcBuilder)).fnGetRouter), reflect.TypeOf(obj.fnGetRouter), tt.name+",fnGetRouter")
 	}
 }
 

@@ -111,7 +111,9 @@ func (w *Responsive) Shutdown() {
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
-	routerObj, err := w.conf.GetRouterConf()
+
+	sr := services.GetRouter(RPC)
+	routerObj, err := sr.GetRouters()
 	if err != nil {
 		return err
 	}
@@ -148,7 +150,8 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
-	router, err := cnf.GetRouterConf()
+	sr := services.GetRouter(RPC)
+	router, err := sr.GetRouters()
 	if err != nil {
 		return nil, err
 	}
