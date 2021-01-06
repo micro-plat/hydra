@@ -126,3 +126,8 @@ func (g *dispCtx) File(name string) {
 func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 	return "", nil, 0, nil
 }
+
+//GetHTTPReqResp 获取http请求与响应对象
+func (g *dispCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
+	return nil, nil
+}

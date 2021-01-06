@@ -31,4 +31,6 @@ type IInnerContext interface {
 	Redirect(int, string)
 	GetService() string
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
+	//GetHTTPReqResp 获取http request,response原生对象
+	GetHTTPReqResp() (*http.Request, http.ResponseWriter)
 }

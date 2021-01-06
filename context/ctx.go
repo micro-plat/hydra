@@ -3,6 +3,7 @@ package context
 import (
 	"context"
 	"io"
+	"net/http"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -138,6 +139,10 @@ type IFile interface {
 
 //IRequest 请求信息
 type IRequest interface {
+
+	//GetHTTPReqResp 获取http request,response原生对象
+	GetHTTPReqResp() (*http.Request, http.ResponseWriter)
+
 	//Path 地址、头、cookie相关信息
 	Path() IPath
 

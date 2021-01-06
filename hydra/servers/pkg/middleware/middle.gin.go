@@ -113,3 +113,8 @@ func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 	}
 	return header.Filename, f, header.Size, nil
 }
+
+//GetHTTPReqResp 获取GetHttpReqResp请求与响应对象
+func (g *ginCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
+	return g.Request, g.Writer
+}
