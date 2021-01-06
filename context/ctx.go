@@ -95,6 +95,7 @@ type IGetter interface {
 
 //IPath 请求参数
 type IPath interface {
+
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
