@@ -385,6 +385,12 @@ func (c *response) GetRawResponse() (int, interface{}, string) {
 	return c.raw.status, c.raw.content, c.raw.contentType
 }
 
+//GetHTTPReponse 获取http response原生对象
+func (c *response) GetHTTPReponse() http.ResponseWriter {
+	_, response := c.ctx.GetHTTPReqResp()
+	return response
+}
+
 //GetFinalResponse 获取响应内容信息
 func (c *response) GetFinalResponse() (int, string, string) {
 	return c.final.status, c.final.content, c.final.contentType

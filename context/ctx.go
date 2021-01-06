@@ -140,8 +140,8 @@ type IFile interface {
 //IRequest 请求信息
 type IRequest interface {
 
-	//GetHTTPReqResp 获取http request,response原生对象
-	GetHTTPReqResp() (*http.Request, http.ResponseWriter)
+	//GetHTTPRequest 获取http request原生对象
+	GetHTTPRequest() *http.Request
 
 	//Path 地址、头、cookie相关信息
 	Path() IPath
@@ -180,6 +180,9 @@ type IRequest interface {
 
 //IResponse 响应信息
 type IResponse interface {
+
+	//GetHTTPReponse 获取http response原生对象
+	GetHTTPReponse() http.ResponseWriter
 
 	//AddSpecial 添加特殊标记，用于在打印响应内容时知道当前请求进行了哪些特殊处理
 	AddSpecial(t string)

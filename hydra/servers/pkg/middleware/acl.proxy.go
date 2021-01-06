@@ -42,7 +42,7 @@ func Proxy() Handler {
 func useProxy(ctx IMiddleContext, cluster *proxy.UpCluster) {
 
 	//检查当前请求
-	req, resp := ctx.Request().GetHTTPReqResp()
+	req := ctx.Request().GetHTTPRequest()
 	if strings.Contains(req.Header.Get("proxy"), ctx.APPConf().GetServerConf().GetServerID()) {
 		ctx.Response().Abort(http.StatusBadGateway, fmt.Errorf("服务多次经过当前服务器 %s", req.Header.Get("proxy")))
 		return
@@ -81,6 +81,7 @@ RETRY:
 	}
 
 	//处理代理服务
+	resp := ctx.Response().GetHTTPReponse()
 	response := newRWriter(resp)
 	rproxy.ServeHTTP(response, req)
 
