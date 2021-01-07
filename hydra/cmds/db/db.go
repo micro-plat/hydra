@@ -48,10 +48,6 @@ func install(c *cli.Context) (err error) {
 		return err
 	}
 
-	if !global.IsDebug {
-		return fmt.Errorf("此命令只能在debug模式下才能运行")
-	}
-
 	//2. 获取执行参数
 	sqls := global.Installer.DB.GetSQLs()
 	handlers := global.Installer.DB.GetHandlers()
