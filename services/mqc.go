@@ -87,11 +87,11 @@ func (c *mqc) notify() {
 		case <-global.Current().ClosingNotify():
 			return
 		case <-c.signalChan:
-			// c.lock.Lock() 发送消息无须加锁
+			c.lock.Lock()
 			for _, e := range c.subscribers {
 				c.sendNow(e) //向订阅者推送消息
 			}
-			// c.lock.Unlock()
+			c.lock.Unlock()
 		}
 	}
 }
