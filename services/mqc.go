@@ -58,17 +58,21 @@ func (c *mqc) Remove(mqName string, service string) IMQC {
 
 //Subscribe 订阅任务
 func (c *mqc) Subscribe(f func(t *queue.Queue)) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
 	subscriber := &mqcSubscriber{
 		callback:  f,
 		queueChan: make(chan *queue.Queue, len(c.dynamicQueues.Queues)+100),
 	}
+
+	//锁定消息与订阅者，避免消息丢失
+	c.lock.Lock()
 	for _, t := range c.dynamicQueues.Queues {
 		subscriber.queueChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
-	c.signalChan <- struct{}{}
+	c.lock.Unlock()
+
+	//立即向订阅者推送消息
+	c.sendNow(subscriber)
 }
 
 //GetTasks 获取任务列表
@@ -85,17 +89,22 @@ func (c *mqc) notify() {
 		case <-c.signalChan:
 			c.lock.Lock()
 			for _, e := range c.subscribers {
-			SUBFOR:
-				for {
-					select {
-					case t := <-e.queueChan:
-						e.callback(t)
-					default:
-						break SUBFOR
-					}
-				}
+				c.sendNow(e) //向订阅者推送消息
 			}
 			c.lock.Unlock()
+		}
+	}
+}
+
+//sendNow 向订阅者推送消息
+func (c *mqc) sendNow(e *mqcSubscriber) {
+SUBFOR:
+	for {
+		select {
+		case t := <-e.queueChan:
+			e.callback(t)
+		default:
+			break SUBFOR
 		}
 	}
 }
