@@ -1,3 +1,5 @@
+// +build !prod
+
 package db
 
 import (
