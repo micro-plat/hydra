@@ -94,17 +94,19 @@ func (c *cron) Remove(cron string, service string) ICRON {
 
 //Subscribe 订阅任务
 func (c *cron) Subscribe(callback func(t *task.Task)) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+
 	subscriber := &subscriber{
 		callback: callback,
 		taskChan: make(chan *task.Task, 255),
 	}
+	c.lock.Lock()
 	for _, t := range c.dynamicTasks.Tasks {
 		subscriber.taskChan <- t
 	}
 	c.subscribers = append(c.subscribers, subscriber)
-	c.signalChan <- struct{}{}
+
+	c.lock.Unlock()
+	c.sendNow(subscriber)
 }
 
 //notify 通知任务
@@ -114,19 +116,22 @@ func (c *cron) notify() {
 		case <-global.Current().ClosingNotify():
 			return
 		case <-c.signalChan:
-			c.lock.Lock()
 			for _, e := range c.subscribers {
-			SUBFOR:
-				for {
-					select {
-					case t := <-e.taskChan:
-						e.callback(t)
-					default:
-						break SUBFOR
-					}
-				}
+				c.sendNow(e)
 			}
-			c.lock.Unlock()
+		}
+	}
+}
+
+//sendNow 向订阅者推送消息
+func (c *cron) sendNow(e *subscriber) {
+SUBFOR:
+	for {
+		select {
+		case t := <-e.taskChan:
+			e.callback(t)
+		default:
+			break SUBFOR
 		}
 	}
 }
