@@ -8,7 +8,7 @@ type option struct {
 	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
 	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
 	Host      string `json:"host,omitempty" toml:"host,omitempty"`
-	Domain    string `json:"dn,omitempty" toml:"dn,omitempty"`
+	Domain    string `json:"dns,omitempty" toml:"dns,omitempty"`
 	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
