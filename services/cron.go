@@ -116,9 +116,11 @@ func (c *cron) notify() {
 		case <-global.Current().ClosingNotify():
 			return
 		case <-c.signalChan:
+			c.lock.Lock()
 			for _, e := range c.subscribers {
 				c.sendNow(e)
 			}
+			c.lock.Unlock()
 		}
 	}
 }
