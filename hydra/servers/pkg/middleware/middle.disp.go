@@ -36,7 +36,11 @@ func (g *dispCtx) GetRouterPath() string {
 	return g.Context.Request.GetName()
 }
 func (g *dispCtx) GetParams() map[string]interface{} {
-	return nil
+	params := make(map[string]interface{})
+	for _, v := range g.Context.Params {
+		params[v.Key] = v.Value
+	}
+	return params
 }
 func (g *dispCtx) GetBody() io.ReadCloser {
 	text := g.Request.GetForm()["__body__"]
