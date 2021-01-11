@@ -49,10 +49,11 @@ func (r *Request) Request(service string, input interface{}, opts ...rpc.Request
 	//处理链路跟踪
 	nopts := make([]rpc.RequestOption, 0, 2)
 	nopts = append(nopts, opts...)
-	nopts = append(opts, rpc.WithTraceID(global.RID.GetXRequestID()))
+
+	nopts = append(opts, rpc.WithTraceID(rc.Current().User().GetTraceID()))
 
 	//发送请求
-	return r.RequestByCtx(context.Background(), service, input, opts...)
+	return r.RequestByCtx(context.Background(), service, input, nopts...)
 }
 
 //Swap 将当前请求参数作为RPC参数并发送RPC请求
