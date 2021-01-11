@@ -272,8 +272,8 @@ type IUser interface {
 	//GetClientIP 获取客户端请求IP
 	GetClientIP() string
 
-	//GetRequestID 获取请求编号
-	GetRequestID() string
+	//GetTraceID 获取链路跟踪编号
+	GetTraceID() string
 
 	//Auth 认证信息
 	Auth() IAuth

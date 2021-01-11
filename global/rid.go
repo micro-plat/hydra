@@ -20,11 +20,6 @@ func (i *rid) GetXRequestID() string {
 	return v.(string)
 }
 
-//Add 添加新编号
-func (i *rid) Add(nid string) {
-	i.cache.Set(GetGoroutineID(), nid)
-}
-
 //Remove 移除当前用户编号
 func (i *rid) Remove() {
 	i.cache.Remove(GetGoroutineID())

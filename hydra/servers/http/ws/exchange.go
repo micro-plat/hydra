@@ -75,7 +75,7 @@ func (e *Exchange) Notify(uuid string, msg interface{}) error {
 
 //handle 业务回调处理
 func (e *Exchange) handle(ctx context.IContext) interface{} {
-	uuid := ctx.User().GetRequestID()
+	uuid := ctx.User().GetTraceID()
 	v, ok := e.uuid.Get(uuid)
 	if !ok {
 		return errs.NewError(http.StatusNoContent, nil)

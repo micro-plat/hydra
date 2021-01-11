@@ -50,7 +50,7 @@ func useProxy(ctx IMiddleContext, cluster *proxy.UpCluster) {
 
 	req.Header.Set("proxy", fmt.Sprintf("%s|%s", req.Header.Get("proxy"), ctx.APPConf().GetServerConf().GetServerID()))
 	if req.Header.Get("X-Request-Id") == "" {
-		req.Header.Set("X-Request-Id", ctx.User().GetRequestID())
+		req.Header.Set("X-Request-Id", ctx.User().GetTraceID())
 	}
 
 	//处理重试问题

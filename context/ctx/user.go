@@ -4,16 +4,17 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 var _ context.IUser = &user{}
 
 type user struct {
 	conf.IMeta
-	ctx       context.IInnerContext
-	requestID string
-	auth      *Auth
-	jwtToken  interface{}
+	ctx      context.IInnerContext
+	traceID  string
+	auth     *Auth
+	jwtToken interface{}
 }
 
 //NewUser 用户信息
@@ -24,15 +25,16 @@ func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 		IMeta: meta,
 	}
 	if ids, ok := ctx.GetHeaders()[context.XRequestID]; ok && len(ids) > 0 && ids[0] != "" {
-		global.RID.Add(ids[0])
+		u.traceID = ids[0]
+	} else {
+		u.traceID = utility.GetGUID()[:9]
 	}
-	u.requestID = global.RID.GetXRequestID()
 	return u
 }
 
-//GetRequestID 获取请求编号
-func (c *user) GetRequestID() string {
-	return c.requestID
+//GetTraceID 获取链路跟踪编号
+func (c *user) GetTraceID() string {
+	return c.traceID
 }
 
 //GetUserName 获取用户名(basic认证启动后有效)

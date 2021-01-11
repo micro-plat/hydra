@@ -72,8 +72,8 @@ func WithHost(s ...string) RequestOption {
 	}
 }
 
-//WithXRequestID 设置请求编号
-func WithXRequestID(s string) RequestOption {
+//WithTraceID 设置链路跟踪编号
+func WithTraceID(s string) RequestOption {
 	return func(o *requestOption) {
 		o.headers["X-Request-Id"] = s
 	}

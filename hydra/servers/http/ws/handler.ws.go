@@ -27,9 +27,9 @@ func WSExecuteHandler(service string) middleware.Handler {
 		}
 
 		//构建处理函数
-		h := newWSHandler(conn, ctx.User().GetRequestID(), ctx.User().GetClientIP())
-		exchange.Subscribe(ctx.User().GetRequestID(), h.recvNotify(c))
-		defer exchange.Unsubscribe(ctx.User().GetRequestID())
+		h := newWSHandler(conn, ctx.User().GetTraceID(), ctx.User().GetClientIP())
+		exchange.Subscribe(ctx.User().GetTraceID(), h.recvNotify(c))
+		defer exchange.Unsubscribe(ctx.User().GetTraceID())
 
 		//异步读取与写入
 		go h.readPump()

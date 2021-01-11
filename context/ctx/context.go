@@ -53,10 +53,10 @@ func NewCtx(c context.IInnerContext, tp string) *Ctx {
 	ctx.user = NewUser(c, ctx.meta)
 	context.Cache(ctx)
 	ctx.request = NewRequest(c, ctx.appConf, ctx.meta)
-	ctx.log = logger.GetSession(ctx.appConf.GetServerConf().GetServerName(), ctx.User().GetRequestID())
+	ctx.log = logger.GetSession(ctx.appConf.GetServerConf().GetServerName(), ctx.User().GetTraceID())
 	ctx.response = NewResponse(c, ctx.appConf, ctx.log, ctx.meta)
 	timeout := time.Duration(ctx.appConf.GetServerConf().GetMainConf().GetInt("", 30))
-	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetRequestID()), time.Second*timeout)
+	ctx.ctx, ctx.cancelFunc = r.WithTimeout(r.WithValue(r.Background(), "X-Request-Id", ctx.user.GetTraceID()), time.Second*timeout)
 	ctx.tracer = newTracer(c.GetURL().Path, ctx.log, ctx.appConf)
 	return ctx
 }
