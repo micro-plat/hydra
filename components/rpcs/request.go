@@ -49,9 +49,9 @@ func (r *Request) Request(service string, input interface{}, opts ...rpc.Request
 	//处理链路跟踪
 	nopts := make([]rpc.RequestOption, 0, 2)
 	nopts = append(nopts, opts...)
-
-	nopts = append(opts, rpc.WithTraceID(rc.Current().User().GetTraceID()))
-
+	if ctx, ok := rc.GetContext(); ok {
+		nopts = append(opts, rpc.WithTraceID(ctx.User().GetTraceID()))
+	}
 	//发送请求
 	return r.RequestByCtx(context.Background(), service, input, nopts...)
 }
@@ -100,6 +100,10 @@ func (r *Request) RequestByCtx(ctx context.Context, service string, input interf
 	nopts = append(nopts, opts...)
 	if reqid := types.GetString(ctx.Value(rc.XRequestID)); reqid != "" {
 		nopts = append(nopts, rpc.WithTraceID(reqid))
+	} else {
+		if ctx, ok := rc.GetContext(); ok {
+			nopts = append(opts, rpc.WithTraceID(ctx.User().GetTraceID()))
+		}
 	}
 	fm := pkgs.GetString(input)
 	return client.RequestByString(ctx, rservice, fm, nopts...)

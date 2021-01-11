@@ -38,7 +38,9 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		req.Header.Set(i, strings.Join(v, ","))
 	}
 
-	req.Header.Set(context.XRequestID, context.Current().User().GetTraceID())
+	if ctx, ok := context.GetContext(); ok {
+		req.Header.Set(context.XRequestID, ctx.User().GetTraceID())
+	}
 	c.Response, err = c.client.Do(req)
 	if c.Response != nil {
 		defer c.Response.Body.Close()

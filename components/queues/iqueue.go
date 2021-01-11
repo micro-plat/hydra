@@ -35,7 +35,9 @@ func (q *queue) Send(key string, value interface{}, requestID ...string) error {
 	if len(requestID) > 0 {
 		hd = append(hd, context.XRequestID, requestID[0])
 	} else {
-		hd = append(hd, context.XRequestID, global.RID.GetXRequestID())
+		if ctx, ok := context.GetContext(); ok {
+			hd = append(hd, context.XRequestID, ctx.User().GetTraceID())
+		}
 	}
 	return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(value, hd...))
 }
