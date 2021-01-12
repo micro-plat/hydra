@@ -11,7 +11,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx/internal"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/services"
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -102,19 +102,19 @@ func (c *Ctx) Tracer() context.ITracer {
 }
 
 //Invoke 调用本地服务
-func (c *Ctx) Invoke(service string) interface{} {
+func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	proto, addr, err := global.ParseProto(service)
 	if err != nil {
 		c.Log().Errorf("调用服务出错:%s,%+v", service, err)
-		return err
+		return pkgs.NewRspns(err)
 	}
 	switch proto {
 	case global.ProtoRPC:
 		return internal.CallRPC(c, addr)
 	case global.ProtoInvoker:
-		return services.Def.Call(c, addr)
+		return pkgs.NewRspns(Def.Call(c, addr))
 	}
-	return fmt.Errorf("不支持%s的服务调用%s", proto, service)
+	return pkgs.NewRspns(fmt.Errorf("不支持%s的服务调用%s", proto, service))
 
 }
 

@@ -3,9 +3,9 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/components/rpcs/balancer"
@@ -56,7 +56,7 @@ func NewClientByConf(address, plat, service string, conf *rpcconf.RPCConf) (*Cli
 }
 
 //Request 发送Request请求
-func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error) {
+func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *pkgs.Rspns, err error) {
 	//处理可选参数
 	buff, err := json.Marshal(form)
 	if err != nil {
@@ -70,7 +70,7 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 }
 
 //RequestByString 发送Request请求
-func (c *Client) RequestByString(ctx context.Context, service string, form string, opts ...RequestOption) (res *Response, err error) {
+func (c *Client) RequestByString(ctx context.Context, service string, form string, opts ...RequestOption) (res *pkgs.Rspns, err error) {
 	//处理可选参数
 	o := newOption()
 	for _, opt := range opts {
@@ -79,9 +79,9 @@ func (c *Client) RequestByString(ctx context.Context, service string, form strin
 	o.service = service
 	response, err := c.clientRequest(ctx, o, form)
 	if err != nil {
-		return NewResponseByStatus(http.StatusInternalServerError, err), err
+		return pkgs.NewRspns(err), err
 	}
-	return NewResponse(int(response.Status), response.GetHeader(), response.GetResult()), err
+	return pkgs.NewRspnsByHD(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 
 //Close 关闭RPC客户端连接

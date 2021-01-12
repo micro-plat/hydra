@@ -7,6 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -25,7 +26,7 @@ type BasicAuth struct {
 	Members         map[string]string `json:"members,omitempty" toml:"members,omitempty"`
 	Disable         bool              `json:"disable,omitempty" toml:"disable,omitempty"`
 	Invoker         string            `json:"invoker,omitempty" toml:"invoker,omitempty"`
-	invoker         *conf.Invoker     `json:"-"`
+	invoker         *pkgs.Invoker     `json:"-"`
 	*conf.PathMatch `json:"-"`
 	authorization   []*auth `json:"-"`
 }
@@ -41,14 +42,14 @@ func NewBasic(opts ...Option) *BasicAuth {
 	}
 	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
-	basic.invoker = conf.NewInvoker(basic.Invoker)
+	basic.invoker = pkgs.NewInvoker(basic.Invoker)
 	return basic
 }
 
 //Verify 验证用户信息
-func (b *BasicAuth) Verify(authValue string, i conf.FnInvoker) (string, bool) {
-	if ok, r, err := b.invoker.CheckAndInvoke(i); ok {
-		return types.DecodeString(err, nil, types.GetString(r), ""), err == nil
+func (b *BasicAuth) Verify(authValue string, i pkgs.FnInvoker) (string, bool) {
+	if ok, r := b.invoker.CheckAndInvoke(i); ok {
+		return types.DecodeString(r.GetError(), nil, types.GetString(r), ""), r.GetError() == nil
 	}
 	for _, pair := range b.authorization {
 		if pair.auth == authValue {
@@ -78,6 +79,6 @@ func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	}
 	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
-	basic.invoker = conf.NewInvoker(basic.Invoker)
+	basic.invoker = pkgs.NewInvoker(basic.Invoker)
 	return &basic, nil
 }
