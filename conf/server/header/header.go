@@ -1,6 +1,7 @@
 package header
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -84,7 +85,7 @@ func (h Headers) hasCross(origin string) bool {
 //GetConf 设置header
 func GetConf(cnf conf.IServerConf) (header Headers, err error) {
 	rawConf, err := cnf.GetSubConf(TypeNodeName)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return Headers{}, nil
 	}
 	if err != nil {

@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
@@ -62,7 +63,7 @@ func (g *Proxy) Check() (*UpCluster, bool, error) {
 //GetConf 获取Proxy
 func GetConf(cnf conf.IServerConf) (*Proxy, error) {
 	script, err := cnf.GetSubConf(registry.Join(ParNodeName, SubNodeName))
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &Proxy{Disable: true}, nil
 	}
 	if err != nil {

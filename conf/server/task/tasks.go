@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -53,7 +54,7 @@ func (t *Tasks) Append(tasks ...*Task) (*Tasks, []*Task) {
 func GetConf(cnf conf.IServerConf) (tasks *Tasks, err error) {
 	tasks = &Tasks{}
 	_, err = cnf.GetSubObject(TypeNodeName, tasks)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &Tasks{}, nil
 	}
 	if err != nil {

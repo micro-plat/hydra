@@ -1,6 +1,7 @@
 package whitelist
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -53,7 +54,7 @@ func (w *WhiteList) IsAllow(path string, ip string) bool {
 func GetConf(cnf conf.IServerConf) (*WhiteList, error) {
 	ip := WhiteList{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &ip)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &WhiteList{Disable: true}, nil
 	}
 	if err != nil {

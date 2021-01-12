@@ -1,6 +1,7 @@
 package static
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -67,7 +68,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	//设置静态文件路由
 	static := newStatic()
 	_, err := cnf.GetSubObject(TypeNodeName, static)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		static.Disable = true
 		return static, nil
 	}

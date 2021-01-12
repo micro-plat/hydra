@@ -6,6 +6,7 @@
 package limiter
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -66,7 +67,7 @@ func (l *Limiter) GetLimiter(path string) (bool, *Rule) {
 func GetConf(cnf conf.IServerConf) (*Limiter, error) {
 	limiter := &Limiter{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), limiter)
-	if err == conf.ErrNoSetting || len(limiter.Rules) == 0 {
+	if errors.Is(err, conf.ErrNoSetting) || len(limiter.Rules) == 0 {
 		return &Limiter{Disable: true}, nil
 	}
 	if err != nil {

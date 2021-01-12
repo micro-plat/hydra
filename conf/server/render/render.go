@@ -1,6 +1,7 @@
 package render
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
@@ -27,7 +28,7 @@ type Render struct {
 //GetConf 设置GetRender配置
 func GetConf(cnf conf.IServerConf) (rsp *Render, err error) {
 	script, err := cnf.GetSubConf(TypeNodeName)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &Render{Disable: true}, nil
 	}
 	if err != nil {

@@ -1,6 +1,7 @@
 package ras
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -45,7 +46,7 @@ func GetConf(cnf conf.IServerConf) (auths *RASAuth, err error) {
 	auths = &RASAuth{}
 	//设置Remote安全认证参数
 	_, err = cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), auths)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		auths.Disable = true
 		return auths, nil
 	}

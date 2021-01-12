@@ -1,6 +1,7 @@
 package mqc
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -50,7 +51,7 @@ func GetConf(cnf conf.IServerConf) (*Server, error) {
 
 	_, err := cnf.GetMainObject(&s)
 
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}
 	if err != nil {

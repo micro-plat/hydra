@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
@@ -54,7 +55,7 @@ func NewByRaw(raw string) *Redis {
 //GetConf GetConf
 func GetConf(varConf conf.IVarConf, name string) (redis *Redis, err error) {
 	js, err := varConf.GetConf("redis", name)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("未配置：/var/redis/%s", name)
 	}
 	if err != nil {

@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
@@ -24,7 +25,7 @@ func NewPackage(url string, version string, crc32 uint32) *Package {
 //GetConf 获取配置信息
 func GetConf(cnf conf.IServerConf) (pkg *Package, err error) {
 	_, err = cnf.GetSubObject("package", &pkg)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("/%s/package :%w", cnf.GetServerPath(), err)
 	}
 	if err != nil {

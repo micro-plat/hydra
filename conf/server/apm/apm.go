@@ -1,6 +1,7 @@
 package apm
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -36,7 +37,7 @@ func New(address string, opts ...Option) *APM {
 func GetConf(cnf conf.IServerConf) (apm *APM, err error) {
 	apm = &APM{}
 	_, err = cnf.GetSubObject(TypeNodeName, apm)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		apm.Disable = true
 		return apm, nil
 	}

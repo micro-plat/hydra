@@ -3,6 +3,7 @@ package apikey
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -93,7 +94,7 @@ func (a *APIKeyAuth) Verify(raw string, sign string, invoke conf.FnInvoker) erro
 func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	f := APIKeyAuth{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &f)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &APIKeyAuth{Disable: true, PathMatch: conf.NewPathMatch()}, nil
 	}
 	if err != nil {

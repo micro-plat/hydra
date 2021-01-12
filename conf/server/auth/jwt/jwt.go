@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -123,7 +124,7 @@ func (j *JWTAuth) GetExpireTime() string {
 func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &jwt)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &JWTAuth{Disable: true}, nil
 	}
 	if err != nil {

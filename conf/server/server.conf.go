@@ -70,7 +70,7 @@ func (c *ServerConf) GetSubConf(name string) (*conf.RawConf, error) {
 		return &v, nil
 	}
 
-	return nil, conf.ErrNoSetting
+	return nil, fmt.Errorf("%s %w", name, conf.ErrNoSetting)
 }
 
 //GetClusterNames 获取所有当前服务器下所有集群名称

@@ -1,12 +1,14 @@
 package basic
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
-	"strconv"
 )
 
 const (
@@ -65,7 +67,7 @@ func (b *BasicAuth) GetRealm() string {
 func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	basic := BasicAuth{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &basic)
-	if err == conf.ErrNoSetting || len(basic.Members) == 0 {
+	if errors.Is(err, conf.ErrNoSetting) || len(basic.Members) == 0 {
 		return &BasicAuth{Disable: true}, nil
 	}
 	if err != nil {

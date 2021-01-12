@@ -1,6 +1,7 @@
 package blacklist
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -43,7 +44,7 @@ func (w *BlackList) IsDeny(ip string) bool {
 func GetConf(cnf conf.IServerConf) (*BlackList, error) {
 	ip := BlackList{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &ip)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return &BlackList{Disable: true}, nil
 	}
 	if err != nil {

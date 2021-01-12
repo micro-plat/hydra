@@ -1,6 +1,7 @@
 package metric
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -41,7 +42,7 @@ func New(host string, db string, cron string, opts ...Option) *Metric {
 func GetConf(cnf conf.IServerConf) (metric *Metric, err error) {
 	metric = &Metric{}
 	_, err = cnf.GetSubObject(TypeNodeName, metric)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		metric.Disable = true
 		return metric, nil
 	}

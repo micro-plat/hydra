@@ -2,6 +2,7 @@ package rlog
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
@@ -85,7 +86,7 @@ func GetConf(cnf conf.IVarConf) (s *Layout, err error) {
 	if err != nil && err != conf.ErrNoSetting {
 		return nil, fmt.Errorf("读取./var/%s/%s 配置发生错误 %w", TypeNodeName, LogName, err)
 	}
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		s.Disable = true
 		return s, nil
 	}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/micro-plat/lib4go/types"
@@ -125,7 +126,7 @@ func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	}
 	s = &Server{}
 	_, err = cnf.GetMainObject(s)
-	if err == conf.ErrNoSetting {
+	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}
 	if err != nil {
