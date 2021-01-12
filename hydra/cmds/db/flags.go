@@ -1,4 +1,4 @@
-// +build !prod
+// +build dev
 
 package db
 
