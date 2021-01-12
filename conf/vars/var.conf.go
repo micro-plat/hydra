@@ -96,7 +96,7 @@ func (c *VarConf) GetConf(tp string, name string) (*conf.RawConf, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return &v, nil
 	}
-	return conf.EmptyRawConf, conf.ErrNoSetting
+	return conf.EmptyRawConf, fmt.Errorf("%s %w", registry.Join(tp, name), conf.ErrNoSetting)
 }
 
 //GetConfVersion 获取配置的版本号
@@ -104,7 +104,7 @@ func (c *VarConf) GetConfVersion(tp string, name string) (int32, error) {
 	if v, ok := c.varNodeConfs[registry.Join(tp, name)]; ok {
 		return v.GetVersion(), nil
 	}
-	return 0, conf.ErrNoSetting
+	return 0, fmt.Errorf("%s %w", registry.Join(tp, name), conf.ErrNoSetting)
 }
 
 //GetObject 获取子配置信息
