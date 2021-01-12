@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/net"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //APIKeyAuth 静态密钥验证
@@ -61,7 +62,7 @@ func getSecret(ctx context.IContext, auth *apikey.APIKeyAuth) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		secret = response.Result
+		secret = types.GetString(response.GetResult())
 	}
 	return "", fmt.Errorf("apikey不支持协议%s", proto)
 }

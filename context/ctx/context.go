@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/context/ctx/internal"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/pkgs"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -112,7 +113,7 @@ func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	case global.ProtoRPC:
 		return internal.CallRPC(c, addr)
 	case global.ProtoInvoker:
-		return pkgs.NewRspns(Def.Call(c, addr))
+		return pkgs.NewRspns(services.Def.Call(c, addr))
 	}
 	return pkgs.NewRspns(fmt.Errorf("不支持%s的服务调用%s", proto, service))
 

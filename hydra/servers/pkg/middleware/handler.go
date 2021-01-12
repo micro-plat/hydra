@@ -21,10 +21,10 @@ func ExecuteHandler(service string) Handler {
 		if addr, ok := global.IsProto(service, global.ProtoRPC); ok {
 			response, err := components.Def.RPC().GetRegularRPC().Swap(addr, ctx)
 			if err != nil {
-				ctx.Response().Write(response.Status, err)
+				ctx.Response().Write(response.GetStatus(), err)
 				return
 			}
-			ctx.Response().Write(response.Status, response.Result)
+			ctx.Response().Write(response.GetStatus(), response.GetResult())
 			return
 		}
 
