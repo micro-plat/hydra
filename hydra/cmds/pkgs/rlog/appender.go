@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/components"
+	"github.com/micro-plat/hydra/components/rpcs/rpc"
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -105,7 +106,11 @@ func (f *RPCAppender) writeNow() (err error) {
 			err = fmt.Errorf("json.compact.err:%v", err)
 			return 0, err
 		}
-		_, err = components.Def.RPC().GetRegularRPC().Request(f.service, buff.Bytes())
+		_, err = components.Def.RPC().GetRegularRPC().Request(
+			f.service,
+			buff.Bytes(),
+			rpc.WithHeader("plat", global.Def.PlatName),
+			rpc.WithHeader("system", global.Def.SysName))
 		if err != nil {
 			return 0, fmt.Errorf("rlog写入日志失败 %s %w", f.service, err)
 		}
