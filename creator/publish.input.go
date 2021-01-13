@@ -192,7 +192,10 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	//处理多个数据值问题
 	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
 		validTagName := tfield.Tag.Get("valid")
-		if isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) { //验证为必须参数才设置一个空元素，并引导用户填入
+		if !isRequire(validTagName) {
+			return nil
+		}
+		if !vfield.IsValid() || vfield.IsZero() { //验证为必须参数才设置一个空元素，并引导用户填入
 			t := tfield.Type.Elem()
 			if t.Kind() == reflect.Ptr {
 				t = t.Elem()
@@ -202,8 +205,6 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 				initializeStruct(t, v.Elem())
 				vfield.Set(reflect.Append(vfield, v))
 			}
-		} else {
-			return nil
 		}
 	}
 
