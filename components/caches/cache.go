@@ -39,7 +39,7 @@ func (s *StandardCache) GetRegularCache(names ...string) (c ICache) {
 //GetCache 获取缓存操作对象
 func (s *StandardCache) GetCache(names ...string) (c ICache, err error) {
 	name := types.GetStringByIndex(names, 0, cacheNameNode)
-	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(cacheTypeNode, name, func(conf *conf.RawConf, keys ...string) (interface{}, error) {
 		if conf.IsEmpty() {
 			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", cacheTypeNode, name)
 		}

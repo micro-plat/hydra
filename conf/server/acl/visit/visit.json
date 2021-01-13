@@ -1,0 +1,21 @@
+[
+    {
+        "page": "/trade/order",
+        "api": [
+            {
+                "path": "/order/**",
+                "method":"GET",
+                "tags": []
+            }
+        ]
+    },
+    {
+        "page": "/trade/delivery",
+        "api": [
+            {
+                "path": "/order/**",
+                "tags": ["view"]
+            }
+        ]
+    }
+]

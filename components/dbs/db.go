@@ -41,7 +41,7 @@ func (s *StandardDB) GetRegularDB(names ...string) (d IDB) {
 //GetDB 获取数据库操作对象
 func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 	name := types.GetStringByIndex(names, 0, dbNameNode)
-	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(conf *conf.RawConf) (obj interface{}, err error) {
+	obj, err := s.c.GetOrCreate(dbTypeNode, name, func(conf *conf.RawConf, keys ...string) (obj interface{}, err error) {
 		if conf.IsEmpty() {
 			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", dbTypeNode, name)
 		}
