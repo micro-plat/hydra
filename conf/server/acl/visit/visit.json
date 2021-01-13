@@ -4,7 +4,7 @@
         "api": [
             {
                 "path": "/order/**",
-                "method":"GET",
+                "method":["GET"],
                 "tags": []
             }
         ]
