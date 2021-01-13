@@ -25,9 +25,9 @@ func TestContainer_GetOrCreate(t *testing.T) {
 	type args struct {
 		typ     string
 		name    string
-		creator func(conf *conf.RawConf) (interface{}, error)
+		creator func(conf *conf.RawConf, keys ...string) (interface{}, error)
 	}
-	creator := func(conf *conf.RawConf) (interface{}, error) {
+	creator := func(conf *conf.RawConf, keys ...string) (interface{}, error) {
 		return nil, nil
 	}
 	tests := []struct {

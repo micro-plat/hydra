@@ -36,7 +36,7 @@ func (s *StandardQueue) GetRegularQueue(names ...string) (c IQueue) {
 //GetQueue GetQueue
 func (s *StandardQueue) GetQueue(names ...string) (q IQueue, err error) {
 	name := types.GetStringByIndex(names, 0, queueNameNode)
-	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(queueTypeNode, name, func(conf *conf.RawConf, keys ...string) (interface{}, error) {
 		if conf.IsEmpty() {
 			return nil, fmt.Errorf("节点/%s/%s未配置，或不可用", queueTypeNode, name)
 		}

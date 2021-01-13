@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -18,7 +19,7 @@ type ICloser interface {
 
 //IContainer 组件容器
 type IContainer interface {
-	GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error)
+	GetOrCreate(typ string, name string, creator func(conf *conf.RawConf, keys ...string) (interface{}, error), keys ...string) (interface{}, error)
 	ICloser
 }
 
@@ -40,7 +41,7 @@ func NewContainer() *Container {
 }
 
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
-func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf) (interface{}, error)) (interface{}, error) {
+func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf, keys ...string) (interface{}, error), keys ...string) (interface{}, error) {
 
 	//1. 获取配置信息
 	varConf, err := app.Cache.GetVarConf()
@@ -56,15 +57,19 @@ func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf
 	}
 
 	//2. 根据配置创建组件
-	key := fmt.Sprintf("%s_%s_%d", typ, name, jconf.GetVersion())
+	key := fmt.Sprintf("%s_%s_%s_%d", typ, name, strings.Join(keys, "_"), jconf.GetVersion())
 	_, obj, err := c.cache.SetIfAbsentCb(key, func(i ...interface{}) (interface{}, error) {
-		v, err := creator(i[0].(*conf.RawConf))
+		nkeys := []string{}
+		if len(i) > 1 {
+			nkeys = i[1].([]string)
+		}
+		v, err := creator(i[0].(*conf.RawConf), nkeys...)
 		if err != nil {
 			return nil, err
 		}
-		c.histories.Add(fmt.Sprintf("%s_%s", typ, name), key)
+		c.histories.Add(fmt.Sprintf("%s_%s_%s", typ, name, strings.Join(keys, "_")), key)
 		return v, nil
-	}, jconf)
+	}, jconf, keys)
 	return obj, err
 }
 

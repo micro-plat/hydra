@@ -37,7 +37,7 @@ func (s *StandardRPC) GetRegularRPC(names ...string) (c IRequest) {
 //GetRPC 获取缓存操作对象
 func (s *StandardRPC) GetRPC(names ...string) (c IRequest, err error) {
 	name := types.GetStringByIndex(names, 0, rpcconf.RPCNameNode)
-	v, err := s.c.GetOrCreate(rpcconf.RPCTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
+	v, err := s.c.GetOrCreate(rpcconf.RPCTypeNode, name, func(conf *conf.RawConf, keys ...string) (interface{}, error) {
 		if conf.IsEmpty() {
 			return NewRequest(0, rpcconf.New()), nil
 		}
