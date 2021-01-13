@@ -115,7 +115,7 @@ func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	case global.ProtoInvoker:
 		return services.Def.Invoke(c, addr)
 	}
-	return pkgs.NewRspns(fmt.Errorf("不支持%s的服务调用%s", proto, service))
+	return pkgs.NewRspns(fmt.Errorf("不支持服务类型%s(%s)", proto, service))
 }
 
 //Close 关闭并释放所有资源
