@@ -106,7 +106,7 @@ func (c *Ctx) Tracer() context.ITracer {
 func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	proto, addr, err := global.ParseProto(service)
 	if err != nil {
-		c.Log().Errorf("调用服务出错:%s,%+v", service, err)
+		err = fmt.Errorf("调用服务出错:%s,%w", service, err)
 		return pkgs.NewRspns(err)
 	}
 	switch proto {
