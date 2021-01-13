@@ -87,11 +87,31 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 			}
 		case reflect.Struct:
 			tnames = append(tnames, tfield.Name)
+			validTagName := tfield.Tag.Get("valid")
+			if !isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) {
+				return
+			}
+			if isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
+				t := tfield.Type
+				v := reflect.New(t)
+				initializeStruct(t, v.Elem())
+				vfield.Set(v.Elem())
+			}
 			if err := checkStruct(path, vfield, tnames, input); err != nil {
 				return err
 			}
 		case reflect.Ptr:
 			tnames = append(tnames, tfield.Name)
+			validTagName := tfield.Tag.Get("valid")
+			if !isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) {
+				return
+			}
+			if isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
+				t := tfield.Type.Elem()
+				v := reflect.New(t)
+				initializeStruct(t, v.Elem())
+				vfield.Set(v)
+			}
 			if err := checkStruct(path, vfield.Elem(), tnames, input); err != nil {
 				return err
 			}
@@ -182,8 +202,9 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 				initializeStruct(t, v.Elem())
 				vfield.Set(reflect.Append(vfield, v))
 			}
+		} else {
+			return nil
 		}
-		return nil
 	}
 
 	var v interface{}
