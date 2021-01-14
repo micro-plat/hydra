@@ -86,32 +86,24 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 				return err
 			}
 		case reflect.Struct:
+			if !vfield.IsValid() || vfield.IsZero() {
+				if !isRequire(tfield) {
+					return
+				}
+				setZeroField(vfield, tfield)
+			}
 			tnames = append(tnames, tfield.Name)
-			validTagName := tfield.Tag.Get("valid")
-			if !isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) {
-				return
-			}
-			if isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
-				t := tfield.Type
-				v := reflect.New(t)
-				initializeStruct(t, v.Elem())
-				vfield.Set(v.Elem())
-			}
 			if err := checkStruct(path, vfield, tnames, input); err != nil {
 				return err
 			}
 		case reflect.Ptr:
+			if !vfield.IsValid() || vfield.IsZero() {
+				if !isRequire(tfield) {
+					return
+				}
+				setZeroField(vfield, tfield)
+			}
 			tnames = append(tnames, tfield.Name)
-			validTagName := tfield.Tag.Get("valid")
-			if !isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) {
-				return
-			}
-			if isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
-				t := tfield.Type.Elem()
-				v := reflect.New(t)
-				initializeStruct(t, v.Elem())
-				vfield.Set(v)
-			}
 			if err := checkStruct(path, vfield.Elem(), tnames, input); err != nil {
 				return err
 			}
@@ -148,13 +140,54 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 		return check()
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
 		return check()
-	case isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()):
+	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
 		return check()
 	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
 		return check()
 	}
 	return nil, nil
 
+}
+
+//为 zero value 设置一个它对应类型的空值，并引导用户填入
+func setZeroField(vfield reflect.Value, tfield reflect.StructField) {
+	isPtr := false
+	t := tfield.Type
+
+	fieldType := t.Kind() //filed的类型
+	if fieldType == reflect.Ptr {
+		fieldType = t.Elem().Kind()
+	}
+
+	if t.Kind() == reflect.Slice { //取数组的元素类型
+		t = t.Elem()
+	}
+
+	if t.Kind() == reflect.Ptr { //取具体的类型
+		isPtr = true
+		t = t.Elem()
+	}
+
+	v := reflect.New(t)
+
+	if t.Kind() == reflect.Struct {
+		initializeStruct(t, v.Elem())
+	}
+
+	if !isPtr {
+		v = v.Elem()
+	}
+
+	switch fieldType {
+	case reflect.Slice:
+		vfield.Set(reflect.Append(vfield, v))
+		return
+	case reflect.Struct:
+		vfield.Set(v)
+		return
+	default:
+		panic("设置空值错误")
+	}
 }
 
 func initializeStruct(t reflect.Type, v reflect.Value) {
@@ -165,8 +198,7 @@ func initializeStruct(t reflect.Type, v reflect.Value) {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		ft := t.Field(i)
-		validTagName := ft.Tag.Get("valid")
-		if !isRequire(validTagName) {
+		if !isRequire(ft) {
 			continue
 		}
 		switch ft.Type.Kind() {
@@ -191,21 +223,10 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 
 	//处理多个数据值问题
 	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
-		validTagName := tfield.Tag.Get("valid")
-		if !isRequire(validTagName) {
+		if !isRequire(tfield) {
 			return nil
 		}
-		if !vfield.IsValid() || vfield.IsZero() { //验证为必须参数才设置一个空元素，并引导用户填入
-			t := tfield.Type.Elem()
-			if t.Kind() == reflect.Ptr {
-				t = t.Elem()
-			}
-			if t.Kind() == reflect.Struct {
-				v := reflect.New(t)
-				initializeStruct(t, v.Elem())
-				vfield.Set(reflect.Append(vfield, v))
-			}
-		}
+		setZeroField(vfield, tfield)
 	}
 
 	var v interface{}
@@ -288,7 +309,8 @@ func readFromCli(name string, tagName string, label string, msg string, isArray 
 
 }
 
-func isRequire(tagName string) bool {
+func isRequire(tfield reflect.StructField) bool {
+	tagName := tfield.Tag.Get("valid")
 	return strings.Contains(tagName, "required")
 }
 
