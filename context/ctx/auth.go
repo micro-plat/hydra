@@ -55,11 +55,11 @@ func (c *Auth) Bind(out interface{}) error {
 			return fmt.Errorf("将用户信息转换为json失败:%w", err)
 		}
 		if err := json.Unmarshal(buff, out); err != nil {
-			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
+			return fmt.Errorf("将用户信息反序化为对象时失败(func):%w ;%s", err, string(buff))
 		}
 	case string:
 		if err := json.Unmarshal([]byte(v), out); err != nil {
-			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
+			return fmt.Errorf("将用户信息反序化为对象时失败(string):%w;%s", err, v)
 		}
 	default:
 		buff, err := json.Marshal(v)
@@ -67,7 +67,7 @@ func (c *Auth) Bind(out interface{}) error {
 			return fmt.Errorf("将用户信息转换为json失败:%w", err)
 		}
 		if err := json.Unmarshal(buff, out); err != nil {
-			return fmt.Errorf("将用户信息反序化为对象时失败:%w", err)
+			return fmt.Errorf("将用户信息反序化为对象时失败(default):%w ;%s", err, string(buff))
 		}
 	}
 	return nil
