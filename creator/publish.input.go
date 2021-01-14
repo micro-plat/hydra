@@ -87,11 +87,31 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 			}
 		case reflect.Struct:
 			tnames = append(tnames, tfield.Name)
+			validTagName := tfield.Tag.Get("valid")
+			if !isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) {
+				return
+			}
+			if isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
+				t := tfield.Type
+				v := reflect.New(t)
+				initializeStruct(t, v.Elem())
+				vfield.Set(v.Elem())
+			}
 			if err := checkStruct(path, vfield, tnames, input); err != nil {
 				return err
 			}
 		case reflect.Ptr:
 			tnames = append(tnames, tfield.Name)
+			validTagName := tfield.Tag.Get("valid")
+			if !isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) {
+				return
+			}
+			if isRequire(validTagName) && (!vfield.Elem().IsValid() || vfield.Elem().IsZero()) { //验证为必须参数设置一个空元素，并引导用户填入
+				t := tfield.Type.Elem()
+				v := reflect.New(t)
+				initializeStruct(t, v.Elem())
+				vfield.Set(v)
+			}
 			if err := checkStruct(path, vfield.Elem(), tnames, input); err != nil {
 				return err
 			}
@@ -172,7 +192,10 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	//处理多个数据值问题
 	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
 		validTagName := tfield.Tag.Get("valid")
-		if isRequire(validTagName) && (!vfield.IsValid() || vfield.IsZero()) { //验证为必须参数才设置一个空元素，并引导用户填入
+		if !isRequire(validTagName) {
+			return nil
+		}
+		if !vfield.IsValid() || vfield.IsZero() { //验证为必须参数才设置一个空元素，并引导用户填入
 			t := tfield.Type.Elem()
 			if t.Kind() == reflect.Ptr {
 				t = t.Elem()
@@ -183,7 +206,6 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 				vfield.Set(reflect.Append(vfield, v))
 			}
 		}
-		return nil
 	}
 
 	var v interface{}

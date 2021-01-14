@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -307,7 +308,7 @@ type IContext interface {
 	Tracer() ITracer
 
 	//Invoke 调用本地服务
-	Invoke(service string) interface{}
+	Invoke(service string) *pkgs.Rspns
 
 	//Close 关闭并释放资源
 	Close()

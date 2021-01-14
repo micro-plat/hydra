@@ -85,6 +85,9 @@ var MQConf = global.MQConf
 //LocalIP 获取本机IP
 var LocalIP = global.LocalIP
 
+//IsDebug 是否是debug模式
+var IsDebug = global.Def.IsDebug
+
 //Server 通过服务类型从全局缓存中获取服务配置
 func Server(tp string) app.IAPPConf {
 	s, err := app.Cache.GetAPPConf(tp)

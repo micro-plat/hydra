@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/pkgs"
 	"golang.org/x/net/context"
 )
 
 //IRequest RPC请求
 type IRequest interface {
-	Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *Response, err error)
+	Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *pkgs.Rspns, err error)
 }
 
 type requestOption struct {

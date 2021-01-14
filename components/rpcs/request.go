@@ -9,6 +9,7 @@ import (
 	rpcconf "github.com/micro-plat/hydra/conf/vars/rpc"
 	rc "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
+	npkgs "github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -19,13 +20,13 @@ var requests = cmap.New(4)
 type IRequest interface {
 
 	//Request request 请求
-	Request(service string, input interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error)
+	Request(service string, input interface{}, opts ...rpc.RequestOption) (res *npkgs.Rspns, err error)
 
 	//Swap 将当前请求参数作为RPC参数并发送RPC请求
-	Swap(service string, ctx rc.IContext) (res *rpc.Response, err error)
+	Swap(service string, ctx rc.IContext) (res *npkgs.Rspns, err error)
 
 	//RequestByCtx RPC请求，可通过context撤销请求
-	RequestByCtx(ctx context.Context, service string, input interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error)
+	RequestByCtx(ctx context.Context, service string, input interface{}, opts ...rpc.RequestOption) (res *npkgs.Rspns, err error)
 }
 
 //Request RPC Request
@@ -44,7 +45,7 @@ func NewRequest(version int32, conf *rpcconf.RPCConf) *Request {
 }
 
 //Request request 请求
-func (r *Request) Request(service string, input interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
+func (r *Request) Request(service string, input interface{}, opts ...rpc.RequestOption) (res *npkgs.Rspns, err error) {
 
 	//处理链路跟踪
 	nopts := make([]rpc.RequestOption, 0, 2)
@@ -57,7 +58,7 @@ func (r *Request) Request(service string, input interface{}, opts ...rpc.Request
 }
 
 //Swap 将当前请求参数作为RPC参数并发送RPC请求
-func (r *Request) Swap(service string, ctx rc.IContext) (res *rpc.Response, err error) {
+func (r *Request) Swap(service string, ctx rc.IContext) (res *npkgs.Rspns, err error) {
 
 	//获取内容
 	input := ctx.Request().GetMap()
@@ -78,7 +79,7 @@ func (r *Request) Swap(service string, ctx rc.IContext) (res *rpc.Response, err 
 }
 
 //RequestByCtx RPC请求，可通过context撤销请求
-func (r *Request) RequestByCtx(ctx context.Context, service string, input interface{}, opts ...rpc.RequestOption) (res *rpc.Response, err error) {
+func (r *Request) RequestByCtx(ctx context.Context, service string, input interface{}, opts ...rpc.RequestOption) (res *npkgs.Rspns, err error) {
 	isip, rservice, platName, err := rpc.ResolvePath(service, global.Current().GetPlatName())
 	if err != nil {
 		return

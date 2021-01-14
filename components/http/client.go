@@ -30,7 +30,7 @@ func (s *StandardHTTPClient) GetRegularClient(names ...string) (d IClient) {
 //GetClient 获取http请求对象
 func (s *StandardHTTPClient) GetClient(names ...string) (d IClient, err error) {
 	name := types.GetStringByIndex(names, 0, httpconf.HttpNameNode)
-	obj, err := s.c.GetOrCreate(httpconf.HttpTypeNode, name, func(conf *conf.RawConf) (interface{}, error) {
+	obj, err := s.c.GetOrCreate(httpconf.HttpTypeNode, name, func(conf *conf.RawConf, keys ...string) (interface{}, error) {
 		if conf.IsEmpty() {
 			return http.NewClient()
 		}

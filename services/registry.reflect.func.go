@@ -3,6 +3,12 @@ package services
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/micro-plat/hydra/context"
+)
+
+var (
+	contextHandlerType = reflect.TypeOf((*context.IHandler)(nil)).Elem()
 )
 
 func createObject(f interface{}) (interface{}, error) {
@@ -14,12 +20,15 @@ func createObject(f interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("函数的输入参数或输出参数个数错误")
 	}
 
+	outObj := tp.Out(0)
 	//检查第一个输出参数
 	outKind := tp.Out(0).Kind()
 	if outKind == reflect.Ptr {
 		outKind = tp.Out(0).Elem().Kind()
+		outObj = tp.Out(0).Elem()
 	}
-	if outKind != reflect.Struct {
+
+	if outKind != reflect.Struct && !contextHandlerType.ConvertibleTo(outObj) {
 		return nil, fmt.Errorf("输出参数第一个参数必须是结构体")
 	}
 

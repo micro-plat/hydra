@@ -1,4 +1,4 @@
-package services
+package pkgs
 
 import (
 	"encoding/json"
@@ -26,14 +26,14 @@ type Rspns struct {
 	encoding string
 }
 
-//NewRspnsByStatus 根据状态构建响应
-func NewRspnsByStatus(status int, result interface{}) *Rspns {
-	r := NewRspns(status, "{}", result)
+//NewRspns 根据状态构建响应
+func NewRspns(result interface{}) *Rspns {
+	r := NewRspnsByHD(0, "{}", result)
 	return r
 }
 
-//NewRspns 请求响应
-func NewRspns(status int, header string, result interface{}) (r *Rspns) {
+//NewRspnsByHD 请求响应
+func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 	r = &Rspns{
 		encoding: "utf-8",
 		result:   result,
