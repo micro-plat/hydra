@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -113,7 +114,7 @@ type IPath interface {
 	GetRequestPath() string
 
 	//GetURL 获取请求的URL信息
-	GetURL() string
+	GetURL() *url.URL
 
 	//Limit 设置限流信息
 	Limit(isLimit bool, fallback bool)

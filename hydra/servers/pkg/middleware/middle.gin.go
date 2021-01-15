@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type ginCtx struct {
@@ -35,7 +36,6 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 	return params
 }
 func (g *ginCtx) GetRouterPath() string {
-
 	return g.Context.FullPath()
 }
 
@@ -56,7 +56,11 @@ func (g *ginCtx) GetURL() *url.URL {
 	return g.Request.URL
 }
 func (g *ginCtx) GetHeaders() http.Header {
-	return g.Request.Header
+	hd := g.Request.Header
+	if _, ok := hd["Host"]; !ok {
+		hd["Host"] = []string{types.GetString(g.Request.Host, g.GetURL().Host)}
+	}
+	return hd
 }
 
 func (g *ginCtx) GetCookies() []*http.Cookie {

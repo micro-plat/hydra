@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
@@ -99,8 +100,8 @@ func (c *rpath) GetRouter() (*router.Router, error) {
 }
 
 //GetURL 获取请求路径
-func (c *rpath) GetURL() string {
-	return c.ctx.GetURL().String()
+func (c *rpath) GetURL() *url.URL {
+	return c.ctx.GetURL()
 }
 
 //GetRequestPath 获取请求路径

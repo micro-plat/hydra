@@ -7,7 +7,7 @@ import (
 )
 
 var originName = "Origin"
-var refererName = "Referer"
+var hostName = "Host"
 
 //Header 响应头设置
 func Header() Handler {
@@ -26,8 +26,7 @@ func Header() Handler {
 
 		//3. 处理响应header参数
 		origin := ctx.Request().Headers().GetString(originName)
-		referer := ctx.Request().Headers().GetString(refererName)
-		hds := headers.GetHeaderByOrigin(types.GetString(origin, referer))
+		hds := headers.GetHeaderByOrigin(types.GetString(origin, ctx.Response().GetHeaders().GetString(hostName)))
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
 		}
