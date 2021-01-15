@@ -46,4 +46,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
-// replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

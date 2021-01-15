@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -458,16 +459,45 @@ func (q XMap) ToSMap() map[string]string {
 	return rmap
 }
 
-//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+//Translate 翻译带参数的变量支持格式有 @abc,{@abc},转义符@
 func (q XMap) Translate(format string) string {
-	brackets, _ := regexp.Compile(`\{@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\}`)
-	result := brackets.ReplaceAllStringFunc(format, func(s string) string {
+	word := regexp.MustCompile(`[\w^@]*(\{@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\})`)
+	result := word.ReplaceAllStringFunc(format, func(s string) string {
+		if strings.HasPrefix(s, "@{@") {
+			return s[1:]
+		}
 		return q.GetString(s[2 : len(s)-1])
 	})
-	word, _ := regexp.Compile(`@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*`)
+	word = regexp.MustCompile(`[\w^#]*(\{#\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\})`)
 	result = word.ReplaceAllStringFunc(result, func(s string) string {
+		if strings.HasPrefix(s, "#{#") {
+			return s[1:]
+		}
+		return url.QueryEscape(q.GetString(s[2 : len(s)-1]))
+	})
+
+	word = regexp.MustCompile(`[\w^@{}]*(@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*)`)
+	result = word.ReplaceAllStringFunc(result, func(s string) string {
+		if strings.HasPrefix(s, "@@") {
+			return s[1:]
+		}
+		if strings.HasPrefix(s, "{@") {
+			return s
+		}
 		return q.GetString(s[1:])
 	})
+
+	word = regexp.MustCompile(`[\w^#{}]*(#\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*)`)
+	result = word.ReplaceAllStringFunc(result, func(s string) string {
+		if strings.HasPrefix(s, "##") {
+			return s[1:]
+		}
+		if strings.HasPrefix(s, "{#") {
+			return s
+		}
+		return url.QueryEscape(q.GetString(s[1:]))
+	})
+
 	return result
 }
 

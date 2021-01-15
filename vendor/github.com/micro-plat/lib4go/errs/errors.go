@@ -15,6 +15,7 @@ type IError interface {
 	Error() string
 	GetError() error
 	GetCode() int
+	CanIgnore() bool
 }
 
 //Error 错误信息
