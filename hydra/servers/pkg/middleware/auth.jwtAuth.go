@@ -44,7 +44,7 @@ func JwtAuth() Handler {
 		//5.jwt验证失败后返回错误
 		ctx.Log().Error(err)
 		if jwtAuth.AuthURL != "" {
-			ctx.Response().Header("Location", jwtAuth.AuthURL)
+			ctx.Response().Header("Location", ctx.Request().Headers().Translate(jwtAuth.AuthURL))
 			ctx.Response().Abort(xjwt.JWTStatusRedirect)
 			return
 		}
