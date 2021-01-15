@@ -1,0 +1,63 @@
+[{
+    "page": "/difference/collect/query",
+    "api": [{
+            "path": "/grs/info/query",
+            "method": ["GET"]
+        }, {
+            "path": "/bills/gcr/info",
+            "method": ["GET"]
+        }, {
+            "path": "/tencent/info/query",
+            "method": ["GET"]
+        },
+        {
+            "path": "/tencent/info/query",
+            "method": ["GET"]
+        },
+        {
+            "path": "/difference/collect/query",
+            "method": ["GET"]
+        }
+    ]
+},
+{
+    "page": "/bills/gcr/info",
+    "api": [{
+        "path": "/gcr/info/querylist",
+        "method": ["GET"]
+    }, {
+        "path": "/gcr/info/exportgcr",
+        "method": ["POST"]
+    }]
+}, {
+    "page": "/dds/dictionary/info",
+    "api": [{
+        "path": "/dds/dictionary/info",
+        "method": ["GET"]
+    }, {
+        "path": "/dds/dictionary/info/out",
+        "method": ["POST"]
+    }, {
+        "path": "/dds/dictionary/info/update",
+        "method": ["GET"]
+    }, {
+        "path": "/dds/dictionary/info",
+        "method": ["POST"]
+    }]
+}, {
+    "page": "/config/info",
+    "api": [{
+        "path": "/config/info/query",
+        "method": ["GET"]
+    }, {
+        "path": "/config/info/update",
+        "method": ["GET"]
+    }, {
+        "path": "/config/info/edit",
+        "method": ["POST"]
+    }, {
+        "path": "/config/info/add",
+        "method": ["POST"]
+    }]
+}
+]
