@@ -63,3 +63,10 @@ func WithClusterName(clusterName string) Option {
 		global.Def.ClusterName = clusterName
 	}
 }
+
+//WithRegistry 设置注册中心地址
+func WithRegistry(addr string) Option {
+	return func(o *mock) {
+		global.Def.RegistryAddr = addr
+	}
+}
