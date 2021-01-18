@@ -11,6 +11,7 @@ import (
 
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
+	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -30,7 +31,7 @@ type mock struct {
 //newMock 构建
 func newMock(content string) *mock {
 	mk := &mock{
-		serverType: "api",
+		serverType: xhttp.API,
 		RHeaders:   make(types.XMap),
 		wHeaders:   make(types.XMap),
 		Cookies:    make(types.XMap),

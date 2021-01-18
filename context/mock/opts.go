@@ -1,6 +1,9 @@
 package mock
 
-import "github.com/micro-plat/lib4go/types"
+import (
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/types"
+)
 
 //Option 配置选项
 type Option func(*mock)
@@ -37,5 +40,26 @@ func WithRHeaders(header types.XMap) Option {
 func WithCookies(cookie types.XMap) Option {
 	return func(o *mock) {
 		o.Cookies = cookie
+	}
+}
+
+//WithPlatName 设置平台名称
+func WithPlatName(platName string) Option {
+	return func(o *mock) {
+		global.Def.PlatName = platName
+	}
+}
+
+//WithSystemName 设置系统名称
+func WithSystemName(sysName string) Option {
+	return func(o *mock) {
+		global.Def.SysName = sysName
+	}
+}
+
+//WithClusterName 设置集群名称
+func WithClusterName(clusterName string) Option {
+	return func(o *mock) {
+		global.Def.ClusterName = clusterName
 	}
 }
