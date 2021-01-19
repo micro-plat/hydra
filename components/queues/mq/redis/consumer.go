@@ -37,6 +37,11 @@ type Consumer struct {
 	ConfOpts   *varredis.Redis
 }
 
+//NewConsumerByRaw 创建新的Consumer
+func NewConsumerByRaw(cfg string) (consumer *Consumer, err error) {
+	return NewConsumerByConfig(varredis.NewByRaw(cfg))
+}
+
 //NewConsumerByConfig 创建新的Consumer
 func NewConsumerByConfig(cfg *varredis.Redis) (consumer *Consumer, err error) {
 	consumer = &Consumer{log: logger.GetSession("mq.redis", logger.CreateSession())}
@@ -156,7 +161,7 @@ type cresolver struct {
 }
 
 func (s *cresolver) Resolve(confRaw string) (mq.IMQC, error) {
-	return NewConsumerByConfig(queueredis.NewByRaw(confRaw).Redis)
+	return NewConsumerByRaw(queueredis.NewByRaw(confRaw).GetRaw())
 }
 func init() {
 	mq.RegisterConsumer(Proto, &cresolver{})

@@ -161,7 +161,7 @@ type redisResolver struct {
 }
 
 func (s *redisResolver) Resolve(configData string) (cache.ICache, error) {
-	return NewByConfig(cacheredis.NewByRaw(configData).Redis)
+	return NewByConfig(varredis.NewByRaw(cacheredis.NewByRaw(configData).GetRaw()))
 }
 func init() {
 	cache.Register(Proto, &redisResolver{})

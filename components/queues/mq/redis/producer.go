@@ -4,7 +4,7 @@ import (
 	rds "github.com/go-redis/redis"
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
-	 "github.com/micro-plat/hydra/conf/vars/queue/queueredis"
+	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
 	varredis "github.com/micro-plat/hydra/conf/vars/redis"
 )
 
@@ -15,8 +15,13 @@ type Producer struct {
 	confOpts *varredis.Redis
 }
 
-// New 根据配置文件创建一个redis连接
-func NewByConfig(confOpts *varredis.Redis) (m *Producer, err error) {
+// NewProducerByRaw 根据配置文件创建一个redis连接
+func NewProducerByRaw(cfg string) (m *Producer, err error) {
+	return NewProducerByConfig(varredis.NewByRaw(cfg))
+}
+
+// NewProducerByConfig 根据配置文件创建一个redis连接
+func NewProducerByConfig(confOpts *varredis.Redis) (m *Producer, err error) {
 	m = &Producer{confOpts: confOpts}
 	m.client, err = redis.NewByConfig(m.confOpts)
 	if err != nil {
@@ -54,7 +59,7 @@ type producerResolver struct {
 }
 
 func (s *producerResolver) Resolve(confRaw string) (mq.IMQP, error) {
-	return NewByConfig(queueredis.NewByRaw(confRaw).Redis)
+	return NewProducerByRaw(queueredis.NewByRaw(confRaw).GetRaw())
 }
 func init() {
 	mq.RegisterProducer("redis", &producerResolver{})

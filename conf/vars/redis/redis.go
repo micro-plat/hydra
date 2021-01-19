@@ -29,9 +29,9 @@ func New(addrs string, opts ...Option) *Redis {
 	r := &Redis{
 		Addrs:        types.Split(addrs, ","),
 		DbIndex:      0,
-		DialTimeout:  10,
-		ReadTimeout:  10,
-		WriteTimeout: 10,
+		DialTimeout:  3,
+		ReadTimeout:  3,
+		WriteTimeout: 3,
 		PoolSize:     10,
 	}
 	for _, opt := range opts {
