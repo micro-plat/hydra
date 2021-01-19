@@ -40,4 +40,5 @@ func Pause() {
 //Resume 恢复记录
 func Resume() {
 	globalPause = false
+	initConf()
 }

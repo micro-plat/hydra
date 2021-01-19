@@ -104,6 +104,7 @@ func (logger *Logger) Pause() {
 //Resume 恢复记录
 func (logger *Logger) Resume() {
 	logger.isPause = false
+	initConf()
 }
 
 //GetSessionID 获取当前日志的session id

@@ -81,6 +81,9 @@ func init() {
 var once sync.Once
 
 func initConf() {
+	if globalPause {
+		return
+	}
 	once.Do(func() {
 		path, err := Encode(loggerPath...)
 		if err != nil {
