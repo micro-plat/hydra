@@ -80,7 +80,6 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 
 // Build creates a new resolver for the given target.
 func (b *ResolverBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver resolver.Resolver, err error) {
-	//fmt.Println(" (b *ResolverBuilder) Build:", target.Scheme, target.Authority, target.Endpoint)
 	return b.orgResolver.Build(target, cc, opts)
 }
 
@@ -90,7 +89,6 @@ func (b *ResolverBuilder) Scheme() string {
 }
 
 func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
-	//fmt.Println("buildManualResolver:", proto)
 	rb := manual.NewBuilderWithScheme(proto)
 
 	rb.ResolveNowCallback = func(o resolver.ResolveNowOptions) {

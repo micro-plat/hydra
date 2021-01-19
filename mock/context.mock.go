@@ -11,30 +11,27 @@ import (
 
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
-	xhttp "github.com/micro-plat/hydra/hydra/servers/http"
 	"github.com/micro-plat/lib4go/types"
 )
 
 //mock 用于context的mock包
 type mock struct {
-	RHeaders   types.XMap
-	wHeaders   types.XMap
-	Cookies    types.XMap
-	serverType string
-	result     []byte
-	Service    string
-	status     int
-	Body       string
-	URL        string
+	RHeaders types.XMap
+	wHeaders types.XMap
+	Cookies  types.XMap
+	result   []byte
+	Service  string
+	status   int
+	Body     string
+	URL      string
 }
 
 //newMock 构建
 func newMock(content string) *mock {
 	mk := &mock{
-		serverType: xhttp.API,
-		RHeaders:   make(types.XMap),
-		wHeaders:   make(types.XMap),
-		Cookies:    make(types.XMap),
+		RHeaders: make(types.XMap),
+		wHeaders: make(types.XMap),
+		Cookies:  make(types.XMap),
 	}
 	mk.RHeaders["Content-Type"], mk.Body = getContentType(content)
 	return mk

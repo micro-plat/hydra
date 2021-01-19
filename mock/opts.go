@@ -11,7 +11,7 @@ type Option func(*mock)
 //WithServerType 服务器类型
 func WithServerType(t string) Option {
 	return func(o *mock) {
-		o.serverType = t
+		global.Def.ServerTypes = []string{t}
 	}
 }
 
