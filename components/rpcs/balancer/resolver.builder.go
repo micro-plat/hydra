@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -11,6 +13,7 @@ import (
 
 	//"google.golang.org/grpc/naming"
 
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/resolver/manual"
 )
@@ -31,19 +34,25 @@ type Builder interface {
 
 //ResolverBuilder creates a resolver that will be used to watch name resolution updates.
 type ResolverBuilder struct {
-	address    string
-	proto      string
-	plat       string
-	service    string
-	sortPrefix string
-	caches     map[string]bool
-	logger     *logger.Logger
-
+	address     string
+	proto       string
+	plat        string
+	service     string
+	sortPrefix  string
+	caches      map[string]bool
+	logger      *logger.Logger
 	regst       registry.IRegistry
 	orgResolver *manual.Resolver
+	closeChan   chan struct{}
+	isClose     bool
+	lock        sync.Mutex
+	onceLock    sync.Once
 }
 
-func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Builder, error) {
+var _ resolver.Builder = &ResolverBuilder{}
+
+//NewResolverBuilder 新建builder
+func NewResolverBuilder(address, plat, service, sortPrefix string) (*ResolverBuilder, error) {
 	proto, addr, err := global.ParseProto(address)
 	if err != nil {
 		return nil, fmt.Errorf("GRPC address:%s parse error:%+v", address, err)
@@ -57,6 +66,8 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 		address:    address,
 		proto:      proto,
 		logger:     logging,
+		closeChan:  make(chan struct{}),
+		caches:     map[string]bool{},
 	}
 
 	addresses := []string{addr}
@@ -72,6 +83,7 @@ func NewResolverBuilder(address, plat, service, sortPrefix string) (resolver.Bui
 		if err != nil {
 			return nil, fmt.Errorf("rpc.client.resolver target err:%v", err)
 		}
+		go builder.watchChildren()
 	}
 
 	builder.buildManualResolver(proto, addresses)
@@ -90,43 +102,16 @@ func (b *ResolverBuilder) Scheme() string {
 }
 
 func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
-	//fmt.Println("buildManualResolver:", proto)
 	rb := manual.NewBuilderWithScheme(proto)
-
-	rb.ResolveNowCallback = func(o resolver.ResolveNowOptions) {
-
-		if len(b.plat) <= 0 {
-			return
-		}
-
-		address, err := b.getGrpcAddress()
-		if err != nil {
-			b.logger.Errorf("获取grpc地址错误:%+v", err)
-			return
-		}
-		var needUpdate = false
-		newCache := make(map[string]bool)
-		for i := 0; i < len(address); i++ {
-			newCache[address[i]] = true
-			if _, ok := b.caches[address[i]]; !ok {
-				needUpdate = true
-			}
-		}
-		b.caches = newCache
-
-		if !needUpdate {
-			return
-		}
-
-		var grpcAddrs []resolver.Address
-		for i := range address {
-			grpcAddrs = append(grpcAddrs, resolver.Address{Addr: address[i], Type: resolver.Backend})
-		}
-		rb.CC.UpdateState(resolver.State{Addresses: grpcAddrs})
-	}
+	rb.ResolveNowCallback = func(o resolver.ResolveNowOptions) {}
 	var grpcAddrs []resolver.Address
 	for i := range address {
-		grpcAddrs = append(grpcAddrs, resolver.Address{Addr: address[i], Type: resolver.Backend})
+		grpcAddrs = append(grpcAddrs, resolver.Address{
+			Addr:       address[i],
+			Type:       resolver.Backend,
+			Attributes: attributes.New(),
+		})
+		b.caches[address[i]] = true
 	}
 
 	rb.InitialState(resolver.State{Addresses: grpcAddrs})
@@ -141,12 +126,12 @@ func (b *ResolverBuilder) getGrpcAddress() (addrs []string, err error) {
 	}
 
 	//获取所有rpc服务下的子节点
-	chilren, _, err := b.regst.GetChildren(rpath)
+	children, _, err := b.regst.GetChildren(rpath)
 	if err != nil {
 		return []string{}, fmt.Errorf("GetChildren服务地址出错 %s %w", rpath, err)
 	}
 
-	addrs = b.extractAddrs(chilren)
+	addrs = b.extractAddrs(children)
 	return
 }
 
@@ -241,4 +226,86 @@ func (b *ResolverBuilder) getPath(rpath string, sp []string, index int) (string,
 	}
 
 	return "", false, nil
+}
+
+func (b *ResolverBuilder) watchChildren() {
+	if len(b.plat) <= 0 {
+		return
+	}
+
+	for {
+		if b.isClose {
+			return
+		}
+		realPath, err := b.getRealPath()
+		if err != nil {
+			b.logger.Errorf("watchChildren.获取注册中心路径:%+v", err)
+			time.Sleep(time.Second)
+			continue
+		}
+		childChan, err := b.regst.WatchChildren(realPath)
+		if err != nil {
+			b.logger.Errorf("watchChildren.监控路径%s:%+v", realPath, err)
+			time.Sleep(time.Second)
+			continue
+		}
+		select {
+		case <-b.closeChan:
+			return
+		case <-childChan:
+			b.updateAddrs()
+		}
+	}
+}
+
+func (b *ResolverBuilder) updateAddrs() {
+	if len(b.plat) <= 0 || b.isClose {
+		return
+	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	address, err := b.getGrpcAddress()
+	if err != nil {
+		b.logger.Errorf("获取grpc地址错误:%+v", err)
+		return
+	}
+
+	if !b.checkUpdate(address) {
+		return
+	}
+
+	var grpcAddrs []resolver.Address
+	for i := range address {
+		grpcAddrs = append(grpcAddrs, resolver.Address{
+			Addr:       address[i],
+			Type:       resolver.Backend,
+			Attributes: attributes.New(),
+		})
+	}
+	b.orgResolver.CC.UpdateState(resolver.State{Addresses: grpcAddrs})
+}
+
+func (b *ResolverBuilder) checkUpdate(address []string) bool {
+	var needUpdate = false
+	if len(address) != len(b.caches) {
+		needUpdate = true
+	}
+	newCache := make(map[string]bool)
+	for i := 0; i < len(address); i++ {
+		newCache[address[i]] = true
+		if _, ok := b.caches[address[i]]; !ok {
+			needUpdate = true
+		}
+	}
+	b.caches = newCache
+	return needUpdate
+}
+
+//Close 关闭builder
+func (b *ResolverBuilder) Close() {
+	b.onceLock.Do(func() {
+		b.isClose = true
+		close(b.closeChan)
+	})
 }

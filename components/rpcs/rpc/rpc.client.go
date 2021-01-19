@@ -15,7 +15,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
 )
 
 //Client rpc client, 用于构建基础的RPC调用,并提供基于服务器的限流工具，轮询、本地优先等多种负载算法
@@ -26,10 +25,11 @@ type Client struct {
 	service string
 	log     *logger.Logger
 	*rpcconf.RPCConf
-	client        pb.RPCClient
-	hasRunChecker bool
-	IsConnect     bool
-	isClose       bool
+	client          pb.RPCClient
+	balancerBuilder *balancer.ResolverBuilder
+	hasRunChecker   bool
+	IsConnect       bool
+	isClose         bool
 }
 
 //NewClient .
@@ -90,6 +90,7 @@ func (c *Client) Close() {
 	if c.conn != nil {
 		c.conn.Close()
 	}
+	c.balancerBuilder.Close()
 }
 
 //Connect 连接到RPC服务器，如果当前无法连接系统会定时自动重连
@@ -106,8 +107,7 @@ func (c *Client) connect() (err error) {
 		c.Balancer = rpcconf.LocalFirst
 	}
 
-	var rb resolver.Builder
-	rb, err = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
+	c.balancerBuilder, err = balancer.NewResolverBuilder(c.address, c.plat, c.service, c.SortPrefix)
 	if err != nil {
 		return
 	}
@@ -117,7 +117,7 @@ func (c *Client) connect() (err error) {
 		c.address+"/rpcsrv",
 		grpc.WithInsecure(),
 		grpc.WithBalancerName(c.Balancer),
-		grpc.WithResolvers(rb))
+		grpc.WithResolvers(c.balancerBuilder))
 
 	if err != nil {
 		return
