@@ -21,7 +21,6 @@ var isReady = false
 //Def 默认appliction
 var Def = &global{
 	DNSRoot:       "/dns",
-	log:           logger.New("hydra"),
 	LocalConfName: "./" + filepath.Base(os.Args[0]) + ".conf.toml",
 	close:         make(chan struct{}),
 }
@@ -169,6 +168,9 @@ func (m *global) ClosingNotify() chan struct{} {
 
 //Log 获取日志组件
 func (m *global) Log() logger.ILogger {
+	if m.log == nil {
+		m.log = logger.New("hydra")
+	}
 	return m.log
 }
 
