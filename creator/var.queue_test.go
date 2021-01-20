@@ -7,7 +7,6 @@ import (
 	queuelmq "github.com/micro-plat/hydra/conf/vars/queue/lmq"
 	queuemqtt "github.com/micro-plat/hydra/conf/vars/queue/mqtt"
 	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
-	"github.com/micro-plat/hydra/conf/vars/redis"
 	"github.com/micro-plat/lib4go/assert"
 )
 
@@ -27,8 +26,6 @@ func TestNewQueue(t *testing.T) {
 }
 
 func TestVarqueue_Redis(t *testing.T) {
-	newRedis := queueredis.New("", queueredis.WithConfigName("address"))
-	newRedis.Redis = redis.New("192.196.0.1")
 	type args struct {
 		name string
 		addr string

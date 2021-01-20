@@ -168,7 +168,7 @@ func Test_conf_Pub1(t *testing.T) {
 
 	for _, tt := range tests {
 		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
-		assert.Equal(t, tt.wantErr, err == nil, "发布异常", err)
+		assert.Equal(t, tt.wantErr, err == nil, "发布异常:"+tt.name, err.Error())
 		r, err := registry.GetRegistry(tt.regstType, global.Def.Log())
 		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
 		err = checkData(r, registry.Join("platname3"), data)

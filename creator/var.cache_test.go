@@ -10,7 +10,6 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/cache/cacheredis"
 	gocache "github.com/micro-plat/hydra/conf/vars/cache/gocache"
 	memcached "github.com/micro-plat/hydra/conf/vars/cache/memcached"
-	"github.com/micro-plat/hydra/conf/vars/redis"
 )
 
 func TestNewCache(t *testing.T) {
@@ -30,8 +29,6 @@ func TestNewCache(t *testing.T) {
 
 func TestVarcache_Redis(t *testing.T) {
 
-	newRedis := cacheredis.New("", cacheredis.WithConfigName("address"))
-	newRedis.Redis = redis.New("192.196.0.1")
 	type args struct {
 		name    string
 		address string

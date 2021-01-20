@@ -93,7 +93,7 @@ func Test_conf_Load(t *testing.T) {
 		defer func(name string) {
 			e := recover()
 			if name == "5.1 没有设置MQC节点,加载默认节点" {
-				assert.Equal(t, "未指定mqc服务器配置", types.GetString(e), name+",mqc-panic")
+				assert.Equal(t, "未指定mqc服务器配置,请通过hydra.Conf.MQC...指定", types.GetString(e), name+",mqc-panic")
 			} else {
 				assert.Equal(t, true, e == nil, name+",panic1")
 			}
@@ -378,7 +378,7 @@ func Test_conf_GetMQC(t *testing.T) {
 		defer func(name string) {
 			e := recover()
 			if name == "1. 未设置,获取mqc配置对象" {
-				assert.Equal(t, "未指定mqc服务器配置", types.GetString(e), name+",mqc-panic")
+				assert.Equal(t, "未指定mqc服务器配置,请通过hydra.Conf.MQC...指定", types.GetString(e), name+",mqc-panic")
 			} else {
 				assert.Equal(t, true, e == nil, name+",panic1")
 			}
