@@ -42,13 +42,13 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
 	switch strings.ToUpper(jwt.Source) {
 	case xjwt.SourceHeader, xjwt.SourceHeaderShort: //"HEADER", "H":
-		ctx.Response().Header(jwt.Name, token)
+		ctx.Response().Header(xjwt.AuthorizationHeader, xjwt.TokenBearerPrefix+token)
 	default:
 		expireVal := jwt.GetExpireTime()
 		if jwt.Domain != "" {
-			ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", jwt.Name, token, jwt.Domain, expireVal))
+			ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;HttpOnly", jwt.Name, token, jwt.Domain, expireVal))
 			return
 		}
-		ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", jwt.Name, token, expireVal))
+		ctx.Response().Header("Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;HttpOnly", jwt.Name, token, expireVal))
 	}
 }
