@@ -155,6 +155,9 @@ type IRequest interface {
 	//Check 检查指定的字段是否有值
 	Check(field ...string) error
 
+	//CheckMap 传入验证Map[字段名]验证规则，并使用govalidator.ValidateMap进行参数验证
+	CheckMap(vdt map[string]interface{}) error
+
 	//GetMap 将当前请求转换为map并返回
 	GetMap() types.XMap
 
