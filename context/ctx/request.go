@@ -58,7 +58,7 @@ func (r *request) Path() context.IPath {
 	return r.path
 }
 
-//Bind 根据输入参数绑定对象
+//Bind 根据输入参数绑定对象，并使用govalidator.ValidateMap进行参数验证
 func (r *request) Bind(obj interface{}) error {
 	if r.readMapErr != nil {
 		return r.readMapErr
@@ -82,6 +82,23 @@ func (r *request) Check(field ...string) error {
 		if v := r.GetString(key); v == "" {
 			return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数:%s值不能为空", key))
 		}
+	}
+	return nil
+}
+
+//CheckMap 传入验证Map[字段名]验证规则，并使用govalidator.ValidateMap进行参数验证
+func (r *request) CheckMap(vdt map[string]interface{}) error {
+	if len(vdt) == 0 {
+		return nil
+	}
+	input := make(map[string]interface{})
+	for k := range vdt {
+		input[k] = r.XMap[k]
+	}
+
+	//验证数据格式
+	if _, err := govalidator.ValidateMap(input, vdt); err != nil {
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
 	}
 	return nil
 }

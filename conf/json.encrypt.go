@@ -12,13 +12,13 @@ const confIV = "#*---iv*"
 const hd = "encrypt"
 const mode = "cbc/pkcs5"
 
-//对加密内容进行des加密，并增加加密头
+//Encrypt 对加密内容进行des加密，并增加加密头
 func Encrypt(input []byte) string {
 	v, _ := des.EncryptBytes(input, confKey, []byte(confIV), mode)
 	return fmt.Sprintf("%s:%s:%s", hd, mode, hex.EncodeToString(v))
 }
 
-//检查是否包含加密头，报含则根据加密头数据解密数据
+//Decrypt 检查是否包含加密头，报含则根据加密头数据解密数据
 func Decrypt(data []byte) ([]byte, error) {
 	lheader := len(hd)
 	lmode := len(mode)
