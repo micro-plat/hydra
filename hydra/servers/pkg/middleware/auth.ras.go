@@ -57,7 +57,8 @@ func RASAuth() Handler {
 			ctx.Response().Abort(http.StatusForbidden, fmt.Errorf("远程请求结果解析错误 %w", err))
 			return
 		}
-		ctx.Meta().MergeMap(respones.GetMap())
+
+		ctx.Request().GetMap().MergeMap(respones.GetMap())
 		return
 	}
 }
