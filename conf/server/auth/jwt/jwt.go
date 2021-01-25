@@ -137,7 +137,7 @@ func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string)
 
 //getExpireTime 获取jwt的超时时间
 func (j *JWTAuth) getExpireTime(expired bool) string {
-	expireTime := time.Now().Add(time.Hour * -1)
+	expireTime := time.Now().Add(time.Hour * -24)
 	if !expired {
 		expireTime = time.Now().Add(time.Duration(time.Duration(j.ExpireAt)*time.Second - 8*60*60*time.Second))
 	}
