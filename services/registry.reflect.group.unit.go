@@ -4,6 +4,11 @@ import (
 	"github.com/micro-plat/hydra/context"
 )
 
+type rawUnit struct {
+	RawPath string
+	RawMTag string
+}
+
 type Unit struct {
 	Path     string
 	Service  string
@@ -11,8 +16,9 @@ type Unit struct {
 	Handled  context.IHandler
 	Handle   context.IHandler
 	Fallback context.IHandler
-	Actions  []string
-	Group    *UnitGroup
+	*rawUnit
+	Actions []string
+	Group   *UnitGroup
 }
 
 //GetHandlings 获取所有预处理函数

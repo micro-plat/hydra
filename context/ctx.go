@@ -113,6 +113,9 @@ type IPath interface {
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string
 
+	//GetRawPathAndTag 获取服务原始注册路径与tag名(tag为handle前的名称,restful服务的tag为空)
+	GetRawPathAndTag() (path string, tag string, ok bool)
+
 	//GetURL 获取请求的URL信息
 	GetURL() *url.URL
 

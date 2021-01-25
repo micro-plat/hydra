@@ -99,6 +99,12 @@ func (c *rpath) GetRouter() (*router.Router, error) {
 
 }
 
+//GetRawPathAndTag 获取服务原始注册路径与tag名(tag为handle前的名称,restful服务的tag为空)
+func (c *rpath) GetRawPathAndTag() (path string, tag string, ok bool) {
+	tp := c.appConf.GetServerConf().GetServerType()
+	return services.Def.GetRawPathAndTag(tp, c.GetService())
+}
+
 //GetURL 获取请求路径
 func (c *rpath) GetURL() *url.URL {
 	return c.ctx.GetURL()

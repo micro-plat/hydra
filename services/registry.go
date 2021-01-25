@@ -228,6 +228,11 @@ func (s *regist) GetHandler(serverType string, service string) (context.IHandler
 	return s.get(serverType).GetHandlers(service)
 }
 
+//GetRawPathAndTag 获取服务原始注册路径与方法名(restful服务的tag值为空)
+func (s *regist) GetRawPathAndTag(serverType string, service string) (path string, tagName string, ok bool) {
+	return s.get(serverType).GetRawPathAndTag(service)
+}
+
 //GetHandling 获取预处理函数
 func (s *regist) GetHandlings(serverType string, service string) []context.IHandler {
 	return s.get(serverType).GetHandlings(service)

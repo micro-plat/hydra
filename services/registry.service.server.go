@@ -48,7 +48,7 @@ func (s *serverServices) addGroup(g *UnitGroup, ext ...interface{}) error {
 		}
 
 		//添加服务
-		if err := s.metaServices.AddHanler(u.Service, u.Handle); err != nil {
+		if err := s.metaServices.AddHanler(u.Service, u.Handle, u.rawUnit); err != nil {
 			return err
 
 		}
