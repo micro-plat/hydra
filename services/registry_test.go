@@ -449,3 +449,26 @@ func Test_regist_CRON(t *testing.T) {
 		checkTestCustomeResult(t, s, global.CRON, tt.name, tt.ext[0], tt.ext[1])
 	}
 }
+func Test_regist_rawPathTag(t *testing.T) {
+	cases := []struct {
+		service string
+		path    string
+		tag     string
+		ok      bool
+	}{
+		{service: "/order/$get", path: "/order", tag: "", ok: true},
+		{service: "/order/$post", path: "/order", tag: "", ok: true},
+		{service: "/order/$put", path: "/order", tag: "", ok: true},
+		{service: "/order/$delete", path: "/order", tag: "", ok: true},
+		{service: "/order/order", path: "/order", tag: "order", ok: true},
+	}
+	def := Def
+	def.Micro("/order", &testHandler{})
+	for _, v := range cases {
+		path, tag, ok := def.GetRawPathAndTag(global.API, v.service)
+		assert.Equal(t, v.path, path, v.service)
+		assert.Equal(t, v.tag, tag, v.service)
+		assert.Equal(t, v.ok, ok, v.service)
+	}
+
+}

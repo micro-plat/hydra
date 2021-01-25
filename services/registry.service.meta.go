@@ -15,9 +15,10 @@ type metaServices struct {
 
 func newService() *metaServices {
 	return &metaServices{
-		services:  make([]string, 0, 1),
-		handlers:  make(map[string]context.IHandler),
-		fallbacks: make(map[string]context.IHandler),
+		services:   make([]string, 0, 1),
+		rawService: make(map[string]*rawUnit),
+		handlers:   make(map[string]context.IHandler),
+		fallbacks:  make(map[string]context.IHandler),
 	}
 }
 

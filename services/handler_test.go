@@ -44,6 +44,12 @@ func (t *testHandler) GetHandle(context.IContext) interface{} {
 func (t *testHandler) PostHandle(context.IContext) interface{} {
 	return nil
 }
+func (t *testHandler) PutHandle(context.IContext) interface{} {
+	return nil
+}
+func (t *testHandler) DeleteHandle(context.IContext) interface{} {
+	return nil
+}
 func (t *testHandler) Handled(context.IContext) interface{} {
 	return nil
 }
