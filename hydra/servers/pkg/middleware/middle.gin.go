@@ -13,8 +13,9 @@ import (
 
 type ginCtx struct {
 	*gin.Context
-	once    sync.Once
-	service string
+	once          sync.Once
+	service       string
+	needClearAuth bool
 }
 
 func NewGinCtx(c *gin.Context) *ginCtx {
@@ -121,4 +122,11 @@ func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 //GetHTTPReqResp 获取GetHttpReqResp请求与响应对象
 func (g *ginCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return g.Request, g.Writer
+}
+func (g *ginCtx) ClearAuth(c ...bool) bool {
+	if len(c) == 0 {
+		return g.needClearAuth
+	}
+	g.needClearAuth = types.GetBoolByIndex(c, 0, false)
+	return g.needClearAuth
 }

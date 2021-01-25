@@ -28,7 +28,8 @@ func NewDispCtx() *dispCtx {
 
 type dispCtx struct {
 	*dispatcher.Context
-	service string
+	service       string
+	needClearAuth bool
 }
 
 //
@@ -134,4 +135,11 @@ func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) 
 //GetHTTPReqResp 获取http请求与响应对象
 func (g *dispCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return nil, nil
+}
+func (g *dispCtx) ClearAuth(c ...bool) bool {
+	if len(c) == 0 {
+		return g.needClearAuth
+	}
+	g.needClearAuth = types.GetBoolByIndex(c, 0, false)
+	return g.needClearAuth
 }

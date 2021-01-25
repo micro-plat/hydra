@@ -176,6 +176,9 @@ func (m *mock) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 func (m *mock) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return nil, nil
 }
+func (m *mock) ClearAuth(c ...bool) bool {
+	return false
+}
 
 type buffer struct {
 	*bytes.Buffer

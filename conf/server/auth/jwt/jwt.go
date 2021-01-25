@@ -121,17 +121,19 @@ func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 }
 
 //GetJWTForRspns 获取jwt响应参数值
-func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string) {
+func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string, bool) {
+
+	isExpired := types.GetBoolByIndex(expired, 0, false)
 	token = TokenBearerPrefix + token
 	switch strings.ToUpper(j.Source) {
 	case SourceHeader, SourceHeaderShort: //"HEADER", "H":
-		return AuthorizationHeader, token
+		return AuthorizationHeader, token, isExpired == false
 	default:
-		expireVal := j.getExpireTime(types.GetBoolByIndex(expired, 0, false))
+		expireVal := j.getExpireTime(isExpired)
 		if j.Domain != "" {
-			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;HttpOnly", j.Name, token, j.Domain, expireVal)
+			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;HttpOnly", j.Name, token, j.Domain, expireVal), true
 		}
-		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;HttpOnly", j.Name, token, expireVal)
+		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;HttpOnly", j.Name, token, expireVal), true
 	}
 }
 

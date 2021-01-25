@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/errs"
 )
 
 type Auth struct {
 	request  interface{}
 	response interface{}
+	c        context.IInnerContext
+}
+
+func newAuth(c context.IInnerContext) *Auth {
+	return &Auth{
+		c: c,
+	}
 }
 
 //Response  用户响应的认证信息
@@ -30,6 +38,11 @@ func (c *Auth) Request(v ...interface{}) interface{} {
 		c.request = v[0]
 	}
 	return c.request
+}
+
+//Clear  清除认证信息
+func (c *Auth) Clear() {
+	c.c.ClearAuth(true)
 }
 
 //Bind 绑定用户信息

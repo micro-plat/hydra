@@ -21,7 +21,7 @@ type user struct {
 func NewUser(ctx context.IInnerContext, meta conf.IMeta) *user {
 	u := &user{
 		ctx:   ctx,
-		auth:  &Auth{},
+		auth:  newAuth(ctx),
 		IMeta: meta,
 	}
 	if ids, ok := ctx.GetHeaders()[context.XRequestID]; ok && len(ids) > 0 && ids[0] != "" {
