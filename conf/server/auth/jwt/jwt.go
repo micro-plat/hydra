@@ -129,9 +129,9 @@ func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string)
 	default:
 		expireVal := j.getExpireTime(types.GetBoolByIndex(expired, 0, false))
 		if j.Domain != "" {
-			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", j.Name, token, j.Domain, expireVal)
+			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;HttpOnly", j.Name, token, j.Domain, expireVal)
 		}
-		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", j.Name, token, expireVal)
+		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;HttpOnly", j.Name, token, expireVal)
 	}
 }
 

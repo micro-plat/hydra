@@ -35,11 +35,16 @@ func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{
 			return
 		}
 	}
+	//检查是否需要跳过请求
+	if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok && jwtToken == "" {
+		return
+	}
+
 	setToken(ctx, jwtAuth, jwtToken)
 }
 
 //setToken 设置jwt到响应头或cookie中
-func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
-	k, v := jwt.GetJWTForRspns(token, token == "")
+func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, jwtToken string) {
+	k, v := jwt.GetJWTForRspns(jwtToken, jwtToken == "")
 	ctx.Response().Header(k, v)
 }
