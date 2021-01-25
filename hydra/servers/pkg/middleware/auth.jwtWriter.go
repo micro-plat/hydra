@@ -26,19 +26,25 @@ func JwtWriter() Handler {
 }
 
 func setJwtResponse(ctx context.IContext, jwtAuth *xjwt.JWTAuth, data interface{}) {
-	if data == nil {
+	var jwtToken = ""
+	var err error
+	if data != nil {
+		jwtToken, err = jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
+		if err != nil {
+			ctx.Response().Abort(xjwt.JWTStatusConfDataError, fmt.Errorf("jwt配置出错：%v", err))
+			return
+		}
+	}
+	//检查是否需要跳过请求
+	if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok && jwtToken == "" {
 		return
 	}
-	jwtToken, err := jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
-	if err != nil {
-		ctx.Response().Abort(xjwt.JWTStatusConfDataError, fmt.Errorf("jwt配置出错：%v", err))
-		return
-	}
+
 	setToken(ctx, jwtAuth, jwtToken)
 }
 
 //setToken 设置jwt到响应头或cookie中
-func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, token string) {
-	k, v := jwt.GetJWTForRspns(token)
+func setToken(ctx context.IContext, jwt *xjwt.JWTAuth, jwtToken string) {
+	k, v := jwt.GetJWTForRspns(jwtToken, jwtToken == "")
 	ctx.Response().Header(k, v)
 }

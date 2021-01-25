@@ -129,15 +129,15 @@ func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string)
 	default:
 		expireVal := j.getExpireTime(types.GetBoolByIndex(expired, 0, false))
 		if j.Domain != "" {
-			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", j.Name, token, j.Domain, expireVal)
+			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;HttpOnly", j.Name, token, j.Domain, expireVal)
 		}
-		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", j.Name, token, expireVal)
+		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;HttpOnly", j.Name, token, expireVal)
 	}
 }
 
 //getExpireTime 获取jwt的超时时间
 func (j *JWTAuth) getExpireTime(expired bool) string {
-	expireTime := time.Now().Add(time.Hour * -1)
+	expireTime := time.Now().Add(time.Hour * -24)
 	if !expired {
 		expireTime = time.Now().Add(time.Duration(time.Duration(j.ExpireAt)*time.Second - 8*60*60*time.Second))
 	}
