@@ -122,9 +122,10 @@ func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 
 //GetJWTForRspns 获取jwt响应参数值
 func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string) {
+	token = TokenBearerPrefix + token
 	switch strings.ToUpper(j.Source) {
 	case SourceHeader, SourceHeaderShort: //"HEADER", "H":
-		return j.Name, token
+		return AuthorizationHeader, token
 	default:
 		expireVal := j.getExpireTime(types.GetBoolByIndex(expired, 0, false))
 		if j.Domain != "" {

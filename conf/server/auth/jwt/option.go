@@ -13,12 +13,12 @@ const SourceHeader = "HEADER"
 const SourceHeaderShort = "H"
 const SourceCookie = "COOKIE"
 
-// //WithName jwt设置到cookie中或header中的名称
-// func WithName(name string) Option {
-// 	return func(a *JWTAuth) {
-// 		a.Name = name
-// 	}
-// }
+//WithName jwt设置到cookie中或header中的名称
+func WithName(name string) Option {
+	return func(a *JWTAuth) {
+		a.Name = name
+	}
+}
 
 //WithExpireAt 过期时间以秒为单位
 func WithExpireAt(expireAt int64) Option {
