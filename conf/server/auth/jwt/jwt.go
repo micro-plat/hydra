@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/security/jwt"
+	"github.com/micro-plat/lib4go/types"
 	"github.com/micro-plat/lib4go/utility"
 )
 
@@ -114,9 +115,26 @@ func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 	return data, nil
 }
 
-//GetExpireTime 获取jwt的超时时间
-func (j *JWTAuth) GetExpireTime() string {
-	expireTime := time.Now().Add(time.Duration(time.Duration(j.ExpireAt)*time.Second - 8*60*60*time.Second))
+//GetJWTForRspns 获取jwt响应参数值
+func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string) {
+	switch strings.ToUpper(j.Source) {
+	case SourceHeader, SourceHeaderShort: //"HEADER", "H":
+		return j.Name, token
+	default:
+		expireVal := j.getExpireTime(types.GetBoolByIndex(expired, 0, false))
+		if j.Domain != "" {
+			return "Set-Cookie", fmt.Sprintf("%s=%s;domain=%s;path=/;expires=%s;", j.Name, token, j.Domain, expireVal)
+		}
+		return "Set-Cookie", fmt.Sprintf("%s=%s;path=/;expires=%s;", j.Name, token, expireVal)
+	}
+}
+
+//getExpireTime 获取jwt的超时时间
+func (j *JWTAuth) getExpireTime(expired bool) string {
+	expireTime := time.Now()
+	if !expired {
+		expireTime = time.Now().Add(time.Duration(time.Duration(j.ExpireAt)*time.Second - 8*60*60*time.Second))
+	}
 	return expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
 }
 
