@@ -225,7 +225,7 @@ func (q XMap) Append(kv ...interface{}) {
 	if len(kv) == 0 || len(kv)%2 != 0 {
 		return
 	}
-	for i := 0; i < len(kv)/2; i++ {
+	for i := 0; i < len(kv); i = i + 2 {
 		q.SetValue(fmt.Sprint(kv[i]), kv[i+1])
 	}
 	return
@@ -370,8 +370,15 @@ func (q XMap) GetXMap(name string) (c XMap) {
 	if !ok {
 		return map[string]interface{}{}
 	}
-	if data, ok := v.(map[string]interface{}); ok {
-		return data
+	switch value := v.(type) {
+	case map[string]interface{}:
+		return value
+	case IXMap:
+		return value.ToMap()
+	case XMap:
+		return value
+	case map[string]string:
+		return NewXMapBySMap(value)
 	}
 	return map[string]interface{}{}
 }

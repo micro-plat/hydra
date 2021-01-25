@@ -77,7 +77,11 @@ func setIntField(val string, bitSize int, field reflect.Value) error {
 	if val == "" {
 		val = "0"
 	}
-	intVal, err := strconv.ParseInt(val, 10, bitSize)
+	nval := val
+	if dx, err := NewDecimalFromString(val); err == nil {
+		nval = dx.String()
+	}
+	intVal, err := strconv.ParseInt(nval, 10, bitSize)
 	if err == nil {
 		field.SetInt(intVal)
 	}
@@ -88,7 +92,11 @@ func setUintField(val string, bitSize int, field reflect.Value) error {
 	if val == "" {
 		val = "0"
 	}
-	uintVal, err := strconv.ParseUint(val, 10, bitSize)
+	nval := val
+	if dx, err := NewDecimalFromString(val); err == nil {
+		nval = dx.String()
+	}
+	uintVal, err := strconv.ParseUint(nval, 10, bitSize)
 	if err == nil {
 		field.SetUint(uintVal)
 	}
@@ -110,7 +118,11 @@ func setFloatField(val string, bitSize int, field reflect.Value) error {
 	if val == "" {
 		val = "0.0"
 	}
-	floatVal, err := strconv.ParseFloat(val, bitSize)
+	nval := val
+	if dx, err := NewDecimalFromString(val); err == nil {
+		nval = dx.String()
+	}
+	floatVal, err := strconv.ParseFloat(nval, bitSize)
 	if err == nil {
 		field.SetFloat(floatVal)
 	}
@@ -125,7 +137,11 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 
 	switch tf := strings.ToLower(timeFormat); tf {
 	case "unix", "unixnano":
-		tv, err := strconv.ParseInt(val, 10, 0)
+		nval := val
+		if dx, err := NewDecimalFromString(val); err == nil {
+			nval = dx.String()
+		}
+		tv, err := strconv.ParseInt(nval, 10, 0)
 		if err != nil {
 			return err
 		}
