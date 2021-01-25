@@ -113,8 +113,8 @@ type IPath interface {
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string
 
-	//GetRawPathAndTag 获取服务原始注册路径与tag名(tag为handle前的名称,restful服务的tag为空)
-	GetRawPathAndTag() (path string, tag string, ok bool)
+	//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
+	GetPageAndTag() (page string, tag string, ok bool)
 
 	//GetURL 获取请求的URL信息
 	GetURL() *url.URL
@@ -269,6 +269,9 @@ type IAuth interface {
 
 	//Bind 将请求的认证对象绑定为特定的结构体
 	Bind(out interface{}) error
+
+	//Clear 清除用户登录信息
+	Clear()
 }
 
 //IUser 用户相关信息

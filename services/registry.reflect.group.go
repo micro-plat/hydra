@@ -67,7 +67,7 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 	path, service, actions := g.getPaths(g.Path, name)
 	unit, ok := g.Services[service]
 	if !ok {
-		unit = &Unit{Group: g, Path: path, Service: service, rawUnit: &rawUnit{RawPath: g.Path, RawMTag: g.getMTag(name)}}
+		unit = &Unit{Group: g, Path: path, Service: service, rawUnit: &rawUnit{RawPath: g.Path, RawMTag: name}}
 		g.Services[service] = unit
 	}
 
@@ -119,12 +119,4 @@ func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, a
 		return path, path, router.DefMethods
 	}
 	return registry.Join(path, name), registry.Join(path, name), router.DefMethods
-}
-func (g *UnitGroup) getMTag(name string) string {
-	for _, m := range router.Methods {
-		if strings.EqualFold(m, name) {
-			return ""
-		}
-	}
-	return name
 }
