@@ -85,7 +85,7 @@ type JWTAuth struct {
 //NewJWT 构建JWT配置参数
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
-		Name:     JWTName,
+		Name:     AuthorizationHeader,
 		Mode:     ModeHS512,
 		Secret:   utility.GetGUID(),
 		ExpireAt: 86400,
@@ -103,6 +103,11 @@ func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 	if token == "" {
 		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
 	}
+	if !strings.HasPrefix(token, TokenBearerPrefix) {
+		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt.token格式错误(%s)", token))
+	}
+	token = token[len(TokenBearerPrefix):]
+
 	//2. 解密jwt判断是否有效，是否过期
 	data, er := jwt.Decrypt(token, j.Secret)
 	if er != nil {

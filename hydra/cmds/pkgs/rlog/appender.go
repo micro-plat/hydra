@@ -69,7 +69,7 @@ func (f *RPCAppender) Close() error {
 		f.ticker.Stop()
 		f.lock.Lock()
 		defer f.lock.Unlock()
-		f.writeNow()
+		f.writeNow(true)
 	})
 
 	return nil
@@ -83,7 +83,7 @@ START:
 		select {
 		case _, ok := <-f.ticker.C:
 			if ok {
-				if err := f.writeNow(); err != nil {
+				if err := f.writeNow(false); err != nil {
 					logger.SysLog.Errorf("未正确写入日志:%v", err)
 				}
 			} else {
@@ -94,7 +94,7 @@ START:
 }
 
 //writeNow 将数据写入远程请求
-func (f *RPCAppender) writeNow() (err error) {
+func (f *RPCAppender) writeNow(b bool) (err error) {
 	if f.buffer.Len() == 0 {
 		return nil
 	}
@@ -106,18 +106,21 @@ func (f *RPCAppender) writeNow() (err error) {
 			err = fmt.Errorf("json.compact.err:%v", err)
 			return 0, err
 		}
+
 		_, err = components.Def.RPC().GetRegularRPC().Request(
 			f.service,
-			buff.Bytes(),
-			rpc.WithHeader("plat", global.Def.PlatName),
-			rpc.WithHeader("system", global.Def.SysName))
+			buff.String(),
+			rpc.WithHeader("Plat", global.Def.PlatName),
+			rpc.WithHeader("System", global.Def.SysName))
 		if err != nil {
 			return 0, fmt.Errorf("rlog写入日志失败 %s %w", f.service, err)
 		}
 		return len(p) - 1, nil
 	}
-	f.lock.Lock()
-	defer f.lock.Unlock()
+	if !b {
+		f.lock.Lock()
+		defer f.lock.Unlock()
+	}
 	if _, err := f.buffer.WriteTo(writeHandler(write)); err != nil {
 		return err
 	}
