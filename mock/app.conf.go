@@ -1,25 +1,19 @@
 package mock
 
 import (
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/context"
-	"github.com/micro-plat/hydra/context/ctx"
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
-	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//NewContext 创建mock类型的Context包
-func NewContext(content, encoding string, opts ...Option) context.IContext {
-
-	//构建mock
-	mk := newMock(content, encoding)
+//NewAPPConf 构建APP配置
+func NewAPPConf(opts ...hydra.Option) (app.IAPPConf, error) {
 	for _, opt := range opts {
-		opt(mk)
+		opt()
 	}
-
 	//初始化参数
 	global.Def.PlatName = types.GetString(global.Def.PlatName, "mock_plat")
 	global.Def.SysName = types.GetString(global.Def.SysName, "tserver")
@@ -42,7 +36,5 @@ func NewContext(content, encoding string, opts ...Option) context.IContext {
 	if err != nil {
 		panic(err)
 	}
-
-	//构建Context
-	return ctx.NewCtx(mk, global.Def.ServerTypes[0])
+	return app.Cache.GetAPPConf(http.API)
 }

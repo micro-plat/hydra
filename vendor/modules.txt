@@ -186,6 +186,7 @@ github.com/shopspring/decimal
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/stretchr/testify v1.6.1
+## explicit
 github.com/stretchr/testify/assert
 # github.com/ugorji/go/codec v1.2.2
 ## explicit

@@ -139,7 +139,6 @@ type IVarConf interface {
 	GetConf(tp string, name string) (*RawConf, error)
 	GetConfVersion(tp string, name string) (int32, error)
 	GetObject(tp string, name string, v interface{}) (int32, error)
-	GetCachedObject(tp string, name string, v interface{}) (int32, error)
 	GetClone() IVarConf
 	Has(tp string, name string) bool
 	Iter(f func(k string, conf *RawConf) bool)

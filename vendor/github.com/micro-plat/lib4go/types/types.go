@@ -1,6 +1,9 @@
 package types
 
 import (
+	"bytes"
+	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -8,7 +11,7 @@ import (
 	"strings"
 	"time"
 	"unsafe"
-	"encoding/json"
+
 	"github.com/shopspring/decimal"
 )
 
@@ -432,4 +435,14 @@ func Struct2Map(i interface{}) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+//DeepCopyByGob 通过gob对对象进行深拷贝
+func DeepCopyByGob(dst, src interface{}) error {
+	var buffer bytes.Buffer
+	if err := gob.NewEncoder(&buffer).Encode(src); err != nil {
+		return err
+	}
+
+	return gob.NewDecoder(&buffer).Decode(dst)
 }
