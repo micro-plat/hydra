@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/types"
@@ -27,13 +29,15 @@ type mock struct {
 }
 
 //newMock 构建
-func newMock(content string) *mock {
+func newMock(content, encoding string) *mock {
+	ctp, body := getContentType(content)
 	mk := &mock{
 		RHeaders: make(types.XMap),
 		wHeaders: make(types.XMap),
 		Cookies:  make(types.XMap),
+		Body:     body,
 	}
-	mk.RHeaders["Content-Type"], mk.Body = getContentType(content)
+	mk.RHeaders["Content-Type"] = fmt.Sprintf(ctp, encoding)
 	return mk
 }
 
@@ -204,6 +208,11 @@ func getContentType(text string) (string, string) {
 		_, err := url.ParseQuery(text)
 		if err == nil {
 			return "application/x-www-form-urlencoded", text
+		}
+		var out interface{}
+		err = yaml.Unmarshal([]byte(text), &out)
+		if err == nil {
+			return context.YAMLF, text
 		}
 		return context.PLAINF, text
 	}
