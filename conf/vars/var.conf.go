@@ -5,7 +5,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 var _ conf.IVarConf = &VarConf{}
@@ -25,7 +24,6 @@ type cacheObj struct {
 
 //VarConf 变量信息
 type VarConf struct {
-	cache cmap.ConcurrentMap
 	conf.IVarPub
 	varConfPath  string
 	varVersion   int32
@@ -36,7 +34,6 @@ type VarConf struct {
 //NewVarConf 构建服务器配置缓存
 func NewVarConf(platName string, rgst registry.IRegistry) (s *VarConf, err error) {
 	s = &VarConf{
-		cache:        cmap.New(3),
 		IVarPub:      NewVarPub(platName),
 		registry:     rgst,
 		varNodeConfs: make(map[string]conf.RawConf),
@@ -127,25 +124,6 @@ func (c *VarConf) GetObject(tp string, name string, v interface{}) (int32, error
 		return 0, err
 	}
 	return conf.GetVersion(), nil
-}
-
-//GetCachedObject　获取已缓存的对象(未缓存时调用GetObject转换对象，并缓存)
-func (c *VarConf) GetCachedObject(tp string, name string, v interface{}) (int32, error) {
-	key := fmt.Sprintf("%s-%s", tp, name)
-	_, obj, err := c.cache.SetIfAbsentCb(key, func(...interface{}) (interface{}, error) {
-		ver, err := c.GetObject(tp, name, v)
-		if err != nil {
-			return nil, err
-		}
-		ch := &cacheObj{obj: v, version: ver}
-		return ch, nil
-	})
-	if err != nil {
-		return 0, err
-	}
-	ch := obj.(*cacheObj)
-	v = ch.obj
-	return ch.version, nil
 }
 
 //GetClone 获取配置拷贝
