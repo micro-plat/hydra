@@ -33,6 +33,9 @@ func NewResponsive(cnf app.IAPPConf) (h *Responsive, err error) {
 	}
 
 	app.Cache.Save(cnf)
+	if err := services.Def.DoSetup(cnf); err != nil {
+		return nil, err
+	}
 	h.Server, err = h.getServer(cnf)
 	return h, err
 }

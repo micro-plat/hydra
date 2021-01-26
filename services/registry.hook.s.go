@@ -8,10 +8,23 @@ import (
 )
 
 type serverHook struct {
+	setup     func(app.IAPPConf) error
 	starting  func(app.IAPPConf) error
 	closing   func(app.IAPPConf) error
 	handlings []context.IHandler
 	handleds  []context.IHandler
+}
+
+//AddSetup 添加服务器启动前配置参数前执行勾子
+func (s *serverHook) AddSetup(h func(app.IAPPConf) error) error {
+	if h == nil {
+		return fmt.Errorf("服务不能为空")
+	}
+	if s.setup != nil {
+		return fmt.Errorf("服务不能重复注册")
+	}
+	s.setup = h
+	return nil
 }
 
 //AddStarting 添加服务器启动勾子
@@ -64,6 +77,14 @@ func (s *serverHook) GetHandleExecutings() []context.IHandler {
 //GetHandleExecuteds 获取handle后处理勾子
 func (s *serverHook) GetHandleExecuteds() []context.IHandler {
 	return s.handleds
+}
+
+//DoSetup 获取服务器配置勾子
+func (s *serverHook) DoSetup(c app.IAPPConf) error {
+	if s.setup == nil {
+		return nil
+	}
+	return s.setup(c)
 }
 
 //DoStarting 获取服务器启动预处理函数
