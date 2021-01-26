@@ -51,8 +51,11 @@ type IService interface {
 	//OnSetup 服务器初始化勾子，服务器配置初始化前执行
 	OnSetup(h func(app.IAPPConf) error, tps ...string)
 
-	//OnStarting 服务器启动勾子，服务器启动前执行
+	//OnStarting 服务器启动前勾子，服务器启动前执行
 	OnStarting(h func(app.IAPPConf) error, tps ...string)
+
+	//OnStarted 服务器启动完成勾子，服务器启动后执行
+	OnStarted(h func(app.IAPPConf) error, tps ...string)
 
 	//OnClosing 服务器关闭勾子，服务器关闭后执行
 	OnClosing(h func(app.IAPPConf) error, tps ...string)
@@ -180,7 +183,7 @@ func (s *regist) OnSetup(h func(app.IAPPConf) error, tps ...string) {
 	}
 }
 
-//OnStarting 处理服务器启动
+//OnStarting 处理服务器启动前
 func (s *regist) OnStarting(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -188,6 +191,18 @@ func (s *regist) OnStarting(h func(app.IAPPConf) error, tps ...string) {
 	for _, typ := range tps {
 		if err := s.get(typ).AddStarting(h); err != nil {
 			panic(fmt.Errorf("%s OnStarting %v", typ, err))
+		}
+	}
+}
+
+//OnStarted 处理服务器启动后
+func (s *regist) OnStarted(h func(app.IAPPConf) error, tps ...string) {
+	if len(tps) == 0 {
+		tps = global.Def.ServerTypes
+	}
+	for _, typ := range tps {
+		if err := s.get(typ).AddStarted(h); err != nil {
+			panic(fmt.Errorf("%s OnStarted %v", typ, err))
 		}
 	}
 }
@@ -273,6 +288,12 @@ func (s *regist) get(tp string) *serverServices {
 //DoStarting 执行服务启动函数
 func (s *regist) DoStarting(c app.IAPPConf) error {
 	return s.get(c.GetServerConf().GetServerType()).DoStarting(c)
+
+}
+
+//DoStarted 执行服务启动函数
+func (s *regist) DoStarted(c app.IAPPConf) error {
+	return s.get(c.GetServerConf().GetServerType()).DoStarted(c)
 
 }
 

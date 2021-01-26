@@ -61,8 +61,13 @@ func (w *Responsive) Start() (err error) {
 		w.Shutdown()
 		return err
 	}
-
 	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.serverNum())
+
+	//服务启动成功后钩子
+	if err := services.Def.DoStarted(w.conf); err != nil {
+		w.Shutdown()
+		return err
+	}
 	return nil
 }
 
