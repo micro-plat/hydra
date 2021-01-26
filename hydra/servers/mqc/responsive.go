@@ -78,6 +78,7 @@ func (w *Responsive) Start() (err error) {
 
 	//服务启动成功后钩子
 	if err := services.Def.DoStarted(w.conf); err != nil {
+		err = fmt.Errorf("%s外部处理失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
