@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -79,7 +80,9 @@ func (w *body) GetMap() (data map[string]interface{}, err error) {
 		case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
 			w.mapBody.err = yaml.Unmarshal(body, &data)
 		case strings.Contains(ctp, "/json"):
-			w.mapBody.err = json.Unmarshal(body, &data)
+			d := json.NewDecoder(bytes.NewReader(body))
+			d.UseNumber()
+			w.mapBody.err = d.Decode(&data)
 		case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
 			var values url.Values
 			values, w.mapBody.err = url.ParseQuery(types.BytesToString(body))
