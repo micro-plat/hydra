@@ -24,7 +24,8 @@ func (o ATTPLContext) GetSQLContext(tpl string, input map[string]interface{}) (s
 		index++
 		return fmt.Sprint(o.prefix, index)
 	}
-	return AnalyzeTPLFromCache(o.name, tpl, input, f)
+	sql, args, _ = AnalyzeTPL(tpl, input, f, o.like)
+	return sql, args
 }
 
 //GetSPContext 获取
@@ -32,6 +33,9 @@ func (o ATTPLContext) GetSPContext(tpl string, input map[string]interface{}) (sq
 	q, args := o.GetSQLContext(tpl, input)
 	sql = o.getSPName(q)
 	return
+}
+func (o ATTPLContext) like(key string, prefix func() string) string {
+	return fmt.Sprintf("'%%'||%s||'%%'", prefix())
 }
 
 //Replace 替换SQL中的占位符

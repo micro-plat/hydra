@@ -17,12 +17,16 @@ func (o MTPLContext) GetSQLContext(tpl string, input map[string]interface{}) (qu
 	f := func() string {
 		return o.prefix
 	}
-	return AnalyzeTPLFromCache(o.name, tpl, input, f)
+	query, args, _ = AnalyzeTPL(tpl, input, f, o.like)
+	return query, args
 }
 
 //GetSPContext 获取存储过程
 func (o MTPLContext) GetSPContext(tpl string, input map[string]interface{}) (query string, args []interface{}) {
 	return o.GetSQLContext(tpl, input)
+}
+func (o MTPLContext) like(key string, prefix func() string) string {
+	return "CONCAT('%'," + prefix() + ",'%')"
 }
 
 //Replace 替换SQL中的占位符
