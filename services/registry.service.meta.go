@@ -51,6 +51,12 @@ func (s *metaServices) remove(service string) {
 	}
 }
 
+//Has 是否包含服务
+func (s *metaServices) Has(service string) (ok bool) {
+	_, ok = s.handlers[service]
+	return
+}
+
 //GetHandlers 获取服务的处理对象
 func (s *metaServices) GetHandlers(service string) (h context.IHandler, ok bool) {
 	h, ok = s.handlers[service]
