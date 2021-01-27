@@ -12,10 +12,10 @@ import (
 )
 
 //NewContext 创建mock类型的Context包
-func NewContext(content, encoding string, opts ...Option) context.IContext {
+func NewContext(content string, opts ...Option) context.IContext {
 
 	//构建mock
-	mk := newMock(content, encoding)
+	mk := newMock(content)
 	for _, opt := range opts {
 		opt(mk)
 	}
