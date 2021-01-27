@@ -166,7 +166,10 @@ func (c *response) Data(code int, contentType string, data interface{}) interfac
 //WriteAny 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
 //格式输出内容
 func (c *response) WriteAny(v interface{}) error {
-	return c.Write(http.StatusOK, v)
+	if v == nil {
+		return nil
+	}
+	return c.Write(c.final.status, v)
 }
 
 //Write 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
@@ -230,9 +233,11 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		}
 	case error:
 		c.log.Error(content)
-
 		if status >= http.StatusOK && status < http.StatusBadRequest {
-			rs = http.StatusBadRequest
+			rs = c.final.status
+			if c.final.status >= http.StatusOK && c.final.status < http.StatusBadRequest {
+				rs = http.StatusBadRequest
+			}
 		}
 		if global.IsDebug {
 			rc = v.Error()
