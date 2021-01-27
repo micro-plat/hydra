@@ -15,10 +15,7 @@ import (
 func NewContext(content string, opts ...Option) context.IContext {
 
 	//构建mock
-	mk := newMock(content)
-	for _, opt := range opts {
-		opt(mk)
-	}
+	mk := newMock(content, opts...)
 
 	//初始化参数
 	global.Def.PlatName = types.GetString(global.Def.PlatName, "mock_plat")

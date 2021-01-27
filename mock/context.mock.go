@@ -30,13 +30,16 @@ type mock struct {
 }
 
 //newMock 构建
-func newMock(content string) *mock {
+func newMock(content string, opts ...Option) *mock {
 	ctp, body := getContentType(content)
 	mk := &mock{
 		RHeaders: make(types.XMap),
 		wHeaders: make(types.XMap),
 		Cookies:  make(types.XMap),
 		Body:     body,
+	}
+	for _, opt := range opts {
+		opt(mk)
 	}
 	mk.RHeaders["Content-Type"] = fmt.Sprintf(ctp, mk.encoding)
 	return mk
