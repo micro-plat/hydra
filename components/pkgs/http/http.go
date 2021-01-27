@@ -18,7 +18,6 @@ import (
 type Client struct {
 	*varhttp.HTTPConf
 	client *http.Client
-	Response *http.Response
 }
 
 //ClientRequest  http请求

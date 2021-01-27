@@ -41,22 +41,25 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	if ctx, ok := context.GetContext(); ok {
 		req.Header.Set(context.XRequestID, ctx.User().GetTraceID())
 	}
-	c.Response, err = c.client.Do(req)
-	if c.Response != nil {
-		defer c.Response.Body.Close()
+	response, err := c.client.Do(req)
+	if response != nil {
+		defer response.Body.Close()
 	}
 	if err != nil {
-		return
+		return nil, 0, fmt.Errorf("client.Do err:%v", err)
 	}
-	body, err := ioutil.ReadAll(c.Response.Body)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		c.printResponseError(method, url, c.Response.Status, time.Now().Sub(start), err)
-		return
+		c.printResponseError(method, url, response.Status, time.Now().Sub(start), err)
+		return nil, 0, fmt.Errorf("body ReadAll err:%v", err)
 	}
 
-	c.printResponse(method, url, c.Response.Status, time.Now().Sub(start), string(body))
-	status = c.Response.StatusCode
+	c.printResponse(method, url, response.Status, time.Now().Sub(start), string(body))
+	status = response.StatusCode
 	ct, err := encoding.DecodeBytes(body, charset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("body charset err:%v", err)
+	}
 	content = ct
 	return
 }
