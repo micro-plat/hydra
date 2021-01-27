@@ -29,6 +29,13 @@ func WithService(service string) Option {
 	}
 }
 
+//WithEncoding 设置编码格式
+func WithEncoding(encoding string) Option {
+	return func(o *mock) {
+		o.encoding = encoding
+	}
+}
+
 //WithRHeaders 设置header参数
 func WithRHeaders(header types.XMap) Option {
 	return func(o *mock) {

@@ -21,6 +21,7 @@ type mock struct {
 	RHeaders types.XMap
 	wHeaders types.XMap
 	Cookies  types.XMap
+	encoding string
 	result   []byte
 	Service  string
 	status   int
@@ -29,7 +30,7 @@ type mock struct {
 }
 
 //newMock 构建
-func newMock(content, encoding string) *mock {
+func newMock(content string, opts ...Option) *mock {
 	ctp, body := getContentType(content)
 	mk := &mock{
 		RHeaders: make(types.XMap),
@@ -37,7 +38,10 @@ func newMock(content, encoding string) *mock {
 		Cookies:  make(types.XMap),
 		Body:     body,
 	}
-	mk.RHeaders["Content-Type"] = fmt.Sprintf(ctp, encoding)
+	for _, opt := range opts {
+		opt(mk)
+	}
+	mk.RHeaders["Content-Type"] = fmt.Sprintf(ctp, mk.encoding)
 	return mk
 }
 
