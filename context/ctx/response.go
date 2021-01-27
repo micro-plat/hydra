@@ -219,32 +219,33 @@ func (c *response) getContentType() string {
 	return headers["Content-Type"]
 }
 
-func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) {
-	//处理状态码与响应内容的默认
-	rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
+func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) { //处理状态码与响应内容的默认
+
 	switch v := content.(type) {
 	case errs.IError:
 		c.log.Error(content)
-
 		if global.IsDebug {
 			rs, rc = v.GetCode(), v.GetError().Error()
 		} else {
 			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(v.GetCode()), "", "Internal Server Error")
 		}
+		rs = types.DecodeInt(rs, 0, c.final.status)
+		rs = types.DecodeInt(rs, 0, http.StatusBadRequest)
+		return
 	case error:
 		c.log.Error(content)
-		if status >= http.StatusOK && status < http.StatusBadRequest {
-			rs = c.final.status
-			if c.final.status >= http.StatusOK && c.final.status < http.StatusBadRequest {
-				rs = http.StatusBadRequest
-			}
-		}
+		rs = types.DecodeInt(rs, 0, c.final.status)
+		rs = types.DecodeInt(rs, 0, http.StatusBadRequest)
 		if global.IsDebug {
 			rc = v.Error()
 		} else {
 			rc = types.DecodeString(http.StatusText(rs), "", "Internal Server Error")
 		}
+		return
 	}
+
+	//处理非错误
+	rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
 	if content == nil {
 		rc = ""
 	}
