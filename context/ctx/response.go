@@ -224,30 +224,40 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 	switch v := content.(type) {
 	case errs.IError:
 		c.log.Error(content)
+
+		//处理状态码与内容
 		if global.IsDebug {
 			rs, rc = v.GetCode(), v.GetError().Error()
 		} else {
 			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(v.GetCode()), "", "Internal Server Error")
 		}
+
+		//处理状态码与内容
 		rs = types.DecodeInt(rs, 0, c.final.status)
-		rs = types.DecodeInt(rs, 0, http.StatusBadRequest)
-		return
+		if rs == 0 || rs >= http.StatusOK && rs < http.StatusBadRequest {
+			rs = http.StatusBadRequest
+		}
 	case error:
 		c.log.Error(content)
+
+		//处理状态码
 		rs = types.DecodeInt(rs, 0, c.final.status)
-		rs = types.DecodeInt(rs, 0, http.StatusBadRequest)
+		if rs == 0 || rs >= http.StatusOK && rs < http.StatusBadRequest {
+			rs = http.StatusBadRequest
+		}
+
+		//处理返回内容
 		if global.IsDebug {
 			rc = v.Error()
 		} else {
 			rc = types.DecodeString(http.StatusText(rs), "", "Internal Server Error")
 		}
-		return
-	}
-
-	//处理非错误
-	rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
-	if content == nil {
-		rc = ""
+	default:
+		//处理非错误
+		rs, rc = types.DecodeInt(status, 0, http.StatusOK), content
+		if content == nil {
+			rc = ""
+		}
 	}
 	return rs, rc
 }
