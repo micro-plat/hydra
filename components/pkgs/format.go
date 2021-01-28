@@ -12,19 +12,21 @@ import (
 
 var def = ""
 
+//兼容hydra0-1版本
+var hydra01 = envs.GetBool("hydra01-mqc", false)
+
 //GetStringByHeader 设置头信息
 func GetStringByHeader(content interface{}, hd ...string) string {
+	//兼容老版本
+	if hydra01 {
+		return GetString(content)
+	}
 
 	header := make(map[string]string, 0)
 	if len(hd)%2 == 0 {
 		for i := 0; i < len(hd)/2; i++ {
 			header[fmt.Sprint(hd[i])] = hd[i+1]
 		}
-	}
-
-	//兼容老版本
-	if envs.GetBool("hydra01-mqc", false) {
-		return GetString(content)
 	}
 
 	//新版本hydra
