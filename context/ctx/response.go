@@ -269,7 +269,6 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 	if ctp := c.getContentType(); ctp != "" {
 		return ctp, c.getStringByCP(ctp, vtpKind, content)
 	}
-
 	//根据content确定 content-type
 	if vtpKind == reflect.String {
 		text := fmt.Sprint(content)
@@ -297,7 +296,13 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 }
 
 func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interface{}) string {
+	if tpkind == reflect.Invalid {
+		//非法无效的类型
+		return ""
+	}
+
 	if tpkind != reflect.Map && tpkind != reflect.Struct && tpkind != reflect.Slice && tpkind != reflect.Array {
+
 		return fmt.Sprint(content)
 	}
 
@@ -321,6 +326,9 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 			return string(buff)
 		}
 	default:
+		if content == nil {
+			return ""
+		}
 		return fmt.Sprint(content)
 	}
 }
