@@ -12,13 +12,20 @@ import (
 
 var def = ""
 
-//兼容hydra0-1版本
-var hydra01 = envs.GetBool("hydra01", false)
+//兼容hydra0-1版本的mqc服务
+var queues01 = map[string]string{}
+
+func init() {
+	lst := strings.Split(envs.GetString("hydra01-queues"), ",")
+	for _, i := range lst {
+		queues01[i] = ""
+	}
+}
 
 //GetStringByHeader 设置头信息
-func GetStringByHeader(content interface{}, hd ...string) string {
+func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	//兼容老版本
-	if hydra01 {
+	if _, ok := queues01[name]; ok {
 		return GetString(content)
 	}
 
