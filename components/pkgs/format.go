@@ -13,7 +13,7 @@ import (
 var def = ""
 
 //兼容hydra0-1版本
-var hydra01 = envs.GetBool("hydra01-mqc", false)
+var hydra01 = envs.GetBool("hydra01", false)
 
 //GetStringByHeader 设置头信息
 func GetStringByHeader(content interface{}, hd ...string) string {
