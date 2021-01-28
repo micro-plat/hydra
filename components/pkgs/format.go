@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/micro-plat/lib4go/envs"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -21,6 +22,12 @@ func GetStringByHeader(content interface{}, hd ...string) string {
 		}
 	}
 
+	//兼容老版本
+	if envs.GetBool("hydra01-mqc", false) {
+		return GetString(content)
+	}
+
+	//新版本hydra
 	out := types.NewXMap()
 	out.SetValue("__data__", types.StringToBytes(GetString(content)))
 	out.SetValue("__header__", header)

@@ -134,6 +134,7 @@ github.com/micro-plat/lib4go/db
 github.com/micro-plat/lib4go/db/tpl
 github.com/micro-plat/lib4go/encoding
 github.com/micro-plat/lib4go/encoding/base64
+github.com/micro-plat/lib4go/envs
 github.com/micro-plat/lib4go/errs
 github.com/micro-plat/lib4go/file
 github.com/micro-plat/lib4go/jsons
