@@ -129,10 +129,18 @@ func (r *Rspns) getMap(ctp string, body []byte) (data map[string]interface{}, er
 	case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
 		err = yaml.Unmarshal(body, &data)
 	case strings.Contains(ctp, "/json"):
-		d := json.NewDecoder(bytes.NewReader(body))
+		newbuff := body
+		if bytes.HasPrefix(newbuff, []byte(`"{\"`)) {
+			var s string
+			err = json.Unmarshal(body, &s)
+			if err == nil {
+				newbuff = types.StringToBytes(s)
+			}
+		}
+		d := json.NewDecoder(bytes.NewReader(newbuff))
 		d.UseNumber()
 		err = d.Decode(&data)
-		// err = json.Unmarshal(body, &data)
+		r.err = err
 	case strings.Contains(ctp, "/x-www-form-urlencoded") || strings.Contains(ctp, "/form-data"):
 		var values url.Values
 		values, err = url.ParseQuery(types.BytesToString(body))
