@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -67,7 +68,11 @@ func (g *dispCtx) GetMethod() string {
 	return g.Context.Request.GetMethod()
 }
 func (g *dispCtx) GetURL() *url.URL {
-	u, _ := url.ParseRequestURI(g.Context.Request.GetService())
+	u, err := url.ParseRequestURI(g.Context.Request.GetService())
+	if err != nil {
+		global.Def.Log().Error("service不是有效的路径，转换为URL失败", err)
+		return &url.URL{}
+	}
 	return u
 }
 func (g *dispCtx) GetHeaders() http.Header {
