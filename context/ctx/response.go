@@ -169,6 +169,11 @@ func (c *response) WriteAny(v interface{}) error {
 	if v == nil {
 		return nil
 	}
+	switch v.(type) {
+	case *context.EmptyResult:
+		return nil
+	}
+
 	return c.Write(c.final.status, v)
 }
 
@@ -188,7 +193,8 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	switch content.(type) {
 	case context.EmptyResult:
 		return nil
-
+	case *context.EmptyResult:
+		return nil
 	}
 
 	//2. 修改当前结果状态码与内容
@@ -198,7 +204,6 @@ func (c *response) Write(status int, ct ...interface{}) error {
 	if strings.Contains(c.final.contentType, "%s") {
 		c.final.contentType = fmt.Sprintf(c.final.contentType, c.path.GetEncoding())
 	}
-
 	if c.hasWrite {
 		return nil
 	}
