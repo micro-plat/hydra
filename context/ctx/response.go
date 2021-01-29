@@ -68,9 +68,9 @@ func (c *response) Header(k string, v string) {
 
 //Header 获取头信息
 func (c *response) GetHeaders() types.XMap {
-	if c.headers != nil {
-		return c.headers
-	}
+	// if c.headers != nil {
+	// 	return c.headers
+	// }
 	hds := c.ctx.WHeaders()
 	c.headers = make(map[string]interface{})
 	for k, v := range hds {
@@ -380,6 +380,7 @@ func (c *response) writeNow() error {
 			buff = buff1
 		}
 	}
+	fmt.Println("ctyp:", ctyp)
 	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
