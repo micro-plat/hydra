@@ -257,24 +257,24 @@ hello world
 
 #### 3. *API*监听端口：
 ```go
-	hydra.Conf.API(":8090")	
+	hydra.Conf.API("8090")	
 ```
 
 #### 4. *API*超时时长
 ```go
-	hydra.Conf.API(":8090", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)) 
+	hydra.Conf.API("8090", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30)) 
 ```
 
 #### 5. 白名单、黑名单
 ```go
-    hydra.Conf.API(":8080").			
+    hydra.Conf.API("8080").			
 	WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121"))).
 	BlackList(blacklist.WithIP("192.168.4.120"))
 ```
 #### 6. JWT认证
 - 1. 配置*/member*开头人路径不验证，将jwt串串存到header中：
 ```go
-    hydra.Conf.API(":8080").Jwt(jwt.WithExcludes("/member/**"), jwt.WithHeader())
+    hydra.Conf.API("8080").Jwt(jwt.WithExcludes("/member/**"), jwt.WithHeader())
 ```
 - 2. 登录成功设置jwt信息:
 
@@ -306,7 +306,7 @@ func login(ctx hydra.IContext) interface{} {
 以 *202.222.* 开头的IP，转发到名称中包含*gray*的集群（tengo脚本）:
 
 ```go
-	hydra.Conf.API(":8090").Proxy(`	
+	hydra.Conf.API("8090").Proxy(`	
                 request := import("request")
                 app := import("app")
                 text := import("text")
@@ -328,7 +328,7 @@ func login(ctx hydra.IContext) interface{} {
 
 - 1. 处理输出（tengo脚本）：
 ```go
-    hydra.Conf.API(":8070").Render(`
+    hydra.Conf.API("8070").Render(`
             request := import("request")
             response := import("response")
             text := import("text")
