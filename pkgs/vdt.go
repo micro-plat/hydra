@@ -8,5 +8,7 @@ import (
 
 func init() {
 	//注册服务名验证方式
-	govalidator.ParamTagRegexMap["spath"] = regexp.MustCompile(`^(/[^/\x00]*)+/?$`)
+	govalidator.TagMap["spath"] = govalidator.Validator(func(str string) bool {
+		return regexp.MustCompile(`^(/[^/\x00]*)+/?$`).Match([]byte(str))
+	})
 }

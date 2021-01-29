@@ -16,7 +16,7 @@ const CronExecuteNow = "@now"
 //Task cron任务的task明细
 type Task struct {
 	Cron    string `json:"cron,omitempty" valid:"ascii,required" toml:"cron,omitempty" label:"任务名称"`
-	Service string `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty" label:"任务服务"`
+	Service string `json:"service,omitempty" valid:"spath,required" toml:"service,omitempty" label:"任务服务"`
 	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
