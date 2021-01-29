@@ -5,6 +5,37 @@ import (
 	"reflect"
 )
 
+//Maps2Structs 将map转换为struct
+func Maps2Structs(v interface{}, input []map[string]interface{}, tag string) (err error) {
+
+	//检查输入对象的类型
+	value := reflect.ValueOf(v)
+	vt := reflect.TypeOf(v)
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+		vt = vt.Elem()
+	}
+	if value.Kind() != reflect.Array && value.Kind() != reflect.Slice {
+		return fmt.Errorf("输出对象必须为array或slice:%s", value.Kind().String())
+	}
+
+	//循环处理数组
+
+	// slice := reflect.MakeSlice(value.Type(), len(input), len(input))
+	// err := SetArray(vals, slice, field)
+	// if err != nil {
+	// 	return err
+	// }
+	// value.Set(slice)
+
+	// for i := 0; i < len(input); i++ {
+	// 	if err := Map2Struct(value.Index(i).Interface(), input[i], tag); err != nil {
+	// 		return err
+	// 	}
+	// }
+	return nil
+}
+
 //Map2Struct 将map转换为struct
 func Map2Struct(v interface{}, input map[string]interface{}, tag string) (err error) {
 

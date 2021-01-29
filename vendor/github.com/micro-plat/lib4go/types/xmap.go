@@ -125,6 +125,18 @@ type IXMap interface {
 	//Merge 合并多个xmap
 	Merge(m IXMap)
 
+	//Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
+	Each(fn func(string, interface{}))
+
+	//Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
+	Iterator(fn func(string, interface{}) interface{}) XMap
+
+	//Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
+	Count(fn func(string, interface{}) bool) int
+
+	//Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
+	Filter(fn func(string, interface{}) bool) XMap
+
 	//MergeMap 合并map[string]interface{}
 	MergeMap(anr map[string]interface{})
 
@@ -437,6 +449,45 @@ func (q XMap) ToStruct(out interface{}) error {
 //ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
 	return Map2Struct(out, q, "json")
+}
+
+//Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
+func (q XMap) Each(fn func(string, interface{})) {
+	for k, v := range q {
+		fn(k, v)
+	}
+}
+
+//Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
+func (q XMap) Iterator(fn func(string, interface{}) interface{}) XMap {
+	n := NewXMap()
+	for k, v := range q {
+		nv := fn(k, v)
+		n.SetValue(k, nv)
+	}
+	return n
+}
+
+//Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
+func (q XMap) Count(fn func(string, interface{}) bool) int {
+	var n = 0
+	for k, v := range q {
+		if fn(k, v) {
+			n++
+		}
+	}
+	return n
+}
+
+//Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
+func (q XMap) Filter(fn func(string, interface{}) bool) XMap {
+	n := NewXMap()
+	for k, v := range q {
+		if fn(k, v) {
+			n.SetValue(k, v)
+		}
+	}
+	return n
 }
 
 //ToMap 转换为map[string]interface{}
