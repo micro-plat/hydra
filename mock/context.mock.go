@@ -122,8 +122,8 @@ func (m *mock) Abort() {
 }
 
 //WStatus 设置当前状态码
-func (m *mock) WStatus(int) {
-	return
+func (m *mock) WStatus(status int) {
+	m.status = status
 }
 
 //Status 获取当前状态码
@@ -146,8 +146,8 @@ func (m *mock) WHeaders() http.Header {
 }
 
 //WHeader 获取响应头的值
-func (m *mock) WHeader(string) string {
-	return ""
+func (m *mock) WHeader(name string) string {
+	return m.wHeaders.GetString(name)
 }
 
 //File 写入文件
