@@ -16,7 +16,7 @@ var def = ""
 var queues01 = map[string]string{}
 
 func init() {
-	lst := strings.Split(envs.GetString("hydra01-queues"), ",")
+	lst := strings.Split(envs.GetString("hydra01queues"), ",")
 	for _, i := range lst {
 		queues01[i] = ""
 	}
