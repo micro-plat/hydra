@@ -380,7 +380,6 @@ func (c *response) writeNow() error {
 			buff = buff1
 		}
 	}
-	fmt.Println("ctyp:", ctyp)
 	c.ContentType(ctyp)
 	c.ctx.Data(status, ctyp, buff)
 	return nil
