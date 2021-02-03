@@ -58,20 +58,23 @@ func New(secret string, opts ...Option) *APIKeyAuth {
 		opt(f)
 	}
 	f.PathMatch = conf.NewPathMatch(f.Excludes...)
-	f.invoker = pkgs.NewInvoker(f.Invoker)
-	if f.invoker.Allow() {
-		f.Mode = ModeSRVC
+	if f.Invoker != "" {
+		f.invoker = pkgs.NewInvoker(f.Invoker)
+		if f.invoker.Allow() {
+			f.Mode = ModeSRVC
+		}
 	}
 	return f
 }
 
 //Verify 验证签名是否通过
 func (a *APIKeyAuth) Verify(raw string, sign string, invoke pkgs.FnInvoker) error {
-	//检查并执行本地服务调用
-	if ok, rspns := a.invoker.CheckAndInvoke(invoke); ok {
-		return rspns.GetError()
+	if a.Invoker != "" {
+		//检查并执行本地服务调用
+		if ok, rspns := a.invoker.CheckAndInvoke(invoke); ok {
+			return rspns.GetError()
+		}
 	}
-
 	//根据配置进行签名验证
 	var expect string
 	switch strings.ToUpper(a.Mode) {
@@ -101,9 +104,11 @@ func GetConf(cnf conf.IServerConf) (*APIKeyAuth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("apikey配置格式有误:%v", err)
 	}
-	f.invoker = pkgs.NewInvoker(f.Invoker)
-	if f.invoker.Allow() {
-		f.Mode = ModeSRVC
+	if f.Invoker != "" {
+		f.invoker = pkgs.NewInvoker(f.Invoker)
+		if f.invoker.Allow() {
+			f.Mode = ModeSRVC
+		}
 	}
 	if b, err := govalidator.ValidateStruct(&f); !b {
 		return nil, fmt.Errorf("apikey配置数据有误:%v", err)

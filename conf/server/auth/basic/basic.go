@@ -42,14 +42,18 @@ func NewBasic(opts ...Option) *BasicAuth {
 	}
 	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
-	basic.invoker = pkgs.NewInvoker(basic.Invoker)
+	if basic.Invoker != "" {
+		basic.invoker = pkgs.NewInvoker(basic.Invoker)
+	}
 	return basic
 }
 
 //Verify 验证用户信息
 func (b *BasicAuth) Verify(authValue string, i pkgs.FnInvoker) (string, bool) {
-	if ok, r := b.invoker.CheckAndInvoke(i); ok {
-		return types.DecodeString(r.GetError(), nil, types.GetString(r), ""), r.GetError() == nil
+	if b.Invoker != "" {
+		if ok, r := b.invoker.CheckAndInvoke(i); ok {
+			return types.DecodeString(r.GetError(), nil, types.GetString(r), ""), r.GetError() == nil
+		}
 	}
 	for _, pair := range b.authorization {
 		if pair.auth == authValue {
@@ -79,6 +83,8 @@ func GetConf(cnf conf.IServerConf) (*BasicAuth, error) {
 	}
 	basic.PathMatch = conf.NewPathMatch(basic.Excludes...)
 	basic.authorization = newAuthorization(basic.Members)
-	basic.invoker = pkgs.NewInvoker(basic.Invoker)
+	if basic.Invoker != "" {
+		basic.invoker = pkgs.NewInvoker(basic.Invoker)
+	}
 	return &basic, nil
 }
