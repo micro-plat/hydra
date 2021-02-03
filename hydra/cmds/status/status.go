@@ -27,7 +27,7 @@ func doStatus(c *cli.Context) (err error) {
 	//关闭日志显示
 	global.Current().Log().Pause()
 	//3.创建本地服务
-	hydraSrv, err := pkgs.GetService(c)
+	hydraSrv, err := pkgs.GetService(c, vname)
 	if err != nil {
 		return err
 	}

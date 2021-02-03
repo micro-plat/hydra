@@ -8,11 +8,14 @@ import (
 	"github.com/urfave/cli"
 )
 
+var vname string
+
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "start",
 			Usage:  "启动服务，以后台方式运行服务",
+			Flags:  pkgs.GetAppNameFlags(&vname),
 			Action: doStart,
 		}
 	})
@@ -24,7 +27,7 @@ func doStart(c *cli.Context) (err error) {
 	global.Current().Log().Pause()
 
 	//3.创建本地服务
-	hydraSrv, err := pkgs.GetService(c)
+	hydraSrv, err := pkgs.GetService(c, vname)
 	if err != nil {
 		return err
 	}
