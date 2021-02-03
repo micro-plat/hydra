@@ -8,14 +8,14 @@ import (
 	"github.com/urfave/cli"
 )
 
-var vname string
+var isFixed bool
 
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "remove",
 			Usage:  "删除服务，从本地服务器移除服务",
-			Flags:  pkgs.GetAppNameFlags(&vname),
+			Flags:  pkgs.GetFixedFlags(&isFixed),
 			Action: doRemove,
 		}
 	})
@@ -26,7 +26,7 @@ func doRemove(c *cli.Context) (err error) {
 	global.Current().Log().Pause()
 
 	//3.创建本地服务
-	hydraSrv, err := pkgs.GetService(c, vname)
+	hydraSrv, err := pkgs.GetService(c, isFixed)
 	if err != nil {
 		return err
 	}

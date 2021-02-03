@@ -22,24 +22,16 @@ func Pub2Registry(cover bool) error {
 	return nil
 }
 
-//GetAppNameFlags 获取服务名称flags
-func GetAppNameFlags(vname *string) []cli.Flag {
+//GetFixedFlags 获取服务名称flags
+func GetFixedFlags(isFixed *bool) []cli.Flag {
 	flags := make([]cli.Flag, 0, 1)
-	flags = append(flags, cli.StringFlag{
-		Name:        "name,n",
-		Destination: vname,
-		Usage:       `-指定服务名称`,
+	flags = append(flags, cli.BoolFlag{
+		Name:        "fixed,fd",
+		Destination: isFixed,
+		Usage:       `-指定服务名称与程序名称相同`,
 	})
 	return flags
 
-}
-
-//GetAppNameDesc 获取应用程序名称
-func GetAppNameDesc(vname string) (string, string) {
-	if vname != "" {
-		return global.Def.GetLongAppName(vname), global.Def.GetLongAppName(vname)
-	}
-	return global.Def.GetLongAppName(), global.Usage
 }
 
 //GetBaseFlags 获取运行时的参数

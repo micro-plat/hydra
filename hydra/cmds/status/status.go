@@ -9,14 +9,14 @@ import (
 	"github.com/urfave/cli"
 )
 
-var vname string
+var isFixed bool
 
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
 		return cli.Command{
 			Name:   "status",
 			Usage:  "查询状态，查询服务器运行、停止状态",
-			Flags:  pkgs.GetAppNameFlags(&vname),
+			Flags:  pkgs.GetFixedFlags(&isFixed),
 			Action: doStatus,
 		}
 	})
@@ -27,7 +27,7 @@ func doStatus(c *cli.Context) (err error) {
 	//关闭日志显示
 	global.Current().Log().Pause()
 	//3.创建本地服务
-	hydraSrv, err := pkgs.GetService(c, vname)
+	hydraSrv, err := pkgs.GetService(c, isFixed)
 	if err != nil {
 		return err
 	}

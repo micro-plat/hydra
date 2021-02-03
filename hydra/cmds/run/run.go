@@ -8,11 +8,11 @@ import (
 	"github.com/urfave/cli"
 )
 
-var vname string
+var isFixed bool
 
 func init() {
 	cmds.RegisterFunc(func() cli.Command {
-		flags := pkgs.GetAppNameFlags(&vname)
+		flags := pkgs.GetFixedFlags(&isFixed)
 		flags = append(flags, getFlags()...)
 		return cli.Command{
 			Name:   "run",
@@ -26,7 +26,7 @@ func init() {
 //doRun 服务启动
 func doRun(c *cli.Context) (err error) {
 	//1.创建本地服务
-	hydraSrv, err := pkgs.GetService(c, vname, os.Args[2:]...)
+	hydraSrv, err := pkgs.GetService(c, isFixed, os.Args[2:]...)
 	if err != nil {
 		return err
 	}
