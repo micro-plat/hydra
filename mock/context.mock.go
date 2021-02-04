@@ -13,6 +13,7 @@ import (
 
 	"github.com/clbanning/mxj"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -27,6 +28,7 @@ type mock struct {
 	status   int
 	Body     string
 	URL      string
+	Conf     creator.IConf
 }
 
 //newMock 构建
@@ -47,7 +49,7 @@ func newMock(content string, opts ...Option) *mock {
 
 //ClientIP 获取客户端ＩＰ
 func (m *mock) ClientIP() string {
-	return m.RHeaders.GetString("client_ip")
+	return m.RHeaders.GetString("Client-IP")
 }
 
 //GetMethod 获取请求方法

@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -75,5 +76,12 @@ func WithClusterName(clusterName string) Option {
 func WithRegistry(addr string) Option {
 	return func(o *mock) {
 		global.Def.RegistryAddr = addr
+	}
+}
+
+//WithConf 设置配置对象
+func WithConf(conf creator.IConf) Option {
+	return func(o *mock) {
+		o.Conf = conf
 	}
 }

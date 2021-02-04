@@ -24,8 +24,12 @@ func NewContext(content string, opts ...Option) context.IContext {
 	global.Def.RegistryAddr = types.GetString(global.Def.RegistryAddr, "lm://.")
 	global.Def.ServerTypes = []string{http.API}
 
+	if mk.Conf == nil {
+		mk.Conf = creator.Conf
+	}
+
 	//发布配置
-	err := creator.Conf.Pub(global.Current().GetPlatName(),
+	err := mk.Conf.Pub(global.Current().GetPlatName(),
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
 		global.Def.RegistryAddr,
