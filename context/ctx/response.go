@@ -238,7 +238,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		}
 
 		//处理状态码与内容
-		rs = types.DecodeInt(rs, 0, c.final.status)
+		rs = types.DecodeInt(rs, 0, c.final.status) //当c.final.status为200-400时使用400状态码，否则使用rs错误码
 		if rs == 0 || c.final.status >= http.StatusOK && c.final.status < http.StatusBadRequest {
 			rs = http.StatusBadRequest
 		}
