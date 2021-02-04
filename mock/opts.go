@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"net/http"
+
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/types"
@@ -83,5 +85,19 @@ func WithRegistry(addr string) Option {
 func WithConf(conf creator.IConf) Option {
 	return func(o *mock) {
 		o.Conf = conf
+	}
+}
+
+//WithRequest 设置HTTP请求
+func WithRequest(request *http.Request) Option {
+	return func(o *mock) {
+		o.Request = request
+	}
+}
+
+//WithResponse 设置HTTP writer
+func WithResponse(response http.ResponseWriter) Option {
+	return func(o *mock) {
+		o.Response = response
 	}
 }

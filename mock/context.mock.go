@@ -29,6 +29,8 @@ type mock struct {
 	Body     string
 	URL      string
 	Conf     creator.IConf
+	Request  *http.Request
+	Response http.ResponseWriter
 }
 
 //newMock 构建
@@ -184,7 +186,8 @@ func (m *mock) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 
 //GetHTTPReqResp 获取Http请求与响应
 func (m *mock) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
-	return nil, nil
+
+	return m.Request, m.Response
 }
 func (m *mock) ClearAuth(c ...bool) bool {
 	return false
