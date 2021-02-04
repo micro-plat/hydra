@@ -178,12 +178,13 @@ func (c *Client) SearchChildren(path string) (children []string, err error) {
 		if err != nil {
 			return
 		}
-		if cur <= 0 {
-			break
-		}
 		if len(keys) > 0 {
 			children = append(children, keys...)
 		}
+		if cur <= 0 {
+			break
+		}
+
 	}
 	return children, nil
 }
