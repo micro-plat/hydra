@@ -206,7 +206,7 @@ func (c *Cluster) watchCluster() error {
 	}
 	interval := time.Second * 5
 	loopPull := time.NewTicker(interval)
-	loopPull.Stop()
+
 LOOP:
 	for {
 		select {
