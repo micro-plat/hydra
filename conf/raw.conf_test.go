@@ -52,7 +52,7 @@ func TestNewByJSON(t *testing.T) {
 		wantC   *RawConf
 		wantErr bool
 	}{
-		{name: "1. rawconf-NewByJSON-反序列化失败初始化", args: args{message: []byte("{sdfsdfsdf}"), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("{sdfsdfsdf}"), signature: md5.EncryptBytes([]byte("{sdfsdfsdf}"))}, wantErr: false},
+		{name: "1. rawconf-NewByJSON-反序列化失败初始化", args: args{message: []byte("{sdfsdfsdf}"), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("{sdfsdfsdf}"), signature: md5.EncryptBytes([]byte("{sdfsdfsdf}"))}, wantErr: true},
 		{name: "2. rawconf-NewByJSON-正常初始化", args: args{message: []byte(`{"sss":"11"}`), version: 0}, wantC: &RawConf{XMap: map[string]interface{}{"sss": "11"}, version: 0, raw: []byte(`{"sss":"11"}`), signature: md5.EncryptBytes([]byte(`{"sss":"11"}`))}, wantErr: false},
 		{name: "3. rawconf-NewByJSON-无data,正常初始化", args: args{message: []byte(`test1`), version: 0}, wantC: &RawConf{XMap: nil, version: 0, raw: []byte("test1"), signature: md5.EncryptBytes([]byte(`test1`))}, wantErr: false},
 	}

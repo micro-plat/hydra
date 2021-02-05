@@ -23,7 +23,7 @@ func TestServer_addHttpRouters(t *testing.T) {
 		opt := WithServerType("api")
 		opt(s.option)
 		s.addHttpRouters(tt.routers...)
-		assert.Equalf(t, 18, len(s.engine.RouterGroup.Handlers), tt.name+",中间件数量")
+		assert.Equalf(t, 19, len(s.engine.RouterGroup.Handlers), tt.name+",中间件数量")
 		assert.Equalf(t, len(tt.routers), len(s.engine.Routes()), tt.name+",路由数量")
 	}
 }

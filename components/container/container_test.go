@@ -41,8 +41,7 @@ func TestContainer_GetOrCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := c.GetOrCreate(tt.args.typ, tt.args.name, tt.args.creator)
-			assert.Nil(t, tt.wantErr, err, tt.name)
-			assert.Equal(t, tt.wantErr, err == nil, tt.name)
+			assert.Equal(t, tt.wantErr, err != nil, tt.name)
 			assert.Equal(t, tt.want, got, tt.name)
 		})
 	}

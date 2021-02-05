@@ -145,13 +145,13 @@ func Test_conf_Pub(t *testing.T) {
 
 func Test_conf_Pub1(t *testing.T) {
 	data := map[string]string{
-		"/platname3/systemname3/api/clustername3/conf":                `{"address":":8585","status":"start"}`,
+		"/platname3/systemname3/api/clustername3/conf":                `{"address":"8585","status":"start","rTimeout":30,"wTimeout":30,"rhTimeout":30}`,
 		"/platname3/systemname3/api/clustername3/conf/acl/white.list": `{"disable":true}`,
 		"/platname3/systemname3/api/clustername3/conf/static":         `{"dir":"./src","exclude":["/view/","/views/","/web/",".exe",".so"],"homePage":"index.html","rewriters":["/","index.htm","default.html","default.htm"]}`,
 		"/platname3/var/http/httpclient":                              `{"connectionTimeout":10,"requestTimeout":10,"certs":null,"ca":"","proxy":"","keepAlive":true,"trace":false}`,
 		"/platname3/var/rpc/rpcclinent":                               `{"connectionTimeout":20,"log":"","sortPrefix":"","tls":null,"balancer":"localfirst"}`,
 	}
-	Conf.API(":8585").WhiteList(whitelist.WithDisable()).Static()
+	Conf.API("8585").WhiteList(whitelist.WithDisable()).Static()
 	Conf.Vars().HTTP("httpclient", http.WithConnTimeout(10), http.WithKeepalive(true))
 	Conf.Vars().RPC("rpcclinent", rpc.WithConnectionTimeout(20), rpc.WithLocalFirst())
 	global.Def.ServerTypes = []string{"api"}
@@ -168,11 +168,11 @@ func Test_conf_Pub1(t *testing.T) {
 
 	for _, tt := range tests {
 		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
-		assert.Equal(t, tt.wantErr, err == nil, "发布异常:"+tt.name, err.Error())
+		assert.Equal(t, tt.wantErr, err == nil, "发布异常:"+tt.name)
 		r, err := registry.GetRegistry(tt.regstType, global.Def.Log())
-		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		assert.Equal(t, true, err == nil, "获取注册中心异常1", err)
 		err = checkData(r, registry.Join("platname3"), data)
-		assert.Equal(t, true, err == nil, "获取注册中心异常", err)
+		assert.Equal(t, true, err == nil, "获取注册中心异常2", err)
 		r.Delete(registry.Join("platname3"))
 	}
 }

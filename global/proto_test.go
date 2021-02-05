@@ -49,7 +49,11 @@ func TestParseProto(t *testing.T) {
 
 		assert.Equal(t, tt.wantProto, gotproto, tt.name)
 		assert.Equal(t, tt.wantAddr, gotAddr, tt.name)
-		assert.Nil(t, tt.isNilErr, err, tt.name)
+		if tt.isNilErr {
+			assert.Nil(t, err, tt.name)
+		} else {
+			assert.NotNil(t, err, tt.name)
+		}
 	}
 }
 
@@ -65,7 +69,7 @@ func TestIsProto(t *testing.T) {
 		wantIs   bool
 	}{
 		{name: "1. IsProto-匹配的proto", args: args{addr: "zk://192.168.0.1", proto: "zk"}, wantAddr: "192.168.0.1", wantIs: true},
-		{name: "2. IsProto-不匹配的proto", args: args{addr: "zk://192.168.0.1", proto: "lm"}, wantAddr: "192.168.0.1", wantIs: false},
+		{name: "2. IsProto-不匹配的proto", args: args{addr: "zk://192.168.0.1", proto: "lm"}, wantAddr: "", wantIs: false},
 	}
 	for _, tt := range tests {
 		gotAddr, gotIs := IsProto(tt.args.addr, tt.args.proto)

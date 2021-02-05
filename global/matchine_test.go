@@ -25,11 +25,11 @@ func TestGetHostPort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		gotHost, gotPort, err := GetHostPort(tt.args.addr)
-
-		//t.Log(gotHost, gotPort, err, tt.IsNilErr)
-
-		assert.Equal(t, tt.wantHost, gotHost, tt.name)
-		assert.Equal(t, tt.wantPort, gotPort, tt.name)
-		assert.Nil(t, tt.IsNilErr, err, tt.name)
+		if tt.IsNilErr {
+			assert.Equal(t, tt.wantHost, gotHost, tt.name)
+			assert.Equal(t, tt.wantPort, gotPort, tt.name)
+			continue
+		}
+		assert.NotNil(t, err, tt.name)
 	}
 }

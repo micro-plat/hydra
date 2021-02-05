@@ -31,7 +31,7 @@ func Test_histories_Add(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s.Add(fmt.Sprintf("%s_%s", tt.args.tp, tt.args.name), tt.args.key)
-			tps := fmt.Sprintf("%s-%s", tt.args.tp, tt.args.name)
+			tps := fmt.Sprintf("%s_%s", tt.args.tp, tt.args.name)
 			if ver, ok := s.records[tps]; !ok {
 				t.Errorf("histories.keys[%s] doesn't exist", tps)
 			} else {
