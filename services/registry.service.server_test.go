@@ -143,13 +143,13 @@ func Test_serverServices_Register(t *testing.T) {
 		}
 	}
 	r, _ := API.GetRouters()
-	assert.Equal(t, 10, len(r.Routers), "api的services数量")
+	assert.Equal(t, 14, len(r.Routers), "api的services数量")
 	r, _ = WEB.GetRouters()
-	assert.Equal(t, 10, len(r.Routers), "web的services数量")
+	assert.Equal(t, 14, len(r.Routers), "web的services数量")
 	r, _ = WS.GetRouters()
-	assert.Equal(t, 10, len(r.Routers), "ws的services数量")
+	assert.Equal(t, 14, len(r.Routers), "ws的services数量")
 	r, _ = RPC.GetRouters()
-	assert.Equal(t, 10, len(r.Routers), "rpc的services数量")
-	assert.Equal(t, 10, len(CRON.dynamicTasks.Tasks), "cron数量")
+	assert.Equal(t, 14, len(r.Routers), "rpc的services数量")
+	assert.Equal(t, 14, len(CRON.dynamicTasks.Tasks), "cron数量")
 	assert.Equal(t, 4, len(MQC.dynamicQueues.Queues), "MQC数量")
 }

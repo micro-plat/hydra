@@ -456,10 +456,10 @@ func Test_regist_rawPathTag(t *testing.T) {
 		tag     string
 		ok      bool
 	}{
-		{service: "/order/$get", path: "/order", tag: "", ok: true},
-		{service: "/order/$post", path: "/order", tag: "", ok: true},
-		{service: "/order/$put", path: "/order", tag: "", ok: true},
-		{service: "/order/$delete", path: "/order", tag: "", ok: true},
+		{service: "/order/$get", path: "/order", tag: "get", ok: true},
+		{service: "/order/$post", path: "/order", tag: "post", ok: true},
+		{service: "/order/$put", path: "/order", tag: "put", ok: true},
+		{service: "/order/$delete", path: "/order", tag: "delete", ok: true},
 		{service: "/order/order", path: "/order", tag: "order", ok: true},
 	}
 	def := Def
