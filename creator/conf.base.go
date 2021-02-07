@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"github.com/micro-plat/hydra/conf/server/apm"
+	"github.com/micro-plat/hydra/conf/server/metric"
 )
 
 type ISUB interface {
@@ -32,8 +35,24 @@ func (b BaseBuilder) Sub(name string, s ...interface{}) ISUB {
 	}
 	return b
 }
+
+//Metric 监控配置
+func (b BaseBuilder) Metric(host string, db string, cron string, opts ...metric.Option) BaseBuilder {
+	b[metric.TypeNodeName] = metric.New(host, db, cron, opts...)
+	return b
+}
+
+//APM 构建APM配置
+func (b BaseBuilder) APM(address string) BaseBuilder {
+	b[apm.TypeNodeName] = apm.New(address)
+	return b
+}
+
+//Map 将监控配置返回为map
 func (b BaseBuilder) Map() map[string]interface{} {
 	return b
 }
+
+//Load 加载配置内容
 func (b BaseBuilder) Load() {
 }

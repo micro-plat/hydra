@@ -16,6 +16,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
 	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
 	s.engine.Use(middleware.Recovery().GinFunc())
+	s.engine.Use(s.metric.Handle().GinFunc()) //生成metric报表
 	// s.engine.Use(middleware.APM().GinFunc())       //链数跟踪
 	s.engine.Use(middleware.Trace().GinFunc())     //跟踪信息
 	s.engine.Use(middleware.BlackList().GinFunc()) //黑名单控制
@@ -34,7 +35,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 
 	s.engine.Use(middleware.Render().GinFunc())    //响应渲染组件
 	s.engine.Use(middleware.JwtWriter().GinFunc()) //设置jwt回写
-	s.engine.Use(s.metric.Handle().GinFunc())      //生成metric报表
 
 	s.addRouter(routers...)
 	s.server.Handler = s.engine

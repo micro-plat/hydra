@@ -48,8 +48,9 @@ func NewProcessor() (p *Processor) {
 	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
 	p.Engine.Use(middleware.Logging().DispFunc())
 	p.Engine.Use(middleware.Recovery().DispFunc())
-	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(p.metric.Handle().DispFunc())
+
+	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middlewares.DispFunc()...)
 
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)

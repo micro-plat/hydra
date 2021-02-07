@@ -8,13 +8,11 @@ import (
 	"github.com/micro-plat/hydra/conf/server/acl/proxy"
 	"github.com/micro-plat/hydra/conf/server/acl/whitelist"
 	"github.com/micro-plat/hydra/conf/server/api"
-	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/auth/apikey"
 	"github.com/micro-plat/hydra/conf/server/auth/basic"
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
-	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
 )
@@ -84,12 +82,6 @@ func (b *httpBuilder) Header(opts ...header.Option) *httpBuilder {
 	return b
 }
 
-//Header 头配置
-func (b *httpBuilder) Metric(host string, db string, cron string, opts ...metric.Option) *httpBuilder {
-	b.BaseBuilder[metric.TypeNodeName] = metric.New(host, db, cron, opts...)
-	return b
-}
-
 //Static 静态文件配置
 func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
 	b.BaseBuilder[static.TypeNodeName] = static.New(opts...)
@@ -113,11 +105,5 @@ func (b *httpBuilder) Proxy(script string) *httpBuilder {
 //Render 响应渲染配置
 func (b *httpBuilder) Render(script string) *httpBuilder {
 	b.BaseBuilder[render.TypeNodeName] = script
-	return b
-}
-
-//APM 构建APM配置
-func (b *httpBuilder) APM(address string) *httpBuilder {
-	b.BaseBuilder[apm.TypeNodeName] = apm.New(address)
 	return b
 }
