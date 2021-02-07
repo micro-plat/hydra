@@ -5,6 +5,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
+	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -523,4 +524,36 @@ func Test_conf_Encode2File(t *testing.T) {
 //toml 文件格式化  暂时不用测试
 func Test_conf_Decode(t *testing.T) {
 
+}
+
+func Test_BaseBuilder_Metric(t *testing.T) {
+	type args struct {
+		host string
+		db   string
+		cron string
+		opts []metric.Option
+	}
+	tests := []struct {
+		name   string
+		fields *httpBuilder
+		args   args
+		repeat *args
+		want   BaseBuilder
+	}{
+		{name: "1. 初始化默认metric对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})}, args: args{host: "host1", db: "db1", cron: "cron1", opts: []metric.Option{}}, want: BaseBuilder{"metric": metric.New("host1", "db1", "cron1")}},
+		{name: "2. 初始化自定义metric对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})},
+			args: args{host: "host1", db: "db1", cron: "cron1", opts: []metric.Option{metric.WithDisable(), metric.WithUPName("name", "pwd")}},
+			want: BaseBuilder{"metric": metric.New("host1", "db1", "cron1", metric.WithDisable(), metric.WithUPName("name", "pwd"))}},
+		{name: "3. 重复初始化自定义metric对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})},
+			args:   args{host: "host1", db: "db1", cron: "cron1", opts: []metric.Option{metric.WithDisable(), metric.WithUPName("name", "pwd")}},
+			repeat: &args{host: "host2", db: "db2", cron: "cron2", opts: []metric.Option{metric.WithEnable(), metric.WithUPName("xxxx", "pppp")}},
+			want:   BaseBuilder{"metric": metric.New("host2", "db2", "cron2", metric.WithEnable(), metric.WithUPName("xxxx", "pppp"))}},
+	}
+	for _, tt := range tests {
+		got := tt.fields.Metric(tt.args.host, tt.args.db, tt.args.cron, tt.args.opts...)
+		if tt.repeat != nil {
+			got = tt.fields.Metric(tt.repeat.host, tt.repeat.db, tt.repeat.cron, tt.repeat.opts...)
+		}
+		assert.Equal(t, tt.want, got, tt.name)
+	}
 }
