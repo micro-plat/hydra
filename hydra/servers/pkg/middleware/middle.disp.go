@@ -148,3 +148,6 @@ func (g *dispCtx) ClearAuth(c ...bool) bool {
 	g.needClearAuth = types.GetBoolByIndex(c, 0, false)
 	return g.needClearAuth
 }
+func (g *dispCtx) FileFromFS(filepath string, fs http.FileSystem) {
+	return
+}

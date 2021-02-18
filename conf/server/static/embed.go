@@ -1,42 +1,20 @@
 package static
 
+//处理内嵌文件，压缩包则解压并保存到本地，否则通过内存映射
+
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"embed"
 )
 
-const embedArchiveTag = ":EMBED:"
-
-var embedArchive []byte
-var embedExt string
-
-func getEmbedFileName() string {
-	return fmt.Sprintf("%s%s", TempArchiveName, embedExt)
+type embedFs struct {
+	name    string
+	archive embed.FS
 }
 
-//saveArchive 保存归档文件
-func saveArchive() (string, error) {
-	if len(embedArchive) == 0 {
-		return "", nil
-	}
+var defEmbedFs = &embedFs{}
 
-	rootPath := filepath.Dir(os.Args[0])
-	file, err := ioutil.TempFile(rootPath, getEmbedFileName())
-	if err != nil {
-		return "", err
-	}
-	_, err = file.Write(embedArchive)
-	if err != nil {
-		return "", err
-	}
-	if err = file.Close(); err != nil {
-		return "", err
-	}
-	return file.Name(), nil
+//check2FS 检查并转换为fs类型
+func (e *embedFs) check2FS() (IFS, error) {
+	return newEFS(e.name, e.archive), nil
 
-}
-func removeArchive(f string) {
-	os.RemoveAll(f)
 }

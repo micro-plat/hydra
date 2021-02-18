@@ -3,15 +3,9 @@ package static
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 
-	"github.com/asaskevich/govalidator"
-	"github.com/mholt/archiver"
 	"github.com/micro-plat/hydra/conf"
-	"github.com/micro-plat/hydra/global"
 )
 
 //TempDirName 临时目录创建名
@@ -30,32 +24,50 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
-	Dir            string              `json:"dir,omitempty" valid:"ascii" toml:"dir,omitempty" label:"静态文件根目录"`
-	Archive        string              `json:"archive,omitempty" valid:"ascii" toml:"archive,omitempty" label:"静态压缩文件目录"`
-	Prefix         string              `json:"prefix,omitempty" valid:"ascii" toml:"prefix,omitempty" label:"静态文件前缀"`
-	Exts           []string            `json:"exts,omitempty" valid:"ascii" toml:"exts,omitempty"`
-	Exclude        []string            `json:"exclude,omitempty" valid:"ascii" toml:"exclude,omitempty" label:"静态文件排除目录"`
-	HomePage       string              `json:"homePage ,omitempty" valid:"ascii" toml:"homePage,omitempty" label:"静态文件首页"`
-	Rewriters      []string            `json:"rewriters,omitempty" valid:"ascii" toml:"rewriters,omitempty" label:"静态文件重写规则"`
-	Disable        bool                `json:"disable,omitempty" toml:"disable,omitempty"`
-	FileMap        map[string]FileInfo `json:"-"`
-	RewritersMatch *conf.PathMatch     `json:"-"`
-}
-
-//FileInfo 压缩文件保存
-type FileInfo struct {
-	GzFile string
-	HasGz  bool
+	Path          string          `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
+	Excludes      []string        `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
+	HomePage      string          `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
+	AutoRewrite   bool            `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
+	Disable       bool            `json:"disable,omitempty"`
+	excludesMatch *conf.PathMatch `json:"-"`
+	fs            IFS
 }
 
 //New 构建静态文件配置信息
 func New(opts ...Option) *Static {
-	s := newStatic()
+	a := &Static{HomePage: DefaultHome, Excludes: DefaultExclude}
 	for _, opt := range opts {
-		opt(s)
+		opt(a)
 	}
-	s.RereshData()
-	return s
+
+	return a
+}
+
+//Has 是否存在指定的文件
+func (s *Static) Has(name string) bool {
+	return s.fs != nil && s.fs.Has(name)
+}
+
+//Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
+func (s *Static) Get(name string) (http.FileSystem, string, error) {
+	if s.fs == nil {
+		return nil, "", nil
+	}
+	if !s.fs.Has(name) && s.AutoRewrite {
+		fs, err := s.fs.ReadFile(name)
+		return fs, s.HomePage, err
+	}
+	fs, err := s.fs.ReadFile(name)
+	return fs, name, err
+}
+
+//IsExclude 是否是排除的文件
+func (s *Static) IsExclude(rPath string) bool {
+	if len(s.Excludes) == 0 {
+		return false
+	}
+	ok, _ := s.excludesMatch.Match(rPath)
+	return ok
 }
 
 //AllowRequest 是否是合适的请求
@@ -65,77 +77,31 @@ func (s *Static) AllowRequest(m string) bool {
 
 //GetConf 设置static
 func GetConf(cnf conf.IServerConf) (*Static, error) {
-	//设置静态文件路由
-	static := newStatic()
+	static := &Static{}
 	_, err := cnf.GetSubObject(TypeNodeName, static)
-	if errors.Is(err, conf.ErrNoSetting) {
-		static.Disable = true
-		return static, nil
-	}
-	if err != nil {
+	if err != nil && !errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
-	if static.Exts == nil {
-		static.Exts = []string{}
-	}
+	static.excludesMatch = conf.NewPathMatch(static.Excludes...)
 
-	//处理嵌入档案文件
-	if static.Archive == embedArchiveTag {
-		archivePath, err := saveArchive()
-		if err != nil {
-			return nil, err
-		}
-		static.Archive = archivePath
-		defer removeArchive(archivePath) //移除archive
-	}
-
-	//验证配置信息
-	if b, err := govalidator.ValidateStruct(static); !b {
-		return nil, fmt.Errorf("static配置数据有误:%v", err)
-	}
-	static.Dir, err = unarchive(static.Dir, static.Archive) //处理归档文件
+	//转换配置文件
+	fs, err := static.check2fs()
 	if err != nil {
-		return nil, fmt.Errorf("%s获取失败:%v", static.Archive, err)
+		return nil, err
 	}
-	static.RereshData()
-	static.RewritersMatch = conf.NewPathMatch(static.Rewriters...)
-	return static, nil
-}
-
-var waitRemoveDir = make([]string, 0, 1)
-
-func unarchive(dir string, path string) (string, error) {
-	if path == "" {
-		return dir, nil
+	if fs != nil {
+		static.fs = fs
+		return static, nil
 	}
 
-	_, err := os.Stat(path)
+	//转换本地内嵌文件
+	fs, err = defEmbedFs.check2FS()
 	if err != nil {
-		if os.IsNotExist(err) {
-			return dir, nil
-		}
-		return "", fmt.Errorf("无法打开文件:%s,%w", path, err)
+		return nil, err
 	}
-
-	rootPath := filepath.Dir(os.Args[0])
-	tmpDir, err := ioutil.TempDir(rootPath, TempDirName)
-	if err != nil {
-		return "", fmt.Errorf("创建临时文件失败:%v", err)
+	if fs != nil {
+		static.fs = fs
+		return static, nil
 	}
-	err = archiver.Unarchive(path, tmpDir)
-	if err != nil {
-		return "", fmt.Errorf("指定的文件%s解压失败:%v", path, err)
-	}
-
-	waitRemoveDir = append(waitRemoveDir, tmpDir)
-	return tmpDir, nil
-}
-
-func init() {
-	global.Def.AddCloser(func() error {
-		for _, d := range waitRemoveDir {
-			os.RemoveAll(d)
-		}
-		return nil
-	})
+	return nil, conf.ErrNoSetting
 }

@@ -113,9 +113,6 @@ type IPath interface {
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string
 
-	//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
-	GetPageAndTag() (page string, tag string, ok bool)
-
 	//GetURL 获取请求的URL信息
 	GetURL() *url.URL
 
@@ -241,7 +238,7 @@ type IResponse interface {
 	Write(s int, v ...interface{}) error
 
 	//File 向响应流中写入文件(立即写入)
-	File(path string)
+	File(path string, fs http.FileSystem)
 
 	//Abort 停止当前服务执行(立即写入)
 	Abort(int, ...interface{})

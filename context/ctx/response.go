@@ -68,9 +68,6 @@ func (c *response) Header(k string, v string) {
 
 //Header 获取头信息
 func (c *response) GetHeaders() types.XMap {
-	// if c.headers != nil {
-	// 	return c.headers
-	// }
 	hds := c.ctx.WHeaders()
 	c.headers = make(map[string]interface{})
 	for k, v := range hds {
@@ -106,7 +103,7 @@ func (c *response) Abort(s int, content ...interface{}) {
 }
 
 //File 将文件写入到响应流,并终止应用
-func (c *response) File(path string) {
+func (c *response) File(path string, fs http.FileSystem) {
 	defer c.ctx.Abort()
 	if c.noneedWrite || c.ctx.Written() {
 		return
@@ -115,7 +112,7 @@ func (c *response) File(path string) {
 	c.raw.status = http.StatusOK
 	c.final.status = http.StatusOK
 	c.ctx.WStatus(http.StatusOK)
-	c.ctx.File(path)
+	c.ctx.FileFromFS(path, fs)
 }
 
 //NoNeedWrite 无需写入响应数据到缓存

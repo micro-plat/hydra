@@ -1,7 +1,6 @@
 package ctx
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -97,29 +96,6 @@ func (c *rpath) GetRouter() (*router.Router, error) {
 	default:
 		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8")), nil
 	}
-
-}
-
-//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
-func (c *rpath) GetPageAndTag() (page string, tag string, ok bool) {
-
-	//获取服务注册的路径名，tag标签
-	tp := c.appConf.GetServerConf().GetServerType()
-	page, tag, ok = services.Def.GetRawPathAndTag(tp, c.GetService())
-	if !ok {
-		return "", "", false
-	}
-
-	//处理tag为空时，获取当前method
-	if tag == "" {
-		tag = c.ctx.GetMethod()
-	}
-
-	//处理页面前缀问题
-	if static, err := c.appConf.GetStaticConf(); err == nil && strings.Trim(static.Prefix, "/") != "" {
-		return fmt.Sprintf("/%s/%s", strings.Trim(static.Prefix, "/"), strings.TrimPrefix(page, "/")), tag, true
-	}
-	return page, tag, ok
 
 }
 
