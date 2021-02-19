@@ -15,7 +15,7 @@ import (
 
 //IFS 文件管理器
 type IFS interface {
-	ReadFile(name string) (http.FileSystem, error)
+	ReadFile(name string) (http.FileSystem, string, error)
 	Has(name string) bool
 }
 
@@ -32,8 +32,8 @@ func newOSFS(dir string) *osfs {
 	}
 }
 
-func (o *osfs) ReadFile(name string) (http.FileSystem, error) {
-	return o.fs, nil
+func (o *osfs) ReadFile(name string) (http.FileSystem, string, error) {
+	return o.fs, filepath.Join(o.dir, name), nil
 }
 func (o *osfs) Has(name string) bool {
 	_, err := os.Stat(name)
@@ -77,8 +77,8 @@ func newEFS(name string, fs embed.FS) *efs {
 	}
 }
 
-func (o *efs) ReadFile(name string) (http.FileSystem, error) { //http.FileServer(http.FS(embed.FS{}))
-	return o.hfs, nil
+func (o *efs) ReadFile(name string) (http.FileSystem, string, error) { //http.FileServer(http.FS(embed.FS{}))
+	return o.hfs, filepath.Join(o.name, name), nil
 }
 
 func (o *efs) Has(name string) bool {

@@ -6,8 +6,8 @@ import (
 )
 
 func doStatic(ctx IMiddleContext, service string) bool {
+
 	//查询静态文件中是否存在
-	ctx.Response().AddSpecial("static")
 	static, err := ctx.APPConf().GetStaticConf()
 	if err != nil {
 		return false
@@ -17,14 +17,10 @@ func doStatic(ctx IMiddleContext, service string) bool {
 	}
 
 	//检查文件是否需要按静态文件处理
+	ctx.Response().AddSpecial("static")
 	var rpath = ctx.Request().Path().GetRequestPath()
 	var method = ctx.Request().Path().GetMethod()
 	if !static.AllowRequest(method) {
-		return false
-	}
-
-	if !static.Has(rpath) {
-		ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("文件不存在%s", rpath))
 		return false
 	}
 
@@ -36,6 +32,7 @@ func doStatic(ctx IMiddleContext, service string) bool {
 	}
 
 	//写入到响应流
+	ctx.Log().Debug(rpath, p)
 	ctx.Response().File(p, fs)
 	return true
 }

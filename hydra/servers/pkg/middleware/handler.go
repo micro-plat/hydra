@@ -49,6 +49,7 @@ func ExecuteHandler(service string) Handler {
 		if doStatic(ctx, service) {
 			return
 		}
+		ctx.Log().Debug("404")
 		ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到路径:%s", ctx.Request().Path().GetRequestPath()))
 	}
 }

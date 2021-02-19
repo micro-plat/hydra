@@ -45,4 +45,5 @@ func (s *Server) addRouter(routers ...*router.Router) {
 			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
+	s.engine.Any("*name", middleware.ExecuteHandler("/").GinFunc())
 }

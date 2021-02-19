@@ -43,22 +43,15 @@ func New(opts ...Option) *Static {
 	return a
 }
 
-//Has 是否存在指定的文件
-func (s *Static) Has(name string) bool {
-	return s.fs != nil && s.fs.Has(name)
-}
-
 //Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
 func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
 		return nil, "", nil
 	}
 	if !s.fs.Has(name) && s.AutoRewrite {
-		fs, err := s.fs.ReadFile(name)
-		return fs, s.HomePage, err
+		return s.fs.ReadFile(s.HomePage)
 	}
-	fs, err := s.fs.ReadFile(name)
-	return fs, name, err
+	return s.fs.ReadFile(name)
 }
 
 //IsExclude 是否是排除的文件
