@@ -4,7 +4,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -129,4 +131,18 @@ func (g *ginCtx) ClearAuth(c ...bool) bool {
 	}
 	g.needClearAuth = types.GetBoolByIndex(c, 0, false)
 	return g.needClearAuth
+}
+
+func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) {
+	f, err := fs.Open(filepath)
+	if err != nil {
+		status := http.StatusBadRequest
+		if os.IsNotExist(err) {
+			status = http.StatusNotFound
+		}
+		g.AbortWithError(status, err)
+		return
+	}
+
+	http.ServeContent(g.Writer, g.Request, filepath, time.Time{}, f)
 }

@@ -112,7 +112,7 @@ func (c *response) File(path string, fs http.FileSystem) {
 	c.raw.status = http.StatusOK
 	c.final.status = http.StatusOK
 	c.ctx.WStatus(http.StatusOK)
-	c.ctx.FileFromFS(path, fs)
+	c.ctx.ServeContent(path, fs)
 }
 
 //NoNeedWrite 无需写入响应数据到缓存
