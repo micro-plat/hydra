@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -136,13 +135,28 @@ func (g *ginCtx) ClearAuth(c ...bool) bool {
 func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) {
 	f, err := fs.Open(filepath)
 	if err != nil {
-		status := http.StatusBadRequest
-		if os.IsNotExist(err) {
-			status = http.StatusNotFound
-		}
+		status := toHTTPError(err)
 		g.AbortWithError(status, err)
 		return
 	}
 
-	http.ServeContent(g.Writer, g.Request, filepath, time.Time{}, f)
+	d, err := f.Stat()
+	if err != nil {
+		status := toHTTPError(err)
+		g.AbortWithError(status, err)
+		return
+	}
+
+	http.ServeContent(g.Writer, g.Request, filepath, d.ModTime(), f)
+}
+
+func toHTTPError(err error) int {
+	if os.IsNotExist(err) {
+		return http.StatusNotFound
+	}
+	if os.IsPermission(err) {
+		return http.StatusForbidden
+	}
+	// Default:
+	return http.StatusInternalServerError
 }
