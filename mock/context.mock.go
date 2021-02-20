@@ -155,8 +155,8 @@ func (m *mock) WHeader(name string) string {
 }
 
 //File 写入文件
-func (m *mock) ServeContent(filepath string, fs http.FileSystem) {
-	return
+func (m *mock) ServeContent(filepath string, fs http.FileSystem) int {
+	return http.StatusOK
 }
 
 //Data　设置响应数据

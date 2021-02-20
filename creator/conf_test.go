@@ -40,20 +40,20 @@ func Test_conf_Load(t *testing.T) {
 	servers.Register(global.MQC, nil)
 	servers.Register(global.CRON, nil)
 	cuurConfDefault := New()
-	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API(":1122"); return cuurConf }()
-	cuurConfWS := func() *conf { cuurConf := New(); cuurConf.WS(":1123"); return cuurConf }()
-	cuurConfWEB := func() *conf { cuurConf := New(); cuurConf.Web(":1124"); return cuurConf }()
+	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API("1122"); return cuurConf }()
+	cuurConfWS := func() *conf { cuurConf := New(); cuurConf.WS("1123"); return cuurConf }()
+	cuurConfWEB := func() *conf { cuurConf := New(); cuurConf.Web("1124"); return cuurConf }()
 	cuurConfMQC := func() *conf { cuurConf := New(); cuurConf.MQC("redis://192.168.0.102"); return cuurConf }()
-	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC(":1125"); return cuurConf }()
+	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC("1125"); return cuurConf }()
 	cuurConfCRON := func() *conf { cuurConf := New(); cuurConf.CRON(); return cuurConf }()
 	cuurConfCustom := func() *conf { cuurConf := New(); cuurConf.Custom("test", "自定义配置"); return cuurConf }()
 	cuurConfAll := func() *conf {
 		cuurConf := New()
 		cuurConf.Custom("test", "自定义配置")
-		cuurConf.API(":1122")
-		cuurConf.WS(":1123")
+		cuurConf.API("1122")
+		cuurConf.WS("1123")
 		cuurConf.MQC("redis://192.168.0.102")
-		cuurConf.RPC(":1125")
+		cuurConf.RPC("1125")
 		cuurConf.CRON()
 		return cuurConf
 	}()
@@ -65,16 +65,16 @@ func Test_conf_Load(t *testing.T) {
 		wantErr     bool
 	}{
 		{name: "1.1 没有设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress)}, wantErr: true},
-		{name: "1.2 已经设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122")}, wantErr: true},
+		{name: "1.2 已经设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, "1122")}, wantErr: true},
 
 		{name: "2.1 没有设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}, wantErr: true},
-		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1123")}, wantErr: true},
+		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, "1123")}, wantErr: true},
 
-		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithArchive(global.AppName))}, wantErr: true},
-		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1124").Static(static.WithArchive(global.AppName))}, wantErr: true},
+		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithAssetsPath(global.AppName))}, wantErr: true},
+		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1124").Static(static.WithAssetsPath(global.AppName))}, wantErr: true},
 
 		{name: "4.1 没有设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress)}, wantErr: true},
-		{name: "4.2 已经设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1125")}, wantErr: true},
+		{name: "4.2 已经设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC("1125")}, wantErr: true},
 
 		{name: "5.1 没有设置MQC节点,加载默认节点", serverTypes: []string{global.MQC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.MQC: newMQC("redis://192.168.0.101")}, wantErr: true},
 		{name: "5.2 已经设置MQC节点,加载默认节点", serverTypes: []string{global.MQC}, fields: cuurConfMQC, want: map[string]iCustomerBuilder{global.MQC: newMQC("redis://192.168.0.102")}, wantErr: true},
@@ -85,8 +85,8 @@ func Test_conf_Load(t *testing.T) {
 		{name: "7.1 没有设置任何节点", serverTypes: []string{}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{}, wantErr: true},
 		{name: "7.2 已经设置自定义节点节点-test", serverTypes: []string{"test"}, fields: cuurConfCustom, want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置")}, wantErr: true},
 		{name: "7.3 同时加载所有服务节点", serverTypes: []string{global.API, global.WS, global.Web, global.RPC, global.CRON, "test"}, fields: cuurConfAll,
-			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, ":1122"), global.WS: newHTTP(global.WS, ":1123"),
-				global.Web: newHTTP(global.Web, ":1124").Static(static.WithArchive(global.AppName)), global.RPC: newRPC(":1125"),
+			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, "1122"), global.WS: newHTTP(global.WS, "1123"),
+				global.Web: newHTTP(global.Web, "1124").Static(static.WithAssetsPath(global.AppName)), global.RPC: newRPC("1125"),
 				global.MQC: newMQC("redis://192.168.0.102"), global.CRON: newCron()}, wantErr: true},
 	}
 	for _, tt := range tests {
@@ -130,7 +130,7 @@ func Test_conf_Load(t *testing.T) {
 
 func Test_conf_API(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API(":1122"); return cuurConf }()
+	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API("1122"); return cuurConf }()
 	tests := []struct {
 		name    string
 		address string
@@ -153,14 +153,14 @@ func Test_conf_API(t *testing.T) {
 
 func Test_conf_GetAPI(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API(":1122"); return cuurConf }()
+	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API("1122"); return cuurConf }()
 	tests := []struct {
 		name   string
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
 		{name: "1. 未设置,获取api配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress)}},
-		{name: "2. 已设置,获取api配置对象", fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, ":1122")}},
+		{name: "2. 已设置,获取api配置对象", fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, "1122")}},
 	}
 
 	for _, tt := range tests {
@@ -172,7 +172,7 @@ func Test_conf_GetAPI(t *testing.T) {
 
 func Test_conf_Web(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWeb := func() *conf { cuurConf := New(); cuurConf.Web(":1122"); return cuurConf }()
+	cuurConfWeb := func() *conf { cuurConf := New(); cuurConf.Web("1122"); return cuurConf }()
 	tests := []struct {
 		name    string
 		address string
@@ -186,7 +186,7 @@ func Test_conf_Web(t *testing.T) {
 
 	for _, tt := range tests {
 		want := newHTTP(global.Web, tt.address, tt.opts...)
-		want.Static(static.WithArchive(global.AppName))
+		want.Static(static.WithAssetsPath(global.AppName))
 		obj := tt.fields.Web(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
@@ -195,14 +195,14 @@ func Test_conf_Web(t *testing.T) {
 
 func Test_conf_GetWeb(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWeb := func() *conf { cuurConf := New(); cuurConf.Web(":1122"); return cuurConf }()
+	cuurConfWeb := func() *conf { cuurConf := New(); cuurConf.Web("1122"); return cuurConf }()
 	tests := []struct {
 		name   string
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithArchive(global.AppName))}},
-		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, ":1122").Static(static.WithArchive(global.AppName))}},
+		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithAssetsPath(global.AppName))}},
+		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1122").Static(static.WithAssetsPath(global.AppName))}},
 	}
 
 	for _, tt := range tests {
@@ -215,7 +215,7 @@ func Test_conf_GetWeb(t *testing.T) {
 
 func Test_conf_WS(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS(":1122"); return cuurConf }()
+	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS("1122"); return cuurConf }()
 	tests := []struct {
 		name    string
 		address string
@@ -237,14 +237,14 @@ func Test_conf_WS(t *testing.T) {
 
 func Test_conf_GetWS(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS(":1122"); return cuurConf }()
+	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS("1122"); return cuurConf }()
 	tests := []struct {
 		name   string
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
 		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}},
-		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, ":1122")}},
+		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, "1122")}},
 	}
 
 	for _, tt := range tests {
@@ -257,7 +257,7 @@ func Test_conf_GetWS(t *testing.T) {
 
 func Test_conf_RPC(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC(":1122"); return cuurConf }()
+	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC("1122"); return cuurConf }()
 	tests := []struct {
 		name    string
 		address string
@@ -279,14 +279,14 @@ func Test_conf_RPC(t *testing.T) {
 
 func Test_conf_GetRPC(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC(":1122"); return cuurConf }()
+	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC("1122"); return cuurConf }()
 	tests := []struct {
 		name   string
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
 		{name: "1. 未设置,获取rpc配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress)}},
-		{name: "2. 已设置,获取rpc配置对象", fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC(":1122")}},
+		{name: "2. 已设置,获取rpc配置对象", fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC("1122")}},
 	}
 
 	for _, tt := range tests {

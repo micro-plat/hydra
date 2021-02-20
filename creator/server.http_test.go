@@ -234,12 +234,12 @@ func Test_httpBuilder_Static(t *testing.T) {
 	}{
 		{name: "1. 初始化默认static对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})}, args: []static.Option{}, want: BaseBuilder{"static": static.New()}},
 		{name: "2. 初始化自定义static对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})},
-			args: []static.Option{static.WithDisable(), static.WithArchive("./sssss")},
-			want: BaseBuilder{"static": static.New(static.WithDisable(), static.WithArchive("./sssss"))}},
+			args: []static.Option{static.WithDisable(), static.WithAssetsPath("./sssss")},
+			want: BaseBuilder{"static": static.New(static.WithDisable(), static.WithAssetsPath("./sssss"))}},
 		{name: "3. 重复初始化自定义static对象", fields: &httpBuilder{tp: "x1", BaseBuilder: make(map[string]interface{})},
-			args:   []static.Option{static.WithDisable(), static.WithArchive("./sssss")},
-			repeat: []static.Option{static.WithEnable(), static.WithArchive("./xxxx"), static.WithExts(".ss", ".dic")},
-			want:   BaseBuilder{"static": static.New(static.WithEnable(), static.WithArchive("./xxxx"), static.WithExts(".ss", ".dic"))}},
+			args:   []static.Option{static.WithDisable(), static.WithAssetsPath("./sssss")},
+			repeat: []static.Option{static.WithEnable(), static.WithAssetsPath("./xxxx")},
+			want:   BaseBuilder{"static": static.New(static.WithEnable(), static.WithAssetsPath("./xxxx"))}},
 	}
 	for _, tt := range tests {
 		got := tt.fields.Static(tt.args...)
