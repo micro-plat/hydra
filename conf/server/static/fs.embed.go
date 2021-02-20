@@ -22,7 +22,7 @@ type embedFs struct {
 var defEmbedFs = &embedFs{}
 
 //check2FS 检查并转换为fs类型
-func (e *embedFs) check2FS() (IFS, error) {
+func (e *embedFs) getFileEmbed() (IFS, error) {
 	return newEFS(e.name, e.archive), nil
 
 }

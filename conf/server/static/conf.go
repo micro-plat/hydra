@@ -13,7 +13,7 @@ import (
 )
 
 //反归档为文件
-func (s *Static) check2fs() (IFS, error) {
+func (s *Static) getFileOS() (IFS, error) {
 	//检查路径是否配置
 	if s.Path == "" {
 		return nil, nil

@@ -49,13 +49,16 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
 		return nil, "", nil
 	}
-	//排除内容
-	if s.IsExclude(name) {
-		return nil, "", nil
-	}
 
-	if !s.fs.Has(name) && s.AutoRewrite {
-		return s.fs.ReadFile(s.HomePage)
+	if !s.fs.Has(name) {
+		//排除内容
+		if s.IsExclude(name) {
+			return nil, "", nil
+		}
+		if s.AutoRewrite {
+			return s.fs.ReadFile(s.HomePage)
+		}
+		return nil, "", nil
 	}
 	return s.fs.ReadFile(name)
 }
@@ -84,7 +87,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	static.excludesMatch = conf.NewPathMatch(static.Excludes...)
 
 	//转换配置文件
-	fs, err := static.check2fs()
+	fs, err := static.getFileOS()
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +97,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	}
 
 	//转换本地内嵌文件
-	fs, err = defEmbedFs.check2FS()
+	fs, err = defEmbedFs.getFileEmbed()
 	if err != nil {
 		return nil, err
 	}

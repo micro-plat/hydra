@@ -9,7 +9,7 @@ const DefaultSataticDir = "./static"
 const DefaultHome = "index.html"
 
 //DefaultExclude 默认需要排除的文件,扩展名,路径
-var DefaultExclude = []string{".exe", ".so"}
+var DefaultExclude = []string{".exe", ".so", "/favicon.ico", "/robots.txt"}
 
 //Option jwt配置选项
 type Option func(*Static)
