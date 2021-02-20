@@ -14,6 +14,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/lib4go/net"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 //Server cron服务器
@@ -57,7 +58,10 @@ func (s *Server) Start() error {
 			ch <- err
 			return
 		}
-
+		//debug模式，将注册的服务反射到server上，方便调试RPC接口
+		if global.Def.IsDebug() {
+			reflection.Register(s.engine)
+		}
 		if err := s.engine.Serve(lis); err != nil {
 			ch <- err
 		}
