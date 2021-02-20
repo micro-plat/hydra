@@ -24,14 +24,16 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
-	Path          string                `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
-	Excludes      []string              `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
-	HomePage      string                `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
-	AutoRewrite   bool                  `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
-	Disable       bool                  `json:"disable,omitempty"`
-	excludesMatch *conf.PathMatch       `json:"-"`
-	fs            IFS                   `json:"-"`
-	gzipfileMap   map[string]gzFileInfo `json:"-"`
+	Path           string                `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
+	Excludes       []string              `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
+	HomePage       string                `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
+	AutoRewrite    bool                  `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
+	Unrewrites     []string              `json:"unrewrite,omitempty" valid:"ascii" label:"不重写列表"`
+	Disable        bool                  `json:"disable,omitempty"`
+	excludesMatch  *conf.PathMatch       `json:"-"`
+	unRewriteMatch *conf.PathMatch       `json:"-"`
+	fs             IFS                   `json:"-"`
+	gzipfileMap    map[string]gzFileInfo `json:"-"`
 }
 
 //New 构建静态文件配置信息
@@ -49,12 +51,17 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
 		return nil, "", nil
 	}
-
+	//排除内容
+	if s.IsExclude(name) {
+		return nil, "", nil
+	}
+	//文件不存在
 	if !s.fs.Has(name) {
-		//排除内容
-		if s.IsExclude(name) {
+		//是否是不重写文件
+		if s.IsUnrewrite(name) {
 			return nil, "", nil
 		}
+		//是否自动重写
 		if s.AutoRewrite {
 			return s.fs.ReadFile(s.HomePage)
 		}
@@ -72,6 +79,15 @@ func (s *Static) IsExclude(rPath string) bool {
 	return ok
 }
 
+//IsUnrewrite 是否是非重写文件
+func (s *Static) IsUnrewrite(rPath string) bool {
+	if len(s.Unrewrites) == 0 {
+		return false
+	}
+	ok, _ := s.unRewriteMatch.Match(rPath)
+	return ok
+}
+
 //AllowRequest 是否是合适的请求
 func (s *Static) AllowRequest(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead
@@ -85,7 +101,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 	static.excludesMatch = conf.NewPathMatch(static.Excludes...)
-
+	static.unRewriteMatch = conf.NewPathMatch(static.Unrewrites...)
 	//转换配置文件
 	fs, err := static.getFileOS()
 	if err != nil {

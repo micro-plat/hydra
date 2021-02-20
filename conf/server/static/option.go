@@ -14,17 +14,31 @@ var DefaultExclude = []string{".exe", ".so", "/favicon.ico", "/robots.txt"}
 //Option jwt配置选项
 type Option func(*Static)
 
-//WithExclude 图片服务配置
-func WithExclude(exclude ...string) Option {
+//WithExclude 排除配置
+func WithExclude(excludes ...string) Option {
 	return func(s *Static) {
-		s.Excludes = exclude
+		s.Excludes = excludes
+	}
+}
+
+//WithUnrewrite 不重写列表
+func WithUnrewrite(list ...string) Option {
+	return func(s *Static) {
+		s.Unrewrites = list
+	}
+}
+
+//WithAssetsPath 设置资源地址
+func WithAssetsPath(path string) Option {
+	return func(s *Static) {
+		s.Path = path
 	}
 }
 
 //WithHomePage 设置静首页地址
-func WithHomePage(firstPage string) Option {
+func WithHomePage(homePage string) Option {
 	return func(s *Static) {
-		s.HomePage = firstPage
+		s.HomePage = homePage
 	}
 }
 
@@ -36,17 +50,17 @@ func WithEmbed(root string, fs embed.FS) Option {
 	}
 }
 
+//WithAutoRewrite 设置为自动重写
+func WithAutoRewrite() Option {
+	return func(a *Static) {
+		a.AutoRewrite = true
+	}
+}
+
 //WithDisable 禁用配置
 func WithDisable() Option {
 	return func(a *Static) {
 		a.Disable = true
-	}
-}
-
-//WithRewrite 设置为自动重写
-func WithRewrite() Option {
-	return func(a *Static) {
-		a.AutoRewrite = true
 	}
 }
 

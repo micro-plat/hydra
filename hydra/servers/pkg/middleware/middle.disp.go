@@ -149,6 +149,6 @@ func (g *dispCtx) ClearAuth(c ...bool) bool {
 	return g.needClearAuth
 }
 
-func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) {
-	return
+func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) int {
+	return http.StatusOK
 }

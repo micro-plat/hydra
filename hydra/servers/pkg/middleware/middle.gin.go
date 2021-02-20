@@ -132,22 +132,24 @@ func (g *ginCtx) ClearAuth(c ...bool) bool {
 	return g.needClearAuth
 }
 
-func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) {
+func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) (status int) {
 	f, err := fs.Open(filepath)
 	if err != nil {
-		status := toHTTPError(err)
+		status = toHTTPError(err)
 		g.AbortWithError(status, err)
 		return
 	}
 
 	d, err := f.Stat()
 	if err != nil {
-		status := toHTTPError(err)
+		status = toHTTPError(err)
 		g.AbortWithError(status, err)
 		return
 	}
 
+	status = http.StatusOK
 	http.ServeContent(g.Writer, g.Request, filepath, d.ModTime(), f)
+	return
 }
 
 func toHTTPError(err error) int {

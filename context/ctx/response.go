@@ -109,10 +109,10 @@ func (c *response) File(path string, fs http.FileSystem) {
 		return
 	}
 	c.noneedWrite = true
-	c.raw.status = http.StatusOK
-	c.final.status = http.StatusOK
-	c.ctx.WStatus(http.StatusOK)
-	c.ctx.ServeContent(path, fs)
+	status := c.ctx.ServeContent(path, fs)
+	c.ctx.WStatus(status)
+	c.raw.status = status
+	c.final.status = status
 }
 
 //NoNeedWrite 无需写入响应数据到缓存
