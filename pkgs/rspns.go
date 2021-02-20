@@ -91,6 +91,11 @@ func (r *Rspns) GetMap() types.XMap {
 	return r.data
 }
 
+//GetHeaders 获取响应头信息
+func (r *Rspns) GetHeaders() types.XMap {
+	return r.header
+}
+
 //GetResult 获取响应的原串
 func (r *Rspns) GetResult() interface{} {
 	return r.result

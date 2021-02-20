@@ -12,7 +12,6 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler(service string) Handler {
 	return func(ctx IMiddleContext) {
-		ctx.Log().Info("services.ExecuteHandler")
 		//检查是否被限流
 		ctx.Service(service) //保存服务信息
 		if ctx.Request().Path().IsLimited() {
@@ -27,6 +26,10 @@ func ExecuteHandler(service string) Handler {
 				ctx.Response().Write(response.GetStatus(), err)
 				return
 			}
+			headers := response.GetHeaders()
+			for k := range headers {
+				ctx.Response().Header(k, headers.GetString(k))
+			}
 			ctx.Response().Write(response.GetStatus(), response.GetResult())
 			return
 		}
@@ -38,18 +41,15 @@ func ExecuteHandler(service string) Handler {
 
 		//检查服务中是否包含当前请求路径
 		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service) {
-			ctx.Log().Debug("services.Def.Call")
 			result := services.Def.Call(ctx, service)
 			ctx.Response().WriteAny(result)
 			return
 		}
 
 		//处理静态文件
-		ctx.Log().Debug("doStatic")
 		if doStatic(ctx, service) {
 			return
 		}
-		ctx.Log().Debug("404")
 		ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到路径:%s", ctx.Request().Path().GetRequestPath()))
 	}
 }

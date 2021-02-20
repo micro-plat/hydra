@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func doStatic(ctx IMiddleContext, service string) bool {
@@ -32,7 +33,9 @@ func doStatic(ctx IMiddleContext, service string) bool {
 	}
 
 	//写入到响应流
-	ctx.Log().Debug(rpath, p)
+	if strings.HasSuffix(p, ".gz") {
+		ctx.Response().Header("Content-Encoding", "gzip")
+	}
 	ctx.Response().File(p, fs)
 	return true
 }
