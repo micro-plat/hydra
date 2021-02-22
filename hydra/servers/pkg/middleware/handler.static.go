@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func getStatic(ctx IMiddleContext, service string) (exists bool, filePath string, fs http.FileSystem) {
@@ -20,6 +21,14 @@ func getStatic(ctx IMiddleContext, service string) (exists bool, filePath string
 	ctx.Response().AddSpecial("static")
 	var rpath = ctx.Request().Path().GetRequestPath()
 	var method = ctx.Request().Path().GetMethod()
+
+	//option请求则直接返回结果
+	if strings.ToUpper(method) == http.MethodOptions {
+		exists = static.Has(rpath)
+		return
+	}
+
+	//检查请求类型是否为允许的类型
 	if !static.AllowRequest(method) {
 		return
 	}

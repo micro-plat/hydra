@@ -68,7 +68,6 @@ func procSvc(ctx IMiddleContext, service string) (hasSvc bool) {
 
 //处理静态资源服务
 func procStatic(ctx IMiddleContext, service string) (exists bool) {
-	ctx.Log().Debug("static")
 	//处理静态文件
 	exists, filePath, fs := getStatic(ctx, service)
 	if exists && checkOption(ctx) {
@@ -79,9 +78,18 @@ func procStatic(ctx IMiddleContext, service string) (exists bool) {
 		if strings.HasSuffix(filePath, ".gz") {
 			ctx.Response().Header("Content-Encoding", "gzip")
 		}
-		ctx.Log().Debug("static:", service, ctx.Request().Path().GetRequestPath(), filePath)
 		ctx.Response().File(filePath, fs)
 		return
 	}
 	return
+}
+
+//checkOption 请求处理
+func checkOption(ctx IMiddleContext) bool {
+	if strings.ToUpper(ctx.Request().Path().GetMethod()) != http.MethodOptions {
+		return false
+	}
+	ctx.Response().AddSpecial("opt")
+	ctx.Response().Abort(http.StatusOK, nil)
+	return true
 }
