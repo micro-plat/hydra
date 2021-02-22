@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf"
 )
@@ -30,15 +31,19 @@ type Static struct {
 	AutoRewrite    bool                  `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
 	Unrewrites     []string              `json:"unrewrite,omitempty" valid:"ascii" label:"不重写列表"`
 	Disable        bool                  `json:"disable,omitempty"`
-	excludesMatch  *conf.PathMatch       `json:"-"`
-	unRewriteMatch *conf.PathMatch       `json:"-"`
+	unrewriteMatch *conf.PathMatch       `json:"-"`
 	fs             IFS                   `json:"-"`
 	gzipfileMap    map[string]gzFileInfo `json:"-"`
 }
 
 //New 构建静态文件配置信息
 func New(opts ...Option) *Static {
-	a := &Static{HomePage: DefaultHome, Excludes: DefaultExclude, gzipfileMap: map[string]gzFileInfo{}}
+	a := &Static{
+		HomePage:    DefaultHome,
+		Excludes:    DefaultExclude,
+		Unrewrites:  DefaultUnrewrite,
+		gzipfileMap: map[string]gzFileInfo{},
+	}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -55,6 +60,7 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.IsExclude(name) {
 		return nil, "", nil
 	}
+
 	//文件不存在
 	if !s.fs.Has(name) {
 		//是否是不重写文件
@@ -71,12 +77,19 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 }
 
 //IsExclude 是否是排除的文件
+//@todo:该方法不是非常合适，需要修改匹配算法
 func (s *Static) IsExclude(rPath string) bool {
 	if len(s.Excludes) == 0 {
 		return false
 	}
-	ok, _ := s.excludesMatch.Match(rPath)
-	return ok
+
+	for i := range s.Excludes {
+		if strings.Contains(rPath, s.Excludes[i]) {
+			return true
+		}
+	}
+
+	return false
 }
 
 //IsUnrewrite 是否是非重写文件
@@ -84,7 +97,7 @@ func (s *Static) IsUnrewrite(rPath string) bool {
 	if len(s.Unrewrites) == 0 {
 		return false
 	}
-	ok, _ := s.unRewriteMatch.Match(rPath)
+	ok, _ := s.unrewriteMatch.Match(rPath)
 	return ok
 }
 
@@ -100,20 +113,16 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	if err != nil && !errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
-	static.excludesMatch = conf.NewPathMatch(static.Excludes...)
-	static.unRewriteMatch = conf.NewPathMatch(static.Unrewrites...)
+	static.unrewriteMatch = conf.NewPathMatch(static.Unrewrites...)
 	//转换配置文件
 	fs, err := static.getFileOS()
 	if err != nil {
 		return nil, err
 	}
-	if fs != nil {
-		static.fs = NewGzip(fs, static)
-		return static, nil
+	if fs == nil {
+		//转换本地内嵌文件
+		fs, err = defEmbedFs.getFileEmbed()
 	}
-
-	//转换本地内嵌文件
-	fs, err = defEmbedFs.getFileEmbed()
 	if err != nil {
 		return nil, err
 	}

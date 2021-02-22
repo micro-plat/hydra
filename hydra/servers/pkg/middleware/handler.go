@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/global"
@@ -34,22 +35,53 @@ func ExecuteHandler(service string) Handler {
 			return
 		}
 
-		//处理option
-		if checkOption(ctx) {
+		//处理服务请求
+		if procSvc(ctx, service) {
 			return
 		}
 
-		//检查服务中是否包含当前请求路径
-		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service) {
-			result := services.Def.Call(ctx, service)
-			ctx.Response().WriteAny(result)
+		//处理静态资源服务
+		if procStatic(ctx, service) {
 			return
 		}
 
-		//处理静态文件
-		if doStatic(ctx, service) {
-			return
-		}
 		ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到路径:%s", ctx.Request().Path().GetRequestPath()))
 	}
+}
+
+//处理服务请求
+func procSvc(ctx IMiddleContext, service string) (hasSvc bool) {
+	//检查服务中是否包含当前请求路径
+	hasSvc = services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service)
+	//处理option
+	if hasSvc && checkOption(ctx) {
+		return
+	}
+
+	if hasSvc {
+		result := services.Def.Call(ctx, service)
+		ctx.Response().WriteAny(result)
+		return
+	}
+	return
+}
+
+//处理静态资源服务
+func procStatic(ctx IMiddleContext, service string) (exists bool) {
+	ctx.Log().Debug("static")
+	//处理静态文件
+	exists, filePath, fs := getStatic(ctx, service)
+	if exists && checkOption(ctx) {
+		return
+	}
+	if exists {
+		//写入到响应流
+		if strings.HasSuffix(filePath, ".gz") {
+			ctx.Response().Header("Content-Encoding", "gzip")
+		}
+		ctx.Log().Debug("static:", service, ctx.Request().Path().GetRequestPath(), filePath)
+		ctx.Response().File(filePath, fs)
+		return
+	}
+	return
 }

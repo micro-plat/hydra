@@ -32,7 +32,7 @@ func (s *Static) GetGzip() interface{} {
 func (s *Static) refreshGzip() {
 	//root := s.fs.GetRoot()
 	root := ""
-	entrys, err := s.fs.GetDirEntrys("")
+	entrys, err := s.fs.GetDirEntrys(root)
 	if err != nil {
 		return
 	}
@@ -82,7 +82,6 @@ func (w *gzipFSWrapper) ReadFile(name string) (fs http.FileSystem, realPath stri
 	if err != nil {
 		return
 	}
-
 	if gzfile := w.static.getGzFile(name); gzfile != "" {
 		realPath = path.Join(w.GetRoot(), gzfile)
 	}

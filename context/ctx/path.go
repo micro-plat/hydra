@@ -61,6 +61,7 @@ func (c *rpath) GetEncoding() string {
 	//从router配置获取
 	routerObj, err := c.GetRouter()
 	if err != nil {
+		c.encoding = encoding.UTF8
 		return c.encoding
 	}
 	if c.encoding = routerObj.Encoding; c.encoding != "" {

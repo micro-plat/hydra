@@ -9,7 +9,10 @@ const DefaultSataticDir = "./static"
 const DefaultHome = "index.html"
 
 //DefaultExclude 默认需要排除的文件,扩展名,路径
-var DefaultExclude = []string{".exe", ".so", "/favicon.ico", "/robots.txt"}
+var DefaultExclude = []string{".exe", ".so"}
+
+//DefaultUnrewrite 默认不重写文件
+var DefaultUnrewrite = []string{"/favicon.ico", "/robots.txt"}
 
 //Option jwt配置选项
 type Option func(*Static)
@@ -47,6 +50,14 @@ func WithEmbed(root string, fs embed.FS) Option {
 	return func(s *Static) {
 		defEmbedFs.archive = fs
 		defEmbedFs.name = root
+	}
+}
+
+//WithEmbedBytes 通过嵌入的方式指定压缩文件
+func WithEmbedBytes(fileName string, bytes []byte) Option {
+	return func(s *Static) {
+		defEmbedFs.bytes = bytes
+		defEmbedFs.name = fileName
 	}
 }
 
