@@ -34,12 +34,7 @@ func ExecuteHandler(service string) Handler {
 			return
 		}
 
-		//处理option
-		if checkOption(ctx) {
-			return
-		}
-
-		//检查服务中是否包含当前请求路径
+		//处理本地服务调用
 		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service) {
 			result := services.Def.Call(ctx, service)
 			ctx.Response().WriteAny(result)

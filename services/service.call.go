@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/pkgs"
@@ -20,6 +21,11 @@ func (s *regist) Call(ctx context.IContext, service string) (result interface{})
 	if !ok {
 		ctx.Response().AddSpecial("hdl")
 		return errs.NewErrorf(http.StatusNotFound, "未找到服务:%s", service)
+	}
+
+	//option请求则直接返回结果
+	if strings.ToUpper(ctx.Request().Path().GetMethod()) == http.MethodOptions {
+		return nil
 	}
 
 	//预处理,用户资源检查，发生错误后不再执行业务处理-------

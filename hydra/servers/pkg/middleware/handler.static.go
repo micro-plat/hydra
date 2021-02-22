@@ -21,6 +21,13 @@ func doStatic(ctx IMiddleContext, service string) bool {
 	ctx.Response().AddSpecial("static")
 	var rpath = ctx.Request().Path().GetRequestPath()
 	var method = ctx.Request().Path().GetMethod()
+
+	//option请求则直接返回结果
+	if strings.ToUpper(ctx.Request().Path().GetMethod()) == http.MethodOptions {
+		return static.Has(rpath)
+	}
+
+	//检查请求类型是否为允许的类型
 	if !static.AllowRequest(method) {
 		return false
 	}

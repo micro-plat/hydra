@@ -46,6 +46,24 @@ func New(opts ...Option) *Static {
 	return a
 }
 
+//Has 检查文件是否存在
+func (s *Static) Has(name string) bool {
+	if s.fs == nil {
+		return false
+	}
+	//排除内容
+	if s.IsExclude(name) {
+		return false
+	}
+	if s.fs.Has(name) {
+		return true
+	}
+	if s.AutoRewrite && !s.IsUnrewrite(name) {
+		return true
+	}
+	return false
+}
+
 //Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
 func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
