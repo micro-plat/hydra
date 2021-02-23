@@ -14,6 +14,7 @@ var ErrNotExist = errors.New("不存在")
 type IError interface {
 	Error() string
 	GetError() error
+	NeedStop() bool
 	GetCode() int
 	CanIgnore() bool
 }
@@ -22,12 +23,18 @@ type IError interface {
 type Error struct {
 	code      int
 	canIgnore bool
+	stop      bool
 	error
 }
 
 //GetCode 获取错误码
 func (a *Error) GetCode() int {
 	return a.code
+}
+
+//NeedStop 获取结束标记
+func (a *Error) NeedStop() bool {
+	return a.stop
 }
 
 //GetError 获取错误信息
@@ -73,6 +80,20 @@ func NewError(code int, err interface{}) *Error {
 	return r
 }
 
+//NewStop 构建带有结束标记的错误消息
+func NewStop(code int, err interface{}) *Error {
+	e := NewError(code, err)
+	e.stop = true
+	return e
+}
+
+//NewStopf 构建带有结束标记的错误消息
+func NewStopf(code int, f string, args ...interface{}) *Error {
+	e := NewErrorf(code, f, args...)
+	e.stop = true
+	return e
+}
+
 //GetCode 获取错误码
 func GetCode(err interface{}, def ...int) int {
 	switch v := err.(type) {
@@ -80,6 +101,16 @@ func GetCode(err interface{}, def ...int) int {
 		return v.GetCode()
 	default:
 		return types.GetIntByIndex(def, 0, 0)
+	}
+}
+
+//NeedStop 获取结束标记
+func NeedStop(err interface{}, def ...bool) bool {
+	switch v := err.(type) {
+	case IError:
+		return v.NeedStop()
+	default:
+		return types.GetBoolByIndex(def, 0, false)
 	}
 }
 
