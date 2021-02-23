@@ -18,7 +18,7 @@ func New(provider string, connString string, opts ...Option) *DB {
 		Provider:   provider,
 		ConnString: connString,
 		MaxOpen:    10,
-		MaxIdle:    3,
+		MaxIdle:    10,
 		LifeTime:   600,
 	}
 	for _, opt := range opts {
