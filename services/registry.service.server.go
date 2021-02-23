@@ -17,12 +17,12 @@ func newServerServices(v func(u *Unit, ext ...interface{}) error) *serverService
 }
 
 //Register 注册服务
-func (s *serverServices) Register(name string, h interface{}, ext ...interface{}) {
+func (s *serverServices) Register(group string, name string, h interface{}, ext ...interface{}) {
 	groups, err := reflectHandle(name, h)
 	if err != nil {
 		panic(err)
 	}
-	if err := s.addGroup(groups, ext...); err != nil {
+	if err := s.addGroup(groups, group, ext...); err != nil {
 		panic(err)
 	}
 }
@@ -34,7 +34,7 @@ func (s *serverServices) handleExt(u *Unit, ext ...interface{}) error {
 }
 
 //addGroup 添加服务注册
-func (s *serverServices) addGroup(g *UnitGroup, ext ...interface{}) error {
+func (s *serverServices) addGroup(g *UnitGroup, group string, ext ...interface{}) error {
 	for _, u := range g.Services {
 
 		//添加预处理函数
@@ -48,7 +48,7 @@ func (s *serverServices) addGroup(g *UnitGroup, ext ...interface{}) error {
 		}
 
 		//添加服务
-		if err := s.metaServices.AddHanler(u.Service, u.Handle, u.rawUnit); err != nil {
+		if err := s.metaServices.AddHanler(u.Service, group, u.Handle, u.rawUnit); err != nil {
 			return err
 
 		}

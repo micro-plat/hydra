@@ -53,6 +53,22 @@ func (c *rpath) Params() types.XMap {
 func (c *rpath) GetService() string {
 	return c.ctx.GetService()
 }
+
+//GetGroup 获取当前服务注册的group名
+func (c *rpath) GetGroup() string {
+	return services.Def.GetGroup(c.appConf.GetServerConf().GetServerType(), c.GetService())
+}
+
+//GetRawPath 获取当前请求的原始路径名(去除group)
+func (c *rpath) GetRawPath() string {
+	group := c.GetGroup()
+	path := c.GetRequestPath()
+	if group == "" {
+		return path
+	}
+	return strings.TrimPrefix(strings.TrimPrefix(path, "/"), group)
+}
+
 func (c *rpath) GetEncoding() string {
 	if c.encoding != "" {
 		return c.encoding

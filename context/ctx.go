@@ -107,6 +107,12 @@ type IPath interface {
 	//Param 路由参数
 	Params() types.XMap
 
+	//GetGroup 获取当前服务注册的group名
+	GetGroup() string
+
+	//GetRawPath 获取当前请求的原始名(去除grop)
+	GetRawPath() string
+
 	//GetRouter 获取当前请求对应的路由信息
 	GetRouter() (*router.Router, error)
 

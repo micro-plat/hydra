@@ -52,7 +52,7 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 		assert.Panics(t, func() {
 			//errors.New(tt.errStr),
 			s := newServerServices(tt.f)
-			s.Register(tt.pName, tt.h, tt.ext...)
+			s.Register("", tt.pName, tt.h, tt.ext...)
 		}, tt.name)
 	}
 }
@@ -121,7 +121,7 @@ func Test_serverServices_Register(t *testing.T) {
 	for _, tt := range tests {
 
 		s := newServerServices(tt.f)
-		s.Register(tt.pName, tt.h, tt.ext...)
+		s.Register("", tt.pName, tt.h, tt.ext...)
 		g, _ := reflectHandle(tt.pName, tt.h)
 
 		for _, v := range tt.wantService {

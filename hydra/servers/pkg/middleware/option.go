@@ -10,14 +10,11 @@ import (
 //Options 请求处理
 func Options() Handler {
 	return func(ctx IMiddleContext) {
-		//options请求则自动不再进行后续处理
-		if strings.ToUpper(ctx.Request().Path().GetMethod()) != http.MethodOptions {
-			ctx.Next()
-			return
-		}
 
 		//是否支持服务调用
-		if doOption(ctx, services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), ctx.FullPath(), ctx.Request().Path().GetMethod())) {
+		if doOption(ctx, services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(),
+			ctx.FullPath(),
+			ctx.Request().Path().GetMethod())) {
 			return
 		}
 		ctx.Next()

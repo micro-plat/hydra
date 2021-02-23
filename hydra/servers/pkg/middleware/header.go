@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/micro-plat/lib4go/types"
 )
@@ -18,10 +18,6 @@ func Header() Handler {
 		//1. 业务处理
 		ctx.Next()
 
-		if strings.Contains(ctx.Response().GetSpecials(), "static") {
-			return
-		}
-
 		//2. 获取header配置
 		headers, err := ctx.APPConf().GetHeaderConf()
 		if err != nil {
@@ -34,6 +30,7 @@ func Header() Handler {
 		//3. 处理响应header参数
 		origin := ctx.Request().Headers().GetString(originName)
 		hds := headers.GetHeaderByOrigin(types.GetString(origin, ctx.Response().GetHeaders().GetString(hostName)))
+		fmt.Println("hds:", origin, hds)
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
 		}

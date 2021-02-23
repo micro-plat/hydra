@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -35,7 +34,8 @@ type Routers struct {
 func (h *Routers) String() string {
 	var sb strings.Builder
 	for _, v := range h.Routers {
-		sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v\n", v.Path, v.Service, strings.Join(v.Action, " "), v.Pages))
+		sb.WriteString(v.String())
+		sb.WriteString("\n")
 	}
 	return sb.String()
 }
@@ -74,17 +74,22 @@ func (r *Router) GetEncoding() string {
 	}
 	return "utf-8"
 }
+func (r *Router) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v", r.Path, r.Service, strings.Join(r.Action, " "), r.Pages))
+	return sb.String()
+}
 
 //IsUTF8 是否是UTF8编码
 func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
 }
 
-//IsUTF8 是否是UTF8编码
-func (r *Router) String() string {
-	bytes, _ := json.Marshal(r)
-	return string(bytes)
-}
+// //IsUTF8 是否是UTF8编码
+// func (r *Router) String() string {
+// 	bytes, _ := json.Marshal(r)
+// 	return string(bytes)
+// }
 
 //NewRouters 构建路由
 func NewRouters() *Routers {

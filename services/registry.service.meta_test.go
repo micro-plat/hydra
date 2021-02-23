@@ -21,7 +21,7 @@ func Test_metaServices_AddHanler(t *testing.T) {
 	s := newService()
 	services := []string{}
 	for _, tt := range tests {
-		err := s.AddHanler(tt.service, tt.h, nil)
+		err := s.AddHanler(tt.service, "", tt.h, nil)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			continue
