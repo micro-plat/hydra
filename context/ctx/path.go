@@ -59,14 +59,27 @@ func (c *rpath) GetGroup() string {
 	return services.Def.GetGroup(c.appConf.GetServerConf().GetServerType(), c.GetService())
 }
 
-//GetRawPath 获取当前请求的原始路径名(去除group)
-func (c *rpath) GetRawPath() string {
-	group := c.GetGroup()
-	path := c.GetRequestPath()
-	if group == "" {
-		return path
+//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
+func (c *rpath) GetPageAndTag() (page string, tag string, ok bool) {
+
+	//获取服务注册的路径名，tag标签
+	tp := c.appConf.GetServerConf().GetServerType()
+	page, tag, ok = services.Def.GetRawPathAndTag(tp, c.GetService())
+	if !ok {
+		return "", "", false
 	}
-	return strings.TrimPrefix(strings.TrimPrefix(path, "/"), group)
+
+	//处理tag为空时，获取当前method
+	if tag == "" {
+		tag = c.ctx.GetMethod()
+	}
+	group := c.GetGroup()
+	if group == "" {
+		return page, tag, ok
+	}
+	page = strings.TrimPrefix(page, "/"+group)
+	return page, tag, ok
+
 }
 
 func (c *rpath) GetEncoding() string {
