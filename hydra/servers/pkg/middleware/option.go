@@ -12,23 +12,24 @@ func Options() Handler {
 	return func(ctx IMiddleContext) {
 
 		//是否支持服务调用
-		if doOption(ctx, services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(),
-			ctx.FullPath(),
-			ctx.Request().Path().GetMethod())) {
+		if doOption(ctx, false) {
 			return
 		}
 		ctx.Next()
-		return
 	}
 }
-func doOption(ctx IMiddleContext, v bool) bool {
+
+func doOption(ctx IMiddleContext, staticCheck bool) (isOpt bool) {
 	if strings.ToUpper(ctx.Request().Path().GetMethod()) != http.MethodOptions {
 		return false
 	}
-	if v {
-		ctx.Response().AddSpecial("opt")
+	ctx.Response().AddSpecial("opt")
+	if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(),
+		ctx.FullPath(),
+		ctx.Request().Path().GetMethod()) || staticCheck {
 		ctx.Response().Abort(http.StatusOK, nil)
 		return true
 	}
-	return false
+	ctx.Response().Abort(http.StatusNotFound, ctx.Request().Path().GetRequestPath())
+	return true
 }

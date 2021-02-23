@@ -25,18 +25,21 @@ func Static() Handler {
 		//处理option请求
 		var rpath = ctx.Request().Path().GetRequestPath()
 		var method = ctx.Request().Path().GetMethod()
+
+		//是option则处理业务逻辑
 		if doOption(ctx, static.Has(rpath)) {
-			return
-		}
-		//检查请求类型是否为允许的类型
-		if !static.AllowRequest(method) {
-			ctx.Next()
 			return
 		}
 
 		//优先后端服务调用
 		var fullPath = ctx.FullPath()
 		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), fullPath, method) {
+			ctx.Next()
+			return
+		}
+
+		//检查请求类型是否为允许的类型
+		if !static.AllowRequest(method) {
 			ctx.Next()
 			return
 		}
