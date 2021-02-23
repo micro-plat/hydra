@@ -69,7 +69,7 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 func (g *ginCtx) Find(path string) bool {
-	return true
+	return g.FullPath() == path
 
 }
 func (g *ginCtx) Next() {

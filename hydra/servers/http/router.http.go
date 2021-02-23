@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,8 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.engine.Use(middleware.Delay().GinFunc())     //
 	s.engine.Use(middleware.Limit().GinFunc())     //限流处理
 	s.engine.Use(middleware.Header().GinFunc())    //设置请求头
+	s.engine.Use(middleware.Options().GinFunc())   //处理option响应
+	s.engine.Use(middleware.Static().GinFunc())    //处理静态文件
 	s.engine.Use(middleware.BasicAuth().GinFunc()) //
 	s.engine.Use(middleware.APIKeyAuth().GinFunc())
 	s.engine.Use(middleware.RASAuth().GinFunc())
@@ -42,8 +45,8 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 func (s *Server) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
 		for _, method := range router.Action {
+			fmt.Println("router:", router.Path, router.Service)
 			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
-	s.engine.Any("*name", middleware.ExecuteHandler("/").GinFunc())
 }

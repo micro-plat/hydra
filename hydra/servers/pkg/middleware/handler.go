@@ -41,10 +41,6 @@ func ExecuteHandler(service string) Handler {
 			return
 		}
 
-		//处理静态文件
-		if doStatic(ctx, service) {
-			return
-		}
 		ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("未找到路径:%s", ctx.Request().Path().GetRequestPath()))
 	}
 }
