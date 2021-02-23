@@ -48,7 +48,7 @@ func WithHomePage(homePage string) Option {
 //WithEmbed 通过嵌入的方式指定压缩文件
 func WithEmbed(root string, fs embed.FS) Option {
 	return func(s *Static) {
-		defEmbedFs.archive = fs
+		defEmbedFs.archive = &fs
 		defEmbedFs.name = root
 	}
 }

@@ -3,7 +3,9 @@ package ctx
 import (
 	"encoding/json"
 	"fmt"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -109,6 +111,7 @@ func (c *response) File(path string, fs http.FileSystem) {
 		return
 	}
 	c.noneedWrite = true
+	c.ContentType(mime.TypeByExtension(filepath.Ext(path)))
 	status := c.ctx.ServeContent(path, fs)
 	c.ctx.WStatus(status)
 	c.raw.status = status

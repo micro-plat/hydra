@@ -28,17 +28,15 @@ func Static() Handler {
 		if doOption(ctx, static.Has(rpath)) {
 			return
 		}
-
-		//优先后端服务调用
-		var fullPath = ctx.FullPath()
-		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), fullPath, method) {
+		//检查请求类型是否为允许的类型
+		if !static.AllowRequest(method) {
 			ctx.Next()
 			return
 		}
 
-		//检查请求类型是否为允许的类型
-
-		if !static.AllowRequest(method) {
+		//优先后端服务调用
+		var fullPath = ctx.FullPath()
+		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), fullPath, method) {
 			ctx.Next()
 			return
 		}

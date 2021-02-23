@@ -16,7 +16,7 @@ import (
 
 type embedFs struct {
 	name    string
-	archive embed.FS
+	archive *embed.FS
 	bytes   []byte
 }
 
@@ -27,7 +27,7 @@ func (e *embedFs) getFileEmbed() (IFS, error) {
 	if len(e.bytes) > 0 {
 		return newEmbedFile(e.name, e.bytes)
 	}
-	if &e.archive != nil {
+	if e.archive != nil {
 		return newEFS(e.name, e.archive), nil
 	}
 	return nil, nil
@@ -61,12 +61,12 @@ func newEmbedFile(name string, buff []byte) (IFS, error) {
 
 //efs 扩展embed.fs
 type efs struct {
-	fs   embed.FS
+	fs   *embed.FS
 	hfs  http.FileSystem
 	name string
 }
 
-func newEFS(name string, fs embed.FS) *efs {
+func newEFS(name string, fs *embed.FS) *efs {
 	return &efs{
 		fs:   fs,
 		name: name,
