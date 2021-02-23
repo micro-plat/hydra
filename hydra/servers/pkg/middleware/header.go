@@ -14,10 +14,7 @@ func Header() Handler {
 
 	return func(ctx IMiddleContext) {
 
-		//1. 业务处理
-		ctx.Next()
-
-		//2. 获取header配置
+		//1. 获取header配置
 		headers, err := ctx.APPConf().GetHeaderConf()
 		if err != nil {
 			ctx.Response().Abort(http.StatusNotExtended, err)
@@ -32,6 +29,9 @@ func Header() Handler {
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
 		}
+
+		//2. 业务处理
+		ctx.Next()
 
 	}
 }
