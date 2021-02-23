@@ -27,9 +27,10 @@ func (e *embedFs) getFileEmbed() (IFS, error) {
 	if len(e.bytes) > 0 {
 		return newEmbedFile(e.name, e.bytes)
 	}
-
-	return newEFS(e.name, e.archive), nil
-
+	if &e.archive != nil {
+		return newEFS(e.name, e.archive), nil
+	}
+	return nil, nil
 }
 
 func newEmbedFile(name string, buff []byte) (IFS, error) {
