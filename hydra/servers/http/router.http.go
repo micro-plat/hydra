@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +44,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 func (s *Server) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
 		for _, method := range router.Action {
-			fmt.Println("router:", router.Path, router.Service)
 			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
