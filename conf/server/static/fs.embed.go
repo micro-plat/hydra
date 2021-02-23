@@ -17,12 +17,17 @@ import (
 type embedFs struct {
 	name    string
 	archive embed.FS
+	bytes   []byte
 }
 
 var defEmbedFs = &embedFs{}
 
 //check2FS 检查并转换为fs类型
 func (e *embedFs) getFileEmbed() (IFS, error) {
+	if len(e.bytes) > 0 {
+		return newEmbedFile(e.name, e.bytes)
+	}
+
 	return newEFS(e.name, e.archive), nil
 
 }
@@ -47,6 +52,9 @@ func newEmbedFile(name string, buff []byte) (IFS, error) {
 	if err = file.Close(); err != nil {
 		return nil, err
 	}
+	defer func(fileName string) {
+		os.Remove(fileName)
+	}(file.Name())
 	return unarchive(file.Name())
 }
 
