@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/micro-plat/lib4go/types"
@@ -30,7 +29,6 @@ func Header() Handler {
 		//3. 处理响应header参数
 		origin := ctx.Request().Headers().GetString(originName)
 		hds := headers.GetHeaderByOrigin(types.GetString(origin, ctx.Response().GetHeaders().GetString(hostName)))
-		fmt.Println("hds:", origin, hds)
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
 		}
