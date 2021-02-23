@@ -144,7 +144,6 @@ func (c *conf) GetAPI() *httpBuilder {
 //Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
 	web := newHTTP(global.Web, address, opts...)
-	// web.Static(static.WithArchive(global.AppName))
 	c.data[global.Web] = web
 	return web
 }
