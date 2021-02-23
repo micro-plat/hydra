@@ -8,6 +8,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/pkgs/influxdb"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 	cron "github.com/robfig/cron/v3"
 	"github.com/zkfy/go-metrics"
 )
@@ -218,11 +219,12 @@ func (r *reporter) send() error {
 				Measurement: rname,
 				Tags:        tags,
 				Fields: map[string]interface{}{
-					"count": ms.Count(),
-					"m1":    ms.Rate1(),
-					"m5":    ms.Rate5(),
-					"m15":   ms.Rate15(),
-					"mean":  ms.RateMean(),
+					"count":   ms.Count(),
+					"m1":      ms.Rate1(),
+					"m5":      ms.Rate5(),
+					"m15":     ms.Rate15(),
+					"mean":    ms.RateMean(),
+					"fstatus": types.GetInt64(tags["status"]),
 				},
 				Time: now,
 			})

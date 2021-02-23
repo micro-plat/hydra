@@ -32,6 +32,7 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 			current.AddHandle(h.(string), nil)
 			return current, nil
 		}
+		return nil, fmt.Errorf("传入的rpc协议格式不正确:%s", val)
 	}
 
 	//检查传入的是构建函数
