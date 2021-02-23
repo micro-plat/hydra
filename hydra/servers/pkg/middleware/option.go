@@ -17,7 +17,7 @@ func Options() Handler {
 		}
 
 		//是否支持服务调用
-		if doOption(ctx, services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), ctx.FullPath())) {
+		if doOption(ctx, services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), ctx.FullPath(), ctx.Request().Path().GetMethod())) {
 			return
 		}
 		ctx.Next()

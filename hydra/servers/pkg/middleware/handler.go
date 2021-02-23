@@ -35,7 +35,7 @@ func ExecuteHandler(service string) Handler {
 		}
 
 		//处理本地服务调用
-		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service) {
+		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), service, ctx.Request().Path().GetMethod()) {
 			result := services.Def.Call(ctx, service)
 			ctx.Response().WriteAny(result)
 			return
