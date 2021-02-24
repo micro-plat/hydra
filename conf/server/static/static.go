@@ -148,5 +148,5 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		static.fs = NewGzip(fs, static)
 		return static, nil
 	}
-	return nil, conf.ErrNoSetting
+	return nil, fmt.Errorf("%s %w", "static", conf.ErrNoSetting)
 }
