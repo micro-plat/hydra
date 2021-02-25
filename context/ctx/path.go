@@ -73,13 +73,8 @@ func (c *rpath) GetPageAndTag() (page string, tag string, ok bool) {
 	if tag == "" {
 		tag = c.ctx.GetMethod()
 	}
-	group := c.GetGroup()
-	if group == "" {
-		return page, tag, ok
-	}
-	page = strings.TrimPrefix(page, "/"+group)
-	return page, tag, ok
 
+	return page, tag, ok
 }
 
 func (c *rpath) GetEncoding() string {

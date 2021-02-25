@@ -31,6 +31,7 @@ type dispCtx struct {
 	*dispatcher.Context
 	service       string
 	needClearAuth bool
+	servicePrefix string
 }
 
 //
@@ -154,4 +155,7 @@ func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) int {
 }
 func (g *dispCtx) FullPath() string {
 	return g.service
+}
+func (g *dispCtx) ServicePrefix(prefix string) {
+	g.servicePrefix = prefix
 }

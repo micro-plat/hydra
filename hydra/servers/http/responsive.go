@@ -147,7 +147,10 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	processorObj, err := cnf.GetProcessorConf()
+	if err != nil {
+		return nil, err
+	}
 	//从服务中获取路由
 	sr := services.GetRouter(tp)
 	routerconf, err := sr.GetRouters()
@@ -161,21 +164,27 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 			routerconf.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
-			WithGinTrace(apiConf.Trace))
+			WithGinTrace(apiConf.Trace),
+			WithServicePrefix(processorObj.ServicePrefix),
+		)
 	case Web:
 		return NewServer(tp,
 			apiConf.GetWEBAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
-			WithGinTrace(apiConf.Trace))
+			WithGinTrace(apiConf.Trace),
+			WithServicePrefix(processorObj.ServicePrefix),
+		)
 	default:
 		return NewServer(tp,
 			apiConf.GetAPIAddress(),
 			routerconf.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
-			WithGinTrace(apiConf.Trace))
+			WithGinTrace(apiConf.Trace),
+			WithServicePrefix(processorObj.ServicePrefix),
+		)
 	}
 }
 

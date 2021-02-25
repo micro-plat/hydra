@@ -17,6 +17,7 @@ type imiddle interface {
 	Find(path string) bool
 	Service(string)
 	ClearAuth(c ...bool) bool
+	ServicePrefix(string)
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数

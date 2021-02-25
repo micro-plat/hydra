@@ -17,6 +17,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
+	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -50,8 +51,11 @@ type IAPPConf interface {
 	GetLimiterConf() (*limiter.Limiter, error)
 	GetProxyConf() (*proxy.Proxy, error)
 	GetAPMConf() (*apm.APM, error)
+	GetProcessorConf() (*processor.Processor, error)
+
 	//获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
+
 	Close() error
 }
 

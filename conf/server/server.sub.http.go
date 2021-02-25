@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
+	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
 )
@@ -32,6 +33,7 @@ type HttpSub struct {
 	limit     *Loader
 	proxy     *Loader
 	apm       *Loader
+	processor *Loader
 }
 
 func NewHttpSub(cnf conf.IServerConf) *HttpSub {
@@ -49,6 +51,7 @@ func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s.limit = GetLoader(cnf, s.getLimiterFunc())
 	s.proxy = GetLoader(cnf, s.getProxyFunc())
 	s.apm = GetLoader(cnf, s.getAPMFunc())
+	s.processor = GetLoader(cnf, s.getProcessorFunc())
 	return s
 }
 
@@ -140,6 +143,13 @@ func (s HttpSub) getProxyFunc() func(cnf conf.IServerConf) (interface{}, error) 
 func (s HttpSub) getAPMFunc() func(cnf conf.IServerConf) (interface{}, error) {
 	return func(cnf conf.IServerConf) (interface{}, error) {
 		return apm.GetConf(cnf)
+	}
+}
+
+//getGrayFunc 获取gray配置信息
+func (s HttpSub) getProcessorFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
+		return processor.GetConf(cnf)
 	}
 }
 
@@ -263,4 +273,13 @@ func (s *HttpSub) GetAPMConf() (*apm.APM, error) {
 		return nil, err
 	}
 	return apmc.(*apm.APM), nil
+}
+
+//GetProcessorConf 获取Processor配置
+func (s *HttpSub) GetProcessorConf() (*processor.Processor, error) {
+	apmc, err := s.processor.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return apmc.(*processor.Processor), nil
 }

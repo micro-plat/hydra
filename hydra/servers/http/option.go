@@ -15,6 +15,7 @@ type option struct {
 	metric            *middleware.Metric
 	serverType        string
 	ginTrace          bool
+	servicePrefix     string
 }
 
 //Option 配置选项
@@ -24,6 +25,13 @@ type Option func(*option)
 func WithServerType(t string) Option {
 	return func(o *option) {
 		o.serverType = t
+	}
+}
+
+//WithServicePrefix 服务前缀
+func WithServicePrefix(prefix string) Option {
+	return func(o *option) {
+		o.servicePrefix = prefix
 	}
 }
 
