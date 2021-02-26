@@ -50,8 +50,8 @@ func (b BaseBuilder) APM(address string) BaseBuilder {
 }
 
 //Processor 构建APM配置
-func (b BaseBuilder) Processor() BaseBuilder {
-	b[processor.TypeNodeName] = processor.New()
+func (b BaseBuilder) Processor(opts ...processor.Option) BaseBuilder {
+	b[processor.TypeNodeName] = processor.New(opts...)
 	return b
 }
 
