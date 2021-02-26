@@ -108,7 +108,7 @@ func getJSON(path string, v interface{}) (value string, err error) {
 	if x, ok := v.(string); ok {
 		return x, nil
 	}
-	buff, err := json.Marshal(&v)
+	buff, err := json.Marshal(v)
 	if err != nil {
 		return "", err
 	}

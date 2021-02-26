@@ -23,9 +23,6 @@ func (b BaseBuilder) Sub(name string, s ...interface{}) ISUB {
 	}
 	tp := reflect.TypeOf(s[0])
 	val := reflect.ValueOf(s[0])
-	if tp.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
 	switch tp.Kind() {
 	case reflect.String:
 		b[name] = json.RawMessage([]byte(val.Interface().(string)))
