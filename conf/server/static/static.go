@@ -128,7 +128,10 @@ func (s *Static) AllowRequest(m string) bool {
 func GetConf(cnf conf.IServerConf) (*Static, error) {
 	static := New()
 	_, err := cnf.GetSubObject(TypeNodeName, static)
-	if err != nil && !errors.Is(err, conf.ErrNoSetting) {
+	if err != nil {
+		if errors.Is(err, conf.ErrNoSetting) {
+			return static, nil
+		}
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
 	static.unrewriteMatch = conf.NewPathMatch(static.Unrewrites...)
