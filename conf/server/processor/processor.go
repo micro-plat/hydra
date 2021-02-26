@@ -3,6 +3,8 @@ package processor
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
@@ -35,6 +37,9 @@ func New(opts ...Option) *Processor {
 func (p *Processor) TreatRouters(routers []*router.Router) {
 	for i := range routers {
 		routers[i].RealPath = fmt.Sprintf("%s%s", p.ServicePrefix, routers[i].Path)
+		if !strings.Contains(strings.Join(routers[i].Action, ","), http.MethodOptions) {
+			routers[i].Action = append(routers[i].Action, http.MethodOptions)
+		}
 	}
 }
 
