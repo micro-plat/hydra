@@ -154,8 +154,8 @@ func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) (status int) 
 		return
 	}
 
-	status = http.StatusOK
 	http.ServeContent(g.Writer, g.Request, filepath, d.ModTime(), f)
+	status = g.Writer.Status()
 	return
 }
 
