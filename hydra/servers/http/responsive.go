@@ -157,6 +157,8 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	routerlist := routerconf.GetRouters()
+	processorObj.TreatRouters(routerlist)
 	switch tp {
 	case WS:
 		return NewWSServer(tp,
@@ -165,7 +167,6 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),
-			WithServicePrefix(processorObj.ServicePrefix),
 		)
 	case Web:
 		return NewServer(tp,
@@ -174,7 +175,6 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),
-			WithServicePrefix(processorObj.ServicePrefix),
 		)
 	default:
 		return NewServer(tp,
@@ -183,7 +183,6 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),
-			WithServicePrefix(processorObj.ServicePrefix),
 		)
 	}
 }

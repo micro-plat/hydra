@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/server/router"
 )
 
 //TypeNodeName processor配置节点名
@@ -28,6 +29,13 @@ func New(opts ...Option) *Processor {
 		opt(m)
 	}
 	return m
+}
+
+//TreatRouters TreatRouters
+func (p *Processor) TreatRouters(routers []*router.Router) {
+	for i := range routers {
+		routers[i].RealPath = fmt.Sprintf("%s%s", p.ServicePrefix, routers[i].Path)
+	}
 }
 
 //GetConf 设置Processor

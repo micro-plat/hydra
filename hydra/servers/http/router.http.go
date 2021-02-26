@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -45,13 +44,8 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 
 func (s *Server) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
-		path := fmt.Sprintf("%s%s", s.option.servicePrefix, router.Path)
-		//service := fmt.Sprintf("%s%s", s.option.servicePrefix, router.Service)
-		//path := router.Path
-		//fmt.Println("addRouter:", path, fmt.Sprintf("%s%s", s.option.servicePrefix, router.Path))
-		service := router.Service
 		for _, method := range router.Action {
-			s.engine.Handle(strings.ToUpper(method), path, middleware.ExecuteHandler(service).GinFunc())
+			s.engine.Handle(strings.ToUpper(method), router.RealPath, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
 }

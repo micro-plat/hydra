@@ -45,14 +45,6 @@ func (m *CronTask) GetName() string {
 	return m.Task.GetUNQ()
 }
 
-//NextTime 下次执行时间
-func (m *CronTask) NextTime(t time.Time) time.Time {
-	if m.IsImmediately() {
-		return time.Now()
-	}
-	return m.schedule.Next(t)
-}
-
 //GetService 服务名
 func (m *CronTask) GetService() string {
 	return m.Task.Service
@@ -71,4 +63,12 @@ func (m *CronTask) GetForm() map[string]interface{} {
 //GetHeader 头信息
 func (m *CronTask) GetHeader() map[string]string {
 	return m.header
+}
+
+//NextTime 下次执行时间
+func (m *CronTask) NextTime(t time.Time) time.Time {
+	if m.IsImmediately() {
+		return time.Now()
+	}
+	return m.schedule.Next(t)
 }

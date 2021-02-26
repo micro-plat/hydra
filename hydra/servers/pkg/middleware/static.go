@@ -32,8 +32,8 @@ func Static() Handler {
 		}
 
 		//优先后端服务调用
-		var fullPath = ctx.FullPath()
-		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), fullPath, method) {
+		var routerPath = ctx.GetRouterPath()
+		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), routerPath, method) {
 			ctx.Next()
 			return
 		}

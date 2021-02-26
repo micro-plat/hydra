@@ -34,10 +34,6 @@ type dispCtx struct {
 	servicePrefix string
 }
 
-//
-func (g *dispCtx) GetRouterPath() string {
-	return g.Context.Request.GetName()
-}
 func (g *dispCtx) GetParams() map[string]interface{} {
 	params := make(map[string]interface{})
 	for _, v := range g.Context.Params {
@@ -153,9 +149,12 @@ func (g *dispCtx) ClearAuth(c ...bool) bool {
 func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) int {
 	return http.StatusOK
 }
-func (g *dispCtx) FullPath() string {
-	return g.service
+
+//
+func (g *dispCtx) GetRouterPath() string {
+	return g.Context.Request.GetService()
 }
+
 func (g *dispCtx) ServicePrefix(prefix string) {
 	g.servicePrefix = prefix
 }

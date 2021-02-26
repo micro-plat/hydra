@@ -39,16 +39,13 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 	}
 	return params
 }
-func (g *ginCtx) FullPath() string {
+
+func (g *ginCtx) GetRouterPath() string {
 	path := g.Context.FullPath()
 	if g.servicePrefix != "" {
 		path = strings.TrimPrefix(path, g.servicePrefix)
 	}
 	return path
-
-}
-func (g *ginCtx) GetRouterPath() string {
-	return g.FullPath()
 }
 
 func (g *ginCtx) GetService() string {
@@ -79,7 +76,7 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 func (g *ginCtx) Find(path string) bool {
-	return g.FullPath() == path
+	return g.GetRouterPath() == path
 
 }
 func (g *ginCtx) Next() {
