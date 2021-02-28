@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/services"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Options 请求处理
@@ -23,7 +24,7 @@ func doOption(ctx IMiddleContext, staticCheck bool) (isOpt bool) {
 	if strings.ToUpper(ctx.Request().Path().GetMethod()) != http.MethodOptions {
 		return false
 	}
-	ctx.Response().AddSpecial("opt")
+	ctx.Response().AddSpecial(types.DecodeString(staticCheck, true, "sopt", "opt"))
 	if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(),
 		ctx.GetRouterPath(),
 		ctx.Request().Path().GetMethod()) || staticCheck {

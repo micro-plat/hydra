@@ -41,15 +41,15 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 }
 
 func (g *ginCtx) GetRouterPath() string {
+	return g.GetURL().Path
+}
+
+func (g *ginCtx) GetService() string {
 	path := g.Context.FullPath()
 	if g.servicePrefix != "" {
 		path = strings.TrimPrefix(path, g.servicePrefix)
 	}
 	return path
-}
-
-func (g *ginCtx) GetService() string {
-	return g.service
 }
 func (g *ginCtx) Service(service string) {
 	g.service = service
