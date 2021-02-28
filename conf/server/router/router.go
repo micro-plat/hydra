@@ -52,7 +52,7 @@ type Router struct {
 	Service  string   `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
 	Encoding string   `json:"encoding,omitempty" toml:"encoding,omitempty"`
 	Pages    []string `json:"pages,omitempty" toml:"pages,omitempty"`
-	RealPath string   `json:"-"`
+	// RealPath string   `json:"-"`
 }
 
 //NewRouter 构建路径配置

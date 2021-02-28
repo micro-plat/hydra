@@ -45,7 +45,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 func (s *Server) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
 		for _, method := range router.Action {
-			s.engine.Handle(strings.ToUpper(method), router.RealPath, middleware.ExecuteHandler(router.Service).GinFunc())
+			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}
 }
