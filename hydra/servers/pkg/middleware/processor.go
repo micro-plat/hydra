@@ -1,6 +1,9 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 //Processor 请求处理
 func Processor() Handler {
@@ -11,7 +14,7 @@ func Processor() Handler {
 			ctx.Response().Abort(http.StatusNotExtended, err)
 			return
 		}
-		if processorObj.ServicePrefix == "" {
+		if strings.Trim(processorObj.ServicePrefix, "/") == "" {
 			ctx.Next()
 			return
 		}
