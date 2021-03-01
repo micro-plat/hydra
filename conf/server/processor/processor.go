@@ -35,7 +35,9 @@ func New(opts ...Option) *Processor {
 //TreatRouters TreatRouters
 func (p *Processor) TreatRouters(routers []*router.Router) {
 	for i := range routers {
-		routers[i].Path = fmt.Sprintf("/%s/%s", strings.Trim(p.ServicePrefix, "/"), strings.TrimLeft(routers[i].Path, "/"))
+		if prefix := strings.Trim(p.ServicePrefix, "/"); prefix != "" {
+			routers[i].Path = fmt.Sprintf("/%s/%s", prefix, strings.TrimLeft(routers[i].Path, "/"))
+		}
 	}
 }
 

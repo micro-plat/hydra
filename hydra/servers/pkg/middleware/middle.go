@@ -13,9 +13,8 @@ import (
 
 type imiddle interface {
 	Next()
-	GetRouterPath() string
 	Find(path string) bool
-	Service(string)
+	RawService(string)
 	ClearAuth(c ...bool) bool
 	ServicePrefix(string)
 }

@@ -32,7 +32,7 @@ func Static() Handler {
 		}
 
 		//优先后端服务调用
-		var routerPath = ctx.GetRouterPath()
+		var routerPath = ctx.Request().Path().GetURL().Path
 		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), routerPath, method) {
 			ctx.Next()
 			return

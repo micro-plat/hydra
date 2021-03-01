@@ -26,7 +26,7 @@ func doOption(ctx IMiddleContext, staticCheck bool) (isOpt bool) {
 	}
 	ctx.Response().AddSpecial(types.DecodeString(staticCheck, true, "sopt", "opt"))
 	if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(),
-		ctx.GetRouterPath(),
+		ctx.Request().Path().GetURL().Path,
 		ctx.Request().Path().GetMethod()) || staticCheck {
 		ctx.Response().Abort(http.StatusOK, nil)
 		return true

@@ -16,7 +16,7 @@ import (
 type ginCtx struct {
 	*gin.Context
 	once          sync.Once
-	service       string
+	rawService    string
 	needClearAuth bool
 	servicePrefix string
 }
@@ -39,20 +39,18 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 	}
 	return params
 }
-
-func (g *ginCtx) GetRouterPath() string {
-	return g.GetURL().Path
-}
-
 func (g *ginCtx) GetService() string {
-	path := g.Context.FullPath()
+	path := g.Context.FullPath() //还源为服务路径
 	if g.servicePrefix != "" {
 		path = strings.TrimPrefix(path, g.servicePrefix)
 	}
 	return path
 }
-func (g *ginCtx) Service(service string) {
-	g.service = service
+func (g *ginCtx) RawService(service string) {
+	g.rawService = service
+}
+func (g *ginCtx) GetRawService() string {
+	return g.rawService
 }
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()
@@ -76,7 +74,7 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 func (g *ginCtx) Find(path string) bool {
-	return g.GetRouterPath() == path
+	return g.GetURL().Path == path
 
 }
 func (g *ginCtx) Next() {
@@ -161,10 +159,6 @@ func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) (status int) 
 
 func (g *ginCtx) ServicePrefix(prefix string) {
 	g.servicePrefix = prefix
-	if prefix != "" && g.Request.URL != nil {
-		g.Request.URL.Path = strings.TrimPrefix(g.Request.URL.Path, prefix)
-		g.Request.URL.RawPath = strings.TrimPrefix(g.Request.URL.RawPath, prefix)
-	}
 }
 
 func toHTTPError(err error) int {
