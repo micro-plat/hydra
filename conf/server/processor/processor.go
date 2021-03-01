@@ -20,7 +20,7 @@ type IProcessor interface {
 
 //Processor Processor
 type Processor struct {
-	ServicePrefix string `json:"servicePrefix,omitempty" valid:"lowercase,maxstringlength(16),matches(^(/[a-z0-9]+)$)"  toml:"servicePrefix,omitempty" label:"服务前缀"`
+	ServicePrefix string `json:"servicePrefix,omitempty" valid:"lowercase,maxstringlength(16),matches(^[a-z0-9]+$)"  toml:"servicePrefix,omitempty" label:"服务前缀"`
 }
 
 //New 构建api server配置信息
