@@ -3,7 +3,6 @@ package services
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/app"
@@ -263,17 +262,11 @@ func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 }
 
 //Has 服务器是否注册了某个服务
-func (s *regist) Has(serverType string, service string, method string) (ok bool) {
+func (s *regist) Has(serverType string, service string) (ok bool) {
 	if s.get(serverType).Has(service) {
 		return true
 	}
-	if strings.ToUpper(method) == http.MethodOptions {
-		return s.get(serverType).Has(registry.Join(service, "$"+strings.ToLower(http.MethodGet))) ||
-			s.get(serverType).Has(registry.Join(service, "$"+strings.ToLower(http.MethodPost))) ||
-			s.get(serverType).Has(registry.Join(service, "$"+strings.ToLower(http.MethodPut))) ||
-			s.get(serverType).Has(registry.Join(service, "$"+strings.ToLower(http.MethodDelete)))
-	}
-	return s.get(serverType).Has(registry.Join(service, "$"+strings.ToLower(method)))
+	return false
 }
 
 //GetHandleExecutings 获取handle预处理勾子

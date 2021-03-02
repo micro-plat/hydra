@@ -25,15 +25,13 @@ func Static() Handler {
 		//处理option请求
 		var rpath = ctx.Request().Path().GetRequestPath()
 		var method = ctx.Request().Path().GetMethod()
-
 		//是option则处理业务逻辑
-		if doOption(ctx, static.Has(rpath)) {
+		if doOption(ctx, static.OptionsCheck(rpath)) {
 			return
 		}
-
 		//优先后端服务调用
-		var routerPath = ctx.Request().Path().GetURL().Path
-		if services.Def.Has(ctx.APPConf().GetServerConf().GetServerType(), routerPath, method) {
+		var routerPath = ctx.GetRouterPath()
+		if services.GetRouter(ctx.APPConf().GetServerConf().GetServerType()).Has(routerPath, method) {
 			ctx.Next()
 			return
 		}
@@ -43,12 +41,11 @@ func Static() Handler {
 			ctx.Next()
 			return
 		}
-
 		//读取静态文件
 		ctx.Response().AddSpecial("static")
 		fs, p, err := static.Get(rpath)
 		if err != nil || fs == nil {
-			ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("文件不存在%s", rpath))
+			ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("文件不存在:%s", rpath))
 			return
 		}
 

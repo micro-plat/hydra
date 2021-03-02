@@ -23,13 +23,14 @@ func (b *buffer) Close() error {
 	return nil
 }
 
-func NewDispCtx() *dispCtx {
+//NewDispCtx NewDispCtx
+func newDispCtx() *dispCtx {
 	return &dispCtx{Context: &dispatcher.Context{}}
 }
 
 type dispCtx struct {
 	*dispatcher.Context
-	rawService    string
+	service       string
 	needClearAuth bool
 	servicePrefix string
 }
@@ -58,11 +59,8 @@ func (g *dispCtx) GetBody() io.ReadCloser {
 func (g *dispCtx) GetService() string {
 	return g.Context.Request.GetService()
 }
-func (g *dispCtx) RawService(service string) {
-	g.rawService = service
-}
-func (g *dispCtx) GetRawService() string {
-	return g.rawService
+func (g *dispCtx) Service(service string) {
+	g.service = service
 }
 func (g *dispCtx) GetMethod() string {
 	return g.Context.Request.GetMethod()
@@ -152,9 +150,8 @@ func (g *dispCtx) ClearAuth(c ...bool) bool {
 func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) int {
 	return http.StatusOK
 }
-func (g *dispCtx) FullPath() string {
-	return g.GetService()
-}
-func (g *dispCtx) ServicePrefix(prefix string) {
-	g.servicePrefix = prefix
+
+//
+func (g *dispCtx) GetRouterPath() string {
+	return g.Context.Request.GetService()
 }

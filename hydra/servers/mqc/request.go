@@ -11,7 +11,7 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-const DefMethod = "GET"
+var DefMethod = "GET"
 
 //Request 处理任务请求
 type Request struct {

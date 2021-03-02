@@ -69,6 +69,21 @@ func (s *Static) Has(name string) bool {
 	return false
 }
 
+//OptionsCheck 检查文件是否存在
+func (s *Static) OptionsCheck(name string) bool {
+	if s.fs == nil {
+		return false
+	}
+	//排除内容
+	if s.IsExclude(name) {
+		return false
+	}
+	if s.fs.Has(name) {
+		return true
+	}
+	return false
+}
+
 //Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
 func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
@@ -130,6 +145,7 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	_, err := cnf.GetSubObject(TypeNodeName, static)
 	if err != nil {
 		if errors.Is(err, conf.ErrNoSetting) {
+			static.Disable = true
 			return static, nil
 		}
 		return nil, fmt.Errorf("static配置格式有误:%v", err)

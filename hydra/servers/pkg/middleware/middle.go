@@ -14,9 +14,9 @@ import (
 type imiddle interface {
 	Next()
 	Find(path string) bool
-	RawService(string)
+	Service(string)
+	GetRouterPath() string
 	ClearAuth(c ...bool) bool
-	ServicePrefix(string)
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数

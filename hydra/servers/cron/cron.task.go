@@ -8,6 +8,8 @@ import (
 	cron "github.com/robfig/cron/v3"
 )
 
+var DefMethod = "GET"
+
 //CronTask 定时任务
 type CronTask struct {
 	*task.Task
@@ -25,7 +27,7 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 		Task:    t,
 		Counter: &Counter{},
 		Round:   &Round{},
-		method:  "GET",
+		method:  DefMethod,
 		form:    make(map[string]interface{}),
 		header:  map[string]string{"Client-IP": "127.0.0.1"},
 	}

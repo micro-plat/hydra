@@ -14,8 +14,8 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	}
 	s.engine = gin.New()
 	s.engine.Use(middleware.Recovery().GinFunc(s.serverType))
-	s.engine.Use(middleware.Logging().GinFunc())   //记录请求日志
-	s.engine.Use(middleware.Processor().GinFunc()) //前缀处理
+	s.engine.Use(middleware.Logging().GinFunc()) //记录请求日志
+	//s.engine.Use(middleware.Processor().GinFunc()) //前缀处理
 	s.engine.Use(middleware.Recovery().GinFunc())
 	s.engine.Use(s.metric.Handle().GinFunc()) //生成metric报表
 	// s.engine.Use(middleware.APM().GinFunc())       //链数跟踪

@@ -94,13 +94,13 @@ func TestORouter_Add(t *testing.T) {
 	getTests("/path3", newTestHandler9, &tests)
 
 	//测试添加
-	s := NewORouter()
+	s := NewORouter("TEST")
 	rightTestCount := 0
 	for _, tt := range tests {
 		err := s.Add(tt.path, tt.service, tt.action, tt.opts...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
-			s = NewORouter()
+			s = NewORouter("TEST")
 			continue
 		}
 		rightTestCount++
@@ -135,7 +135,7 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 		for _, v := range tt.testHandler {
 			getTests(tt.path, v, &rtests)
 		}
-		s := NewORouter()
+		s := NewORouter("TEST")
 		routers := []*router.Router{}
 		for _, tt2 := range rtests {
 			s.Add(tt2.path, tt2.service, tt2.action, tt2.opts...)

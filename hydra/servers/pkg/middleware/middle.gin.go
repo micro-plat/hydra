@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -16,12 +15,11 @@ import (
 type ginCtx struct {
 	*gin.Context
 	once          sync.Once
-	rawService    string
+	service       string
 	needClearAuth bool
-	servicePrefix string
 }
 
-func NewGinCtx(c *gin.Context) *ginCtx {
+func newGinCtx(c *gin.Context) *ginCtx {
 	return &ginCtx{Context: c}
 }
 
@@ -39,18 +37,17 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 	}
 	return params
 }
+
+func (g *ginCtx) GetRouterPath() string {
+	return g.Context.FullPath()
+}
+
 func (g *ginCtx) GetService() string {
-	path := g.Context.FullPath() //还源为服务路径
-	if g.servicePrefix != "" {
-		path = strings.TrimPrefix(path, g.servicePrefix)
-	}
-	return path
+	return g.service
 }
-func (g *ginCtx) RawService(service string) {
-	g.rawService = service
-}
-func (g *ginCtx) GetRawService() string {
-	return g.rawService
+
+func (g *ginCtx) Service(service string) {
+	g.service = service
 }
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()
@@ -74,7 +71,7 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 func (g *ginCtx) Find(path string) bool {
-	return g.GetURL().Path == path
+	return g.GetRouterPath() == path
 
 }
 func (g *ginCtx) Next() {
@@ -155,10 +152,6 @@ func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) (status int) 
 	http.ServeContent(g.Writer, g.Request, filepath, d.ModTime(), f)
 	status = g.Writer.Status()
 	return
-}
-
-func (g *ginCtx) ServicePrefix(prefix string) {
-	g.servicePrefix = prefix
 }
 
 func toHTTPError(err error) int {

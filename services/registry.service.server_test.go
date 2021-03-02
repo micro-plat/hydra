@@ -58,10 +58,10 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 }
 
 func Test_serverServices_Register(t *testing.T) {
-	var API = NewORouter()
-	var WS = NewORouter()
-	var WEB = NewORouter()
-	var RPC = NewORouter()
+	var API = NewORouter("API")
+	var WS = NewORouter("WS")
+	var WEB = NewORouter("WEB")
+	var RPC = NewORouter("RPC")
 	var CRON = newCron()
 	var MQC = newMQC()
 	cronFunc := func(g *Unit, ext ...interface{}) error {

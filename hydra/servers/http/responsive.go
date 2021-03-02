@@ -153,17 +153,15 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	}
 	//从服务中获取路由
 	sr := services.GetRouter(tp)
-	routerconf, err := sr.GetRouters()
+	routersObj, err := sr.BuildRouters(processorObj.ServicePrefix)
 	if err != nil {
 		return nil, err
 	}
-	routerlist := routerconf.GetRouters()
-	processorObj.TreatRouters(routerlist)
 	switch tp {
 	case WS:
 		return NewWSServer(tp,
 			apiConf.GetWSAddress(),
-			routerconf.GetRouters(),
+			routersObj.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),
@@ -171,7 +169,7 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	case Web:
 		return NewServer(tp,
 			apiConf.GetWEBAddress(),
-			routerconf.GetRouters(),
+			routersObj.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),
@@ -179,7 +177,7 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	default:
 		return NewServer(tp,
 			apiConf.GetAPIAddress(),
-			routerconf.GetRouters(),
+			routersObj.GetRouters(),
 			WithServerType(tp),
 			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
 			WithGinTrace(apiConf.Trace),

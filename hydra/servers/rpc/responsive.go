@@ -12,6 +12,7 @@ import (
 	"github.com/micro-plat/hydra/registry/pub"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Responsive 响应式服务器
@@ -62,7 +63,7 @@ func (w *Responsive) Start() (err error) {
 		return err
 	}
 
-	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.serverNum())
+	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), len(w.serverPaths()))
 
 	//服务启动成功后钩子
 	if err := services.Def.DoStarted(w.conf); err != nil {
@@ -122,29 +123,26 @@ func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
 
-	sr := services.GetRouter(RPC)
-	routerObj, err := sr.GetRouters()
-	if err != nil {
-		return err
-	}
-
-	if err := w.pub.Publish(serverName, addr, w.conf.GetServerConf().GetServerID(), routerObj.GetPath()...); err != nil {
+	if err := w.pub.Publish(serverName,
+		addr,
+		w.conf.GetServerConf().GetServerID(),
+		w.serverPaths()...); err != nil {
 		return err
 	}
 
 	return
 }
 
-//serverNum 获取服务数量
-func (w *Responsive) serverNum() int {
+//serverPaths 获取服务数量
+func (w *Responsive) serverPaths() []string {
 	routers := w.Server.Routes()
-	serverMap := map[string]string{}
+	serverMap := types.XMap{}
 	for _, item := range routers {
 		if _, ok := serverMap[item.Path]; !ok {
 			serverMap[item.Path] = item.Path
 		}
 	}
-	return len(serverMap)
+	return serverMap.Keys()
 }
 
 //update 更新发布数据
@@ -161,16 +159,19 @@ func (w *Responsive) update(kv ...string) (err error) {
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	sr := services.GetRouter(RPC)
-	router, err := sr.GetRouters()
+	routerObj, err := sr.BuildRouters("")
 	if err != nil {
 		return nil, err
 	}
-
 	rpcConf, err := rpc.GetConf(cnf.GetServerConf())
 	if err != nil {
 		return nil, err
 	}
-	return NewServer(rpcConf.Address, router.Routers, rpcConf.GetMaxRecvMsgSize(), rpcConf.GetMaxSendMsgSize())
+	return NewServer(rpcConf.Address,
+		routerObj.GetRouters(),
+		rpcConf.GetMaxRecvMsgSize(),
+		rpcConf.GetMaxSendMsgSize(),
+	)
 }
 
 func init() {

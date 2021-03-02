@@ -29,10 +29,9 @@ type IInnerContext interface {
 	ServeContent(filepath string, fs http.FileSystem) int
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)
 	Redirect(int, string)
-	GetService() string
+	GetRouterPath() string
 	//获取原始服务路径(包括请求method)
-	GetRawService() string
-	FullPath() string
+	GetService() string
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 	GetHTTPReqResp() (*http.Request, http.ResponseWriter)
 	ClearAuth(c ...bool) bool

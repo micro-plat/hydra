@@ -6,23 +6,25 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //API  路由信息
-var API = NewORouter()
+var API = NewORouter("API")
 
 //WEB web服务的路由信息
-var WEB = NewORouter()
+var WEB = NewORouter("WEB")
 
 //WS web socket路由信息
-var WS = NewORouter()
+var WS = NewORouter("WS")
 
 //RPC rpc服务的路由信息
-var RPC = NewORouter()
+var RPC = NewORouter("RPC")
 
 //GetRouter 获取服务器的路由配置
 func GetRouter(tp string) *ORouter {
@@ -41,18 +43,21 @@ func GetRouter(tp string) *ORouter {
 }
 
 type ORouter struct {
+	name        string
 	routers     *router.Routers
 	pathRouters map[string]*pathRouter
 }
 
 //NewORouter 构建路由管理器
-func NewORouter() *ORouter {
+func NewORouter(name string) *ORouter {
 	return &ORouter{
+		name:        name,
 		routers:     router.NewRouters(),
 		pathRouters: make(map[string]*pathRouter),
 	}
 }
 
+//Add 添加路由
 func (s *ORouter) Add(path string, service string, action []string, opts ...interface{}) error {
 	if _, ok := s.pathRouters[path]; !ok {
 		s.pathRouters[path] = newPathRouter(path)
@@ -63,17 +68,65 @@ func (s *ORouter) Add(path string, service string, action []string, opts ...inte
 	return nil
 }
 
-//GetRouters 获取所有路由配置
-func (s *ORouter) GetRouters() (*router.Routers, error) {
-	if len(s.routers.Routers) != 0 {
-		return s.routers, nil
+//Has  @liujinyin
+//@params routerPath, httpmethod
+func (s *ORouter) Has(routerPath string, httpMethod string) bool {
+	return s.routers.Has(routerPath, httpMethod)
+}
+
+//Get Get  @liujinyin
+func (s *ORouter) Get(service string) (*router.Router, error) {
+	return s.routers.Get(service)
+}
+
+//BuildRouters 根据前缀处理路由数据
+func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
+	prefix = strings.TrimSuffix(strings.TrimPrefix(prefix, "/"), "/")
+	if prefix != "" {
+		prefix = "/" + prefix
 	}
-	for _, p := range s.pathRouters {
-		routers, err := p.GetRouters()
+
+	s.routers = router.NewRouters()
+	s.routers.ServicePrefix = prefix
+	for _, prouter := range s.pathRouters {
+		routers, err := prouter.GetRouters()
 		if err != nil {
 			return nil, err
 		}
-		s.routers.Routers = append(s.routers.Routers, routers...)
+		tmplist := make([]*router.Router, len(routers))
+		for i, r := range routers {
+			var t = *r
+			tmplist[i] = &t
+			tmplist[i].Path = fmt.Sprintf("%s%s", prefix, r.Path)
+
+			array, ok := s.routers.MapPath[tmplist[i].Path]
+			if !ok {
+				array = make([]string, 0)
+			}
+			array = append(array, tmplist[i].Action...)
+			s.routers.MapPath[tmplist[i].Path] = array
+		}
+		s.routers.Routers = append(s.routers.Routers, tmplist...)
+	}
+
+	for p, acts := range s.routers.MapPath {
+		if !types.StringContains(acts, http.MethodOptions) {
+			s.routers.Routers = append(s.routers.Routers, router.NewRouter(
+				p,
+				fmt.Sprintf("%s$%s", p, http.MethodOptions),
+				[]string{http.MethodOptions},
+			))
+			s.routers.MapPath[p] = append(acts, http.MethodOptions)
+		}
+	}
+
+	return s.routers, nil
+}
+
+//GetRouters 获取所有路由配置
+func (s *ORouter) GetRouters() (*router.Routers, error) {
+	if len(s.routers.Routers) == 0 {
+		return nil, fmt.Errorf("%s:路由数据未执行build操作", s.name)
 	}
 	return s.routers, nil
 }
