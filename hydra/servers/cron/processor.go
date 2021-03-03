@@ -57,6 +57,7 @@ func NewProcessor() (p *Processor) {
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
 	}
+	p.StoreOrginalChain()
 	return p
 }
 
@@ -87,7 +88,8 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 		}
 
 		if !s.Engine.Find(task.GetService()) {
-			s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.Service).DispFunc(CRON))
+			s.Engine.RenewHandlersChain(middleware.Service(task.GetService()).DispFunc(CRON))
+			s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.GetService()).DispFunc(CRON))
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err

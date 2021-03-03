@@ -8,9 +8,10 @@ var default404Body = []byte("404 service not found")
 
 type Engine struct {
 	RouterGroup
-	trees            methodTrees
-	pool             sync.Pool
-	secureJsonPrefix string
+	trees                methodTrees
+	pool                 sync.Pool
+	secureJsonPrefix     string
+	orginalHandlersChain HandlersChain
 }
 
 func New() *Engine {
@@ -29,6 +30,21 @@ func New() *Engine {
 	}
 	return engine
 }
+
+//StoreOrginalChain 存储原有的中间件handlersChain
+func (engine *Engine) StoreOrginalChain() {
+	engine.orginalHandlersChain = make([]HandlerFunc, len(engine.Handlers))
+	copy(engine.orginalHandlersChain, engine.Handlers)
+}
+
+//RenewHandlersChain 存储原有的中间件handlersChain
+func (engine *Engine) RenewHandlersChain(handlers ...HandlerFunc) {
+	newChain := make(HandlersChain, len(engine.orginalHandlersChain)+len(handlers))
+	copy(newChain, handlers)
+	copy(newChain[len(handlers):], engine.orginalHandlersChain)
+	engine.Handlers = newChain
+}
+
 func (engine *Engine) allocateContext() *Context {
 	return &Context{engine: engine}
 }

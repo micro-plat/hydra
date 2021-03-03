@@ -54,6 +54,8 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middlewares.DispFunc()...)
 
+	p.StoreOrginalChain()
+
 	return p, nil
 }
 
@@ -135,6 +137,7 @@ func (s *Processor) Resume() (bool, error) {
 }
 func (s *Processor) consume(queue *queue.Queue) error {
 	if !s.Engine.Find(queue.Service) {
+		s.Engine.RenewHandlersChain(middleware.Service(queue.Service).DispFunc(MQC))
 		s.Engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler(queue.Service).DispFunc(MQC))
 	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {

@@ -43,8 +43,15 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 }
 
 func (s *Server) addRouter(routers ...*router.Router) {
+	orgHandlerchain := make([]gin.HandlerFunc, len(s.engine.Handlers)+1)
+	for i := range s.engine.Handlers {
+		orgHandlerchain[i+1] = s.engine.Handlers[i]
+	}
+
 	for _, router := range routers {
 		for _, method := range router.Action {
+			orgHandlerchain[0] = middleware.Service(router.Service).GinFunc(s.serverType)
+			s.engine.Handlers = orgHandlerchain
 			s.engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).GinFunc())
 		}
 	}

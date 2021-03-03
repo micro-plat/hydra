@@ -158,8 +158,14 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
+
+	processorObj, err := cnf.GetProcessorConf()
+	if err != nil {
+		return nil, err
+	}
+
 	sr := services.GetRouter(RPC)
-	routerObj, err := sr.BuildRouters("")
+	routerObj, err := sr.BuildRouters(processorObj.ServicePrefix)
 	if err != nil {
 		return nil, err
 	}

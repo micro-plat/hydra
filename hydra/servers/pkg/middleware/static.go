@@ -26,12 +26,12 @@ func Static() Handler {
 		var rpath = ctx.Request().Path().GetRequestPath()
 		var method = ctx.Request().Path().GetMethod()
 		//是option则处理业务逻辑
-		if doOption(ctx, static.OptionsCheck(rpath)) {
+		if doOption(ctx, static.Has(rpath)) {
 			return
 		}
 		//优先后端服务调用
-		var routerPath = ctx.GetRouterPath()
-		if services.GetRouter(ctx.APPConf().GetServerConf().GetServerType()).Has(routerPath, method) {
+		var serverType = ctx.APPConf().GetServerConf().GetServerType()
+		if services.Def.Has(serverType, ctx.GetService(), method) {
 			ctx.Next()
 			return
 		}

@@ -15,6 +15,7 @@ type imiddle interface {
 	Next()
 	Find(path string) bool
 	Service(string)
+	GetService() string
 	GetRouterPath() string
 	ClearAuth(c ...bool) bool
 }

@@ -224,7 +224,7 @@ func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ..
 
 	//cron
 	if tp == global.CRON {
-		assert.Equal(t, len(ext)*len(m.services), len(CRON.staticTasks.Tasks), testName+" cron")
+		assert.Equal(t, len(ext)*len(m.handlers), len(CRON.staticTasks.Tasks), testName+" cron")
 		return
 	}
 
@@ -245,7 +245,7 @@ func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ..
 
 	for _, r := range routers.Routers {
 		exist := false
-		for _, v := range m.services {
+		for v := range m.handlers {
 			if r.Service == v {
 				exist = true
 			}
@@ -253,7 +253,7 @@ func checkTestCustomeResult(t *testing.T, s *regist, tp, testName string, ext ..
 		assert.Equal(t, true, exist, testName+r.Service+" not exists")
 	}
 
-	for _, v := range m.services {
+	for v := range m.handlers {
 
 		//检查fallback
 		gotFallback, ok := s.GetFallback(tp, v)

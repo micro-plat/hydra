@@ -27,6 +27,9 @@ func New(opts ...Option) *Processor {
 	for _, opt := range opts {
 		opt(m)
 	}
+	if ok, err := govalidator.ValidateStruct(m); !ok {
+		panic(fmt.Errorf("Processor配置数据有误:%v", err))
+	}
 	return m
 }
 

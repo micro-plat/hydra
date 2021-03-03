@@ -36,6 +36,9 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
 	p.Engine.Use(middleware.Delay().DispFunc())
 	p.Engine.Use(middlewares.DispFunc()...)
+
+	p.StoreOrginalChain()
+
 	p.addRouter(routers...)
 	return p
 }
@@ -43,6 +46,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 func (s *Processor) addRouter(routers ...*router.Router) {
 	for _, router := range routers {
 		for _, method := range router.Action {
+			s.Engine.RenewHandlersChain(middleware.Service(router.Service).DispFunc(RPC))
 			s.Engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).DispFunc())
 		}
 	}

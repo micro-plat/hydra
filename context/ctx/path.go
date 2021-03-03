@@ -119,7 +119,7 @@ func (c *rpath) GetRouter() (*router.Router, error) {
 		}
 		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
 	default:
-		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetService(), []string{}, router.WithEncoding("utf-8")), nil
+		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetService(), []string{}, router.WithEncoding(encoding.UTF8)), nil
 	}
 }
 

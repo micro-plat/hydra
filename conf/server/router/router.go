@@ -28,9 +28,9 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers       []*Router           `json:"routers,omitempty" toml:"routers,omitempty"`
-	MapPath       map[string][]string `json:"-"`
-	ServicePrefix string              `json:"-"`
+	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
+	MapPath       map[string]map[string]string `json:"-"`
+	ServicePrefix string                       `json:"-"`
 }
 
 func (h *Routers) String() string {
@@ -54,7 +54,6 @@ type Router struct {
 	Service  string   `json:"service,omitempty" valid:"ascii,required" toml:"service,omitempty"`
 	Encoding string   `json:"encoding,omitempty" toml:"encoding,omitempty"`
 	Pages    []string `json:"pages,omitempty" toml:"pages,omitempty"`
-	// RealPath string   `json:"-"`
 }
 
 //NewRouter 构建路径配置
@@ -79,7 +78,7 @@ func (r *Router) GetEncoding() string {
 }
 func (r *Router) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v", r.Path, r.Service, strings.Join(r.Action, " "), r.Pages))
+	sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v %s", r.Path, r.Service, strings.Join(r.Action, " "), r.Pages, r.Encoding))
 	return sb.String()
 }
 
@@ -91,7 +90,7 @@ func (r *Router) IsUTF8() bool {
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
-		MapPath: make(map[string][]string),
+		MapPath: make(map[string]map[string]string),
 		Routers: make([]*Router, 0, 1),
 	}
 	return r
@@ -101,30 +100,6 @@ func NewRouters() *Routers {
 func (h *Routers) Append(path string, service string, action []string, opts ...Option) *Routers {
 	h.Routers = append(h.Routers, NewRouter(path, service, action, opts...))
 	return h
-}
-
-//Has Has
-func (h *Routers) Has(path string, method string) bool {
-	if strings.Contains(path, "$") {
-		idx := strings.Index(path, "$")
-		path = fmt.Sprintf("/%s%s", h.ServicePrefix, path[0:idx])
-		method = path[idx+1:]
-	}
-	methods, ok := h.MapPath[path]
-	if !ok {
-		return false
-	}
-	return types.StringContains(methods, method) || method == http.MethodOptions
-}
-
-//Get Get
-func (h *Routers) Get(service string) (*Router, error) {
-	for _, r := range h.Routers {
-		if r.Service == service {
-			return r, nil
-		}
-	}
-	return nil, fmt.Errorf("未找到与[%s]匹配的路由", service)
 }
 
 //Match 根据请求路径匹配指定的路由配置
