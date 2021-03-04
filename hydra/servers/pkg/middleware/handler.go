@@ -34,9 +34,7 @@ func ExecuteHandler() Handler {
 			return
 		}
 
-		//处理本地服务调用 @liujinyin mqc/cron
 		serverType := ctx.APPConf().GetServerConf().GetServerType()
-		//routerPath := ctx.GetRouterPath()
 		method := ctx.Request().Path().GetMethod()
 
 		if services.Def.Has(serverType, service, method) {

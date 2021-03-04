@@ -69,21 +69,6 @@ func NewRouter(path string, service string, action []string, opts ...Option) *Ro
 	return r
 }
 
-//GetActions GetActions
-func (r *Router) GetActions() []string {
-	return r.Action
-}
-
-//GetPath GetPath
-func (r *Router) GetPath() string {
-	return r.Path
-}
-
-//GetService GetService
-func (r *Router) GetService() string {
-	return r.Service
-}
-
 //GetEncoding 获取encoding配置，未配置时返回utf-8
 func (r *Router) GetEncoding() string {
 	if r.Encoding != "" {
