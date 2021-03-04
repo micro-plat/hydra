@@ -19,7 +19,7 @@ type ginCtx struct {
 	needClearAuth bool
 }
 
-func newGinCtx(c *gin.Context) *ginCtx {
+func NewGinCtx(c *gin.Context) *ginCtx {
 	return &ginCtx{Context: c}
 }
 

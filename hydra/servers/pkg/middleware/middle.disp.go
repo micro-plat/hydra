@@ -24,7 +24,7 @@ func (b *buffer) Close() error {
 }
 
 //NewDispCtx NewDispCtx
-func newDispCtx() *dispCtx {
+func NewDispCtx() *dispCtx {
 	return &dispCtx{Context: &dispatcher.Context{}}
 }
 
