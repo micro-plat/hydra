@@ -15,7 +15,7 @@ import (
 
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
-	*dispatcher.Engine
+	//*dispatcher.Engine
 	done          bool
 	closeChan     chan struct{}
 	metric        *middleware.Metric
@@ -28,8 +28,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 		closeChan: make(chan struct{}),
 		metric:    middleware.NewMetric(),
 	}
-	p.adapterEngine = adapter.New()
-	p.Engine = p.adapterEngine.DispEngine()
+	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), RPC))
 
 	p.adapterEngine.Use(middleware.Recovery())
 	p.adapterEngine.Use(middleware.Logging())
@@ -49,7 +48,7 @@ func (s *Processor) addRouter(routers ...*router.Router) {
 	for i := range routers {
 		adapterRouters[i] = routers[i]
 	}
-	s.adapterEngine.DispHandle(RPC, adapterRouters...)
+	s.adapterEngine.Handle(adapterRouters...)
 }
 
 //Request 处理业务请求
@@ -65,7 +64,7 @@ func (s *Processor) Request(context context.Context, request *pb.RequestContext)
 	}
 
 	//发起本地处理
-	w, err := s.Engine.HandleRequest(req)
+	w, err := s.adapterEngine.HandleRequest(req)
 	if err != nil {
 		p = &pb.ResponseContext{}
 		p.Status = int32(http.StatusInternalServerError)

@@ -1,33 +1,43 @@
 package adapter
 
 import (
+	"net/http"
 	"strings"
 	"sync"
 
-	"github.com/gin-gonic/gin"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
+//IEngine IEngine
+type IEngine interface {
+	Use(handlers ...middleware.Handler)
+	Handle(method string, path string, handler middleware.Handler)
+	Routes() RoutesInfo
+	SetHandlers(handlers ...middleware.Handler)
+	ServeHTTP(http.ResponseWriter, *http.Request)
+	HandleRequest(request IRequest) (response IResponseWriter, err error)
+}
+
 //Engine AdapterEngine
 type Engine struct {
-	handlers   middleware.Handlers
-	nodes      []node
-	ginEngine  *gin.Engine
-	dispEngine *dispatcher.Engine
-	onceLock   sync.Once
+	handlers      middleware.Handlers
+	nodes         []node
+	wrapperEngine IEngine
+	onceLock      sync.Once
 }
 
 //New New
-func New() *Engine {
+func New(wrapperEngine IEngine) *Engine {
 	return &Engine{
-		handlers: []middleware.Handler{},
-		nodes:    []node{},
+		wrapperEngine: wrapperEngine,
+		handlers:      []middleware.Handler{},
+		nodes:         []node{},
 	}
 }
 
 //Use Use
 func (engine *Engine) Use(handlers ...middleware.Handler) {
+	engine.wrapperEngine.Use(handlers...)
 	engine.handlers = append(engine.handlers, handlers...)
 	return
 }
@@ -49,52 +59,87 @@ func (engine *Engine) interanlHandle(routers ...IRouter) []node {
 	return nodes
 }
 
-//GinHandle Handle
-func (engine *Engine) GinHandle(tp string, routers ...IRouter) {
+//Handle Handle
+func (engine *Engine) Handle(routers ...IRouter) {
+	// nodes := engine.interanlHandle(routers...)
+	// for _, n := range nodes {
+	// 	engine.wrapperEngine.SetHandlers(n.handlers...)
+	// 	for j := range n.actions {
+	// 		engine.wrapperEngine.Handle(strings.ToUpper(n.actions[j]), n.path)
+	// 	}
+	// }
+	engine.HandleCustom(middleware.ExecuteHandler(), routers...)
+	return
+}
+
+//HandleCustom Handle
+func (engine *Engine) HandleCustom(handler middleware.Handler, routers ...IRouter) {
 	nodes := engine.interanlHandle(routers...)
-	engine.onceLock.Do(func() {
-		engine.ginEngine.Use(engine.handlers.GinFunc(tp)...)
-	})
 	for _, n := range nodes {
-		engine.ginEngine.Handlers = n.GetGinHandlers(tp)
+		engine.wrapperEngine.SetHandlers(n.handlers...)
 		for j := range n.actions {
-			engine.ginEngine.Handle(strings.ToUpper(n.actions[j]), n.path, middleware.ExecuteHandler().GinFunc(tp))
+			engine.wrapperEngine.Handle(strings.ToUpper(n.actions[j]), n.path, handler)
 		}
 	}
 	return
 }
 
-//DispHandle Handle
-func (engine *Engine) DispHandle(tp string, routers ...IRouter) {
-	nodes := engine.interanlHandle(routers...)
-	engine.onceLock.Do(func() {
-		engine.dispEngine.Use(engine.handlers.DispFunc(tp)...)
-	})
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	engine.wrapperEngine.ServeHTTP(w, req)
+}
 
-	for _, n := range nodes {
-		engine.dispEngine.Handlers = n.GetDispHandlers(tp)
-		for j := range n.actions {
-			engine.dispEngine.Handle(n.actions[j], n.path, middleware.ExecuteHandler().DispFunc(tp))
-		}
-	}
+//Find 查找服务
+func (engine *Engine) Find(service string) bool {
+	return false
+}
+
+//HandleRequest 查找服务
+func (engine *Engine) HandleRequest(request IRequest) (response IResponseWriter, err error) {
+	response, err = engine.wrapperEngine.HandleRequest(request)
 	return
 }
 
-//GinEngine GinEngine
-func (engine *Engine) GinEngine() *gin.Engine {
-	if engine.ginEngine == nil {
-		engine.ginEngine = gin.New()
-	}
-	return engine.ginEngine
+//GetHandlers GetHandlers
+func (engine *Engine) GetHandlers() middleware.Handlers {
+	return engine.handlers
 }
 
-//DispEngine DispEngine
-func (engine *Engine) DispEngine() *dispatcher.Engine {
-	if engine.dispEngine == nil {
-		engine.dispEngine = dispatcher.New()
-	}
-	return engine.dispEngine
+//Routes Routes
+func (engine *Engine) Routes() RoutesInfo {
+	return engine.wrapperEngine.Routes()
 }
+
+// //DispHandle Handle
+// func (engine *Engine) DispHandle(tp string, routers ...IRouter) {
+// 	nodes := engine.interanlHandle(routers...)
+// 	engine.onceLock.Do(func() {
+// 		engine.dispEngine.Use(engine.handlers.DispFunc(tp)...)
+// 	})
+
+// 	for _, n := range nodes {
+// 		engine.dispEngine.Handlers = n.GetDispHandlers(tp)
+// 		for j := range n.actions {
+// 			engine.dispEngine.Handle(n.actions[j], n.path, middleware.ExecuteHandler().DispFunc(tp))
+// 		}
+// 	}
+// 	return
+// }
+
+// //GinEngine GinEngine
+// func (engine *Engine) GinEngine() *gin.Engine {
+// 	if engine.ginEngine == nil {
+// 		engine.ginEngine = gin.New()
+// 	}
+// 	return engine.ginEngine
+// }
+
+// //DispEngine DispEngine
+// func (engine *Engine) DispEngine() *dispatcher.Engine {
+// 	if engine.dispEngine == nil {
+// 		engine.dispEngine = dispatcher.New()
+// 	}
+// 	return engine.dispEngine
+// }
 
 // func (engine *Engine) Find(path string) bool {
 // 	return

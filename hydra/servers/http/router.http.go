@@ -11,11 +11,8 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	if !s.ginTrace {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	s.adapterEngine = adapter.New()
-	s.engine = s.adapterEngine.GinEngine()
-
+	s.adapterEngine = adapter.New(adapter.NewEngineWrapperGin(gin.New(), s.serverType))
 	//s.engine = gin.New()
-
 	s.adapterEngine.Use(middleware.Recovery())
 	s.adapterEngine.Use(middleware.Logging()) //记录请求日志
 	//s.adapterEngine.Use(middleware.Processor()) //前缀处理
@@ -40,7 +37,7 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.adapterEngine.Use(middleware.Render())    //响应渲染组件
 	s.adapterEngine.Use(middleware.JwtWriter()) //设置jwt回写
 
-	s.server.Handler = s.engine
+	s.server.Handler = s.adapterEngine
 
 	s.addRouter(routers...)
 	return
@@ -51,6 +48,5 @@ func (s *Server) addRouter(routers ...*router.Router) {
 	for i := range routers {
 		adapterRouters[i] = routers[i]
 	}
-	s.adapterEngine.GinHandle(s.serverType, adapterRouters...)
-
+	s.adapterEngine.Handle(adapterRouters...)
 }

@@ -22,7 +22,7 @@ const (
 
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
-	*dispatcher.Engine
+	//*dispatcher.Engine
 	lock          sync.Mutex
 	done          bool
 	closeChan     chan struct{}
@@ -46,7 +46,7 @@ func NewProcessor() (p *Processor) {
 		startTime: time.Now(),
 		metric:    middleware.NewMetric(),
 	}
-	p.adapterEngine = adapter.New()
+	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), CRON))
 
 	p.adapterEngine.Use(middleware.Recovery())
 	p.adapterEngine.Use(middleware.Logging())
@@ -56,7 +56,7 @@ func NewProcessor() (p *Processor) {
 	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
 	p.adapterEngine.Use(middlewares...)
 
-	p.Engine = p.adapterEngine.DispEngine()
+	//p.Engine = p.adapterEngine.DispEngine()
 
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
 	for i := 0; i < p.length; i++ {
@@ -92,8 +92,8 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
 
-		if !s.Engine.Find(task.GetService()) {
-			s.adapterEngine.DispHandle(CRON, task)
+		if !s.adapterEngine.Find(task.GetService()) {
+			s.adapterEngine.Handle(task)
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err
@@ -211,7 +211,7 @@ func (s *Processor) handle(task *CronTask) error {
 	}
 	if s.status == running {
 		task.Counter.Increase()
-		s.Engine.HandleRequest(task) //触发服务引擎进行业务处理
+		s.adapterEngine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
 	if task.IsImmediately() {
 		return nil

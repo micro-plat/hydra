@@ -56,7 +56,7 @@ func (c *wsHandler) wsAction() error {
 	}
 
 	//使用引擎执行请求
-	writer, err := c.engine.HandleRequest(req)
+	writer, err := c.engine.adapterEngine.HandleRequest(req)
 	if err != nil {
 		c.sendNow(req.GetService(), http.StatusInternalServerError, err)
 		return nil

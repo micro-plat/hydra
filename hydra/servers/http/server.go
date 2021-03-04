@@ -7,7 +7,6 @@ import (
 	x "net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
@@ -18,8 +17,8 @@ import (
 //Server api服务器
 type Server struct {
 	*option
-	server        *x.Server
-	engine        *gin.Engine
+	server *x.Server
+	//engine        *gin.Engine
 	running       bool
 	ip            string
 	proto         string

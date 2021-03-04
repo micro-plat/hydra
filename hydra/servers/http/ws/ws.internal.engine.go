@@ -17,7 +17,7 @@ func InitWSEngine(routers ...*router.Router) {
 }
 
 type wsEngine struct {
-	*dispatcher.Engine
+	//*dispatcher.Engine
 	metric        *middleware.Metric
 	adapterEngine *adapter.Engine
 }
@@ -26,8 +26,8 @@ func newWSEngine(routers ...*router.Router) *wsEngine {
 	s := &wsEngine{
 		metric: metric,
 	}
-	s.adapterEngine = adapter.New()
-	s.Engine = s.adapterEngine.DispEngine()
+	s.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), global.WS))
+	//s.Engine = s.adapterEngine.DispEngine()
 
 	s.adapterEngine.Use(middleware.Recovery())
 	s.adapterEngine.Use(middleware.Logging()) //记录请求日志
@@ -52,5 +52,5 @@ func (s *wsEngine) addWSRouter(routers ...*router.Router) {
 	for i := range routers {
 		adapterRouters[i] = routers[i]
 	}
-	s.adapterEngine.DispHandle(global.WS, adapterRouters...)
+	s.adapterEngine.Handle(adapterRouters...)
 }

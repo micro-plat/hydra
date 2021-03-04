@@ -135,7 +135,7 @@ func (w *Responsive) publish() (err error) {
 
 //serverPaths 获取服务数量
 func (w *Responsive) serverPaths() []string {
-	routers := w.Server.Routes()
+	routers := w.Server.adapterEngine.Routes()
 	serverMap := types.XMap{}
 	for _, item := range routers {
 		if _, ok := serverMap[item.Path]; !ok {

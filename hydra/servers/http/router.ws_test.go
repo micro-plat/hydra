@@ -24,7 +24,7 @@ func TestServer_addWSRouters(t *testing.T) {
 		opt := WithServerType("ws")
 		opt(s.option)
 		s.addWSRouters(tt.routers...)
-		assert.Equalf(t, 6, len(s.engine.RouterGroup.Handlers), tt.name+",中间件数量")
-		assert.Equalf(t, 6, len(s.engine.Routes()), tt.name+",路由数量")
+		assert.Equalf(t, 6, len(s.adapterEngine.GetHandlers()), tt.name+",中间件数量")
+		assert.Equalf(t, 6, len(s.adapterEngine.Routes()), tt.name+",路由数量")
 	}
 }

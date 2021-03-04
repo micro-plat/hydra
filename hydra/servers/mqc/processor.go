@@ -21,7 +21,7 @@ const (
 
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
-	*dispatcher.Engine
+	//*dispatcher.Engine
 	lock          sync.Mutex
 	done          bool
 	closeChan     chan struct{}
@@ -47,8 +47,8 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("构建mqc服务失败(proto:%s,raw:%s) %v", proto, confRaw, err)
 	}
-	p.adapterEngine = adapter.New()
-	p.Engine = p.adapterEngine.DispEngine()
+	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), MQC))
+	//p.Engine = p.adapterEngine.DispEngine()
 
 	p.adapterEngine.Use(middleware.Recovery())
 	p.adapterEngine.Use(middleware.Logging())
@@ -137,8 +137,8 @@ func (s *Processor) Resume() (bool, error) {
 	return false, nil
 }
 func (s *Processor) consume(queue *queue.Queue) error {
-	if !s.Engine.Find(queue.Service) {
-		s.adapterEngine.DispHandle(MQC, queue)
+	if !s.adapterEngine.Find(queue.Service) {
+		s.adapterEngine.Handle(queue)
 	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
 		return err
@@ -165,6 +165,6 @@ func (s *Processor) handle(queue *queue.Queue) func(mq.IMQCMessage) {
 		if err != nil {
 			panic(err)
 		}
-		s.Engine.HandleRequest(req)
+		s.adapterEngine.HandleRequest(req)
 	}
 }

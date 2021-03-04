@@ -12,7 +12,7 @@ import (
 //upgrader 处理ws请求
 
 //WSExecuteHandler 业务处理Handler
-func WSExecuteHandler(service string) middleware.Handler {
+func WSExecuteHandler() middleware.Handler {
 	return func(ctx middleware.IMiddleContext) {
 		n, ok := ctx.Meta().Get("__context_")
 		if !ok {
