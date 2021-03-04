@@ -92,7 +92,7 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 		}
 
 		if !s.engine.Find(task.GetService()) {
-			s.engine.Handle("GET", task.Service, middleware.ExecuteHandler())
+			s.engine.Handle(DefMethod, task.Service, middleware.ExecuteHandler())
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err

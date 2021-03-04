@@ -8,11 +8,6 @@ type Queue struct {
 	Disable     bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
-//GetService GetService
-func (q *Queue) GetService() string {
-	return q.Service
-}
-
 //NewQueue 构建queue任务信息
 func NewQueue(queue string, service string, opts ...Option) *Queue {
 	q := &Queue{

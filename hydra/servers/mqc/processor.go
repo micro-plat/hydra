@@ -136,7 +136,7 @@ func (s *Processor) Resume() (bool, error) {
 }
 func (s *Processor) consume(queue *queue.Queue) error {
 	if !s.engine.Find(queue.Service) {
-		s.engine.Handle("GET", queue.GetService(), middleware.ExecuteHandler())
+		s.engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler())
 	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
 		return err
