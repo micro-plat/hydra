@@ -32,7 +32,7 @@ func doOption(ctx IMiddleContext, staticCheck bool) (isOpt bool) {
 
 	//@liujinyin
 	serverType := ctx.APPConf().GetServerConf().GetServerType()
-	if services.Def.Has(serverType, ctx.GetService(), ctx.Request().Path().GetMethod()) {
+	if services.Def.Has(serverType, ctx.Request().Path().GetService(), ctx.Request().Path().GetMethod()) {
 		ctx.Response().Abort(http.StatusOK, nil)
 		return true
 	}

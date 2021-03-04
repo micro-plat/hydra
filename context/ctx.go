@@ -9,7 +9,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
@@ -112,9 +111,6 @@ type IPath interface {
 
 	//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
 	GetPageAndTag() (page string, tag string, ok bool)
-
-	//GetRouter 获取当前请求对应的路由信息
-	GetRouter() (*router.Router, error)
 
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string

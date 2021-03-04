@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -18,7 +16,6 @@ type ginCtx struct {
 	*gin.Context
 	tp            string
 	once          sync.Once
-	service       string
 	needClearAuth bool
 }
 
@@ -45,19 +42,6 @@ func (g *ginCtx) GetRouterPath() string {
 	return g.Context.FullPath()
 }
 
-func (g *ginCtx) GetService() string {
-
-	router, err := services.GetRouter(g.tp).GetRouters()
-	if err != nil {
-		return ""
-	}
-	nrouter, err := router.Match(g.FullPath(), g.Request.Method)
-	if err != nil {
-		return ""
-	}
-	fmt.Println("router:", g.FullPath(), nrouter)
-	return nrouter.Service
-}
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()
 	return g.Request.Body

@@ -15,11 +15,6 @@ func (q *Queue) GetActions() []string {
 	return []string{http.MethodGet}
 }
 
-//GetPath GetPath
-func (q *Queue) GetPath() string {
-	return q.Service
-}
-
 //GetService GetService
 func (q *Queue) GetService() string {
 	return q.Service

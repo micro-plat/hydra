@@ -151,7 +151,6 @@ func (g *dispCtx) ServeContent(filepath string, fs http.FileSystem) int {
 	return http.StatusOK
 }
 
-//
 func (g *dispCtx) GetRouterPath() string {
-	return g.Context.Request.GetService()
+	return g.Context.FullPath()
 }

@@ -31,7 +31,7 @@ func Static() Handler {
 		}
 		//优先后端服务调用
 		var serverType = ctx.APPConf().GetServerConf().GetServerType()
-		if services.Def.Has(serverType, ctx.GetService(), method) {
+		if services.Def.Has(serverType, ctx.Request().Path().GetService(), method) {
 			ctx.Next()
 			return
 		}

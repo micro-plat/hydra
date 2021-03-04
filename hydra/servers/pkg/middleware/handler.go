@@ -12,7 +12,7 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler() Handler {
 	return func(ctx IMiddleContext) {
-		service := ctx.GetService()
+		service := ctx.Request().Path().GetService()
 		//检查是否被限流
 		if ctx.Request().Path().IsLimited() {
 			//降级处理

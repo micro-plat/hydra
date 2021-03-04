@@ -29,6 +29,7 @@ type Context struct {
 	Keys      map[string]interface{}
 	Errors    errorMsgs
 	Accepted  []string
+	fullPath  string
 }
 
 func (c *Context) reset(r IRequest) {
@@ -40,6 +41,7 @@ func (c *Context) reset(r IRequest) {
 	c.Keys = nil
 	c.Errors = c.Errors[0:0]
 	c.Accepted = nil
+	c.fullPath = ""
 }
 
 // Copy returns a copy of the current context that can be safely used outside the request's scope.
@@ -68,6 +70,11 @@ func (c *Context) Next() {
 //Find 查找指定的路由是否存在
 func (c *Context) Find(path string) bool {
 	return c.engine.Find(path)
+}
+
+//FullPath 获取完整的路由名称
+func (c *Context) FullPath() string {
+	return c.fullPath
 }
 
 // IsAborted returns true if the current context was aborted.
