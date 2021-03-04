@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/micro-plat/hydra/conf/server/task"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -22,16 +23,17 @@ const (
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	*dispatcher.Engine
-	lock      sync.Mutex
-	done      bool
-	closeChan chan struct{}
-	length    int
-	index     int
-	span      time.Duration
-	slots     []cmap.ConcurrentMap //time slots
-	startTime time.Time
-	metric    *middleware.Metric
-	status    int
+	lock          sync.Mutex
+	done          bool
+	closeChan     chan struct{}
+	length        int
+	index         int
+	span          time.Duration
+	slots         []cmap.ConcurrentMap //time slots
+	startTime     time.Time
+	metric        *middleware.Metric
+	status        int
+	adapterEngine *adapter.Engine
 }
 
 //NewProcessor 创建processor
@@ -44,20 +46,23 @@ func NewProcessor() (p *Processor) {
 		startTime: time.Now(),
 		metric:    middleware.NewMetric(),
 	}
-	p.Engine = dispatcher.New()
-	p.Engine.Use(middleware.Recovery().DispFunc(CRON))
-	p.Engine.Use(middleware.Logging().DispFunc())
-	p.Engine.Use(middleware.Recovery().DispFunc())
-	p.Engine.Use(p.metric.Handle().DispFunc())
+	p.adapterEngine = adapter.New()
 
-	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
-	p.Engine.Use(middlewares.DispFunc()...)
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(middleware.Logging())
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(p.metric.Handle())
+
+	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
+	p.adapterEngine.Use(middlewares...)
+
+	p.Engine = p.adapterEngine.DispEngine()
 
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
 	}
-	p.StoreOrginalChain()
+
 	return p
 }
 
@@ -88,8 +93,7 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 		}
 
 		if !s.Engine.Find(task.GetService()) {
-			s.Engine.RenewHandlersChain(middleware.Service(task.GetService()).DispFunc(CRON))
-			s.Engine.Handle(task.GetMethod(), task.GetService(), middleware.ExecuteHandler(task.GetService()).DispFunc(CRON))
+			s.adapterEngine.DispHandle(CRON, task)
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err

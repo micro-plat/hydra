@@ -81,7 +81,7 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 			var t = *r
 			tmplist[i] = &t
 			tmplist[i].Path = fmt.Sprintf("%s%s", prefix, r.Path)
-			s.fillActs(r)
+			s.fillActs(tmplist[i])
 		}
 		s.routers.Routers = append(s.routers.Routers, tmplist...)
 	}

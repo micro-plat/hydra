@@ -15,19 +15,19 @@ type ICustomMiddleware interface {
 }
 
 //DispFunc 返回DispFunc
-func (c Handlers) DispFunc() []dispatcher.HandlerFunc {
+func (c Handlers) DispFunc(tp ...string) []dispatcher.HandlerFunc {
 	list := make([]dispatcher.HandlerFunc, 0, len(c))
 	for _, item := range c {
-		list = append(list, item.DispFunc())
+		list = append(list, item.DispFunc(tp...))
 	}
 	return list
 }
 
 //GinFunc 返回GinFunc
-func (c Handlers) GinFunc() []gin.HandlerFunc {
+func (c Handlers) GinFunc(tp ...string) []gin.HandlerFunc {
 	list := make([]gin.HandlerFunc, 0, len(c))
 	for _, item := range c {
-		list = append(list, item.GinFunc())
+		list = append(list, item.GinFunc(tp...))
 	}
 	return list
 }

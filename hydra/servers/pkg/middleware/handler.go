@@ -10,10 +10,10 @@ import (
 )
 
 //ExecuteHandler 业务处理Handler
-func ExecuteHandler(service string) Handler {
+func ExecuteHandler() Handler {
 	return func(ctx IMiddleContext) {
+		service := ctx.GetService()
 		//检查是否被限流
-		ctx.Service(service)
 		if ctx.Request().Path().IsLimited() {
 			//降级处理
 			fallback(ctx, service)

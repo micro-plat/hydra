@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/hydra/conf/server/router"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/jsons"
@@ -16,9 +16,10 @@ import (
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	*dispatcher.Engine
-	done      bool
-	closeChan chan struct{}
-	metric    *middleware.Metric
+	done          bool
+	closeChan     chan struct{}
+	metric        *middleware.Metric
+	adapterEngine *adapter.Engine
 }
 
 //NewProcessor 创建processor
@@ -27,29 +28,28 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 		closeChan: make(chan struct{}),
 		metric:    middleware.NewMetric(),
 	}
-	p.Engine = dispatcher.New()
-	p.Engine.Use(middleware.Recovery().DispFunc(RPC))
-	p.Engine.Use(middleware.Logging().DispFunc())
-	p.Engine.Use(middleware.Recovery().DispFunc())
-	p.Engine.Use(p.metric.Handle().DispFunc())
+	p.adapterEngine = adapter.New()
+	p.Engine = p.adapterEngine.DispEngine()
 
-	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
-	p.Engine.Use(middleware.Delay().DispFunc())
-	p.Engine.Use(middlewares.DispFunc()...)
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(middleware.Logging())
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(p.metric.Handle())
 
-	p.StoreOrginalChain()
+	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
+	p.adapterEngine.Use(middleware.Delay())
+	p.adapterEngine.Use(middlewares...)
 
 	p.addRouter(routers...)
 	return p
 }
 
 func (s *Processor) addRouter(routers ...*router.Router) {
-	for _, router := range routers {
-		for _, method := range router.Action {
-			s.Engine.RenewHandlersChain(middleware.Service(router.Service).DispFunc(RPC))
-			s.Engine.Handle(strings.ToUpper(method), router.Path, middleware.ExecuteHandler(router.Service).DispFunc())
-		}
+	adapterRouters := make([]adapter.IRouter, len(routers))
+	for i := range routers {
+		adapterRouters[i] = routers[i]
 	}
+	s.adapterEngine.DispHandle(RPC, adapterRouters...)
 }
 
 //Request 处理业务请求

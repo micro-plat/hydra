@@ -7,7 +7,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/apm"
 	"github.com/micro-plat/hydra/conf/server/metric"
-	"github.com/micro-plat/hydra/conf/server/processor"
 )
 
 type ISUB interface {
@@ -43,12 +42,6 @@ func (b BaseBuilder) Metric(host string, db string, cron string, opts ...metric.
 //APM 构建APM配置
 func (b BaseBuilder) APM(address string) BaseBuilder {
 	b[apm.TypeNodeName] = apm.New(address)
-	return b
-}
-
-//Processor 构建APM配置
-func (b BaseBuilder) Processor(opts ...processor.Option) BaseBuilder {
-	b[processor.TypeNodeName] = processor.New(opts...)
 	return b
 }
 

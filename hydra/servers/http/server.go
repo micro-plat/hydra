@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/types"
 )
@@ -17,13 +18,14 @@ import (
 //Server api服务器
 type Server struct {
 	*option
-	server  *x.Server
-	engine  *gin.Engine
-	running bool
-	ip      string
-	proto   string
-	host    string
-	port    string
+	server        *x.Server
+	engine        *gin.Engine
+	running       bool
+	ip            string
+	proto         string
+	host          string
+	port          string
+	adapterEngine *adapter.Engine
 }
 
 //NewServer 创建http api服务嚣

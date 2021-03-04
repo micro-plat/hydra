@@ -7,6 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -21,14 +22,15 @@ const (
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	*dispatcher.Engine
-	lock      sync.Mutex
-	done      bool
-	closeChan chan struct{}
-	queues    cmap.ConcurrentMap
-	metric    *middleware.Metric
-	startTime time.Time
-	customer  mq.IMQC
-	status    int
+	lock          sync.Mutex
+	done          bool
+	closeChan     chan struct{}
+	queues        cmap.ConcurrentMap
+	metric        *middleware.Metric
+	startTime     time.Time
+	customer      mq.IMQC
+	status        int
+	adapterEngine *adapter.Engine
 }
 
 //NewProcessor 创建processor
@@ -45,16 +47,15 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("构建mqc服务失败(proto:%s,raw:%s) %v", proto, confRaw, err)
 	}
-	p.Engine = dispatcher.New()
-	p.Engine.Use(middleware.Recovery().DispFunc(MQC))
-	p.Engine.Use(middleware.Logging().DispFunc())
-	p.Engine.Use(middleware.Recovery().DispFunc())
-	p.Engine.Use(p.metric.Handle().DispFunc())
+	p.adapterEngine = adapter.New()
+	p.Engine = p.adapterEngine.DispEngine()
 
-	p.Engine.Use(middleware.Trace().DispFunc()) //跟踪信息
-	p.Engine.Use(middlewares.DispFunc()...)
-
-	p.StoreOrginalChain()
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(middleware.Logging())
+	p.adapterEngine.Use(middleware.Recovery())
+	p.adapterEngine.Use(p.metric.Handle())
+	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
+	p.adapterEngine.Use(middlewares...)
 
 	return p, nil
 }
@@ -137,8 +138,7 @@ func (s *Processor) Resume() (bool, error) {
 }
 func (s *Processor) consume(queue *queue.Queue) error {
 	if !s.Engine.Find(queue.Service) {
-		s.Engine.RenewHandlersChain(middleware.Service(queue.Service).DispFunc(MQC))
-		s.Engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler(queue.Service).DispFunc(MQC))
+		s.adapterEngine.DispHandle(MQC, queue)
 	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
 		return err
