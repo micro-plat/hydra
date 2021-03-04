@@ -8,18 +8,17 @@ import (
 	"github.com/micro-plat/hydra/components/rpcs/rpc/pb"
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/jsons"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
-	//*dispatcher.Engine
-	done          bool
-	closeChan     chan struct{}
-	metric        *middleware.Metric
-	adapterEngine *adapter.Engine
+	done      bool
+	closeChan chan struct{}
+	metric    *middleware.Metric
+	engine    *adapter.DispatcherEngine
 }
 
 //NewProcessor 创建processor
@@ -28,27 +27,23 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 		closeChan: make(chan struct{}),
 		metric:    middleware.NewMetric(),
 	}
-	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), RPC))
+	p.engine = adapter.NewDispatcherEngine(RPC)
 
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(middleware.Logging())
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(p.metric.Handle())
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(middleware.Logging())
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(p.metric.Handle())
 
-	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
-	p.adapterEngine.Use(middleware.Delay())
-	p.adapterEngine.Use(middlewares...)
+	p.engine.Use(middleware.Trace()) //跟踪信息
+	p.engine.Use(middleware.Delay())
+	p.engine.Use(middlewares...)
 
 	p.addRouter(routers...)
 	return p
 }
 
 func (s *Processor) addRouter(routers ...*router.Router) {
-	adapterRouters := make([]adapter.IRouter, len(routers))
-	for i := range routers {
-		adapterRouters[i] = routers[i]
-	}
-	s.adapterEngine.Handle(adapterRouters...)
+	s.engine.Handles(routers, middleware.ExecuteHandler())
 }
 
 //Request 处理业务请求
@@ -64,7 +59,7 @@ func (s *Processor) Request(context context.Context, request *pb.RequestContext)
 	}
 
 	//发起本地处理
-	w, err := s.adapterEngine.HandleRequest(req)
+	w, err := s.engine.HandleRequest(req)
 	if err != nil {
 		p = &pb.ResponseContext{}
 		p.Status = int32(http.StatusInternalServerError)
@@ -85,6 +80,18 @@ func (s *Processor) Request(context context.Context, request *pb.RequestContext)
 	}
 	p.Header = string(h)
 	return p, nil
+}
+
+//GetServices 获取所有服务列表
+func (s *Processor) GetServices() []string {
+	routers := s.engine.Routes()
+	serverMap := types.XMap{}
+	for _, item := range routers {
+		if _, ok := serverMap[item.Path]; !ok {
+			serverMap[item.Path] = item.Path
+		}
+	}
+	return serverMap.Keys()
 }
 
 //Close 关闭处理程序

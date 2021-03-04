@@ -8,7 +8,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/utility"
@@ -23,17 +22,17 @@ const (
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	//*dispatcher.Engine
-	lock          sync.Mutex
-	done          bool
-	closeChan     chan struct{}
-	length        int
-	index         int
-	span          time.Duration
-	slots         []cmap.ConcurrentMap //time slots
-	startTime     time.Time
-	metric        *middleware.Metric
-	status        int
-	adapterEngine *adapter.Engine
+	lock      sync.Mutex
+	done      bool
+	closeChan chan struct{}
+	length    int
+	index     int
+	span      time.Duration
+	slots     []cmap.ConcurrentMap //time slots
+	startTime time.Time
+	metric    *middleware.Metric
+	status    int
+	engine    *adapter.DispatcherEngine
 }
 
 //NewProcessor 创建processor
@@ -46,17 +45,17 @@ func NewProcessor() (p *Processor) {
 		startTime: time.Now(),
 		metric:    middleware.NewMetric(),
 	}
-	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), CRON))
+	p.engine = adapter.NewDispatcherEngine(CRON)
 
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(middleware.Logging())
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(p.metric.Handle())
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(middleware.Logging())
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(p.metric.Handle())
 
-	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
-	p.adapterEngine.Use(middlewares...)
+	p.engine.Use(middleware.Trace()) //跟踪信息
+	p.engine.Use(middlewares...)
 
-	//p.Engine = p.adapterEngine.DispEngine()
+	//p.Engine = p.engine.DispEngine()
 
 	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
 	for i := 0; i < p.length; i++ {
@@ -92,8 +91,8 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
 
-		if !s.adapterEngine.Find(task.GetService()) {
-			s.adapterEngine.Handle(task)
+		if !s.engine.Find(task.GetService()) {
+			s.engine.Handle("GET", task.Service, middleware.ExecuteHandler())
 		}
 		if _, _, err := s.add(task); err != nil {
 			return err
@@ -211,7 +210,7 @@ func (s *Processor) handle(task *CronTask) error {
 	}
 	if s.status == running {
 		task.Counter.Increase()
-		s.adapterEngine.HandleRequest(task) //触发服务引擎进行业务处理
+		s.engine.HandleRequest(task) //触发服务引擎进行业务处理
 	}
 	if task.IsImmediately() {
 		return nil

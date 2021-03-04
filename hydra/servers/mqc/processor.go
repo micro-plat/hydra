@@ -8,7 +8,6 @@ import (
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -22,15 +21,15 @@ const (
 //Processor cron管理程序，用于管理多个任务的执行，暂停，恢复，动态添加，移除
 type Processor struct {
 	//*dispatcher.Engine
-	lock          sync.Mutex
-	done          bool
-	closeChan     chan struct{}
-	queues        cmap.ConcurrentMap
-	metric        *middleware.Metric
-	startTime     time.Time
-	customer      mq.IMQC
-	status        int
-	adapterEngine *adapter.Engine
+	lock      sync.Mutex
+	done      bool
+	closeChan chan struct{}
+	queues    cmap.ConcurrentMap
+	metric    *middleware.Metric
+	startTime time.Time
+	customer  mq.IMQC
+	status    int
+	engine    *adapter.DispatcherEngine
 }
 
 //NewProcessor 创建processor
@@ -47,15 +46,14 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("构建mqc服务失败(proto:%s,raw:%s) %v", proto, confRaw, err)
 	}
-	p.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), MQC))
-	//p.Engine = p.adapterEngine.DispEngine()
+	p.engine = adapter.NewDispatcherEngine(MQC)
 
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(middleware.Logging())
-	p.adapterEngine.Use(middleware.Recovery())
-	p.adapterEngine.Use(p.metric.Handle())
-	p.adapterEngine.Use(middleware.Trace()) //跟踪信息
-	p.adapterEngine.Use(middlewares...)
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(middleware.Logging())
+	p.engine.Use(middleware.Recovery())
+	p.engine.Use(p.metric.Handle())
+	p.engine.Use(middleware.Trace()) //跟踪信息
+	p.engine.Use(middlewares...)
 
 	return p, nil
 }
@@ -137,8 +135,8 @@ func (s *Processor) Resume() (bool, error) {
 	return false, nil
 }
 func (s *Processor) consume(queue *queue.Queue) error {
-	if !s.adapterEngine.Find(queue.Service) {
-		s.adapterEngine.Handle(queue)
+	if !s.engine.Find(queue.Service) {
+		s.engine.Handle("GET", queue.GetPath(), middleware.ExecuteHandler())
 	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
 		return err
@@ -165,6 +163,6 @@ func (s *Processor) handle(queue *queue.Queue) func(mq.IMQCMessage) {
 		if err != nil {
 			panic(err)
 		}
-		s.adapterEngine.HandleRequest(req)
+		s.engine.HandleRequest(req)
 	}
 }

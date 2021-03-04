@@ -15,7 +15,7 @@ const TypeNodeName = "router"
 var Methods = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodHead}
 
 //DefMethods 普通服务包含的路由
-var DefMethods = []string{http.MethodGet, http.MethodPost}
+var DefMethods = []string{http.MethodGet, http.MethodPost, http.MethodOptions}
 
 //GetWSHomeRouter 获取ws主页路由
 func GetWSHomeRouter() *Router {
@@ -119,13 +119,6 @@ func (h *Routers) Append(path string, service string, action []string, opts ...O
 
 //Match 根据请求路径匹配指定的路由配置
 func (h *Routers) Match(path string, method string) (*Router, error) {
-	if path == "" || method == http.MethodOptions || method == http.MethodHead {
-		return &Router{
-			Path:   path,
-			Action: []string{method},
-		}, nil
-	}
-
 	for _, r := range h.Routers {
 		if r.Path == path && types.StringContains(r.Action, method) {
 			return r, nil

@@ -6,7 +6,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -84,19 +83,6 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 			s.fillActs(tmplist[i])
 		}
 		s.routers.Routers = append(s.routers.Routers, tmplist...)
-	}
-
-	for p, acts := range s.routers.MapPath {
-		if _, ok := acts[http.MethodOptions]; !ok {
-			service := fmt.Sprintf("%s$%s", p, http.MethodOptions)
-			s.routers.Routers = append(s.routers.Routers, router.NewRouter(
-				p,
-				service,
-				[]string{http.MethodOptions},
-			))
-			acts[http.MethodOptions] = service
-			s.routers.MapPath[p] = acts
-		}
 	}
 
 	return s.routers, nil

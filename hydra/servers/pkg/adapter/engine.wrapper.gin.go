@@ -1,70 +1,48 @@
 package adapter
 
 import (
-	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-var _ IEngine = &EngineWrapperGin{}
-
-//EngineWrapperGin EngineWrapperGin
-type EngineWrapperGin struct {
+//GinEngine EngineWrapperGin
+type GinEngine struct {
 	serverType string
-	engine     *gin.Engine
-	handlers   middleware.Handlers
+	*gin.Engine
 }
 
-//NewEngineWrapperGin NewEngineWrapperGin
-func NewEngineWrapperGin(engine *gin.Engine, serverType string) IEngine {
-	return &EngineWrapperGin{
+//NewGinEngine NewEngineWrapperGin
+func NewGinEngine(serverType string) *GinEngine {
+	return &GinEngine{
 		serverType: serverType,
-		engine:     engine,
-		handlers:   make(middleware.Handlers, 0),
+		Engine:     gin.New(),
 	}
 }
 
 //Use Use
-func (e *EngineWrapperGin) Use(handlers ...middleware.Handler) {
-	e.handlers = append(e.handlers, handlers...)
-	handlerList := middleware.Handlers(handlers)
-	e.engine.Use(handlerList.GinFunc(e.serverType)...)
+func (e *GinEngine) Use(handlers ...middleware.Handler) {
+	for _, h := range handlers {
+		e.Engine.Use(h.GinFunc(e.serverType))
+	}
 }
 
 //Handle Handle
-func (e *EngineWrapperGin) Handle(method string, path string, handler middleware.Handler) {
-	e.engine.Handle(method, path, handler.GinFunc(e.serverType))
+func (e *GinEngine) Handle(method string, path string, handler middleware.Handler, hds ...middleware.Handler) {
+	handlers := make([]gin.HandlerFunc, 0, len(hds)+1)
+	for _, h := range hds {
+		handlers = append(handlers, h.GinFunc(e.serverType))
+	}
+	handlers = append(handlers, handler.GinFunc(e.serverType))
+	e.Engine.Handle(method, path, handlers...)
 }
 
-//SetHandlers SetHandlers
-func (e *EngineWrapperGin) SetHandlers(handlers ...middleware.Handler) {
-	handlerList := middleware.Handlers(handlers)
-	e.engine.Handlers = handlerList.GinFunc(e.serverType)
-}
-
-//Routes Routes
-func (e *EngineWrapperGin) Routes() RoutesInfo {
-	erts := e.engine.Routes()
-	result := make(RoutesInfo, len(erts))
-
-	for i := range erts {
-		cur := erts[i]
-		result[i] = RouteInfo{
-			Method:  cur.Method,
-			Path:    cur.Path,
-			Handler: cur.Handler,
+func (e *GinEngine) Handles(routers []*router.Router, handler middleware.Handler, hds ...middleware.Handler) {
+	for _, r := range routers {
+		for _, action := range r.Action {
+			e.Handle(strings.ToUpper(action), r.Path, middleware.ExecuteHandler())
 		}
 	}
-	return result
-}
-
-func (e *EngineWrapperGin) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	e.engine.ServeHTTP(w, req)
-}
-
-//HandleRequest 查找服务
-func (e *EngineWrapperGin) HandleRequest(request IRequest) (response IResponseWriter, err error) {
-
-	return
 }
