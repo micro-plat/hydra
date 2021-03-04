@@ -152,6 +152,9 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		}
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
+	if static.Disable {
+		return static, nil
+	}
 	static.unrewriteMatch = conf.NewPathMatch(static.Unrewrites...)
 	//转换配置文件
 	fs, err := static.getFileOS()
