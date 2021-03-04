@@ -20,7 +20,7 @@ type embedFs struct {
 	bytes   []byte
 }
 
-var defEmbedFs = &embedFs{}
+var defEmbedFs = map[string]*embedFs{}
 
 //check2FS 检查并转换为fs类型
 func (e *embedFs) getFileEmbed() (IFS, error) {

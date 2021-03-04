@@ -34,11 +34,13 @@ type Static struct {
 	unrewriteMatch *conf.PathMatch       `json:"-"`
 	fs             IFS                   `json:"-"`
 	gzipfileMap    map[string]gzFileInfo `json:"-"`
+	serverType     string
 }
 
 //New 构建静态文件配置信息
-func New(opts ...Option) *Static {
+func New(serverType string, opts ...Option) *Static {
 	a := &Static{
+		serverType:  serverType,
 		HomePage:    DefaultHome,
 		Excludes:    DefaultExclude,
 		Unrewrites:  DefaultUnrewrite,
@@ -141,7 +143,7 @@ func (s *Static) AllowRequest(m string) bool {
 
 //GetConf 设置static
 func GetConf(cnf conf.IServerConf) (*Static, error) {
-	static := New()
+	static := New(cnf.GetServerType())
 	_, err := cnf.GetSubObject(TypeNodeName, static)
 	if err != nil {
 		if errors.Is(err, conf.ErrNoSetting) {
@@ -158,7 +160,9 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 	}
 	if fs == nil {
 		//转换本地内嵌文件
-		fs, err = defEmbedFs.getFileEmbed()
+		if nfs, ok := defEmbedFs[static.serverType]; ok {
+			fs, err = nfs.getFileEmbed()
+		}
 	}
 	if err != nil {
 		return nil, err
