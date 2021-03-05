@@ -48,16 +48,18 @@ func WithHomePage(homePage string) Option {
 //WithEmbed 通过嵌入的方式指定压缩文件
 func WithEmbed(root string, fs embed.FS) Option {
 	return func(s *Static) {
-		defEmbedFs.archive = &fs
-		defEmbedFs.name = root
+		defEmbedFs[s.serverType] = &embedFs{}
+		defEmbedFs[s.serverType].archive = &fs
+		defEmbedFs[s.serverType].name = root
 	}
 }
 
 //WithEmbedBytes 通过嵌入的方式指定压缩文件
 func WithEmbedBytes(fileName string, bytes []byte) Option {
 	return func(s *Static) {
-		defEmbedFs.bytes = bytes
-		defEmbedFs.name = fileName
+		defEmbedFs[s.serverType] = &embedFs{}
+		defEmbedFs[s.serverType].bytes = bytes
+		defEmbedFs[s.serverType].name = fileName
 	}
 }
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/server/router"
@@ -64,13 +65,21 @@ func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
 }
 
 func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
-	path, service, actions := g.getPaths(g.Path, name)
+	path, service, actions, restfulOption := g.getPaths(g.Path, name)
+	if _, ok := g.Services[restfulOption]; restfulOption != "" && !ok {
+		unit := &Unit{Group: g,
+			Path:    path,
+			Service: restfulOption,
+			Actions: []string{http.MethodOptions},
+			rawUnit: &rawUnit{RawPath: g.Path, RawMTag: http.MethodOptions}}
+		unit.Handle = context.Handler(func(context.IContext) interface{} { return nil })
+		g.Services[restfulOption] = unit
+	}
 	unit, ok := g.Services[service]
 	if !ok {
 		unit = &Unit{Group: g, Path: path, Service: service, rawUnit: &rawUnit{RawPath: g.Path, RawMTag: name}}
 		g.Services[service] = unit
 	}
-
 	switch htype {
 	case handling:
 		unit.Handling = handler
@@ -85,11 +94,11 @@ func (g *UnitGroup) storeService(name string, handler context.IHandler, htype ha
 	}
 }
 
-func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string) {
+func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, action []string, restfulOption string) {
 
 	//rpc
 	if strings.HasPrefix(name, "rpc://") {
-		return path, name, []string{}
+		return path, name, []string{}, ""
 	}
 
 	//替换注册路径中最后一个*
@@ -104,19 +113,20 @@ func (g *UnitGroup) getPaths(path, name string) (rpath string, service string, a
 
 	//作为func注册的服务，只支持GET，POST
 	if name == "" {
-		return path, path, []string{}
+		return path, path, []string{}, ""
 	}
 
 	//RESTful
 	for _, m := range router.Methods {
 		if strings.EqualFold(m, name) {
-			return path, registry.Join(path, "$"+name), []string{m}
+			restfulOption = registry.Join(path, "$"+strings.ToLower(http.MethodOptions))
+			return path, registry.Join(path, "$"+name), []string{m}, restfulOption
 		}
 	}
 
 	//非RESTful
 	if lastIndex > -1 {
-		return path, path, router.DefMethods
+		return path, path, router.DefMethods, ""
 	}
-	return registry.Join(path, name), registry.Join(path, name), router.DefMethods
+	return registry.Join(path, name), registry.Join(path, name), router.DefMethods, ""
 }

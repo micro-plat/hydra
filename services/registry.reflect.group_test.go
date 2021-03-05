@@ -14,30 +14,32 @@ func TestUnitGroup_getPaths(t *testing.T) {
 		mName       string
 		wantRpath   string
 		wantService string
+		wantOpts    string
 		wantAction  []string
 	}{
 		{name: "1.1 函数前缀为空,注册路径没有*", path: "/path", mName: "", wantRpath: "/path", wantService: "/path", wantAction: []string{}},
 		{name: "1.2 函数前缀为空,注册路径有一个*", path: "/path/*", mName: "", wantRpath: "/path/handle", wantService: "/path/handle", wantAction: []string{}},
 		{name: "1.3 函数前缀为空,注册路径有多个*", path: "/*/path*", mName: "", wantRpath: "/*/pathhandle", wantService: "/*/pathhandle", wantAction: []string{}},
 
-		{name: "2.1 函数前缀为[GET],注册路径没有*", path: "/path", mName: "GET", wantRpath: "/path", wantService: "/path/$GET", wantAction: []string{"GET"}},
-		{name: "2.2 函数前缀为[GET],注册路径有一个*", path: "/path/*", mName: "GET", wantRpath: "/path/GET", wantService: "/path/GET/$GET", wantAction: []string{"GET"}},
-		{name: "2.3 函数前缀为[GET],注册路径有多个*", path: "/*/path*", mName: "GET", wantRpath: "/*/pathGET", wantService: "/*/pathGET/$GET", wantAction: []string{"GET"}},
+		{name: "2.1 函数前缀为[GET],注册路径没有*", path: "/path", mName: "GET", wantRpath: "/path", wantService: "/path/$GET", wantOpts: "/path/$options", wantAction: []string{"GET"}},
+		{name: "2.2 函数前缀为[GET],注册路径有一个*", path: "/path/*", mName: "GET", wantRpath: "/path/GET", wantService: "/path/GET/$GET", wantOpts: "/path/GET/$options", wantAction: []string{"GET"}},
+		{name: "2.3 函数前缀为[GET],注册路径有多个*", path: "/*/path*", mName: "GET", wantRpath: "/*/pathGET", wantService: "/*/pathGET/$GET", wantOpts: "/*/pathGET/$options", wantAction: []string{"GET"}},
 
-		{name: "3.1 函数前缀为[POST],注册路径没有*", path: "/path", mName: "POST", wantRpath: "/path", wantService: "/path/$POST", wantAction: []string{"POST"}},
-		{name: "3.2 函数前缀为[POST],注册路径没有*", path: "/path/*", mName: "POST", wantRpath: "/path/POST", wantService: "/path/POST/$POST", wantAction: []string{"POST"}},
-		{name: "3.3 函数前缀为[POST],注册路径没有*", path: "/*/path*", mName: "POST", wantRpath: "/*/pathPOST", wantService: "/*/pathPOST/$POST", wantAction: []string{"POST"}},
+		{name: "3.1 函数前缀为[POST],注册路径没有*", path: "/path", mName: "POST", wantRpath: "/path", wantService: "/path/$POST", wantOpts: "/path/$options", wantAction: []string{"POST"}},
+		{name: "3.2 函数前缀为[POST],注册路径没有*", path: "/path/*", mName: "POST", wantRpath: "/path/POST", wantService: "/path/POST/$POST", wantOpts: "/path/POST/$options", wantAction: []string{"POST"}},
+		{name: "3.3 函数前缀为[POST],注册路径没有*", path: "/*/path*", mName: "POST", wantRpath: "/*/pathPOST", wantService: "/*/pathPOST/$POST", wantOpts: "/*/pathPOST/$options", wantAction: []string{"POST"}},
 
-		{name: "1.4 函数前缀为[ORDER],注册路径没有*", path: "/path", mName: "ORDER", wantRpath: "/path/ORDER", wantService: "/path/ORDER", wantAction: []string{"GET", "POST"}},
-		{name: "1.4 函数前缀为[ORDER],注册路径有一个*", path: "/path/*", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST"}},
-		{name: "1.4 函数前缀为[ORDER],注册路径有多个*", path: "/*/path*", mName: "FILE", wantRpath: "/*/pathFILE", wantService: "/*/pathFILE", wantAction: []string{"GET", "POST"}},
+		{name: "4.1 函数前缀为[ORDER],注册路径没有*", path: "/path", mName: "ORDER", wantRpath: "/path/ORDER", wantService: "/path/ORDER", wantAction: []string{"GET", "POST", "OPTIONS"}},
+		{name: "4.2 函数前缀为[ORDER],注册路径有一个*", path: "/path/*", mName: "FILE", wantRpath: "/path/FILE", wantService: "/path/FILE", wantAction: []string{"GET", "POST", "OPTIONS"}},
+		{name: "4.3 函数前缀为[ORDER],注册路径有多个*", path: "/*/path*", mName: "FILE", wantRpath: "/*/pathFILE", wantService: "/*/pathFILE", wantAction: []string{"GET", "POST", "OPTIONS"}},
 	}
 	g := &UnitGroup{}
 	for _, tt := range tests {
-		gotRpath, gotService, gotAction := g.getPaths(tt.path, tt.mName)
+		gotRpath, gotService, gotAction, restOpt := g.getPaths(tt.path, tt.mName)
 		assert.Equal(t, tt.wantRpath, gotRpath, tt.name)
 		assert.Equal(t, tt.wantService, gotService, tt.name)
 		assert.Equal(t, tt.wantAction, gotAction, tt.name)
+		assert.Equal(t, tt.wantOpts, restOpt, tt.name)
 	}
 }
 

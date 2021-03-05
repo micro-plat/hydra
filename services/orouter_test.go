@@ -105,7 +105,7 @@ func TestORouter_Add(t *testing.T) {
 		}
 		rightTestCount++
 	}
-
+	s.BuildRouters("")
 	//获取routers
 	a, err := s.GetRouters()
 	assert.Equal(t, false, err != nil, "获取routers")

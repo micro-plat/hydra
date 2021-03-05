@@ -6,7 +6,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -51,7 +50,21 @@ func (c *rpath) Params() types.XMap {
 
 //GetService 获取服务名称
 func (c *rpath) GetService() string {
-	return c.ctx.GetService()
+	tp := c.appConf.GetServerConf().GetServerType()
+	switch tp {
+	case global.API, global.Web, global.WS, global.RPC:
+		routerObj, err := services.GetRouter(tp).GetRouters()
+		if err != nil {
+			return ""
+		}
+		router, err := routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		if err != nil {
+			return ""
+		}
+		return router.Service
+	default:
+		return c.ctx.GetRouterPath()
+	}
 }
 
 //GetGroup 获取当前服务注册的group名
@@ -82,13 +95,7 @@ func (c *rpath) GetEncoding() string {
 		return c.encoding
 	}
 
-	//从router配置获取
-	routerObj, err := c.GetRouter()
-	if err != nil {
-		c.encoding = encoding.UTF8
-		return c.encoding
-	}
-	if c.encoding = routerObj.Encoding; c.encoding != "" {
+	if c.encoding = c.getEncoding(); c.encoding != "" {
 		return c.encoding
 	}
 
@@ -108,18 +115,22 @@ func (c *rpath) GetEncoding() string {
 	return c.encoding
 }
 
-//GetRouter 获取路由信息
-func (c *rpath) GetRouter() (*router.Router, error) {
+//getEncoding 获取路由配置的编码
+func (c *rpath) getEncoding() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS:
+	case global.API, global.Web, global.WS, global.RPC:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
-			return nil, err
+			return ""
 		}
-		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		router, err := routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		if err != nil {
+			return ""
+		}
+		return router.Encoding
 	default:
-		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetService(), []string{}, router.WithEncoding(encoding.UTF8)), nil
+		return ""
 	}
 }
 

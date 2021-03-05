@@ -92,7 +92,7 @@ func (engine *Engine) Find(path string) bool {
 	t := engine.trees
 	for i, tl := 0, len(t); i < tl; i++ {
 		root := t[i].root
-		handlers, _, _ := root.getValue(path, make(Params, 0, 2), false)
+		handlers, _, _, _ := root.getValue(path, make(Params, 0, 2), false)
 		if handlers != nil {
 			return true
 		}
@@ -112,8 +112,9 @@ func (engine *Engine) handleRequest(c *Context) {
 		if t[i].method == httpMethod {
 			root := t[i].root
 			// Find route in tree
-			handlers, params, _ := root.getValue(path, c.Params, unescape)
+			handlers, params, fullPath, _ := root.getValue(path, c.Params, unescape)
 			if handlers != nil {
+				c.fullPath = fullPath
 				c.handlers = handlers
 				c.Params = params
 				c.Next()

@@ -19,12 +19,12 @@ type Server struct {
 	*option
 	server *x.Server
 	//engine        *gin.Engine
-	running       bool
-	ip            string
-	proto         string
-	host          string
-	port          string
-	adapterEngine *adapter.Engine
+	running bool
+	ip      string
+	proto   string
+	host    string
+	port    string
+	engine  *adapter.GinEngine
 }
 
 //NewServer 创建http api服务嚣

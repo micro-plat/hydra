@@ -14,12 +14,12 @@ import (
 
 type ginCtx struct {
 	*gin.Context
+	tp            string
 	once          sync.Once
-	service       string
 	needClearAuth bool
 }
 
-func newGinCtx(c *gin.Context) *ginCtx {
+func NewGinCtx(c *gin.Context) *ginCtx {
 	return &ginCtx{Context: c}
 }
 
@@ -42,13 +42,6 @@ func (g *ginCtx) GetRouterPath() string {
 	return g.Context.FullPath()
 }
 
-func (g *ginCtx) GetService() string {
-	return g.service
-}
-
-func (g *ginCtx) Service(service string) {
-	g.service = service
-}
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()
 	return g.Request.Body

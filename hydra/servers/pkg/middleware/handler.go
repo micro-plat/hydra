@@ -12,7 +12,7 @@ import (
 //ExecuteHandler 业务处理Handler
 func ExecuteHandler() Handler {
 	return func(ctx IMiddleContext) {
-		service := ctx.GetService()
+		service := ctx.Request().Path().GetService()
 		//检查是否被限流
 		if ctx.Request().Path().IsLimited() {
 			//降级处理
@@ -34,9 +34,7 @@ func ExecuteHandler() Handler {
 			return
 		}
 
-		//处理本地服务调用 @liujinyin mqc/cron
 		serverType := ctx.APPConf().GetServerConf().GetServerType()
-		//routerPath := ctx.GetRouterPath()
 		method := ctx.Request().Path().GetMethod()
 
 		if services.Def.Has(serverType, service, method) {

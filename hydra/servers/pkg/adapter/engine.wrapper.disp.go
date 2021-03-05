@@ -1,71 +1,49 @@
 package adapter
 
 import (
-	"net/http"
+	"strings"
 
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-var _ IEngine = &EngineWrapperDisp{}
-
-//EngineWrapperDisp EngineWrapperDisp
-type EngineWrapperDisp struct {
+//DispatcherEngine DispatcherEngine
+type DispatcherEngine struct {
 	serverType string
-	engine     *dispatcher.Engine
-	handlers   middleware.Handlers
+	*dispatcher.Engine
 }
 
-//NewEngineWrapperDisp NewEngineWrapperDisp
-func NewEngineWrapperDisp(engine *dispatcher.Engine, serverType string) IEngine {
-	return &EngineWrapperDisp{
+//NewDispatcherEngine NewDispatcherEngine
+func NewDispatcherEngine(serverType string) *DispatcherEngine {
+	return &DispatcherEngine{
 		serverType: serverType,
-		engine:     engine,
-		handlers:   make(middleware.Handlers, 0),
+		Engine:     dispatcher.New(),
 	}
 }
 
 //Use Use
-func (e *EngineWrapperDisp) Use(handlers ...middleware.Handler) {
-	e.handlers = append(e.handlers, handlers...)
-	handlerList := middleware.Handlers(handlers)
-	e.engine.Use(handlerList.DispFunc(e.serverType)...)
+func (e *DispatcherEngine) Use(handlers ...middleware.Handler) {
+	for _, h := range handlers {
+		e.Engine.Use(h.DispFunc(e.serverType))
+	}
+}
+
+//Handles Handles
+func (e *DispatcherEngine) Handles(routers []*router.Router, handler middleware.Handler, hds ...middleware.Handler) {
+	for _, r := range routers {
+		for _, action := range r.Action {
+			e.Handle(strings.ToUpper(action), r.Path, handler, hds...)
+		}
+	}
 }
 
 //Handle Handle
-func (e *EngineWrapperDisp) Handle(method string, path string, handler middleware.Handler) {
-	e.engine.Handle(method, path, handler.DispFunc(e.serverType))
-
-}
-
-//SetHandlers SetHandlers
-func (e *EngineWrapperDisp) SetHandlers(handlers ...middleware.Handler) {
-	handlerList := middleware.Handlers(handlers)
-	e.engine.Handlers = handlerList.DispFunc(e.serverType)
-}
-
-//Routes Routes
-func (e *EngineWrapperDisp) Routes() RoutesInfo {
-	erts := e.engine.Routes()
-	result := make(RoutesInfo, len(erts))
-
-	for i := range erts {
-		cur := erts[i]
-		result[i] = RouteInfo{
-			Method:  cur.Method,
-			Path:    cur.Path,
-			Handler: cur.Handler,
-		}
+func (e *DispatcherEngine) Handle(method string, path string, handler middleware.Handler, hds ...middleware.Handler) {
+	handlers := make([]dispatcher.HandlerFunc, 0, len(hds)+1)
+	for _, h := range hds {
+		handlers = append(handlers, h.DispFunc(e.serverType))
 	}
-	return result
-}
-
-func (e *EngineWrapperDisp) ServeHTTP(http.ResponseWriter, *http.Request) {
-
-}
-
-//HandleRequest 处理请求
-func (e *EngineWrapperDisp) HandleRequest(request IRequest) (response IResponseWriter, err error) {
-	response, err = e.engine.HandleRequest(request)
-	return
+	handlers = append(handlers, handler.DispFunc(e.serverType))
+	e.Engine.Handle(method, path, handlers...)
 }

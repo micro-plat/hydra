@@ -14,8 +14,6 @@ import (
 type imiddle interface {
 	Next()
 	Find(path string) bool
-	Service(string)
-	GetService() string
 	GetRouterPath() string
 	ClearAuth(c ...bool) bool
 }
@@ -57,7 +55,7 @@ func (h Handler) GinFunc(tps ...string) gin.HandlerFunc {
 				global.Def.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s 构建context出现错误", err, global.GetStack())
 				c.AbortWithError(http.StatusNotExtended, fmt.Errorf("%v", "Server Error"))
 			}
-			rawCtx := &ginCtx{Context: c}
+			rawCtx := &ginCtx{Context: c, tp: tps[0]}
 			nctx := ctx.NewCtx(rawCtx, tps[0])
 			nctx.Meta().SetValue("__context_", c)
 			v = NewMiddleContext(nctx, rawCtx)

@@ -130,7 +130,7 @@ func (w *Responsive) publish() (err error) {
 
 //serverNum 获取服务数量
 func (w *Responsive) serverNum() int {
-	routers := w.Server.adapterEngine.Routes()
+	routers := w.Server.engine.Routes()
 	serverMap := map[string]string{}
 	for _, item := range routers {
 		if _, ok := serverMap[item.Path]; !ok {

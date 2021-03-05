@@ -85,7 +85,7 @@ func (b *httpBuilder) Header(opts ...header.Option) *httpBuilder {
 
 //Static 静态文件配置
 func (b *httpBuilder) Static(opts ...static.Option) *httpBuilder {
-	b.BaseBuilder[static.TypeNodeName] = static.New(opts...)
+	b.BaseBuilder[static.TypeNodeName] = static.New(b.tp, opts...)
 	return b
 }
 

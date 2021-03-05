@@ -1,28 +1,11 @@
 package queue
 
-import "net/http"
-
 //Queue 配置参数
 type Queue struct {
 	Queue       string `json:"queue,omitempty" valid:"ascii,required" toml:"queue,omitempty" label:"队列名"`
 	Service     string `json:"service,omitempty" valid:"ascii,spath,required" toml:"service,omitempty" label:"队列服务"`
 	Concurrency int    `json:"concurrency,omitempty" toml:"concurrency,omitempty"`
 	Disable     bool   `json:"disable,omitempty" toml:"disable,omitempty"`
-}
-
-//GetActions GetActions
-func (q *Queue) GetActions() []string {
-	return []string{http.MethodGet}
-}
-
-//GetPath GetPath
-func (q *Queue) GetPath() string {
-	return q.Service
-}
-
-//GetService GetService
-func (q *Queue) GetService() string {
-	return q.Service
 }
 
 //NewQueue 构建queue任务信息

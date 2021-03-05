@@ -30,8 +30,6 @@ type IInnerContext interface {
 	Data(int, string, []byte) //c.Context.Data(status, tpName, v)
 	Redirect(int, string)
 	GetRouterPath() string
-	//获取原始服务路径(包括请求method)
-	GetService() string
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 	GetHTTPReqResp() (*http.Request, http.ResponseWriter)
 	ClearAuth(c ...bool) bool

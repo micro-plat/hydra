@@ -4,7 +4,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/dispatcher"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
@@ -18,39 +17,38 @@ func InitWSEngine(routers ...*router.Router) {
 
 type wsEngine struct {
 	//*dispatcher.Engine
-	metric        *middleware.Metric
-	adapterEngine *adapter.Engine
+	metric *middleware.Metric
+	engine *adapter.DispatcherEngine
 }
 
 func newWSEngine(routers ...*router.Router) *wsEngine {
 	s := &wsEngine{
 		metric: metric,
 	}
-	s.adapterEngine = adapter.New(adapter.NewEngineWrapperDisp(dispatcher.New(), global.WS))
-	//s.Engine = s.adapterEngine.DispEngine()
+	s.engine = adapter.NewDispatcherEngine(global.WS)
 
-	s.adapterEngine.Use(middleware.Recovery())
-	s.adapterEngine.Use(middleware.Logging()) //记录请求日志
-	s.adapterEngine.Use(middleware.Recovery())
-	s.adapterEngine.Use(middleware.Tag())
-	s.adapterEngine.Use(middleware.Trace()) //跟踪信息
-	s.adapterEngine.Use(middleware.Limit()) //限流处理
-	s.adapterEngine.Use(middleware.Delay()) //
-	s.adapterEngine.Use(middleware.APIKeyAuth())
-	s.adapterEngine.Use(middleware.RASAuth())
-	s.adapterEngine.Use(middleware.JwtAuth())   //jwt安全认证
-	s.adapterEngine.Use(middleware.Render())    //响应渲染组件
-	s.adapterEngine.Use(middleware.JwtWriter()) //设置jwt回写
-	s.adapterEngine.Use(middlewares...)
-	s.adapterEngine.Use(s.metric.Handle()) //生成metric报表
+	s.engine.Use(middleware.Recovery())
+	s.engine.Use(middleware.Logging()) //记录请求日志
+	s.engine.Use(middleware.Recovery())
+	s.engine.Use(middleware.Tag())
+	s.engine.Use(middleware.Trace()) //跟踪信息
+	s.engine.Use(middleware.Limit()) //限流处理
+	s.engine.Use(middleware.Delay()) //
+	s.engine.Use(middleware.APIKeyAuth())
+	s.engine.Use(middleware.RASAuth())
+	s.engine.Use(middleware.JwtAuth())   //jwt安全认证
+	s.engine.Use(middleware.Render())    //响应渲染组件
+	s.engine.Use(middleware.JwtWriter()) //设置jwt回写
+	s.engine.Use(middlewares...)
+	s.engine.Use(s.metric.Handle()) //生成metric报表
 
 	s.addWSRouter(routers...)
 	return s
 }
 func (s *wsEngine) addWSRouter(routers ...*router.Router) {
-	adapterRouters := make([]adapter.IRouter, len(routers))
-	for i := range routers {
-		adapterRouters[i] = routers[i]
+	for _, r := range routers {
+		for _, action := range r.Action {
+			s.engine.Handle(action, r.Path, middleware.ExecuteHandler())
+		}
 	}
-	s.adapterEngine.Handle(adapterRouters...)
 }

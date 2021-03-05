@@ -12,7 +12,6 @@ import (
 	"github.com/micro-plat/hydra/registry/pub"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/logger"
-	"github.com/micro-plat/lib4go/types"
 )
 
 //Responsive 响应式服务器
@@ -63,7 +62,7 @@ func (w *Responsive) Start() (err error) {
 		return err
 	}
 
-	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), len(w.serverPaths()))
+	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), len(w.GetServices()))
 
 	//服务启动成功后钩子
 	if err := services.Def.DoStarted(w.conf); err != nil {
@@ -126,23 +125,11 @@ func (w *Responsive) publish() (err error) {
 	if err := w.pub.Publish(serverName,
 		addr,
 		w.conf.GetServerConf().GetServerID(),
-		w.serverPaths()...); err != nil {
+		w.GetServices()...); err != nil {
 		return err
 	}
 
 	return
-}
-
-//serverPaths 获取服务数量
-func (w *Responsive) serverPaths() []string {
-	routers := w.Server.adapterEngine.Routes()
-	serverMap := types.XMap{}
-	for _, item := range routers {
-		if _, ok := serverMap[item.Path]; !ok {
-			serverMap[item.Path] = item.Path
-		}
-	}
-	return serverMap.Keys()
 }
 
 //update 更新发布数据

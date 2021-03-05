@@ -47,11 +47,6 @@ func (m *CronTask) GetName() string {
 	return m.Task.GetUNQ()
 }
 
-//GetPath 服务名
-func (m *CronTask) GetPath() string {
-	return m.Task.Service
-}
-
 //GetService 服务名
 func (m *CronTask) GetService() string {
 	return m.Task.Service
@@ -60,11 +55,6 @@ func (m *CronTask) GetService() string {
 //GetMethod GetMethod
 func (m *CronTask) GetMethod() string {
 	return m.method
-}
-
-//GetActions 方法名
-func (m *CronTask) GetActions() []string {
-	return []string{m.method}
 }
 
 //GetForm 输入参数
