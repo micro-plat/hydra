@@ -8,6 +8,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/http"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
+	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -23,6 +24,8 @@ func NewContext(content string, opts ...Option) context.IContext {
 	global.Def.ClusterName = types.GetString(global.Def.ClusterName, "test")
 	global.Def.RegistryAddr = types.GetString(global.Def.RegistryAddr, "lm://.")
 	global.Def.ServerTypes = []string{http.API}
+
+	services.GetRouter(http.API).BuildRouters("")
 
 	if mk.Conf == nil {
 		mk.Conf = creator.Conf
