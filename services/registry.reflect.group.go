@@ -67,7 +67,11 @@ func (g *UnitGroup) AddFallback(name string, h context.IHandler) {
 func (g *UnitGroup) storeService(name string, handler context.IHandler, htype handlerType) {
 	path, service, actions, restfulOption := g.getPaths(g.Path, name)
 	if _, ok := g.Services[restfulOption]; restfulOption != "" && !ok {
-		unit := &Unit{Group: g, Path: path, Service: restfulOption, rawUnit: &rawUnit{RawPath: g.Path, RawMTag: http.MethodOptions}}
+		unit := &Unit{Group: g,
+			Path:    path,
+			Service: restfulOption,
+			Actions: []string{http.MethodOptions},
+			rawUnit: &rawUnit{RawPath: g.Path, RawMTag: http.MethodOptions}}
 		unit.Handle = context.Handler(func(context.IContext) interface{} { return nil })
 		g.Services[restfulOption] = unit
 	}
