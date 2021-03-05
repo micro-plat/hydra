@@ -220,11 +220,11 @@ func (r *reporter) send() error {
 				Tags:        tags,
 				Fields: map[string]interface{}{
 					"count":   ms.Count(),
-					"m1":      types.GetInt64(fmt.Sprintf("%.f", ms.Rate1())),
-					"m5":      types.GetInt64(fmt.Sprintf("%.f", ms.Rate5())),
-					"m15":     types.GetInt64(fmt.Sprintf("%.f", ms.Rate15())),
+					"m1":      ms.Rate1(),
+					"m5":      ms.Rate5(),
+					"m15":     ms.Rate15(),
 					"mean":    types.GetInt64(fmt.Sprintf("%.f", ms.RateMean())),
-					"fstatus": types.GetInt64(tags["status"]),
+					"fstatus": types.GetInt32(tags["status"]),
 				},
 				Time: now,
 			})
