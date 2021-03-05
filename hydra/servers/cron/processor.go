@@ -47,10 +47,10 @@ func NewProcessor() (p *Processor) {
 	}
 	p.engine = adapter.NewDispatcherEngine(CRON)
 
-	p.engine.Use(middleware.Recovery())
+	p.engine.Use(middleware.Recovery(true))
+	p.engine.Use(p.metric.Handle())
 	p.engine.Use(middleware.Logging())
 	p.engine.Use(middleware.Recovery())
-	p.engine.Use(p.metric.Handle())
 
 	p.engine.Use(middleware.Trace()) //跟踪信息
 	p.engine.Use(middlewares...)
