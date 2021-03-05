@@ -15,7 +15,7 @@ func Recovery(needPrt ...bool) Handler {
 				if len(needPrt) > 0 && needPrt[0] {
 					serverType := ctx.APPConf().GetServerConf().GetServerType()
 					path := ctx.Request().Path().GetURL().Path
-					ctx.Log().Info(serverType+".request:", ctx.Request().Path().GetMethod(), path, "from", ctx.User().GetClientIP())
+					ctx.Log().Info(serverType+".recovery:", ctx.Request().Path().GetMethod(), path, "from", ctx.User().GetClientIP())
 				}
 				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
 				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", "Server Error"))
