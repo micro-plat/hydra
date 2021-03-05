@@ -13,7 +13,7 @@ func (s *Server) addWSRouters(routers ...*router.Router) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	s.engine = adapter.NewGinEngine(s.serverType)
-	s.engine.Use(middleware.Recovery())
+	s.engine.Use(middleware.Recovery(true))
 	s.engine.Use(middleware.Logging()) //记录请求日志
 	s.engine.Use(middleware.Recovery())
 	s.engine.Use(middleware.BlackList()) //黑名单控制
