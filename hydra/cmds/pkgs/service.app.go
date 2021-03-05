@@ -56,6 +56,8 @@ func GetSrvConfig(isFixed bool, args ...string) *service.Config {
 	}
 	path, _ := filepath.Abs(os.Args[0])
 	cfg.WorkingDirectory = filepath.Dir(path)
+	cfg.Option = make(map[string]interface{})
+	cfg.Option["LimitNOFILE"] = 10240
 	return cfg
 }
 
