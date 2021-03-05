@@ -8,13 +8,13 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-//GinEngine EngineWrapperGin
+//GinEngine GinEngine
 type GinEngine struct {
 	serverType string
 	*gin.Engine
 }
 
-//NewGinEngine NewEngineWrapperGin
+//NewGinEngine NewGinEngine
 func NewGinEngine(serverType string) *GinEngine {
 	return &GinEngine{
 		serverType: serverType,
@@ -39,10 +39,11 @@ func (e *GinEngine) Handle(method string, path string, handler middleware.Handle
 	e.Engine.Handle(method, path, handlers...)
 }
 
+//Handles Handles
 func (e *GinEngine) Handles(routers []*router.Router, handler middleware.Handler, hds ...middleware.Handler) {
 	for _, r := range routers {
 		for _, action := range r.Action {
-			e.Handle(strings.ToUpper(action), r.Path, middleware.ExecuteHandler())
+			e.Handle(strings.ToUpper(action), r.Path, handler, hds...)
 		}
 	}
 }

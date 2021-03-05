@@ -8,13 +8,13 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 )
 
-//DispatcherEngine EngineWrapperGin
+//DispatcherEngine DispatcherEngine
 type DispatcherEngine struct {
 	serverType string
 	*dispatcher.Engine
 }
 
-//NewDispatcherEngine NewEngineWrapperGin
+//NewDispatcherEngine NewDispatcherEngine
 func NewDispatcherEngine(serverType string) *DispatcherEngine {
 	return &DispatcherEngine{
 		serverType: serverType,
@@ -28,10 +28,12 @@ func (e *DispatcherEngine) Use(handlers ...middleware.Handler) {
 		e.Engine.Use(h.DispFunc(e.serverType))
 	}
 }
+
+//Handles Handles
 func (e *DispatcherEngine) Handles(routers []*router.Router, handler middleware.Handler, hds ...middleware.Handler) {
 	for _, r := range routers {
 		for _, action := range r.Action {
-			e.Handle(strings.ToUpper(action), r.Path, middleware.ExecuteHandler())
+			e.Handle(strings.ToUpper(action), r.Path, handler, hds...)
 		}
 	}
 }
