@@ -46,7 +46,7 @@ func TestBaseBuilder_Sub(t *testing.T) {
 		{name: "1. 无入参,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{}}, want: nil, wantErr: "配置：x1值不能为空"},
 		{name: "2. 入参-string,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{"1111"}}, want: BaseBuilder{"x1": json.RawMessage([]byte("1111"))}, wantErr: ""},
 		{name: "3. 入参-map,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{map[string]string{"xx": "yy"}}}, want: BaseBuilder{"x1": map[string]string{"xx": "yy"}}, wantErr: ""},
-		{name: "4. 入参-Ptr,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{&args{}}}, want: BaseBuilder{"x1": args{}}, wantErr: ""},
+		{name: "4. 入参-Ptr,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{&args{}}}, want: BaseBuilder{"x1": &args{}}, wantErr: ""},
 		{name: "5. 入参-struct,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{args{name: "ss"}}}, want: BaseBuilder{"x1": args{name: "ss"}}, wantErr: ""},
 		{name: "6. 入参-int,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{32}}, want: nil, wantErr: "配置：x1值类型不支持"},
 		{name: "7. 入参-float,构建自定义子节点", b: BaseBuilder{}, args: args{name: "x1", s: []interface{}{10.1}}, want: nil, wantErr: "配置：x1值类型不支持"},

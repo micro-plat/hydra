@@ -70,8 +70,8 @@ func Test_conf_Load(t *testing.T) {
 		{name: "2.1 没有设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}, wantErr: true},
 		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, "1123")}, wantErr: true},
 
-		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithAssetsPath(global.AppName))}, wantErr: true},
-		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1124").Static(static.WithAssetsPath(global.AppName))}, wantErr: true},
+		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress)}, wantErr: true},
+		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1124")}, wantErr: true},
 
 		{name: "4.1 没有设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.RPC: newRPC(rpc.DefaultRPCAddress)}, wantErr: true},
 		{name: "4.2 已经设置RPC节点,加载默认节点", serverTypes: []string{global.RPC}, fields: cuurConfRPC, want: map[string]iCustomerBuilder{global.RPC: newRPC("1125")}, wantErr: true},
@@ -186,7 +186,6 @@ func Test_conf_Web(t *testing.T) {
 
 	for _, tt := range tests {
 		want := newHTTP(global.Web, tt.address, tt.opts...)
-		want.Static(static.WithAssetsPath(global.AppName))
 		obj := tt.fields.Web(tt.address, tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
@@ -201,8 +200,8 @@ func Test_conf_GetWeb(t *testing.T) {
 		fields *conf
 		want   map[string]iCustomerBuilder
 	}{
-		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress).Static(static.WithAssetsPath(global.AppName))}},
-		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1122").Static(static.WithAssetsPath(global.AppName))}},
+		{name: "1. 未设置,获取web配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress)}},
+		{name: "2. 已设置,获取web配置对象", fields: cuurConfWeb, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1122")}},
 	}
 
 	for _, tt := range tests {

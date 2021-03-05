@@ -15,8 +15,8 @@ func TestServer_addWSRouters(t *testing.T) {
 		routers []*router.Router
 	}{
 		{name: "1. httpserver-添加ws空路由", routers: []*router.Router{}},
-		{name: "2. httpserver-添加ws单条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"})}},
-		{name: "3. httpserver-添加ws多条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"Get"}), router.NewRouter("/rpcserver/taosy/test1", "/rpcserver/taosy/test1", []string{"Post"})}},
+		{name: "2. httpserver-添加ws单条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"GET"})}},
+		{name: "3. httpserver-添加ws多条路由", routers: []*router.Router{router.NewRouter("/rpcserver/taosy/test", "/rpcserver/taosy/test", []string{"GET"}), router.NewRouter("/rpcserver/taosy/test1", "/rpcserver/taosy/test1", []string{"POST"})}},
 	}
 
 	for _, tt := range tests {

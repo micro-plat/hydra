@@ -56,7 +56,7 @@ func TestProcessor_Add(t *testing.T) {
 		s := NewProcessor()
 		err := s.Add(tt.ts...)
 		assert.Equalf(t, tt.wantErr, err == nil, tt.name, err)
-		assert.Equalf(t, 5+tt.count, len(s.engine.Routes()), tt.name+",服务数量")
+		assert.Equalf(t, tt.count, len(s.engine.Routes()), tt.name+",服务数量")
 	}
 }
 
