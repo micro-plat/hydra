@@ -29,7 +29,5 @@ func Logging() Handler {
 			ctx.Log().Error(serverType+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
 		}
 
-		//5.释放资源
-		ctx.Close()
 	}
 }

@@ -20,6 +20,11 @@ func Recovery(needPrt ...bool) Handler {
 				ctx.Log().Errorf("-----[Recovery] panic recovered:\n%s\n%s", err, global.GetStack())
 				ctx.Response().Abort(http.StatusNotExtended, fmt.Errorf("%v", "Server Error"))
 			}
+			if len(needPrt) > 0 && needPrt[0] {
+				//5.释放资源
+				ctx.Close()
+			}
+
 		}()
 		ctx.Next()
 	}
