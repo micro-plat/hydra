@@ -127,7 +127,7 @@ github.com/mholt/archiver
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.0.10 => ../../../github.com/micro-plat/lib4go
+# github.com/micro-plat/lib4go v1.1.0
 ## explicit
 github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -354,4 +354,3 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
 gopkg.in/yaml.v3
-# github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

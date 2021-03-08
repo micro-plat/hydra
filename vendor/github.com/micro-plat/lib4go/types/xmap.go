@@ -321,7 +321,7 @@ func (q XMap) GetDatetime(name string, format ...string) (time.Time, error) {
 //GetStrings 获取字符串数组
 func (q XMap) GetStrings(name string, def ...string) (r []string) {
 	if v := q.GetString(name); v != "" {
-		if r = strings.Split(v, ";"); len(r) > 0 {
+		if r = strings.Split(v, ","); len(r) > 0 {
 			return r
 		}
 	}
