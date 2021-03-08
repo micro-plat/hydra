@@ -142,6 +142,22 @@ func (client *ZookeeperClient) Close() error {
 	})
 	return nil
 }
+
 func (client *ZookeeperClient) GetSeparator() string {
 	return "/"
+}
+
+var baseVal int64
+
+func init() {
+	baseTime := time.Date(time.Now().Year()-10, 1, 1, 0, 0, 0, 0, time.Local)
+	baseVal = time.Now().Sub(baseTime).Nanoseconds() / 1e6
+}
+
+func getVersion(stat *zk.Stat) int32 {
+	if stat == nil {
+		return 0
+	}
+	curtime := stat.Mtime
+	return int32((curtime - baseVal) / 1e3)
 }

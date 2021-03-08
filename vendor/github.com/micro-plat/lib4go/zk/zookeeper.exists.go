@@ -44,11 +44,7 @@ func (client *ZookeeperClient) exists(path string) (b bool, version int32, err e
 			return
 		}
 		b, s, err := client.conn.Exists(path)
-		var v int32 = 0
-		if s != nil {
-			v = s.Version
-		}
-		ch <- existsType{b: b, err: err, version: v}
+		ch <- existsType{b: b, err: err, version: getVersion(s)}
 	}(ch)
 
 	select {
