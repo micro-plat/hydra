@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/mholt/archiver"
 	"github.com/micro-plat/hydra/global"
@@ -33,8 +32,8 @@ func (s *Static) getFileOS() (IFS, error) {
 
 func unarchive(path string) (IFS, error) {
 	//非目录则按压缩包方式解压
-	rootPath := filepath.Dir(os.Args[0])
-	tmpDir, err := ioutil.TempDir(rootPath, TempDirName)
+	//rootPath := filepath.Dir(os.Args[0])
+	tmpDir, err := ioutil.TempDir(".", TempDirName)
 	if err != nil {
 		return nil, fmt.Errorf("创建临时文件失败:%v", err)
 	}
