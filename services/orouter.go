@@ -51,6 +51,7 @@ type ORouter struct {
 func NewORouter(name string) *ORouter {
 	return &ORouter{
 		name:        name,
+		routers:     router.NewRouters(),
 		pathRouters: make(map[string]*pathRouter),
 	}
 }

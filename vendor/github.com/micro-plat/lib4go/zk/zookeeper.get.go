@@ -27,7 +27,11 @@ func (client *ZookeeperClient) GetValue(path string) (value []byte, version int3
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
 		data, stat, err := client.conn.Get(path)
-		ch <- getValueType{data: data, err: err, version: stat.Version}
+		ch <- getValueType{
+			data:    data,
+			err:     err,
+			version: getVersion(stat), // stat.Version
+		}
 	}(ch)
 
 	select {
@@ -78,7 +82,11 @@ func (client *ZookeeperClient) GetChildren(path string) (paths []string, version
 	ch := make(chan interface{}, 1)
 	go func(ch chan interface{}) {
 		data, stat, err := client.conn.Children(path)
-		ch <- getChildrenType{data: data, err: err, version: stat.Version}
+		ch <- getChildrenType{
+			data:    data,
+			err:     err,
+			version: getVersion(stat), // stat.Version ,
+		}
 	}(ch)
 
 	// 使用定时器判断获取子节点是否超时
