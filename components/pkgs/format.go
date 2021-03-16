@@ -14,19 +14,25 @@ import (
 var def = ""
 
 //Queues01 兼容hydra0-1版本的mqc服务
-var Queues01 = map[string]bool{}
+var queues01 = map[string]bool{}
 
 func init() {
 	lst := strings.Split(envs.GetString("hydra01queues"), ",")
 	for _, i := range lst {
-		Queues01[i] = true
+		queues01[i] = true
 	}
+	key := fmt.Sprintf("%s_%s", global.Def.PlatName, "hydra01queues")
+	lst = strings.Split(envs.GetString(key), ",")
+	for _, i := range lst {
+		queues01[i] = true
+	}
+
 }
 
 //GetStringByHeader 设置头信息
 func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	//兼容老版本
-	if _, ok := Queues01[name]; ok {
+	if IsOriginalQueue(name) {
 		return GetString(content)
 	}
 
@@ -46,10 +52,15 @@ func GetStringByHeader(name string, content interface{}, hd ...string) string {
 
 //IsOriginalQueue 是否是老版本队列
 func IsOriginalQueue(name string) bool {
-	originalQueue := global.MQConf.GetOriginalName(name)
-	if _, ok := Queues01[originalQueue]; ok {
+
+	if _, ok := queues01[name]; ok {
 		return true
 	}
+	name = global.MQConf.GetQueueName(name)
+	if _, ok := queues01[name]; ok {
+		return true
+	}
+
 	return false
 }
 
