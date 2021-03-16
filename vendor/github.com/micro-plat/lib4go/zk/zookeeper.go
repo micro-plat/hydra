@@ -155,9 +155,9 @@ func init() {
 }
 
 func getVersion(stat *zk.Stat) int32 {
-	if stat == nil {
-		return 0
+	curtime := stat.Ctime
+	if stat.Mtime != 0 {
+		curtime = stat.Mtime
 	}
-	curtime := stat.Mtime
 	return int32((curtime - baseVal) / 1e3)
 }

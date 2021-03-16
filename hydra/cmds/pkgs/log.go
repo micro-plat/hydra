@@ -17,5 +17,5 @@ func GetCmdsResult(serviceName, action string, err error, args ...string) error 
 	if len(args) > 0 {
 		serviceName = serviceName + " " + strings.Join(args, " ")
 	}
-	return errs.NewIgnoreError(0, fmt.Sprintf("%s %s %s", action, serviceName, compatible.SUCCESS))
+	return errs.NewErrorf(0, "%s %s %s", action, serviceName, compatible.SUCCESS)
 }
