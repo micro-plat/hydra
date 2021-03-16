@@ -1,6 +1,9 @@
 package global
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 //MQConf 消息队列全局配置
 var MQConf = &messageQueueConf{
@@ -32,6 +35,15 @@ func (m *messageQueueConf) NeedAddPrefix() bool {
 func (m *messageQueueConf) GetQueueName(n string) string {
 	if m.platNameAsPrefix {
 		return fmt.Sprintf("%s%s%s", Def.PlatName, m.separate, n)
+	}
+	return n
+}
+
+//GetOriginalName 获取队列的原始队列名
+func (m *messageQueueConf) GetOriginalName(n string) string {
+	if m.platNameAsPrefix {
+		n = strings.TrimPrefix(n, Def.PlatName+m.separate)
+		//return fmt.Sprintf("%s%s%s", Def.PlatName, m.separate, n)
 	}
 	return n
 }

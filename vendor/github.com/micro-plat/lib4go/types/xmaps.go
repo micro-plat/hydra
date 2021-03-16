@@ -7,6 +7,17 @@ import (
 	"reflect"
 )
 
+type IXMaps interface {
+	Append(i ...XMap) IXMaps
+	ToStructs(o interface{}) error
+	ToAnyStructs(o interface{}) error
+	IsEmpty() bool
+	Len() int
+	Get(i int) IXMap
+}
+
+var _ IXMaps = &XMaps{}
+
 //XMaps 多行数据
 type XMaps []XMap
 
@@ -25,9 +36,9 @@ func NewXMapsByJSON(j string) (XMaps, error) {
 }
 
 //Append 追加xmap
-func (q *XMaps) Append(i ...XMap) XMaps {
+func (q *XMaps) Append(i ...XMap) IXMaps {
 	*q = append(*q, i...)
-	return *q
+	return q
 }
 
 //ToStructs 将当前对象转换为指定的struct
@@ -91,7 +102,7 @@ func (q XMaps) Len() int {
 }
 
 //Get 获取指定索引的数据
-func (q XMaps) Get(i int) XMap {
+func (q XMaps) Get(i int) IXMap {
 	if q == nil || i >= len(q) || i < 0 {
 		return XMap{}
 	}

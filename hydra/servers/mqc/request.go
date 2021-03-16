@@ -6,11 +6,13 @@ import (
 
 	"github.com/micro-plat/lib4go/encoding/base64"
 
+	"github.com/micro-plat/hydra/components/pkgs"
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/lib4go/types"
 )
 
+//DefMethod DefMethod
 var DefMethod = "GET"
 
 //Request 处理任务请求
@@ -24,6 +26,36 @@ type Request struct {
 
 //NewRequest 构建任务请求
 func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
+	if pkgs.IsOriginalQueue(queue.Queue) {
+		return newOldRequest(queue, m)
+	}
+	return newRequest(queue, m)
+}
+
+func newOldRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
+	r = &Request{
+		IMQCMessage: m,
+		queue:       queue,
+		method:      DefMethod,
+		form:        make(map[string]interface{}),
+		header:      make(map[string]string),
+	}
+	//将消息原串转换为map
+	input := make(map[string]interface{})
+	message := m.GetMessage()
+	json.Unmarshal(types.StringToBytes(message), &input)
+
+	r.form = input
+	//检查是否包含头信息
+	r.form["__body__"] = message
+	r.header["Content-Type"] = "application/json"
+
+	//处理头信息
+	r.header["__all__"] = message
+	return
+}
+
+func newRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	r = &Request{
 		IMQCMessage: m,
 		queue:       queue,

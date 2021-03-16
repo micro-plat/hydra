@@ -6,26 +6,33 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/envs"
 	"github.com/micro-plat/lib4go/types"
 )
 
 var def = ""
 
-//兼容hydra0-1版本的mqc服务
-var queues01 = map[string]string{}
+//Queues01 兼容hydra0-1版本的mqc服务
+var queues01 = map[string]bool{}
 
 func init() {
 	lst := strings.Split(envs.GetString("hydra01queues"), ",")
 	for _, i := range lst {
-		queues01[i] = ""
+		queues01[i] = true
 	}
+	key := fmt.Sprintf("%s_%s", global.Def.PlatName, "hydra01queues")
+	lst = strings.Split(envs.GetString(key), ",")
+	for _, i := range lst {
+		queues01[i] = true
+	}
+
 }
 
 //GetStringByHeader 设置头信息
 func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	//兼容老版本
-	if _, ok := queues01[name]; ok {
+	if IsOriginalQueue(name) {
 		return GetString(content)
 	}
 
@@ -41,6 +48,20 @@ func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	out.SetValue("__data__", types.StringToBytes(GetString(content)))
 	out.SetValue("__header__", header)
 	return string(out.Marshal())
+}
+
+//IsOriginalQueue 是否是老版本队列
+func IsOriginalQueue(name string) bool {
+
+	if _, ok := queues01[name]; ok {
+		return true
+	}
+	name = global.MQConf.GetQueueName(name)
+	if _, ok := queues01[name]; ok {
+		return true
+	}
+
+	return false
 }
 
 //GetString 将任意类型转换为字符串，map,struct等转换为json
