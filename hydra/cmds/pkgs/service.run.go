@@ -12,6 +12,9 @@ import (
 )
 
 func (p *ServiceApp) run() (err error) {
+	if p.c.Bool("nostd") {
+		logger.RemoveStdoutAppender()
+	}
 
 	//1. 绑定应用程序参数
 	if err := global.Def.Bind(p.c); err != nil {
