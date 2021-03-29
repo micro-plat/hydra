@@ -154,6 +154,8 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
+	tp := cnf.GetServerConf().GetServerType()
+
 	nconf, err := cnf.GetMQCMainConf()
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器配置获取失败:%v", err)
@@ -166,15 +168,29 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mqc服务器监听队列配置有误:%w", err)
 	}
+
+	processorObj, err := cnf.GetProcessorConf()
+	if err != nil {
+		return nil, err
+	}
+	//从服务中获取路由
+	sr := services.GetRouter(tp)
+	routersObj, err := sr.BuildRouters(processorObj.ServicePrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	routers := routersObj.GetRouters()
+
 	if global.IsLocal(proto) {
-		return NewServer(proto, nil, queueObj.Queues...)
+		return NewServer(proto, nil, queueObj.Queues, routers...)
 	}
 
 	js, err := cnf.GetVarConf().GetConf(varqueue.TypeNodeName, queuename)
 	if err != nil {
 		return nil, fmt.Errorf("获取mqc服务器配置失败./var/%s/%s %w", varqueue.TypeNodeName, queuename, err)
 	}
-	return NewServer(proto, js.GetRaw(), queueObj.Queues...)
+	return NewServer(proto, js.GetRaw(), queueObj.Queues, routers...)
 }
 
 func init() {

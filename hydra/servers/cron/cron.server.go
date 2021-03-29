@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/global"
 )
@@ -16,8 +17,8 @@ type Server struct {
 }
 
 //NewServer 创建cron服务器
-func NewServer(tasks ...*task.Task) (t *Server, err error) {
-	t = &Server{Processor: NewProcessor()}
+func NewServer(tasks []*task.Task, routers ...*router.Router) (t *Server, err error) {
+	t = &Server{Processor: NewProcessor(routers...)}
 	if err := t.Processor.Add(tasks...); err != nil {
 		return nil, err
 	}

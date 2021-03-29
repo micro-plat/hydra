@@ -24,6 +24,12 @@ var WS = NewORouter("WS")
 //RPC rpc服务的路由信息
 var RPC = NewORouter("RPC")
 
+//routerMQC MQC服务的路由信息
+var routerMQC = NewORouter("MQC")
+
+//routerCRON CRON服务的路由信息
+var routerCRON = NewORouter("CRON")
+
 //GetRouter 获取服务器的路由配置
 func GetRouter(tp string) *ORouter {
 	switch tp {
@@ -35,6 +41,10 @@ func GetRouter(tp string) *ORouter {
 		return WS
 	case global.RPC:
 		return RPC
+	case global.MQC:
+		return routerMQC
+	case global.CRON:
+		return routerCRON
 	default:
 		panic(fmt.Sprintf("无法获取服务%s的路由配置", tp))
 	}
