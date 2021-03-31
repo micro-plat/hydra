@@ -162,7 +162,7 @@ func jsonEscape(input string) string {
 	r := strings.Replace(input, "\\u0026", "&", -1)
 	r = strings.Replace(r, "\\u003c", "<", -1)
 	r = strings.Replace(r, "\\u003e", ">", -1)
-	r = strings.Replace(r, "\n", "</br>", -1)
+	r = strings.Replace(r, "\n", "<br />", -1)
 	r = strings.Replace(r, "\r", "", -1)
 	r = strings.Replace(r, "\t", "    ", -1)
 
