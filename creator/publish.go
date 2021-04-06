@@ -116,9 +116,7 @@ func getJSON(path string, v interface{}) (value string, err error) {
 
 	switch en := v.(type) {
 	case security.IEncrypt:
-		ent := en.Encrypt(buff)
-		fmt.Println("v.type:security.IEncrypt", path, ent, string(buff))
-		return ent, nil
+		return en.Encrypt(buff), nil
 	default:
 		return string(buff), nil
 	}
