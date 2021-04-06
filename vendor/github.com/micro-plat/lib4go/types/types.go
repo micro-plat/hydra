@@ -446,3 +446,46 @@ func DeepCopyByGob(dst, src interface{}) error {
 
 	return gob.NewDecoder(&buffer).Decode(dst)
 }
+func Sprint(input ...interface{}) string {
+	buff := strings.Builder{}
+	for _, i := range input {
+		tv := reflect.ValueOf(i)
+		rt := reflect.TypeOf(i)
+		switch rt.Kind() {
+		case reflect.Map:
+			keys := tv.MapKeys()
+			for _, k := range keys {
+				value := tv.MapIndex(k)
+				buff.WriteString(fmt.Sprintf("%s:%s ", k, Sprint(value.Interface())))
+			}
+		case reflect.Struct:
+			switch er := tv.Interface().(type) {
+			case error:
+				buff.WriteString(fmt.Sprintf("[%v]", er.Error()))
+				continue
+			}
+
+			for i := 0; i < tv.NumField(); i++ {
+				tfield := rt.Field(i)
+				vfield := tv.Field(i)
+				if tfield.PkgPath != "" && !tfield.Anonymous { // unexported
+					continue
+				}
+				if !vfield.IsValid() || vfield.IsZero() {
+					buff.WriteString(fmt.Sprintf("%s:[%s]", tfield.Name, "nil"))
+					continue
+				}
+				buff.WriteString(fmt.Sprintf("%s:%s", tfield.Name, Sprint(vfield.Interface())))
+			}
+		case reflect.Array, reflect.Slice:
+			for i := 0; i < tv.Len(); i++ {
+				buff.WriteString(fmt.Sprintf("[%d]:%s", i, Sprint(tv.Index(i).Interface())))
+			}
+		case reflect.Chan, reflect.Func, reflect.UnsafePointer:
+			return fmt.Sprintf("[%s]", rt.Kind())
+		default:
+			buff.WriteString(fmt.Sprintf("[%v]", i))
+		}
+	}
+	return strings.TrimRight(buff.String(), " ")
+}

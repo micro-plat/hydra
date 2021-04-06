@@ -127,7 +127,7 @@ github.com/mholt/archiver
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.1.2
+# github.com/micro-plat/lib4go v1.1.5
 ## explicit
 github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -148,6 +148,7 @@ github.com/micro-plat/lib4go/security/crc32
 github.com/micro-plat/lib4go/security/des
 github.com/micro-plat/lib4go/security/jwt
 github.com/micro-plat/lib4go/security/md5
+github.com/micro-plat/lib4go/security/padding
 github.com/micro-plat/lib4go/security/sha1
 github.com/micro-plat/lib4go/security/sha256
 github.com/micro-plat/lib4go/sysinfo/pipes

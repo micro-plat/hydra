@@ -6,14 +6,23 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+
+	"github.com/micro-plat/lib4go/security/padding"
+	"github.com/micro-plat/lib4go/types"
+)
+
+const (
+	DesECB = "ECB"
+	DesCBC = "CBC"
 )
 
 // Encrypt DES加密
-// input 要加密的字符串	skey 加密使用的秘钥[字符串长度必须是8的倍数]
-func Encrypt(input string, skey string, mode string) (r string, err error) {
+// mode 加密类型/填充模式,不传默认为:CFB/ZERO
+// input 要加密的字符串	skey 加密使用的秘钥[字符串长度必须是8]
+func Encrypt(input string, skey string, mode ...string) (r string, err error) {
 	origData := []byte(input)
 	iv := []byte{0, 0, 0, 0, 0, 0, 0, 0}
-	crypted, err := EncryptBytes(origData, skey, iv, mode)
+	crypted, err := EncryptBytes(origData, skey, iv, mode...)
 	if err != nil {
 		return
 	}
@@ -22,14 +31,15 @@ func Encrypt(input string, skey string, mode string) (r string, err error) {
 }
 
 // Decrypt DES解密
-// input 要解密的字符串	skey 加密使用的秘钥[字符串长度必须是8的倍数]
-func Decrypt(input string, skey string, mode string) (r string, err error) {
+// mode 加密类型/填充模式,不传默认为:CFB/ZERO
+// input 要解密的字符串	skey 加密使用的秘钥[字符串长度必须是8]
+func Decrypt(input string, skey string, mode ...string) (r string, err error) {
 	crypted, err := hex.DecodeString(input)
 	if err != nil {
 		return "", fmt.Errorf("hex DecodeString err:%v", err)
 	}
 	iv := []byte{0, 0, 0, 0, 0, 0, 0, 0}
-	origData, err := DecryptBytes(crypted, skey, iv, mode)
+	origData, err := DecryptBytes(crypted, skey, iv, mode...)
 	if err != nil {
 		return
 	}
@@ -38,35 +48,39 @@ func Decrypt(input string, skey string, mode string) (r string, err error) {
 }
 
 // EncryptBytes DES加密
-// input 要加密的字符串	skey 加密使用的秘钥[字符串长度必须是8的倍数]
-func EncryptBytes(origData []byte, skey string, iv []byte, mode string) (crypted []byte, err error) {
+// mode 加密类型/填充模式,不传默认为:CFB/ZERO
+// input 要加密的字符串	skey 加密使用的秘钥[字符串长度必须是8]
+func EncryptBytes(origData []byte, skey string, iv []byte, mode ...string) (crypted []byte, err error) {
 	key := []byte(skey)
 	block, err := des.NewCipher(key)
 	if err != nil {
 		err = fmt.Errorf("des NewCipher err:%v", err)
 		return
 	}
-	m, p, err := getModePadding(mode)
+	cmode := types.GetStringByIndex(mode, 0, fmt.Sprintf("%s/%s", DesECB, padding.PaddingZero))
+
+	m, p, err := padding.GetModePadding(cmode)
 	if err != nil {
-		return
+		return nil, err
 	}
+
 	var blockMode cipher.BlockMode
 	switch m {
-	case "ECB":
+	case DesECB:
 		blockMode = NewECBEncrypter(block)
-	case "CBC":
+	case DesCBC:
 		blockMode = cipher.NewCBCEncrypter(block, iv)
 	default:
 		err = fmt.Errorf("加密模式不支持:%s", m)
 		return
 	}
 	switch p {
-	case "PKCS5":
-		origData = PKCS5Padding(origData, block.BlockSize())
-	case "PKCS7":
-		origData = PKCS7Padding(origData)
-	case "ZERO":
-		origData = ZeroPadding(origData, block.BlockSize())
+	case padding.PaddingPkcs5:
+		origData = padding.PKCS5Padding(origData, block.BlockSize())
+	case padding.PaddingPkcs7:
+		origData = padding.PKCS7Padding(origData)
+	case padding.PaddingZero:
+		origData = padding.ZeroPadding(origData, block.BlockSize())
 	default:
 		err = fmt.Errorf("填充模式不支持:%s", p)
 		return
@@ -77,8 +91,9 @@ func EncryptBytes(origData []byte, skey string, iv []byte, mode string) (crypted
 }
 
 // DecryptBytes DES解密
-// input 要解密的字符串	skey 加密使用的秘钥[字符串长度必须是8的倍数]
-func DecryptBytes(crypted []byte, skey string, iv []byte, mode string) (r []byte, err error) {
+// mode 加密类型/填充模式,不传默认为:CFB/ZERO
+// input 要解密的字符串	skey 加密使用的秘钥[字符串长度必须是8]
+func DecryptBytes(crypted []byte, skey string, iv []byte, mode ...string) (r []byte, err error) {
 
 	key := []byte(skey)
 	block, err := des.NewCipher(key)
@@ -86,15 +101,18 @@ func DecryptBytes(crypted []byte, skey string, iv []byte, mode string) (r []byte
 		err = fmt.Errorf("des NewCipher err:%v", err)
 		return
 	}
-	m, p, err := getModePadding(mode)
+	cmode := types.GetStringByIndex(mode, 0, fmt.Sprintf("%s/%s", DesECB, padding.PaddingZero))
+
+	m, p, err := padding.GetModePadding(cmode)
 	if err != nil {
-		return
+		return nil, err
 	}
+
 	var blockMode cipher.BlockMode
 	switch m {
-	case "CBC":
+	case DesCBC:
 		blockMode = cipher.NewCBCDecrypter(block, iv)
-	case "ECB":
+	case DesECB:
 		blockMode = NewECBDecrypter(block)
 	default:
 		err = fmt.Errorf("加密模式不支持:%s", m)
@@ -103,35 +121,16 @@ func DecryptBytes(crypted []byte, skey string, iv []byte, mode string) (r []byte
 	r = make([]byte, len(crypted))
 	blockMode.CryptBlocks(r, crypted)
 	switch p {
-	case "PKCS5":
-		r = PKCS5UnPadding(r)
-	case "PKCS7":
-		r = PKCS7UnPadding(r)
-	case "ZERO":
-		r = ZeroUnPadding(r)
+	case padding.PaddingPkcs5:
+		r = padding.PKCS5UnPadding(r)
+	case padding.PaddingPkcs7:
+		r = padding.PKCS7UnPadding(r)
+	case padding.PaddingZero:
+		r = padding.ZeroUnPadding(r)
 	default:
 		err = fmt.Errorf("填充模式不支持:%s", p)
 		return
 	}
 
-	return
-}
-
-func getModePadding(name string) (mode, padding string, err error) {
-	names := strings.Split(name, "/")
-	if len(names) != 2 {
-		err = fmt.Errorf("输入模式不正确:%s", name)
-		return
-	}
-	mode = strings.ToUpper(names[0])
-	padding = strings.ToUpper(names[1])
-	if mode != "CBC" && mode != "ECB" {
-		err = fmt.Errorf("加密模式不支持:%s", mode)
-		return
-	}
-	if padding != "PKCS5" && padding != "PKCS7" && padding != "ZERO" {
-		err = fmt.Errorf("填充模式不支持:%s", padding)
-		return
-	}
 	return
 }

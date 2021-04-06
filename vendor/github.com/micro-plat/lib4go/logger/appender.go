@@ -34,6 +34,13 @@ func (a *appenderWriter) AddAppender(typ string, i IAppender) {
 	a.appenders[typ] = i
 }
 
+//RemoveAppender 移除某个Appender
+func (a *appenderWriter) RemoveAppender(typ string) {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	delete(a.appenders, typ)
+}
+
 //AddLayout 添加layout配置
 func (a *appenderWriter) AddLayout(layouts ...*Layout) {
 	a.lock.Lock()
@@ -42,10 +49,9 @@ func (a *appenderWriter) AddLayout(layouts ...*Layout) {
 		if layout.Level == SLevel_OFF {
 			continue
 		}
-		if _, ok := a.appenders[layout.Type]; !ok {
-			panic(fmt.Errorf("layout中配置的日志组件类型不支持:%s", layout.Type))
+		if _, ok := a.appenders[layout.Type]; ok {
+			a.layouts = append(a.layouts, layout)
 		}
-		a.layouts = append(a.layouts, layout)
 	}
 }
 
@@ -58,10 +64,9 @@ func (a *appenderWriter) ResetLayout(layouts ...*Layout) {
 		if layout.Level == SLevel_OFF {
 			continue
 		}
-		if _, ok := a.appenders[layout.Type]; !ok {
-			panic(fmt.Errorf("layout中配置的日志组件类型不支持:%s", layout.Type))
+		if _, ok := a.appenders[layout.Type]; ok {
+			a.layouts = append(a.layouts, layout)
 		}
-		a.layouts = append(a.layouts, layout)
 	}
 }
 
@@ -107,6 +112,16 @@ func AddAppender(typ string, i IAppender) {
 	defWriter.AddAppender(typ, i)
 }
 
+//RemoveAppender 移除Appender
+func RemoveAppender(typ string) {
+	defWriter.RemoveAppender(typ)
+}
+
+//RemoveStdoutAppender 移除stdout appender
+func RemoveStdoutAppender() {
+	defWriter.RemoveAppender("stdout")
+}
+
 //AddLayout 添加日志输出配置
 func AddLayout(l ...*Layout) {
 	defWriter.AddLayout(l...)
@@ -114,4 +129,10 @@ func AddLayout(l ...*Layout) {
 
 func logNow(event *LogEvent) {
 	defWriter.Log(event)
+}
+
+//进行日志配置文件初始化
+func init() {
+	AddAppender("file", NewFileAppender())
+	AddAppender("stdout", NewStudoutAppender())
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/micro-plat/lib4go/types"
 	//_ "github.com/mattn/go-oci8"
 	//_ "github.com/mattn/go-sqlite3"
 	//_ "gopkg.in/rana/ora.v4"
@@ -119,7 +121,7 @@ func resolveRows(rows *sql.Rows, col int) (dataRows QueryRows, columns []string,
 	}
 
 	for rows.Next() {
-		row := NewQueryRow(len(columns))
+		row := types.NewXMap(len(columns))
 		dataRows.Append(row)
 		var buffer []interface{}
 		for index := 0; index < len(columns); index++ {
@@ -138,7 +140,8 @@ func resolveRows(rows *sql.Rows, col int) (dataRows QueryRows, columns []string,
 			} else {
 				//	buff := value.(*[]byte)
 				//row[key] = bytes.NewBuffer(*buff).String()
-				row[key] = strings.TrimPrefix(fmt.Sprintf("%s", value), "&")
+				// row[key] = strings.TrimPrefix(fmt.Sprintf("%s", value), "&")
+				row.SetValue(key, strings.TrimPrefix(fmt.Sprintf("%s", value), "&"))
 			}
 		}
 	}
