@@ -5,7 +5,7 @@ type IEncrypt interface {
 }
 
 type ConfEncrypt struct {
-	EnableEncryption bool
+	EnableEncryption bool `json:"-"`
 }
 
 func (c ConfEncrypt) Encrypt(input []byte) string {
