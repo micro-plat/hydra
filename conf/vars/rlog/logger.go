@@ -7,6 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/logger"
 )
@@ -19,6 +20,7 @@ const TypeNodeName = "app"
 
 //Layout 日志配置
 type Layout struct {
+	security.ConfEncrypt
 	Level   string `json:"level"  valid:"in(Off|Info|Warn|Error|Fatal|Debug|All)" toml:"level"`
 	Service string `json:"service,omitempty" toml:"service"`
 	Layout  string `json:"layout" toml:"layout"`

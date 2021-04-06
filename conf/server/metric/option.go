@@ -24,3 +24,10 @@ func WithEnable() Option {
 		a.Disable = false
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Metric) {
+		a.EnableEncryption = true
+	}
+}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TypeNodeName metric配置节点名
@@ -17,6 +18,7 @@ type IMetric interface {
 
 //Metric Metric
 type Metric struct {
+	security.ConfEncrypt
 	Host     string `json:"host,omitempty" valid:"requrl,required" toml:"host,omitempty" label:"监控主机地址"`
 	DataBase string `json:"dataBase,omitempty" valid:"ascii,required" toml:"dataBase,omitempty" label:"监控主机数据库"`
 	Cron     string `json:"cron,omitempty" valid:"ascii,required" toml:"cron,omitempty" label:"监控主机cron"`

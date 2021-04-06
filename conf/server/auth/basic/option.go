@@ -37,3 +37,10 @@ func WithEnable() Option {
 		b.Disable = false
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *BasicAuth) {
+		a.EnableEncryption = true
+	}
+}

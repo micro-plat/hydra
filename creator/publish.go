@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
@@ -112,5 +113,10 @@ func getJSON(path string, v interface{}) (value string, err error) {
 	if err != nil {
 		return "", err
 	}
-	return string(buff), nil
+	switch en := v.(type) {
+	case security.IEncrypt:
+		return en.Encrypt(buff), nil
+	default:
+		return string(buff), nil
+	}
 }

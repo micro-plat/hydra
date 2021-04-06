@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TypeNodeName processor配置节点名
@@ -18,6 +19,7 @@ type IProcessor interface {
 
 //Processor Processor
 type Processor struct {
+	security.ConfEncrypt
 	ServicePrefix string `json:"servicePrefix,omitempty" valid:"maxstringlength(16),matches(^/[a-z0-9]+$)"  toml:"servicePrefix,omitempty" label:"服务前缀"`
 }
 

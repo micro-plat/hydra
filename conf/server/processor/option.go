@@ -11,3 +11,10 @@ func WithServicePrefix(prefix string) Option {
 		a.ServicePrefix = "/" + strings.TrimSuffix(strings.TrimPrefix(prefix, "/"), "/")
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Processor) {
+		a.EnableEncryption = true
+	}
+}

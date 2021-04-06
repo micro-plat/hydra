@@ -60,3 +60,10 @@ func WithRaw(raw []byte) Option {
 		o = c
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *HTTPConf) {
+		a.EnableEncryption = true
+	}
+}

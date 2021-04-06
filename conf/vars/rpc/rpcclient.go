@@ -1,5 +1,7 @@
 package rpc
 
+import "github.com/micro-plat/hydra/conf/pkgs/security"
+
 //RPCTypeNode rpc在var配置中的类型名称
 const RPCTypeNode = "rpc"
 
@@ -14,6 +16,7 @@ const RoundRobin = "round_robin"
 
 //RPCConf http客户端配置对象
 type RPCConf struct {
+	security.ConfEncrypt
 	ConntTimeout int      `json:"connectionTimeout"`
 	Log          string   `json:"log"`
 	SortPrefix   string   `json:"sortPrefix"`

@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 const (
@@ -17,18 +18,24 @@ const (
 
 //Server api server配置信息
 type Server struct {
-	Address string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty" label:"ws服务地址"`
-	*option
+	security.ConfEncrypt
+	Address   string `json:"address,omitempty" valid:"dialstring" toml:"address,omitempty" label:"ws服务地址"`
+	Status    string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+	RTimeout  int    `json:"rTimeout,omitempty" toml:"rTimeout,omitzero"`
+	WTimeout  int    `json:"wTimeout,omitempty" toml:"wTimeout,omitzero"`
+	RHTimeout int    `json:"rhTimeout,omitempty" toml:"rhTimeout,omitzero"`
+	Host      string `json:"host,omitempty" toml:"host,omitempty"`
+	Domain    string `json:"dns,omitempty" toml:"dns,omitempty"`
+	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
 //New 构建websocket server配置信息
 func New(address string, opts ...Option) *Server {
 	a := &Server{
 		Address: address,
-		option:  &option{},
 	}
 	for _, opt := range opts {
-		opt(a.option)
+		opt(a)
 	}
 	return a
 }

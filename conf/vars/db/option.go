@@ -11,3 +11,10 @@ func WithConnect(maxOpen int, maxIdle int, lifeTime int) Option {
 		a.LifeTime = lifeTime
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *DB) {
+		a.EnableEncryption = true
+	}
+}

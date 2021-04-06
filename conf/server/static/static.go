@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TempDirName 临时目录创建名
@@ -25,6 +26,7 @@ type IStatic interface {
 
 //Static 设置静态文件配置
 type Static struct {
+	security.ConfEncrypt
 	Path           string                `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
 	Excludes       []string              `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
 	HomePage       string                `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`

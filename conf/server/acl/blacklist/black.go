@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -18,6 +19,7 @@ const (
 
 //BlackList 黑名单配置
 type BlackList struct {
+	security.ConfEncrypt
 	Disable bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	IPS     []string `json:"blackList,omitempty" toml:"blackList,omitempty"`
 	ipm     *conf.PathMatch

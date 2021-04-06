@@ -35,3 +35,10 @@ func WithRaw(raw string) Option {
 		}
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *MQTT) {
+		a.EnableEncryption = true
+	}
+}

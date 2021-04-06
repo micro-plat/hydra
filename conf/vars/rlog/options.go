@@ -72,3 +72,10 @@ func WithAll() Option {
 		a.Level = "All"
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Layout) {
+		a.EnableEncryption = true
+	}
+}

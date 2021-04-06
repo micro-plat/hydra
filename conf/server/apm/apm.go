@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TypeNodeName APM配置节点名
@@ -17,6 +18,7 @@ type IAPM interface {
 
 //APM APM
 type APM struct {
+	security.ConfEncrypt
 	Address string `json:"address,omitempty" valid:"required" toml:"address,omitempty" label:"应用程序性能监控地址"`
 	Version int32  `json:"-"`
 	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`

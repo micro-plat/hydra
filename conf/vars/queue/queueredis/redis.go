@@ -16,7 +16,6 @@ import (
 //Redis redis缓存配置
 type Redis struct {
 	*queue.Queue
-
 	Addrs        []string `json:"addrs,omitempty" toml:"addrs,omitempty" label:"集群地址(|分割)"`
 	Password     string   `json:"password,omitempty" toml:"password,omitempty"`
 	DbIndex      int      `json:"db,omitempty" toml:"db,omitempty"`

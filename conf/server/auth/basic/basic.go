@@ -7,6 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
@@ -21,6 +22,7 @@ const (
 
 //BasicAuth http basic 认证配置
 type BasicAuth struct {
+	security.ConfEncrypt
 	//Excludes 排除路径列表
 	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
 	Members         map[string]string `json:"members,omitempty" toml:"members,omitempty"`

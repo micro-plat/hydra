@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/global"
 )
 
@@ -33,6 +34,7 @@ var SubConfName = []string{"router", "metric"}
 
 //Server rpc server配置信息
 type Server struct {
+	security.ConfEncrypt
 	Address        string `json:"address,omitempty" toml:"address,omitempty"`
 	Status         string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty" label:"rpc服务状态"`
 	Host           string `json:"host,omitempty" toml:"host,omitempty"`

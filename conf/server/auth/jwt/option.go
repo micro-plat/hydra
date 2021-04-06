@@ -89,3 +89,10 @@ func WithDomain(domain string) Option {
 		a.Domain = domain
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *JWTAuth) {
+		a.EnableEncryption = true
+	}
+}

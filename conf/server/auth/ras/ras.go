@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -18,6 +19,7 @@ const (
 
 //RASAuth 远程服务验证组
 type RASAuth struct {
+	security.ConfEncrypt
 	Disable bool    `json:"disable,omitempty" toml:"disable,omitempty"`
 	Auth    []*Auth `json:"auth" toml:"auth"`
 }

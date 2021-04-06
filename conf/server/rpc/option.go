@@ -47,3 +47,10 @@ func WithMaxSendMsgSize(maxRecvMsgSize int) Option {
 		a.MaxRecvMsgSize = maxRecvMsgSize
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Server) {
+		a.EnableEncryption = true
+	}
+}
