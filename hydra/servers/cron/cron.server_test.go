@@ -25,7 +25,7 @@ func TestNewServer(t *testing.T) {
 			tt.wantT.Add(tt.tasks...)
 		}
 
-		gotT, err := NewServer(tt.tasks...)
+		gotT, err := NewServer(tt.tasks)
 		assert.Equal(t, tt.wantErr, err == nil, tt.name, err)
 		if tt.wantErr {
 			assert.Equalf(t, tt.wantT.span, gotT.span, tt.name+",span")

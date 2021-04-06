@@ -52,7 +52,7 @@ func (c *rpath) Params() types.XMap {
 func (c *rpath) GetService() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS, global.RPC:
+	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
 			return ""
@@ -119,7 +119,7 @@ func (c *rpath) GetEncoding() string {
 func (c *rpath) getEncoding() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS, global.RPC:
+	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
 			return ""

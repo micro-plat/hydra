@@ -380,12 +380,15 @@ func init() {
 		for _, t := range ext {
 			CRON.Static(t.(string), g.Service)
 		}
+
+		routerCRON.Add(g.Path, g.Service, g.Actions)
 		return nil
 	})
 	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
 			MQC.Static(t.(string), g.Service)
 		}
+		routerMQC.Add(g.Path, g.Service, g.Actions)
 		return nil
 	})
 }

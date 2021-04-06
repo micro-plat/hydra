@@ -7,6 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/server/queue"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
@@ -33,7 +34,7 @@ type Processor struct {
 }
 
 //NewProcessor 创建processor
-func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
+func NewProcessor(proto string, confRaw string, routers ...*router.Router) (p *Processor, err error) {
 	p = &Processor{
 		status:    unstarted,
 		closeChan: make(chan struct{}),
@@ -55,7 +56,13 @@ func NewProcessor(proto string, confRaw string) (p *Processor, err error) {
 	p.engine.Use(middleware.Trace()) //跟踪信息
 	p.engine.Use(middlewares...)
 
+	p.addRouter(routers...)
+
 	return p, nil
+}
+
+func (s *Processor) addRouter(routers ...*router.Router) {
+	s.engine.Handles(routers, middleware.ExecuteHandler())
 }
 
 //Done Done
@@ -135,9 +142,6 @@ func (s *Processor) Resume() (bool, error) {
 	return false, nil
 }
 func (s *Processor) consume(queue *queue.Queue) error {
-	if !s.engine.Find(queue.Service) {
-		s.engine.Handle(DefMethod, queue.Service, middleware.ExecuteHandler())
-	}
 	if err := s.customer.Consume(queue.Queue, queue.Concurrency, s.handle(queue)); err != nil {
 		return err
 	}

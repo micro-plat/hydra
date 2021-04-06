@@ -7,6 +7,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 
 	"github.com/micro-plat/hydra/conf/server/queue"
+	"github.com/micro-plat/hydra/conf/server/router"
 )
 
 //Server cron服务器
@@ -17,8 +18,8 @@ type Server struct {
 }
 
 //NewServer 创建mqc服务器
-func NewServer(proto string, raw []byte, queues ...*queue.Queue) (t *Server, err error) {
-	p, err := NewProcessor(proto, string(raw))
+func NewServer(proto string, raw []byte, queues []*queue.Queue, routers ...*router.Router) (t *Server, err error) {
+	p, err := NewProcessor(proto, string(raw), routers...)
 	if err != nil {
 		return nil, err
 	}

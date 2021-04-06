@@ -158,6 +158,8 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
+	tp := cnf.GetServerConf().GetServerType()
+
 	_, err := cron.GetConf(cnf.GetServerConf())
 	if err != nil {
 		return nil, err
@@ -167,8 +169,20 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	processorObj, err := cnf.GetProcessorConf()
+	if err != nil {
+		return nil, err
+	}
+	//从服务中获取路由
+	sr := services.GetRouter(tp)
+	routersObj, err := sr.BuildRouters(processorObj.ServicePrefix)
+	if err != nil {
+		return nil, err
+	}
+
 	//初始化server
-	return NewServer(task.Tasks...)
+	return NewServer(task.Tasks, routersObj.GetRouters()...)
 }
 
 func init() {
