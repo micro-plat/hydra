@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/lib4go/jsons"
 	"github.com/micro-plat/lib4go/net"
 )
 
@@ -73,7 +73,7 @@ var ip = net.GetLocalIPAddress()
 //Transform 翻译模板串
 func (e *LogEvent) Transform(tpl string) (result string) {
 	word, _ := regexp.Compile(`%\w+`)
-	encode := strings.Contains(tpl, "\"")
+	isJson := (strings.HasPrefix(tpl, "[") || strings.HasPrefix(tpl, "{")) && (strings.HasSuffix(tpl, "]") || strings.HasSuffix(tpl, "}"))
 	//@变量, 将数据放入params中
 	result = word.ReplaceAllStringFunc(tpl, func(s string) string {
 		key := s[1:]
@@ -116,8 +116,14 @@ func (e *LogEvent) Transform(tpl string) (result string) {
 		case "caller":
 			return getCaller(8)
 		case "content":
-			if encode {
-				return jsons.Escape(strings.Replace(e.Content, `"`, `\"`, -1))
+			if isJson {
+				buff, err := json.Marshal(e.Content)
+				if err != nil {
+					return e.Content
+				}
+				if len(buff) > 2 {
+					return string(string(buff[1 : len(buff)-1]))
+				}
 			}
 			return e.Content
 		case "index":

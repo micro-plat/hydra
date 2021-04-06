@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/micro-plat/hydra/conf/vars/rlog"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/lib4go/jsons"
 	"github.com/micro-plat/lib4go/logger"
 )
 
@@ -54,7 +54,7 @@ func (f *RPCAppender) Write(layout *logger.Layout, event *logger.LogEvent) error
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	f.buffer.WriteString(",")
-	f.buffer.WriteString(jsons.Escape(event.Output))
+	f.buffer.WriteString(jsonEscape(event.Output))
 	f.lastWrite = time.Now()
 	return nil
 }
@@ -155,4 +155,16 @@ func Registry(platName string, addr string) error {
 	logger.AddAppender(rlog.LogName, NewRPCAppender(layout.Service))
 	logger.AddLayout(layout.ToLoggerLayout())
 	return nil
+}
+
+// Escape 把编码 \\u0026，\\u003c，\\u003e 替换为 &,<,>
+func jsonEscape(input string) string {
+	r := strings.Replace(input, "\\u0026", "&", -1)
+	r = strings.Replace(r, "\\u003c", "<", -1)
+	r = strings.Replace(r, "\\u003e", ">", -1)
+	r = strings.Replace(r, "\n", "<br />", -1)
+	r = strings.Replace(r, "\r", "", -1)
+	r = strings.Replace(r, "\t", "    ", -1)
+
+	return r
 }

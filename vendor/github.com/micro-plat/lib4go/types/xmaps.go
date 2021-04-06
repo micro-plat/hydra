@@ -8,9 +8,10 @@ import (
 )
 
 type IXMaps interface {
-	Append(i ...XMap) IXMaps
 	ToStructs(o interface{}) error
+	Append(i ...IXMap)
 	ToAnyStructs(o interface{}) error
+	Maps() []XMap
 	IsEmpty() bool
 	Len() int
 	Get(i int) IXMap
@@ -23,12 +24,13 @@ type XMaps []XMap
 
 //NewXMaps 构建xmap对象
 func NewXMaps(len ...int) XMaps {
-	return make(XMaps, 0, GetIntByIndex(len, 0, 1))
+	v := make(XMaps, 0, GetIntByIndex(len, 0))
+	return v
 }
 
 //NewXMapsByJSON 根据json创建XMaps
 func NewXMapsByJSON(j string) (XMaps, error) {
-	var query XMaps
+	var query = make(XMaps, 0, 1)
 	d := json.NewDecoder(bytes.NewBuffer(StringToBytes(j)))
 	d.UseNumber()
 	err := d.Decode(&query)
@@ -36,9 +38,11 @@ func NewXMapsByJSON(j string) (XMaps, error) {
 }
 
 //Append 追加xmap
-func (q *XMaps) Append(i ...XMap) IXMaps {
-	*q = append(*q, i...)
-	return q
+func (q *XMaps) Append(i ...IXMap) {
+	for _, v := range i {
+		*q = append(*q, v.ToMap())
+	}
+	return
 }
 
 //ToStructs 将当前对象转换为指定的struct
@@ -89,6 +93,11 @@ func (q XMaps) ToAnyStructs(o interface{}) error {
 	}
 	DeepCopy(o, val.Interface())
 	return nil
+}
+
+//Maps map列表
+func (q XMaps) Maps() []XMap {
+	return q
 }
 
 //IsEmpty 当前数据集是否为空

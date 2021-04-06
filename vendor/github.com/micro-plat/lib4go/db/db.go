@@ -27,6 +27,7 @@ type IDBExecuter interface {
 	Scalar(sql string, input map[string]interface{}) (data interface{}, err error)
 	Execute(sql string, input map[string]interface{}) (row int64, err error)
 	Executes(sql string, input map[string]interface{}) (lastInsertID int64, affectedRow int64, err error)
+	ExecuteBatch(sql []string, input map[string]interface{}) (data QueryRows, err error)
 }
 
 //DB 数据库操作类
@@ -68,10 +69,10 @@ func (db *DB) Scalar(sql string, input map[string]interface{}) (data interface{}
 	if err != nil {
 		return nil, getDBError(err, query, args)
 	}
-	if result.Len() == 0 || result[0].Len() == 0 || len(result[0].Keys()) == 0 {
+	if result.Len() == 0 || result.Get(0).IsEmpty() {
 		return nil, nil
 	}
-	data, _ = result[0].Get(result[0].Keys()[0])
+	data, _ = result.Get(0).Get(result.Get(0).Keys()[0])
 	return
 }
 
@@ -104,6 +105,11 @@ func (db *DB) ExecuteSP(procName string, input map[string]interface{}, output ..
 		return 0, getDBError(err, query, args)
 	}
 	return
+}
+
+//ExecuteBatch 批量执行SQL语句
+func (db *DB) ExecuteBatch(sqls []string, input map[string]interface{}) (QueryRows, error) {
+	return executeBatch(db, sqls, input)
 }
 
 //Replace 替换SQL语句中的参数

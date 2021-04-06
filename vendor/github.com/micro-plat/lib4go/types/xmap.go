@@ -86,6 +86,9 @@ type IXMap interface {
 	//MustFloat64   值是否是int并返回相关的值与判断结果
 	MustFloat64(name string) (float64, bool)
 
+	//Delete 删除指定名称的值
+	Delete(name string)
+
 	//Marshal 将当前对转转换为json
 	Marshal() []byte
 
@@ -456,6 +459,11 @@ func (q XMap) Each(fn func(string, interface{})) {
 	for k, v := range q {
 		fn(k, v)
 	}
+}
+
+//Delete 删除指定键名的值
+func (q XMap) Delete(name string) {
+	delete(q, name)
 }
 
 //Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回

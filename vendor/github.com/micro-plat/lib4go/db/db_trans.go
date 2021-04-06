@@ -27,10 +27,10 @@ func (t *DBTrans) Scalar(sql string, input map[string]interface{}) (data interfa
 	if err != nil {
 		return nil, getDBError(err, query, args)
 	}
-	if result.Len() == 0 || result[0].Len() == 0 || len(result[0].Keys()) == 0 {
+	if result.Len() == 0 || result.Get(0).IsEmpty() {
 		return nil, nil
 	}
-	data, _ = result[0].Get(result[0].Keys()[0])
+	data, _ = result.Get(0).Get(result.Get(0).Keys()[0])
 	return
 }
 
@@ -62,6 +62,11 @@ func (t *DBTrans) ExecuteSP(sql string, input map[string]interface{}) (row int64
 		return 0, getDBError(err, query, args)
 	}
 	return
+}
+
+//ExecuteBatch 批量执行SQL语句
+func (t *DBTrans) ExecuteBatch(sqls []string, input map[string]interface{}) (QueryRows, error) {
+	return executeBatch(t, sqls, input)
 }
 
 //Rollback 回滚所有操作

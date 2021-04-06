@@ -71,13 +71,6 @@ func Decode(f string) (*layoutSetting, error) {
 	return l, nil
 }
 
-//进行日志配置文件初始化
-func init() {
-	AddAppender("file", NewFileAppender())
-	AddAppender("stdout", NewStudoutAppender())
-
-}
-
 var once sync.Once
 
 func initConf() {

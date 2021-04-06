@@ -28,7 +28,7 @@ type RPCConf struct {
 func New(opts ...Option) *RPCConf {
 	rpcConf := &RPCConf{
 		ConntTimeout: 3,
-		Balancer:     LocalFirst,
+		Balancer:     RoundRobin,
 	}
 	for _, opt := range opts {
 		opt(rpcConf)

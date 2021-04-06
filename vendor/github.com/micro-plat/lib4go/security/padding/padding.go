@@ -1,6 +1,21 @@
-package des
+package padding
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"strings"
+)
+
+const (
+	//PaddingNull 不填充
+	PaddingNull = "NULL"
+	//PaddingPkcs7 .
+	PaddingPkcs7 = "PKCS7"
+	//PaddingPkcs5 .
+	PaddingPkcs5 = "PKCS5"
+	//PaddingZero 0填充
+	PaddingZero = "ZERO"
+)
 
 // ZeroPadding Zero填充模式
 func ZeroPadding(ciphertext []byte, blockSize int) []byte {
@@ -46,4 +61,20 @@ func PKCS7UnPadding(data []byte) []byte {
 	// 去掉最后一个字节 unpadding 次
 	unpadding := int(data[length-1])
 	return data[:(length - unpadding)]
+}
+
+//GetModePadding 解析加密模式和填充模式
+func GetModePadding(name string) (mode, pade string, err error) {
+	names := strings.Split(name, "/")
+	if len(names) != 2 {
+		err = fmt.Errorf("输入模式不正确:%s", name)
+		return
+	}
+	mode = strings.ToUpper(names[0])
+	pade = strings.ToUpper(names[1])
+	if pade != PaddingPkcs5 && pade != PaddingPkcs7 && pade != PaddingZero && pade != PaddingNull {
+		err = fmt.Errorf("填充模式不支持:%s", pade)
+		return
+	}
+	return
 }

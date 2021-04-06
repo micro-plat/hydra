@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/micro-plat/lib4go/security/padding"
 )
 
 // EncryptECB DES加密
@@ -17,7 +19,7 @@ func EncryptECB(input string, skey string) (r string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("des NewCipher err:%v", err)
 	}
-	origData = PKCS5Padding(origData, block.BlockSize())
+	origData = padding.PKCS5Padding(origData, block.BlockSize())
 	blockMode := NewECBEncrypter(block)
 	crypted := make([]byte, len(origData))
 	blockMode.CryptBlocks(crypted, origData)
@@ -46,7 +48,7 @@ func DecryptECB(input string, skey string) (r string, err error) {
 	blockMode := NewECBDecrypter(block)
 	origData := make([]byte, len(crypted))
 	blockMode.CryptBlocks(origData, crypted)
-	origData = PKCS5UnPadding(origData)
+	origData = padding.PKCS5UnPadding(origData)
 	r = string(origData)
 	return
 }
