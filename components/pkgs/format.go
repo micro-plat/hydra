@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/envs"
 	"github.com/micro-plat/lib4go/types"
 )
 
-var def = ""
+var onceLock sync.Once
 
 //Queues01 兼容hydra0-1版本的mqc服务
 var queues01 = map[string]bool{}
 
-func init() {
+func envsInit() {
 	lst := strings.Split(envs.GetString("hydra01queues"), ",")
 	for _, i := range lst {
 		queues01[i] = true
@@ -52,6 +53,7 @@ func GetStringByHeader(name string, content interface{}, hd ...string) string {
 
 //IsOriginalQueue 是否是老版本队列
 func IsOriginalQueue(name string) bool {
+	onceLock.Do(envsInit)
 
 	if _, ok := queues01[name]; ok {
 		return true
