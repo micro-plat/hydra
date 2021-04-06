@@ -28,6 +28,12 @@ func init() {
 					Flags:  getInstallFlags(),
 					Action: installNow,
 				},
+				{
+					Name:   "encrypt",
+					Usage:  "-使用内置加密方法加密配置数据",
+					Action: encrypt,
+					Flags:  getEncryptFlags(),
+				},
 			},
 		}
 	})
