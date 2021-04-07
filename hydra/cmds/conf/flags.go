@@ -43,3 +43,18 @@ func getShowFlags() []cli.Flag {
 	flags = append(flags, global.ConfCli.GetFlags()...)
 	return flags
 }
+
+var orgData string
+
+//getEncryptFlags 获取运行时的参数
+func getEncryptFlags() []cli.Flag {
+	flags := pkgs.GetBaseFlags()
+	flags = append(flags, cli.StringFlag{
+		Name:        "data",
+		Destination: &orgData,
+		Usage:       `-需要加密数据`,
+	})
+
+	flags = append(flags, global.ConfCli.GetFlags()...)
+	return flags
+}
