@@ -17,6 +17,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
 	"github.com/micro-plat/hydra/conf/server/mqc"
+	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/queue"
 	"github.com/micro-plat/hydra/conf/server/render"
@@ -53,6 +54,7 @@ type IAPPConf interface {
 	GetAPMConf() (*apm.APM, error)
 	GetProcessorConf() (*processor.Processor, error)
 
+	GetNFSConf() (*nfs.NFS, error)
 	//获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
 
