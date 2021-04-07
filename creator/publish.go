@@ -10,13 +10,16 @@ import (
 	varpub "github.com/micro-plat/hydra/conf/vars"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //Pub 将配置发布到配置中心
 func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+
 	if err := c.Load(); err != nil {
 		return err
 	}
+	cache := types.XMap{}
 
 	//创建注册中心，根据注册中心提供的接口进行配置发布
 	r, err := registry.GetRegistry(registryAddr, global.Def.Log())
@@ -25,14 +28,14 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	}
 	for tp, subs := range c.data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetServerPath(), subs.Map()[ServerMainNodeName], cover); err != nil {
+		if err := publish(r, pub.GetServerPath(), subs.Map()[ServerMainNodeName], cache, cover); err != nil {
 			return err
 		}
 		for name, value := range subs.Map() {
 			if name == ServerMainNodeName {
 				continue
 			}
-			if err := publish(r, pub.GetSubConfPath(name), value, cover); err != nil {
+			if err := publish(r, pub.GetSubConfPath(name), value, cache, cover); err != nil {
 				return err
 			}
 		}
@@ -40,7 +43,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	for tp, subs := range c.vars {
 		pub := varpub.NewVarPub(platName)
 		for k, v := range subs {
-			if err := publish(r, pub.GetVarPath(tp, k), v, cover); err != nil {
+			if err := publish(r, pub.GetVarPath(tp, k), v, cache, cover); err != nil {
 				return err
 			}
 		}
@@ -48,8 +51,8 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	return nil
 }
 
-func publish(r registry.IRegistry, path string, v interface{}, cover bool) error {
-	value, err := getJSON(path, v)
+func publish(r registry.IRegistry, path string, v interface{}, input types.XMap, cover bool) error {
+	value, err := getJSON(path, v, input)
 	if err != nil {
 		return err
 	}
@@ -102,8 +105,8 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 }
 
 //getJSON 将对象序列化为json字符串
-func getJSON(path string, v interface{}) (value string, err error) {
-	if err := checkAndInput(path, reflect.ValueOf(v), []string{}, map[string]interface{}{}); err != nil {
+func getJSON(path string, v interface{}, input types.XMap) (value string, err error) {
+	if err := checkAndInput(path, reflect.ValueOf(v), []string{}, input); err != nil {
 		return "", err
 	}
 	if x, ok := v.(string); ok {

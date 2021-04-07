@@ -8,10 +8,10 @@ import (
 )
 
 type serverHook struct {
-	setup     func(app.IAPPConf) error
-	starting  func(app.IAPPConf) error
-	started   func(app.IAPPConf) error
-	closing   func(app.IAPPConf) error
+	setups    []func(app.IAPPConf) error
+	startings []func(app.IAPPConf) error
+	starteds  []func(app.IAPPConf) error
+	closings  []func(app.IAPPConf) error
 	handlings []context.IHandler
 	handleds  []context.IHandler
 }
@@ -21,10 +21,7 @@ func (s *serverHook) AddSetup(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("服务不能为空")
 	}
-	if s.setup != nil {
-		return fmt.Errorf("服务不能重复注册")
-	}
-	s.setup = h
+	s.setups = append(s.setups, h)
 	return nil
 }
 
@@ -33,10 +30,7 @@ func (s *serverHook) AddStarted(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("服务不能为空")
 	}
-	if s.started != nil {
-		return fmt.Errorf("服务不能重复注册")
-	}
-	s.started = h
+	s.starteds = append(s.starteds, h)
 	return nil
 }
 
@@ -45,10 +39,7 @@ func (s *serverHook) AddStarting(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("启动服务不能为空")
 	}
-	if s.starting != nil {
-		return fmt.Errorf("启动服务不能重复注册")
-	}
-	s.starting = h
+	s.startings = append(s.startings, h)
 	return nil
 }
 
@@ -57,10 +48,7 @@ func (s *serverHook) AddClosing(h func(app.IAPPConf) error) error {
 	if h == nil {
 		return fmt.Errorf("关闭服务不能为空")
 	}
-	if s.closing != nil {
-		return fmt.Errorf("关闭服务不能重复注册")
-	}
-	s.closing = h
+	s.closings = append(s.closings, h)
 	return nil
 }
 
@@ -94,32 +82,40 @@ func (s *serverHook) GetHandleExecuteds() []context.IHandler {
 
 //DoSetup 获取服务器配置勾子
 func (s *serverHook) DoSetup(c app.IAPPConf) error {
-	if s.setup == nil {
-		return nil
+	for _, setup := range s.setups {
+		if err := setup(c); err != nil {
+			return err
+		}
 	}
-	return s.setup(c)
+	return nil
 }
 
 //DoStarted 获取服务器启动完成处理函数
 func (s *serverHook) DoStarted(c app.IAPPConf) error {
-	if s.started == nil {
-		return nil
+	for _, started := range s.starteds {
+		if err := started(c); err != nil {
+			return err
+		}
 	}
-	return s.started(c)
+	return nil
 }
 
 //DoStarting 获取服务器启动预处理函数
 func (s *serverHook) DoStarting(c app.IAPPConf) error {
-	if s.starting == nil {
-		return nil
+	for _, starting := range s.startings {
+		if err := starting(c); err != nil {
+			return err
+		}
 	}
-	return s.starting(c)
+	return nil
 }
 
 //DoClosing 获取服务器关闭处理函数
 func (s *serverHook) DoClosing(c app.IAPPConf) error {
-	if s.closing == nil {
-		return nil
+	for _, closing := range s.closings {
+		if err := closing(c); err != nil {
+			return err
+		}
 	}
-	return s.closing(c)
+	return nil
 }

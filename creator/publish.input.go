@@ -14,7 +14,7 @@ import (
 )
 
 //检查输入参数，并处理用户输入
-func checkAndInput(path string, value reflect.Value, tnames []string, input map[string]interface{}) error {
+func checkAndInput(path string, value reflect.Value, tnames []string, input types.XMap) error {
 
 	//处理参数类型
 	if value.Kind() == reflect.Ptr {
@@ -38,11 +38,11 @@ func checkAndInput(path string, value reflect.Value, tnames []string, input map[
 	}
 }
 
-func checkString(path string, m reflect.Value, input map[string]interface{}) error {
+func checkString(path string, m reflect.Value, input types.XMap) error {
 	return nil
 }
 
-func checkMap(path string, m reflect.Value, input map[string]interface{}) (err error) {
+func checkMap(path string, m reflect.Value, input types.XMap) (err error) {
 	keys := m.MapKeys()
 	for _, key := range keys {
 		value := m.MapIndex(key)
@@ -54,7 +54,7 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 		if !strings.HasPrefix(svalue, vc.ByInstall) && !strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)) {
 			continue
 		}
-		v, ok := input[skey]
+		v, ok := input.Get(skey)
 		if !ok {
 			fname := getFullName(path, skey, skey)
 			v, err = readFromCli(fname, "-", fname, "", false)
@@ -67,7 +67,7 @@ func checkMap(path string, m reflect.Value, input map[string]interface{}) (err e
 	return nil
 }
 
-func checkStruct(path string, value reflect.Value, tnames []string, input map[string]interface{}) (err error) {
+func checkStruct(path string, value reflect.Value, tnames []string, input types.XMap) (err error) {
 	vt := reflect.TypeOf(value.Interface())
 	for i := 0; i < value.NumField(); i++ {
 		tfield := vt.Field(i)
@@ -117,7 +117,7 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 	return nil
 }
 
-func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (value interface{}, err error) {
+func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (value interface{}, err error) {
 	validTagName := tfield.Tag.Get("valid")
 	label, msg := getLable(tfield)
 	tnames = append(tnames, tfield.Name)
@@ -125,7 +125,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 
 	isArray := vfield.Kind() == reflect.Array || vfield.Kind() == reflect.Slice
 	check := func() (interface{}, error) {
-		v, ok := input[fname]
+		v, ok := input.Get(fname)
 		if !ok {
 			v, err = readFromCli(fname, validTagName, label, msg, isArray)
 			if err != nil {
@@ -219,7 +219,7 @@ func initializeStruct(t reflect.Type, v reflect.Value) {
 	}
 }
 
-func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
+func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (err error) {
 
 	//处理多个数据值问题
 	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
@@ -260,7 +260,7 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	return types.SetSlice([]interface{}{v}, vfield, tfield)
 }
 
-func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
+func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (err error) {
 	v, err := getValues(path, vfield, tfield, tnames, input)
 	if err != nil || v == nil {
 		return err
@@ -305,6 +305,7 @@ func readFromCli(name string, tagName string, label string, msg string, isArray 
 	}
 
 	_, result, err := prompt.Run()
+	fmt.Println("key:", name, ",value:", result)
 	return result, err
 
 }

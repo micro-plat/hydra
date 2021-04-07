@@ -19,6 +19,7 @@ import (
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 	"github.com/micro-plat/lib4go/assert"
+	"github.com/micro-plat/lib4go/types"
 )
 
 func Test_conf_Pub(t *testing.T) {
@@ -210,6 +211,7 @@ func checkData(r registry.IRegistry, path string, data map[string]string) error 
 }
 
 func Test_publish(t *testing.T) {
+	input := types.XMap{}
 	tests := []struct {
 		name    string
 		path    string
@@ -230,7 +232,7 @@ func Test_publish(t *testing.T) {
 			err := rgt.CreatePersistentNode(tt.path, "{}")
 			assert.Equal(t, true, err == nil, "创建初始化节点失败")
 		}
-		err = publish(rgt, tt.path, tt.v, tt.cover)
+		err = publish(rgt, tt.path, tt.v, input, tt.cover)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
 
 		data, _, err := rgt.GetValue(tt.path)
@@ -306,6 +308,7 @@ type testss struct {
 }
 
 func Test_getJSON(t *testing.T) {
+	input := types.XMap{}
 	buff, _ := json.Marshal(map[string]string{"xx": "cc"})
 	tests := []struct {
 		name      string
@@ -322,7 +325,7 @@ func Test_getJSON(t *testing.T) {
 		{name: "6. 参数是byte", args: []byte("d"), wantValue: `"ZA=="`, wantErr: false},
 	}
 	for _, tt := range tests {
-		got, err := getJSON("", tt.args)
+		got, err := getJSON("", tt.args, input)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err")
 		assert.Equal(t, tt.wantValue, got, tt.name+",value")
 	}
