@@ -1,5 +1,7 @@
 package nfs
 
+import "encoding/json"
+
 type eFileFPLists = map[string]*eFileFP
 
 //eRomotingFileFP 远程文件清单
@@ -77,4 +79,8 @@ func (e *eFileFP) Has(host string) bool {
 		}
 	}
 	return false
+}
+func (e *eFileFP) GetJSON() string {
+	buff, _ := json.Marshal(e)
+	return string(buff)
 }

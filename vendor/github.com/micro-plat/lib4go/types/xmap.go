@@ -107,6 +107,9 @@ type IXMap interface {
 	//Len 获取元素个数
 	Len() int
 
+	//ToKV 转换为可通过URL传递的键值对
+	ToKV(ecoding ...string) string
+
 	//ToStruct 将当前map转换为结构值对象
 	ToStruct(o interface{}) error
 
@@ -437,6 +440,15 @@ func (q XMap) MustFloat32(name string) (float32, bool) {
 //MustFloat64 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustFloat64(name string) (float64, bool) {
 	return MustFloat64(q[name])
+}
+
+//ToKV 转换为可通过URL传递的键值对
+func (q XMap) ToKV(ecoding ...string) string {
+	u := url.Values{}
+	for k, v := range q {
+		u.Set(k, fmt.Sprint(v))
+	}
+	return u.Encode()
 }
 
 //ToStruct 将当前对象转换为指定的struct

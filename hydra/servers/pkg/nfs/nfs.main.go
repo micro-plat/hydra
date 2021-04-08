@@ -24,18 +24,27 @@ func init() {
 		cnfs := newNFS(n)
 		allCnfs[c.GetServerConf().GetServerType()] = cnfs
 
-		//注册服务
-		services.Def.API(SVS_Donwload, cnfs.Download)
-		services.Def.API(SVS_Upload, cnfs.Upload)
+		if c.GetServerConf().GetServerType() == global.API {
+			//注册服务
+			services.Def.API(SVS_Donwload, cnfs.Download)
+			services.Def.API(SVS_Upload, cnfs.Upload)
+			//内部服务
+			services.Def.API(rmt_fp_get, cnfs.GetFP)
+			services.Def.API(rmt_fp_push, cnfs.RecvNotify)
+			services.Def.API(rmt_fp_list, cnfs.GetFPList)
+			services.Def.API(rmt_file_pull, cnfs.GetFile)
+		}
 
-		services.Def.Web(SVS_Donwload, cnfs.Download)
-		services.Def.Web(SVS_Upload, cnfs.Upload)
+		if c.GetServerConf().GetServerType() == global.Web {
+			services.Def.Web(SVS_Donwload, cnfs.Download)
+			services.Def.Web(SVS_Upload, cnfs.Upload)
 
-		//内部服务
-		services.Def.RPC(rpc_fp_get, cnfs.GetFP)
-		services.Def.RPC(rpc_fp_push, cnfs.RecvNotify)
-		services.Def.RPC(rpc_fp_list, cnfs.GetFPList)
-		services.Def.RPC(rpc_file_pull, cnfs.GetFile)
+			//内部服务
+			services.Def.Web(rmt_fp_get, cnfs.GetFP)
+			services.Def.Web(rmt_fp_push, cnfs.RecvNotify)
+			services.Def.Web(rmt_fp_list, cnfs.GetFPList)
+			services.Def.Web(rmt_file_pull, cnfs.GetFile)
+		}
 
 		return nil
 
