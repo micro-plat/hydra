@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
+const typeNodeName = "nfs"
+
 //NFS 网络文件系统配置
 type NFS struct {
 	security.ConfEncrypt
@@ -29,7 +31,7 @@ func New(addr string, opts ...Option) *NFS {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IServerConf) (*NFS, error) {
 	s := NFS{}
-	_, err := cnf.GetMainObject(&s)
+	_, err := cnf.GetSubObject(typeNodeName, &s)
 	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}

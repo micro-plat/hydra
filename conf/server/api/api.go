@@ -42,7 +42,7 @@ const (
 var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "dns"}
 
 //SubConfName 子配置中的关键配置名
-var SubConfName = []string{"router", "metric", "processor"}
+var SubConfName = []string{"router", "metric", "processor", "nfs"}
 var validTypes = map[string]bool{"api": true, "web": true, "ws": true}
 
 //Server api server配置信息
