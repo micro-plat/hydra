@@ -43,27 +43,6 @@ func checkString(path string, m reflect.Value, input types.XMap) error {
 }
 
 func checkMap(path string, m reflect.Value, input types.XMap) (err error) {
-	keys := m.MapKeys()
-	for _, key := range keys {
-		value := m.MapIndex(key)
-		skey := fmt.Sprint(key.Interface())
-		if !reflect.ValueOf(value).IsValid() || reflect.ValueOf(value).IsZero() {
-			continue
-		}
-		svalue := fmt.Sprint(value.Interface())
-		if !strings.HasPrefix(svalue, vc.ByInstall) && !strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)) {
-			continue
-		}
-		v, ok := input.Get(skey)
-		if !ok {
-			fname := getFullName(path, skey, skey)
-			v, err = readFromCli(fname, "-", fname, "", false)
-			if err != nil {
-				return err
-			}
-		}
-		m.SetMapIndex(key, reflect.ValueOf(v))
-	}
 	return nil
 }
 
@@ -82,13 +61,16 @@ func checkStruct(path string, value reflect.Value, tnames []string, input types.
 				return err
 			}
 		case reflect.Map:
-			if err := checkMap(path, vfield, input); err != nil {
+			if isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()) {
+				return fmt.Errorf("未配置%s", path)
+			}
+			if err := checkMap(path, vfield, input); err != nil { //属性类型为map，没有进行验证处理
 				return err
 			}
 		case reflect.Struct:
 			if !vfield.IsValid() || vfield.IsZero() {
 				if !isRequire(tfield) {
-					return
+					continue
 				}
 				setZeroField(vfield, tfield)
 			}
@@ -99,7 +81,7 @@ func checkStruct(path string, value reflect.Value, tnames []string, input types.
 		case reflect.Ptr:
 			if !vfield.IsValid() || vfield.IsZero() {
 				if !isRequire(tfield) {
-					return
+					continue
 				}
 				setZeroField(vfield, tfield)
 			}
@@ -124,26 +106,28 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 	fname := getFullName(path, label, strings.Join(tnames, "."))
 
 	isArray := vfield.Kind() == reflect.Array || vfield.Kind() == reflect.Slice
-	check := func() (interface{}, error) {
-		v, ok := input.Get(fname)
+	check := func(key string) (interface{}, error) {
+		valueKey := types.GetString(key, fname)
+		v, ok := input.Get(valueKey)
 		if !ok {
 			v, err = readFromCli(fname, validTagName, label, msg, isArray)
 			if err != nil {
 				return nil, err
 			}
+			input[valueKey] = v
 		}
 		return v, nil
 	}
 	svalue := getSValue(vfield, isArray)
 	switch {
 	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
-		return check()
+		return check("")
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
-		return check()
+		return check(strings.TrimLeft(svalue, vc.ByInstall))
 	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
-		return check()
+		return check("")
 	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
-		return check()
+		return check("")
 	}
 	return nil, nil
 
@@ -305,7 +289,6 @@ func readFromCli(name string, tagName string, label string, msg string, isArray 
 	}
 
 	_, result, err := prompt.Run()
-	fmt.Println("key:", name, ",value:", result)
 	return result, err
 
 }
