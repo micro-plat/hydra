@@ -10,28 +10,35 @@ import (
 )
 
 type cnfs struct {
-	c       *nfs.NFS
-	app     app.IAPPConf
-	watcher conf.IWatcher
-	closch  chan struct{}
-	module  *module
-	once    sync.Once
+	c         *nfs.NFS
+	app       app.IAPPConf
+	watcher   conf.IWatcher
+	closch    chan struct{}
+	isStarted bool
+	module    *module
+	once      sync.Once
 }
 
-func newNFS(c *nfs.NFS) *cnfs {
-	return &cnfs{c: c}
+func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
+	return &cnfs{c: c, app: app}
 }
 func (c *cnfs) Start() error {
+	if c.isStarted {
+		return nil
+	}
+	c.isStarted = true
 	hosts, masterHost, isMaster, err := c.get()
 	if err != nil {
 		return err
 	}
+
 	c.module, err = newModule(c.c.Local, hosts, masterHost, isMaster)
 	if err != nil {
 		return err
 	}
 	go c.watch()
 	return nil
+
 }
 
 //监控集群变化

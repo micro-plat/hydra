@@ -21,7 +21,7 @@ func init() {
 		}
 
 		//构建对象
-		cnfs := newNFS(n)
+		cnfs := newNFS(c, n)
 		allCnfs[c.GetServerConf().GetServerType()] = cnfs
 
 		if c.GetServerConf().GetServerType() == global.API {
@@ -52,6 +52,13 @@ func init() {
 
 	//处理服务启动完成
 	services.Def.OnStarted(func(c app.IAPPConf) error {
+		n, err := c.GetNFSConf()
+		if err != nil {
+			return err
+		}
+		if n.Disable {
+			return nil
+		}
 		if cnfs, ok := allCnfs[c.GetServerConf().GetServerType()]; ok {
 			return cnfs.Start()
 		}
