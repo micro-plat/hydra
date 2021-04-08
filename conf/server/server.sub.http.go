@@ -35,7 +35,7 @@ type HttpSub struct {
 	proxy     *Loader
 	apm       *Loader
 	processor *Loader
-	nfs       *Loader
+	fs        *Loader
 }
 
 func NewHttpSub(cnf conf.IServerConf) *HttpSub {
@@ -54,7 +54,7 @@ func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s.proxy = GetLoader(cnf, s.getProxyFunc())
 	s.apm = GetLoader(cnf, s.getAPMFunc())
 	s.processor = GetLoader(cnf, s.getProcessorFunc())
-	s.nfs = GetLoader(cnf, s.getNFSFunc())
+	s.fs = GetLoader(cnf, s.getNFSFunc())
 	return s
 }
 
@@ -296,7 +296,7 @@ func (s *HttpSub) GetProcessorConf() (*processor.Processor, error) {
 
 //GetNFSConf 获取NFS配置
 func (s *HttpSub) GetNFSConf() (*nfs.NFS, error) {
-	f, err := s.nfs.GetConf()
+	f, err := s.fs.GetConf()
 	if err != nil {
 		return nil, err
 	}

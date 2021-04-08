@@ -137,9 +137,7 @@ type IVariable interface {
 
 type IFile interface {
 	SaveFile(fileKey, dst string) error
-	GetFileSize(fileKey string) (int64, error)
-	GetFileName(fileKey string) (string, error)
-	GetFileBody(fileKey string) (io.ReadCloser, error)
+	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 }
 
 //IRequest 请求信息
