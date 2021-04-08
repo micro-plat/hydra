@@ -43,29 +43,6 @@ func checkString(path string, m reflect.Value, input types.XMap) error {
 }
 
 func checkMap(path string, m reflect.Value, input types.XMap) (err error) {
-	// keys := m.MapKeys()
-	// for _, key := range keys {
-	// 	value := m.MapIndex(key)
-	// 	skey := fmt.Sprint(key.Interface())
-	// 	if !reflect.ValueOf(value).IsValid() || reflect.ValueOf(value).IsZero() {
-	// 		continue
-	// 	}
-	// 	svalue := fmt.Sprint(value.Interface())
-	// 	if !strings.HasPrefix(svalue, vc.ByInstall) && !strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)) {
-	// 		continue
-	// 	}
-	// 	fname := getFullName(path, skey, skey)
-	// 	valueKey := types.GetString(strings.TrimLeft(svalue, vc.ByInstall), fname)
-	// 	v, ok := input.Get(valueKey)
-	// 	if !ok {
-	// 		v, err = readFromCli(fname, "-", fname, "", false) //map不进行验证
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		input[valueKey] = v
-	// 	}
-	// 	m.SetMapIndex(key, reflect.ValueOf(v))
-	// }
 	return nil
 }
 
@@ -312,7 +289,6 @@ func readFromCli(name string, tagName string, label string, msg string, isArray 
 	}
 
 	_, result, err := prompt.Run()
-	fmt.Println("key:", name, ",value:", result)
 	return result, err
 
 }
