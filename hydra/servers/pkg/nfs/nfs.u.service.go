@@ -6,6 +6,9 @@ import (
 	"github.com/micro-plat/hydra/context"
 )
 
+//SVS_NOT_Excludes 服务路径中排除的
+var SVS_NOT_Excludes = []string{"/nfs/file/*", "/_/nfs/**"}
+
 const (
 	SVS_Upload   = "/nfs/file/upload"
 	SVS_Donwload = "/nfs/file/download"
@@ -29,15 +32,17 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	}
 
 	//写入文件
-	if err := c.module.SaveNewFile(name, buff); err != nil {
+	fp, err := c.module.SaveNewFile(name, buff)
+	if err != nil {
 		return err
 	}
-	return "success"
+	return map[string]interface{}{
+		"name": fp.Path,
+	}
 }
 
 //Download 用户下载文件
 func (c *cnfs) Download(ctx context.IContext) interface{} {
-
 	//根据路径查询文件
 	path := ctx.Request().Path().GetURL().Path
 	_, err := c.module.GetFile(path)

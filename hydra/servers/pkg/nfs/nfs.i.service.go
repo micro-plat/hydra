@@ -31,13 +31,10 @@ func (c *cnfs) RecvNotify(ctx context.IContext) interface{} {
 //Download 用户下载文件
 func (c *cnfs) GetFile(ctx context.IContext) interface{} {
 	//根据路径查询文件
-	path := ctx.Request().Path().GetURL().Path
+	path := ctx.Request().GetString("name")
 	buff, err := c.module.GetFile(path)
 	if err != nil {
 		return err
 	}
-	return map[string]interface{}{
-		"file": path,
-		path:   buff,
-	}
+	return buff
 }

@@ -62,6 +62,7 @@ func init() {
 	services.Def.OnClosing(func(c app.IAPPConf) error {
 		if cnfs, ok := allCnfs[c.GetServerConf().GetServerType()]; ok {
 			cnfs.Close()
+			delete(allCnfs, c.GetServerConf().GetServerType())
 		}
 		return nil
 	})

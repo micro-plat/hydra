@@ -9,7 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
-const typeNodeName = "nfs"
+const TypeNodeName = "nfs"
 
 //NFS 网络文件系统配置
 type NFS struct {
@@ -20,8 +20,8 @@ type NFS struct {
 }
 
 //New 构建mqc NFS配置，默认为对等模式
-func New(addr string, opts ...Option) *NFS {
-	s := &NFS{}
+func New(local string, opts ...Option) *NFS {
+	s := &NFS{Local: local}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -31,7 +31,7 @@ func New(addr string, opts ...Option) *NFS {
 //GetConf 获取主配置信息
 func GetConf(cnf conf.IServerConf) (*NFS, error) {
 	s := NFS{}
-	_, err := cnf.GetSubObject(typeNodeName, &s)
+	_, err := cnf.GetSubObject(TypeNodeName, &s)
 	if errors.Is(err, conf.ErrNoSetting) {
 		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
 	}

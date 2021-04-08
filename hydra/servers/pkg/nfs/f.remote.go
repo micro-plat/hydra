@@ -13,16 +13,16 @@ import (
 const (
 
 	//获取远程文件的指纹信息
-	rmt_fp_get = "/_/nfs/fp/get@%s"
+	rmt_fp_get = "/_/nfs/fp/get"
 
 	//推送指纹数据
-	rmt_fp_push = "/_/nfs/fp/push@%s"
+	rmt_fp_push = "/_/nfs/fp/push"
 
 	//拉取指纹列表
-	rmt_fp_list = "/_/nfs/fp/list@%s"
+	rmt_fp_list = "/_/nfs/fp/list"
 
 	//获取远程文件数据
-	rmt_file_pull = "/_/nfs/file/pull@%s"
+	rmt_file_pull = "/_/nfs/file/pull"
 )
 
 //remoting 远程文件管理
@@ -49,7 +49,7 @@ func (r *remoting) Update(hosts []string, masterHost string, isMaster bool) {
 func (r *remoting) GetFPFormMaster(name string) (*eFileFP, error) {
 	//查询远程服务
 	input := types.XMap{"name": name}
-	rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf(rmt_fp_get, r.masterHost), input.ToKV())
+	rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_get, r.masterHost), input.ToKV())
 	if status == http.StatusNoContent {
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
@@ -71,7 +71,7 @@ func (r *remoting) Pull(name string, host []string) ([]byte, error) {
 	input := types.XMap{"name": name}
 	for _, host := range host {
 		//查询远程服务
-		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf(rmt_file_pull, host), input.ToKV())
+		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_file_pull, host), input.ToKV())
 		if status == http.StatusNoContent {
 			continue
 		}
@@ -89,7 +89,7 @@ func (r *remoting) Push(fp *eFileFP) error {
 	hosts := fp.ExcludeHosts(r.getHosts()...)
 	for _, host := range hosts {
 		//查询远程服务
-		_, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf(rmt_fp_push, host), fp.GetJSON())
+		_, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_push, host), fp.GetJSON())
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func (r *remoting) Query() (eFileFPLists, error) {
 	for _, host := range r.getHosts() {
 
 		//查询远程服务
-		rpns, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf(rmt_fp_list, host), "")
+		rpns, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_list, host), "")
 		if err != nil {
 			return nil, err
 		}

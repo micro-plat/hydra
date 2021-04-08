@@ -99,22 +99,22 @@ func (m *module) GetFile(name string) ([]byte, error) {
 //1. 查询本地是否有此文件了,有则报错
 //2. 保存到本地，返回指纹信息
 //3. 通知master我也有这个文件了,如果是master则告诉所有人我也有此文件了
-func (m *module) SaveNewFile(name string, buff []byte) error {
+func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 	//检查文件是否存在
 	name = getFileName(name)
 	if m.local.Has(name) {
-		return fmt.Errorf("文件名称重复:%s", name)
+		return nil, fmt.Errorf("文件名称重复:%s", name)
 	}
 
 	//保存到本地
 	fp, err := m.local.SaveFile(name, buff)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//远程通知
 	m.msg.Report(fp)
-	return nil
+	return fp, nil
 }
 
 //GetFP 获取本地的指纹信息，用于master对外提供服务
