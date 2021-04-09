@@ -44,7 +44,6 @@ func (m *module) Update(hosts []string, path string, currentAddr string, masterH
 	m.isMaster = isMaster
 	m.remoting.Update(hosts, masterHost, currentAddr, isMaster)
 	m.Report()
-
 }
 
 //从服务器拉取配置，并进行同步
