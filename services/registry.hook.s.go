@@ -16,6 +16,17 @@ type serverHook struct {
 	handleds  []context.IHandler
 }
 
+func newServerHook() *serverHook {
+	return &serverHook{
+		setups:    make([]func(app.IAPPConf) error, 0, 1),
+		startings: make([]func(app.IAPPConf) error, 0, 1),
+		starteds:  make([]func(app.IAPPConf) error, 0, 1),
+		closings:  make([]func(app.IAPPConf) error, 0, 1),
+		handlings: make([]context.IHandler, 0, 1),
+		handleds:  make([]context.IHandler, 0, 1),
+	}
+}
+
 //AddSetup 添加服务器启动前配置参数前执行勾子
 func (s *serverHook) AddSetup(h func(app.IAPPConf) error) error {
 	if h == nil {

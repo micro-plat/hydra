@@ -27,29 +27,34 @@ const (
 
 //remoting 远程文件管理
 type remoting struct {
-	isMaster   bool
-	hosts      []string
-	masterHost string
+	isMaster    bool
+	hosts       []string
+	masterHost  string
+	currentAddr string
 }
 
-func newRemoting(path string, hosts []string, masterHost string, isMaster bool) *remoting {
+func newRemoting(path string, hosts []string, masterHost string, currentAddr string, isMaster bool) *remoting {
 	return &remoting{
-		hosts:      hosts,
-		masterHost: masterHost,
-		isMaster:   isMaster,
+		hosts:       hosts,
+		masterHost:  masterHost,
+		currentAddr: currentAddr,
+		isMaster:    isMaster,
 	}
 }
-func (r *remoting) Update(hosts []string, masterHost string, isMaster bool) {
+func (r *remoting) Update(hosts []string, masterHost string, currentAddrs string, isMaster bool) {
 	r.hosts = hosts
 	r.masterHost = masterHost
+	r.currentAddr = currentAddrs
 	r.isMaster = isMaster
 }
 
-//GetFP 查询某个文件是否存在，及所在的服务器
+//GetFPFormMaster 查询某个文件是否存在，及所在的服务器
 func (r *remoting) GetFPFormMaster(name string) (*eFileFP, error) {
+
 	//查询远程服务
+	trace("get.start:", r.masterHost, name)
 	input := types.XMap{"name": name}
-	rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_get, r.masterHost), input.ToKV())
+	rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", r.masterHost, rmt_fp_get), input.ToKV())
 	if status == http.StatusNoContent {
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
@@ -58,10 +63,12 @@ func (r *remoting) GetFPFormMaster(name string) (*eFileFP, error) {
 	}
 
 	//处理参数合并
+	trace("get.end:", r.masterHost, rpns)
 	rCache := &eFileFP{}
 	if err = json.Unmarshal([]byte(rpns), rCache); err != nil {
 		return nil, err
 	}
+
 	return rCache, nil
 
 }
@@ -71,13 +78,15 @@ func (r *remoting) Pull(name string, host []string) ([]byte, error) {
 	input := types.XMap{"name": name}
 	for _, host := range host {
 		//查询远程服务
-		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_file_pull, host), input.ToKV())
+		trace("pull.start:", name, host)
+		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", host, rmt_file_pull), input.ToKV())
 		if status == http.StatusNoContent {
 			continue
 		}
 		if err != nil {
 			return nil, err
 		}
+		trace("pull.end:", name, rpns)
 		return []byte(rpns), nil
 	}
 	return nil, errs.NewError(http.StatusNoContent, "未找到文件")
@@ -85,14 +94,20 @@ func (r *remoting) Pull(name string, host []string) ([]byte, error) {
 }
 
 //Push 向集群推送文件指纹信息
-func (r *remoting) Push(fp *eFileFP) error {
-	hosts := fp.ExcludeHosts(r.getHosts()...)
+func (r *remoting) Push(fp eFileFPLists) error {
+	hosts := fexclude(r.currentAddr, r.getHosts()...)
+	trace("push.start:", fp, hosts)
 	for _, host := range hosts {
 		//查询远程服务
-		_, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_push, host), fp.GetJSON())
+
+		_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
+			fmt.Sprintf("http://%s%s", host, rmt_fp_push), fp.GetJSON(), "utf-8", http.Header{
+				"Content-Type": []string{"application/json"},
+			})
 		if err != nil {
 			return err
 		}
+		trace("push.end:", host, status)
 	}
 	return nil
 }
@@ -104,7 +119,8 @@ func (r *remoting) Query() (eFileFPLists, error) {
 	for _, host := range r.getHosts() {
 
 		//查询远程服务
-		rpns, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", rmt_fp_list, host), "")
+		trace("query.start:", host)
+		rpns, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", host, rmt_fp_list), "")
 		if err != nil {
 			return nil, err
 		}
@@ -121,6 +137,7 @@ func (r *remoting) Query() (eFileFPLists, error) {
 			}
 			result[k].Hosts = append(result[k].Hosts, v.Hosts...)
 		}
+		trace("query.end:", nresult)
 	}
 	return result, nil
 }
@@ -130,5 +147,21 @@ func (r *remoting) getHosts() []string {
 		return r.hosts
 	}
 	return []string{r.masterHost}
+
+}
+func fexclude(ex string, hosts ...string) []string {
+	mp := make(map[string]interface{})
+	nhost := make([]string, 0, len(hosts))
+	for _, h := range hosts {
+		if _, ok := mp[h]; !ok {
+			mp[h] = 0
+		}
+	}
+	for h := range mp {
+		if h != ex {
+			nhost = append(nhost, h)
+		}
+	}
+	return nhost
 
 }

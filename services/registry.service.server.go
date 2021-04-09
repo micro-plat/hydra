@@ -11,7 +11,7 @@ func newServerServices(v func(u *Unit, ext ...interface{}) error) *serverService
 	return &serverServices{
 		handleHook:   newHandleHook(),
 		metaServices: newService(),
-		serverHook:   new(serverHook),
+		serverHook:   newServerHook(),
 		extHandle:    v,
 	}
 }

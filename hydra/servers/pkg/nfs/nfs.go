@@ -1,12 +1,14 @@
 package nfs
 
 import (
+	"fmt"
 	"net"
 	"sync"
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/nfs"
+	"github.com/micro-plat/hydra/global"
 )
 
 type cnfs struct {
@@ -20,19 +22,18 @@ type cnfs struct {
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	return &cnfs{c: c, app: app}
+	return &cnfs{c: c, app: app, closch: make(chan struct{})}
 }
 func (c *cnfs) Start() error {
 	if c.isStarted {
 		return nil
 	}
 	c.isStarted = true
-	hosts, masterHost, isMaster, err := c.get()
+	hosts, masterHost, currentAddr, isMaster, err := c.get()
 	if err != nil {
 		return err
 	}
-
-	c.module, err = newModule(c.c.Local, hosts, masterHost, isMaster)
+	c.module, err = newModule(c.c.Local, hosts, masterHost, currentAddr, isMaster)
 	if err != nil {
 		return err
 	}
@@ -52,11 +53,12 @@ func (c *cnfs) watch() {
 	for {
 		select {
 		case <-notify:
-			hosts, masterHost, isMaster, err := c.get()
+			hosts, masterHost, currentAddr, isMaster, err := c.get()
 			if err != nil {
 				return
 			}
-			c.module.Update(hosts, c.c.Local, masterHost, isMaster)
+			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
+			c.module.Update(hosts, c.c.Local, currentAddr, masterHost, isMaster)
 		case <-c.closch:
 			c.watcher.Close()
 			return
@@ -65,24 +67,25 @@ func (c *cnfs) watch() {
 }
 
 //get 从集群中获取数据
-func (r *cnfs) get() (hosts []string, masterHost string, isMaster bool, err error) {
+func (r *cnfs) get() (hosts []string, masterHost string, currentAddr string, isMaster bool, err error) {
 	c, err := r.app.GetServerConf().GetCluster()
 	if err != nil {
-		return nil, "", false, err
+		return nil, "", "", false, err
 	}
 	hosts = make([]string, 0, 0)
 	c.Iter(func(n conf.ICNode) bool {
 		if !n.IsCurrent() {
 			hosts = append(hosts, net.JoinHostPort(n.GetHost(), n.GetPort()))
 		}
-		if n.IsMaster(n.GetIndex()) {
+		if n.GetIndex() == 0 {
 			masterHost = net.JoinHostPort(n.GetHost(), n.GetPort())
 		}
 		return true
 	})
 
 	//是否是主集群
-	isMaster = c.Current().IsMaster(c.Current().GetIndex())
+	isMaster = c.Current().GetIndex() == 0
+	currentAddr = net.JoinHostPort(c.Current().GetHost(), c.Current().GetPort())
 	return
 }
 func (r *cnfs) Close() error {
@@ -94,4 +97,8 @@ func (r *cnfs) Close() error {
 
 	})
 	return nil
+}
+
+func trace(msg ...interface{}) {
+	global.Def.Log().Debug(msg...)
 }

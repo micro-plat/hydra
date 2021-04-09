@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/context"
@@ -20,8 +19,8 @@ import (
 // header,http请求头多个用/n分隔,每个键值之前用=号连接
 func (c *Client) Request(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, status int, err error) {
 	method = strings.ToUpper(method)
-	start := time.Now()
-	c.printRequest(method, url, params, charset)
+	// start := time.Now()
+	// c.printRequest(method, url, params, charset)
 	req, err := http.NewRequest(method, url, encoding.GetEncodeReader([]byte(params), charset))
 	if err != nil {
 		return
@@ -50,11 +49,11 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		c.printResponseError(method, url, response.Status, time.Now().Sub(start), err)
+		// c.printResponseError(method, url, response.Status, time.Now().Sub(start), err)
 		return nil, 0, fmt.Errorf("body ReadAll err:%v", err)
 	}
 
-	c.printResponse(method, url, response.Status, time.Now().Sub(start), string(body))
+	// c.printResponse(method, url, response.Status, time.Now().Sub(start), string(body))
 	status = response.StatusCode
 	ct, err := encoding.DecodeBytes(body, charset)
 	if err != nil {
@@ -103,15 +102,16 @@ func getCharset(charset ...string) (encoding string) {
 	}
 	return "UTF-8"
 }
-func (c *Client) printRequest(r ...interface{}) {
-	c.print(context.Current().Log().Debug, " > http request:", r...)
-}
-func (c *Client) printResponse(r ...interface{}) {
-	c.print(context.Current().Log().Debug, " > http response:", r...)
-}
-func (c *Client) printResponseError(r ...interface{}) {
-	c.print(context.Current().Log().Error, " > http response:", r...)
-}
+
+// func (c *Client) printRequest(r ...interface{}) {
+// 	c.print(context.Current().Log().Debug, " > http request:", r...)
+// }
+// func (c *Client) printResponse(r ...interface{}) {
+// 	c.print(context.Current().Log().Debug, " > http response:", r...)
+// }
+// func (c *Client) printResponseError(r ...interface{}) {
+// 	c.print(context.Current().Log().Error, " > http response:", r...)
+// }
 
 func (c *Client) print(p func(...interface{}), h string, r ...interface{}) {
 	if c.Trace {

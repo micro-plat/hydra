@@ -15,7 +15,7 @@ const TypeNodeName = "nfs"
 type NFS struct {
 	security.ConfEncrypt
 	Local   string `json:"local,omitempty" toml:"local,omitempty"`
-	Host    string `json:"host,omitempty" valid:"required"  toml:"host,omitempty" label:"mqc服务地址"`
+	Host    string `json:"host,omitempty" toml:"host,omitempty"`
 	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
