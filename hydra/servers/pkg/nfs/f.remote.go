@@ -49,12 +49,14 @@ func (r *remoting) Update(hosts []string, masterHost string, currentAddrs string
 }
 
 //GetFPFormMaster 查询某个文件是否存在，及所在的服务器
-func (r *remoting) GetFPFormMaster(name string) (*eFileFP, error) {
+func (r *remoting) GetFPFormMaster(name string) (v *eFileFP, err error) {
 
 	//查询远程服务
-	trace("get.start:", r.masterHost, name)
+	v = &eFileFP{}
 	input := types.XMap{"name": name}
+	log := start(rmt_fp_get, name, r.masterHost)
 	rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", r.masterHost, rmt_fp_get), input.ToKV())
+	log.end(rmt_fp_get, name, r.masterHost, status, err)
 	if status == http.StatusNoContent {
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
@@ -63,14 +65,10 @@ func (r *remoting) GetFPFormMaster(name string) (*eFileFP, error) {
 	}
 
 	//处理参数合并
-	trace("get.end:", r.masterHost, rpns)
-	rCache := &eFileFP{}
-	if err = json.Unmarshal([]byte(rpns), rCache); err != nil {
+	if err = json.Unmarshal([]byte(rpns), v); err != nil {
 		return nil, err
 	}
-
-	return rCache, nil
-
+	return v, nil
 }
 
 //Pull 从远程服务器拉取文件信息
@@ -78,36 +76,34 @@ func (r *remoting) Pull(name string, host []string) ([]byte, error) {
 	input := types.XMap{"name": name}
 	for _, host := range host {
 		//查询远程服务
-		trace("pull.start:", name, host)
+		log := start(rmt_file_pull, name, "to", host)
 		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", host, rmt_file_pull), input.ToKV())
+		log.end(rmt_file_pull, name, status, err)
 		if status == http.StatusNoContent {
 			continue
 		}
 		if err != nil {
 			return nil, err
 		}
-		trace("pull.end:", name, rpns)
 		return []byte(rpns), nil
 	}
 	return nil, errs.NewError(http.StatusNoContent, "未找到文件")
-
 }
 
 //Push 向集群推送文件指纹信息
 func (r *remoting) Push(fp eFileFPLists) error {
 	hosts := fexclude(r.currentAddr, r.getHosts()...)
-	trace("push.start:", fp, hosts)
 	for _, host := range hosts {
 		//查询远程服务
-
+		log := start(rmt_fp_push, fp, "to", host)
 		_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
 			fmt.Sprintf("http://%s%s", host, rmt_fp_push), fp.GetJSON(), "utf-8", http.Header{
 				"Content-Type": []string{"application/json"},
 			})
+		log.end(rmt_fp_push, host, status, err)
 		if err != nil {
 			return err
 		}
-		trace("push.end:", host, status)
 	}
 	return nil
 }
@@ -119,8 +115,9 @@ func (r *remoting) Query() (eFileFPLists, error) {
 	for _, host := range r.getHosts() {
 
 		//查询远程服务
-		trace("query.start:", host)
-		rpns, _, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", host, rmt_fp_list), "")
+		log := start(rmt_fp_list, "from", host)
+		rpns, status, err := hydra.C.HTTP().GetRegularClient().Post(fmt.Sprintf("http://%s%s", host, rmt_fp_list), "")
+		log.end(rmt_fp_list, "from", host, status, err)
 		if err != nil {
 			return nil, err
 		}
@@ -137,7 +134,6 @@ func (r *remoting) Query() (eFileFPLists, error) {
 			}
 			result[k].Hosts = append(result[k].Hosts, v.Hosts...)
 		}
-		trace("query.end:", nresult)
 	}
 	return result, nil
 }
@@ -163,5 +159,4 @@ func fexclude(ex string, hosts ...string) []string {
 		}
 	}
 	return nhost
-
 }
