@@ -30,6 +30,10 @@ func (l *local) FPWrite(content interface{}) error {
 	if err != nil {
 		return err
 	}
+	_, s := os.Stat(l.path)
+	if os.IsNotExist(s) {
+		os.MkdirAll(l.path, 0777)
+	}
 	return os.WriteFile(l.fpPath, buff, 0666)
 }
 
