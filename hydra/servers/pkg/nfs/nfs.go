@@ -22,21 +22,13 @@ type cnfs struct {
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	return &cnfs{c: c, app: app, closch: make(chan struct{})}
+	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c.Local)}
 }
 func (c *cnfs) Start() error {
 	if c.isStarted {
 		return nil
 	}
 	c.isStarted = true
-	hosts, masterHost, currentAddr, isMaster, err := c.get()
-	if err != nil {
-		return err
-	}
-	c.module, err = newModule(c.c.Local, hosts, masterHost, currentAddr, isMaster)
-	if err != nil {
-		return err
-	}
 	go c.watch()
 	return nil
 
@@ -55,10 +47,11 @@ func (c *cnfs) watch() {
 		case <-notify:
 			hosts, masterHost, currentAddr, isMaster, err := c.get()
 			if err != nil {
-				return
+				continue
 			}
 			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
-			c.module.Update(hosts, c.c.Local, currentAddr, masterHost, isMaster)
+			c.module.Update(c.c.Local, hosts, currentAddr, masterHost, isMaster)
+
 		case <-c.closch:
 			c.watcher.Close()
 			return
@@ -71,6 +64,9 @@ func (r *cnfs) get() (hosts []string, masterHost string, currentAddr string, isM
 	c, err := r.app.GetServerConf().GetCluster()
 	if err != nil {
 		return nil, "", "", false, err
+	}
+	if c.Current().GetPort() == "" {
+		return nil, "", "", false, fmt.Errorf("系统未就绪")
 	}
 	hosts = make([]string, 0, 0)
 	c.Iter(func(n conf.ICNode) bool {

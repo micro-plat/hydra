@@ -3,10 +3,11 @@ package nfs
 import "sync"
 
 type msg struct {
-	reportChan   chan eFileFPLists
-	downloadChan chan *eFileFP
 	r            *remoting
 	l            *local
+	hosts        []string
+	reportChan   chan map[string]eFileFPLists
+	downloadChan chan *eFileFP
 	reportExit   bool
 	downloadExit bool
 	once         sync.Once
@@ -16,16 +17,19 @@ func newMsg(l *local, r *remoting) *msg {
 	m := &msg{
 		r:            r,
 		l:            l,
-		reportChan:   make(chan eFileFPLists, 1000),
+		reportChan:   make(chan map[string]eFileFPLists, 1000),
 		downloadChan: make(chan *eFileFP, 1000),
 	}
 	go m.loopReport()
 	go m.loopDownload()
 	return m
 }
+func (m *msg) Update(hosts []string) {
+	m.hosts = hosts
+}
 
 //Report 上报指纹信息
-func (m *msg) Report(f eFileFPLists) {
+func (m *msg) Report(f map[string]eFileFPLists) {
 	if len(f) == 0 {
 		return
 	}
@@ -43,8 +47,7 @@ func (m *msg) loopReport() {
 			if !ok {
 				return
 			}
-			trace("push-1:", f)
-			m.r.Push(f)
+			m.r.Report(f)
 		}
 	}
 }
@@ -56,19 +59,15 @@ func (m *msg) loopDownload() {
 				return
 			}
 			//从远程拉取文件
-			buff, err := m.r.Pull(f.Path, f.Hosts)
-			trace("pull-1:", f.Path, err)
+			buff, err := m.r.Pull(f)
 			if err != nil {
-				trace("pull-1-err:", f.Path, err)
 				continue
 			}
 			fx, err := m.l.SaveFile(f.Path, buff, f.Hosts...)
-			trace("pull-2:", f.Path, err)
 			if err != nil {
-				trace("pull-2-save.err:", f.Path, err)
 				continue
 			}
-			m.Report(fx.GetMAP())
+			m.Report(GetNotify(fx.GetMAP(), m.hosts))
 		}
 	}
 }

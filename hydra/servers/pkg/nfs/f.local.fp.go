@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-//GetFP 获以FP配置
-func (l *local) GetFP(name string) (*eFileFP, bool) {
+//GetFPByName 获以FP配置
+func (l *local) GetFPByName(name string) (*eFileFP, bool) {
 	if fx, ok := l.FPS.Get(name); ok {
 		f := fx.(*eFileFP)
 		return f, true

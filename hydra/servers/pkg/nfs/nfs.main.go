@@ -29,11 +29,12 @@ func init() {
 				//注册服务
 				services.Def.API(SVS_Donwload, cnfs.Download)
 				services.Def.API(SVS_Upload, cnfs.Upload)
+
 				//内部服务
 				services.Def.API(rmt_fp_get, cnfs.GetFP)
-				services.Def.API(rmt_fp_push, cnfs.RecvNotify)
-				services.Def.API(rmt_fp_list, cnfs.GetFPList)
-				services.Def.API(rmt_file_pull, cnfs.GetFile)
+				services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
+				services.Def.API(rmt_fp_query, cnfs.GetFPList)
+				services.Def.API(rmt_file_download, cnfs.GetFile)
 			}
 
 			if c.GetServerConf().GetServerType() == global.Web {
@@ -42,9 +43,9 @@ func init() {
 
 				//内部服务
 				services.Def.Web(rmt_fp_get, cnfs.GetFP)
-				services.Def.Web(rmt_fp_push, cnfs.RecvNotify)
-				services.Def.Web(rmt_fp_list, cnfs.GetFPList)
-				services.Def.Web(rmt_file_pull, cnfs.GetFile)
+				services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
+				services.Def.Web(rmt_fp_query, cnfs.GetFPList)
+				services.Def.Web(rmt_file_download, cnfs.GetFile)
 			}
 
 			return nil
@@ -52,15 +53,11 @@ func init() {
 		}, global.API, global.Web)
 
 		//处理服务启动完成
-		services.Def.OnStarting(func(c app.IAPPConf) error {
+		services.Def.OnStarted(func(c app.IAPPConf) error {
 			if cnfs, ok := allCnfs[c.GetServerConf().GetServerType()]; ok {
 				err := cnfs.Start()
 				if err != nil {
 					return err
-				}
-				if cnfs.module.isMaster {
-					global.Def.Log().Info("nfs启动成功[master]...")
-					return nil
 				}
 				global.Def.Log().Info("nfs启动成功...")
 				return nil

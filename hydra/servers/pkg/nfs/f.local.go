@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -16,17 +17,34 @@ type local struct {
 	fpPath      string
 	currentAddr string
 	FPS         cmap.ConcurrentMap
+	once        sync.Once
 }
 
 //newLocal 构建本地处理服务
-func newLocal(path string, currentAddr string) (*local, error) {
+func newLocal(path string) *local {
 	l := &local{
-		path:        path,
-		fpPath:      filepath.Join(path, ".fp"),
-		currentAddr: currentAddr,
-		FPS:         cmap.New(8),
+		path:   path,
+		fpPath: filepath.Join(path, ".fp"),
+		FPS:    cmap.New(8),
 	}
-	return l, l.check()
+	fps, _ := l.FPRead()
+	for k, v := range fps {
+		l.FPS.Set(k, v)
+	}
+	return l
+}
+
+func (l *local) Update(path string, currentAddr string) {
+	opath := l.path
+	ocurrentAddr := currentAddr
+	l.path = path
+	l.fpPath = filepath.Join(path, ".fp")
+	l.currentAddr = currentAddr
+	if opath != path || ocurrentAddr != currentAddr {
+		l.check()
+	}
+
+	return
 }
 
 //check 处理本地文件与指纹不一致，以文件为准
@@ -44,7 +62,7 @@ func (l *local) check() error {
 	//处理不一致数据
 	for _, path := range lst {
 		if v, ok := fps[path]; ok {
-			v.AddHosts(l.currentAddr)
+			v.MergeHosts(l.currentAddr)
 			l.FPS.Set(path, v)
 			continue
 		}
@@ -61,8 +79,8 @@ func (l *local) check() error {
 
 }
 
-//MergeFPSList 合并外部数据列表
-func (l *local) MergeFPSList(list eFileFPLists) (eFileFPLists, eFileFPLists) {
+//MergeLocal 合并到本地列表
+func (l *local) MergeLocal(list eFileFPLists) (eFileFPLists, eFileFPLists) {
 	reports := make(eFileFPLists, 10)
 	download := make(eFileFPLists, 10)
 	for _, fp := range list {
@@ -72,7 +90,7 @@ func (l *local) MergeFPSList(list eFileFPLists) (eFileFPLists, eFileFPLists) {
 			continue
 		}
 		lk := nlk.(*eFileFP)
-		if fp.AddHosts(lk.Hosts...) {
+		if fp.MergeHosts(lk.Hosts...) {
 			l.FPS.Set(fp.Path, fp)
 			reports[fp.Path] = fp
 		}
@@ -82,12 +100,29 @@ func (l *local) MergeFPSList(list eFileFPLists) (eFileFPLists, eFileFPLists) {
 	}
 	return reports, download
 }
+func (l *local) GetNotify(aliveHosts []string) map[string]eFileFPLists {
+	list := make(eFileFPLists)
+	items := l.FPS.Items()
+	for k, v := range items {
+		list[k] = v.(*eFileFP)
+	}
+	return GetNotify(list, aliveHosts)
+}
 
-//MergeFPSList 合并外部数据列表
-func (l *local) MergeFPS(e *eFileFP) (eFileFPLists, eFileFPLists) {
-	return l.MergeFPSList(map[string]*eFileFP{
-		e.Path: e,
-	})
+//GetNotify 获取需要通知的服务
+func GetNotify(fps eFileFPLists, aliveHosts []string) map[string]eFileFPLists {
+	nlist := make(map[string]eFileFPLists)
+	for k, ff := range fps {
+		for _, h := range aliveHosts {
+			if !ff.Has(h) {
+				if _, ok := nlist[h]; !ok {
+					nlist[h] = make(eFileFPLists)
+				}
+				nlist[h][k] = ff
+			}
+		}
+	}
+	return nlist
 }
 
 //GetFile 获取本地文件

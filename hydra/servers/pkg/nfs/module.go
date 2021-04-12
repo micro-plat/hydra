@@ -12,38 +12,31 @@ import (
 
 //module 协调本地文件、本地指纹、远程指纹等处理
 type module struct {
-	path          string
-	local         *local
-	remoting      *remoting
-	remotingHosts []string
-	msg           *msg
-	isMaster      bool
+	path     string
+	local    *local
+	remoting *remoting
+	msg      *msg
 }
 
-func newModule(path string, hosts []string, masterHost string, currentAddr string, isMaster bool) (m *module, err error) {
-	l, err := newLocal(path, currentAddr)
-	if err != nil {
-		return nil, err
-	}
+func newModule(path string) (m *module) {
 	m = &module{
-		path:          path,
-		remotingHosts: hosts,
-		local:         l,
-		isMaster:      isMaster,
-		remoting:      newRemoting(path, hosts, masterHost, currentAddr, isMaster),
+		path:     path,
+		local:    newLocal(path),
+		remoting: newRemoting(),
 	}
 	m.msg = newMsg(m.local, m.remoting)
-	m.Report()
-	return m, nil
+	return m
 }
 
 //Update 更新环境配置
-func (m *module) Update(hosts []string, path string, currentAddr string, masterHost string, isMaster bool) {
-	m.remotingHosts = hosts
+func (m *module) Update(path string, hosts []string, currentAddr string, masterHost string, isMaster bool) {
 	m.path = path
-	m.isMaster = isMaster
 	m.remoting.Update(hosts, masterHost, currentAddr, isMaster)
-	m.Report()
+	m.local.Update(path, currentAddr)
+	m.msg.Update(hosts)
+	if isMaster {
+		m.Report()
+	}
 }
 
 //从服务器拉取配置，并进行同步
@@ -54,10 +47,14 @@ func (m *module) Report() {
 		return
 	}
 
+	if m.remoting.isMaster {
+		m.msg.Report(m.local.GetNotify(m.remoting.hosts))
+	}
+
 	//合并到本地
-	reports, downloads := m.local.MergeFPSList(mp)
+	reports, downloads := m.local.MergeLocal(mp)
 	//处理本地新文件上报
-	m.msg.Report(reports)
+	m.msg.Report(GetNotify(reports, m.remoting.hosts))
 	for _, f := range downloads {
 		m.msg.Download(f)
 	}
@@ -85,7 +82,7 @@ func (m *module) GetFile(name string) ([]byte, error) {
 	}
 
 	//从远程拉取文件
-	buff, err = m.remoting.Pull(name, fp.GetAliveHost(m.remotingHosts...))
+	buff, err = m.remoting.Pull(fp)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +94,7 @@ func (m *module) GetFile(name string) ([]byte, error) {
 	}
 
 	//上报给其它服务器
-	m.msg.Report(fp.GetMAP())
+	m.msg.Report(GetNotify(fp.GetMAP(), m.remoting.hosts))
 	return buff, nil
 }
 
@@ -125,7 +122,7 @@ func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 	}
 
 	//远程通知
-	m.msg.Report(fp.GetMAP())
+	m.msg.Report(GetNotify(fp.GetMAP(), m.remoting.hosts))
 	return fp, nil
 }
 
@@ -135,7 +132,7 @@ func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 //3. 向master发起查询
 func (m *module) GetLocalFP(name string) (*eFileFP, error) {
 	//从本地文件获取
-	if f, ok := m.local.GetFP(name); ok {
+	if f, ok := m.local.GetFPByName(name); ok {
 		return f, nil
 	}
 	return nil, errs.NewError(http.StatusNotFound, "文件不存在")
@@ -152,8 +149,8 @@ func (m *module) GetFPList() eFileFPLists {
 //3. 合并服务列表
 func (m *module) RecvNotify(f eFileFPLists) {
 	//处理本地新文件上报
-	reports, downloads := m.local.MergeFPSList(f)
-	m.msg.Report(reports)
+	reports, downloads := m.local.MergeLocal(f)
+	m.msg.Report(GetNotify(reports, m.remoting.hosts))
 	for _, f := range downloads {
 		m.msg.Download(f)
 	}

@@ -1,15 +1,8 @@
 package nfs
 
-import (
-	"encoding/json"
-)
+import "github.com/micro-plat/lib4go/types"
 
 type eFileFPLists map[string]*eFileFP
-
-func (ex eFileFPLists) GetJSON() string {
-	buff, _ := json.Marshal(ex)
-	return string(buff)
-}
 
 //eRomotingFileFP 远程文件清单
 type eFileFP struct {
@@ -25,8 +18,8 @@ type eFileEntity struct {
 	Buffer []byte `json:"buffer,omitempty" valid:"required"`
 }
 
-//AddHosts 添加hosts,去除重复host
-func (e *eFileFP) AddHosts(hosts ...string) bool {
+//MergeHosts 合并hosts
+func (e *eFileFP) MergeHosts(hosts ...string) bool {
 	hasChange := false
 	mp := make(map[string]interface{})
 	nhost := make([]string, 0, len(hosts)+len(e.Hosts))
@@ -44,7 +37,6 @@ func (e *eFileFP) AddHosts(hosts ...string) bool {
 			hasChange = true
 		}
 	}
-
 	e.Hosts = nhost
 	return hasChange
 }
@@ -59,7 +51,7 @@ func (e *eFileFP) GetAliveHost(aliveHosts ...string) []string {
 		}
 	}
 	for _, h := range e.Hosts {
-		if _, ok := mp[h]; ok {
+		if _, ok := mp[h]; ok && h != "" {
 			nhost = append(nhost, h)
 		}
 	}
@@ -74,12 +66,8 @@ func (e *eFileFP) Has(host string) bool {
 	}
 	return false
 }
-func (e *eFileFP) GetJSON() string {
-	buff, _ := json.Marshal(e)
-	return string(buff)
-}
 func (e *eFileFP) String() string {
-	return e.GetJSON()
+	return types.ToJSON(e)
 }
 func (e *eFileFP) GetMAP() eFileFPLists {
 	return map[string]*eFileFP{

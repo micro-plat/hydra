@@ -109,10 +109,7 @@ func (logger *Logger) Resume() {
 
 //GetSessionID 获取当前日志的session id
 func (logger *Logger) GetSessionID() string {
-	if len(logger.sessions) > 0 {
-		return logger.sessions
-	}
-	return ""
+	return logger.sessions
 }
 
 //Debug 输出debug日志

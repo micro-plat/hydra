@@ -18,8 +18,8 @@ func (l *local) SaveFile(name string, buff []byte, hosts ...string) (f *eFileFP,
 
 	//生成crc64并
 	fp := &eFileFP{Path: name, CRC64: getCRC64(buff)}
-	fp.AddHosts(hosts...)
-	fp.AddHosts(l.currentAddr)
+	fp.MergeHosts(hosts...)
+	fp.MergeHosts(l.currentAddr)
 	l.FPS.Set(name, fp)
 	return fp, l.FPWrite(l.FPS)
 }
