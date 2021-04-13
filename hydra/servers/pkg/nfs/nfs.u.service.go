@@ -11,14 +11,14 @@ import (
 )
 
 //SVSNOTExcludes 服务路径中排除的
-var SVSNOTExcludes = []string{"/nfs/file/*", "/_/nfs/**"}
+var SVSNOTExcludes = []string{"/nfs/*", "/_/nfs/**"}
 
 const (
 	//SVSUpload 用户端上传文件
-	SVSUpload = "/nfs/file/upload"
+	SVSUpload = "/nfs/upload"
 
 	//SVSDonwload 用户端下载文件
-	SVSDonwload = "/nfs/file/download/:dir/:name"
+	SVSDonwload = "/nfs/download/:dir/:name"
 )
 
 //Upload 用户上传文件

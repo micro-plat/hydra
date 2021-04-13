@@ -21,7 +21,9 @@ func newMsg(l *local, r *remoting) *msg {
 		downloadChan: make(chan *eFileFP, 1000),
 	}
 	go m.loopReport()
-	go m.loopDownload()
+	for i := 0; i < 10; i++ {
+		go m.loopDownload()
+	}
 	return m
 }
 func (m *msg) Update(hosts []string) {
