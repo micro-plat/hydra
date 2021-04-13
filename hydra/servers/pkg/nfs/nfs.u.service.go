@@ -57,7 +57,6 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 		return errs.NewError(http.StatusNotAcceptable, "参数不能为空")
 	}
 	path := filepath.Join(dir, name)
-	fmt.Println("path:", path)
 	_, err := c.module.GetFile(path)
 	if err != nil {
 		return err
