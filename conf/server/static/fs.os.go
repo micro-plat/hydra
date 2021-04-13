@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
 //osfs 本地文件系统
@@ -27,12 +26,9 @@ func containsAny(s, chars string) bool {
 	return false
 }
 func (dir localFs) Open(name string) (fs.File, error) {
-	if !fs.ValidPath(name) || runtime.GOOS == "windows" && containsAny(name, `\:`) {
-		return nil, &os.PathError{Op: "open", Path: name, Err: os.ErrInvalid}
-	}
-	f, err := os.Open(name)
+	f, err := os.Open(filepath.Join(string(dir), name))
 	if err != nil {
-		return nil, err // nil fs.File
+		return nil, err
 	}
 	return f, nil
 }
@@ -45,7 +41,7 @@ func newOSFS(dir string) *osfs {
 }
 
 func (o *osfs) ReadFile(name string) (http.FileSystem, string, error) {
-	return o.fs, filepath.Join(o.dir, name), nil
+	return o.fs, name, nil
 }
 
 func (o *osfs) GetRoot() string {

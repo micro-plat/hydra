@@ -27,8 +27,8 @@ func init() {
 
 			if c.GetServerConf().GetServerType() == global.API {
 				//注册服务
-				services.Def.API(SVS_Donwload, cnfs.Download)
-				services.Def.API(SVS_Upload, cnfs.Upload)
+				services.Def.API(SVSDonwload, cnfs.Download)
+				services.Def.API(SVSUpload, cnfs.Upload)
 
 				//内部服务
 				services.Def.API(rmt_fp_get, cnfs.GetFP)
@@ -38,8 +38,8 @@ func init() {
 			}
 
 			if c.GetServerConf().GetServerType() == global.Web {
-				services.Def.Web(SVS_Donwload, cnfs.Download)
-				services.Def.Web(SVS_Upload, cnfs.Upload)
+				services.Def.Web(SVSDonwload, cnfs.Download)
+				services.Def.Web(SVSUpload, cnfs.Upload)
 
 				//内部服务
 				services.Def.Web(rmt_fp_get, cnfs.GetFP)
