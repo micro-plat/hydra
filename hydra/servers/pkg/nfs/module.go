@@ -29,7 +29,7 @@ func newModule(path string) (m *module) {
 }
 
 //Update 更新环境配置
-func (m *module) Update(path string, hosts []string, currentAddr string, masterHost string, isMaster bool) {
+func (m *module) Update(path string, hosts []string, masterHost string, currentAddr string, isMaster bool) {
 	m.path = path
 	m.remoting.Update(hosts, masterHost, currentAddr, isMaster)
 	m.local.Update(path, currentAddr)
@@ -47,17 +47,9 @@ func (m *module) Report() {
 		return
 	}
 
-	if m.remoting.isMaster {
-		m.msg.Report(m.local.GetNotify(m.remoting.hosts))
-	}
-
-	//合并到本地
-	reports, downloads := m.local.MergeLocal(mp)
-	//处理本地新文件上报
-	m.msg.Report(GetNotify(reports, m.remoting.hosts))
-	for _, f := range downloads {
-		m.msg.Download(f)
-	}
+	mp.Merge(m.local.GetFPList())
+	//结合外部传入，与当前服务器，进行整体合并，并进行通知
+	m.msg.Report(GetAllNotify(mp, append(m.remoting.hosts, m.remoting.currentAddr)))
 	return
 }
 
@@ -94,7 +86,7 @@ func (m *module) GetFile(name string) ([]byte, error) {
 	}
 
 	//上报给其它服务器
-	m.msg.Report(GetNotify(fp.GetMAP(), m.remoting.hosts))
+	m.msg.Report(GetAllNotify(fp.GetMAP(), m.remoting.hosts))
 	return buff, nil
 }
 
@@ -122,7 +114,7 @@ func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 	}
 
 	//远程通知
-	m.msg.Report(GetNotify(fp.GetMAP(), m.remoting.hosts))
+	m.msg.Report(GetAllNotify(fp.GetMAP(), m.remoting.getHosts()))
 	return fp, nil
 }
 
@@ -147,14 +139,17 @@ func (m *module) GetFPList() eFileFPLists {
 //1. 检查本地是否有些文件
 //2. 文件不存在则自动下载
 //3. 合并服务列表
-func (m *module) RecvNotify(f eFileFPLists) {
+func (m *module) RecvNotify(f eFileFPLists) error {
 	//处理本地新文件上报
-	reports, downloads := m.local.MergeLocal(f)
-	m.msg.Report(GetNotify(reports, m.remoting.hosts))
+	reports, downloads, err := m.local.MergeLocal(f)
+	if err != nil {
+		return err
+	}
+	m.msg.Report(GetAllNotify(reports, m.remoting.getHosts()))
 	for _, f := range downloads {
 		m.msg.Download(f)
 	}
-	return
+	return m.local.FPWrite(m.local.FPS.Items())
 }
 
 //Close 关闭服务

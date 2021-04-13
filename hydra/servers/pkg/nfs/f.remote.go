@@ -93,20 +93,18 @@ func (r *remoting) Pull(v *eFileFP) ([]byte, error) {
 //Report 当前差异时主动向集群推送指纹信息
 func (r *remoting) Report(rp map[string]eFileFPLists) error {
 	for host, list := range rp {
-		hosts := fexclude(r.currentAddr, host)
-		for _, host := range hosts {
-			//查询远程服务
-			log := start(rmt_fp_notify, host)
-			_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
-				fmt.Sprintf("http://%s%s", host, rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
-					"Content-Type":     []string{"application/json"},
-					context.XRequestID: []string{log.log.GetSessionID()},
-				})
-			log.end(rmt_fp_notify, host, status)
-			if err != nil {
-				return err
-			}
+		//查询远程服务
+		log := start(rmt_fp_notify, host)
+		_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
+			fmt.Sprintf("http://%s%s", host, rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
+				"Content-Type":     []string{"application/json"},
+				context.XRequestID: []string{log.log.GetSessionID()},
+			})
+		log.end(rmt_fp_notify, host, status)
+		if err != nil {
+			return err
 		}
+
 	}
 	return nil
 }
@@ -137,7 +135,7 @@ func (r *remoting) Query() (eFileFPLists, error) {
 				result[k] = v
 				continue
 			}
-			result[k].Hosts = append(result[k].Hosts, v.Hosts...)
+			result[k].MergeHosts(v.Hosts...)
 		}
 	}
 	return result, nil

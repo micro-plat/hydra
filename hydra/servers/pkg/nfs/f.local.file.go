@@ -35,7 +35,17 @@ func (l *local) Read(name string) ([]byte, error) {
 
 //Write 写入文件到本地
 func (l *local) Write(name string, buff []byte) error {
-	err := os.WriteFile(filepath.Join(l.path, name), buff, 0666)
+	rpath := filepath.Join(l.path, name)
+
+	//处理目录
+	dir := filepath.Dir(rpath)
+	_, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		os.MkdirAll(dir, 0777)
+	}
+
+	//生成文件
+	err = os.WriteFile(rpath, buff, 0666)
 	if err != nil {
 		return fmt.Errorf("写文件失败:%w", err)
 	}

@@ -67,7 +67,7 @@ func (m *msg) loopDownload() {
 			if err != nil {
 				continue
 			}
-			m.Report(GetNotify(fx.GetMAP(), m.hosts))
+			m.Report(GetAllNotify(fx.GetMAP(), m.hosts))
 		}
 	}
 }

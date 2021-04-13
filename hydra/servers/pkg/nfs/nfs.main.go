@@ -33,7 +33,7 @@ func init() {
 				//内部服务
 				services.Def.API(rmt_fp_get, cnfs.GetFP)
 				services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
-				services.Def.API(rmt_fp_query, cnfs.GetFPList)
+				services.Def.API(rmt_fp_query, cnfs.QueryFP)
 				services.Def.API(rmt_file_download, cnfs.GetFile)
 			}
 
@@ -44,7 +44,7 @@ func init() {
 				//内部服务
 				services.Def.Web(rmt_fp_get, cnfs.GetFP)
 				services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
-				services.Def.Web(rmt_fp_query, cnfs.GetFPList)
+				services.Def.Web(rmt_fp_query, cnfs.QueryFP)
 				services.Def.Web(rmt_file_download, cnfs.GetFile)
 			}
 

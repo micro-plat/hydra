@@ -17,6 +17,7 @@ func (l *local) GetFPByName(name string) (*eFileFP, bool) {
 
 //GetFPList 获以FP列表
 func (l *local) GetFPList() eFileFPLists {
+	<-l.readyChan
 	list := make(eFileFPLists)
 	for k, v := range l.FPS.Items() {
 		list[k] = v.(*eFileFP)

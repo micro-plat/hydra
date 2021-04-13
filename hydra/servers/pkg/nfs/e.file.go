@@ -4,6 +4,16 @@ import "github.com/micro-plat/lib4go/types"
 
 type eFileFPLists map[string]*eFileFP
 
+func (e eFileFPLists) Merge(list eFileFPLists) {
+	for k, v := range list {
+		if _, ok := e[k]; !ok {
+			e[k] = v
+			continue
+		}
+		e[k].MergeHosts(v.Hosts...)
+	}
+}
+
 //eRomotingFileFP 远程文件清单
 type eFileFP struct {
 	Path  string   `json:"path,omitempty" valid:"required" `
@@ -24,14 +34,14 @@ func (e *eFileFP) MergeHosts(hosts ...string) bool {
 	mp := make(map[string]interface{})
 	nhost := make([]string, 0, len(hosts)+len(e.Hosts))
 	for _, h := range e.Hosts {
-		if _, ok := mp[h]; !ok && h != "" {
+		if _, ok := mp[h]; !ok && h != "" && h != ":" {
 			mp[h] = 0
 			nhost = append(nhost, h)
 		}
 	}
 
 	for _, h := range hosts {
-		if _, ok := mp[h]; !ok && h != "" {
+		if _, ok := mp[h]; !ok && h != "" && h != ":" {
 			mp[h] = 0
 			nhost = append(nhost, h)
 			hasChange = true

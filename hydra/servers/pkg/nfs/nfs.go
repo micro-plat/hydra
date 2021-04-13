@@ -50,7 +50,7 @@ func (c *cnfs) watch() {
 				continue
 			}
 			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
-			c.module.Update(c.c.Local, hosts, currentAddr, masterHost, isMaster)
+			c.module.Update(c.c.Local, hosts, masterHost, currentAddr, isMaster)
 
 		case <-c.closch:
 			c.watcher.Close()

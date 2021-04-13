@@ -56,15 +56,15 @@ func (w *Responsive) Start() (err error) {
 		return
 	}
 
-	if err = w.publish(); err != nil {
-		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetServerConf().GetServerType(), err)
+	//服务启动成功后钩子
+	if err := services.Def.DoStarted(w.conf); err != nil {
+		err = fmt.Errorf("%s启动失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
 
-	//服务启动成功后钩子
-	if err := services.Def.DoStarted(w.conf); err != nil {
-		err = fmt.Errorf("%s启动失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
+	if err = w.publish(); err != nil {
+		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}

@@ -18,7 +18,6 @@ const (
 func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	//读取文件
-	defer req(ctx).rspns()
 	name, reader, size, err := ctx.Request().GetFile("file")
 	if err != nil {
 		return err
@@ -45,7 +44,6 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 //Download 用户下载文件
 func (c *cnfs) Download(ctx context.IContext) interface{} {
 	//根据路径查询文件
-	defer req(ctx).rspns()
 	path := ctx.Request().Path().GetURL().Path
 	_, err := c.module.GetFile(path)
 	if err != nil {
