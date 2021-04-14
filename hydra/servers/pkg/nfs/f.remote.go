@@ -52,6 +52,7 @@ func (r *remoting) GetFPFormMaster(name string) (v *eFileFP, err error) {
 	log := start(rmt_fp_get, name, r.masterHost)
 	rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", r.masterHost, rmt_fp_get), input.ToKV(), "utf-8", http.Header{
 		context.XRequestID: []string{log.log.GetSessionID()},
+		"Accept-Encoding":  []string{"gzip"},
 	})
 	log.end(rmt_fp_get, name, r.masterHost, status)
 	if status == http.StatusNoContent {
@@ -77,6 +78,7 @@ func (r *remoting) Pull(v *eFileFP) ([]byte, error) {
 		log := start(rmt_file_download, v.Path, "to", host)
 		rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_file_download), input.ToKV(), "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
+			"Accept-Encoding":  []string{"gzip"},
 		})
 		log.end(rmt_file_download, v.Path, "to", host, status)
 		if status == http.StatusNoContent {
@@ -99,6 +101,7 @@ func (r *remoting) Report(rp map[string]eFileFPLists) error {
 			fmt.Sprintf("http://%s%s", host, rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
 				"Content-Type":     []string{"application/json"},
 				context.XRequestID: []string{log.log.GetSessionID()},
+				"Accept-Encoding":  []string{"gzip"},
 			})
 		log.end(rmt_fp_notify, host, status)
 		if err != nil {
@@ -119,6 +122,7 @@ func (r *remoting) Query() (eFileFPLists, error) {
 		log := start(rmt_fp_query, "from", host)
 		rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_fp_query), "", "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
+			"Accept-Encoding":  []string{"gzip"},
 		})
 		log.end(rmt_fp_query, "from", host, status)
 		if err != nil {

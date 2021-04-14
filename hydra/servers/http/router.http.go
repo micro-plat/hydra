@@ -13,9 +13,11 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	}
 	s.engine = adapter.NewGinEngine(s.serverType)
 	s.engine.Use(middleware.Recovery(true))
-	s.engine.Use(s.metric.Handle())    //生成metric报表
+	s.engine.Use(s.metric.Handle()) //生成metric报表
+	s.engine.Use(middleware.Gzip(middleware.DefaultCompression))
 	s.engine.Use(middleware.Logging()) //记录请求日志
 	s.engine.Use(middleware.Recovery())
+
 	// s.engine.Use(middleware.APM())       //链数跟踪
 	s.engine.Use(middleware.Trace())     //跟踪信息
 	s.engine.Use(middleware.BlackList()) //黑名单控制

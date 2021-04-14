@@ -16,6 +16,9 @@ type imiddle interface {
 	Find(path string) bool
 	GetRouterPath() string
 	ClearAuth(c ...bool) bool
+	GetWriter() interface{}
+	SetWriter(w interface{})
+	GetType() string
 }
 
 //IMiddleContext 中间件转换器，在context.IContext中扩展next函数

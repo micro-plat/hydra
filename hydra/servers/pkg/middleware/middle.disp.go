@@ -35,6 +35,9 @@ type dispCtx struct {
 	servicePrefix string
 }
 
+func (g *dispCtx) GetType() string {
+	return "dispatcher"
+}
 func (g *dispCtx) GetParams() map[string]interface{} {
 	params := make(map[string]interface{})
 	for _, v := range g.Context.Params {
@@ -138,6 +141,16 @@ func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) 
 //GetHTTPReqResp 获取http请求与响应对象
 func (g *dispCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return nil, nil
+}
+
+//GetWriter 获取writer
+func (g *dispCtx) GetWriter() interface{} {
+	return g.Writer
+}
+
+//GetWriter 获取writer
+func (g *dispCtx) SetWriter(w interface{}) {
+	g.Writer = w.(dispatcher.ResponseWriter)
 }
 func (g *dispCtx) ClearAuth(c ...bool) bool {
 	if len(c) == 0 {
