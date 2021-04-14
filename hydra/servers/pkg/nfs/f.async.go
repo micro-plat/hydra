@@ -81,9 +81,8 @@ func (m *async) loopQuery() {
 					time.Sleep(time.Second * 60)
 					m.DoQuery()
 				}()
-				return
+				continue
 			}
-
 			//结合外部传入，与当前服务器，进行整体合并，并进行通知
 			mp.Merge(m.local.GetFPs())
 			m.DoReport(mp) //?应该包含自己
@@ -128,5 +127,6 @@ func (m *async) loopDownload() {
 func (m *async) Close() error {
 	close(m.reportChan)
 	close(m.downloadChan)
+	close(m.queryChan)
 	return nil
 }
