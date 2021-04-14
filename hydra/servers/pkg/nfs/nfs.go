@@ -9,6 +9,8 @@ import (
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/services"
+	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
 type cnfs struct {
@@ -49,7 +51,7 @@ func (c *cnfs) watch() {
 			if err != nil {
 				continue
 			}
-			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
+			start(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
 			c.module.Update(c.c.Local, hosts, masterHost, currentAddr, isMaster)
 
 		case <-c.closch:
@@ -78,8 +80,6 @@ func (r *cnfs) get() (hosts []string, masterHost string, currentAddr string, isM
 		}
 		return true
 	})
-
-	//是否是主集群
 	isMaster = c.Current().GetIndex() == 0
 	currentAddr = net.JoinHostPort(c.Current().GetHost(), c.Current().GetPort())
 	return
@@ -87,14 +87,95 @@ func (r *cnfs) get() (hosts []string, masterHost string, currentAddr string, isM
 func (r *cnfs) Close() error {
 	r.once.Do(func() {
 		close(r.closch)
-		if r.module != nil {
-			r.module.Close()
-		}
-
+		r.module.Close()
 	})
 	return nil
 }
 
-func trace(msg ...interface{}) {
-	global.Def.Log().Debug(msg...)
+func init() {
+	global.OnReady(func() {
+		//处理服务初始化
+		services.Def.OnSetup(func(c app.IAPPConf) error {
+			closeNFS(c.GetServerConf().GetServerType())
+			n, err := c.GetNFSConf()
+			if err != nil {
+				return err
+			}
+			if n.Disable {
+				return nil
+			}
+
+			//构建并缓存nfs
+			cnfs := newNFS(c, n)
+			nfsCaches.Set(c.GetServerConf().GetServerType(), cnfs)
+
+			//注册服务
+			registry(c.GetServerConf().GetServerType(), cnfs)
+			return nil
+		})
+
+		//处理服务启动完成
+		services.Def.OnStarted(func(c app.IAPPConf) error {
+			return startNFS(c.GetServerConf().GetServerType())
+		})
+
+		//处理服务关闭
+		services.Def.OnClosing(func(c app.IAPPConf) error {
+			return closeNFS(c.GetServerConf().GetServerType())
+		})
+
+	})
+
+}
+
+var nfsCaches cmap.ConcurrentMap = cmap.New(2)
+var registryOnce sync.Once
+
+func startNFS(tp string) error {
+	v, ok := nfsCaches.Get(tp)
+	if !ok {
+		return nil
+	}
+	m := v.(*cnfs)
+	return m.Start()
+}
+
+func closeNFS(tp string) error {
+	nfsCaches.RemoveIterCb(func(k string, v interface{}) bool {
+		if k == tp {
+			m := v.(*cnfs)
+			m.Close()
+			return true
+		}
+		return false
+	})
+	return nil
+
+}
+func registry(tp string, cnfs *cnfs) {
+	registryOnce.Do(func() {
+		if tp == global.API {
+			//注册服务
+			services.Def.API(SVSDonwload, cnfs.Download)
+			services.Def.API(SVSUpload, cnfs.Upload)
+
+			//内部服务
+			services.Def.API(rmt_fp_get, cnfs.GetFP)
+			services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
+			services.Def.API(rmt_fp_query, cnfs.Query)
+			services.Def.API(rmt_file_download, cnfs.GetFile)
+		}
+
+		if tp == global.Web {
+			services.Def.Web(SVSDonwload, cnfs.Download)
+			services.Def.Web(SVSUpload, cnfs.Upload)
+
+			//内部服务
+			services.Def.Web(rmt_fp_get, cnfs.GetFP)
+			services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
+			services.Def.Web(rmt_fp_query, cnfs.Query)
+			services.Def.Web(rmt_file_download, cnfs.GetFile)
+		}
+	})
+
 }

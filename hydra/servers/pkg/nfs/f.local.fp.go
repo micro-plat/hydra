@@ -6,8 +6,13 @@ import (
 	"os"
 )
 
-//GetFPByName 获以FP配置
-func (l *local) GetFPByName(name string) (*eFileFP, bool) {
+//FPHas 本地是否存在文件
+func (l *local) Has(name string) bool {
+	return l.FPS.Has(name)
+}
+
+//GetFP 获以FP配置
+func (l *local) GetFP(name string) (*eFileFP, bool) {
 	if fx, ok := l.FPS.Get(name); ok {
 		f := fx.(*eFileFP)
 		return f, true
@@ -15,8 +20,8 @@ func (l *local) GetFPByName(name string) (*eFileFP, bool) {
 	return nil, false
 }
 
-//GetFPList 获以FP列表
-func (l *local) GetFPList() eFileFPLists {
+//GetFPs 获以FP列表
+func (l *local) GetFPs() eFileFPLists {
 	<-l.readyChan
 	list := make(eFileFPLists)
 	for k, v := range l.FPS.Items() {

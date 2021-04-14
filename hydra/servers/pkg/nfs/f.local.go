@@ -9,8 +9,6 @@ import (
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
-var exclude = []string{".fp"}
-
 //local 本地文件管理
 type local struct {
 	path        string
@@ -32,6 +30,7 @@ func newLocal(path string) *local {
 	return l
 }
 
+//Update 更新配置数据
 func (l *local) Update(path string, currentAddr string) {
 	needCheck := l.path != path || l.currentAddr != currentAddr
 	l.path = path
@@ -43,41 +42,8 @@ func (l *local) Update(path string, currentAddr string) {
 	return
 }
 
-//check 处理本地文件与指纹不一致，以文件为准
-func (l *local) check() error {
-	defer close(l.readyChan)
-	//读取本地指纹
-	fps, err := l.FPRead()
-	if err != nil {
-		return err
-	}
-
-	//获取本地文件列表
-	lst, err := l.List()
-	if err != nil {
-		return err
-	}
-
-	//处理不一致数据
-	for _, path := range lst {
-		if v, ok := fps[path]; ok {
-			v.MergeHosts(l.currentAddr)
-			l.FPS.Set(path, v)
-			continue
-		}
-		buff, err := l.Read(path)
-		if err != nil {
-			return err
-		}
-		fp := &eFileFP{Path: path, CRC64: getCRC64(buff), Hosts: []string{l.currentAddr}}
-		l.FPS.Set(path, fp)
-	}
-	//更新数据
-	return l.FPWrite(l.FPS.Items())
-}
-
-//MergeLocal 合并到本地列表
-func (l *local) MergeLocal(list eFileFPLists) (reports eFileFPLists, download eFileFPLists, err error) {
+//Merge 合并到本地列表
+func (l *local) Merge(list eFileFPLists) (reports eFileFPLists, download eFileFPLists, err error) {
 	reports = make(eFileFPLists, 10)
 	download = make(eFileFPLists, 10)
 	for _, fp := range list {
@@ -100,28 +66,6 @@ func (l *local) MergeLocal(list eFileFPLists) (reports eFileFPLists, download eF
 	return reports, download, err
 }
 
-func GetAllNotify(fps eFileFPLists, allAliveHosts []string) map[string]eFileFPLists {
-	if len(fps) == 0 {
-		return nil
-	}
-	list := make(map[string]eFileFPLists, len(allAliveHosts))
-	for _, v := range allAliveHosts {
-		list[v] = fps
-	}
-	return list
-}
-
-//GetFile 获取本地文件
-func (l *local) GetFile(name string) ([]byte, error) {
-	return l.Read(name)
-}
-
-//FPHas 本地是否存在文件
-func (l *local) Has(name string) bool {
-	_, ok := l.FPS.Get(name)
-	return ok
-}
-
 //Open 读取文件
 func (l *local) Open(name string) (fs.File, error) {
 	return os.Open(filepath.Join(l.path, name))
@@ -131,4 +75,37 @@ func (l *local) Open(name string) (fs.File, error) {
 func (l *local) Close() error {
 	l.FPS = nil
 	return nil
+}
+
+//check 处理本地文件与指纹不一致，以文件为准
+func (l *local) check() error {
+	defer close(l.readyChan)
+	//读取本地指纹
+	fps, err := l.FPRead()
+	if err != nil {
+		return err
+	}
+
+	//获取本地文件列表
+	lst, err := l.FList(l.path)
+	if err != nil {
+		return err
+	}
+
+	//处理不一致数据
+	for _, path := range lst {
+		if v, ok := fps[path]; ok {
+			v.MergeHosts(l.currentAddr)
+			l.FPS.Set(path, v)
+			continue
+		}
+		buff, err := l.FRead(path)
+		if err != nil {
+			return err
+		}
+		fp := &eFileFP{Path: path, CRC64: getCRC64(buff), Hosts: []string{l.currentAddr}}
+		l.FPS.Set(path, fp)
+	}
+	//更新数据
+	return l.FPWrite(l.FPS.Items())
 }

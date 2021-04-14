@@ -14,6 +14,18 @@ func (e eFileFPLists) Merge(list eFileFPLists) {
 	}
 }
 
+//GetAlives 获取可用于通知所有alive的tp列表
+func (e eFileFPLists) GetAlives(allAliveHosts []string) map[string]eFileFPLists {
+	if len(e) == 0 {
+		return nil
+	}
+	list := make(map[string]eFileFPLists, len(allAliveHosts))
+	for _, v := range allAliveHosts {
+		list[v] = e
+	}
+	return list
+}
+
 //eRomotingFileFP 远程文件清单
 type eFileFP struct {
 	Path  string   `json:"path,omitempty" valid:"required" `

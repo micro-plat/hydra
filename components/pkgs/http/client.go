@@ -1,6 +1,7 @@
 package http
 
 import (
+	"compress/gzip"
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
@@ -19,8 +20,6 @@ import (
 // header,http请求头多个用/n分隔,每个键值之前用=号连接
 func (c *Client) Request(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, status int, err error) {
 	method = strings.ToUpper(method)
-	// start := time.Now()
-	// c.printRequest(method, url, params, charset)
 	req, err := http.NewRequest(method, url, encoding.GetEncodeReader([]byte(params), charset))
 	if err != nil {
 		return
@@ -47,13 +46,21 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	if err != nil {
 		return nil, 0, fmt.Errorf("client.Do err:%v", err)
 	}
-	body, err := ioutil.ReadAll(response.Body)
+
+	rawBody := response.Body
+	if response.Header.Get("Content-Encoding") == "gzip" {
+		rawBody, err = gzip.NewReader(response.Body)
+		if err != nil {
+			err = fmt.Errorf("http resp unzip is failed,err: %w", err)
+			return nil, status, err
+		}
+	}
+
+	body, err := ioutil.ReadAll(rawBody)
 	if err != nil {
-		// c.printResponseError(method, url, response.Status, time.Now().Sub(start), err)
 		return nil, 0, fmt.Errorf("body ReadAll err:%v", err)
 	}
 
-	// c.printResponse(method, url, response.Status, time.Now().Sub(start), string(body))
 	status = response.StatusCode
 	ct, err := encoding.DecodeBytes(body, charset)
 	if err != nil {
