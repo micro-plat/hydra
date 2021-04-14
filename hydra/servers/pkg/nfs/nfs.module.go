@@ -8,20 +8,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/lib4go/errs"
 )
 
 //module 协调本地文件、本地指纹、远程指纹等处理
 type module struct {
+	c        *nfs.NFS
 	local    *local
 	remoting *remoting
 	async    *async
 	once     sync.Once
 }
 
-func newModule(path string) (m *module) {
+func newModule(c *nfs.NFS) (m *module) {
 	m = &module{
-		local:    newLocal(path),
+		local:    newLocal(c.Local),
 		remoting: newRemoting(),
 	}
 	m.async = newAsync(m.local, m.remoting)
@@ -29,9 +31,9 @@ func newModule(path string) (m *module) {
 }
 
 //Update 更新环境配置
-func (m *module) Update(path string, hosts []string, masterHost string, currentAddr string, isMaster bool) {
+func (m *module) Update(hosts []string, masterHost string, currentAddr string, isMaster bool) {
 	m.remoting.Update(hosts, masterHost, currentAddr, isMaster)
-	m.local.Update(path, currentAddr)
+	m.local.Update(currentAddr)
 	if isMaster {
 		m.async.DoQuery()
 	}

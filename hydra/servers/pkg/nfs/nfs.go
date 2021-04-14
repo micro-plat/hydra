@@ -24,7 +24,7 @@ type cnfs struct {
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c.Local)}
+	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c)}
 }
 func (c *cnfs) Start() error {
 	if c.isStarted {
@@ -52,7 +52,7 @@ func (c *cnfs) watch() {
 				continue
 			}
 			start(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
-			c.module.Update(c.c.Local, hosts, masterHost, currentAddr, isMaster)
+			c.module.Update(hosts, masterHost, currentAddr, isMaster)
 
 		case <-c.closch:
 			c.watcher.Close()
@@ -110,7 +110,7 @@ func init() {
 			nfsCaches.Set(c.GetServerConf().GetServerType(), cnfs)
 
 			//注册服务
-			registry(c.GetServerConf().GetServerType(), cnfs)
+			registry(c.GetServerConf().GetServerType(), cnfs, n)
 			return nil
 		})
 
@@ -152,12 +152,17 @@ func closeNFS(tp string) error {
 	return nil
 
 }
-func registry(tp string, cnfs *cnfs) {
+func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 	registryOnce.Do(func() {
 		if tp == global.API {
 			//注册服务
-			services.Def.API(SVSDonwload, cnfs.Download)
-			services.Def.API(SVSUpload, cnfs.Upload)
+			if cnf.DiableUpload {
+				services.Def.API(SVSUpload, cnfs.Upload)
+			}
+
+			if cnf.AllowDownload {
+				services.Def.API(SVSDonwload, cnfs.Download)
+			}
 
 			//内部服务
 			services.Def.API(rmt_fp_get, cnfs.GetFP)
@@ -167,8 +172,14 @@ func registry(tp string, cnfs *cnfs) {
 		}
 
 		if tp == global.Web {
-			services.Def.Web(SVSDonwload, cnfs.Download)
-			services.Def.Web(SVSUpload, cnfs.Upload)
+
+			if cnf.DiableUpload {
+				services.Def.Web(SVSUpload, cnfs.Upload)
+			}
+
+			if cnf.AllowDownload {
+				services.Def.Web(SVSDonwload, cnfs.Download)
+			}
 
 			//内部服务
 			services.Def.Web(rmt_fp_get, cnfs.GetFP)

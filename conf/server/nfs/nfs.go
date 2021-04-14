@@ -14,9 +14,11 @@ const TypeNodeName = "nfs"
 //NFS 网络文件系统配置
 type NFS struct {
 	security.ConfEncrypt
-	Local   string `json:"local,omitempty" toml:"local,omitempty"`
-	Host    string `json:"host,omitempty" toml:"host,omitempty"`
-	Disable bool   `json:"disable,omitempty" toml:"disable,omitempty"`
+	Local         string `json:"local,omitempty" toml:"local,omitempty"`
+	Domain        string `json:"domain,omitempty" toml:"domain,omitempty"`
+	AllowDownload bool   `json:"allowDownload,omitempty" toml:"allowDownload,omitempty"`
+	DiableUpload  bool   `json:"diableUpload,omitempty" toml:"diableUpload,omitempty"`
+	Disable       bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //New 构建mqc NFS配置，默认为对等模式

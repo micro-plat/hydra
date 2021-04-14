@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/errs"
@@ -111,7 +112,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	// 处理返回结果
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	return map[string]interface{}{
-		"name": fp.Path,
+		"name": fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/")),
 	}
 }
 

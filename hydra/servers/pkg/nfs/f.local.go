@@ -31,11 +31,10 @@ func newLocal(path string) *local {
 }
 
 //Update 更新配置数据
-func (l *local) Update(path string, currentAddr string) {
-	needCheck := l.path != path || l.currentAddr != currentAddr
-	l.path = path
+func (l *local) Update(currentAddr string) {
+	needCheck := l.currentAddr != currentAddr
 	l.currentAddr = currentAddr
-	l.fpPath = filepath.Join(path, ".fp")
+	l.fpPath = filepath.Join(l.path, ".fp")
 	if needCheck {
 		l.check()
 	}

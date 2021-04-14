@@ -1,14 +1,19 @@
 package nfs
 
-import "time"
+import (
+	"time"
+
+	"github.com/micro-plat/lib4go/concurrent/cmap"
+)
 
 //async 异步处理任务
 type async struct {
 	remoting       *remoting
 	local          *local
-	reportChan     chan eFileFPLists
+	reportChan     chan struct{}
 	downloadChan   chan *eFileFP
 	queryChan      chan struct{}
+	reportList     cmap.ConcurrentMap
 	reportExit     bool
 	downloadExit   bool
 	maxGocoroutine int
@@ -18,10 +23,11 @@ func newAsync(l *local, r *remoting) *async {
 	m := &async{
 		remoting:       r,
 		local:          l,
-		reportChan:     make(chan eFileFPLists, 10000),
+		reportChan:     make(chan struct{}),
 		downloadChan:   make(chan *eFileFP, 10000),
 		queryChan:      make(chan struct{}, 1),
 		maxGocoroutine: 10,
+		reportList:     cmap.New(6),
 	}
 	go m.loopReport()
 	go m.loopQuery()
@@ -36,7 +42,15 @@ func (m *async) DoReport(f eFileFPLists) {
 	if len(f) == 0 {
 		return
 	}
-	m.reportChan <- f
+	for k, v := range f {
+		mv, ok := m.reportList.Get(k)
+		if ok {
+			nv := mv.(*eFileFP).MergeHosts(v.Hosts...)
+			m.reportList.Set(k, nv)
+			continue
+		}
+		m.reportList.Set(k, v)
+	}
 }
 
 //DoQuery 执行远程服务查询
@@ -52,15 +66,21 @@ func (m *async) DoDownload(f *eFileFP) {
 	m.downloadChan <- f
 }
 
-//loopReport 循环处理上报
 func (m *async) loopReport() {
+	tk := time.Tick(time.Millisecond * 500)
 	for {
 		select {
-		case f, ok := <-m.reportChan:
-			if !ok {
-				return
+		case <-m.reportChan:
+			return
+		case <-tk:
+			list := m.reportList.PopAll()
+			nlist := make(eFileFPLists)
+			for k, v := range list {
+				nlist[k] = v.(*eFileFP)
 			}
-			m.remoting.Report(f)
+			if len(nlist) > 0 {
+				m.remoting.Report(nlist)
+			}
 		}
 	}
 }
