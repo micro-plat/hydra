@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -16,17 +17,21 @@ type local struct {
 	currentAddr string
 	FPS         cmap.ConcurrentMap
 	once        sync.Once
+	fsWatcher   *fsnotify.Watcher
 	readyChan   chan struct{}
+	done        bool
 }
 
 //newLocal 构建本地处理服务
 func newLocal(path string) *local {
+
 	l := &local{
+		FPS:       cmap.New(8),
 		path:      path,
 		fpPath:    filepath.Join(path, ".fp"),
 		readyChan: make(chan struct{}),
-		FPS:       cmap.New(8),
 	}
+
 	return l
 }
 
@@ -72,13 +77,18 @@ func (l *local) Open(name string) (fs.File, error) {
 
 //Close 将缓存数据写入本地文件
 func (l *local) Close() error {
-	l.FPS = nil
+	l.done = true
+	l.once.Do(func() {
+		l.fsWatcher.Close()
+		l.FPS.Clear()
+	})
 	return nil
 }
 
 //check 处理本地文件与指纹不一致，以文件为准
 func (l *local) check() error {
 	defer close(l.readyChan)
+
 	//读取本地指纹
 	fps, err := l.FPRead()
 	if err != nil {
@@ -98,11 +108,10 @@ func (l *local) check() error {
 			l.FPS.Set(path, v)
 			continue
 		}
-		buff, err := l.FRead(path)
-		if err != nil {
-			return err
+		fp := &eFileFP{
+			Path:  path,
+			Hosts: []string{l.currentAddr},
 		}
-		fp := &eFileFP{Path: path, CRC64: getCRC64(buff), Hosts: []string{l.currentAddr}}
 		l.FPS.Set(path, fp)
 	}
 	//更新数据

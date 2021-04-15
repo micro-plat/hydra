@@ -91,6 +91,9 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	}
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
+		if err := services.Def.DoSetup(c); err != nil {
+			return false, err
+		}
 		server, err := w.getServer(c)
 		if err != nil {
 			return false, err

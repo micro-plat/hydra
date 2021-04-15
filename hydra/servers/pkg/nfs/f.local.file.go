@@ -16,7 +16,10 @@ func (l *local) SaveFile(name string, buff []byte, hosts ...string) (f *eFileFP,
 	}
 
 	//生成crc64并
-	fp := &eFileFP{Path: name, CRC64: getCRC64(buff)}
+	fp := &eFileFP{
+		Path: name,
+		// CRC64: getCRC64(buff),
+	}
 	fp.MergeHosts(hosts...)
 	fp.MergeHosts(l.currentAddr)
 	l.FPS.Set(name, fp)
@@ -89,7 +92,7 @@ func (l *local) FList(path string) ([]string, error) {
 	return list, nil
 }
 
-var exclude = []string{"."}
+var exclude = []string{".", "~"}
 
 func (l *local) exclude(f string) bool {
 	for _, ex := range exclude {
@@ -97,5 +100,29 @@ func (l *local) exclude(f string) bool {
 			return true
 		}
 	}
+	// if strings.HasPrefix(f, filepath.Join(l.path, time.Now().Format("20060102"))) {
+	// 	return true
+	// }
 	return false
+}
+func (l *local) FindChange() bool {
+	//获取本地文件列表
+	change := false
+	lst, err := l.FList(l.path)
+	if err != nil {
+		return false
+	}
+
+	//处理不一致数据
+	for _, path := range lst {
+		if ok := l.FPS.Has(path); !ok {
+			fp := &eFileFP{
+				Path:  path,
+				Hosts: []string{l.currentAddr},
+			}
+			l.FPS.Set(path, fp)
+			change = true
+		}
+	}
+	return change
 }

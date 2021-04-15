@@ -77,6 +77,11 @@ func (s *ORouter) Add(path string, service string, action []string, opts ...inte
 	return nil
 }
 
+//Remove 移除路由
+func (s *ORouter) Remove(path string) {
+	delete(s.pathRouters, path)
+}
+
 //BuildRouters 根据前缀处理路由数据
 func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 	s.routers = router.NewRouters()

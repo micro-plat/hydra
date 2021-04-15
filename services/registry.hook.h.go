@@ -77,3 +77,9 @@ func (s *handleHook) GetHandleds(service string) (h []context.IHandler) {
 func (s *handleHook) GetClosingHandlers() []func() error {
 	return s.closings
 }
+
+//Remove 移除某个服务的钩子函数
+func (s *handleHook) Remove(service string) {
+	delete(s.handlings, service)
+	delete(s.handleds, service)
+}

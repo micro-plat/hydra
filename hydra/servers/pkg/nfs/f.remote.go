@@ -36,7 +36,7 @@ func (r *remoting) GetFP(name string) (v *eFileFP, err error) {
 	input := types.XMap{"name": name}
 
 	//发送远程请求
-	log := start(rmt_fp_get, name, r.masterHost)
+	log := trace(rmt_fp_get, name, r.masterHost)
 	rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", r.masterHost, rmt_fp_get), input.ToKV(), "utf-8", http.Header{
 		context.XRequestID: []string{log.log.GetSessionID()},
 		"Accept-Encoding":  []string{"gzip"},
@@ -76,7 +76,7 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 	//向集群发起请求
 	var status int
 	for _, host := range host {
-		log := start(rmt_file_download, v.Path, "from", host)
+		log := trace(rmt_file_download, v.Path, "from", host)
 		rpns, status, err = hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_file_download), input.ToKV(), "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
 			"Accept-Encoding":  []string{"gzip"},
@@ -94,11 +94,11 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 			continue
 		}
 
-		//检查校验位是否一致
-		if getCRC64(rpns) != v.CRC64 {
-			log.end(rmt_file_download, v.Path, "from", host, status, "crc不一致")
-			continue
-		}
+		// //检查校验位是否一致
+		// if getCRC64(rpns) != v.CRC64 {
+		// 	log.end(rmt_file_download, v.Path, "from", host, status, "crc不一致")
+		// 	continue
+		// }
 
 		//数据正确
 		log.end(rmt_file_download, v.Path, "from", host, status)
@@ -112,7 +112,7 @@ func (r *remoting) Report(tps eFileFPLists) error {
 	//向集群发起请求
 	rps := tps.GetAlives(r.getRHosts())
 	for host, list := range rps {
-		log := start(rmt_fp_notify, host)
+		log := trace(rmt_fp_notify, host)
 		_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
 			fmt.Sprintf("http://%s%s", host, rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
 				"Content-Type":     []string{"application/json"},
@@ -135,7 +135,7 @@ func (r *remoting) Query() (eFileFPLists, error) {
 	for _, host := range r.getQHosts() {
 
 		//查询远程服务
-		log := start(rmt_fp_query, "from", host)
+		log := trace(rmt_fp_query, "from", host)
 		rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_fp_query), "", "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
 			"Accept-Encoding":  []string{"gzip"},

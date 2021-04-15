@@ -3,7 +3,21 @@ package nfs
 //Option 配置选项
 type Option func(*NFS)
 
-//WithDisableUpload 允许下载文件
+//WithRename 重命名文件名称
+func WithRename() Option {
+	return func(a *NFS) {
+		a.Rename = true
+	}
+}
+
+//WithWatch 启动文件夹监控
+func WithWatch() Option {
+	return func(a *NFS) {
+		a.Watch = true
+	}
+}
+
+//WithDisableUpload 禁用上传文件
 func WithDisableUpload() Option {
 	return func(a *NFS) {
 		a.DiableUpload = true

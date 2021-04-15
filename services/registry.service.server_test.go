@@ -15,6 +15,7 @@ func Test_serverServices_handleExt(t *testing.T) {
 	tests := []struct {
 		name    string
 		f       func(u *Unit, ext ...interface{}) error
+		r       func(path string)
 		g       *Unit
 		ext     []interface{}
 		wantErr bool
@@ -24,7 +25,7 @@ func Test_serverServices_handleExt(t *testing.T) {
 		{name: "2. extHandle报错", f: func(u *Unit, ext ...interface{}) error { return fmt.Errorf("错误") }, g: &Unit{}, wantErr: true, errStr: "错误"},
 	}
 	for _, tt := range tests {
-		err := newServerServices(tt.f).handleExt(tt.g, tt.ext...)
+		err := newServerServices(tt.f, tt.r).handleExt(tt.g, tt.ext...)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
@@ -39,6 +40,7 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 		h           interface{}
 		ext         []interface{}
 		f           func(g *Unit, ext ...interface{}) error
+		r           func(path string)
 		wantErr     bool
 		errStr      string
 		wantService []string
@@ -51,7 +53,7 @@ func Test_serverServices_Register_WithPanic(t *testing.T) {
 	for _, tt := range tests {
 		assert.Panics(t, func() {
 			//errors.New(tt.errStr),
-			s := newServerServices(tt.f)
+			s := newServerServices(tt.f, tt.r)
 			s.Register("", tt.pName, tt.h, tt.ext...)
 		}, tt.name)
 	}
@@ -85,6 +87,7 @@ func Test_serverServices_Register(t *testing.T) {
 		h           interface{}
 		ext         []interface{}
 		f           func(g *Unit, ext ...interface{}) error
+		r           func(path string)
 		wantService []string
 	}{
 		{name: "1.1.api注册对象为结构体指针", pName: "/api/path1", h: &testHandler{}, f: func(g *Unit, ext ...interface{}) error { return API.Add(g.Path, g.Service, g.Actions, ext...) }, wantService: []string{"/api/path1/$get", "/api/path1/$post", "/api/path1/order"}},
@@ -120,7 +123,7 @@ func Test_serverServices_Register(t *testing.T) {
 
 	for _, tt := range tests {
 
-		s := newServerServices(tt.f)
+		s := newServerServices(tt.f, tt.r)
 		s.Register("", tt.pName, tt.h, tt.ext...)
 		g, _ := reflectHandle(tt.pName, tt.h)
 

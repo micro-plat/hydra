@@ -16,6 +16,8 @@ type NFS struct {
 	security.ConfEncrypt
 	Local         string `json:"local,omitempty" toml:"local,omitempty"`
 	Domain        string `json:"domain,omitempty" toml:"domain,omitempty"`
+	Rename        bool   `json:"rename,omitempty" toml:"rename,omitempty"`
+	Watch         bool   `json:"watch,omitempty" toml:"watch,omitempty"`
 	AllowDownload bool   `json:"allowDownload,omitempty" toml:"allowDownload,omitempty"`
 	DiableUpload  bool   `json:"diableUpload,omitempty" toml:"diableUpload,omitempty"`
 	Disable       bool   `json:"disable,omitempty" toml:"disable,omitempty"`

@@ -17,7 +17,7 @@ type log struct {
 	log   *logger.Logger
 }
 
-func start(input ...interface{}) log {
+func trace(input ...interface{}) log {
 	l := log{
 		start: time.Now(),
 		log:   logger.New("nfs"),

@@ -41,18 +41,18 @@ func Test_regist_RegisterServer(t *testing.T) {
 	tests := []struct {
 		name string
 		tp   string
-		f    []func(g *Unit, ext ...interface{}) error
+		f    func(g *Unit, ext ...interface{}) error
 	}{
 		{name: "1.注册file服务类型", tp: "file", f: nil},
-		{name: "2.注册socket服务类型", tp: "socket", f: []func(g *Unit, ext ...interface{}) error{f}},
+		{name: "2.注册socket服务类型", tp: "socket", f: f},
 	}
 	s := Def
 	for _, tt := range tests {
-		s.RegisterServer(tt.tp, tt.f...)
+		s.RegisterServer(tt.tp, tt.f, nil)
 	}
 
 	//注册已经存在的服务类型
-	assert.Panics(t, func() { s.RegisterServer(global.API) }, "注册已经存在的服务类型")
+	assert.Panics(t, func() { s.RegisterServer(global.API, nil, nil) }, "注册已经存在的服务类型")
 }
 
 func Test_regist_OnStarting(t *testing.T) {

@@ -28,8 +28,8 @@ func (e eFileFPLists) GetAlives(allAliveHosts []string) map[string]eFileFPLists 
 
 //eRomotingFileFP 远程文件清单
 type eFileFP struct {
-	Path  string   `json:"path,omitempty" valid:"required" `
-	CRC64 uint64   `json:"crc64,omitempty" valid:"required" `
+	Path string `json:"path,omitempty" valid:"required" `
+	// CRC64 uint64   `json:"crc64,omitempty" valid:"required" `
 	Hosts []string `json:"hosts,omitempty" valid:"required" `
 }
 

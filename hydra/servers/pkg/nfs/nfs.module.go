@@ -8,25 +8,33 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/utility"
 )
 
 //module 协调本地文件、本地指纹、远程指纹等处理
 type module struct {
-	c        *nfs.NFS
-	local    *local
-	remoting *remoting
-	async    *async
-	once     sync.Once
+	c         *nfs.NFS
+	local     *local
+	remoting  *remoting
+	async     *async
+	once      sync.Once
+	fsWatcher *fsnotify.Watcher
+	checkChan chan struct{}
+	done      bool
 }
 
 func newModule(c *nfs.NFS) (m *module) {
 	m = &module{
-		local:    newLocal(c.Local),
-		remoting: newRemoting(),
+		c:         c,
+		local:     newLocal(c.Local),
+		remoting:  newRemoting(),
+		checkChan: make(chan struct{}, 1),
 	}
 	m.async = newAsync(m.local, m.remoting)
+	go m.watch()
 	return m
 }
 
@@ -89,7 +97,7 @@ func (m *module) HasFile(name string) error {
 //3. 通知master我也有这个文件了,如果是master则告诉所有人我也有此文件了
 func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 	//检查文件是否存在
-	name = getFileName(name)
+	name = getFileName(name, m.c.Rename)
 	if m.local.Has(name) {
 		return nil, fmt.Errorf("文件名称重复:%s", name)
 	}
@@ -143,9 +151,14 @@ func (m *module) RecvNotify(f eFileFPLists) error {
 
 //Close 关闭服务
 func (m *module) Close() error {
+	m.done = true
 	m.once.Do(func() {
+		close(m.checkChan)
 		m.local.Close()
 		m.async.Close()
+		if m.fsWatcher != nil {
+			m.fsWatcher.Close()
+		}
 	})
 	return nil
 }
@@ -154,6 +167,20 @@ func getCRC64(buff []byte) uint64 {
 	return crc64.Checksum(buff, crc64.MakeTable(crc64.ISO))
 }
 
-func getFileName(name string) string {
-	return filepath.Join(time.Now().Format("20060102"), name)
+func getFileName(name string, rename bool) string {
+	if !rename {
+		return filepath.Join(time.Now().Format("20060102"), name)
+	}
+	ext := filepath.Ext(name)
+	return filepath.Join(time.Now().Format("20060102"), fmt.Sprintf("%d%s", fnv32(utility.GetGUID()), ext))
+
+}
+func fnv32(key string) uint32 {
+	hash := uint32(2166136261)
+	const prime32 = uint32(16777619)
+	for i := 0; i < len(key); i++ {
+		hash *= prime32
+		hash ^= uint32(key[i])
+	}
+	return hash
 }

@@ -51,7 +51,7 @@ func (c *cnfs) watch() {
 			if err != nil {
 				continue
 			}
-			start(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
+			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
 			c.module.Update(hosts, masterHost, currentAddr, isMaster)
 
 		case <-c.closch:
@@ -96,6 +96,8 @@ func init() {
 	global.OnReady(func() {
 		//处理服务初始化
 		services.Def.OnSetup(func(c app.IAPPConf) error {
+			//取消服务注册
+			unRegistry(c.GetServerConf().GetServerType())
 			closeNFS(c.GetServerConf().GetServerType())
 			n, err := c.GetNFSConf()
 			if err != nil {
@@ -119,17 +121,11 @@ func init() {
 			return startNFS(c.GetServerConf().GetServerType())
 		})
 
-		//处理服务关闭
-		services.Def.OnClosing(func(c app.IAPPConf) error {
-			return closeNFS(c.GetServerConf().GetServerType())
-		})
-
 	})
 
 }
 
 var nfsCaches cmap.ConcurrentMap = cmap.New(2)
-var registryOnce sync.Once
 
 func startNFS(tp string) error {
 	v, ok := nfsCaches.Get(tp)
@@ -152,41 +148,51 @@ func closeNFS(tp string) error {
 	return nil
 
 }
+func unRegistry(tp string) {
+	if tp == global.API || tp == global.Web {
+		//注册服务
+		services.Def.Remove(SVSUpload, tp)
+		services.Def.Remove(SVSDonwload, tp)
+
+		//内部服务
+		services.Def.Remove(rmt_fp_get, tp)
+		services.Def.Remove(rmt_fp_notify, tp)
+		services.Def.Remove(rmt_fp_query, tp)
+		services.Def.Remove(rmt_file_download, tp)
+	}
+}
 func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
-	registryOnce.Do(func() {
-		if tp == global.API {
-			//注册服务
-			if cnf.DiableUpload {
-				services.Def.API(SVSUpload, cnfs.Upload)
-			}
-
-			if cnf.AllowDownload {
-				services.Def.API(SVSDonwload, cnfs.Download)
-			}
-
-			//内部服务
-			services.Def.API(rmt_fp_get, cnfs.GetFP)
-			services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
-			services.Def.API(rmt_fp_query, cnfs.Query)
-			services.Def.API(rmt_file_download, cnfs.GetFile)
+	if tp == global.API {
+		//注册服务
+		if !cnf.DiableUpload {
+			services.Def.API(SVSUpload, cnfs.Upload)
 		}
 
-		if tp == global.Web {
-
-			if cnf.DiableUpload {
-				services.Def.Web(SVSUpload, cnfs.Upload)
-			}
-
-			if cnf.AllowDownload {
-				services.Def.Web(SVSDonwload, cnfs.Download)
-			}
-
-			//内部服务
-			services.Def.Web(rmt_fp_get, cnfs.GetFP)
-			services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
-			services.Def.Web(rmt_fp_query, cnfs.Query)
-			services.Def.Web(rmt_file_download, cnfs.GetFile)
+		if cnf.AllowDownload {
+			services.Def.API(SVSDonwload, cnfs.Download)
 		}
-	})
 
+		//内部服务
+		services.Def.API(rmt_fp_get, cnfs.GetFP)
+		services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
+		services.Def.API(rmt_fp_query, cnfs.Query)
+		services.Def.API(rmt_file_download, cnfs.GetFile)
+	}
+
+	if tp == global.Web {
+
+		if !cnf.DiableUpload {
+			services.Def.Web(SVSUpload, cnfs.Upload)
+		}
+
+		if cnf.AllowDownload {
+			services.Def.Web(SVSDonwload, cnfs.Download)
+		}
+
+		//内部服务
+		services.Def.Web(rmt_fp_get, cnfs.GetFP)
+		services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
+		services.Def.Web(rmt_fp_query, cnfs.Query)
+		services.Def.Web(rmt_file_download, cnfs.GetFile)
+	}
 }

@@ -2,8 +2,10 @@ package pkgs
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -67,6 +69,13 @@ func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 		r.data["__body__"] = v
 	case string:
 		//转换数据
+		if strings.EqualFold(r.header.GetString("Content-Encoding"), "gzip") { //处理gzip压缩
+			if rawBody, err := gzip.NewReader(bytes.NewBufferString(v)); err == nil {
+				if x, err := ioutil.ReadAll(rawBody); err != nil {
+					v = types.BytesToString(x)
+				}
+			}
+		}
 		r.data, r.err = r.getMap(fmt.Sprint(r.header["Content-Type"]), types.StringToBytes(v))
 	case map[string]interface{}:
 		r.data = v

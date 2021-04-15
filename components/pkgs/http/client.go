@@ -48,7 +48,7 @@ func (c *Client) Request(method string, url string, params string, charset strin
 	}
 
 	rawBody := response.Body
-	if response.Header.Get("Content-Encoding") == "gzip" {
+	if strings.EqualFold(response.Header.Get("Content-Encoding"), "gzip") {
 		rawBody, err = gzip.NewReader(response.Body)
 		if err != nil {
 			err = fmt.Errorf("http resp unzip is failed,err: %w", err)

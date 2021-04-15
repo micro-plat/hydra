@@ -1,19 +1,31 @@
 package services
 
+import "strings"
+
 type serverServices struct {
-	extHandle func(u *Unit, ext ...interface{}) error
+	unitGroups []*UnitGroup
+	extHandle  func(u *Unit, ext ...interface{}) error
+	extRemove  func(path string)
 	*metaServices
 	*handleHook
 	*serverHook
 }
 
-func newServerServices(v func(u *Unit, ext ...interface{}) error) *serverServices {
-	return &serverServices{
+func newServerServices(v func(u *Unit, ext ...interface{}) error, remove func(path string)) *serverServices {
+
+	s := &serverServices{
+		unitGroups:   make([]*UnitGroup, 0, 1),
 		handleHook:   newHandleHook(),
 		metaServices: newService(),
 		serverHook:   newServerHook(),
 		extHandle:    v,
+		extRemove:    remove,
 	}
+	if s.extHandle == nil {
+		s.extHandle = func(u *Unit, ext ...interface{}) error { return nil }
+		s.extRemove = func(path string) { return }
+	}
+	return s
 }
 
 //Register 注册服务
@@ -33,8 +45,22 @@ func (s *serverServices) handleExt(u *Unit, ext ...interface{}) error {
 	return s.extHandle(u, ext...)
 }
 
+//Remove 移除已注册的服务
+func (s *serverServices) Remove(path string) {
+	for _, g := range s.unitGroups {
+		if strings.EqualFold(g.Path, path) {
+			for _, u := range g.Services {
+				s.handleHook.Remove(u.Service)
+				s.metaServices.Remove(u.Service)
+			}
+			s.extRemove(path)
+		}
+	}
+}
+
 //addGroup 添加服务注册
 func (s *serverServices) addGroup(g *UnitGroup, group string, ext ...interface{}) error {
+	s.unitGroups = append(s.unitGroups, g)
 	for _, u := range g.Services {
 
 		//添加预处理函数

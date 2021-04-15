@@ -22,7 +22,7 @@ const (
 )
 
 type UnitGroup struct {
-	Path     string
+	Path     string //原始注册服务路径
 	Handling context.IHandler
 	Handled  context.IHandler
 	Closing  interface{}

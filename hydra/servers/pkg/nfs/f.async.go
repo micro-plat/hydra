@@ -14,6 +14,7 @@ type async struct {
 	downloadChan   chan *eFileFP
 	queryChan      chan struct{}
 	reportList     cmap.ConcurrentMap
+	done           bool
 	reportExit     bool
 	downloadExit   bool
 	maxGocoroutine int
@@ -39,7 +40,7 @@ func newAsync(l *local, r *remoting) *async {
 
 //DoReport 上报指纹信息
 func (m *async) DoReport(f eFileFPLists) {
-	if len(f) == 0 {
+	if len(f) == 0 || m.done {
 		return
 	}
 	for k, v := range f {
@@ -55,6 +56,9 @@ func (m *async) DoReport(f eFileFPLists) {
 
 //DoQuery 执行远程服务查询
 func (m *async) DoQuery() {
+	if m.done {
+		return
+	}
 	select {
 	case m.queryChan <- struct{}{}:
 	default:
@@ -63,6 +67,9 @@ func (m *async) DoQuery() {
 
 //DoDownload 下载文件
 func (m *async) DoDownload(f *eFileFP) {
+	if m.done {
+		return
+	}
 	m.downloadChan <- f
 }
 
@@ -145,6 +152,7 @@ func (m *async) loopDownload() {
 
 //Close 关闭任务
 func (m *async) Close() error {
+	m.done = true
 	close(m.reportChan)
 	close(m.downloadChan)
 	close(m.queryChan)
