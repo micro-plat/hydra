@@ -110,13 +110,13 @@ func (b *httpBuilder) Render(script string) *httpBuilder {
 	return b
 }
 
-//Processor 构建APM配置
+//Processor 构建Processor配置
 func (b *httpBuilder) Processor(opts ...processor.Option) *httpBuilder {
 	b.BaseBuilder[processor.TypeNodeName] = processor.New(opts...)
 	return b
 }
 
-//NFS 构建NFS配置
+//NFS 网络文件系统配置
 func (b *httpBuilder) NFS(local string, opts ...nfs.Option) *httpBuilder {
 	b.BaseBuilder[nfs.TypeNodeName] = nfs.New(local, opts...)
 	return b

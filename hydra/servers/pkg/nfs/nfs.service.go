@@ -19,7 +19,7 @@ const (
 	SVSUpload = "/nfs/upload"
 
 	//SVSDonwload 用户端下载文件
-	SVSDonwload = "/nfs/download/:dir/:name"
+	SVSDonwload = "/nfs/file/:dir/:name"
 
 	fileName = "name"
 
