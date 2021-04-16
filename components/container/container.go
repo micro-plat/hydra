@@ -20,6 +20,7 @@ type ICloser interface {
 //IContainer 组件容器
 type IContainer interface {
 	GetOrCreate(typ string, name string, creator func(conf *conf.RawConf, keys ...string) (interface{}, error), keys ...string) (interface{}, error)
+	Remove(typ, name string, keys ...string) error
 	ICloser
 }
 
@@ -81,6 +82,25 @@ func (c *Container) Close() error {
 		}
 		return true
 	})
+	return nil
+}
+
+//Remove 释放组件资源
+func (c *Container) Remove(typ, name string, keys ...string) error {
+	group := fmt.Sprintf("%s_%s_%s", typ, name, strings.Join(keys, "_"))
+	keyList := c.histories.GetGroupKeys(group)
+	for _, key := range keyList {
+		v, ok := c.cache.Get(key)
+		if !ok {
+			continue
+		}
+
+		if closer, ok := v.(ICloser); ok {
+			closer.Close()
+		}
+
+		c.cache.Remove(key)
+	}
 	return nil
 }
 

@@ -49,3 +49,13 @@ func (v *histories) Remove(f func(key string) bool) {
 		}
 	}
 }
+
+//GetGroupKeys 获取一个分组下所有的历史版本key
+func (v *histories) GetGroupKeys(group string) []string {
+	his, ok := v.records[group]
+	if !ok {
+		return []string{}
+	}
+
+	return his.keys
+}
