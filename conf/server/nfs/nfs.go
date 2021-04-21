@@ -37,7 +37,8 @@ func GetConf(cnf conf.IServerConf) (*NFS, error) {
 	s := NFS{}
 	_, err := cnf.GetSubObject(TypeNodeName, &s)
 	if errors.Is(err, conf.ErrNoSetting) {
-		return nil, fmt.Errorf("/%s :%w", cnf.GetServerPath(), err)
+		s.Disable = true
+		return &s, nil
 	}
 	if err != nil {
 		return nil, err
