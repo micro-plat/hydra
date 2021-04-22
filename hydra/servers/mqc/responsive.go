@@ -130,7 +130,6 @@ func (w *Responsive) Shutdown() {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
-	return
 }
 
 //publish 将当前服务器的节点信息发布到注册中心

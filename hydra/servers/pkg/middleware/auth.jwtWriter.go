@@ -45,6 +45,5 @@ func setJwtResponse(ctx IMiddleContext, jwtAuth *xjwt.JWTAuth, data interface{})
 			ctx.Response().Header(k, v)
 		}
 	}
-	return
 
 }

@@ -58,7 +58,7 @@ func NewProcessor(routers ...*router.Router) (p *Processor) {
 
 	p.addRouter(routers...)
 
-	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
+	p.slots = make([]cmap.ConcurrentMap, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
 	}

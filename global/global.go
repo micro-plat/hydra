@@ -246,7 +246,7 @@ func GetExePath() (string, error) {
 		i = strings.LastIndex(path, "\\")
 	}
 	if i < 0 {
-		return "", errors.New(`error: Can't find "/" or "\".`)
+		return "", errors.New(`error: Can't find "/" or "\" `)
 	}
 	return string(path[0 : i+1]), nil
 }

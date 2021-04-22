@@ -12,8 +12,7 @@ func TestPathMatch_spec_Match(t *testing.T) {
 		spl  string
 	}
 	type want struct {
-		match   bool
-		pattern string
+		match bool
 	}
 
 	tests := []struct {

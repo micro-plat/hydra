@@ -1,8 +1,6 @@
 package pkgs
 
 import (
-	"fmt"
-
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/types"
@@ -68,7 +66,7 @@ var sysNameFlag = cli.StringFlag{
 var serverTypesFlag = cli.StringFlag{
 	Name:        "server-types,S",
 	Destination: &global.FlagVal.ServerTypeNames,
-	Usage:       fmt.Sprintf("-服务类型，有api,web,rpc,cron,mqc,ws。多个以“-”分割"),
+	Usage:       "-服务类型，有api,web,rpc,cron,mqc,ws。多个以“-”分割",
 }
 var clusterFlag = cli.StringFlag{
 	Name:        "cluster,c",

@@ -61,7 +61,6 @@ func TestVarqueue_MQTT(t *testing.T) {
 	type args struct {
 		name string
 		addr string
-		opts queuemqtt.Option
 	}
 	tests := []struct {
 		name   string

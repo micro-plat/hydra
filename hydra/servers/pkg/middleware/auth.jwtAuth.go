@@ -49,8 +49,6 @@ func JwtAuth() Handler {
 			return
 		}
 		ctx.Response().Abort(errs.GetCode(err, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))
-		return
-
 	}
 }
 

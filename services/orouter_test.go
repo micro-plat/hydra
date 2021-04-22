@@ -153,14 +153,14 @@ func Test_pathRouter_GetRouters(t *testing.T) {
 		}
 
 		//获取routers
-		a, err := s.GetRouters()
+		_, err := s.GetRouters()
 		assert.Equal(t, tt.wantErr, err != nil, tt.name)
 		if tt.wantErr {
 			assert.Equal(t, tt.errStr, err.Error(), tt.name)
 			continue
 		}
 		//再次获取routers
-		a, err = s.GetRouters()
+		a, err := s.GetRouters()
 		assert.Equal(t, false, err != nil, tt.name)
 		assert.Equal(t, len(routers), len(a.Routers), tt.name)
 		for _, v1 := range routers {

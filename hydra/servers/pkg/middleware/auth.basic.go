@@ -45,7 +45,6 @@ func BasicAuthForRealm() Handler {
 
 		ctx.Response().Header("WWW-Authenticate", basic.GetRealm())
 		ctx.Response().Abort(http.StatusUnauthorized, errors.New("未提供验证信息"))
-		return
 
 	}
 }

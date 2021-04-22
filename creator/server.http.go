@@ -33,7 +33,6 @@ func newHTTP(tp string, address string, opts ...api.Option) *httpBuilder {
 
 //Load 加载路由
 func (b *httpBuilder) Load() {
-	return
 }
 
 //Jwt jwt配置

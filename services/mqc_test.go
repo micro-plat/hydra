@@ -170,7 +170,7 @@ func Test_mqc_Remove(t *testing.T) {
 	assert.Equal(t, nonExist+addQueuesLen, len(queues), "队列长度")
 
 	for _, v := range queues {
-		index := strings.TrimLeft(v.Queue, "queue")
+		index := strings.TrimPrefix(v.Queue, "queue")
 		if _, ok := all[index]; ok {
 			assert.Equal(t, true, v.Disable, "队列状态1")
 			assert.Equal(t, 0, v.Concurrency, "队列并发1")

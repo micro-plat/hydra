@@ -4,14 +4,12 @@ import (
 	"testing"
 
 	"github.com/micro-plat/hydra/conf/server/rpc"
-	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/assert"
 )
 
 func Test_newRPC(t *testing.T) {
 	type args struct {
 		address string
-		f       func(string) *services.ORouter
 		opts    []rpc.Option
 	}
 	tests := []struct {

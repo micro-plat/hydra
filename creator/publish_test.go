@@ -73,13 +73,13 @@ func Test_conf_Pub(t *testing.T) {
 		if tt.isExsit {
 			c.data = tt.fields.olddata
 			c.vars = tt.fields.oldvars
-			err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, true)
+			err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, true, nil)
 			assert.Equal(t, false, err != nil, tt.name+",err")
 		}
 
 		c.data = tt.fields.data
 		c.vars = tt.fields.vars
-		err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, tt.args.cover)
+		err := c.Pub(tt.args.platName, tt.args.systemName, tt.args.clusterName, tt.args.registryAddr, tt.args.cover, nil)
 		assert.Equal(t, tt.wantErr, err != nil, tt.name+",err1")
 
 		rgt, err := registry.GetRegistry("lm://.", global.Def.Log())
@@ -168,7 +168,7 @@ func Test_conf_Pub1(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true)
+		err := Conf.Pub("platname3", "systemname3", "clustername3", tt.regstType, true, nil)
 		assert.Equal(t, tt.wantErr, err == nil, "发布异常:"+tt.name)
 		r, err := registry.GetRegistry(tt.regstType, global.Def.Log())
 		assert.Equal(t, true, err == nil, "获取注册中心异常1", err)

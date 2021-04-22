@@ -54,6 +54,5 @@ func Static() Handler {
 			ctx.Response().Header("Content-Encoding", "gzip")
 		}
 		ctx.Response().File(p, fs)
-		return
 	}
 }

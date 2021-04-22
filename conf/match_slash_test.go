@@ -20,8 +20,7 @@ func TestPathMatch_slash_Match(t *testing.T) {
 		spl  string
 	}
 	type want struct {
-		match   bool
-		pattern string
+		match bool
 	}
 
 	tests := []struct {

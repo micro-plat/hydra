@@ -53,7 +53,6 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 
 		//发布子配置
 		for name, value := range subs.Map() {
-			fmt.Println("name:", name)
 			path := pub.GetSubConfPath(name)
 			if name == ServerMainNodeName {
 				continue

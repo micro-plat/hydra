@@ -38,16 +38,13 @@ func (c *wsHandler) writePump() {
 			}
 			if err := w.Close(); err != nil {
 				c.close()
-				break
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				c.close()
-				break
 			}
 		case <-c.closeChan:
-			break
 		}
 	}
 }

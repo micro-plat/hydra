@@ -59,6 +59,5 @@ func RASAuth() Handler {
 		}
 
 		ctx.Request().GetMap().MergeMap(respones.GetMap())
-		return
 	}
 }

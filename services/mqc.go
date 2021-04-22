@@ -34,7 +34,7 @@ func newMQC() *mqc {
 	c := &mqc{
 		dynamicQueues: queue.NewEmptyQueues(),
 		staticQueues:  queue.NewEmptyQueues(),
-		subscribers:   make([]*mqcSubscriber, 0, 0),
+		subscribers:   make([]*mqcSubscriber, 0),
 		signalChan:    make(chan struct{}, 100),
 	}
 	go c.notify()

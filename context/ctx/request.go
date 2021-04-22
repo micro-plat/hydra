@@ -15,7 +15,6 @@ import (
 
 type request struct {
 	ctx     context.IInnerContext
-	appConf app.IAPPConf
 	cookies types.XMap
 	headers types.XMap
 	types.XMap

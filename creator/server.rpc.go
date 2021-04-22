@@ -21,5 +21,4 @@ func newRPC(address string, opts ...rpc.Option) *rpcBuilder {
 
 //Load 加载路由
 func (b *rpcBuilder) Load() {
-	return
 }

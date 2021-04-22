@@ -19,7 +19,7 @@ func init() {
 		return cli.Command{
 			Name:   "install",
 			Usage:  "安装服务，以服务方式安装到本地系统",
-			Flags:  getFlags(),
+			Flags:  flags,
 			Action: doInstall,
 		}
 	})

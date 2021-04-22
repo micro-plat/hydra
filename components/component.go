@@ -1,8 +1,6 @@
 package components
 
 import (
-	//"fmt"
-
 	"fmt"
 
 	"github.com/micro-plat/hydra/components/caches"

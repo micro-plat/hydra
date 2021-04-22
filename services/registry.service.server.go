@@ -23,7 +23,7 @@ func newServerServices(v func(u *Unit, ext ...interface{}) error, remove func(pa
 	}
 	if s.extHandle == nil {
 		s.extHandle = func(u *Unit, ext ...interface{}) error { return nil }
-		s.extRemove = func(path string) { return }
+		s.extRemove = func(path string) {}
 	}
 	return s
 }

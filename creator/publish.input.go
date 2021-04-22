@@ -123,7 +123,7 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
 		return check("")
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
-		return check(strings.TrimLeft(svalue, vc.ByInstall))
+		return check(strings.TrimPrefix(svalue, vc.ByInstall))
 	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
 		return check("")
 	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
