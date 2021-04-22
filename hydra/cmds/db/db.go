@@ -14,7 +14,6 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
@@ -61,12 +60,7 @@ func install(c *cli.Context) (err error) {
 
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		conf, err := creator.GetImportConfs(importConf)
-		if err != nil {
-			logs.Log.Error("导入配置到配置中心:", compatible.FAILED)
-			return err
-		}
-		if err := pkgs.Pub2Registry(true, conf); err != nil {
+		if err := pkgs.Pub2Registry(true, importConf); err != nil {
 			return err
 		}
 	}

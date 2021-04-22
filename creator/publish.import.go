@@ -1,10 +1,7 @@
 package creator
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"reflect"
 	"strings"
 
@@ -13,29 +10,8 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-func GetImportConfs(importPath string) (types.XMap, error) {
-	if importPath == "" {
-		return nil, nil
-	}
-	file, err := os.Open(importPath)
-	if err != nil {
-		return nil, fmt.Errorf("打开导入配置文件错误:%+v", err)
-	}
-	defer file.Close()
-	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("读取导入配置文件错误:%+v", err)
-	}
-
-	confs := make(types.XMap)
-	if err := json.Unmarshal(content, &confs); err != nil {
-		return nil, fmt.Errorf("导入配置格式转换错误:%+v", err)
-	}
-	return confs, nil
-}
-
-//getImportValue 当导入配置存在相同路径时，则将导入数据转换成结构体或直接返回
-func getImportValue(path string, v interface{}, importConf types.XMap) (value interface{}, err error) {
+//getValue 当导入配置存在相同路径时，则将导入数据转换成结构体或直接返回
+func getValue(path string, v interface{}, importConf types.XMap) (value interface{}, err error) {
 	value = v
 
 	importValue, ok := importConf[path]

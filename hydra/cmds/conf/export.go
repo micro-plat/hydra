@@ -27,7 +27,7 @@ func exportNow(c *cli.Context) (err error) {
 
 	//2. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true, nil); err != nil {
+		if err := pkgs.Pub2Registry(true, ""); err != nil {
 			return err
 		}
 	}

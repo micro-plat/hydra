@@ -2,7 +2,6 @@ package conf
 
 import (
 	logs "github.com/lib4dev/cli/logger"
-	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
@@ -20,15 +19,7 @@ func installNow(c *cli.Context) (err error) {
 
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
-
-		//导入配置
-		input, err1 := creator.GetImportConfs(importConf)
-		if err1 != nil {
-			logs.Log.Error("导入配置到配置中心:", compatible.FAILED)
-			return err1
-		}
-
-		if err := pkgs.Pub2Registry(coverIfExists, input); err != nil {
+		if err := pkgs.Pub2Registry(coverIfExists, importConf); err != nil {
 			logs.Log.Error("安装到配置中心:", compatible.FAILED)
 			return err
 		}

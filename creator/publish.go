@@ -41,7 +41,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	for tp, subs := range c.data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
 		path := pub.GetServerPath()
-		value, err := getImportValue(path, subs.Map()[ServerMainNodeName], input)
+		value, err := getValue(path, subs.Map()[ServerMainNodeName], input)
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 			if name == ServerMainNodeName {
 				continue
 			}
-			value, err := getImportValue(path, value, input)
+			value, err := getValue(path, value, input)
 			if err != nil {
 				return err
 			}
@@ -73,7 +73,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 		pub := varpub.NewVarPub(platName)
 		for k, v := range subs {
 			path := pub.GetVarPath(tp, k)
-			value, err := getImportValue(path, v, input)
+			value, err := getValue(path, v, input)
 			if err != nil {
 				return err
 			}

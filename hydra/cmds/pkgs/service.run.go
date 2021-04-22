@@ -3,9 +3,7 @@ package pkgs
 import (
 	logs "github.com/lib4dev/cli/logger"
 
-	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/rlog"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/registry"
@@ -43,13 +41,7 @@ func (p *ServiceApp) run() (err error) {
 
 	//4. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
-		//导入配置
-		conf, err := creator.GetImportConfs(p.c.String("import"))
-		if err != nil {
-			logs.Log.Error("导入配置到配置中心:", compatible.FAILED)
-			return err
-		}
-		if err := Pub2Registry(true, conf); err != nil {
+		if err := Pub2Registry(true, p.c.String("import")); err != nil {
 			return err
 		}
 	}
