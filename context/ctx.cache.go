@@ -33,6 +33,7 @@ func GetContext(g ...string) (IContext, bool) {
 	if c, ok := ctxMap.Get(gid); ok {
 		return c.(IContext), true
 	}
+	global.RID.Remove()
 	return nil, false
 }
 
