@@ -5,18 +5,20 @@ import (
 
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
 )
 
 //Pub2Registry 发布到注册中心
-func Pub2Registry(cover bool) error {
+func Pub2Registry(cover bool, input types.XMap) error {
 
 	//2.发布到配置中心
 	if err := creator.Conf.Pub(global.Current().GetPlatName(),
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
 		global.Def.RegistryAddr,
-		cover); err != nil {
+		cover,
+		input); err != nil {
 		return err
 	}
 	return nil

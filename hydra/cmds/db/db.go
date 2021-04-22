@@ -14,6 +14,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/global/compatible"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
@@ -60,7 +61,12 @@ func install(c *cli.Context) (err error) {
 
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
+		conf, err := creator.GetImportConfs(importConf)
+		if err != nil {
+			logs.Log.Error("导入配置到配置中心:", compatible.FAILED)
+			return err
+		}
+		if err := pkgs.Pub2Registry(true, conf); err != nil {
 			return err
 		}
 	}
@@ -127,6 +133,7 @@ func checkContinue() bool {
 
 var dbName = "db"
 var skip bool
+var importConf string
 
 //getInstallFlags 获取运行时的参数
 func getInstallFlags() []cli.Flag {
@@ -145,6 +152,11 @@ func getInstallFlags() []cli.Flag {
 		Name:        "skip",
 		Destination: &skip,
 		Usage:       `-跳过执行失败的SQL语句`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "import",
+		Destination: &importConf,
+		Usage:       `-导入配置文件`,
 	})
 	flags = append(flags, global.DBCli.GetFlags()...)
 	return flags

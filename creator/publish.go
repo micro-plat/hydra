@@ -14,40 +14,86 @@ import (
 )
 
 //Pub 将配置发布到配置中心
-func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error {
+func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool, input types.XMap) error {
 
 	if err := c.Load(); err != nil {
 		return err
 	}
 
-	cache := types.XMap{}
+	//检查导入配置
+	tps := make([]string, 0, len(c.data))
+	for k := range c.data {
+		tps = append(tps, k)
+	}
+	if err := checkImportConf(tps, platName, systemName, clusterName, input); err != nil {
+		return err
+	}
+
 	//创建注册中心，根据注册中心提供的接口进行配置发布
 	r, err := registry.GetRegistry(registryAddr, global.Def.Log())
 	if err != nil {
 		return err
 	}
+
+	confs := make(map[string]interface{})
+	cache := types.XMap{}
+	//加入server配置
 	for tp, subs := range c.data {
 		pub := server.NewServerPub(platName, systemName, tp, clusterName)
-		if err := publish(r, pub.GetServerPath(), subs.Map()[ServerMainNodeName], cache, cover); err != nil {
+		path := pub.GetServerPath()
+		value, err := getImportValue(path, subs.Map()[ServerMainNodeName], input)
+		if err != nil {
 			return err
 		}
+		//先发布main节点配置
+		if err := publish(r, path, value, cache, cover); err != nil {
+			return err
+		}
+		confs[path] = value
+
+		//发布子配置
 		for name, value := range subs.Map() {
+			fmt.Println("name:", name)
+			path := pub.GetSubConfPath(name)
 			if name == ServerMainNodeName {
 				continue
 			}
-			if err := publish(r, pub.GetSubConfPath(name), value, cache, cover); err != nil {
+			value, err := getImportValue(path, value, input)
+			if err != nil {
 				return err
 			}
+			if err := publish(r, path, value, cache, cover); err != nil {
+				return err
+			}
+			confs[path] = value
 		}
 	}
+
+	//加入var配置
 	for tp, subs := range c.vars {
 		pub := varpub.NewVarPub(platName)
 		for k, v := range subs {
-			if err := publish(r, pub.GetVarPath(tp, k), v, cache, cover); err != nil {
+			path := pub.GetVarPath(tp, k)
+			value, err := getImportValue(path, v, input)
+			if err != nil {
+				return err
+			}
+			confs[path] = value
+			if err := publish(r, path, value, cache, cover); err != nil {
 				return err
 			}
 		}
 	}
+
+	//加入项目未配置的导入配置项
+	for k, v := range input {
+		if _, ok := confs[k]; !ok {
+			if err := publish(r, k, v, cache, cover); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -69,6 +115,7 @@ func publish(r registry.IRegistry, path string, v interface{}, input types.XMap,
 	}
 	return nil
 }
+
 func deleteAll(r registry.IRegistry, path string) error {
 	if b, err := r.Exists(path); err != nil || !b {
 		return err
@@ -85,6 +132,7 @@ func deleteAll(r registry.IRegistry, path string) error {
 	return nil
 
 }
+
 func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 	child, _, err := r.GetChildren(path)
 	if err != nil {
