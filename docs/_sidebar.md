@@ -1,5 +1,5 @@
 <!-- docs/_sidebar.md -->
-* [入门](/README.md)
+* [入门](/)
   
-* [服务配置](/setting/README.md)
+* [服务配置](/setting/)
   
