@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	logs "github.com/lib4dev/cli/logger"
 	"github.com/manifoldco/promptui"
 	vc "github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
@@ -120,14 +121,20 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 	}
 	svalue := getSValue(vfield, isArray)
 	switch {
-	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
-		return check("")
+	case isArray:
+		if err := validateArray(svalue, validTagName, label, msg); err != nil {
+			logs.Log.Errorf("%s验证不通过:%+v", path, err)
+			return check("")
+		}
 	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
 		return check(strings.TrimPrefix(svalue, vc.ByInstall))
 	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
 		return check("")
-	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
-		return check("")
+	case !isArray && vfield.IsValid() && !vfield.IsZero():
+		if err := validate(svalue, validTagName, label, msg); err != nil {
+			logs.Log.Errorf("%s验证不通过:%+v", path, err)
+			return check("")
+		}
 	}
 	return nil, nil
 
