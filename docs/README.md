@@ -1,116 +1,8 @@
+
+
 ## 快速开始
 
-### 1. 构建API服务
   
-```go
-package main
-
-import (
-    "github.com/micro-plat/hydra"
-    "github.com/micro-plat/hydra/hydra/servers/http"
-)
-
-func main() {
-
-    //创建app
-	app := hydra.NewApp(
-            hydra.WithServerTypes(http.API),
-    )
-
-    //注册服务
-    app.API("/hello", func(ctx hydra.IContext) interface{} {
-        return "hello world"
-    })
-
-    //启动app
-    app.Start()
-}
-```
-### 2. 构建RPC服务
-
-```go
-package main
-
-import (
-    "github.com/micro-plat/hydra"
-    "github.com/micro-plat/hydra/hydra/servers/rpc"
-)
-
-func main() {
-
-    //创建app
-	app := hydra.NewApp(
-            hydra.WithServerTypes(rpc.RPC),
-    )
-
-    //注册服务
-    app.RPC("/hello", func(ctx hydra.IContext) interface{} {
-        return "hello world"
-    })
-
-    //启动app
-    app.Start()
-}
-```
-###  3. 构建定时任务(CRON)
-
-```go
-package main
-
-import (
-    "github.com/micro-plat/hydra"   
-    "github.com/micro-plat/hydra/hydra/servers/cron"
-)
-
-func main() {
-
-	app := hydra.NewApp(
-            hydra.WithServerTypes(cron.CRON),
-    )
-   
-   //注册服务
-    app.CRON("/hello",hello,"@every 5s")   
-    app.Start()
-}
-func hello(ctx hydra.IContext) interface{} {
-        return "success"
-}
-```
-### 4. 构建消息消费(MQC)
-
-```go
-package main
-
-import (
-    "github.com/micro-plat/hydra"
-    "github.com/micro-plat/hydra/hydra/servers/mqc"
-    "github.com/micro-plat/hydra/conf/vars/queue/lmq"
-)
-
-func main() {
-
-	app := hydra.NewApp(
-            hydra.WithServerTypes(mqc.MQC),
-    )
-
-    //注册服务
-    app.MQC("/hello",hello,"queue-name")
-
-    //设置消息队列服务器(本地内存MQ，支持redis,mqtt等)  
-    hydra.Conf.MQC(lmq.MQ)
-
-    app.Start()
-}
-
-func hello(ctx hydra.IContext) interface{} {
-        return "success"
-}
-```
-
-
-
-##  简单示例
-
 
 ### 1. 创建项目
 
@@ -205,3 +97,81 @@ $ curl http://192.168.4.121:8080/hello
 hello world
 ```
 
+
+
+
+## 服务构建
+
+
+所有服务器都采用相同的方式构建，即`指定服务类型`,`注册服务`,`配置运行参数`
+
+### 1. 服务类型
+
+构建api server
+```go    
+	app := hydra.NewApp(hydra.WithServerTypes(http.API))
+```
+构建web server
+```go   
+	app := hydra.NewApp(hydra.WithServerTypes(http.Web))
+```
+构建RPC server
+```go   
+	app := hydra.NewApp( hydra.WithServerTypes(http.RPC))
+```
+构建CRON server
+```go
+	app := hydra.NewApp( hydra.WithServerTypes(cron.CRON))
+```
+构建MQC server
+```go    
+	app := hydra.NewApp(hydra.WithServerTypes(mqc.MQC))
+```
+### 2. 注册服务
+服务器提供的服务，都采用相同的方式进行注册，同一个服务`Handler`可注册到任何服务器,可将函数、struct等通过注册接口进行注册
+
+Handler示例：
+```go
+//Query 订单查询
+func Query(ctx hydra.IContext) interface{} {
+	ctx.Log().Debug("-------------处理订单查询----------------------")
+	if err := ctx.Request().Check(fields.FieldMerNo, fields.FieldMerOrderNo); err != nil {
+		return err
+	}
+
+	ctx.Log().Debug("1. 查询订单信息")
+	order, err := orders.QueryDetail(ctx.Request().GetString(fields.FieldMerNo),
+		ctx.Request().GetString(fields.FieldMerOrderNo))
+	if err == nil && order.Len() > 0 {
+		return order
+	}
+
+	ctx.Log().Debug("2. 订单不存在")
+	return errs.NewError(int(enums.CodeOrderNotExists), "订单不存在")
+}
+```
+
+注册为API服务：
+```go
+hydra.S.API("/order/request", Query)
+```
+
+注册为Web服务：
+```go
+hydra.S.Web("/order/request", Query)
+```
+
+注册为RPC服务：
+```go
+hydra.S.RPC("/order/request", Query)
+```
+
+注册为CRON服务：
+```go
+hydra.S.CRON("/order/request", Query)
+```
+
+注册为MQC服务：
+```go
+hydra.S.MQC("/order/request", Query)
+```
