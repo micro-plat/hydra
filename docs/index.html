@@ -10,13 +10,8 @@
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 </head>
 <body>
+ 
   <div id="app"></div>
-  <script>
-    window.$docsify = {
-      name: '',
-      repo: ''
-    }
-  </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script>
@@ -25,6 +20,8 @@
       name: 'hydra',
       
       repo: 'https://github.com/micro-plat/hydra',
+
+      // onlyCover: true,
 
       // 侧边栏支持，默认加载的是项目根目录下的_sidebar.md文件 
       loadSidebar: true,
@@ -36,11 +33,21 @@
        coverpage: true, 
        
        // 最大支持渲染的标题层级 
-       maxLevel: 4, 
+       maxLevel: 10, 
        
        // 自定义侧边栏后默认不会再生成目录，设置生成目录的最大层级，建议配置为1或者2 
-       subMaxLevel: 3
+       subMaxLevel: 3,
+
+       search: {
+        placeholder: '全文搜索',
+        noData: '找不到结果!',
+        depth: 3
+      },
     }
   </script>
+  <script src="//unpkg.com/docsify-copy-code"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-go.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
 </body>
 </html>

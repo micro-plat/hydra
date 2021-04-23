@@ -2,8 +2,6 @@
 
 ## 快速开始
 
-  
-
 ### 1. 创建项目
 
 创建`flowserver`,对外提供api服务，内部每隔5秒自动执行某个服务。
@@ -64,7 +62,7 @@ $ ./flowserver run
 
 ### 3. 服务运行
 
-终端日志如下：
+直接运行服务，方便查看日志，调试代码，终端日志如下：
 
 ```sh
 [2020/07/08 09:36:31.140432][i][29f63e41d]初始化: /test/flowserver/api-cron/1.0.0/conf
@@ -98,80 +96,18 @@ hello world
 ```
 
 
+### 4. 安装部署
+* 1. 将服务安装到本地，以后台方式运行，服务器重启后自动启动:
 
-
-## 服务构建
-
-
-所有服务器都采用相同的方式构建，即`指定服务类型`,`注册服务`,`配置运行参数`
-
-### 1. 服务类型
-
-构建api server
-```go    
-	app := hydra.NewApp(hydra.WithServerTypes(http.API))
+```sh
+./flowserver install
 ```
-构建web server
-```go   
-	app := hydra.NewApp(hydra.WithServerTypes(http.Web))
-```
-构建RPC server
-```go   
-	app := hydra.NewApp( hydra.WithServerTypes(http.RPC))
-```
-构建CRON server
-```go
-	app := hydra.NewApp( hydra.WithServerTypes(cron.CRON))
-```
-构建MQC server
-```go    
-	app := hydra.NewApp(hydra.WithServerTypes(mqc.MQC))
-```
-### 2. 注册服务
-服务器提供的服务，都采用相同的方式进行注册，同一个服务`Handler`可注册到任何服务器,可将函数、struct等通过注册接口进行注册
+> `./flowserver remove` 卸载服务
 
-Handler示例：
-```go
-//Query 订单查询
-func Query(ctx hydra.IContext) interface{} {
-	ctx.Log().Debug("-------------处理订单查询----------------------")
-	if err := ctx.Request().Check(fields.FieldMerNo, fields.FieldMerOrderNo); err != nil {
-		return err
-	}
+2. 启动服务
 
-	ctx.Log().Debug("1. 查询订单信息")
-	order, err := orders.QueryDetail(ctx.Request().GetString(fields.FieldMerNo),
-		ctx.Request().GetString(fields.FieldMerOrderNo))
-	if err == nil && order.Len() > 0 {
-		return order
-	}
-
-	ctx.Log().Debug("2. 订单不存在")
-	return errs.NewError(int(enums.CodeOrderNotExists), "订单不存在")
-}
+```sh
+./flowserver start
 ```
-
-注册为API服务：
-```go
-hydra.S.API("/order/request", Query)
-```
-
-注册为Web服务：
-```go
-hydra.S.Web("/order/request", Query)
-```
-
-注册为RPC服务：
-```go
-hydra.S.RPC("/order/request", Query)
-```
-
-注册为CRON服务：
-```go
-hydra.S.CRON("/order/request", Query)
-```
-
-注册为MQC服务：
-```go
-hydra.S.MQC("/order/request", Query)
-```
+> `./flowserver stop` 停止服务
+> `./flowserver status` 查看服务状态
