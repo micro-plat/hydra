@@ -23,6 +23,13 @@ func WithRequired(fieldName ...string) AuthOption {
 	}
 }
 
+//WithAlias 设置字段别名
+func WithAlias(name, alias string) AuthOption {
+	return func(a *Auth) {
+		a.Alias[name] = alias
+	}
+}
+
 //WithUIDAlias 设置用户euid的字段名
 func WithUIDAlias(name string) AuthOption {
 	return func(a *Auth) {
