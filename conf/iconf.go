@@ -15,6 +15,11 @@ const ByInstall = "###"
 //ByInstallI 通过安装设置
 const ByInstallI = -2<<31 - 1
 
+//ByNamedInstall 指定名称进行install参数指定
+func ByNamedInstall(name string) string {
+	return ByInstall + name
+}
+
 //IServerConf 主配置信息
 type IServerConf interface {
 	IServerPub

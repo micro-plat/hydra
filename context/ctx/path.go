@@ -48,6 +48,15 @@ func (c *rpath) Params() types.XMap {
 	return c.params
 }
 
+//FormatService 通过GetProcessorConf 格式化服务名
+func (c *rpath) FormatService(service string) string {
+	p, err := c.appConf.GetProcessorConf()
+	if err != nil {
+		return service
+	}
+	return p.FormatService(service)
+}
+
 //GetService 获取服务名称
 func (c *rpath) GetService() string {
 	tp := c.appConf.GetServerConf().GetServerType()

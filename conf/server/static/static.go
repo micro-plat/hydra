@@ -27,26 +27,26 @@ type IStatic interface {
 //Static 设置静态文件配置
 type Static struct {
 	security.ConfEncrypt
-	Path           string                `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
-	Excludes       []string              `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
-	HomePage       string                `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
-	AutoRewrite    bool                  `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
-	Unrewrites     []string              `json:"unrewrite,omitempty" valid:"ascii" label:"不重写列表"`
-	Disable        bool                  `json:"disable,omitempty"`
-	unrewriteMatch *conf.PathMatch       `json:"-"`
-	fs             IFS                   `json:"-"`
-	gzipfileMap    map[string]gzFileInfo `json:"-"`
-	serverType     string
+	Path           string          `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
+	Excludes       []string        `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
+	HomePage       string          `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
+	AutoRewrite    bool            `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
+	Unrewrites     []string        `json:"unrewrite,omitempty" valid:"ascii" label:"不重写列表"`
+	Disable        bool            `json:"disable,omitempty"`
+	unrewriteMatch *conf.PathMatch `json:"-"`
+	fs             IFS             `json:"-"`
+	// gzipfileMap    map[string]gzFileInfo `json:"-"`
+	serverType string
 }
 
 //New 构建静态文件配置信息
 func New(serverType string, opts ...Option) *Static {
 	a := &Static{
-		serverType:  serverType,
-		HomePage:    DefaultHome,
-		Excludes:    DefaultExclude,
-		Unrewrites:  DefaultUnrewrite,
-		gzipfileMap: map[string]gzFileInfo{},
+		serverType: serverType,
+		HomePage:   DefaultHome,
+		Excludes:   DefaultExclude,
+		Unrewrites: DefaultUnrewrite,
+		// gzipfileMap: map[string]gzFileInfo{},
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -64,7 +64,7 @@ func (s *Static) Has(name string) bool {
 	if s.IsExclude(name) {
 		return false
 	}
-	if s.fs.Has(name) {
+	if _, ok := s.fs.Has(name); ok {
 		return true
 	}
 	if s.AutoRewrite && !s.IsUnrewrite(name) {
@@ -82,7 +82,7 @@ func (s *Static) OptionsCheck(name string) bool {
 	if s.IsExclude(name) {
 		return false
 	}
-	if s.fs.Has(name) {
+	if _, ok := s.fs.Has(name); ok {
 		return true
 	}
 	return false
@@ -99,7 +99,7 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	}
 
 	//文件不存在
-	if !s.fs.Has(name) {
+	if _, ok := s.fs.Has(name); !ok {
 		//是否是不重写文件
 		if s.IsUnrewrite(name) {
 			return nil, "", nil
@@ -154,26 +154,30 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		}
 		return nil, fmt.Errorf("static配置格式有误:%v", err)
 	}
+
+	//禁用靜态文件配置
 	if static.Disable {
 		return static, nil
 	}
 	static.unrewriteMatch = conf.NewPathMatch(static.Unrewrites...)
+
 	//转换配置文件
 	fs, err := static.getFileOS()
 	if err != nil {
 		return nil, err
 	}
-	if fs == nil {
-		//转换本地内嵌文件
-		if nfs, ok := defEmbedFs[static.serverType]; ok {
-			fs, err = nfs.getFileEmbed()
+
+	//转换本地内嵌文件
+	if nfs, ok := defEmbedFs[static.serverType]; ok {
+		efs, err := nfs.getFileEmbed()
+		if err != nil {
+			return nil, err
 		}
-	}
-	if err != nil {
-		return nil, err
+		efs.Merge(fs)
+		fs = efs
 	}
 	if fs != nil {
-		static.fs = NewGzip(fs, static)
+		static.fs = fs
 		return static, nil
 	}
 	return nil, fmt.Errorf("%s %w", "static", conf.ErrNoSetting)

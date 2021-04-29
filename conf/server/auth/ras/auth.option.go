@@ -51,13 +51,6 @@ func WithSignAlias(name string) AuthOption {
 	}
 }
 
-//WithAlias 设置别名字段名
-func WithAlias(name, alias string) AuthOption {
-	return func(a *Auth) {
-		a.Alias[name] = alias
-	}
-}
-
 //WithDecryptName 设置需要解密的字段名
 func WithDecryptName(name ...string) AuthOption {
 	return func(a *Auth) {

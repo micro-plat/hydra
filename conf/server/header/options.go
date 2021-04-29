@@ -13,8 +13,10 @@ const (
 	HeadeExposeHeaders    = "Access-Control-Expose-Headers"
 )
 
-var allowHeader = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "Authorization", "Authorization-Jwt", "Origin", "Accept"}
-var exposeHeader = []string{"Authorization-Jwt", "WWW-Authenticate", "Authorization"}
+var XLocation = "X-Location"
+
+var allowHeader = []string{"X-Add-Delay", "X-Request-Id", "X-Requested-With", "Content-Type", "Authorization", "Authorization-Jwt", "Origin", "Accept", "X-Location"}
+var exposeHeader = []string{"Authorization-Jwt", "WWW-Authenticate", "Authorization", "X-Location"}
 var allMethods = []string{http.MethodHead, http.MethodOptions, http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}
 
 //Option 配置选项

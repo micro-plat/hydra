@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
+	"github.com/micro-plat/hydra/conf/server/header"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/security/jwt"
 )
 
@@ -33,9 +35,16 @@ func setJwtResponse(ctx IMiddleContext, jwtAuth *xjwt.JWTAuth, data interface{})
 		}
 		return
 	}
-
 	//写入响应
 	if data != nil {
+		switch v := data.(type) {
+		case errs.IError:
+			ctx.Response().Header(header.XLocation, ctx.Request().Headers().Translate(jwtAuth.AuthURL))
+			ctx.Response().Abort(v.GetCode())
+			return
+		case error:
+			return
+		}
 		jwtToken, err := jwt.Encrypt(jwtAuth.Secret, jwtAuth.Mode, data, jwtAuth.ExpireAt)
 		if err != nil {
 			ctx.Response().Abort(xjwt.JWTStatusConfDataError, fmt.Errorf("jwt配置出错：%v", err))

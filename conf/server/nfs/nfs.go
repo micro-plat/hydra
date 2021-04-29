@@ -19,6 +19,7 @@ type NFS struct {
 	Rename        bool   `json:"rename,omitempty" toml:"rename,omitempty"`
 	Watch         bool   `json:"watch,omitempty" toml:"watch,omitempty"`
 	AllowDownload bool   `json:"allowDownload,omitempty" toml:"allowDownload,omitempty"`
+	UploadService string `json:"uploadService,omitempty" toml:"uploadService,omitempty"`
 	DiableUpload  bool   `json:"diableUpload,omitempty" toml:"diableUpload,omitempty"`
 	Disable       bool   `json:"disable,omitempty" toml:"disable,omitempty"`
 }

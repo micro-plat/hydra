@@ -24,6 +24,13 @@ func WithDisableUpload() Option {
 	}
 }
 
+//WithUpload 设置上传服务名称
+func WithUpload(service string) Option {
+	return func(a *NFS) {
+		a.UploadService = service
+	}
+}
+
 //WithAllowDownload 允许下载文件
 func WithAllowDownload() Option {
 	return func(a *NFS) {

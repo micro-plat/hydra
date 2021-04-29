@@ -35,6 +35,11 @@ func New(opts ...Option) *Processor {
 	return m
 }
 
+//FormatService 根据服务名及当前配置重置服务名称
+func (p *Processor) FormatService(service string) string {
+	return fmt.Sprintf("%s%s", p.ServicePrefix, service)
+}
+
 //GetConf 设置Processor
 func GetConf(cnf conf.IServerConf) (p *Processor, err error) {
 	p = New()

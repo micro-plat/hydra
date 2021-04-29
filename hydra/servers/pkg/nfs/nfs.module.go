@@ -23,12 +23,14 @@ type module struct {
 	once      sync.Once
 	fsWatcher *fsnotify.Watcher
 	checkChan chan struct{}
+	prefix    string
 	done      bool
 }
 
-func newModule(c *nfs.NFS) (m *module) {
+func newModule(c *nfs.NFS, prefix string) (m *module) {
 	m = &module{
 		c:         c,
+		prefix:    prefix,
 		local:     newLocal(c.Local),
 		remoting:  newRemoting(),
 		checkChan: make(chan struct{}, 1),
@@ -40,7 +42,7 @@ func newModule(c *nfs.NFS) (m *module) {
 
 //Update 更新环境配置
 func (m *module) Update(hosts []string, masterHost string, currentAddr string, isMaster bool) {
-	m.remoting.Update(hosts, masterHost, currentAddr, isMaster)
+	m.remoting.Update(hosts, masterHost, currentAddr, isMaster, m.prefix)
 	m.local.Update(currentAddr)
 	if isMaster {
 		m.async.DoQuery()

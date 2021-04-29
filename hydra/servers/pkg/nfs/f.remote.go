@@ -17,16 +17,37 @@ type remoting struct {
 	hosts       []string
 	masterHost  string
 	currentAddr string
+	rmt_fp_get  string
+
+	//推送指纹数据
+	rmt_fp_notify string
+
+	//拉取指纹列表
+	rmt_fp_query string
+
+	//获取远程文件数据
+	rmt_file_download string
 }
 
 func newRemoting() *remoting {
 	return &remoting{}
 }
-func (r *remoting) Update(hosts []string, masterHost string, currentAddrs string, isMaster bool) {
+func (r *remoting) Update(hosts []string, masterHost string, currentAddrs string, isMaster bool, prefix string) {
 	r.hosts = hosts
 	r.masterHost = masterHost
 	r.currentAddr = currentAddrs
 	r.isMaster = isMaster
+	//获取远程文件的指纹信息
+	r.rmt_fp_get = prefix + rmt_fp_get
+
+	//推送指纹数据
+	r.rmt_fp_notify = prefix + rmt_fp_notify
+
+	//拉取指纹列表
+	r.rmt_fp_query = prefix + rmt_fp_query
+
+	//获取远程文件数据
+	r.rmt_file_download = prefix + rmt_file_download
 }
 
 //GetFP 主动向master发起查询,查询某个文件是否存在，及所在的服务器
@@ -36,30 +57,30 @@ func (r *remoting) GetFP(name string) (v *eFileFP, err error) {
 	input := types.XMap{"name": name}
 
 	//发送远程请求
-	log := trace(rmt_fp_get, name, r.masterHost)
-	rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", r.masterHost, rmt_fp_get), input.ToKV(), "utf-8", http.Header{
+	log := trace(r.rmt_fp_get, name, r.masterHost)
+	rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", r.masterHost, r.rmt_fp_get), input.ToKV(), "utf-8", http.Header{
 		context.XRequestID: []string{log.log.GetSessionID()},
 		"Accept-Encoding":  []string{"gzip"},
 	})
 
 	//处理返回结果
 	if status == http.StatusNoContent {
-		log.end(rmt_fp_get, name, r.masterHost, status)
+		log.end(r.rmt_fp_get, name, r.masterHost, status)
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
 	if err != nil {
-		log.end(rmt_fp_get, name, r.masterHost, status, err)
+		log.end(r.rmt_fp_get, name, r.masterHost, status, err)
 		return nil, err
 	}
 
 	//处理参数转换
 	if err = json.Unmarshal([]byte(rpns), v); err != nil {
-		log.end(rmt_fp_get, name, r.masterHost, status, err)
+		log.end(r.rmt_fp_get, name, r.masterHost, status, err)
 		return nil, err
 	}
 
 	//返回结果
-	log.end(rmt_fp_get, name, r.masterHost, status)
+	log.end(r.rmt_fp_get, name, r.masterHost, status)
 	return v, nil
 }
 
@@ -76,21 +97,21 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 	//向集群发起请求
 	var status int
 	for _, host := range host {
-		log := trace(rmt_file_download, v.Path, "from", host)
-		rpns, status, err = hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_file_download), input.ToKV(), "utf-8", http.Header{
+		log := trace(r.rmt_file_download, v.Path, "from", host)
+		rpns, status, err = hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, r.rmt_file_download), input.ToKV(), "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
 			"Accept-Encoding":  []string{"gzip"},
 		})
 
 		//检查是否发生错误
 		if err != nil {
-			log.end(rmt_file_download, v.Path, "from", host, status, err)
+			log.end(r.rmt_file_download, v.Path, "from", host, status, err)
 			continue
 		}
 
 		//检查状态码
 		if status == http.StatusNoContent {
-			log.end(rmt_file_download, v.Path, "from", host, status)
+			log.end(r.rmt_file_download, v.Path, "from", host, status)
 			continue
 		}
 
@@ -101,7 +122,7 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 		// }
 
 		//数据正确
-		log.end(rmt_file_download, v.Path, "from", host, status)
+		log.end(r.rmt_file_download, v.Path, "from", host, status)
 		return rpns, nil
 	}
 	return
@@ -112,18 +133,18 @@ func (r *remoting) Report(tps eFileFPLists) error {
 	//向集群发起请求
 	rps := tps.GetAlives(r.getRHosts())
 	for host, list := range rps {
-		log := trace(rmt_fp_notify, host)
+		log := trace(r.rmt_fp_notify, host)
 		_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST",
-			fmt.Sprintf("http://%s%s", host, rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
+			fmt.Sprintf("http://%s%s", host, r.rmt_fp_notify), types.ToJSON(list), "utf-8", http.Header{
 				"Content-Type":     []string{"application/json"},
 				context.XRequestID: []string{log.log.GetSessionID()},
 				"Accept-Encoding":  []string{"gzip"},
 			})
 		if err != nil {
-			log.end(rmt_fp_notify, host, status, err)
+			log.end(r.rmt_fp_notify, host, status, err)
 			continue
 		}
-		log.end(rmt_fp_notify, host, status)
+		log.end(r.rmt_fp_notify, host, status)
 	}
 	return nil
 }
@@ -135,24 +156,24 @@ func (r *remoting) Query() (eFileFPLists, error) {
 	for _, host := range r.getQHosts() {
 
 		//查询远程服务
-		log := trace(rmt_fp_query, "from", host)
-		rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, rmt_fp_query), "", "utf-8", http.Header{
+		log := trace(r.rmt_fp_query, "from", host)
+		rpns, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", host, r.rmt_fp_query), "", "utf-8", http.Header{
 			context.XRequestID: []string{log.log.GetSessionID()},
 			"Accept-Encoding":  []string{"gzip"},
 		})
 		if err != nil {
-			log.end(rmt_fp_query, "from", host, status, err)
+			log.end(r.rmt_fp_query, "from", host, status, err)
 			return nil, err
 		}
 
 		//处理参数合并
 		nresult := make(eFileFPLists)
 		if err = json.Unmarshal([]byte(rpns), &nresult); err != nil {
-			log.end(rmt_fp_query, "from", host, status, err)
+			log.end(r.rmt_fp_query, "from", host, status, err)
 			return nil, err
 		}
 
-		log.end(rmt_fp_query, "from", host, status)
+		log.end(r.rmt_fp_query, "from", host, status)
 		for k, v := range nresult {
 			if _, ok := result[k]; !ok {
 				result[k] = v

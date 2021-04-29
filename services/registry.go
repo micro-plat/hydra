@@ -20,6 +20,9 @@ const defFallback = "Fallback"
 const defClose = "Close"
 
 //IService 服务注册接口
+
+//IMicroRegistry 微服务注册接口
+type IMicroRegistry func(name string, h interface{}, r ...router.Option) IService
 type IService interface {
 	Group(name ...string) IService
 

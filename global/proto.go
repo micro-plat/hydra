@@ -33,6 +33,9 @@ func ParseProto(address string) (string, string, error) {
 	if raddr == "" {
 		return "", "", fmt.Errorf("%s缺少地址addr,正确格式(proto://addr)", address)
 	}
+	if !strings.HasPrefix(raddr, "/") {
+		raddr = fmt.Sprintf("/%s", raddr)
+	}
 	return proto, raddr, nil
 }
 

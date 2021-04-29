@@ -7,12 +7,19 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/micro-plat/hydra/conf/server/auth"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/errs"
 )
 
-//SVSNOTExcludes 服务路径中排除的
-var SVSNOTExcludes = []string{"/nfs/**", "/_/nfs/**"}
+//notExcludes 服务路径中排除的
+var notExcludes = []string{"/**/_/nfs/**"}
+
+const (
+	fileName = "name"
+
+	dirName = "dir"
+)
 
 const (
 	//SVSUpload 用户端上传文件
@@ -20,10 +27,6 @@ const (
 
 	//SVSDonwload 用户端下载文件
 	SVSDonwload = "/nfs/file/:dir/:name"
-
-	fileName = "name"
-
-	dirName = "dir"
 
 	//获取远程文件的指纹信息
 	rmt_fp_get = "/_/nfs/fp/get"
@@ -111,9 +114,11 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	// 处理返回结果
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
-	return map[string]interface{}{
-		"name": fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/")),
-	}
+	path := fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/"))
+	return path
+	// return map[string]interface{}{
+	// 	"name":
+	// }
 }
 
 //Download 用户下载文件
@@ -136,4 +141,7 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 	//写入文件
 	ctx.Response().File(path, http.FS(c.module.local))
 	return nil
+}
+func init() {
+	auth.AppendExcludes(notExcludes...)
 }

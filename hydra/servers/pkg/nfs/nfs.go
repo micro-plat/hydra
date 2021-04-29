@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/types"
 )
 
 type cnfs struct {
@@ -21,10 +22,12 @@ type cnfs struct {
 	isStarted bool
 	module    *module
 	once      sync.Once
+	services  []string
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c)}
+	p, _ := app.GetProcessorConf()
+	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c, p.ServicePrefix), services: make([]string, 0, 3)}
 }
 func (c *cnfs) Start() error {
 	if c.isStarted {
@@ -97,7 +100,7 @@ func init() {
 		//处理服务初始化
 		services.Def.OnSetup(func(c app.IAPPConf) error {
 			//取消服务注册
-			unRegistry(c.GetServerConf().GetServerType())
+			// excludesJWT(c)
 			closeNFS(c.GetServerConf().GetServerType())
 			n, err := c.GetNFSConf()
 			if err != nil {
@@ -140,6 +143,10 @@ func closeNFS(tp string) error {
 	nfsCaches.RemoveIterCb(func(k string, v interface{}) bool {
 		if k == tp {
 			m := v.(*cnfs)
+			for _, s := range m.services {
+				services.Def.Remove(s)
+			}
+
 			m.Close()
 			return true
 		}
@@ -148,28 +155,19 @@ func closeNFS(tp string) error {
 	return nil
 
 }
-func unRegistry(tp string) {
-	if tp == global.API || tp == global.Web {
-		//注册服务
-		services.Def.Remove(SVSUpload, tp)
-		services.Def.Remove(SVSDonwload, tp)
 
-		//内部服务
-		services.Def.Remove(rmt_fp_get, tp)
-		services.Def.Remove(rmt_fp_notify, tp)
-		services.Def.Remove(rmt_fp_query, tp)
-		services.Def.Remove(rmt_file_download, tp)
-	}
-}
 func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 	if tp == global.API {
 		//注册服务
 		if !cnf.DiableUpload {
-			services.Def.API(SVSUpload, cnfs.Upload)
+			s := types.GetString(cnfs.c.UploadService, SVSUpload)
+			services.Def.API(s, cnfs.Upload)
+			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowDownload {
 			services.Def.API(SVSDonwload, cnfs.Download)
+			cnfs.services = append(cnfs.services, SVSDonwload)
 		}
 
 		//内部服务
@@ -177,16 +175,20 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 		services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
 		services.Def.API(rmt_fp_query, cnfs.Query)
 		services.Def.API(rmt_file_download, cnfs.GetFile)
+		cnfs.services = append(cnfs.services, rmt_fp_get, rmt_fp_notify, rmt_fp_query, rmt_file_download)
 	}
 
 	if tp == global.Web {
 
 		if !cnf.DiableUpload {
-			services.Def.Web(SVSUpload, cnfs.Upload)
+			s := types.GetString(cnfs.c.UploadService, SVSUpload)
+			services.Def.Web(s, cnfs.Upload)
+			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowDownload {
 			services.Def.Web(SVSDonwload, cnfs.Download)
+			cnfs.services = append(cnfs.services, SVSDonwload)
 		}
 
 		//内部服务
@@ -194,5 +196,6 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 		services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
 		services.Def.Web(rmt_fp_query, cnfs.Query)
 		services.Def.Web(rmt_file_download, cnfs.GetFile)
+		cnfs.services = append(cnfs.services, rmt_fp_get, rmt_fp_notify, rmt_fp_query, rmt_file_download)
 	}
 }

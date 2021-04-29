@@ -103,6 +103,9 @@ type IPath interface {
 	//GetService 获取服务名称(不包括$method)
 	GetService() string
 
+	//FormatService 通过ProcessorConf 格式化服务名
+	FormatService(service string) string
+
 	//Param 路由参数
 	Params() types.XMap
 
@@ -209,6 +212,9 @@ type IResponse interface {
 
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
+
+	//Redirect 页面转跳
+	Redirect(code int, url string)
 
 	//JSON json输出响应内容
 	JSON(code int, data interface{}) interface{}

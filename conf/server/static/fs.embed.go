@@ -3,7 +3,6 @@ package static
 import (
 	"embed"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -33,7 +32,7 @@ func (e *embedFs) getFileEmbed() (IFS, error) {
 	return nil, nil
 }
 
-func newEmbedFile(name string, buff []byte) (IFS, error) {
+func newEmbedFile(name string, buff []byte) (*osfs, error) {
 	//单个文件,直接返回
 	if _, err := archiver.ByExtension(name); err != nil {
 		return nil, err
@@ -64,6 +63,7 @@ type efs struct {
 	fs   *embed.FS
 	hfs  http.FileSystem
 	name string
+	p    []IFS
 }
 
 func newEFS(name string, fs *embed.FS) *efs {
@@ -71,22 +71,33 @@ func newEFS(name string, fs *embed.FS) *efs {
 		fs:   fs,
 		name: name,
 		hfs:  http.FS(fs),
+		p:    make([]IFS, 0, 0),
 	}
 }
 
-func (o *efs) ReadFile(name string) (http.FileSystem, string, error) { //http.FileServer(http.FS(embed.FS{}))
+func (o *efs) ReadFile(name string) (http.FileSystem, string, error) {
+	for _, p := range o.p {
+		if _, ok := p.Has(name); ok {
+			return p.ReadFile(name)
+		}
+	}
 	return o.hfs, filepath.Join(o.name, name), nil
 }
 
-func (o *efs) GetRoot() string {
-	return o.name
+func (o *efs) Has(name string) (string, bool) {
+	for _, p := range o.p {
+		if v, ok := p.Has(name); ok {
+			return v, true
+		}
+	}
+	path := filepath.Join(o.name, name)
+	_, err := o.fs.ReadFile(path)
+	return path, err == nil
 }
 
-func (o *efs) Has(name string) bool {
-	_, err := o.fs.ReadFile(filepath.Join(o.name, name))
-	return err == nil
-}
-
-func (o *efs) GetDirEntrys(path string) (dirs []fs.DirEntry, err error) {
-	return o.fs.ReadDir(filepath.Join(o.name, path))
+func (o *efs) Merge(p IFS) {
+	if p == nil {
+		return
+	}
+	o.p = append(o.p, p)
 }

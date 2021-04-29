@@ -7,6 +7,7 @@ type IClient interface {
 	Get(url string, charset ...string) (content string, status int, err error)
 	Post(url string, params string, charset ...string) (content string, status int, err error)
 	Request(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, status int, err error)
+	HRequest(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, rspHeader http.Header, status int, err error)
 	SaveAs(method string, url string, params string, path string, charset string, header http.Header, cookies ...*http.Cookie) (status int, err error)
 	Upload(url string, params map[string]string, files map[string]string, charset string, header http.Header, cookies ...*http.Cookie) (content string, status int, err error)
 }

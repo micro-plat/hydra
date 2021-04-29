@@ -1,5 +1,7 @@
 package jwt
 
+import "github.com/micro-plat/hydra/conf/server/auth"
+
 //Option jwt配置选项
 type Option func(*JWTAuth)
 
@@ -58,7 +60,7 @@ func WithCookie() Option {
 //WithExcludes 排除的服务或请求
 func WithExcludes(p ...string) Option {
 	return func(a *JWTAuth) {
-		a.Excludes = p
+		a.Excludes = append(a.Excludes, p...)
 	}
 }
 
@@ -94,5 +96,12 @@ func WithDomain(domain string) Option {
 func WithEnableEncryption() Option {
 	return func(a *JWTAuth) {
 		a.EnableEncryption = true
+	}
+}
+
+//WithAuthExcludes 追加系统excludes
+func WithAuthExcludes() Option {
+	return func(a *JWTAuth) {
+		a.Excludes = append(a.Excludes, auth.GetExcludes()...)
 	}
 }
