@@ -13,7 +13,7 @@ func SwapKey(elem ...string) string {
 		if v == "/" || v == "\\" || strings.TrimSpace(v) == "" {
 			continue
 		}
-		v =  strings.ReplaceAll(v, ":", "###")
+		v = strings.ReplaceAll(v, ":", "###")
 		builder.WriteString(strings.Trim(v, "/"))
 		builder.WriteString(":")
 	}
@@ -39,7 +39,6 @@ func SwapPath(elem ...string) string {
 	}
 
 	str := strings.ReplaceAll(builder.String(), ":", "/")
-	str =  strings.ReplaceAll(str, "###", ":")
+	str = strings.ReplaceAll(str, "###", ":")
 	return registry.Format(str)
 }
- 

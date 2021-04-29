@@ -27,7 +27,6 @@ func (b *cronBuilder) Load() {
 		return
 	}
 	b.BaseBuilder[task.TypeNodeName] = tasks
-	return
 }
 
 //Queue 添加队列配置

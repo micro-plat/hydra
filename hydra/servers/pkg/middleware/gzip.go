@@ -147,7 +147,7 @@ func (e ExcludedPaths) Contains(requestURI string) bool {
 type ExcludedPathesRegexs []*regexp.Regexp
 
 func NewExcludedPathesRegexs(regexs []string) ExcludedPathesRegexs {
-	result := make([]*regexp.Regexp, len(regexs), len(regexs))
+	result := make([]*regexp.Regexp, len(regexs))
 	for i, reg := range regexs {
 		result[i] = regexp.MustCompile(reg)
 	}

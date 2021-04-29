@@ -10,8 +10,6 @@ import (
 )
 
 func Test_serverServices_handleExt(t *testing.T) {
-	type args struct {
-	}
 	tests := []struct {
 		name    string
 		f       func(u *Unit, ext ...interface{}) error

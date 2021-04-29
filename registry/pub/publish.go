@@ -31,7 +31,6 @@ type Publisher struct {
 	c          conf.IServerConf
 	log        logger.ILogging
 	serverNode string
-	serverName string
 	lock       sync.Mutex
 	closeChan  chan struct{}
 	watchChan  chan struct{}

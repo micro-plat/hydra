@@ -60,7 +60,7 @@ func install(c *cli.Context) (err error) {
 
 	//2.检查是否安装注册中心配置
 	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
+		if err := pkgs.Pub2Registry(true, importConf); err != nil {
 			return err
 		}
 	}
@@ -127,6 +127,7 @@ func checkContinue() bool {
 
 var dbName = "db"
 var skip bool
+var importConf string
 
 //getInstallFlags 获取运行时的参数
 func getInstallFlags() []cli.Flag {
@@ -145,6 +146,11 @@ func getInstallFlags() []cli.Flag {
 		Name:        "skip",
 		Destination: &skip,
 		Usage:       `-跳过执行失败的SQL语句`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:        "import",
+		Destination: &importConf,
+		Usage:       `-导入配置文件`,
 	})
 	flags = append(flags, global.DBCli.GetFlags()...)
 	return flags

@@ -8,6 +8,10 @@ import (
 )
 
 func encrypt(c *cli.Context) (err error) {
+	if len(orgData) == 0 {
+		return fmt.Errorf("未指定加密的内容")
+	}
+
 	cipherData := security.Encrypt([]byte(orgData))
 	fmt.Println("原始内容：")
 	fmt.Println(orgData)

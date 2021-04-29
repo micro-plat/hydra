@@ -33,6 +33,10 @@ func getFlags() []cli.Flag {
 		Name:  "nostd",
 		Usage: `-控制台不输出日志`,
 	})
+	flags = append(flags, cli.StringFlag{
+		Name:  "import",
+		Usage: `-导入配置文件`,
+	})
 	flags = append(flags, global.RunCli.GetFlags()...)
 	return flags
 }

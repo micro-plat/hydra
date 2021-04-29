@@ -26,7 +26,7 @@ func NewAPPConf(opts ...hydra.Option) (app.IAPPConf, error) {
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
 		global.Def.RegistryAddr,
-		true)
+		true, nil)
 	if err != nil {
 		panic(err)
 	}

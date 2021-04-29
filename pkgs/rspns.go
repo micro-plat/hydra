@@ -55,17 +55,17 @@ func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 		r.header["Content-Type"] = "application/json"
 	}
 	switch v := result.(type) {
-	case error:
-		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
-			r.status = http.StatusBadRequest
-		}
-		r.err = fmt.Errorf("请求发生错误：%w", v)
-		r.data["__body__"] = v
 	case errs.IError:
 		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
 			r.status = v.GetCode()
 		}
 		r.result = v.GetError().Error()
+		r.data["__body__"] = v
+	case error:
+		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
+			r.status = http.StatusBadRequest
+		}
+		r.err = fmt.Errorf("请求发生错误：%w", v)
 		r.data["__body__"] = v
 	case string:
 		//转换数据
@@ -141,7 +141,7 @@ func (r *Rspns) getMap(ctp string, body []byte) (data map[string]interface{}, er
 			return nil, fmt.Errorf("xml转换为map失败:%w", err)
 		}
 	case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
-		err = yaml.Unmarshal(body, &data)
+		r.err = yaml.Unmarshal(body, &data)
 	case strings.Contains(ctp, "/json"):
 		newbuff := body
 		if bytes.HasPrefix(newbuff, []byte(`"{\"`)) {

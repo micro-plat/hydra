@@ -55,7 +55,7 @@ func (r *Redis) GetChildren(path string) (paths []string, version int32, err err
 			continue
 		}
 
-		if ok, _ := cache[p]; ok {
+		if _, ok := cache[p]; ok {
 			continue
 		}
 		cache[p] = true

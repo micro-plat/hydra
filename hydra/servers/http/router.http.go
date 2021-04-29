@@ -40,7 +40,6 @@ func (s *Server) addHttpRouters(routers ...*router.Router) {
 	s.server.Handler = s.engine
 
 	s.addRouter(routers...)
-	return
 }
 
 func (s *Server) addRouter(routers ...*router.Router) {

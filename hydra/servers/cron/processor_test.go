@@ -32,7 +32,7 @@ func TestNewProcessor(t *testing.T) {
 }
 
 func cMap(lenth int) []cmap.ConcurrentMap {
-	slots := make([]cmap.ConcurrentMap, lenth, lenth)
+	slots := make([]cmap.ConcurrentMap, lenth)
 	for i := 0; i < lenth; i++ {
 		slots[i] = cmap.New(2)
 	}

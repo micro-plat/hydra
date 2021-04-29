@@ -19,7 +19,6 @@ type TMainConf struct {
 	rootVersion int32
 	subConfs    map[string]RawConf
 	IServerPub
-	registry     registry.IRegistry
 	ClusterNames []string
 }
 

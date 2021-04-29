@@ -41,7 +41,7 @@ func (p *ServiceApp) run() (err error) {
 
 	//4. 处理本地内存作为注册中心的服务发布问题
 	if registry.GetProto(globalData.GetRegistryAddr()) == registry.LocalMemory {
-		if err := Pub2Registry(true); err != nil {
+		if err := Pub2Registry(true, p.c.String("import")); err != nil {
 			return err
 		}
 	}

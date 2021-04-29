@@ -122,7 +122,6 @@ func (m *mock) GetBody() io.ReadCloser {
 
 //Abort 中止当前请求
 func (m *mock) Abort() {
-	return
 }
 
 //WStatus 设置当前状态码
@@ -164,14 +163,12 @@ func (m *mock) Data(s int, t string, c []byte) {
 	m.status = s
 	m.wHeaders["Content-Type"] = t
 	m.result = c
-	return
 }
 
 //Redirect 转跳路径
 func (m *mock) Redirect(s int, p string) {
 	m.status = s
 	m.wHeaders["Location"] = p
-	return
 }
 
 //GetService 获取服务名
