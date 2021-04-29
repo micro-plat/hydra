@@ -79,7 +79,9 @@ func (l *local) Open(name string) (fs.File, error) {
 func (l *local) Close() error {
 	l.done = true
 	l.once.Do(func() {
-		l.fsWatcher.Close()
+		if l.fsWatcher != nil {
+			l.fsWatcher.Close()
+		}
 		l.FPS.Clear()
 	})
 	return nil

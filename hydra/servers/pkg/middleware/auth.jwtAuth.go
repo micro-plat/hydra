@@ -31,7 +31,6 @@ func JwtAuth() Handler {
 
 		//3.检查是否需要跳过请求
 		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok {
-			ctx.Log().Warn("跳过:", ctx.Request().Path().GetRequestPath())
 			ctx.Next()
 			return
 		}
