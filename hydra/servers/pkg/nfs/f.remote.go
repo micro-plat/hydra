@@ -65,17 +65,17 @@ func (r *remoting) GetFP(name string) (v *eFileFP, err error) {
 
 	//处理返回结果
 	if status == http.StatusNoContent {
-		log.end(r.rmt_fp_get, name, r.masterHost, status)
+		log.error(r.rmt_fp_get, name, r.masterHost, status)
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
 	if err != nil {
-		log.end(r.rmt_fp_get, name, r.masterHost, status, err)
+		log.error(r.rmt_fp_get, name, r.masterHost, status, err)
 		return nil, err
 	}
 
 	//处理参数转换
 	if err = json.Unmarshal([]byte(rpns), v); err != nil {
-		log.end(r.rmt_fp_get, name, r.masterHost, status, err)
+		log.error(r.rmt_fp_get, name, r.masterHost, status, err)
 		return nil, err
 	}
 
@@ -105,13 +105,13 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 
 		//检查是否发生错误
 		if err != nil {
-			log.end(r.rmt_file_download, v.Path, "from", host, status, err)
+			log.error(r.rmt_file_download, v.Path, "from", host, status, err)
 			continue
 		}
 
 		//检查状态码
 		if status == http.StatusNoContent {
-			log.end(r.rmt_file_download, v.Path, "from", host, status)
+			log.error(r.rmt_file_download, v.Path, "from", host, status)
 			continue
 		}
 
@@ -141,7 +141,7 @@ func (r *remoting) Report(tps eFileFPLists) error {
 				"Accept-Encoding":  []string{"gzip"},
 			})
 		if err != nil {
-			log.end(r.rmt_fp_notify, host, status, err)
+			log.error(r.rmt_fp_notify, host, status, err)
 			continue
 		}
 		log.end(r.rmt_fp_notify, host, status)
@@ -162,14 +162,14 @@ func (r *remoting) Query() (eFileFPLists, error) {
 			"Accept-Encoding":  []string{"gzip"},
 		})
 		if err != nil {
-			log.end(r.rmt_fp_query, "from", host, status, err)
+			log.error(r.rmt_fp_query, "from", host, status, err)
 			return nil, err
 		}
 
 		//处理参数合并
 		nresult := make(eFileFPLists)
 		if err = json.Unmarshal([]byte(rpns), &nresult); err != nil {
-			log.end(r.rmt_fp_query, "from", host, status, err)
+			log.error(r.rmt_fp_query, "from", host, status, err)
 			return nil, err
 		}
 

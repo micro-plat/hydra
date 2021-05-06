@@ -59,6 +59,9 @@ type IService interface {
 	//Remove 移除已注册服务（重启服务器生效）
 	Remove(path string, tp ...string)
 
+	//HookRemove 移除钩子函数
+	HookRemove(hs ...interface{})
+
 	//RegisterServer 注册新的服务器类型
 	RegisterServer(tp string, f func(g *Unit, ext ...interface{}) error, remove func(path string))
 
@@ -182,11 +185,18 @@ func (s *regist) Remove(path string, tp ...string) {
 		return
 	}
 	for _, t := range tp {
-		if s, ok := s.servers[t]; ok {
-			s.Remove(path)
+		if server, ok := s.servers[t]; ok {
+			server.Remove(path)
 		}
 	}
 
+}
+
+//HookRemove 移除钩子函数
+func (s *regist) HookRemove(hs ...interface{}) {
+	for _, server := range s.servers {
+		server.HookRemove(hs...)
+	}
 }
 
 //Custom 自定义服务注册

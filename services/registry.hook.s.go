@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
@@ -68,6 +69,9 @@ func (s *serverHook) AddHandleExecuting(h ...context.IHandler) error {
 	if len(h) == 0 {
 		return nil
 	}
+	for _, v := range h {
+		s.Remove(v)
+	}
 	s.handlings = append(s.handlings, h...)
 	return nil
 }
@@ -129,4 +133,40 @@ func (s *serverHook) DoClosing(c app.IAPPConf) error {
 		}
 	}
 	return nil
+}
+
+//Remove 移除某个钩子函数
+func (s *serverHook) Remove(hs ...interface{}) {
+	for _, h := range hs {
+		for i, p := range s.closings {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.closings = append(s.closings[:i], s.closings[i+1:]...)
+			}
+		}
+		for i, p := range s.handleds {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.handleds = append(s.handleds[:i], s.handleds[i+1:]...)
+			}
+		}
+		for i, p := range s.handlings {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.handlings = append(s.handlings[:i], s.handlings[i+1:]...)
+			}
+		}
+		for i, p := range s.setups {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.setups = append(s.setups[:i], s.setups[i+1:]...)
+			}
+		}
+		for i, p := range s.starteds {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.starteds = append(s.starteds[:i], s.starteds[i+1:]...)
+			}
+		}
+		for i, p := range s.startings {
+			if strings.EqualFold(fmt.Sprintf("%p", p), fmt.Sprintf("%p", h)) {
+				s.startings = append(s.startings[:i], s.startings[i+1:]...)
+			}
+		}
+	}
 }

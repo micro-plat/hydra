@@ -58,6 +58,11 @@ func (s *serverServices) Remove(path string) {
 	}
 }
 
+//HookRemove 移除已注册的钩子函数
+func (s *serverServices) HookRemove(hs ...interface{}) {
+	s.serverHook.Remove(hs...)
+}
+
 //addGroup 添加服务注册
 func (s *serverServices) addGroup(g *UnitGroup, group string, ext ...interface{}) error {
 	s.unitGroups = append(s.unitGroups, g)
