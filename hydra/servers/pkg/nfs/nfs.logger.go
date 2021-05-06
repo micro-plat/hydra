@@ -23,7 +23,7 @@ func trace(input ...interface{}) log {
 		start: time.Now(),
 		log:   logger.New("nfs"),
 	}
-	if !global.IsDebug {
+	if !global.IsDebug || len(input) == 0 {
 		return l
 	}
 	p := make([]interface{}, 0, len(input)+1)
@@ -34,7 +34,7 @@ func trace(input ...interface{}) log {
 }
 
 func (l log) end(input ...interface{}) {
-	if !global.IsDebug {
+	if !global.IsDebug || len(input) == 0 {
 		return
 	}
 	p := make([]interface{}, 0, len(input)+2)

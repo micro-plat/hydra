@@ -15,7 +15,7 @@ func (l *module) watch() {
 	var err error
 	l.fsWatcher, err = fsnotify.NewWatcher()
 	if err != nil {
-		trace("不支持文件监控", err)
+		trace().error("不支持文件监控", err)
 		return
 	}
 	filepath.WalkDir(l.local.path, func(path string, d fs.DirEntry, err error) error {

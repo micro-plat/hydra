@@ -115,10 +115,9 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	// 处理返回结果
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	path := fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/"))
-	return path
-	// return map[string]interface{}{
-	// 	"name":
-	// }
+	return map[string]interface{}{
+		"path": path,
+	}
 }
 
 //Download 用户下载文件
