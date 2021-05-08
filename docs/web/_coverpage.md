@@ -20,4 +20,4 @@ hydra致力于为后端软件开发提供简单的、统一的、完善的服务
 
 
 [GitHub](https://github.com/micro-plat/hydra)
-[快速开始](#快速开始)
+[快速开始](/start/bg.md)
