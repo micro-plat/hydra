@@ -15,6 +15,30 @@
 ```go
 hydra.Conf.API("6689")
 ```
+
+部分配置构建时可能会用到平台名称、系统名等初始参数，建议将配置的初始化放到系统准备就绪后执行:
+
+```go
+func init() {
+	hydra.OnReady(func() {
+        hydra.Conf.API("6689")
+    }
+}
+```
+或
+
+```go
+func init() {
+	hydra.OnReadying(func() {
+        hydra.Conf.API("6689")
+    }
+}
+```
+
+> 注意：两种方式都是在系统参数检查完毕后立即运行，不同的是`OnReadying`先运行，`OnReady`后运行。
+
+> `OnReadying` 和 `OnReady` 都属于系统勾子函数，了解其它勾子函数,请参数`勾子函数`章节
+
 #### 1. 支持链式调用与交互参数输入(hydra.ByInstall):
 
 ```go
@@ -22,7 +46,8 @@ hydra.Conf.API("6689")
 var staticFs embed.FS
 var archive = "loginweb/dist/static"
 
-hydra.Conf.Web("6687", api.WithTimeout(300, 300), api.WithDNS(hydra.ByInstall)).
+hydra.OnReady(func() {
+    hydra.Conf.Web("6687", api.WithTimeout(300, 300), api.WithDNS(hydra.ByInstall)).
 			Static(static.WithAutoRewrite(), static.WithEmbed(archive, staticFs)).
 			Processor(processor.WithServicePrefix("/web")).
 			Header(header.WithCrossDomain()).
@@ -39,7 +64,7 @@ hydra.Conf.Web("6687", api.WithTimeout(300, 300), api.WithDNS(hydra.ByInstall)).
 					"/*/logout",
 				),
 			)
-
+})
 ```
 
 > hydra.ByInstall 会在配置安装时通过向导方式引导用户输入
@@ -53,23 +78,29 @@ hydra.Conf.Web("6687", api.WithTimeout(300, 300), api.WithDNS(hydra.ByInstall)).
 DB配置：
 
 ```go
+hydra.OnReady(func() {
     hydra.Conf.Vars().DB().MySQLByConnStr("db", "hydra:123456@tcp(192.168.0.36:10036)/hydra?charset=utf8")
+})
 ```
 缓存配置：
 
 ```go
+hydra.OnReady(func() {
     hydra.Conf.Vars().Cache().GoCache("cache")
+})
 ```
 
 用户自定义配置:
 
 ```go
+hydra.OnReady(func() {
     hydra.Conf.Vars().Custom("app", "conf", &model.LoginConf{
         LoginHost: hydra.ByInstall,
         APIHost:   hydra.ByInstall,
         UserLoginFailLimit: 5,
         UserLockTime:       24 * 60 * 60,
     })
+})
 ```
 
 
