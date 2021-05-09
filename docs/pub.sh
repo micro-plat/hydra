@@ -14,9 +14,9 @@ echo "2. 复制文件"
 scp ./docs root@121.196.168.242:/tmp
 
 
-ssh -t  root@121.196.168.242 "cd /root/work/docs/bin;./docs stop;mv ./docs ./docs_${dt} ;cp /tmp/docs ./;sleep 3;./docs start;rm -rf /tmp/docs"
+# ssh -t  root@121.196.168.242 "cd /root/work/docs/bin;./docs stop;mv ./docs ./docs_${dt} ;cp /tmp/docs ./;sleep 3;./docs start;rm -rf /tmp/docs"
 
 
-rm -rf ./docs
+# rm -rf ./docs
 
 echo "3. 发布成功"

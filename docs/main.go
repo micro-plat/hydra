@@ -8,7 +8,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/http"
 )
 
-//go:embed web/*
+//go:embed ../docs
 var mgrweb embed.FS
 
 var app = hydra.NewApp(
