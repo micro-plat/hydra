@@ -199,6 +199,9 @@ type IResponse interface {
 	//GetSpecials 获取特殊标识字段串，多个标记用"|"分隔
 	GetSpecials() string
 
+	//HasSpecial 是否包含某个特殊关键字
+	HasSpecial(s string) bool
+
 	//Header 设置响应头
 	Header(string, string)
 

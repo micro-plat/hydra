@@ -404,6 +404,16 @@ func (c *response) GetSpecials() string {
 	return strings.Join(c.specials, "|")
 }
 
+//HasSpecial 是否包含某个特殊关键字
+func (c *response) HasSpecial(s string) bool {
+	for _, p := range c.specials {
+		if strings.EqualFold(p, s) {
+			return true
+		}
+	}
+	return false
+}
+
 //GetRaw 获取原始响应请求
 func (c *response) GetRaw() interface{} {
 	return c.raw.content
