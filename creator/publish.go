@@ -107,7 +107,7 @@ func publish(r registry.IRegistry, path string, v interface{}, input types.XMap)
 		if err != nil {
 			return err
 		}
-		if !checkCover(string(buff)) { //不覆盖配置则退出
+		if !checkCover(path, string(buff)) { //不覆盖配置则退出
 			return nil
 		}
 		if err := deleteAll(r, path); err != nil {
@@ -178,12 +178,12 @@ func getJSON(path string, v interface{}, input types.XMap) (value string, err er
 	}
 }
 
-func checkCover(v string) bool {
-	y := "Yes,覆盖，使用当前配置覆盖已有配置"
-	n := "No,跳过，不覆盖已有配置"
+func checkCover(path string, v string) bool {
+	y := fmt.Sprintf("Yes, 覆盖(使用%s最新配置)", path)
+	n := fmt.Sprintf("No, 不覆盖(使用%s已有配置)", path)
 	prompt := promptui.Select{
-		Label: fmt.Sprintf("注册中心已存在配置%s 是否覆盖?", v),
-		Items: []string{y, n},
+		Label: fmt.Sprintf("是否覆盖已存在的配置?(%s)%s", path, v),
+		Items: []string{n, y},
 	}
 	_, result, err := prompt.Run()
 	return err == nil && result == y
