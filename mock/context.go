@@ -35,8 +35,7 @@ func NewContext(content string, opts ...Option) context.IContext {
 	err := mk.Conf.Pub(global.Current().GetPlatName(),
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
-		global.Def.RegistryAddr,
-		true, nil)
+		global.Def.RegistryAddr, nil)
 	if err != nil {
 		panic(err)
 	}

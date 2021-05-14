@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/manifoldco/promptui"
 	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -14,7 +15,7 @@ import (
 )
 
 //Pub 将配置发布到配置中心
-func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool, input types.XMap) error {
+func (c *conf) Pub(platName string, systemName string, clusterName string, registryAddr string, input types.XMap) error {
 
 	if err := c.Load(); err != nil {
 		return err
@@ -46,7 +47,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 			return err
 		}
 		//先发布main节点配置
-		if err := publish(r, path, value, cache, cover); err != nil {
+		if err := publish(r, path, value, cache); err != nil {
 			return err
 		}
 		confs[path] = value
@@ -61,7 +62,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 			if err != nil {
 				return err
 			}
-			if err := publish(r, path, value, cache, cover); err != nil {
+			if err := publish(r, path, value, cache); err != nil {
 				return err
 			}
 			confs[path] = value
@@ -78,7 +79,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 				return err
 			}
 			confs[path] = value
-			if err := publish(r, path, value, cache, cover); err != nil {
+			if err := publish(r, path, value, cache); err != nil {
 				return err
 			}
 		}
@@ -87,7 +88,7 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	//加入项目未配置的导入配置项
 	for k, v := range input {
 		if _, ok := confs[k]; !ok {
-			if err := publish(r, k, v, cache, cover); err != nil {
+			if err := publish(r, k, v, cache); err != nil {
 				return err
 			}
 		}
@@ -96,19 +97,24 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	return nil
 }
 
-func publish(r registry.IRegistry, path string, v interface{}, input types.XMap, cover bool) error {
+func publish(r registry.IRegistry, path string, v interface{}, input types.XMap) error {
 	value, err := getJSON(path, v, input)
 	if err != nil {
 		return err
 	}
-	if !cover {
-		if b, _ := r.Exists(path); b {
-			return fmt.Errorf("配置信息已存在，请添加参数[--cover]进行覆盖安装")
+	if b, _ := r.Exists(path); b {
+		buff, _, err := r.GetValue(path)
+		if err != nil {
+			return err
+		}
+		if !checkCover(string(buff)) { //不覆盖配置则退出
+			return nil
+		}
+		if err := deleteAll(r, path); err != nil {
+			return err
 		}
 	}
-	if err := deleteAll(r, path); err != nil {
-		return err
-	}
+
 	if err := r.CreatePersistentNode(path, value); err != nil {
 		return fmt.Errorf("创建配置节点%s %s出错:%w", path, value, err)
 	}
@@ -170,4 +176,15 @@ func getJSON(path string, v interface{}, input types.XMap) (value string, err er
 	default:
 		return string(buff), nil
 	}
+}
+
+func checkCover(v string) bool {
+	y := "Yes,覆盖，使用当前配置覆盖已有配置"
+	n := "No,跳过，不覆盖已有配置"
+	prompt := promptui.Select{
+		Label: fmt.Sprintf("注册中心已存在配置%s 是否覆盖?", v),
+		Items: []string{y, n},
+	}
+	_, result, err := prompt.Run()
+	return err == nil && result == y
 }

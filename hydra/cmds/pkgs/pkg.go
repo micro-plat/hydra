@@ -28,7 +28,6 @@ func Pub2Registry(cover bool, importPath string) error {
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
 		global.Def.RegistryAddr,
-		cover,
 		input); err != nil {
 		return err
 	}

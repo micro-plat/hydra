@@ -62,7 +62,7 @@ type IConf interface {
 	GetMQC() *mqcBuilder
 
 	//Pub 发布服务
-	Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool, input types.XMap) error
+	Pub(platName string, systemName string, clusterName string, registryAddr string, input types.XMap) error
 
 	//Load 加载所有配置
 	Load() error

@@ -19,4 +19,5 @@ logger.toml
 consul*
 mqctestserver*
 rpctestservre*
-/logs/*
+/logs
+/conf/logger.toml
