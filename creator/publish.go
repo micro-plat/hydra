@@ -159,6 +159,13 @@ func getAllPath(r registry.IRegistry, path string) ([]string, error) {
 
 //getJSON 将对象序列化为json字符串
 func getJSON(path string, v interface{}, input types.XMap) (value string, err error) {
+
+	if !reflect.ValueOf(v).CanSet() {
+		if value, ok := v.(string); ok { //处理var自定义配置
+			return getCustomString(path, value, input)
+		}
+	}
+
 	if err := checkAndInput(path, reflect.ValueOf(v), []string{}, input); err != nil {
 		return "", err
 	}
