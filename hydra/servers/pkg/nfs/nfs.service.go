@@ -92,6 +92,7 @@ func (c *cnfs) GetFile(ctx context.IContext) interface{} {
 
 //Upload 用户上传文件
 func (c *cnfs) Upload(ctx context.IContext) interface{} {
+
 	//读取文件
 	name := ctx.Request().GetString(fileName, "file")
 	name, reader, size, err := ctx.Request().GetFile(name)
@@ -107,16 +108,16 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	}
 
 	// 保存文件
-	fp, err := c.module.SaveNewFile(name, buff)
+	path := ctx.Request().Path().Params().GetString("path")
+	fp, err := c.module.SaveNewFile(path, name, buff)
 	if err != nil {
 		return err
 	}
 
 	// 处理返回结果
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
-	path := fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/"))
 	return map[string]interface{}{
-		"path": path,
+		"path": fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/")),
 	}
 }
 

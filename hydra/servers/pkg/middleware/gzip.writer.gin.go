@@ -20,6 +20,7 @@ func (g *ginWriter) WriteString(s string) (int, error) {
 func (g *ginWriter) Write(data []byte) (int, error) {
 	return g.gzip.Write(data)
 }
+
 func (g *ginWriter) Close() {
 	g.gzip.Close()
 }

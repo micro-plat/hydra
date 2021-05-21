@@ -31,13 +31,13 @@ func (g *gzipHandler) Handle(ctx IMiddleContext) {
 		writer := ctx.GetWriter().(gin.ResponseWriter)
 		nwriter := newGinWriter(writer, ctx, g.level)
 		ctx.SetWriter(nwriter)
-		defer nwriter.Close()
+		ctx.Response().OnFlush(nwriter.Close)
 
 	default:
 		writer := ctx.GetWriter().(dispatcher.ResponseWriter)
 		nwriter := newDispWriter(writer, ctx, g.level)
 		ctx.SetWriter(nwriter)
-		defer nwriter.Close()
+		ctx.Response().OnFlush(nwriter.Close)
 	}
 	ctx.Next()
 }

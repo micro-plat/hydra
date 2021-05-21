@@ -97,7 +97,7 @@ func (m *module) HasFile(name string) error {
 //1. 查询本地是否有此文件了,有则报错
 //2. 保存到本地，返回指纹信息
 //3. 通知master我也有这个文件了,如果是master则告诉所有人我也有此文件了
-func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
+func (m *module) SaveNewFile(path string, name string, buff []byte) (*eFileFP, error) {
 	//检查文件是否存在
 	name = getFileName(name, m.c.Rename)
 	if m.local.Has(name) {
@@ -105,7 +105,8 @@ func (m *module) SaveNewFile(name string, buff []byte) (*eFileFP, error) {
 	}
 
 	//保存到本地
-	fp, err := m.local.SaveFile(name, buff)
+	filePath := filepath.Join(path, name)
+	fp, err := m.local.SaveFile(filePath, buff)
 	if err != nil {
 		return nil, err
 	}

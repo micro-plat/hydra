@@ -44,11 +44,11 @@ func newGzipWriter(w respWriter, ctx IMiddleContext, level int) *gzipWriter {
 func (g *gzipWriter) WriteString(s string) (int, error) {
 	return g.Write([]byte(s))
 }
-func (g *gzipWriter) getWriter() io.Writer {
+func (g *gzipWriter) getWriter(l int) io.Writer {
 	if g.cwriter != nil {
 		return g.cwriter.(io.Writer)
 	}
-	if !shouldCompress(g.ctx) {
+	if !shouldCompress(g.ctx) || l == 0 {
 		g.cwriter = g.respWriter
 		return g.respWriter
 	}
@@ -65,8 +65,12 @@ func (g *gzipWriter) getWriter() io.Writer {
 
 }
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	writer := g.getWriter()
-	return writer.Write(data)
+	writer := g.getWriter(len(data))
+	s, err := writer.Write(data)
+	if err != nil {
+		return s, err
+	}
+	return s, nil
 }
 func (g *gzipWriter) Close() {
 	if !g.isgzip {
@@ -74,10 +78,11 @@ func (g *gzipWriter) Close() {
 	}
 	writer := g.cwriter.(*gzip.Writer)
 	writer.Close()
+	g.ctx.Response().Header("Content-Length", "")
+	g.ctx.Response().Header("Content-Length", fmt.Sprint(g.respWriter.Size()))
+	g.ctx.Response().AddSpecial(fmt.Sprint(g.respWriter.Size()))
 	writer.Reset(ioutil.Discard)
 	g.gzPool.Put(writer)
-	g.respWriter.Header().Del("Content-Length")
-	g.ctx.Response().Header("Content-Length", fmt.Sprint(g.respWriter.Size()))
 }
 
 func shouldCompress(ctx IMiddleContext) bool {

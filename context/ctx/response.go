@@ -36,30 +36,32 @@ type rspns struct {
 }
 
 type response struct {
-	ctx         context.IInnerContext
-	xmlRoot     string
-	xmlHeader   string
-	headers     types.XMap
-	conf        app.IAPPConf
-	path        *rpath
-	raw         rawrspns
-	final       rspns
-	hasWrite    bool
-	noneedWrite bool
-	log         logger.ILogger
-	specials    []string
+	ctx          context.IInnerContext
+	xmlRoot      string
+	xmlHeader    string
+	headers      types.XMap
+	conf         app.IAPPConf
+	path         *rpath
+	raw          rawrspns
+	final        rspns
+	hasWrite     bool
+	noneedWrite  bool
+	log          logger.ILogger
+	flushHandles []func()
+	specials     []string
 }
 
 //NewResponse 构建响应信息
 func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
 	path := NewRpath(ctx, conf, meta)
 	return &response{
-		ctx:     ctx,
-		conf:    conf,
-		path:    path,
-		xmlRoot: "xml",
-		final:   rspns{contentType: fmt.Sprintf(context.PLAINF, path.GetEncoding())},
-		log:     log,
+		ctx:          ctx,
+		conf:         conf,
+		path:         path,
+		xmlRoot:      "xml",
+		final:        rspns{contentType: fmt.Sprintf(context.PLAINF, path.GetEncoding())},
+		log:          log,
+		flushHandles: make([]func(), 0, 0),
 	}
 }
 
@@ -340,6 +342,9 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
+	for _, h := range c.flushHandles {
+		h()
+	}
 	if c.noneedWrite || c.ctx.Written() {
 		c.final.status = types.DecodeInt(c.final.status, 0, c.ctx.Status())
 		//处理外部框架直接写入到流中,且输出日志状态为0的问题
@@ -349,6 +354,11 @@ func (c *response) Flush() {
 		panic(err)
 	}
 	c.noneedWrite = true
+}
+
+//OnFlush 添加flush勾子，在flush执行前执行
+func (c *response) OnFlush(f func()) {
+	c.flushHandles = append(c.flushHandles, f)
 }
 
 //writeNow 将状态码、内容写入到响应流中
@@ -392,11 +402,11 @@ func (c *response) Redirect(code int, url string) {
 }
 
 //AddSpecial 添加响应的特殊字符
-func (c *response) AddSpecial(t string) {
+func (c *response) AddSpecial(t ...string) {
 	if c.specials == nil {
 		c.specials = make([]string, 0, 1)
 	}
-	c.specials = append(c.specials, t)
+	c.specials = append(c.specials, t...)
 }
 
 //GetSpecials 获取多个响应特殊字符

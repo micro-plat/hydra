@@ -194,7 +194,7 @@ type IResponse interface {
 	GetHTTPReponse() http.ResponseWriter
 
 	//AddSpecial 添加特殊标记，用于在打印响应内容时知道当前请求进行了哪些特殊处理
-	AddSpecial(t string)
+	AddSpecial(t ...string)
 
 	//GetSpecials 获取特殊标识字段串，多个标记用"|"分隔
 	GetSpecials() string
@@ -260,6 +260,9 @@ type IResponse interface {
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
+
+	//OnFlush flush前执行
+	OnFlush(func())
 
 	//GetHeaders 获取返回数据
 	GetHeaders() types.XMap
