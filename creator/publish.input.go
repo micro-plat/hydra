@@ -14,6 +14,23 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+func getCustomString(path, value string, input types.XMap) (string, error) {
+	if strings.HasPrefix(value, vc.ByInstall) || strings.EqualFold(value, fmt.Sprint(vc.ByInstallI)) {
+		fname := getFullName(path, "custom", "custom")
+		valueKey := types.GetString(strings.TrimPrefix(value, vc.ByInstall), fname)
+		if v := input.GetString(valueKey); v != "" {
+			return v, nil
+		}
+		newValue, err := readFromCli(fname, "required", "custom", "", false)
+		if err != nil {
+			return "", err
+		}
+		input[valueKey] = newValue
+		return newValue, nil
+	}
+	return value, nil
+}
+
 //检查输入参数，并处理用户输入
 func checkAndInput(path string, value reflect.Value, tnames []string, input types.XMap) error {
 
@@ -40,6 +57,15 @@ func checkAndInput(path string, value reflect.Value, tnames []string, input type
 }
 
 func checkString(path string, m reflect.Value, input types.XMap) error {
+	if !strings.Contains(path, "/var/") || !m.CanSet() {
+		return nil
+	}
+	//处理var自定义配置
+	v, err := getCustomString(path, m.String(), input)
+	if err != nil {
+		return err
+	}
+	m.SetString(v)
 	return nil
 }
 
@@ -109,14 +135,14 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 	isArray := vfield.Kind() == reflect.Array || vfield.Kind() == reflect.Slice
 	check := func(key string) (interface{}, error) {
 		valueKey := types.GetString(key, fname)
-		v, ok := input.Get(valueKey)
-		if !ok {
-			v, err = readFromCli(fname, validTagName, label, msg, isArray)
-			if err != nil {
-				return nil, err
-			}
-			input[valueKey] = v
+		if v, ok := input.Get(valueKey); ok {
+			return v, nil
 		}
+		v, err := readFromCli(fname, validTagName, label, msg, isArray)
+		if err != nil {
+			return nil, err
+		}
+		input[valueKey] = v
 		return v, nil
 	}
 	svalue := getSValue(vfield, isArray)
@@ -126,7 +152,10 @@ func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tn
 			logs.Log.Errorf("%s验证不通过:%+v", path, err)
 			return check("")
 		}
-	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
+	case strings.Contains(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
+		if strings.Contains(path, "/var/") { //处理var的自定义配置
+			return check("")
+		}
 		return check(strings.TrimPrefix(svalue, vc.ByInstall))
 	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
 		return check("")
