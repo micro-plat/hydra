@@ -12,6 +12,13 @@ func WithServicePrefix(prefix string) Option {
 	}
 }
 
+//WithEnableGzip 启用gzip压缩响应
+func WithEnableGzip() Option {
+	return func(a *Processor) {
+		a.EnableGzip = true
+	}
+}
+
 //WithEnableEncryption 启用加密设置
 func WithEnableEncryption() Option {
 	return func(a *Processor) {

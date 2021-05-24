@@ -261,6 +261,9 @@ type IResponse interface {
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
 
+	//WStatus 设置状态码
+	WStatus(int)
+
 	//OnFlush flush前执行
 	OnFlush(func())
 

@@ -340,6 +340,11 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	}
 }
 
+//WStatus 设置状态码
+func (c *response) WStatus(s int) {
+	c.ctx.WStatus(s)
+}
+
 //Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
 	for _, h := range c.flushHandles {

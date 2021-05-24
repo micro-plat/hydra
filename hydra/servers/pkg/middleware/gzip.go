@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -8,10 +9,7 @@ import (
 )
 
 func Gzip(level int) Handler {
-	handler := newGzipHandler(level).Handle
-	return func(ctx IMiddleContext) {
-		handler(ctx)
-	}
+	return newGzipHandler(level).Handle
 }
 
 type gzipHandler struct {
@@ -25,6 +23,17 @@ func newGzipHandler(level int) *gzipHandler {
 }
 
 func (g *gzipHandler) Handle(ctx IMiddleContext) {
+	processor, err := ctx.APPConf().GetProcessorConf()
+	if err != nil {
+		ctx.Response().Abort(http.StatusNotExtended, err)
+		return
+	}
+
+	//未启用gzip
+	if !processor.EnableGzip {
+		ctx.Next()
+		return
+	}
 
 	switch strings.ToLower(ctx.GetType()) {
 	case "gin":
@@ -32,7 +41,6 @@ func (g *gzipHandler) Handle(ctx IMiddleContext) {
 		nwriter := newGinWriter(writer, ctx, g.level)
 		ctx.SetWriter(nwriter)
 		ctx.Response().OnFlush(nwriter.Close)
-
 	default:
 		writer := ctx.GetWriter().(dispatcher.ResponseWriter)
 		nwriter := newDispWriter(writer, ctx, g.level)

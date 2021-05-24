@@ -21,6 +21,7 @@ type IProcessor interface {
 type Processor struct {
 	security.ConfEncrypt
 	ServicePrefix string `json:"servicePrefix,omitempty" valid:"maxstringlength(16),matches(^/[a-z0-9]+$)"  toml:"servicePrefix,omitempty" label:"服务前缀"`
+	EnableGzip    bool   `json:"gzip"`
 }
 
 //New 构建api server配置信息
