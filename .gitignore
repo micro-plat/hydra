@@ -21,3 +21,4 @@ mqctestserver*
 rpctestservre*
 /logs
 /conf/logger.toml
+.vscode
