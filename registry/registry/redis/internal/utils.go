@@ -21,6 +21,11 @@ func SwapKey(elem ...string) string {
 	str := strings.ReplaceAll(builder.String(), "/", ":")
 	return strings.TrimSuffix(str, ":")
 }
+func UnSwap(elem string) string {
+	str := strings.ReplaceAll(elem, ":", "/")
+	str = strings.ReplaceAll(str, "###", ":")
+	return str
+}
 
 //SplitKey 拆分“：”key
 func SplitKey(key string) []string {

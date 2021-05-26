@@ -54,8 +54,8 @@ func (r *Redis) GetChildren(path string) (paths []string, version int32, err err
 		if p == "" {
 			continue
 		}
-
-		if _, ok := cache[p]; ok {
+		p = internal.UnSwap(p)
+		if ok, _ := cache[p]; ok {
 			continue
 		}
 		cache[p] = true
