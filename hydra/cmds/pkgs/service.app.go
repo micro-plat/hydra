@@ -49,10 +49,11 @@ func GetSrvConfig(isFixed bool, args ...string) *service.Config {
 		dispName = fmt.Sprintf("%s(%s)", strings.Join(parties[:len(parties)-1], "_"), parties[len(parties)-1])
 	}
 	cfg := &service.Config{
-		Name:        svcName,
-		DisplayName: dispName,
-		Description: global.Usage,
-		Arguments:   args,
+		Name:         svcName,
+		DisplayName:  dispName,
+		Description:  global.Usage,
+		Arguments:    args,
+		Dependencies: []string{"After=network.target syslog.target"},
 	}
 	path, _ := filepath.Abs(os.Args[0])
 	cfg.WorkingDirectory = filepath.Dir(path)
