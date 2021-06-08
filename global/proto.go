@@ -2,7 +2,10 @@ package global
 
 import (
 	"fmt"
+	"net"
 	"strings"
+
+	"github.com/asaskevich/govalidator"
 )
 
 const (
@@ -34,9 +37,25 @@ func ParseProto(address string) (string, string, error) {
 		return "", "", fmt.Errorf("%s缺少地址addr,正确格式(proto://addr)", address)
 	}
 	if !strings.HasPrefix(raddr, "/") {
+		if isIP(raddr) {
+			return proto, raddr, nil
+		}
 		raddr = fmt.Sprintf("/%s", raddr)
 	}
 	return proto, raddr, nil
+}
+func isIP(addr string) bool {
+	if !strings.Contains(addr, ":") {
+		if govalidator.IsIP(addr) {
+			return true
+		}
+		return false
+	}
+	a, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return false
+	}
+	return govalidator.IsIP(a)
 }
 
 //IsProto 是否是指定的协议
