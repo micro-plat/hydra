@@ -29,5 +29,5 @@ func doRestart(c *cli.Context) (err error) {
 		return err
 	}
 	err = hydraSrv.Restart()
-	return err
+	return pkgs.GetCmdsResult(hydraSrv.DisplayName, "Restart", err)
 }
