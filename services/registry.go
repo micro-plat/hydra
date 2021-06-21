@@ -59,6 +59,9 @@ type IService interface {
 	//Remove 移除已注册服务（重启服务器生效）
 	Remove(path string, tp ...string)
 
+	//Clear 清除所有注册服务
+	Clear(tp ...string)
+
 	//HookRemove 移除钩子函数
 	HookRemove(hs ...interface{})
 
@@ -187,6 +190,22 @@ func (s *regist) Remove(path string, tp ...string) {
 	for _, t := range tp {
 		if server, ok := s.servers[t]; ok {
 			server.Remove(path)
+		}
+	}
+
+}
+
+//Clear 清除所有注册服务
+func (s *regist) Clear(tp ...string) {
+	if len(tp) == 0 {
+		for _, server := range s.servers {
+			server.Clear()
+		}
+		return
+	}
+	for _, t := range tp {
+		if server, ok := s.servers[t]; ok {
+			server.Clear()
 		}
 	}
 

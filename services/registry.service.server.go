@@ -58,6 +58,17 @@ func (s *serverServices) Remove(path string) {
 	}
 }
 
+//Clear 清除所有注册服务
+func (s *serverServices) Clear() {
+	for _, g := range s.unitGroups {
+		for _, u := range g.Services {
+			s.handleHook.Remove(u.Service)
+			s.metaServices.Remove(u.Service)
+		}
+		s.extRemove(g.Path)
+	}
+}
+
 //HookRemove 移除已注册的钩子函数
 func (s *serverServices) HookRemove(hs ...interface{}) {
 	s.serverHook.Remove(hs...)
