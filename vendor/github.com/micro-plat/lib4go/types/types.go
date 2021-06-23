@@ -489,3 +489,9 @@ func Sprint(input ...interface{}) string {
 	}
 	return strings.TrimRight(buff.String(), " ")
 }
+
+//ToJSON 转换为json
+func ToJSON(obj interface{}) string {
+	buff, _ := json.Marshal(obj)
+	return string(buff)
+}

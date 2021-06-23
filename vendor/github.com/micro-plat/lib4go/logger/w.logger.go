@@ -7,19 +7,18 @@ import (
 	"sync/atomic"
 
 	"bytes"
-
-	"github.com/micro-plat/lib4go/utility"
 )
 
 //Logger 日志对象
 type Logger struct {
-	index    int64
-	names    string
-	sessions string
-	tags     map[string]string
-	isPause  bool
-	DoPrint  func(content ...interface{})
-	DoPrintf func(format string, content ...interface{})
+	index        int64
+	names        string
+	sessions     string
+	cacheSession bool
+	tags         map[string]string
+	isPause      bool
+	DoPrint      func(content ...interface{})
+	DoPrintf     func(format string, content ...interface{})
 }
 
 var loggerEventChan chan *LogEvent
@@ -54,7 +53,7 @@ func New(names string, tags ...string) (logger *Logger) {
 	initConf()
 	logger = &Logger{index: 100}
 	logger.names = names
-	logger.sessions = CreateSession()
+	logger.sessions = getSession()
 	logger.DoPrint = logger.Info
 	logger.DoPrintf = logger.Infof
 	logger.tags = make(map[string]string)
@@ -65,6 +64,14 @@ func New(names string, tags ...string) (logger *Logger) {
 		logger.tags[tags[i]] = tags[i+1]
 	}
 	return logger
+}
+
+//CreateAndCache 使用当前session id创建logger,并将session id 缓存到当前协程
+func CreateAndCache(name string, sessionID string, tags ...string) (logger *Logger) {
+	log := GetSession(name, sessionID, tags...)
+	cacheSession(sessionID)
+	log.cacheSession = true
+	return log
 }
 
 //GetSession 根据日志名称及session获取日志组件
@@ -92,6 +99,9 @@ func (logger *Logger) Close() {
 	select {
 	case loggerCloserChan <- logger:
 	default:
+		if logger.cacheSession {
+			removeSession()
+		}
 		loggerPool.Put(logger)
 	}
 }
@@ -288,9 +298,4 @@ func Close() {
 	<-closeChan
 	logNow(GetEndWriteEvent())
 	defWriter.Close()
-}
-
-//CreateSession create logger session
-func CreateSession() string {
-	return utility.GetGUID()[0:9]
 }
