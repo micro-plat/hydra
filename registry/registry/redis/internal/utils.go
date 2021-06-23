@@ -13,13 +13,18 @@ func SwapKey(elem ...string) string {
 		if v == "/" || v == "\\" || strings.TrimSpace(v) == "" {
 			continue
 		}
-		v =  strings.ReplaceAll(v, ":", "###")
+		v = strings.ReplaceAll(v, ":", "###")
 		builder.WriteString(strings.Trim(v, "/"))
 		builder.WriteString(":")
 	}
 
 	str := strings.ReplaceAll(builder.String(), "/", ":")
 	return strings.TrimSuffix(str, ":")
+}
+func UnSwap(elem string) string {
+	str := strings.ReplaceAll(elem, ":", "/")
+	str = strings.ReplaceAll(str, "###", ":")
+	return str
 }
 
 //SplitKey 拆分“：”key
@@ -39,7 +44,6 @@ func SwapPath(elem ...string) string {
 	}
 
 	str := strings.ReplaceAll(builder.String(), ":", "/")
-	str =  strings.ReplaceAll(str, "###", ":")
+	str = strings.ReplaceAll(str, "###", ":")
 	return registry.Format(str)
 }
- 

@@ -1,16 +1,27 @@
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var _ IError = &Result{}
 
 type IResult interface {
 	GetResult() interface{}
-	GetCode() int
+	IError
 }
 type Result struct {
 	code   int
 	result interface{}
 }
 
+func (a *Result) Error() string {
+	return fmt.Sprintf("%v", a.result)
+}
+func (a *Result) GetError() error {
+	return errors.New(a.Error())
+}
 func (a *Result) GetCode() int {
 	return a.code
 }

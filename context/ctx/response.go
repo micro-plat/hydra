@@ -227,6 +227,8 @@ func (c *response) getContentType() string {
 func (c *response) swapBytp(status int, content interface{}) (rs int, rc interface{}) { //处理状态码与响应内容的默认
 
 	switch v := content.(type) {
+	case errs.IResult:
+		rs, rc = v.GetCode(), v.GetResult()
 	case errs.IError:
 		c.log.Error(content)
 
