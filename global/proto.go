@@ -43,11 +43,11 @@ func ParseProto(address string) (proto string, raddr string, err error) {
 	return proto, raddr, nil
 }
 func isIP(addr string) bool {
+	if strings.Contains(addr, ",") {
+		addr = strings.Split(addr, ",")[0]
+	}
 	if !strings.Contains(addr, ":") {
-		if govalidator.IsIP(addr) {
-			return true
-		}
-		return false
+		return govalidator.IsIP(addr)
 	}
 	a, _, err := net.SplitHostPort(addr)
 	if err != nil {
