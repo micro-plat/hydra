@@ -55,11 +55,18 @@ func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 		r.header["Content-Type"] = "application/json"
 	}
 	switch v := result.(type) {
+	case errs.IResult:
+		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
+			r.status = v.GetCode()
+		}
+		r.result = v.GetResult()
+		r.data["__body__"] = v
 	case errs.IError:
 		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
 			r.status = v.GetCode()
 		}
 		r.result = v.GetError().Error()
+		r.err = v.GetError()
 		r.data["__body__"] = v
 	case error:
 		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
