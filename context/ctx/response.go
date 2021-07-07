@@ -238,7 +238,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if global.IsDebug {
 			rs, rc = v.GetCode(), v.GetError().Error()
 		} else {
-			rs, rc = v.GetCode(), types.DecodeString(http.StatusText(v.GetCode()), "", "Internal Server Error")
+			rs, rc = v.GetCode(), http.StatusText(v.GetCode())
 		}
 
 		//处理状态码与内容
@@ -259,7 +259,7 @@ func (c *response) swapBytp(status int, content interface{}) (rs int, rc interfa
 		if global.IsDebug {
 			rc = v.Error()
 		} else {
-			rc = types.DecodeString(http.StatusText(rs), "", "Internal Server Error")
+			rc = http.StatusText(rs)
 		}
 	default:
 		//处理非错误
