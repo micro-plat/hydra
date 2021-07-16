@@ -185,13 +185,27 @@ func getJSON(path string, v interface{}, input types.XMap) (value string, err er
 	}
 }
 
-func checkCover(path string, v string) bool {
+var coverAll, ignoreAll bool
+
+func checkCover(path string, v string) (cover bool) {
+	if coverAll {
+		return true
+	}
+	if ignoreAll {
+		return
+	}
 	y := fmt.Sprintf("Yes, 覆盖(使用%s最新配置)", path)
 	n := fmt.Sprintf("No, 不覆盖(使用%s已有配置)", path)
+	yall := "覆盖所有存在的配置"
+	nall := "跳过不覆盖所有存在的配置"
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("是否覆盖已存在的配置?(%s)%s", path, v),
-		Items: []string{n, y},
+		Items: []string{n, y, nall, yall},
 	}
 	_, result, err := prompt.Run()
-	return err == nil && result == y
+	if err == nil && result == y {
+		return true
+	}
+	coverAll, ignoreAll = result == yall, result == nall
+	return
 }
