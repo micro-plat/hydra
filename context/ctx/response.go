@@ -315,6 +315,10 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 		return fmt.Sprint(content)
 	}
 
+	if v, ok := content.(error); ok {
+		return v.Error()
+	}
+
 	switch {
 	case strings.Contains(ctp, "xml"):
 		str, err := types.Any2XML(content, c.xmlHeader, c.xmlRoot)
