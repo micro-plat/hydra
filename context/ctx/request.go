@@ -13,6 +13,10 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+type Checker interface {
+	Check() error
+}
+
 type request struct {
 	ctx     context.IInnerContext
 	cookies types.XMap
@@ -72,6 +76,12 @@ func (r *request) Bind(obj interface{}) error {
 	if _, err := govalidator.ValidateStruct(obj); err != nil {
 		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("输入参数有误 %v", err))
 	}
+
+	//绑定对象自定义参数检查
+	if c, ok := obj.(Checker); ok {
+		return c.Check()
+	}
+
 	return nil
 }
 
