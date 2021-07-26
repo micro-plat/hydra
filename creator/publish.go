@@ -98,10 +98,8 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 }
 
 func publish(r registry.IRegistry, path string, v interface{}, input types.XMap) error {
-	value, err := getJSON(path, v, input)
-	if err != nil {
-		return err
-	}
+
+	delete := false
 	if b, _ := r.Exists(path); b {
 		buff, _, err := r.GetValue(path)
 		if err != nil {
@@ -110,6 +108,15 @@ func publish(r registry.IRegistry, path string, v interface{}, input types.XMap)
 		if !checkCover(path, string(buff)) { //不覆盖配置则退出
 			return nil
 		}
+		delete = true
+	}
+
+	value, err := getJSON(path, v, input) //获取节点值
+	if err != nil {
+		return err
+	}
+
+	if delete { //覆盖值之前先删除节点
 		if err := deleteAll(r, path); err != nil {
 			return err
 		}
