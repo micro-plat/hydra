@@ -169,11 +169,11 @@ func getJSON(path string, v interface{}, input types.XMap) (value string, err er
 
 	if !reflect.ValueOf(v).CanSet() {
 		if value, ok := v.(string); ok { //处理var自定义配置
-			return getCustomString(path, value, input)
+			return getCustomString(path, "", value, "", input)
 		}
 	}
 
-	if err := checkAndInput(path, reflect.ValueOf(v), []string{}, input); err != nil {
+	if err := checkAndInput(path, "", reflect.ValueOf(v), []string{}, input); err != nil {
 		return "", err
 	}
 	if x, ok := v.(string); ok {

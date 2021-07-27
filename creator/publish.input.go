@@ -14,14 +14,14 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-func getCustomString(path, value string, input types.XMap) (string, error) {
+func getCustomString(path, label, value, tname string, input types.XMap) (string, error) {
 	if strings.HasPrefix(value, vc.ByInstall) || strings.EqualFold(value, fmt.Sprint(vc.ByInstallI)) {
-		fname := getFullName(path, "custom", "custom")
+		fname := getFullName(path, label, tname)
 		valueKey := types.GetString(strings.TrimPrefix(value, vc.ByInstall), fname)
 		if v := input.GetString(valueKey); v != "" {
 			return v, nil
 		}
-		newValue, err := readFromCli(fname, "required", "custom", "", false)
+		newValue, err := readFromCli(fname, "required", tname, "", false)
 		if err != nil {
 			return "", err
 		}
@@ -32,8 +32,7 @@ func getCustomString(path, value string, input types.XMap) (string, error) {
 }
 
 //检查输入参数，并处理用户输入
-func checkAndInput(path string, value reflect.Value, tnames []string, input types.XMap) error {
-
+func checkAndInput(path, label string, value reflect.Value, tnames []string, input types.XMap) error {
 	//处理参数类型
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -52,16 +51,20 @@ func checkAndInput(path string, value reflect.Value, tnames []string, input type
 	case reflect.Map:
 		return checkMap(path, value, input)
 	default:
-		return checkString(path, value, input)
+		return checkString(path, label, value, tnames, input)
 	}
 }
 
-func checkString(path string, m reflect.Value, input types.XMap) error {
+func checkString(path, label string, m reflect.Value, tnames []string, input types.XMap) error {
 	if !strings.Contains(path, "/var/") || !m.CanSet() {
 		return nil
 	}
 	//处理var自定义配置
-	v, err := getCustomString(path, m.String(), input)
+	tname := ""
+	if len(tnames) > 0 {
+		tname = tnames[0]
+	}
+	v, err := getCustomString(path, label, m.String(), tname, input)
 	if err != nil {
 		return err
 	}
@@ -248,13 +251,13 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 		}
 		setZeroField(vfield, tfield)
 	}
-
+	label, _ := getLable(tfield)
 	var v interface{}
 	listValue := make([]string, 0, 1)
 	for i := 0; i < vfield.Len(); i++ {
 		t := vfield.Index(i)
 		rootNames := append(tnames, fmt.Sprintf("%s[%d]", tfield.Name, i))
-		err := checkAndInput(path, t, rootNames, input)
+		err := checkAndInput(path, label, t, rootNames, input)
 		if err != nil {
 			return err
 		}
@@ -383,8 +386,8 @@ func getSValue(vfield reflect.Value, isArray bool) string {
 	return svalue
 }
 
-func getFullName(path string, name string, tname string) string {
-	return fmt.Sprintf("%s(%s,%s)", name, tname, path)
+func getFullName(path string, label string, tname string) string {
+	return fmt.Sprintf("%s(%s,%s)", label, tname, path)
 }
 
 func getLable(tfield reflect.StructField) (string, string) {
