@@ -28,7 +28,7 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers       map[string]*Router           `json:"routers,omitempty" toml:"routers,omitempty"`
+	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
 	MapPath       map[string]map[string]string `json:"-"`
 	ServicePrefix string                       `json:"-"`
 	tree          *Node                        `json:"-"`
@@ -45,11 +45,7 @@ func (h *Routers) String() string {
 
 //GetRouters 获取路由列表
 func (h *Routers) GetRouters() []*Router {
-	routers := make([]*Router, 0, len(h.Routers))
-	for _, v := range h.Routers {
-		routers = append(routers, v)
-	}
-	return routers
+	return h.Routers
 }
 
 //Router 路由信息
@@ -101,22 +97,15 @@ func (r *Router) GetParams(path string) map[string]string {
 func NewRouters() *Routers {
 	r := &Routers{
 		MapPath: make(map[string]map[string]string),
-		Routers: make(map[string]*Router),
+		Routers: make([]*Router, 0),
 	}
 	return r
-}
-
-func (h *Routers) GetRouter(path string) *Router {
-	if r, ok := h.Routers[path]; ok {
-		return r
-	}
-	return nil
 }
 
 //Append 添加路由信息
 func (h *Routers) Append(path string, service string, action []string, opts ...Option) *Routers {
 	r := NewRouter(path, service, action, opts...)
-	h.Routers[path] = r
+	h.Routers = append(h.Routers, r)
 	h.tree = NewTree(h.GetPath()...)
 	return h
 }
@@ -127,13 +116,11 @@ func (h *Routers) Match(path string, method string) (*Router, error) {
 	if !matched {
 		return nil, fmt.Errorf("未找到与[%s]匹配的路由", path)
 	}
-
-	if r, ok := h.Routers[path]; ok {
-		if types.StringContains(r.Action, method) {
+	for _, r := range h.Routers {
+		if r.Path == path && types.StringContains(r.Action, method) {
 			return r, nil
 		}
 	}
-
 	return nil, fmt.Errorf("未找到与[%s][%s]匹配的路由", path, method)
 }
 
