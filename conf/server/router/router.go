@@ -28,9 +28,10 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
+	Routers       map[string]*Router           `json:"routers,omitempty" toml:"routers,omitempty"`
 	MapPath       map[string]map[string]string `json:"-"`
 	ServicePrefix string                       `json:"-"`
+	tree          *Node                        `json:"-"`
 }
 
 func (h *Routers) String() string {
@@ -44,7 +45,11 @@ func (h *Routers) String() string {
 
 //GetRouters 获取路由列表
 func (h *Routers) GetRouters() []*Router {
-	return h.Routers
+	routers := make([]*Router, 0, len(h.Routers))
+	for _, v := range h.Routers {
+		routers = append(routers, v)
+	}
+	return routers
 }
 
 //Router 路由信息
@@ -87,28 +92,48 @@ func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
 }
 
+//GetParams 获取路由参数
+func (r *Router) GetParams(path string) map[string]string {
+	return getParams(r.Service, path)
+}
+
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
 		MapPath: make(map[string]map[string]string),
-		Routers: make([]*Router, 0, 1),
+		Routers: make(map[string]*Router),
 	}
 	return r
 }
 
+func (h *Routers) GetRouter(path string) *Router {
+	if r, ok := h.Routers[path]; ok {
+		return r
+	}
+	return nil
+}
+
 //Append 添加路由信息
 func (h *Routers) Append(path string, service string, action []string, opts ...Option) *Routers {
-	h.Routers = append(h.Routers, NewRouter(path, service, action, opts...))
+	r := NewRouter(path, service, action, opts...)
+	h.Routers[path] = r
+	h.tree = NewTree(h.GetPath()...)
 	return h
 }
 
 //Match 根据请求路径匹配指定的路由配置
 func (h *Routers) Match(path string, method string) (*Router, error) {
-	for _, r := range h.Routers {
-		if r.Path == path && types.StringContains(r.Action, method) {
+	path, matched := h.tree.Match(path, "")
+	if !matched {
+		return nil, fmt.Errorf("未找到与[%s]匹配的路由", path)
+	}
+
+	if r, ok := h.Routers[path]; ok {
+		if types.StringContains(r.Action, method) {
 			return r, nil
 		}
 	}
+
 	return nil, fmt.Errorf("未找到与[%s][%s]匹配的路由", path, method)
 }
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/micro-plat/hydra/components"
 	"github.com/micro-plat/lib4go/types"
 )
 
@@ -32,29 +31,25 @@ func RASAuth() Handler {
 
 		ctx.Response().AddSpecial("ras")
 		err = ctx.Request().GetError()
-		input := ctx.Request().GetMap()
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
-		input["__auth_"], err = auth.AuthString()
+		authStr, err := auth.AuthString()
 		if err != nil {
 			ctx.Response().Abort(http.StatusInternalServerError, err)
 			return
 		}
-		respones, err := components.Def.RPC().GetRegularRPC().Request(auth.Service, input)
-		if err != nil {
-			ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("rpc远程认证异常:err:%v", err))
-			return
-		}
-		if !respones.IsSuccess() {
-			ctx.Response().Abort(types.GetMax(respones.GetStatus(), http.StatusForbidden), fmt.Errorf("远程认证失败:%s,(%d)", respones.GetResult(), respones.GetStatus()))
-			return
-		}
+		ctx.Request().SetValue("__auth_", authStr)
 
+		respones := ctx.Invoke(auth.Service)
+		if !respones.IsSuccess() {
+			ctx.Response().Abort(types.GetMax(respones.GetStatus(), http.StatusForbidden), fmt.Errorf("RAS认证失败:%s,(%d)", respones.GetResult(), respones.GetStatus()))
+			return
+		}
 		result := respones.GetStatus()
 		if result != 200 {
-			ctx.Response().Abort(http.StatusForbidden, fmt.Errorf("远程请求结果解析错误 %w", err))
+			ctx.Response().Abort(http.StatusForbidden, fmt.Errorf("RAS认证请求结果解析错误 %w", err))
 			return
 		}
 

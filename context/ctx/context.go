@@ -113,7 +113,12 @@ func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	case global.ProtoRPC:
 		return internal.CallRPC(c, addr)
 	case global.ProtoInvoker:
-		return services.Def.Invoke(c, addr)
+		router, err := c.Request().Path().GetRouter(addr)
+		if err != nil {
+			return pkgs.NewRspns(err)
+		}
+		c.Request().Path().Params().MergeSMap(router.GetParams(addr))
+		return services.Def.Invoke(c, router.Service)
 	}
 	return pkgs.NewRspns(fmt.Errorf("不支持服务类型%s(%s)", proto, service))
 }

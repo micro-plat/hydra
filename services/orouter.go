@@ -91,14 +91,12 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 		if err != nil {
 			return nil, err
 		}
-		tmplist := make([]*router.Router, len(routers))
-		for i, r := range routers {
+		for _, r := range routers {
 			var t = *r
-			tmplist[i] = &t
-			tmplist[i].Path = fmt.Sprintf("%s%s", prefix, r.Path)
-			s.fillActs(tmplist[i])
+			t.Path = fmt.Sprintf("%s%s", prefix, r.Path)
+			s.fillActs(&t)
+			s.routers.Append(t.Path, t.Service, t.Action)
 		}
-		s.routers.Routers = append(s.routers.Routers, tmplist...)
 	}
 
 	return s.routers, nil

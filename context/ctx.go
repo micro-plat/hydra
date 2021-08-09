@@ -9,6 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
@@ -101,7 +102,7 @@ type IPath interface {
 	GetMethod() string
 
 	//GetService 获取服务名称(不包括$method)
-	GetService() string
+	GetService(path ...string) string
 
 	//FormatService 通过ProcessorConf 格式化服务名
 	FormatService(service string) string
@@ -131,6 +132,8 @@ type IPath interface {
 	AllowFallback() bool
 
 	GetEncoding() string
+
+	GetRouter(path string) (*router.Router, error)
 }
 
 //IVariable 参与变量
