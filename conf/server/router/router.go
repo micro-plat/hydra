@@ -28,10 +28,9 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
-	MapPath       map[string]map[string]string `json:"-"`
-	ServicePrefix string                       `json:"-"`
-	tree          *Node                        `json:"-"`
+	Routers       []*Router `json:"routers,omitempty" toml:"routers,omitempty"`
+	ServicePrefix string    `json:"-"`
+	tree          *Node     `json:"-"`
 }
 
 func (h *Routers) String() string {
@@ -96,7 +95,6 @@ func (r *Router) GetParams(path string) map[string]string {
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
-		MapPath: make(map[string]map[string]string),
 		Routers: make([]*Router, 0),
 	}
 	return r
