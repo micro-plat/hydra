@@ -87,6 +87,7 @@ func (s *ORouter) Remove(path string) {
 //BuildRouters 根据前缀处理路由数据
 func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 	s.routers = router.NewRouters()
+	s.mapPath = make(map[string]map[string]string)
 	s.routers.ServicePrefix = prefix
 	for _, prouter := range s.pathRouters {
 		routers, err := prouter.GetRouters()
@@ -94,7 +95,7 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 			return nil, err
 		}
 		for _, r := range routers {
-			var t = *r
+			t := *r
 			t.Path = fmt.Sprintf("%s%s", prefix, r.Path)
 			s.fillActs(&t)
 			s.routers.Append(t.Path, t.Service, t.Action)
