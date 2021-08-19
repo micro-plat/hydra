@@ -94,7 +94,7 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 			return nil, err
 		}
 		for _, r := range routers {
-			var t = *r
+			t := *r
 			t.Path = fmt.Sprintf("%s%s", prefix, r.Path)
 			s.fillActs(&t)
 			s.routers.Append(t.Path, t.Service, t.Action)
