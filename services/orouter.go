@@ -55,6 +55,7 @@ type ORouter struct {
 	name        string
 	routers     *router.Routers
 	pathRouters map[string]*pathRouter
+	mapPath     map[string]map[string]string
 }
 
 //NewORouter 构建路由管理器
@@ -63,6 +64,7 @@ func NewORouter(name string) *ORouter {
 		name:        name,
 		routers:     router.NewRouters(),
 		pathRouters: make(map[string]*pathRouter),
+		mapPath:     make(map[string]map[string]string),
 	}
 }
 
@@ -103,14 +105,14 @@ func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 }
 
 func (s *ORouter) fillActs(r *router.Router) {
-	array, ok := s.routers.MapPath[r.Path]
+	array, ok := s.mapPath[r.Path]
 	if !ok {
 		array = make(map[string]string)
 	}
 	for i := range r.Action {
 		array[r.Action[i]] = r.Service
 	}
-	s.routers.MapPath[r.Path] = array
+	s.mapPath[r.Path] = array
 }
 
 //GetRouters 获取所有路由配置
