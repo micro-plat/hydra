@@ -24,11 +24,11 @@ const (
 type BasicAuth struct {
 	security.ConfEncrypt
 	//Excludes 排除路径列表
-	Excludes        []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	Members         map[string]string `json:"members,omitempty" toml:"members,omitempty"`
-	Disable         bool              `json:"disable,omitempty" toml:"disable,omitempty"`
-	Invoker         string            `json:"invoker,omitempty" toml:"invoker,omitempty"`
-	invoker         *pkgs.Invoker     `json:"-"`
+	Excludes        []string      `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Members         []*member     `json:"members,omitempty" toml:"members,omitempty"`
+	Disable         bool          `json:"disable,omitempty" toml:"disable,omitempty"`
+	Invoker         string        `json:"invoker,omitempty" toml:"invoker,omitempty"`
+	invoker         *pkgs.Invoker `json:"-"`
 	*conf.PathMatch `json:"-"`
 	authorization   []*auth `json:"-"`
 }
@@ -37,7 +37,7 @@ type BasicAuth struct {
 func NewBasic(opts ...Option) *BasicAuth {
 	basic := &BasicAuth{
 		Excludes: make([]string, 0, 1),
-		Members:  make(map[string]string),
+		Members:  make([]*member, 0),
 	}
 	for _, opt := range opts {
 		opt(basic)
