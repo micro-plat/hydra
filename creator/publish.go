@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/manifoldco/promptui"
 	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/conf/server"
 	varpub "github.com/micro-plat/hydra/conf/vars"
@@ -35,7 +34,6 @@ func (c *conf) Pub(platName string, systemName string, clusterName string, regis
 	if err != nil {
 		return err
 	}
-
 	confs := make(map[string]interface{})
 	cache := types.XMap{}
 	//加入server配置
@@ -105,7 +103,7 @@ func publish(r registry.IRegistry, path string, v interface{}, input types.XMap)
 		if err != nil {
 			return err
 		}
-		if !checkCover(path, string(buff)) { //不覆盖配置则退出
+		if !checkCover(path, string(buff), v) { //不覆盖配置则退出
 			return nil
 		}
 		delete = true
@@ -194,25 +192,19 @@ func getJSON(path string, v interface{}, input types.XMap) (value string, err er
 
 var coverAll, ignoreAll bool
 
-func checkCover(path string, v string) (cover bool) {
+func checkCover(path, v string, s interface{}) (cover bool) {
 	if coverAll {
 		return true
 	}
 	if ignoreAll {
-		return
+		return false
 	}
-	y := fmt.Sprintf("Yes, 覆盖(使用%s最新配置)", path)
-	n := fmt.Sprintf("No, 不覆盖(使用%s已有配置)", path)
-	yall := "覆盖所有存在的配置"
-	nall := "跳过不覆盖所有存在的配置"
-	prompt := promptui.Select{
-		Label: fmt.Sprintf("是否覆盖已存在的配置?(%s)%s", path, v),
-		Items: []string{n, y, nall, yall},
-	}
-	_, result, err := prompt.Run()
-	if err == nil && result == y {
+
+	prompt := newPrompt(path, v, s)
+	result, _, err := prompt.Run()
+	if err == nil && result == 1 {
 		return true
 	}
-	coverAll, ignoreAll = result == yall, result == nall
+	coverAll, ignoreAll = result == 2, result == 3
 	return
 }
