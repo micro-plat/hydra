@@ -127,7 +127,7 @@ github.com/mholt/archiver
 ## explicit
 github.com/micro-plat/gmq/mqtt
 github.com/micro-plat/gmq/mqtt/client
-# github.com/micro-plat/lib4go v1.1.7
+# github.com/micro-plat/lib4go v1.1.7 => ../../../github.com/micro-plat/lib4go
 ## explicit
 github.com/micro-plat/lib4go/assert
 github.com/micro-plat/lib4go/concurrent/cmap
@@ -184,6 +184,9 @@ github.com/robfig/cron/v3
 github.com/russross/blackfriday/v2
 # github.com/samuel/go-zookeeper v0.0.0-20200724154423-2164a8ac840e
 github.com/samuel/go-zookeeper/zk
+# github.com/sergi/go-diff v1.2.0
+## explicit
+github.com/sergi/go-diff/diffmatchpatch
 # github.com/shopspring/decimal v1.2.0
 github.com/shopspring/decimal
 # github.com/shurcooL/sanitized_anchor_name v1.0.0

@@ -343,13 +343,19 @@ func (q XMap) GetArray(name string, def ...interface{}) (r []interface{}) {
 	if !ok && len(def) > 0 || v == nil {
 		return def
 	}
-
 	s := reflect.ValueOf(v)
-	r = make([]interface{}, 0, s.Len())
-	for i := 0; i < s.Len(); i++ {
-		r = append(r, s.Index(i).Interface())
+	t := reflect.TypeOf(v)
+	if t.Kind() == reflect.Array || t.Kind() == reflect.Slice {
+		r = make([]interface{}, 0, s.Len())
+		for i := 0; i < s.Len(); i++ {
+			r = append(r, s.Index(i).Interface())
+		}
+		return r
 	}
-	return r
+	if v == "[]" {
+		return []interface{}{}
+	}
+	return []interface{}{v}
 }
 
 //Marshal 转换为json数据

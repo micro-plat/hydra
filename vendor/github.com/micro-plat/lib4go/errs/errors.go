@@ -49,6 +49,12 @@ func (a *Error) As(target interface{}) bool {
 func NewErrorf(code int, f string, args ...interface{}) *Error {
 	return NewError(code, fmt.Errorf(f, args...))
 }
+func New(f string, err1 interface{}, err ...interface{}) *Error {
+	errs := make([]interface{}, 0, 1+len(err))
+	errs = append(errs, err1)
+	errs = append(errs, err...)
+	return NewErrorf(GetCode(err1, 400), f, errs...)
+}
 
 //NewError 创建错误对象
 func NewError(code int, err interface{}) *Error {
@@ -56,10 +62,10 @@ func NewError(code int, err interface{}) *Error {
 	switch v := err.(type) {
 	case string:
 		r.error = errors.New(v)
-	case error:
-		r.error = v
 	case IError:
 		r.error = v.GetError()
+	case error:
+		r.error = v
 	default:
 		r.error = errors.New(fmt.Sprint(err))
 	}
@@ -69,8 +75,11 @@ func NewError(code int, err interface{}) *Error {
 //GetCode 获取错误码
 func GetCode(err interface{}, def ...int) int {
 	switch v := err.(type) {
+	case IResult:
+		return v.GetCode()
 	case IError:
 		return v.GetCode()
+
 	default:
 		return types.GetIntByIndex(def, 0, 0)
 	}
