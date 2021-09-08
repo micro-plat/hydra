@@ -1,4 +1,4 @@
-// +build dev
+// +build db
 
 package hydra
 
