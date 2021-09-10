@@ -1,4 +1,4 @@
-// +build dev
+// +build db
 
 //数据库安装存在一定的风险，特别是SQL语句中包含有删除表，修改表等指令
 //所以编译项目时只有明确指定tags为"dev"时，才将此功能编译进二进制文件(go install -tags="dev")
