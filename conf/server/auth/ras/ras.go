@@ -22,7 +22,7 @@ type RASAuth struct {
 	security.ConfEncrypt
 	Disable         bool     `json:"disable,omitempty" toml:"disable,omitempty"`
 	Auth            []*Auth  `json:"auth" toml:"auth"`
-	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Excludes        []string `json:"excludes,omitempty" toml:"excludes,omitempty"`
 	*conf.PathMatch `json:"-" toml:"-"`
 }
 
