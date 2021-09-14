@@ -26,6 +26,9 @@ const Consul = "consul"
 //Redis redis
 const Redis = "redis"
 
+//Mysql mysql
+const Mysql = "mysql"
+
 //IRegistry 注册中心接口
 type IRegistry interface {
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)

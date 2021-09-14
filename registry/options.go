@@ -19,6 +19,7 @@ type Options struct {
 	Logger      logger.ILogging
 	Metadata    map[string]string
 	PoolSize    int
+	FlushTime   time.Duration
 }
 
 type AuthCreds struct {
@@ -100,5 +101,12 @@ func WithDB(db int) Option {
 func WithDialTimeout(timeout int) Option {
 	return func(o *Options) {
 		o.DialTimeout = timeout
+	}
+}
+
+//WithFlush mysql拉取数据间隔
+func WithFlushTime(time time.Duration) Option {
+	return func(o *Options) {
+		o.FlushTime = time
 	}
 }

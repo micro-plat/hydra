@@ -37,3 +37,10 @@ func WithEnableEncryption() Option {
 		a.EnableEncryption = true
 	}
 }
+
+//WithExcludes 排除加密路径
+func WithExcludes(p ...string) Option {
+	return func(a *RASAuth) {
+		a.Excludes = p
+	}
+}

@@ -13,7 +13,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.0
 	github.com/gmallard/stompngo v1.0.13 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/protobuf v1.4.3
