@@ -34,8 +34,10 @@ where t.path = @path
 `
 
 const delete = `
-delete from hydra_registry_info
-where path=@path
+update hydra_registry_info t
+set t.delete_time = now(),
+t.is_delete = 0
+where t.path=@path
 `
 
 const update = `
@@ -54,4 +56,25 @@ select t.path,t.value,t.data_version
 from hydra_registry_info t
 where
 t.path like '#path%'
+`
+const getValueChange = `
+select t.path,t.value,t.data_version
+from hydra_registry_info t
+where
+t.path in(#path) and t.update_time > date_add(now(),interval -1*#sec second)
+`
+const getChildrenChange = `
+select t.path,t.value,t.data_version
+from hydra_registry_info t
+where
+t.path like '#path%'
+and (t.create_time > date_add(now(),interval -1*#sec second) or t.delete_time > date_add(now(),interval -1*#sec second))
+and limit 1
+`
+const aclUpdate = `
+update hydra_registry_info t
+set
+t.update_time = now(),
+t.acl_version = t.acl_version + 1
+where t.path in(#path)
 `

@@ -9,13 +9,7 @@ import (
 
 //CreatePersistentNode 创建永久节点
 func (r *DBR) CreatePersistentNode(path string, data string) (err error) {
-	count, err := r.db.Execute(createNode, map[string]interface{}{
-		"path":         path,
-		"value":        data,
-		"data_version": 1,
-		"acl_version":  1,
-		"temp":         1,
-	})
+	count, err := r.db.Execute(createNode, newInputByInsert(path, data, false))
 	if err != nil || count < 1 {
 		return errs.New("创建节点错误:%+v,count:%d", err, count)
 	}
@@ -25,17 +19,11 @@ func (r *DBR) CreatePersistentNode(path string, data string) (err error) {
 
 //CreateTempNode 创建临时节点
 func (r *DBR) CreateTempNode(path string, data string) (err error) {
-	count, err := r.db.Execute(createNode, map[string]interface{}{
-		"path":         path,
-		"value":        data,
-		"data_version": 1,
-		"acl_version":  1,
-		"temp":         0,
-	})
+	count, err := r.db.Execute(createNode, newInputByInsert(path, data, true))
 	if err != nil || count < 1 {
 		return errs.New("创建节点错误:%+v,count:%d", err, count)
 	}
-	r.tmpNodes.Set(path, 0)
+	r.tmpNodes.Append(path)
 	r.notifyParentChange(path, 1)
 	return nil
 }

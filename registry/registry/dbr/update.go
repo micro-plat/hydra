@@ -10,9 +10,7 @@ import (
 func (r *DBR) Update(path string, data string) (err error) {
 
 	//获取原数据
-	datas, err := r.db.Query(getValue, map[string]interface{}{
-		"path": path,
-	})
+	datas, err := r.db.Query(getValue, newInput(path))
 	if err != nil {
 		return err
 	}
@@ -20,17 +18,13 @@ func (r *DBR) Update(path string, data string) (err error) {
 		return fmt.Errorf("数据不存在")
 	}
 
-	count, err := r.db.Execute(update, map[string]interface{}{
-		"path":         path,
-		"value":        data,
-		"data_version": datas.Get(0).GetInt32("data_version"),
-	})
+	count, err := r.db.Execute(update, newInputByUpdate(path, data, datas.Get(0).GetInt32("data_version")))
 
 	if err != nil || count < 1 {
 		return errs.New("更新节点错误:%+v,count:%d", err, count)
 	}
 
 	//通知变更
-	r.notifyValueChange(path, data)
+	r.notifyValueChange(path, data, datas.Get(0).GetInt32("data_version"))
 	return nil
 }

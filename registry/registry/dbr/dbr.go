@@ -2,80 +2,49 @@ package dbr
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/micro-plat/hydra/components/dbs"
 	xdb "github.com/micro-plat/hydra/conf/vars/db"
 	r "github.com/micro-plat/hydra/registry"
-	"github.com/micro-plat/hydra/registry/registry/dbr/internal/client"
-	"github.com/micro-plat/hydra/registry/registry/dbr/internal/river"
-	"github.com/micro-plat/hydra/registry/registry/dbr/internal/watcher"
-	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/db"
 )
 
 type DBR struct {
-	db                  dbs.IDB
-	seqValue            int32
-	tmpNodes            cmap.ConcurrentMap
-	valueWatcherMaps    map[string]*valueWatcher
-	childrenWatcherMaps map[string]*childrenWatcher
-	closeCh             chan struct{}
-	watcher             *watcher.Watcher
-	client              *client.Client
-	done                bool
+	db               dbs.IDB
+	seqValue         int32
+	tmpNodes         *tmpNodeWatchers
+	valueWatchers    *valueWatchers
+	childrenWatchers *childrenWatchers
 }
 
 func NewDBR(c *xdb.DB, o *r.Options) (*DBR, error) {
-	obj, err := db.NewDB(c.Provider, c.ConnString, c.MaxOpen, c.MaxIdle, c.LifeTime)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg := &river.Config{
-		DBConf:        c,
-		FlushBulkTime: time.Millisecond * o.FlushTime,
-	}
-
-	watcher, err := watcher.NewWatcher(cfg)
+	db, err := db.NewDB(c.Provider, c.ConnString, c.MaxOpen, c.MaxIdle, c.LifeTime)
 	if err != nil {
 		return nil, err
 	}
 
 	return &DBR{
-		db:                  obj,
-		seqValue:            10000,
-		tmpNodes:            cmap.New(4),
-		watcher:             watcher,
-		client:              watcher.GetClient(),
-		valueWatcherMaps:    make(map[string]*valueWatcher),
-		childrenWatcherMaps: make(map[string]*childrenWatcher),
+		db:               db,
+		seqValue:         10000,
+		tmpNodes:         newTmpNodeWatchers(db),
+		valueWatchers:    newValueWatchers(db),
+		childrenWatchers: newChildrenWatchers(db),
 	}, nil
 }
 
 //Close 关闭当前服务
 func (r *DBR) Start() error {
-	go func() {
-		r.watcher.Watch()
-		for {
-			select {
-			case <-r.closeCh:
-				r.watcher.Close()
-				return
-			}
-		}
-	}()
+	go r.valueWatchers.Start()
+	go r.childrenWatchers.Start()
+	go r.tmpNodes.Start()
 	return nil
 }
 
 //Close 关闭当前服务
 func (r *DBR) Close() error {
-	if r.done {
-		return nil
-	}
-	r.done = true
-	close(r.closeCh)
-	r.tmpNodes.Clear()
+	r.valueWatchers.Close()
+	r.childrenWatchers.Close()
+	r.tmpNodes.Close()
 	return nil
 }
 

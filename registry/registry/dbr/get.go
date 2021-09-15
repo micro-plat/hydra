@@ -7,9 +7,7 @@ import (
 
 //GetValue 获取节点值
 func (r *DBR) GetValue(path string) (data []byte, version int32, err error) {
-	datas, err := r.db.Query(getValue, map[string]interface{}{
-		"path": path,
-	})
+	datas, err := r.db.Query(getValue, newInput(path))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -21,9 +19,7 @@ func (r *DBR) GetValue(path string) (data []byte, version int32, err error) {
 
 //GetChildren 获取所有子节点
 func (r *DBR) GetChildren(path string) (paths []string, version int32, err error) {
-	datas, err := r.db.Query(getChildren, map[string]interface{}{
-		"path": path,
-	})
+	datas, err := r.db.Query(getChildren, newInput(path))
 	if err != nil {
 		return nil, 0, err
 	}

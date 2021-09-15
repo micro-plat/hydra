@@ -1,34 +1,40 @@
 package dbr
 
-type valueEntity struct {
-	Value   []byte
-	version int32
-	path    string
-	Err     error
-}
-type childrenEntity struct {
-	children []string
-	version  int32
-	path     string
-	Err      error
+import (
+	"strings"
+
+	"github.com/micro-plat/lib4go/types"
+)
+
+type input map[string]interface{}
+
+func newInput(path string) input {
+	return map[string]interface{}{
+		"path": path,
+	}
 }
 
-func (v *valueEntity) GetPath() string {
-	return v.path
-}
-func (v *valueEntity) GetValue() ([]byte, int32) {
-	return v.Value, v.version
-}
-func (v *valueEntity) GetError() error {
-	return v.Err
+func newInputByWatch(sec int, path ...string) input {
+	return map[string]interface{}{
+		"path": `"` + strings.Join(path, `","`) + `"`,
+		"sec":  sec,
+	}
 }
 
-func (v *childrenEntity) GetValue() ([]string, int32) {
-	return v.children, v.version
+func newInputByUpdate(path string, value string, version int32) input {
+	return map[string]interface{}{
+		"path":         path,
+		"value":        value,
+		"data_version": version,
+	}
 }
-func (v *childrenEntity) GetError() error {
-	return v.Err
-}
-func (v *childrenEntity) GetPath() string {
-	return v.path
+
+func newInputByInsert(path string, value string, temp bool) input {
+	return map[string]interface{}{
+		"path":         path,
+		"temp":         types.DecodeInt(temp, true, 1, 0),
+		"value":        value,
+		"data_version": 1,
+		"acl_version":  1,
+	}
 }
