@@ -1,25 +1,16 @@
 package registry
 
 import (
-	"crypto/tls"
-	"time"
-
 	"github.com/micro-plat/lib4go/logger"
 )
 
 type Options struct {
-	Domain      string
-	MasterName  string
-	Addrs       []string
-	Timeout     time.Duration
-	DialTimeout int
-	Db          int
-	TLSConfig   *tls.Config
-	Auth        *AuthCreds
-	Logger      logger.ILogging
-	Metadata    map[string]string
-	PoolSize    int
-	FlushTime   time.Duration
+	Domain   string
+	Addrs    []string
+	Auth     *AuthCreds
+	Logger   logger.ILogging
+	Metadata map[string]string
+	PoolSize int
 }
 
 type AuthCreds struct {
@@ -33,17 +24,6 @@ type Option func(*Options)
 func Addrs(addrs ...string) Option {
 	return func(o *Options) {
 		o.Addrs = addrs
-	}
-}
-
-func Timeout(t time.Duration) Option {
-	return func(o *Options) {
-		o.Timeout = t
-	}
-}
-func TLSConfig(cfg *tls.Config) Option {
-	return func(o *Options) {
-		o.TLSConfig = cfg
 	}
 }
 
@@ -80,33 +60,5 @@ func Metadata(key, val string) Option {
 func WithDomain(domain string) Option {
 	return func(o *Options) {
 		o.Domain = domain
-	}
-}
-
-//WithMaster 设置哨兵服务器
-func WithMaster(master string) Option {
-	return func(o *Options) {
-		o.MasterName = master
-	}
-}
-
-//WithDB 设置数据库
-func WithDB(db int) Option {
-	return func(o *Options) {
-		o.Db = db
-	}
-}
-
-//WithDialTimeout 设置连接超时时长
-func WithDialTimeout(timeout int) Option {
-	return func(o *Options) {
-		o.DialTimeout = timeout
-	}
-}
-
-//WithFlush mysql拉取数据间隔
-func WithFlushTime(time time.Duration) Option {
-	return func(o *Options) {
-		o.FlushTime = time
 	}
 }

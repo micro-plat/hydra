@@ -22,9 +22,9 @@ import (
 
 	_ "github.com/micro-plat/hydra/hydra/cmds/restart"
 
+	_ "github.com/micro-plat/hydra/registry/registry/dbr"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
 	_ "github.com/micro-plat/hydra/registry/registry/localmemory"
-	_ "github.com/micro-plat/hydra/registry/registry/mysql"
 	_ "github.com/micro-plat/hydra/registry/registry/redis"
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 )

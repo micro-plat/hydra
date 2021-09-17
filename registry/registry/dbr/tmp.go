@@ -9,18 +9,20 @@ import (
 )
 
 type tmpNodeWatchers struct {
-	pths    cmap.ConcurrentMap
-	db      dbs.IDB
-	lk      sync.Mutex
-	closeCh chan struct{}
-	once    sync.Once
+	pths       cmap.ConcurrentMap
+	db         dbs.IDB
+	sqltexture *sqltexture
+	lk         sync.Mutex
+	closeCh    chan struct{}
+	once       sync.Once
 }
 
-func newTmpNodeWatchers(db dbs.IDB) *tmpNodeWatchers {
+func newTmpNodeWatchers(db dbs.IDB, sqltexture *sqltexture) *tmpNodeWatchers {
 	return &tmpNodeWatchers{
-		db:      db,
-		pths:    cmap.New(2),
-		closeCh: make(chan struct{}),
+		db:         db,
+		sqltexture: sqltexture,
+		pths:       cmap.New(2),
+		closeCh:    make(chan struct{}),
 	}
 }
 
@@ -33,7 +35,7 @@ func (v *tmpNodeWatchers) Start() {
 		select {
 		case <-tk:
 			path := v.pths.Keys()
-			v.db.Execute(aclUpdate, newInputByWatch(3, path...))
+			v.db.Execute(v.sqltexture.aclUpdate, newInputByWatch(3, path...))
 		case <-v.closeCh:
 			return
 		}

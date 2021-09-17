@@ -16,6 +16,7 @@ require (
 	github.com/gin-gonic/gin v1.7.0
 	github.com/gmallard/stompngo v1.0.13 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
@@ -47,3 +48,5 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
+
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

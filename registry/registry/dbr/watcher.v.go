@@ -10,20 +10,22 @@ import (
 )
 
 type valueWatchers struct {
-	db       dbs.IDB
-	lk       sync.Mutex
-	watchers map[string][]chan registry.ValueWatcher
-	pths     cmap.ConcurrentMap
-	closeCh  chan struct{}
-	once     sync.Once
+	db         dbs.IDB
+	lk         sync.Mutex
+	sqltexture *sqltexture
+	watchers   map[string][]chan registry.ValueWatcher
+	pths       cmap.ConcurrentMap
+	closeCh    chan struct{}
+	once       sync.Once
 }
 
-func newValueWatchers(db dbs.IDB) *valueWatchers {
+func newValueWatchers(db dbs.IDB, sqltexture *sqltexture) *valueWatchers {
 	return &valueWatchers{
-		db:       db,
-		watchers: make(map[string][]chan registry.ValueWatcher),
-		pths:     cmap.New(2),
-		closeCh:  make(chan struct{}),
+		db:         db,
+		sqltexture: sqltexture,
+		watchers:   make(map[string][]chan registry.ValueWatcher),
+		pths:       cmap.New(2),
+		closeCh:    make(chan struct{}),
 	}
 }
 func (v *valueWatchers) Start() {
@@ -32,10 +34,10 @@ func (v *valueWatchers) Start() {
 		select {
 		case <-tk:
 			path := v.pths.Keys()
-			data, err := v.db.Query(getValueChange, newInputByWatch(3, path...))
+			data, err := v.db.Query(v.sqltexture.getValueChange, newInputByWatch(3, path...))
 			if err == nil {
 				for _, r := range data {
-					go v.Notify(r.GetString("path"), r.GetInt32("version"), r.GetString("value"))
+					go v.Notify(r.GetString(FieldPath), r.GetInt32(FieldDataVersion), r.GetString(FieldValue))
 				}
 			}
 		case <-v.closeCh:
