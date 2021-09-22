@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Autor: taoshouyin
+ * @Date: 2021-09-18 09:36:32
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-18 09:38:51
+-->
 ###  1. 注册中心[hydra_registry_info]
 
 | 字段名       | 类型           | 默认值  | 为空  |  约束  | 描述       |

@@ -1,6 +1,15 @@
+/*
+ * @Description:
+ * @Autor: taoshouyin
+ * @Date: 2021-09-18 09:36:32
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-18 10:56:15
+ */
 package dbr
 
 import (
+	"fmt"
+
 	"github.com/micro-plat/hydra/components/dbs"
 	xdb "github.com/micro-plat/hydra/conf/vars/db"
 	"github.com/micro-plat/hydra/conf/vars/db/mysql"
@@ -72,7 +81,10 @@ func (z *dbrFactory) Create(opts ...r.Option) (r.IRegistry, error) {
 		sqltexture = &mysqltexture
 		dbConf = mysql.NewBy(z.opts.Auth.Username, z.opts.Auth.Password, z.opts.Addrs[0], z.opts.Metadata["db"], xdb.WithConnect(10, 6, 900))
 	case ORACLE:
+		sqltexture = &oracletexture
 		dbConf = oracle.NewBy(z.opts.Auth.Username, z.opts.Auth.Password, z.opts.Addrs[0], xdb.WithConnect(10, 6, 900))
+	default:
+		return nil, fmt.Errorf("未知类型的数据库注册中心,%s", z.proto)
 
 	}
 
@@ -92,6 +104,6 @@ var ORACLE = "oracle"
 
 func init() {
 	r.Register(MYSQL, &dbrFactory{proto: MYSQL, opts: &r.Options{}})
-	// r.Register(ORACLE, &dbrFactory{proto: ORACLE, opts: &r.Options{}})//暂未提供SQL
+	r.Register(ORACLE, &dbrFactory{proto: ORACLE, opts: &r.Options{}}) //暂未提供SQL
 
 }
