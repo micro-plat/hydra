@@ -168,7 +168,6 @@ func init() {
 	where t.path like '#path%'
 	and (t.create_time > sysdate -1*#sec/24/60/60 
 		or(t.is_delete = 0 and t.update_time > sysdate -1*#sec/24/60/60 ))
-	and limit 1
 	`
 
 	oracletexture.aclUpdate = `

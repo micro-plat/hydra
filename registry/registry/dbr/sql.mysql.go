@@ -137,7 +137,6 @@ func init() {
 	where t.path like '#path%'
 	and (t.create_time > date_add(now(),interval -1*#sec second) 
 		or(t.is_delete = 0 and t.update_time > date_add(now(),interval -1*#sec second)))
-	and limit 1
 	`
 
 	mysqltexture.aclUpdate = `
