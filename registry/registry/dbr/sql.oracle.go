@@ -63,6 +63,7 @@ func init() {
 
 	oracletexture.createNode = `
 	insert into hydra_registry_info(
+		id,
 		path,
 		value,
 		is_temp,
@@ -72,6 +73,7 @@ func init() {
 		update_time 
 	)
 	select
+		SEQ_HYDRA_REGISTRY_INFO_ID.Nextval,
 		@path,
 		@value,
 		@is_temp,
