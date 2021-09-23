@@ -53,10 +53,11 @@ func (v *childrenWatchers) Start() {
 func (v *childrenWatchers) Watch(path string) chan registry.ChildrenWatcher {
 	v.lk.Lock()
 	defer v.lk.Unlock()
-	if _, ok := v.watchers[path]; !ok {
+	if _, ok := v.watchers[path]; ok {
 		v.watchers[path] = make([]chan registry.ChildrenWatcher, 0, 1)
+		v.pths.SetIfAbsent(path, 0)
 	}
-	ch := make(chan registry.ChildrenWatcher)
+	ch := make(chan registry.ChildrenWatcher, 1)
 	v.watchers[path] = append(v.watchers[path], ch)
 	return ch
 }
@@ -69,6 +70,7 @@ func (v *childrenWatchers) Notify(path string, version int32, paths ...string) {
 		return
 	}
 	for _, ch := range v.watchers[path] {
+		v.pths.Remove(path)
 		ch <- &childrenEntity{version: version, path: path}
 		close(ch)
 	}
@@ -83,6 +85,7 @@ func (v *childrenWatchers) Error(path string, err error) {
 		return
 	}
 	for _, ch := range v.watchers[path] {
+		v.pths.Remove(path)
 		ch <- &childrenEntity{Err: err}
 		close(ch)
 	}

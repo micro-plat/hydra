@@ -132,4 +132,10 @@ func init() {
 	where t.path in (#path)
 	and t.is_delete = 1
 	`
+
+	oracletexture.clearTmpNode = `
+	delete from hydra_registry_info
+	where path in (#path)
+	and is_temp = 0
+	`
 }

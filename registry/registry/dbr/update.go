@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Autor: taoshouyin
+ * @Date: 2021-09-18 09:36:32
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-23 16:14:33
+ */
 package dbr
 
 import (
@@ -19,7 +26,6 @@ func (r *DBR) Update(path string, data string) (err error) {
 	}
 
 	count, err := r.db.Execute(r.sqltexture.update, newInputByUpdate(path, data, datas.Get(0).GetInt32(FieldDataVersion)))
-
 	if err != nil || count < 1 {
 		return errs.New("更新节点错误:%+v,count:%d", err, count)
 	}

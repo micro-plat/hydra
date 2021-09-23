@@ -12,6 +12,7 @@ type sqltexture struct {
 	getChildrenChange string
 	getValueChange    string
 	aclUpdate         string
+	clearTmpNode      string
 }
 
 var mysqltexture sqltexture
@@ -144,5 +145,11 @@ func init() {
 	t.update_time = now() 
 	where t.path in (#path)
 	and t.is_delete = 1
+	`
+
+	mysqltexture.clearTmpNode = `
+	delete from hydra_registry_info
+	where path in (#path)
+	and is_temp = 0
 	`
 }

@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 09:36:32
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-18 10:56:15
+ * @LastEditTime: 2021-09-23 15:17:53
  */
 package dbr
 
@@ -105,5 +105,4 @@ var ORACLE = "oracle"
 func init() {
 	r.Register(MYSQL, &dbrFactory{proto: MYSQL, opts: &r.Options{}})
 	r.Register(ORACLE, &dbrFactory{proto: ORACLE, opts: &r.Options{}}) //暂未提供SQL
-
 }

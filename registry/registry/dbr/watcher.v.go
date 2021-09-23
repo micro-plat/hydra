@@ -54,7 +54,7 @@ func (v *valueWatchers) Watch(path string) chan registry.ValueWatcher {
 		v.watchers[path] = make([]chan registry.ValueWatcher, 0, 1)
 		v.pths.SetIfAbsent(path, 0)
 	}
-	ch := make(chan registry.ValueWatcher)
+	ch := make(chan registry.ValueWatcher, 1)
 	v.watchers[path] = append(v.watchers[path], ch)
 	return ch
 }

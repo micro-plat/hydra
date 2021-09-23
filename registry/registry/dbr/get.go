@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 09:36:32
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-22 11:52:04
+ * @LastEditTime: 2021-09-23 15:43:23
  */
 package dbr
 
@@ -30,13 +30,26 @@ func (r *DBR) GetChildren(path string) (paths []string, version int32, err error
 	if err != nil {
 		return nil, 0, err
 	}
-	paths = make([]string, 0, len(datas))
+	paths = make([]string, 0, len(datas)-1)
+	cache := map[string]bool{}
 	for _, p := range datas {
 		if p.GetString(FieldPath) == path {
+			version = p.GetInt32(FieldDataVersion)
 			continue
 		}
 		np := strings.TrimPrefix(p.GetString(FieldPath), path)
-		paths = append(paths, strings.Trim(strings.Trim(np, path), "/"))
+		np = strings.TrimLeft(np, "/")
+		arryPath := strings.Split(np, "/")
+		if len(arryPath) > 0 {
+			if len(arryPath[0]) > 0 {
+				p := arryPath[0]
+				if ok, _ := cache[p]; ok {
+					continue
+				}
+				cache[p] = true
+				paths = append(paths, p)
+			}
+		}
 	}
-	return paths, datas.Get(0).GetInt32(FieldDataVersion), nil
+	return paths, version, nil
 }
