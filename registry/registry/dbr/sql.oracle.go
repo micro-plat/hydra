@@ -5,18 +5,61 @@ var oracletexture sqltexture
 func init() {
 
 	//以下为oracle
-	oracletexture.createStructure = `CREATE TABLE IF NOT EXISTS hydra_registry_info (
-		id bigint not null auto_increment comment '编号' ,
-		path varchar(64)  not null  comment '路径' ,
-		value varchar(1024)  not null  comment '内容' ,
-		is_temp tinyint default 0 not null  comment '临时节点' ,
-		is_delete tinyint default 1 not null  comment '已删除' ,
-		data_version bigint    comment '数据版本号' ,
-		create_time datetime default current_timestamp not null  comment '创建时间' ,
-		update_time datetime default current_timestamp not null  comment '更新时间' 
-		,primary key (id)
-		,unique index path(path)
-	) ENGINE=InnoDB auto_increment = 100 DEFAULT CHARSET=utf8mb4 COMMENT='注册中心'`
+	oracletexture.createStructure = `
+	create table HYDRA_REGISTRY_INFO
+	(
+	  id           NUMBER(20) not null,
+	  path         VARCHAR2(64) not null,
+	  value        VARCHAR2(1024) not null,
+	  is_temp      NUMBER(2) default 0 not null,
+	  is_delete    NUMBER(2) default 1 not null,
+	  data_version NUMBER(20),
+	  create_time  DATE default sysdate not null,
+	  update_time  DATE default sysdate not null
+	)
+	tablespace USERS
+	  pctfree 10
+	  initrans 1
+	  maxtrans 255;
+	comment on table HYDRA_REGISTRY_INFO
+	  is '注册中心';
+	comment on column HYDRA_REGISTRY_INFO.id
+	  is '编号';
+	comment on column HYDRA_REGISTRY_INFO.path
+	  is '路径';
+	comment on column HYDRA_REGISTRY_INFO.value
+	  is '内容';
+	comment on column HYDRA_REGISTRY_INFO.is_temp
+	  is '临时节点(0:是，1否）';
+	comment on column HYDRA_REGISTRY_INFO.is_delete
+	  is '已删除';
+	comment on column HYDRA_REGISTRY_INFO.data_version
+	  is '数据版本号';
+	comment on column HYDRA_REGISTRY_INFO.create_time
+	  is '创建时间';
+	comment on column HYDRA_REGISTRY_INFO.update_time
+	  is '更新时间';
+	create index IDX_HYDRA_REGISTRY_INFO_PATH on HYDRA_REGISTRY_INFO (PATH)
+	  tablespace USERS
+	  pctfree 10
+	  initrans 2
+	  maxtrans 255;
+	alter table HYDRA_REGISTRY_INFO
+	  add constraint PK_HYDRA_REGISTRY_INFO primary key (ID)
+	  using index 
+	  tablespace USERS
+	  pctfree 10
+	  initrans 2
+	  maxtrans 255;
+
+	  create sequence SEQ_HYDRA_REGISTRY_INFO_ID
+	  minvalue 10000
+	  maxvalue 99999999999999999999
+	  start with 10000
+	  increment by 1
+	  cache 20
+	  cycle;
+	`
 
 	oracletexture.createNode = `
 	insert into hydra_registry_info(
