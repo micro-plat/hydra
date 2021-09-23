@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Autor: taoshouyin
+ * @Date: 2021-09-18 09:36:32
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-22 11:52:04
+ */
 package dbr
 
 import (
@@ -25,6 +32,9 @@ func (r *DBR) GetChildren(path string) (paths []string, version int32, err error
 	}
 	paths = make([]string, 0, len(datas))
 	for _, p := range datas {
+		if p.GetString(FieldPath) == path {
+			continue
+		}
 		np := strings.TrimPrefix(p.GetString(FieldPath), path)
 		paths = append(paths, strings.Trim(strings.Trim(np, path), "/"))
 	}

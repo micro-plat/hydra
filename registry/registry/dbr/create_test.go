@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 11:08:07
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-18 16:04:34
+ * @LastEditTime: 2021-09-22 17:14:22
  */
 package dbr
 
@@ -177,12 +177,12 @@ func TestDBR_CreateSeqNode(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
 			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			go func(wg1 *sync.WaitGroup) {
 				gpath, err := rgt.CreateSeqNode(realPath, data)
 				assert.Equal(t, false, (err != nil), fmt.Sprintf("并发获取数据库注册中心失败,%v", err))
 				createPath[gpath] = true
-			}()
+				wg1.Done()
+			}(&wg)
 		}
 		wg.Wait()
 	}
@@ -190,7 +190,7 @@ func TestDBR_CreateSeqNode(t *testing.T) {
 	gotRpath2, err := rgt.CreateSeqNode(realPath, data)
 	assert.Equal(t, false, (err != nil), fmt.Sprintf("并发获取数据库注册中心失败,%v", err))
 	createPath[gotRpath2] = true
-	pArry = strings.Split(gotRpath1, "_")
+	pArry = strings.Split(gotRpath2, "_")
 	assert.Equal(t, 2, len(pArry), "并发创建的序列节点路径错误")
 	nid2 := pArry[1]
 	assert.Equal(t, types.GetInt(nid2), types.GetInt(nid)+102, "创建的序列顺序不相同xx")

@@ -1,24 +1,11 @@
 package dbr
 
-type sqltexture struct {
-	createStructure   string
-	createNode        string
-	exists            string
-	getValue          string
-	delete            string
-	getChildren       string
-	clear             string
-	update            string
-	getChildrenChange string
-	getValueChange    string
-	aclUpdate         string
-}
-
-var mysqltexture sqltexture
+var oracletexture sqltexture
 
 func init() {
 
-	mysqltexture.createStructure = `CREATE TABLE IF NOT EXISTS hydra_registry_info (
+	//以下为oracle
+	oracletexture.createStructure = `CREATE TABLE IF NOT EXISTS hydra_registry_info (
 		id bigint not null auto_increment comment '编号' ,
 		path varchar(64)  not null  comment '路径' ,
 		value varchar(1024)  not null  comment '内容' ,
@@ -31,7 +18,7 @@ func init() {
 		,unique index path(path)
 	) ENGINE=InnoDB auto_increment = 100 DEFAULT CHARSET=utf8mb4 COMMENT='注册中心'`
 
-	mysqltexture.createNode = `
+	oracletexture.createNode = `
 	insert into hydra_registry_info(
 		path,
 		value,
@@ -47,19 +34,19 @@ func init() {
 		@is_temp,
 		1,
 		@data_version,
-		now(),
-		now()
+		sysdate,
+		sysdate
 	from dual
 	where not exists(select 1 from hydra_registry_info t where t.path = @path)
 	`
-	mysqltexture.exists = `
+	oracletexture.exists = `
 	select count(0)
 	from hydra_registry_info t
 	where t.path = @path
 	and t.is_delete = 1
 	`
 
-	mysqltexture.getValue = `
+	oracletexture.getValue = `
 	select
 	t.id,
 	t.path,
@@ -74,30 +61,30 @@ func init() {
 	and t.is_delete = 1
 	`
 
-	mysqltexture.delete = `
+	oracletexture.delete = `
 	update hydra_registry_info t
-	set t.update_time = now(),
+	set t.update_time = sysdate,
 	t.is_delete = 0
 	where t.path = @path
 	and t.is_delete = 1
 	`
-	mysqltexture.clear = `
+	oracletexture.clear = `
 	delete from hydra_registry_info
 	where path = @path
 	and (is_delete = 0
-	or is_temp = 0 and update_time > date_add(now(),interval -30 second))
+	or is_temp = 0 and update_time > sysdate -30/24/60/60)
 	`
-	mysqltexture.update = `
+	oracletexture.update = `
 	update hydra_registry_info t set
 	t.value = @value,
 	t.data_version = t.data_version + 1,
-	t.update_time = now() 
+	t.update_time = sysdate
 	where t.path = @path 
 	and t.data_version = @data_version
 	and t.is_delete = 1
 	`
 
-	mysqltexture.getChildren = `
+	oracletexture.getChildren = `
 	select
 	t.path,
 	t.value,
@@ -110,7 +97,7 @@ func init() {
 	where t.path like '#path%'
 	and t.is_delete = 1
 	`
-	mysqltexture.getValueChange = `
+	oracletexture.getValueChange = `
 	select
 	t.path,
 	t.value,
@@ -121,9 +108,9 @@ func init() {
 	t.update_time 
 	from hydra_registry_info t
 	where t.path in (#path) 
-	and t.update_time > date_add(now(),interval -1*#sec second)
+	and t.update_time > sysdate -1*#sec/24/60/60 
 	`
-	mysqltexture.getChildrenChange = `
+	oracletexture.getChildrenChange = `
 	select
 	t.path,
 	t.value,
@@ -134,14 +121,14 @@ func init() {
 	t.update_time 
 	from hydra_registry_info t
 	where t.path like '#path%'
-	and (t.create_time > date_add(now(),interval -1*#sec second) 
-		or(t.is_delete = 0 and t.update_time > date_add(now(),interval -1*#sec second)))
+	and (t.create_time > sysdate -1*#sec/24/60/60 
+		or(t.is_delete = 0 and t.update_time > sysdate -1*#sec/24/60/60 ))
 	and limit 1
 	`
 
-	mysqltexture.aclUpdate = `
+	oracletexture.aclUpdate = `
 	update hydra_registry_info t set
-	t.update_time = now() 
+	t.update_time = sysdate
 	where t.path in (#path)
 	and t.is_delete = 1
 	`
