@@ -19,6 +19,7 @@ import (
 )
 
 type DBR struct {
+	provider         string
 	db               dbs.IDB
 	sqltexture       *sqltexture
 	seqValue         int32
@@ -32,8 +33,8 @@ func NewDBR(c *xdb.DB, sqltexture *sqltexture, o *r.Options) (*DBR, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &DBR{
+		provider:         c.Provider,
 		db:               db,
 		seqValue:         10000,
 		sqltexture:       sqltexture,

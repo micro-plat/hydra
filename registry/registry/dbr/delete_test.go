@@ -29,10 +29,10 @@ func TestDBR_Delete(t *testing.T) {
 		{name: "mysql-删除不存在的永久节点", provider: "mysql", isTemp: false, isExist: false, wantErr: true},
 		{name: "mysql-删除父级节点,子节点也要被删除", provider: "mysql", isTemp: false, isExist: false, wantErr: true},
 
-		// {name: "oracle-删除存在的临时节点", provider: "oracle", isTemp: true, isExist: true, wantErr: false},
-		// {name: "oracle-删除不存在的临时节点", provider: "oracle", isTemp: true, isExist: false, wantErr: true},
-		// {name: "oracle-删除存在的永久节点", provider: "oracle", isTemp: false, isExist: true, wantErr: false},
-		// {name: "oracle-删除不存在的永久节点", provider: "oracle", isTemp: false, isExist: false, wantErr: true},
+		{name: "oracle-删除存在的临时节点", provider: "oracle", isTemp: true, isExist: true, wantErr: false},
+		{name: "oracle-删除不存在的临时节点", provider: "oracle", isTemp: true, isExist: false, wantErr: true},
+		{name: "oracle-删除存在的永久节点", provider: "oracle", isTemp: false, isExist: true, wantErr: false},
+		{name: "oracle-删除不存在的永久节点", provider: "oracle", isTemp: false, isExist: false, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

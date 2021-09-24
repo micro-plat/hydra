@@ -45,7 +45,9 @@ func (r *DBR) CreateSeqNode(path string, data string) (rpath string, err error) 
 }
 
 //CreateStructure 创建表结构
-func (r *DBR) CreateStructure() error {
-	_, err := r.db.Execute(r.sqltexture.createStructure, nil)
+func (r *DBR) CreateStructure() (err error) {
+	if r.provider == MYSQL {
+		_, err = r.db.Execute(r.sqltexture.createStructure, nil)
+	}
 	return err
 }
