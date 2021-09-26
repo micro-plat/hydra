@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 09:36:32
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-23 15:43:23
+ * @LastEditTime: 2021-09-26 14:57:48
  */
 package dbr
 
@@ -29,6 +29,9 @@ func (r *DBR) GetChildren(path string) (paths []string, version int32, err error
 	datas, err := r.db.Query(r.sqltexture.getChildren, newInput(path))
 	if err != nil {
 		return nil, 0, err
+	}
+	if len(datas) == 0 {
+		return []string{}, 0, nil
 	}
 	paths = make([]string, 0, len(datas)-1)
 	cache := map[string]bool{}

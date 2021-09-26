@@ -56,7 +56,7 @@ func init() {
 	mysqltexture.exists = `
 	select count(0)
 	from hydra_registry_info t
-	where t.path = @path
+	where t.path like '#path%'
 	and t.is_delete = 1
 	`
 
