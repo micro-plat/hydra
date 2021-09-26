@@ -21,7 +21,7 @@ func init() {
 
 	mysqltexture.createStructure = `CREATE TABLE IF NOT EXISTS hydra_registry_info (
 		id bigint not null auto_increment comment '编号' ,
-		path varchar(64)  not null  comment '路径' ,
+		path varchar(256)  not null  comment '路径' ,
 		value varchar(1024)  not null  comment '内容' ,
 		is_temp tinyint default 0 not null  comment '临时节点' ,
 		is_delete tinyint default 1 not null  comment '已删除' ,
@@ -86,7 +86,7 @@ func init() {
 	delete from hydra_registry_info
 	where path = @path
 	and (is_delete = 0
-	or is_temp = 0 and update_time > date_add(now(),interval -30 second))
+	or (is_temp = 0 and update_time <= date_add(now(),interval -30 second)))
 	`
 	mysqltexture.update = `
 	update hydra_registry_info t set

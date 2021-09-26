@@ -9,7 +9,7 @@ func init() {
 	create table HYDRA_REGISTRY_INFO
 	(
 	  id           NUMBER(20) not null,
-	  path         VARCHAR2(64) not null,
+	  path         VARCHAR2(256) not null,
 	  value        VARCHAR2(1024) not null,
 	  is_temp      NUMBER(2) default 0 not null,
 	  is_delete    NUMBER(2) default 1 not null,
@@ -117,7 +117,7 @@ func init() {
 	delete from hydra_registry_info
 	where path = @path
 	and (is_delete = 0
-	or is_temp = 0 and update_time > sysdate -30/24/60/60)
+	or (is_temp = 0 and update_time <= sysdate -30/24/60/60))
 	`
 	oracletexture.update = `
 	update hydra_registry_info t set
