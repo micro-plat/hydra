@@ -1,8 +1,16 @@
+/*
+ * @Description:
+ * @Autor: taoshouyin
+ * @Date: 2020-12-23 15:43:54
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-26 16:55:44
+ */
 package pkgs
 
 import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/cmds/pkgs/service"
+	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/hydra/services"
 )
 
@@ -28,6 +36,9 @@ func (p *ServiceApp) Stop(s service.Service) (err error) {
 
 	//通知关闭各组件
 	global.Def.Close()
+
+	//关闭注册中心
+	registry.Close()
 
 	globalLogger.Info(global.AppName, "已安全退出")
 
