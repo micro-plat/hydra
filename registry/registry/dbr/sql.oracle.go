@@ -186,5 +186,5 @@ func init() {
 	and is_temp = 0
 	`
 
-	mysqltexture.getSeq = "select SEQ_HYDRA_REGISTRY_INFO_ID.Nextval from dual"
+	oracletexture.getSeq = "select SEQ_HYDRA_REGISTRY_INFO_ID.Nextval from dual"
 }
