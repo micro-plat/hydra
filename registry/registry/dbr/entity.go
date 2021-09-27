@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Autor: taoshouyin
+ * @Date: 2021-09-18 09:36:32
+ * @LastEditors: taoshouyin
+ * @LastEditTime: 2021-09-27 15:35:47
+ */
 package dbr
 
 import (
@@ -14,7 +21,14 @@ func newInput(path string) input {
 	}
 }
 
-func newInputByWatch(sec int, path ...string) input {
+func newInputByWatch(sec int, path string) input {
+	return map[string]interface{}{
+		FieldPath: path,
+		"sec":     sec,
+	}
+}
+
+func newInputByTmp(sec int, path ...string) input {
 	return map[string]interface{}{
 		FieldPath: `"` + strings.Join(path, `","`) + `"`,
 		"sec":     sec,
