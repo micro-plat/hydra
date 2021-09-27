@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 09:36:32
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-26 10:58:44
+ * @LastEditTime: 2021-09-27 14:52:47
  */
 package dbr
 
@@ -34,9 +34,9 @@ func NewDBR(c *xdb.DB, sqltexture *sqltexture, o *r.Options) (*DBR, error) {
 		return nil, err
 	}
 	return &DBR{
-		provider:         c.Provider,
-		db:               db,
-		seqValue:         10000,
+		provider: c.Provider,
+		db:       db,
+		// seqValue:         10000,
 		sqltexture:       sqltexture,
 		tmpNodes:         newTmpNodeWatchers(db, sqltexture),
 		valueWatchers:    newValueWatchers(db, sqltexture),

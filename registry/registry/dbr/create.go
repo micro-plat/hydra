@@ -2,9 +2,9 @@ package dbr
 
 import (
 	"fmt"
-	"sync/atomic"
 
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //CreatePersistentNode 创建永久节点
@@ -38,8 +38,13 @@ func (r *DBR) CreateTempNode(path string, data string) (err error) {
 
 //CreateSeqNode 创建序列节点 @todo
 func (r *DBR) CreateSeqNode(path string, data string) (rpath string, err error) {
-	nid := atomic.AddInt32(&r.seqValue, 1)
-	rpath = fmt.Sprintf("%s_%d", path, nid)
+
+	nid, err := r.db.Scalar(r.sqltexture.getSeq, nil)
+	if err != nil {
+		return "", errs.New("创建序列节点获取seq错误(path:%s,err:%+v)", path, err)
+	}
+
+	rpath = fmt.Sprintf("%s_%d", path, types.GetInt64(nid))
 	err = r.CreateTempNode(rpath, data)
 	return rpath, err
 }

@@ -13,6 +13,7 @@ type sqltexture struct {
 	getValueChange    string
 	aclUpdate         string
 	clearTmpNode      string
+	getSeq            string
 }
 
 var mysqltexture sqltexture
@@ -154,4 +155,6 @@ func init() {
 	and t.is_delete = 1
 	and is_temp = 0
 	`
+
+	mysqltexture.getSeq = "select replace(unix_timestamp(current_timestamp(3)),'.','')"
 }

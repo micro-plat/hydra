@@ -185,4 +185,6 @@ func init() {
 	and t.is_delete = 1
 	and is_temp = 0
 	`
+
+	mysqltexture.getSeq = "select SEQ_HYDRA_REGISTRY_INFO_ID.Nextval from dual"
 }
