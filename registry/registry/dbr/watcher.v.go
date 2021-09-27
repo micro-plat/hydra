@@ -29,7 +29,7 @@ func newValueWatchers(db dbs.IDB, sqltexture *sqltexture) *valueWatchers {
 	}
 }
 func (v *valueWatchers) Start() {
-	tk := time.Tick(time.Second * 3)
+	tk := time.Tick(time.Second * 2)
 	for {
 		select {
 		case <-tk:

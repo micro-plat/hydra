@@ -29,7 +29,7 @@ func newChildrenWatchers(db dbs.IDB, sqltexture *sqltexture) *childrenWatchers {
 	}
 }
 func (v *childrenWatchers) Start() {
-	tk := time.Tick(time.Second * 3)
+	tk := time.Tick(time.Second * 2)
 	for {
 		select {
 		case <-tk:
