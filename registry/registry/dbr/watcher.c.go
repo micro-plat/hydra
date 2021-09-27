@@ -1,6 +1,7 @@
 package dbr
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -34,6 +35,7 @@ func (v *childrenWatchers) Start() {
 		select {
 		case <-tk:
 			path := v.pths.Keys()
+			fmt.Printf("xxxxxxx:%+v \n", path)
 			for _, p := range path {
 				data, err := v.db.Query(v.sqltexture.getChildrenChange, newInputByWatch(3, p))
 				if err == nil {
@@ -53,10 +55,10 @@ func (v *childrenWatchers) Start() {
 func (v *childrenWatchers) Watch(path string) chan registry.ChildrenWatcher {
 	v.lk.Lock()
 	defer v.lk.Unlock()
-	if _, ok := v.watchers[path]; ok {
+	if _, ok := v.watchers[path]; !ok {
 		v.watchers[path] = make([]chan registry.ChildrenWatcher, 0, 1)
-		v.pths.SetIfAbsent(path, 0)
 	}
+	v.pths.SetIfAbsent(path, 0)
 	ch := make(chan registry.ChildrenWatcher, 1)
 	v.watchers[path] = append(v.watchers[path], ch)
 	return ch

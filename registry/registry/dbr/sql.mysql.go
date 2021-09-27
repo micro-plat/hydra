@@ -147,8 +147,11 @@ func init() {
 	`
 
 	mysqltexture.clearTmpNode = `
-	delete from hydra_registry_info
-	where path in (#path)
+	update hydra_registry_info t
+	set t.update_time = now(),
+	t.is_delete = 0
+	where t.path in (#path)
+	and t.is_delete = 1
 	and is_temp = 0
 	`
 }
