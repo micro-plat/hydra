@@ -34,12 +34,10 @@ func (v *valueWatchers) Start() {
 		select {
 		case <-tk:
 			path := v.pths.Keys()
-			for _, p := range path {
-				data, err := v.db.Query(v.sqltexture.getValueChange, newInputByWatch(3, p))
-				if err == nil {
-					for _, r := range data {
-						go v.Notify(r.GetString(FieldPath), r.GetInt32(FieldDataVersion), r.GetString(FieldValue))
-					}
+			data, err := v.db.Query(v.sqltexture.getValueChange, newInputBySelectIn(3, path...))
+			if err == nil {
+				for _, r := range data {
+					go v.Notify(r.GetString(FieldPath), r.GetInt32(FieldDataVersion), r.GetString(FieldValue))
 				}
 			}
 		case <-v.closeCh:

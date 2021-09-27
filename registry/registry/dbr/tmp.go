@@ -3,7 +3,7 @@
  * @Autor: taoshouyin
  * @Date: 2021-09-18 09:36:32
  * @LastEditors: taoshouyin
- * @LastEditTime: 2021-09-27 15:35:56
+ * @LastEditTime: 2021-09-27 16:01:56
  */
 package dbr
 
@@ -42,7 +42,7 @@ func (v *tmpNodeWatchers) Start() {
 		select {
 		case <-tk:
 			path := v.pths.Keys()
-			v.db.Execute(v.sqltexture.aclUpdate, newInputByTmp(3, path...))
+			v.db.Execute(v.sqltexture.aclUpdate, newInputBySelectIn(3, path...))
 		case <-v.closeCh:
 			return
 		}
@@ -53,7 +53,7 @@ func (v *tmpNodeWatchers) Close() {
 	v.once.Do(func() {
 		//退出时 删除所有的临时节点
 		path := v.pths.Keys()
-		v.db.Execute(v.sqltexture.clearTmpNode, newInputByTmp(0, path...))
+		v.db.Execute(v.sqltexture.clearTmpNode, newInputBySelectIn(0, path...))
 		close(v.closeCh)
 	})
 }
