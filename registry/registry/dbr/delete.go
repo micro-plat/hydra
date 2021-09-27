@@ -19,6 +19,8 @@ func (r *DBR) Delete(path string) error {
 //clear 清除节点
 func (r *DBR) clear(path string) {
 	_, err := r.db.Execute(r.sqltexture.clear, newInput(path))
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return
 }
