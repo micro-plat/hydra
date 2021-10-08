@@ -123,6 +123,9 @@ github.com/manifoldco/promptui/screenbuf
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
+# github.com/mattn/go-oci8 v0.1.1
+## explicit
+github.com/mattn/go-oci8
 # github.com/mholt/archiver v3.1.1+incompatible
 ## explicit
 github.com/mholt/archiver

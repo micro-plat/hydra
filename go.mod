@@ -22,6 +22,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/lib4dev/cli v1.2.8
 	github.com/manifoldco/promptui v0.8.0
+	github.com/mattn/go-oci8 v0.1.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.1.9
