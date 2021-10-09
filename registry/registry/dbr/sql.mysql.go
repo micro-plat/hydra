@@ -23,14 +23,14 @@ func init() {
 	mysqltexture.createStructure = `CREATE TABLE IF NOT EXISTS hydra_registry_info (
 		id bigint not null auto_increment comment '编号' ,
 		path varchar(256)  not null  comment '路径' ,
-		value varchar(1024)  not null  comment '内容' ,
+		value varchar(4096)  not null  comment '内容' ,
 		is_temp tinyint default 0 not null  comment '临时节点' ,
 		is_delete tinyint default 1 not null  comment '已删除' ,
 		data_version bigint    comment '数据版本号' ,
 		create_time datetime default current_timestamp not null  comment '创建时间' ,
 		update_time datetime default current_timestamp not null  comment '更新时间' 
 		,primary key (id)
-		,unique index path(path)
+		,unique index unq_registry_path(path)
 	) ENGINE=InnoDB auto_increment = 100 DEFAULT CHARSET=utf8mb4 COMMENT='注册中心'`
 
 	mysqltexture.createNode = `

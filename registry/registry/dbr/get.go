@@ -8,7 +8,6 @@
 package dbr
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -19,7 +18,7 @@ func (r *DBR) GetValue(path string) (data []byte, version int32, err error) {
 		return nil, 0, err
 	}
 	if datas.IsEmpty() {
-		return nil, 0, fmt.Errorf("数据不存在")
+		return []byte(""), 0, nil
 	}
 	return []byte(datas.Get(0).GetString(FieldValue)), datas.Get(0).GetInt32(FieldDataVersion), nil
 }
