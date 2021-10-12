@@ -46,7 +46,8 @@ func (m *async) DoReport(f eFileFPLists) {
 	for k, v := range f {
 		mv, ok := m.reportList.Get(k)
 		if ok {
-			nv := mv.(*eFileFP).MergeHosts(v.Hosts...)
+			nv := mv.(*eFileFP)
+			nv.MergeHosts(v.Hosts...)
 			m.reportList.Set(k, nv)
 			continue
 		}
