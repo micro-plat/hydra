@@ -113,7 +113,8 @@ func (c *Ctx) Invoke(service string) *pkgs.Rspns {
 	case global.ProtoRPC:
 		return internal.CallRPC(c, addr)
 	case global.ProtoInvoker:
-		router, err := c.Request().Path().GetRouter(addr)
+		routerPath := c.Request().Path().FormatService(addr)
+		router, err := c.Request().Path().GetRouter(routerPath)
 		if err != nil {
 			return pkgs.NewRspns(err)
 		}
