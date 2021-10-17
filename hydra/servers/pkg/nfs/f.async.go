@@ -75,7 +75,7 @@ func (m *async) DoDownload(f *eFileFP) {
 }
 
 func (m *async) loopReport() {
-	tk := time.Tick(time.Millisecond * 500)
+	tk := time.Tick(time.Millisecond * 30)
 	for {
 		select {
 		case <-m.reportChan:

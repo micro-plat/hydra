@@ -14,6 +14,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
+//currentModule 当前Module
+var currentModule *module
+
 type cnfs struct {
 	c         *nfs.NFS
 	app       app.IAPPConf
@@ -27,7 +30,8 @@ type cnfs struct {
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
 	p, _ := app.GetProcessorConf()
-	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: newModule(c, p.ServicePrefix), services: make([]string, 0, 3)}
+	currentModule = newModule(c, p.ServicePrefix)
+	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: currentModule, services: make([]string, 0, 3)}
 }
 func (c *cnfs) Start() error {
 	if c.isStarted {

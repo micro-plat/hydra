@@ -97,23 +97,23 @@ func (m *module) HasFile(name string) error {
 //1. 查询本地是否有此文件了,有则报错
 //2. 保存到本地，返回指纹信息
 //3. 通知master我也有这个文件了,如果是master则告诉所有人我也有此文件了
-func (m *module) SaveNewFile(path string, name string, buff []byte) (*eFileFP, error) {
+func (m *module) SaveNewFile(path string, name string, buff []byte) (*eFileFP, string, error) {
 	//检查文件是否存在
 	name = getFileName(name, m.c.Rename)
 	if m.local.Has(name) {
-		return nil, fmt.Errorf("文件名称重复:%s", name)
+		return nil, "", fmt.Errorf("文件名称重复:%s", name)
 	}
 
 	//保存到本地
 	filePath := filepath.Join(path, name)
 	fp, err := m.local.SaveFile(filePath, buff)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	//远程通知
 	m.async.DoReport(fp.GetMAP())
-	return fp, nil
+	return fp, m.c.Domain, nil
 }
 
 //GetFP 获取本地的指纹信息，用于master对外提供服务

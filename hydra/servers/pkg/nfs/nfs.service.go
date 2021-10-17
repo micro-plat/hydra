@@ -109,7 +109,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	// 保存文件
 	path := ctx.Request().Path().Params().GetString("path")
-	fp, err := c.module.SaveNewFile(path, name, buff)
+	fp, domain, err := c.module.SaveNewFile(path, name, buff)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	// 处理返回结果
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	return map[string]interface{}{
-		"path": fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(fp.Path, "/")),
+		"path": fmt.Sprintf("%s/%s", strings.Trim(domain, "/"), strings.Trim(fp.Path, "/")),
 	}
 }
 
