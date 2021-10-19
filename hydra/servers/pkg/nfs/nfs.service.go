@@ -108,7 +108,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	}
 
 	// 保存文件
-	path := ctx.Request().Path().Params().GetString("path")
+	path := multiPath(ctx.Request().Path().Params().GetString("path"))
 	fp, domain, err := c.module.SaveNewFile(path, name, buff)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 func (c *cnfs) Download(ctx context.IContext) interface{} {
 
 	//检查参数
-	dir := ctx.Request().Path().Params().GetString(dirName)
+	dir := multiPath(ctx.Request().Path().Params().GetString(dirName))
 	name := ctx.Request().Path().Params().GetString(fileName)
 	if dir == "" || name == "" {
 		return errs.NewError(http.StatusNotAcceptable, "参数不能为空")
@@ -144,4 +144,9 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 }
 func init() {
 	auth.AppendExcludes(notExcludes...)
+}
+
+//处理多级目录
+func multiPath(path string) string {
+	return strings.ReplaceAll(path, "|", "/")
 }

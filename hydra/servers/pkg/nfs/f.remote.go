@@ -64,7 +64,7 @@ func (r *remoting) GetFP(name string) (v *eFileFP, err error) {
 	})
 
 	//处理返回结果
-	if status == http.StatusNoContent {
+	if status == http.StatusNoContent || status == http.StatusNotFound {
 		log.error(r.rmt_fp_get, name, r.masterHost, status)
 		return nil, errs.NewError(http.StatusNotFound, "文件不存在")
 	}
