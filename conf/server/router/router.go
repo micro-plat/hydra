@@ -89,7 +89,7 @@ func (r *Router) IsUTF8() bool {
 
 //GetParams 获取路由参数
 func (r *Router) GetParams(path string) map[string]string {
-	return getParams(r.Service, path)
+	return getParams(r.Path, path)
 }
 
 //NewRouters 构建路由
