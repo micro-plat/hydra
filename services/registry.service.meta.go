@@ -7,6 +7,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/registry"
 )
 
 type metaServices struct {
@@ -115,4 +116,21 @@ func (s *metaServices) GetRawPathAndTag(service string) (path string, tagName st
 func (s *metaServices) GetFallback(service string) (h context.IHandler, ok bool) {
 	h, ok = s.fallbacks[service]
 	return
+}
+
+//GetFallback 获取服务对应的降级函数
+func (s *metaServices) Remove(service string) {
+	delete(s.handlers, service)
+	delete(s.rawService, service)
+	delete(s.groups, service)
+	delete(s.fallbacks, service)
+
+	parties := strings.Split(service, "$")
+	for _, m := range s.pathActs[parties[0]] {
+		rservice := registry.Join(parties[0], m)
+		delete(s.handlers, rservice)
+		delete(s.rawService, rservice)
+		delete(s.groups, rservice)
+		delete(s.fallbacks, rservice)
+	}
 }

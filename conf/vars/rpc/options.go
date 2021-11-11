@@ -60,3 +60,10 @@ func WithRaw(raw []byte) Option {
 		}
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *RPCConf) {
+		a.EnableEncryption = true
+	}
+}

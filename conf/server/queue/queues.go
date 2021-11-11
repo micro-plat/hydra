@@ -5,6 +5,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TypeNodeName 分类节点名
@@ -12,6 +13,7 @@ const TypeNodeName = "queue"
 
 //Queues queue任务
 type Queues struct {
+	security.ConfEncrypt
 	Queues []*Queue `json:"queues" toml:"queues,omitempty"`
 }
 

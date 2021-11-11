@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
@@ -37,7 +38,7 @@ type Processor struct {
 }
 
 //NewProcessor 创建processor
-func NewProcessor() (p *Processor) {
+func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p = &Processor{
 		status:    unstarted,
 		closeChan: make(chan struct{}),
@@ -56,14 +57,18 @@ func NewProcessor() (p *Processor) {
 	p.engine.Use(middleware.Trace()) //跟踪信息
 	p.engine.Use(middlewares...)
 
-	//p.Engine = p.engine.DispEngine()
+	p.addRouter(routers...)
 
-	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
+	p.slots = make([]cmap.ConcurrentMap, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
 	}
 
 	return p
+}
+
+func (s *Processor) addRouter(routers ...*router.Router) {
+	s.engine.Handles(routers, middleware.ExecuteHandler())
 }
 
 //Start 所有任务
@@ -92,9 +97,6 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
 
-		if !s.engine.Find(task.GetService()) {
-			s.engine.Handle(DefMethod, task.Service, middleware.ExecuteHandler())
-		}
 		if _, _, err := s.add(task); err != nil {
 			return err
 		}

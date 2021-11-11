@@ -56,19 +56,21 @@ func (w *Responsive) Start() (err error) {
 		return
 	}
 
+	//服务启动成功后钩子
+	if err := services.Def.DoStarted(w.conf); err != nil {
+		err = fmt.Errorf("%s启动失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
+		w.Shutdown()
+		return err
+	}
+
 	if err = w.publish(); err != nil {
 		err = fmt.Errorf("%s服务发布失败 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
+
 	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.serverNum())
 
-	//服务启动成功后钩子
-	if err := services.Def.DoStarted(w.conf); err != nil {
-		err = fmt.Errorf("%s外部处理失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
-		w.Shutdown()
-		return err
-	}
 	return nil
 }
 
@@ -80,6 +82,9 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	}
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
+		if err := services.Def.DoSetup(c); err != nil {
+			return false, err
+		}
 		server, err := w.getServer(c)
 		if err != nil {
 			return false, err
@@ -113,7 +118,6 @@ func (w *Responsive) Shutdown() {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
-	return
 }
 
 //publish 将当前服务器的节点信息发布到注册中心

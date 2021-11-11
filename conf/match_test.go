@@ -115,7 +115,7 @@ func TestPathMatch_Match(t *testing.T) {
 		{name: "1.2. PathMatchMatch-精确路径列表-多段列表1", fields: fields{all: []string{"/", "/t1", "/t1/t2", "/t1/t2/t3"}}, args: args{service: "/", seq: "/"}, want: true, want1: "/"},
 		{name: "1.3. PathMatchMatch-精确路径列表-多段列表2", fields: fields{all: []string{"/", "/t1", "/t1/t2", "/t1/t2/t3"}}, args: args{service: "/t2/t3", seq: "/"}, want: false, want1: ""},
 		{name: "1.4. PathMatchMatch-精确路径列表-多段列表3", fields: fields{all: []string{"/", "/t1", "/t1/t2", "/t1/t2/t3"}}, args: args{service: "/t1/t2/t3", seq: "/"}, want: true, want1: "/t1/t2/t3"},
-		{name: "1.5. PathMatchMatch-精确路径列表-多段列表，末尾/", fields: fields{all: []string{"/t1/t2/"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},
+		{name: "1.5. PathMatchMatch-精确路径列表-多段列表，末尾/", fields: fields{all: []string{"/t1/t2"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/t2"},
 
 		{name: "2.1. PathMatchMatch-带*模糊匹配-单段末尾", fields: fields{all: []string{"/t1/*"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/*"},
 		{name: "2.2. PathMatchMatch-带*模糊匹配-多段*", fields: fields{all: []string{"/t1/*", "/t1/*/*"}}, args: args{service: "/t1/t3/dd", seq: "/"}, want: true, want1: "/t1/*/*"},
@@ -136,12 +136,11 @@ func TestPathMatch_Match(t *testing.T) {
 		{name: "4.5. PathMatchMatch-*和**混合路径-*和**混合1", fields: fields{all: []string{"/t1/*/t3", "/t1/**"}}, args: args{service: "/t1/t2/t3", seq: "/"}, want: true, want1: "/t1/*/t3"},
 		{name: "4.6. PathMatchMatch-*和**混合路径-*位置混合", fields: fields{all: []string{"/t1/*/*", "/t1/*"}}, args: args{service: "/t1/t3/dd", seq: "/"}, want: true, want1: "/t1/*/*"},
 
-		{name: "5.1. PathMatchMatch-模糊尾端带/-单*", fields: fields{all: []string{"/t1/*/"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},
-		{name: "5.2. PathMatchMatch-模糊尾端带/-单*1", fields: fields{all: []string{"/t1/*/"}}, args: args{service: "/t1/t2/", seq: "/"}, want: true, want1: "/t1/*/"},
-		{name: "5.3. PathMatchMatch-模糊尾端带/-尾端**", fields: fields{all: []string{"/t1/**/"}}, args: args{service: "/t1/t2", seq: "/"}, want: false, want1: ""},
-		{name: "5.4. PathMatchMatch-模糊尾端带/-尾端**1", fields: fields{all: []string{"/t1/**/"}}, args: args{service: "/t1/t2/", seq: "/"}, want: true, want1: "/t1/**/"},
-		{name: "5.5. PathMatchMatch-模糊尾端带/-尾端**2", fields: fields{all: []string{"/t1/**/"}}, args: args{service: "/t1/t2/t3", seq: "/"}, want: true, want1: "/t1/**/"},
-		{name: "5.6. PathMatchMatch-模糊尾端带/-尾端**3", fields: fields{all: []string{"/t1/**/"}}, args: args{service: "/t1/t2/t3/", seq: "/"}, want: false, want1: ""},
+		{name: "5.1. PathMatchMatch-模糊尾端带/-单*", fields: fields{all: []string{"/t1/*"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/*"},
+		{name: "5.2. PathMatchMatch-模糊尾端带/-单*1", fields: fields{all: []string{"/t1/*"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/*"},
+		{name: "5.3. PathMatchMatch-模糊尾端带/-尾端**", fields: fields{all: []string{"/t1/**"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/**"},
+		{name: "5.4. PathMatchMatch-模糊尾端带/-尾端**1", fields: fields{all: []string{"/t1/**"}}, args: args{service: "/t1/t2", seq: "/"}, want: true, want1: "/t1/**"},
+		{name: "5.5. PathMatchMatch-模糊尾端带/-尾端**2", fields: fields{all: []string{"/t1/**"}}, args: args{service: "/t1/t2/t3", seq: "/"}, want: true, want1: "/t1/**"},
 
 		{name: "6.1. PathMatchMatch-ip匹配-精确ip1", fields: fields{all: []string{"192.168.5.124", "192.168.5.22"}}, args: args{service: "192.168.5.94", seq: "."}, want: false, want1: ""},
 		{name: "6.2. PathMatchMatch-ip匹配-精确ip2", fields: fields{all: []string{"192.168.5.124", "192.168.5.94"}}, args: args{service: "192.168.5.94", seq: "."}, want: true, want1: "192.168.5.94"},

@@ -24,18 +24,19 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 	}()
 
 	//@变量, 将数据放入params中
-	word, _ := regexp.Compile(`[\\]?[^|]([@#&~!$?|])(\w+(\.\w+)?)`)
-	matches := word.FindAllStringSubmatch(tpl, -1)
-	for _, v := range matches {
-		pre, key, name := v[1], v[2], v[2]
+	word, _ := regexp.Compile(`[\\]?([@#&~!$?]|[|]{1,2})(\w+(\.\w+)?)`)
+	sql = word.ReplaceAllStringFunc(tpl, func(s string) string {
+		index := 1
+		if strings.HasPrefix(s, "||") {
+			index = 2
+		}
+		pre, key, name := s[:index], s[index:], s[index:]
 		if strings.Index(key, ".") > 0 {
 			name = strings.Split(key, ".")[1]
 		}
-		if strings.Contains(v[0], "\\") {
+		if strings.Contains(pre, "\\") {
 			pre = "\\"
 		}
-		old := pre + key
-		new := ""
 		value := input[name]
 		switch pre {
 		case "@":
@@ -46,57 +47,50 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 				names = append(names, key)
 				params = append(params, "")
 			}
-			new = prefix()
+			return prefix()
 		case "#":
 			if !isNil(value) {
-				new = fmt.Sprintf("%v", value)
-				break
+				return fmt.Sprintf("%v", value)
 			}
-			new = "NULL"
+			return "NULL"
 		case "?":
 			if !isNil(value) {
 				names = append(names, key)
 				params = append(params, value)
-				new = fmt.Sprintf("and %s like %s", key, like(key, prefix))
-				break
+				return fmt.Sprintf("and %s like %s", key, like(key, prefix))
 			}
-			new = ""
+			return ""
 		case "$":
 			if !isNil(value) {
-				new = fmt.Sprintf("%v", value)
-				break
+				return fmt.Sprintf("%v", value)
 			}
-			new = ""
+			return ""
 		case "&":
 			if !isNil(value) {
 				names = append(names, key)
 				params = append(params, value)
-				new = fmt.Sprintf("and %s=%s", key, prefix())
-				break
+				return fmt.Sprintf("and %s=%s", key, prefix())
 			}
-			new = ""
+			return ""
 		case "|":
 			if !isNil(value) {
 				names = append(names, key)
 				params = append(params, value)
-				new = fmt.Sprintf("or %s=%s", key, prefix())
-				break
+				return fmt.Sprintf("or %s=%s", key, prefix())
 			}
-			new = ""
+			return ""
 		case "~":
 			if !isNil(value) {
 				names = append(names, key)
 				params = append(params, value)
-				new = fmt.Sprintf(",%s=%s", key, prefix())
-				break
+				return fmt.Sprintf(",%s=%s", key, prefix())
+
 			}
-			new = ""
+			return ""
 		default:
-			new = old
+			return pre + key
 		}
-		tpl = strings.ReplaceAll(tpl, old, new)
-	}
-	sql = tpl
+	})
 
 	//@变量, 将数据放入params中
 	word2, _ := regexp.Compile(`[\\][@#&~\|!\$\?><]`)

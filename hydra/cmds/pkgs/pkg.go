@@ -1,22 +1,34 @@
 package pkgs
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 
+	logs "github.com/lib4dev/cli/logger"
 	"github.com/micro-plat/hydra/creator"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/global/compatible"
+	"github.com/micro-plat/lib4go/types"
 	"github.com/urfave/cli"
 )
 
 //Pub2Registry 发布到注册中心
-func Pub2Registry(cover bool) error {
+func Pub2Registry(cover bool, importPath string) error {
+	//导入配置
+	input, err := getImportConfs(importPath)
+	if err != nil {
+		logs.Log.Error("导入配置到配置中心:", compatible.FAILED)
+		return err
+	}
 
 	//2.发布到配置中心
 	if err := creator.Conf.Pub(global.Current().GetPlatName(),
 		global.Current().GetSysName(),
 		global.Current().GetClusterName(),
 		global.Def.RegistryAddr,
-		cover); err != nil {
+		input); err != nil {
 		return err
 	}
 	return nil
@@ -66,10 +78,31 @@ var sysNameFlag = cli.StringFlag{
 var serverTypesFlag = cli.StringFlag{
 	Name:        "server-types,S",
 	Destination: &global.FlagVal.ServerTypeNames,
-	Usage:       fmt.Sprintf("-服务类型，有api,web,rpc,cron,mqc,ws。多个以“-”分割"),
+	Usage:       "-服务类型，有api,web,rpc,cron,mqc,ws。多个以“-”分割",
 }
 var clusterFlag = cli.StringFlag{
 	Name:        "cluster,c",
 	Destination: &global.FlagVal.ClusterName,
 	Usage:       "-集群名称，默认值为：prod",
+}
+
+func getImportConfs(importPath string) (types.XMap, error) {
+	if importPath == "" {
+		return nil, nil
+	}
+	file, err := os.Open(importPath)
+	if err != nil {
+		return nil, fmt.Errorf("打开导入配置文件错误:%+v", err)
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("读取导入配置文件错误:%+v", err)
+	}
+
+	confs := make(types.XMap)
+	if err := json.Unmarshal(content, &confs); err != nil {
+		return nil, fmt.Errorf("导入配置格式转换错误:%+v", err)
+	}
+	return confs, nil
 }

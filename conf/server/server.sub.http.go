@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/conf/server/metric"
+	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -34,6 +35,7 @@ type HttpSub struct {
 	proxy     *Loader
 	apm       *Loader
 	processor *Loader
+	fs        *Loader
 }
 
 func NewHttpSub(cnf conf.IServerConf) *HttpSub {
@@ -52,6 +54,7 @@ func NewHttpSub(cnf conf.IServerConf) *HttpSub {
 	s.proxy = GetLoader(cnf, s.getProxyFunc())
 	s.apm = GetLoader(cnf, s.getAPMFunc())
 	s.processor = GetLoader(cnf, s.getProcessorFunc())
+	s.fs = GetLoader(cnf, s.getNFSFunc())
 	return s
 }
 
@@ -150,6 +153,13 @@ func (s HttpSub) getAPMFunc() func(cnf conf.IServerConf) (interface{}, error) {
 func (s HttpSub) getProcessorFunc() func(cnf conf.IServerConf) (interface{}, error) {
 	return func(cnf conf.IServerConf) (interface{}, error) {
 		return processor.GetConf(cnf)
+	}
+}
+
+//getNFSFunc 获取nfs配置信息
+func (s HttpSub) getNFSFunc() func(cnf conf.IServerConf) (interface{}, error) {
+	return func(cnf conf.IServerConf) (interface{}, error) {
+		return nfs.GetConf(cnf)
 	}
 }
 
@@ -282,4 +292,13 @@ func (s *HttpSub) GetProcessorConf() (*processor.Processor, error) {
 		return nil, err
 	}
 	return apmc.(*processor.Processor), nil
+}
+
+//GetNFSConf 获取NFS配置
+func (s *HttpSub) GetNFSConf() (*nfs.NFS, error) {
+	f, err := s.fs.GetConf()
+	if err != nil {
+		return nil, err
+	}
+	return f.(*nfs.NFS), nil
 }

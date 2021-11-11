@@ -11,10 +11,9 @@ var _ context.IUser = &user{}
 
 type user struct {
 	conf.IMeta
-	ctx      context.IInnerContext
-	traceID  string
-	auth     *Auth
-	jwtToken interface{}
+	ctx     context.IInnerContext
+	traceID string
+	auth    *Auth
 }
 
 //NewUser 用户信息

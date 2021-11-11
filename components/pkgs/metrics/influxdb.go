@@ -113,10 +113,12 @@ func (r *reporter) makeClient() (err error) {
 func (r *reporter) run() {
 	pingTicker := time.Tick(time.Second * 5)
 	var intervalTicker int64
+	tick := time.NewTicker(time.Second)
+	defer tick.Stop()
 LOOP:
 	for {
 		select {
-		case <-time.After(time.Second):
+		case <-tick.C:
 			if r.done {
 				break LOOP
 			}

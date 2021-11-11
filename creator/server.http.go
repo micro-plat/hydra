@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/auth/ras"
 	"github.com/micro-plat/hydra/conf/server/header"
+	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
@@ -32,7 +33,6 @@ func newHTTP(tp string, address string, opts ...api.Option) *httpBuilder {
 
 //Load 加载路由
 func (b *httpBuilder) Load() {
-	return
 }
 
 //Jwt jwt配置
@@ -109,8 +109,14 @@ func (b *httpBuilder) Render(script string) *httpBuilder {
 	return b
 }
 
-//Processor 构建APM配置
+//Processor 构建Processor配置
 func (b *httpBuilder) Processor(opts ...processor.Option) *httpBuilder {
 	b.BaseBuilder[processor.TypeNodeName] = processor.New(opts...)
+	return b
+}
+
+//NFS 网络文件系统配置
+func (b *httpBuilder) NFS(local string, opts ...nfs.Option) *httpBuilder {
+	b.BaseBuilder[nfs.TypeNodeName] = nfs.New(local, opts...)
 	return b
 }

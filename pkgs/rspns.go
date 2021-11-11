@@ -2,8 +2,10 @@ package pkgs
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -53,20 +55,34 @@ func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 		r.header["Content-Type"] = "application/json"
 	}
 	switch v := result.(type) {
-	case error:
+	case errs.IResult:
 		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
-			r.status = http.StatusBadRequest
+			r.status = v.GetCode()
 		}
-		r.err = fmt.Errorf("请求发生错误：%w", v)
+		r.result = v.GetResult()
 		r.data["__body__"] = v
 	case errs.IError:
 		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
 			r.status = v.GetCode()
 		}
 		r.result = v.GetError().Error()
+		r.err = v.GetError()
+		r.data["__body__"] = v
+	case error:
+		if r.status >= http.StatusOK && r.status < http.StatusBadRequest {
+			r.status = http.StatusBadRequest
+		}
+		r.err = fmt.Errorf("请求发生错误：%w", v)
 		r.data["__body__"] = v
 	case string:
 		//转换数据
+		if strings.EqualFold(r.header.GetString("Content-Encoding"), "gzip") { //处理gzip压缩
+			if rawBody, err := gzip.NewReader(bytes.NewBufferString(v)); err == nil {
+				if x, err := ioutil.ReadAll(rawBody); err != nil {
+					v = types.BytesToString(x)
+				}
+			}
+		}
 		r.data, r.err = r.getMap(fmt.Sprint(r.header["Content-Type"]), types.StringToBytes(v))
 	case map[string]interface{}:
 		r.data = v
@@ -132,7 +148,7 @@ func (r *Rspns) getMap(ctp string, body []byte) (data map[string]interface{}, er
 			return nil, fmt.Errorf("xml转换为map失败:%w", err)
 		}
 	case strings.Contains(ctp, "/yaml") || strings.Contains(ctp, "/x-yaml"):
-		err = yaml.Unmarshal(body, &data)
+		r.err = yaml.Unmarshal(body, &data)
 	case strings.Contains(ctp, "/json"):
 		newbuff := body
 		if bytes.HasPrefix(newbuff, []byte(`"{\"`)) {

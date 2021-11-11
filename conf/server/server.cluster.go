@@ -2,6 +2,7 @@ package server
 
 import (
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -145,7 +146,7 @@ func (c *Cluster) getCluster() error {
 	}
 
 	//对节点进行排序
-	sort.Strings(children)
+	children = c.sort(children)
 
 	//移除所有已下线的节点
 	c.nodes.RemoveIterCb(func(key string, v interface{}) bool {
@@ -204,8 +205,8 @@ func (c *Cluster) watchCluster() error {
 	if err != nil {
 		return err
 	}
-	interval := time.Second * 5
-	loopPull := time.NewTicker(interval)
+	// interval := time.Second * 5
+	// loopPull := time.NewTicker(interval)
 
 LOOP:
 	for {
@@ -216,10 +217,10 @@ LOOP:
 			break LOOP
 		case <-notify:
 			c.getCluster()
-			loopPull.Reset(interval)
-		case <-loopPull.C:
-			c.getCluster()
-			loopPull.Stop()
+			// loopPull.Reset(interval)
+			// case <-loopPull.C:
+			// c.getCluster()
+			// loopPull.Stop()
 		}
 	}
 	return nil
@@ -241,6 +242,22 @@ func (c *Cluster) removeKey(name string) {
 			c.keyCache = append(c.keyCache[:i], c.keyCache[i+1:]...)
 		}
 	}
+}
+func (c *Cluster) sort(lst []string) []string {
+	ndata := map[string]string{}
+	slist := make([]string, 0, len(lst))
+	nlist := make([]string, 0, len(lst))
+	for _, v := range lst {
+		il := strings.Split(v, "_")
+		d := il[len(il)-1]
+		nlist = append(nlist, d)
+		ndata[d] = v
+	}
+	sort.Strings(nlist)
+	for _, v := range nlist {
+		slist = append(slist, ndata[v])
+	}
+	return slist
 }
 func init() {
 	global.Def.AddCloser(func() {

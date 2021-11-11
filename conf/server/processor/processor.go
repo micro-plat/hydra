@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 //TypeNodeName processor配置节点名
@@ -18,7 +19,9 @@ type IProcessor interface {
 
 //Processor Processor
 type Processor struct {
+	security.ConfEncrypt
 	ServicePrefix string `json:"servicePrefix,omitempty" valid:"maxstringlength(16),matches(^/[a-z0-9]+$)"  toml:"servicePrefix,omitempty" label:"服务前缀"`
+	EnableGzip    bool   `json:"gzip"`
 }
 
 //New 构建api server配置信息
@@ -31,6 +34,11 @@ func New(opts ...Option) *Processor {
 		panic(fmt.Errorf("Processor配置数据有误:%v", err))
 	}
 	return m
+}
+
+//FormatService 根据服务名及当前配置重置服务名称
+func (p *Processor) FormatService(service string) string {
+	return fmt.Sprintf("%s%s", p.ServicePrefix, service)
 }
 
 //GetConf 设置Processor

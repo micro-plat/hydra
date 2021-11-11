@@ -9,6 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
@@ -101,7 +102,10 @@ type IPath interface {
 	GetMethod() string
 
 	//GetService 获取服务名称(不包括$method)
-	GetService() string
+	GetService(path ...string) string
+
+	//FormatService 通过ProcessorConf 格式化服务名
+	FormatService(service string) string
 
 	//Param 路由参数
 	Params() types.XMap
@@ -128,6 +132,8 @@ type IPath interface {
 	AllowFallback() bool
 
 	GetEncoding() string
+
+	GetRouter(path string) (*router.Router, error)
 }
 
 //IVariable 参与变量
@@ -137,9 +143,7 @@ type IVariable interface {
 
 type IFile interface {
 	SaveFile(fileKey, dst string) error
-	GetFileSize(fileKey string) (int64, error)
-	GetFileName(fileKey string) (string, error)
-	GetFileBody(fileKey string) (io.ReadCloser, error)
+	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 }
 
 //IRequest 请求信息
@@ -193,10 +197,13 @@ type IResponse interface {
 	GetHTTPReponse() http.ResponseWriter
 
 	//AddSpecial 添加特殊标记，用于在打印响应内容时知道当前请求进行了哪些特殊处理
-	AddSpecial(t string)
+	AddSpecial(t ...string)
 
 	//GetSpecials 获取特殊标识字段串，多个标记用"|"分隔
 	GetSpecials() string
+
+	//HasSpecial 是否包含某个特殊关键字
+	HasSpecial(s string) bool
 
 	//Header 设置响应头
 	Header(string, string)
@@ -211,6 +218,9 @@ type IResponse interface {
 
 	//NoNeedWrite 无需写入响应数据到缓存
 	NoNeedWrite(status int)
+
+	//Redirect 页面转跳
+	Redirect(code int, url string)
 
 	//JSON json输出响应内容
 	JSON(code int, data interface{}) interface{}
@@ -253,6 +263,12 @@ type IResponse interface {
 
 	//Flush 将当前内容写入响应流(立即写入)
 	Flush()
+
+	//WStatus 设置状态码
+	WStatus(int)
+
+	//OnFlush flush前执行
+	OnFlush(func())
 
 	//GetHeaders 获取返回数据
 	GetHeaders() types.XMap

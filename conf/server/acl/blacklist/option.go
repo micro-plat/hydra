@@ -10,6 +10,13 @@ func WithIP(ip ...string) Option {
 	}
 }
 
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *BlackList) {
+		a.EnableEncryption = true
+	}
+}
+
 //WithDisable 关闭
 func WithDisable() Option {
 	return func(a *BlackList) {

@@ -53,9 +53,7 @@ func NewFileSystem(rootDir string) (*fs, error) {
 	}
 
 	rootDir = strings.TrimRight(rootDir, "/")
-	if strings.HasPrefix(rootDir, "./") {
-		rootDir = rootDir[2:]
-	}
+	rootDir = strings.TrimPrefix(rootDir, "./")
 	registryfs := &fs{
 		rootDir:             rootDir,
 		watcher:             w,
@@ -150,12 +148,12 @@ func (l *fs) Exists(path string) (bool, error) {
 func (l *fs) GetValue(path string) (data []byte, version int32, err error) {
 
 	rpath := l.replaceColon(l.formatPath(path))
-	fs, err := os.Stat(rpath)
+	_, err = os.Stat(rpath)
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
 	}
 	dataPath := l.getDataPath(rpath)
-	fs, err = os.Stat(dataPath)
+	fs, err := os.Stat(dataPath)
 	if os.IsNotExist(err) {
 		return []byte{}, 0, nil
 	}
@@ -203,7 +201,7 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
-		err = fmt.Errorf("Watch path:%s 不存在", path)
+		err = fmt.Errorf("watch path:%s 不存在", path)
 		return
 	}
 
@@ -226,25 +224,23 @@ func (l *fs) WatchValue(path string) (data chan registry.ValueWatcher, err error
 		go func(evtw *fsValueWatcher) {
 			ticker := time.NewTicker(time.Second * 2)
 			for {
-				select {
-				case <-ticker.C:
-					path := ""
-				INFOR:
-					for {
-						select {
-						case p := <-evtw.syncChan:
-							path = p.Name
-						default:
-							break INFOR
+				<-ticker.C
+				path := ""
+			INFOR:
+				for {
+					select {
+					case p := <-evtw.syncChan:
+						path = p.Name
+					default:
+						break INFOR
 
-						}
 					}
-					if len(path) > 0 {
-						ett := &valueEntity{
-							path: l.exposePath(rpath),
-						}
-						evtw.watcher <- ett
+				}
+				if len(path) > 0 {
+					ett := &valueEntity{
+						path: l.exposePath(rpath),
 					}
+					evtw.watcher <- ett
 				}
 			}
 		}(v)
@@ -270,7 +266,7 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 	realPath := l.replaceColon(l.formatPath(path))
 	_, err = os.Stat(realPath)
 	if os.IsNotExist(err) {
-		err = fmt.Errorf("Watch path:%s 不存在", path)
+		err = fmt.Errorf("watch path:%s 不存在", path)
 		return
 	}
 
@@ -294,28 +290,26 @@ func (l *fs) WatchChildren(path string) (data chan registry.ChildrenWatcher, err
 		go func(evtw *fsChildrenWatcher) {
 			ticker := time.NewTicker(time.Second * 2)
 			for {
-				select {
-				case <-ticker.C:
-					path := ""
-				INFOR:
-					for {
-						select {
-						case p := <-evtw.syncChan:
-							path = p.Name
-						default:
-							break INFOR
-						}
+				<-ticker.C
+				path := ""
+			INFOR:
+				for {
+					select {
+					case p := <-evtw.syncChan:
+						path = p.Name
+					default:
+						break INFOR
 					}
-					if len(path) > 0 {
-						vals, version, err := l.GetChildren(rpath)
-						ett := &valuesEntity{
-							path:    l.exposePath(rpath),
-							values:  vals,
-							version: version,
-							Err:     err,
-						}
-						evtw.watcher <- ett
+				}
+				if len(path) > 0 {
+					vals, version, err := l.GetChildren(rpath)
+					ett := &valuesEntity{
+						path:    l.exposePath(rpath),
+						values:  vals,
+						version: version,
+						Err:     err,
 					}
+					evtw.watcher <- ett
 				}
 			}
 		}(v)

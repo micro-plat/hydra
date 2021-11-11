@@ -13,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/services"
+	"github.com/micro-plat/lib4go/types"
 )
 
 //IConf 配置注册管理
@@ -61,7 +62,7 @@ type IConf interface {
 	GetMQC() *mqcBuilder
 
 	//Pub 发布服务
-	Pub(platName string, systemName string, clusterName string, registryAddr string, cover bool) error
+	Pub(platName string, systemName string, clusterName string, registryAddr string, input types.XMap) error
 
 	//Load 加载所有配置
 	Load() error

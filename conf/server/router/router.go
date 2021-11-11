@@ -28,9 +28,9 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
-	MapPath       map[string]map[string]string `json:"-"`
-	ServicePrefix string                       `json:"-"`
+	Routers       []*Router `json:"routers,omitempty" toml:"routers,omitempty"`
+	ServicePrefix string    `json:"-"`
+	tree          *Node     `json:"-"`
 }
 
 func (h *Routers) String() string {
@@ -87,25 +87,35 @@ func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
 }
 
+//GetParams 获取路由参数
+func (r *Router) GetParams(path string) map[string]string {
+	return getParams(r.Path, path)
+}
+
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
-		MapPath: make(map[string]map[string]string),
-		Routers: make([]*Router, 0, 1),
+		Routers: make([]*Router, 0),
 	}
 	return r
 }
 
 //Append 添加路由信息
 func (h *Routers) Append(path string, service string, action []string, opts ...Option) *Routers {
-	h.Routers = append(h.Routers, NewRouter(path, service, action, opts...))
+	r := NewRouter(path, service, action, opts...)
+	h.Routers = append(h.Routers, r)
+	h.tree = NewTree(h.GetPath()...)
 	return h
 }
 
 //Match 根据请求路径匹配指定的路由配置
 func (h *Routers) Match(path string, method string) (*Router, error) {
+	matchPath, matched := h.tree.Match(path, "")
+	if !matched {
+		return nil, fmt.Errorf("未找到与[%s]匹配的路由", path)
+	}
 	for _, r := range h.Routers {
-		if r.Path == path && types.StringContains(r.Action, method) {
+		if r.Path == matchPath && types.StringContains(r.Action, method) {
 			return r, nil
 		}
 	}

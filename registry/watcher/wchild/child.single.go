@@ -65,15 +65,13 @@ func (w *ChildWatcher) watch(path string) (err error) {
 LOOP:
 	exists, _ := w.registry.Exists(path)
 	for !exists {
-		select {
-		case <-time.After(w.timeSpan):
-			if w.Done {
-				return nil
-			}
-			exists, err = w.registry.Exists(path)
-			if !exists && err == nil {
-				w.deleted()
-			}
+		<-time.After(w.timeSpan)
+		if w.Done {
+			return nil
+		}
+		exists, err = w.registry.Exists(path)
+		if !exists && err == nil {
+			w.deleted()
 		}
 	}
 	//获取节点值
@@ -152,7 +150,6 @@ func (w *ChildWatcher) changed(children []string, version int32) {
 	atomic.AddInt32(&w.changedCnt, 1)
 	updater := watcher.NewCArgsByChange(op, w.deep, w.path, children, version, w.registry)
 	w.notify(updater)
-	return
 }
 func (w *ChildWatcher) notify(a *watcher.ChildChangeArgs) {
 	if len(a.Children) == 0 && a.OP != watcher.DEL {

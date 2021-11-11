@@ -37,7 +37,6 @@ func startTrace(trace, tracePort string) (itrace, error) {
 	default:
 		return nil, fmt.Errorf("不支持trace命令:%v", trace)
 	}
-	return &emptyTrace{}, nil
 }
 
 type webTrace struct {
@@ -53,7 +52,6 @@ func (w *webTrace) Start() error {
 	case <-time.After(time.Millisecond * 200):
 		return nil
 	}
-	return nil
 }
 
 func startServer(tracePort string, errChan chan error) {
@@ -77,12 +75,10 @@ func startServer(tracePort string, errChan chan error) {
 }
 
 func (w *webTrace) Stop() {
-	return
 }
 
 type emptyTrace struct {
 }
 
 func (e *emptyTrace) Stop() {
-	return
 }

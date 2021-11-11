@@ -29,6 +29,14 @@ func getFlags() []cli.Flag {
 		Destination: &global.FlagVal.IPMask,
 		Usage:       `-子网掩码。多个网卡情况下根据mask获取本机IP`,
 	})
+	flags = append(flags, cli.BoolFlag{
+		Name:  "nostd",
+		Usage: `-控制台不输出日志`,
+	})
+	flags = append(flags, cli.StringFlag{
+		Name:  "import",
+		Usage: `-导入配置文件`,
+	})
 	flags = append(flags, global.RunCli.GetFlags()...)
 	return flags
 }

@@ -19,7 +19,7 @@ func init() {
 		return cli.Command{
 			Name:   "install",
 			Usage:  "安装服务，以服务方式安装到本地系统",
-			Flags:  getFlags(),
+			Flags:  flags,
 			Action: doInstall,
 		}
 	})
@@ -38,7 +38,7 @@ func doInstall(c *cli.Context) (err error) {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return err
 	}
-	args := []string{"run"}
+	args := []string{"run", "--nostd"}
 	args = append(args, os.Args[2:]...)
 	//3.创建本地服务
 	hydraSrv, err := pkgs.GetService(c, isFixed, args...)

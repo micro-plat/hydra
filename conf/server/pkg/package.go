@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
 type Package struct {
+	security.ConfEncrypt
 	URL     string `json:"url" valid:"requrl,required" toml:"url,omitempty"`
 	Version string `json:"version" valid:"ascii,required" toml:"version,omitempty"`
 	CRC32   uint32 `json:"crc32" valid:"required" toml:"crc32,omitempty"`

@@ -63,6 +63,7 @@ func getSecret(ctx context.IContext, auth *apikey.APIKeyAuth) (string, error) {
 			return "", err
 		}
 		secret = types.GetString(response.GetResult())
+		return secret, nil
 	}
 	return "", fmt.Errorf("apikey不支持协议%s", proto)
 }

@@ -56,15 +56,13 @@ func (w *SingleValueWatcher) watch() (err error) {
 LOOP:
 	exists, _ := w.registry.Exists(w.path)
 	for !exists {
-		select {
-		case <-time.After(w.timeSpan):
-			if w.Done {
-				return nil
-			}
-			exists, err = w.registry.Exists(w.path)
-			if !exists && err == nil {
-				w.notifyDeleted()
-			}
+		<-time.After(w.timeSpan)
+		if w.Done {
+			return nil
+		}
+		exists, err = w.registry.Exists(w.path)
+		if !exists && err == nil {
+			w.notifyDeleted()
 		}
 	}
 
@@ -126,5 +124,4 @@ func (w *SingleValueWatcher) notifyChanged(content []byte, version int32) {
 	atomic.AddInt32(&w.changed, 1)
 	updater := &watcher.ValueChangeArgs{OP: op, Path: w.path, Version: version, Content: content, Registry: w.registry}
 	w.notifyChan <- updater
-	return
 }

@@ -40,26 +40,8 @@ func (r *file) SaveFile(fileKey, dst string) error {
 	return err
 }
 
-//GetFileSize 获取上传文件大小
-func (r *file) GetFileSize(fileKey string) (int64, error) {
-	_, _, size, err := r.ctx.GetFile(fileKey)
-	if err != nil {
-		return 0, err
-	}
-	return size, nil
-}
-
-//GetFileName 获取上传文件名称
-func (r *file) GetFileName(fileKey string) (string, error) {
-	fileName, _, _, err := r.ctx.GetFile(fileKey)
-	if err != nil {
-		return "", err
-	}
-	return fileName, nil
-}
-
-//GetFileBody 获取上传文件内容
-func (r *file) GetFileBody(fileKey string) (io.ReadCloser, error) {
-	_, reader, _, err := r.ctx.GetFile(fileKey)
-	return reader, err
+//GetFile 获取上传文件内容
+func (r *file) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
+	name, reader, size, err := r.ctx.GetFile(fileKey)
+	return name, reader, size, err
 }

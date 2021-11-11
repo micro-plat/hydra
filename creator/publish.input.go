@@ -8,14 +8,31 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	logs "github.com/lib4dev/cli/logger"
 	"github.com/manifoldco/promptui"
 	vc "github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//检查输入参数，并处理用户输入
-func checkAndInput(path string, value reflect.Value, tnames []string, input map[string]interface{}) error {
+func getCustomString(path, label, value, tname string, input types.XMap) (string, error) {
+	if strings.HasPrefix(value, vc.ByInstall) || strings.EqualFold(value, fmt.Sprint(vc.ByInstallI)) {
+		fname := getFullName(path, label, tname)
+		valueKey := types.GetString(strings.TrimPrefix(value, vc.ByInstall), fname)
+		if v := input.GetString(valueKey); v != "" {
+			return v, nil
+		}
+		newValue, err := readFromCli(fname, "required", tname, "", false)
+		if err != nil {
+			return "", err
+		}
+		input[valueKey] = newValue
+		return newValue, nil
+	}
+	return value, nil
+}
 
+//检查输入参数，并处理用户输入
+func checkAndInput(path, label string, value reflect.Value, tnames []string, input types.XMap) error {
 	//处理参数类型
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -34,40 +51,32 @@ func checkAndInput(path string, value reflect.Value, tnames []string, input map[
 	case reflect.Map:
 		return checkMap(path, value, input)
 	default:
-		return checkString(path, value, input)
+		return checkString(path, label, value, tnames, input)
 	}
 }
 
-func checkString(path string, m reflect.Value, input map[string]interface{}) error {
-	return nil
-}
-
-func checkMap(path string, m reflect.Value, input map[string]interface{}) (err error) {
-	keys := m.MapKeys()
-	for _, key := range keys {
-		value := m.MapIndex(key)
-		skey := fmt.Sprint(key.Interface())
-		if !reflect.ValueOf(value).IsValid() || reflect.ValueOf(value).IsZero() {
-			continue
-		}
-		svalue := fmt.Sprint(value.Interface())
-		if !strings.HasPrefix(svalue, vc.ByInstall) && !strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)) {
-			continue
-		}
-		v, ok := input[skey]
-		if !ok {
-			fname := getFullName(path, skey, skey)
-			v, err = readFromCli(fname, "-", fname, "", false)
-			if err != nil {
-				return err
-			}
-		}
-		m.SetMapIndex(key, reflect.ValueOf(v))
+func checkString(path, label string, m reflect.Value, tnames []string, input types.XMap) error {
+	if !strings.Contains(path, "/var/") || !m.CanSet() {
+		return nil
 	}
+	//处理var自定义配置
+	tname := ""
+	if len(tnames) > 0 {
+		tname = tnames[0]
+	}
+	v, err := getCustomString(path, label, m.String(), tname, input)
+	if err != nil {
+		return err
+	}
+	m.SetString(v)
 	return nil
 }
 
-func checkStruct(path string, value reflect.Value, tnames []string, input map[string]interface{}) (err error) {
+func checkMap(path string, m reflect.Value, input types.XMap) (err error) {
+	return nil
+}
+
+func checkStruct(path string, value reflect.Value, tnames []string, input types.XMap) (err error) {
 	vt := reflect.TypeOf(value.Interface())
 	for i := 0; i < value.NumField(); i++ {
 		tfield := vt.Field(i)
@@ -82,13 +91,16 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 				return err
 			}
 		case reflect.Map:
-			if err := checkMap(path, vfield, input); err != nil {
+			if isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()) {
+				return fmt.Errorf("未配置%s", path)
+			}
+			if err := checkMap(path, vfield, input); err != nil { //属性类型为map，没有进行验证处理
 				return err
 			}
 		case reflect.Struct:
 			if !vfield.IsValid() || vfield.IsZero() {
 				if !isRequire(tfield) {
-					return
+					continue
 				}
 				setZeroField(vfield, tfield)
 			}
@@ -99,7 +111,7 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 		case reflect.Ptr:
 			if !vfield.IsValid() || vfield.IsZero() {
 				if !isRequire(tfield) {
-					return
+					continue
 				}
 				setZeroField(vfield, tfield)
 			}
@@ -117,33 +129,44 @@ func checkStruct(path string, value reflect.Value, tnames []string, input map[st
 	return nil
 }
 
-func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (value interface{}, err error) {
+func getValues(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (value interface{}, err error) {
 	validTagName := tfield.Tag.Get("valid")
 	label, msg := getLable(tfield)
 	tnames = append(tnames, tfield.Name)
 	fname := getFullName(path, label, strings.Join(tnames, "."))
 
 	isArray := vfield.Kind() == reflect.Array || vfield.Kind() == reflect.Slice
-	check := func() (interface{}, error) {
-		v, ok := input[fname]
-		if !ok {
-			v, err = readFromCli(fname, validTagName, label, msg, isArray)
-			if err != nil {
-				return nil, err
-			}
+	check := func(key string) (interface{}, error) {
+		valueKey := types.GetString(key, fname)
+		if v, ok := input.Get(valueKey); ok {
+			return v, nil
 		}
+		v, err := readFromCli(fname, validTagName, label, msg, isArray)
+		if err != nil {
+			return nil, err
+		}
+		input[valueKey] = v
 		return v, nil
 	}
 	svalue := getSValue(vfield, isArray)
 	switch {
-	case isArray && validateArray(svalue, validTagName, label, msg) != nil:
-		return check()
-	case strings.HasPrefix(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
-		return check()
+	case isArray:
+		if err := validateArray(svalue, validTagName, label, msg); err != nil {
+			logs.Log.Errorf("%s验证不通过:%+v", path, err)
+			return check("")
+		}
+	case strings.Contains(svalue, vc.ByInstall) || strings.EqualFold(svalue, fmt.Sprint(vc.ByInstallI)):
+		if strings.Contains(path, "/var/") { //处理var的自定义配置
+			return check("")
+		}
+		return check(strings.TrimPrefix(svalue, vc.ByInstall))
 	case isRequire(tfield) && (!vfield.IsValid() || vfield.IsZero()):
-		return check()
-	case !isArray && vfield.IsValid() && !vfield.IsZero() && validate(svalue, validTagName, label, msg) != nil:
-		return check()
+		return check("")
+	case !isArray && vfield.IsValid() && !vfield.IsZero():
+		if err := validate(svalue, validTagName, label, msg); err != nil {
+			logs.Log.Errorf("%s验证不通过:%+v", path, err)
+			return check("")
+		}
 	}
 	return nil, nil
 
@@ -219,7 +242,7 @@ func initializeStruct(t reflect.Type, v reflect.Value) {
 	}
 }
 
-func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
+func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (err error) {
 
 	//处理多个数据值问题
 	if vfield.Len() == 0 { //数组为空,元素为结构体时,添加的一个新元素
@@ -228,13 +251,13 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 		}
 		setZeroField(vfield, tfield)
 	}
-
+	label, _ := getLable(tfield)
 	var v interface{}
 	listValue := make([]string, 0, 1)
 	for i := 0; i < vfield.Len(); i++ {
 		t := vfield.Index(i)
 		rootNames := append(tnames, fmt.Sprintf("%s[%d]", tfield.Name, i))
-		err := checkAndInput(path, t, rootNames, input)
+		err := checkAndInput(path, label, t, rootNames, input)
 		if err != nil {
 			return err
 		}
@@ -260,7 +283,7 @@ func setSliceValue(path string, vfield reflect.Value, tfield reflect.StructField
 	return types.SetSlice([]interface{}{v}, vfield, tfield)
 }
 
-func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input map[string]interface{}) (err error) {
+func setFieldValue(path string, vfield reflect.Value, tfield reflect.StructField, tnames []string, input types.XMap) (err error) {
 	v, err := getValues(path, vfield, tfield, tnames, input)
 	if err != nil || v == nil {
 		return err
@@ -363,8 +386,8 @@ func getSValue(vfield reflect.Value, isArray bool) string {
 	return svalue
 }
 
-func getFullName(path string, name string, tname string) string {
-	return fmt.Sprintf("%s(%s,%s)", name, tname, path)
+func getFullName(path string, label string, tname string) string {
+	return fmt.Sprintf("%s(%s,%s)", label, tname, path)
 }
 
 func getLable(tfield reflect.StructField) (string, string) {

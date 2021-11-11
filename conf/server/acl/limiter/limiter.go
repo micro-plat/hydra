@@ -11,6 +11,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
@@ -24,6 +25,7 @@ const (
 
 //Limiter 限流器
 type Limiter struct {
+	security.ConfEncrypt
 	Rules    []*Rule         `json:"rules,omitempty" valid:"required" toml:"rules,omitempty" label:"限流器规则"`
 	Disable  bool            `json:"disable,omitempty" toml:"disable,omitempty"`
 	p        *conf.PathMatch `json:"-"`

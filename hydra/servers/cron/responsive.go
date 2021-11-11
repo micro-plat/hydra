@@ -70,14 +70,15 @@ func (w *Responsive) Start() (err error) {
 
 	w.subscribe()
 
-	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.Server.TaskCount())
-
 	//服务启动成功后钩子
 	if err := services.Def.DoStarted(w.conf); err != nil {
-		err = fmt.Errorf("%s外部处理失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
+		err = fmt.Errorf("%s启动失败，关闭服务器 %w", w.conf.GetServerConf().GetServerType(), err)
 		w.Shutdown()
 		return err
 	}
+
+	w.log.Infof("启动成功(%s,%s,[%d])", w.conf.GetServerConf().GetServerType(), w.Server.GetAddress(), w.Server.TaskCount())
+
 	return nil
 }
 
@@ -90,6 +91,9 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	}
 	if w.comparer.IsValueChanged() || w.comparer.IsSubConfChanged() {
 		w.log.Info("关键配置发生变化，准备重启服务器")
+		if err := services.Def.DoSetup(c); err != nil {
+			return false, err
+		}
 		server, err := w.getServer(c)
 		if err != nil {
 			return false, err
@@ -132,7 +136,6 @@ func (w *Responsive) Shutdown() {
 		w.log.Infof("关闭[%s]服务,出现错误", err)
 		return
 	}
-	return
 }
 
 //publish 将当前服务器的节点信息发布到注册中心
@@ -158,6 +161,8 @@ func (w *Responsive) update(kv ...string) (err error) {
 
 //根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
+	tp := cnf.GetServerConf().GetServerType()
+
 	_, err := cron.GetConf(cnf.GetServerConf())
 	if err != nil {
 		return nil, err
@@ -167,8 +172,20 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	processorObj, err := cnf.GetProcessorConf()
+	if err != nil {
+		return nil, err
+	}
+	//从服务中获取路由
+	sr := services.GetRouter(tp)
+	routersObj, err := sr.BuildRouters(processorObj.ServicePrefix)
+	if err != nil {
+		return nil, err
+	}
+
 	//初始化server
-	return NewServer(task.Tasks...)
+	return NewServer(task.Tasks, routersObj.GetRouters()...)
 }
 
 func init() {

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"compress/gzip"
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
@@ -9,19 +10,21 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/encoding"
 )
 
+func (c *Client) Request(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, status int, err error) {
+	r, _, s, err := c.HRequest(method, url, params, charset, header, cookies...)
+	return r, s, err
+}
+
 // Request 发送http请求, method:http请求方法包括:get,post,delete,put等 url: 请求的HTTP地址,不包括参数,params:请求参数,
 // header,http请求头多个用/n分隔,每个键值之前用=号连接
-func (c *Client) Request(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, status int, err error) {
+func (c *Client) HRequest(method string, url string, params string, charset string, header http.Header, cookies ...*http.Cookie) (content []byte, rspHeader http.Header, status int, err error) {
 	method = strings.ToUpper(method)
-	start := time.Now()
-	c.printRequest(method, url, params, charset)
 	req, err := http.NewRequest(method, url, encoding.GetEncodeReader([]byte(params), charset))
 	if err != nil {
 		return
@@ -31,6 +34,9 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		req.AddCookie(cookie)
 	}
 	req.Close = true
+	if header == nil {
+		header = http.Header{}
+	}
 	if c := header.Get("Content-Type"); (method == "POST" || method == "PUT" || method == "DELETE") && c == "" {
 		header.Set("Content-Type", fmt.Sprintf("application/x-www-form-urlencoded;charset=%s", charset))
 	}
@@ -46,19 +52,27 @@ func (c *Client) Request(method string, url string, params string, charset strin
 		defer response.Body.Close()
 	}
 	if err != nil {
-		return nil, 0, fmt.Errorf("client.Do err:%v", err)
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		c.printResponseError(method, url, response.Status, time.Now().Sub(start), err)
-		return nil, 0, fmt.Errorf("body ReadAll err:%v", err)
+		return nil, nil, 0, fmt.Errorf("client.Do err:%v", err)
 	}
 
-	c.printResponse(method, url, response.Status, time.Now().Sub(start), string(body))
+	rawBody := response.Body
+	if strings.EqualFold(response.Header.Get("Content-Encoding"), "gzip") {
+		rawBody, err = gzip.NewReader(response.Body)
+		if err != nil {
+			err = fmt.Errorf("http resp unzip is failed,err: %w", err)
+			return nil, nil, status, err
+		}
+	}
+
+	body, err := ioutil.ReadAll(rawBody)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("body ReadAll err:%v", err)
+	}
+	rspHeader = response.Header
 	status = response.StatusCode
 	ct, err := encoding.DecodeBytes(body, charset)
 	if err != nil {
-		return nil, 0, fmt.Errorf("body charset err:%v", err)
+		return nil, nil, 0, fmt.Errorf("body charset err:%v", err)
 	}
 	content = ct
 	return
@@ -102,15 +116,6 @@ func getCharset(charset ...string) (encoding string) {
 		return strings.ToUpper(charset[0])
 	}
 	return "UTF-8"
-}
-func (c *Client) printRequest(r ...interface{}) {
-	c.print(context.Current().Log().Debug, " > http request:", r...)
-}
-func (c *Client) printResponse(r ...interface{}) {
-	c.print(context.Current().Log().Debug, " > http response:", r...)
-}
-func (c *Client) printResponseError(r ...interface{}) {
-	c.print(context.Current().Log().Error, " > http response:", r...)
 }
 
 func (c *Client) print(p func(...interface{}), h string, r ...interface{}) {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -189,7 +190,7 @@ func getValue(registry registry.IRegistry, path string) (*conf.RawConf, error) {
 		return nil, fmt.Errorf("获取配置出错 %s %w", path, err)
 	}
 
-	rdata, err := conf.Decrypt(data)
+	rdata, err := security.Decrypt(data)
 	if err != nil {
 		return nil, fmt.Errorf("%s[%s]解密子配置失败:%w", path, data, err)
 	}

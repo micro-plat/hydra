@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/global"
 )
 
@@ -24,6 +25,7 @@ var SubConfName = []string{"task"}
 
 //Server 服务嚣配置信息
 type Server struct {
+	security.ConfEncrypt
 	Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty" label:"cron服务状态"`
 	Sharding int    `json:"sharding,omitempty" toml:"sharding,omitempty"`
 	Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`

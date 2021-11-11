@@ -138,11 +138,6 @@ func HasConnectionError(err error) bool {
 //ExistsChildren ExistsChildren
 func (c *Client) ExistsChildren(path string) (exists bool, err error) {
 
-	defer func() {
-		//fmt.Println("ExistsChildren:", path,exists)
-
-	}()
-
 	cur := uint64(0)
 	for {
 		var keys []string
@@ -151,11 +146,11 @@ func (c *Client) ExistsChildren(path string) (exists bool, err error) {
 		if err != nil {
 			return
 		}
-		if cur <= 0 {
-			break
-		}
 		if len(keys) > 0 {
 			exists = true
+			break
+		}
+		if cur <= 0 {
 			break
 		}
 	}
@@ -164,11 +159,6 @@ func (c *Client) ExistsChildren(path string) (exists bool, err error) {
 
 //SearchChildren 根据路径查找
 func (c *Client) SearchChildren(path string) (children []string, err error) {
-	defer func() {
-		//	fmt.Println("SearchChildren:", path,children,err)
-
-	}()
-
 	cur := uint64(0)
 	children = []string{}
 	for {

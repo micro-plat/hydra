@@ -40,7 +40,7 @@ func newCron() *cron {
 	c := &cron{
 		dynamicTasks: task.NewEmptyTasks(),
 		staticTasks:  task.NewEmptyTasks(),
-		subscribers:  make([]*subscriber, 0, 0),
+		subscribers:  make([]*subscriber, 0),
 		signalChan:   make(chan struct{}, 100),
 	}
 	go c.notify()

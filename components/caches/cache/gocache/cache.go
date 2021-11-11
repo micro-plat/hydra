@@ -54,7 +54,7 @@ func (c *Client) Get(key string) (string, error) {
 	if !ok {
 		return "", nil
 	}
-	return v.(string), nil
+	return fmt.Sprint(v), nil
 }
 
 //Decrement 增加变量的值

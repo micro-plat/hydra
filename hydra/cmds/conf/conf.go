@@ -2,11 +2,6 @@ package conf
 
 import (
 	"github.com/lib4dev/cli/cmds"
-	logs "github.com/lib4dev/cli/logger"
-	"github.com/micro-plat/hydra/global"
-	"github.com/micro-plat/hydra/global/compatible"
-	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
-	"github.com/micro-plat/hydra/registry"
 	"github.com/urfave/cli"
 )
 
@@ -28,50 +23,19 @@ func init() {
 					Flags:  getInstallFlags(),
 					Action: installNow,
 				},
+				{
+					Name:   "encrypt",
+					Usage:  "-使用内置加密方法加密配置数据",
+					Action: encrypt,
+					Flags:  getEncryptFlags(),
+				},
+				{
+					Name:   "export",
+					Usage:  "-使用内置加密方法加密配置数据",
+					Action: exportNow,
+					Flags:  getExportFlags(),
+				},
 			},
 		}
 	})
-}
-func showNow(c *cli.Context) (err error) {
-	//1. 绑定应用程序参数
-	global.Current().Log().Pause()
-	if err := global.Def.Bind(c); err != nil {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		return err
-	}
-
-	//2. 处理本地内存作为注册中心的服务发布问题
-	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
-		if err := pkgs.Pub2Registry(true); err != nil {
-			return err
-		}
-	}
-
-	//3. 显示配置
-	return showConf(global.Current().GetRegistryAddr(),
-		global.Current().GetPlatName(),
-		global.Current().GetSysName(),
-		global.Current().GetServerTypes(),
-		global.Current().GetClusterName())
-}
-
-func installNow(c *cli.Context) (err error) {
-	//1. 绑定应用程序参数
-	global.Current().Log().Pause()
-	if err := global.Def.Bind(c); err != nil {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		return err
-	}
-
-	//2.检查是否安装注册中心配置
-	if registry.GetProto(global.Current().GetRegistryAddr()) != registry.LocalMemory {
-		if err := pkgs.Pub2Registry(coverIfExists); err != nil {
-			logs.Log.Error("安装到配置中心:", compatible.FAILED)
-			return err
-		}
-		logs.Log.Info("安装到配置中心:", compatible.SUCCESS)
-		return
-	}
-	return nil
-
 }

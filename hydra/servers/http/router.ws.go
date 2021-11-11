@@ -22,7 +22,6 @@ func (s *Server) addWSRouters(routers ...*router.Router) {
 	s.engine.Use()
 	s.addWSRouter(routers...)
 	s.server.Handler = s.engine
-	return
 }
 
 func (s *Server) addWSRouter(routers ...*router.Router) {

@@ -13,22 +13,25 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.0
 	github.com/gmallard/stompngo v1.0.13 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/lib4dev/cli v1.2.8
 	github.com/manifoldco/promptui v0.8.0
+	github.com/mattn/go-oci8 v0.1.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.1.7
+	github.com/micro-plat/lib4go v1.1.10
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/sergi/go-diff v1.2.0
 	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go/codec v1.2.2
 	github.com/ulikunitz/xz v0.5.9 // indirect

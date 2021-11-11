@@ -1,5 +1,7 @@
 package http
 
+import "github.com/micro-plat/hydra/conf/pkgs/security"
+
 const (
 	//typeNode DB在var配置中的类型名称
 	HttpTypeNode = "http"
@@ -10,6 +12,7 @@ const (
 
 //HTTPConf http客户端配置对象
 type HTTPConf struct {
+	security.ConfEncrypt
 	ConnectionTimeout int      `json:"connectionTimeout"`
 	RequestTimeout    int      `json:"requestTimeout"`
 	Certs             []string `json:"certs"`

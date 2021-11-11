@@ -6,7 +6,10 @@ type Option func(*BasicAuth)
 //WithUP 添加用户名密码
 func WithUP(userName string, pwd string) Option {
 	return func(b *BasicAuth) {
-		b.Members[userName] = pwd
+		b.Members = append(b.Members, &member{
+			UserName: userName,
+			Password: pwd,
+		})
 	}
 }
 
@@ -35,5 +38,12 @@ func WithDisable() Option {
 func WithEnable() Option {
 	return func(b *BasicAuth) {
 		b.Disable = false
+	}
+}
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *BasicAuth) {
+		a.EnableEncryption = true
 	}
 }

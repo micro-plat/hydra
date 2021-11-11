@@ -20,6 +20,9 @@ const defFallback = "Fallback"
 const defClose = "Close"
 
 //IService 服务注册接口
+
+//IMicroRegistry 微服务注册接口
+type IMicroRegistry func(name string, h interface{}, r ...router.Option) IService
 type IService interface {
 	Group(name ...string) IService
 
@@ -43,6 +46,7 @@ type IService interface {
 
 	//WS 注册为websocket服务
 	WS(name string, h interface{}, r ...router.Option) IService
+
 	//MQC 注册为消息消费服务
 	MQC(name string, h interface{}, queues ...string) IService
 
@@ -52,10 +56,19 @@ type IService interface {
 	//custome 注册为自定义服务器的服务
 	Custom(tp string, name string, h interface{}, ext ...interface{}) IService
 
-	//RegisterServer 注册新的服务器类型
-	RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error)
+	//Remove 移除已注册服务（重启服务器生效）
+	Remove(path string, tp ...string)
 
-	//OnSetup 服务器初始化勾子，服务器配置初始化前执行
+	//Clear 清除所有注册服务
+	Clear(tp ...string)
+
+	//HookRemove 移除钩子函数
+	HookRemove(hs ...interface{})
+
+	//RegisterServer 注册新的服务器类型
+	RegisterServer(tp string, f func(g *Unit, ext ...interface{}) error, remove func(path string))
+
+	//OnSetup 服务器初始化勾子，服务器配置初始化前执行(首次启动前 或 收到配置变更后需要重启服务器前)
 	OnSetup(h func(app.IAPPConf) error, tps ...string)
 
 	//OnStarting 服务器启动前勾子，服务器启动前执行
@@ -166,6 +179,45 @@ func (s *regist) CRON(name string, h interface{}, crons ...string) IService {
 	return s.Custom(global.CRON, name, h, v...)
 }
 
+//Remove 移除已注册服务（重启服务生效）
+func (s *regist) Remove(path string, tp ...string) {
+	if len(tp) == 0 {
+		for _, server := range s.servers {
+			server.Remove(path)
+		}
+		return
+	}
+	for _, t := range tp {
+		if server, ok := s.servers[t]; ok {
+			server.Remove(path)
+		}
+	}
+
+}
+
+//Clear 清除所有注册服务
+func (s *regist) Clear(tp ...string) {
+	if len(tp) == 0 {
+		for _, server := range s.servers {
+			server.Clear()
+		}
+		return
+	}
+	for _, t := range tp {
+		if server, ok := s.servers[t]; ok {
+			server.Clear()
+		}
+	}
+
+}
+
+//HookRemove 移除钩子函数
+func (s *regist) HookRemove(hs ...interface{}) {
+	for _, server := range s.servers {
+		server.HookRemove(hs...)
+	}
+}
+
 //Custom 自定义服务注册
 func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{}) IService {
 	//去掉两头'/'
@@ -178,18 +230,18 @@ func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{
 }
 
 //RegisterServer 注册服务器
-func (s *regist) RegisterServer(tp string, f ...func(g *Unit, ext ...interface{}) error) {
+func (s *regist) RegisterServer(tp string, f func(g *Unit, ext ...interface{}) error, v func(path string)) {
 	if _, ok := s.servers[tp]; ok {
 		panic(fmt.Errorf("服务%s已存在，不能重复注册", tp))
 	}
-	if len(f) > 0 {
-		s.servers[tp] = newServerServices(f[0])
+	if f != nil {
+		s.servers[tp] = newServerServices(f, v)
 		return
 	}
-	s.servers[tp] = newServerServices(nil)
+	s.servers[tp] = newServerServices(nil, nil)
 }
 
-//OnSetup 服务器初始化勾子，服务器配置初始化前执行
+//OnSetup 服务器初始化勾子，服务器配置初始化前执行(首次启动前或收到配置变更后需要重启服务器前)
 func (s *regist) OnSetup(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -365,27 +417,30 @@ func (s *regist) Close() error {
 func init() {
 	Def.servers[global.API] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return API.Add(g.Path, g.Service, g.Actions, ext...)
-	})
+	}, API.Remove)
 	Def.servers[global.Web] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return WEB.Add(g.Path, g.Service, g.Actions, ext...)
-	})
+	}, WEB.Remove)
 	Def.servers[global.RPC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
-	})
+	}, RPC.Remove)
 
 	Def.servers[global.WS] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return WS.Add(g.Path, g.Service, g.Actions, ext...)
-	})
+	}, WS.Remove)
 	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			CRON.Static(t.(string), g.Service)
+			CRON.Add(t.(string), g.Service)
 		}
+
+		routerCRON.Add(g.Path, g.Service, g.Actions)
 		return nil
-	})
+	}, routerCRON.Remove)
 	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			MQC.Static(t.(string), g.Service)
+			MQC.Add(t.(string), g.Service)
 		}
+		routerMQC.Add(g.Path, g.Service, g.Actions)
 		return nil
-	})
+	}, routerMQC.Remove)
 }

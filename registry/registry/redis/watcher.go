@@ -109,5 +109,4 @@ func (r *Redis) notifyParentChange(path string, version int32) {
 	})
 
 	r.client.Publish(parent, string(bytes))
-	return
 }

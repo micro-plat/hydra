@@ -44,3 +44,10 @@ func WithEnable() Option {
 		a.Status = StartStatus
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Server) {
+		a.EnableEncryption = true
+	}
+}

@@ -8,10 +8,36 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/cmds/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/types"
+	"github.com/urfave/cli"
 	"github.com/zkfy/log"
 )
+
+func showNow(c *cli.Context) (err error) {
+	//1. 绑定应用程序参数
+	global.Current().Log().Pause()
+	if err := global.Def.Bind(c); err != nil {
+		cli.ShowCommandHelp(c, c.Command.Name)
+		return err
+	}
+
+	//2. 处理本地内存作为注册中心的服务发布问题
+	if registry.GetProto(global.Current().GetRegistryAddr()) == registry.LocalMemory {
+		if err := pkgs.Pub2Registry(true, ""); err != nil {
+			return err
+		}
+	}
+
+	//3. 显示配置
+	return showConf(global.Current().GetRegistryAddr(),
+		global.Current().GetPlatName(),
+		global.Current().GetSysName(),
+		global.Current().GetServerTypes(),
+		global.Current().GetClusterName())
+}
 
 func showConf(addrs string, plat string, sysName string, types []string, cluster string) error {
 	s := newShow(addrs, plat, sysName, types, cluster)

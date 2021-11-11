@@ -3,6 +3,7 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/micro-plat/hydra/pkgs"
@@ -76,6 +77,14 @@ func (c *Client) RequestByString(ctx context.Context, service string, form strin
 	for _, opt := range opts {
 		opt(o)
 	}
+
+	for k := range o.headers {
+		if strings.EqualFold("Content-Type", k) {
+			o.headers[k] = "application/json;charset=utf-8"
+			break
+		}
+	}
+
 	o.service = service
 	response, err := c.clientRequest(ctx, o, form)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -48,23 +49,42 @@ func (c *rpath) Params() types.XMap {
 	return c.params
 }
 
-//GetService 获取服务名称
-func (c *rpath) GetService() string {
-	tp := c.appConf.GetServerConf().GetServerType()
-	switch tp {
-	case global.API, global.Web, global.WS, global.RPC:
-		routerObj, err := services.GetRouter(tp).GetRouters()
-		if err != nil {
-			return ""
-		}
-		router, err := routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
-		if err != nil {
-			return ""
-		}
-		return router.Service
-	default:
-		return c.ctx.GetRouterPath()
+//FormatService 通过GetProcessorConf 格式化服务名
+func (c *rpath) FormatService(service string) string {
+	p, err := c.appConf.GetProcessorConf()
+	if err != nil {
+		return service
 	}
+	return p.FormatService(service)
+}
+
+//GetService 获取服务名称
+func (c *rpath) GetService(path ...string) string {
+	tp := c.appConf.GetServerConf().GetServerType()
+	routerPath := types.GetStringByIndex(path, 0, c.ctx.GetRouterPath())
+	switch tp {
+	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
+		r, err := c.GetRouter(routerPath)
+		if err != nil {
+			return ""
+		}
+		return r.Service
+	default:
+		return routerPath
+	}
+}
+
+func (c *rpath) GetRouter(path string) (*router.Router, error) {
+	tp := c.appConf.GetServerConf().GetServerType()
+	routerObj, err := services.GetRouter(tp).GetRouters()
+	if err != nil {
+		return nil, err
+	}
+	router, err := routerObj.Match(path, c.ctx.GetMethod())
+	if err != nil {
+		return nil, err
+	}
+	return router, nil
 }
 
 //GetGroup 获取当前服务注册的group名
@@ -119,7 +139,7 @@ func (c *rpath) GetEncoding() string {
 func (c *rpath) getEncoding() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS, global.RPC:
+	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
 			return ""

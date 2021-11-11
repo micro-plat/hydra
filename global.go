@@ -64,6 +64,9 @@ const ByInstall = conf.ByInstall
 //ByInstallI 通过安装设置
 const ByInstallI = conf.ByInstallI
 
+//ByNamedInstall 根定名称进行安装参数设置
+var ByNamedInstall = conf.ByNamedInstall
+
 //FlagOption 配置选项
 type FlagOption = global.FlagOption
 

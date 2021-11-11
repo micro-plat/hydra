@@ -28,7 +28,6 @@ func (b *mqcBuilder) Load() {
 		return
 	}
 	b.BaseBuilder[queue.TypeNodeName] = queues
-	return
 }
 
 //Queue 添加队列配置

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
+	"github.com/micro-plat/hydra/conf/server/header"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/lib4go/errs"
 )
@@ -44,13 +45,11 @@ func JwtAuth() Handler {
 		//5.jwt验证失败后返回错误
 		ctx.Log().Error(err)
 		if jwtAuth.AuthURL != "" {
-			ctx.Response().Header("Location", ctx.Request().Headers().Translate(jwtAuth.AuthURL))
+			ctx.Response().Header(header.XLocation, ctx.Request().Headers().Translate(jwtAuth.AuthURL))
 			ctx.Response().Abort(xjwt.JWTStatusTokenError)
 			return
 		}
 		ctx.Response().Abort(errs.GetCode(err, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))
-		return
-
 	}
 }
 

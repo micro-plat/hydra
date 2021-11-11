@@ -65,3 +65,10 @@ func WithInvoker(v string) Option {
 		b.Invoker = v
 	}
 }
+
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *APIKeyAuth) {
+		a.EnableEncryption = true
+	}
+}

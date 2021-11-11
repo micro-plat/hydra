@@ -29,6 +29,13 @@ func WithEnable() Option {
 	}
 }
 
+//WithEnableEncryption 启用加密设置
+func WithEnableEncryption() Option {
+	return func(a *Limiter) {
+		a.EnableEncryption = true
+	}
+}
+
 //RuleOption Rule配置选项
 type RuleOption func(*Rule)
 

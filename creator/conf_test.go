@@ -101,7 +101,7 @@ func Test_conf_Load(t *testing.T) {
 		}(tt.name)
 		err := tt.fields.Load()
 		assert.Equal(t, tt.wantErr, err == nil, tt.name+",err")
-		for k, _ := range tt.want {
+		for k := range tt.want {
 			tt.want[k].Load()
 			_, ok := tt.fields.data[k]
 			assert.Equal(t, true, ok, tt.name+",ok")
@@ -124,7 +124,6 @@ func Test_conf_Load(t *testing.T) {
 			delete(tt.fields.data, k)
 		}
 		assert.Equal(t, 0, len(tt.fields.data), tt.name+",len")
-		cuurConfDefault = New() //重置conf
 	}
 }
 

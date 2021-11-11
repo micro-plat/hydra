@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/asaskevich/govalidator"
@@ -15,6 +16,7 @@ const TypeNodeName = "redis"
 
 //Redis redis缓存配置
 type Redis struct {
+	security.ConfEncrypt
 	Addrs        []string `json:"addrs,omitempty" toml:"addrs,omitempty" valid:"required" label:"集群地址(|分割)"`
 	Password     string   `json:"password,omitempty" toml:"password,omitempty"`
 	DbIndex      int      `json:"db,omitempty" toml:"db,omitempty"`

@@ -9,6 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/security/jwt"
@@ -70,6 +71,7 @@ const JWTName = "Authorization-Jwt"
 
 //JWTAuth jwt配置信息
 type JWTAuth struct {
+	security.ConfEncrypt
 	Name            string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty" label:"jwt名称"`
 	ExpireAt        int64    `json:"expireAt,omitzero" valid:"required" toml:"expireAt,omitzero" label:"jwt过期时间"`
 	Mode            string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty" label:"jwt认证方式"`

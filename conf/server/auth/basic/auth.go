@@ -2,6 +2,11 @@ package basic
 
 import "github.com/micro-plat/lib4go/encoding/base64"
 
+type member struct {
+	UserName string `json:"userName,omitempty" toml:"userName,omitempty" valid:"required"`
+	Password string `json:"password,omitempty" toml:"password,omitempty" valid:"required"`
+}
+
 type auth struct {
 	userName string
 	password string
@@ -9,13 +14,13 @@ type auth struct {
 }
 
 //初始化认证对象列表
-func newAuthorization(m map[string]string) []*auth {
-	pairs := make([]*auth, 0, len(m))
-	for user, password := range m {
-		value := createAuth(user, password)
+func newAuthorization(members []*member) []*auth {
+	pairs := make([]*auth, 0, len(members))
+	for _, m := range members {
+		value := createAuth(m.UserName, m.Password)
 		pairs = append(pairs, &auth{
-			userName: user,
-			password: password,
+			userName: m.UserName,
+			password: m.Password,
 			auth:     value,
 		})
 	}

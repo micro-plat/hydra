@@ -51,9 +51,9 @@ func Static() Handler {
 
 		//写入到响应流
 		if strings.HasSuffix(p, ".gz") {
+			ctx.Response().AddSpecial("gz")
 			ctx.Response().Header("Content-Encoding", "gzip")
 		}
 		ctx.Response().File(p, fs)
-		return
 	}
 }

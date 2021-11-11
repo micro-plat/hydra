@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/registry"
 )
 
@@ -26,6 +27,7 @@ type IPList struct {
 
 //WhiteList 白名单配置
 type WhiteList struct {
+	security.ConfEncrypt
 	Disable   bool      `json:"disable,omitempty" toml:"disable,omitempty"`
 	WhiteList []*IPList `json:"whiteList,omitempty" toml:"whiteList,omitempty"`
 }

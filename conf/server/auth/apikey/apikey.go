@@ -10,6 +10,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/pkgs/security"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/hydra/registry"
 	"github.com/micro-plat/lib4go/security/md5"
@@ -38,6 +39,7 @@ const (
 
 //APIKeyAuth 创建固定密钥验证服务
 type APIKeyAuth struct {
+	security.ConfEncrypt
 	Secret   string        `json:"secret,omitempty" valid:"ascii,required,stringlength(8|64)" toml:"secret,omitempty" label:"密钥验证服务secret"`
 	Mode     string        `json:"mode,omitempty" valid:"in(MD5|SHA1|SHA256|SVS|SRVC),required" toml:"mode,omitempty" label:"密钥验证服务模式"`
 	Excludes []string      `json:"excludes,omitempty" toml:"excludes,omitempty"` //排除不验证的路径

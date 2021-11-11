@@ -1,10 +1,13 @@
 package db
 
+import "github.com/micro-plat/hydra/conf/pkgs/security"
+
 //TypeNodeName 分类节点名
 const TypeNodeName = "db"
 
 //DB 数据库配置
 type DB struct {
+	security.ConfEncrypt
 	Provider   string `json:"provider" valid:"required"`
 	ConnString string `json:"connString" valid:"required" label:"连接字符串"`
 	MaxOpen    int    `json:"maxOpen" valid:"required" label:"最大打开连接数"`

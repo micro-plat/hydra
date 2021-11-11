@@ -26,6 +26,9 @@ const Consul = "consul"
 //Redis redis
 const Redis = "redis"
 
+//Mysql mysql
+const Mysql = "mysql"
+
 //IRegistry 注册中心接口
 type IRegistry interface {
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)
@@ -81,6 +84,7 @@ func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error
 func Support(address string) bool {
 	proto, _, _, _, _, err := Parse(address)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 	_, ok := registries[proto]
@@ -137,10 +141,14 @@ func GetAddrs(addr string) []string {
 //Parse 解析地址
 //如:zk://192.168.0.155:2181 或 fs://../
 func Parse(address string) (proto string, raddr []string, u string, p string, mt map[string]string, err error) {
+
+	//=========================================检查地址是否合法=======================================
+	//必须包含协议，地址两部份
 	if strings.Count(address, "://") != 1 {
 		return "", nil, "", "", nil, fmt.Errorf("%s，包含多个://。格式:[proto]://[address]", address)
 	}
 
+	//检查协议与地址是否合法
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
 		return "", nil, "", "", nil, fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)
@@ -151,12 +159,60 @@ func Parse(address string) (proto string, raddr []string, u string, p string, mt
 	if len(addr[1]) == 0 {
 		return "", nil, "", "", nil, fmt.Errorf("%s，地址不能为空。格式:[proto]://[address]", address)
 	}
+
+	//=========================================处理用户密码与地址=======================================
 	proto = addr[0]
-	raddr = strings.Split(addr[1], ",")
-	var addr0 string
-	u, p, addr0, err = getAddrByUserPass(raddr[0])
-	raddr[0] = addr0
+	originAddr := addr[1]
+	at := strings.Split(originAddr, "@") //检查是否带有用户名密码信息
+	if len(at) > 2 {
+		return "", nil, "", "", nil, fmt.Errorf("不能包含多个@符号%s", address)
+	}
+	ups := ""
+	currentAddr := at[0]
+	if len(at) == 2 {
+		ups = at[0]
+		currentAddr = at[1]
+	}
+
+	//获取用户名密码
+	u, p, err = getUP(ups)
+	if err != nil {
+		return
+	}
+
+	//获取地址
+	mt = make(map[string]string)
+	mt["db"], raddr, err = getAddr(currentAddr)
+	if err != nil {
+		return
+	}
 	return
+}
+func getUP(up string) (u string, p string, err error) {
+	if len(up) == 0 {
+		return "", "", nil
+	}
+	ups := strings.Split(up, ":")
+	switch len(ups) {
+	case 1:
+		return ups[0], "", nil
+	case 2:
+		return ups[0], ups[1], nil
+	default:
+		return "", "", fmt.Errorf(`地址错误，不能包含多个":"(%s)`, up)
+	}
+
+}
+func getAddr(originAddrs string) (d string, addrs []string, err error) {
+	naddrs := strings.Split(originAddrs, "#")
+	switch len(naddrs) {
+	case 1:
+		return "", strings.Split(naddrs[0], ","), nil
+	case 2:
+		return naddrs[0], strings.Split(naddrs[1], ","), nil
+	default:
+		return "", nil, fmt.Errorf(`地址错误，不能包含多个"#"(%s)`, originAddrs)
+	}
 }
 
 //Format 格式化注册中心地址
@@ -186,25 +242,6 @@ func Split(path string) []string {
 //Trim 去掉前后的""/"
 func Trim(l string) string {
 	return strings.Trim(l, "/")
-}
-func getAddrByUserPass(addr string) (u string, p string, address string, err error) {
-	if !strings.Contains(addr, "@") {
-		return "", "", addr, nil
-	}
-	addrs := strings.Split(addr, "@")
-	if len(addrs) != 2 {
-		return "", "", "", fmt.Errorf("地址非法%s", addr)
-	}
-	address = addrs[1]
-	up := strings.Split(addrs[0], ":")
-	switch len(up) {
-	case 1:
-		return up[0], up[0], address, nil
-	case 2:
-		return up[0], up[1], address, nil
-	default:
-		return "", "", "", fmt.Errorf("地址非法%s", addrs[0])
-	}
 }
 
 //Close 关闭注册中心的服务

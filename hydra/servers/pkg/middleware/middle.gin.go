@@ -119,6 +119,19 @@ func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 func (g *ginCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return g.Request, g.Writer
 }
+
+//GetWriter 获取writer
+func (g *ginCtx) GetWriter() interface{} {
+	return g.Writer
+}
+
+//GetWriter 获取writer
+func (g *ginCtx) SetWriter(w interface{}) {
+	g.Writer = w.(gin.ResponseWriter)
+}
+func (g *ginCtx) GetType() string {
+	return "gin"
+}
 func (g *ginCtx) ClearAuth(c ...bool) bool {
 	if len(c) == 0 {
 		return g.needClearAuth

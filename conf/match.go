@@ -1,11 +1,20 @@
 package conf
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/micro-plat/lib4go/concurrent/cmap"
+	"github.com/micro-plat/lib4go/types"
 )
+
+var specials = `~!@#$%^&*()_+-=<>?:"{}|,./;'[]\`
+
+var tsmp = map[string]string{
+	"**": `({0}[{1}\w]+)*`,
+	"*":  `({0}[{1}\w]+)`,
+}
 
 type sortString []string
 
@@ -38,97 +47,102 @@ func (s sortString) Less(i, j int) bool {
 
 //PathMatch 构建模糊匹配缓存查找管理器
 type PathMatch struct {
-	cache cmap.ConcurrentMap
-	all   []string
+	cache     cmap.ConcurrentMap
+	all       []string
+	regexpAll []string
 }
 
 //NewPathMatch 构建模糊匹配缓存查找管理器
 func NewPathMatch(all ...string) *PathMatch {
-	i := &PathMatch{
+	m := &PathMatch{
 		cache: cmap.New(6),
 		all:   all,
 	}
-	sort.Sort(sortString(i.all))
-	return i
+	sort.Sort(sortString(m.all))
+
+	m.regexpAll = make([]string, len(m.all))
+
+	return m
 }
 
-//Match 是否匹配，支付完全匹配，模糊匹配，分段匹配
-func (a *PathMatch) Match(service string, seq ...string) (bool, string) {
-	if v, ok := a.cache.Get(service); ok {
+//Match Match
+func (m *PathMatch) Match(path string, spl ...string) (match bool, pattern string) {
+	if v, ok := m.cache.Get(path); ok {
 		return v != "", v.(string)
 	}
-	nseq := "/"
-	if len(seq) > 0 {
-		nseq = seq[0]
-	}
-	sparties := strings.Split(service, nseq)
-	//排除指定请求
-	for _, u := range a.all {
-		//完全匹配
-		if strings.EqualFold(u, service) {
-			a.cache.SetIfAbsent(service, u)
+
+	var err error
+	sep := types.GetStringByIndex(spl, 0, "/")
+	for i, u := range m.all {
+		if strings.EqualFold(u, path) {
+			m.cache.SetIfAbsent(path, u)
 			return true, u
 		}
-		//分段模糊
-		uparties := strings.Split(u, nseq)
-		//取较少的数组长度
-		uc := len(uparties)
-		sc := len(sparties)
-		/*
-			路径处理模式：
-			1. /a/b/ *
-			2. /a/ **
-			3. /a/ * /d
-
-			ip处理模式：
-			1. 192.168.0.*
-			2. 192.168.**
-			3. 192.*.0.1
-		**/
-
-		//长度不匹配，且未包含**,跳过
-		if uc != sc && !strings.HasSuffix(u, "**") {
-			continue
+		regp := m.getRegexp(u, i, sep)
+		//fmt.Println("regp:", regp)
+		match, err = regexp.Match(regp, []byte(path))
+		if err != nil {
+			match = false
 		}
-
-		//原段较长，不可能匹配跳过
-		if uc > sc {
-			continue
+		if match {
+			m.cache.SetIfAbsent(path, u)
+			return match, u
 		}
-
-		//原段较短，或有**进行分段检查
-		isMatch := true
-		for i := 0; i < uc; i++ {
-
-			//此段为 **
-			if uparties[i] == "**" {
-				a.cache.SetIfAbsent(service, u)
-				return true, u
-			}
-
-			//此段为 *,匹配后续段
-			if uparties[i] == "*" {
-				for j := i + 1; j < uc; j++ {
-					if uparties[j] == "*" {
-						continue
-					}
-					if uparties[j] != sparties[j] {
-						isMatch = false
-						break
-					}
-				}
-				if !isMatch {
-					break
-				}
-				a.cache.SetIfAbsent(service, u)
-				return true, u
-			}
-			if uparties[i] != sparties[i] {
-				break
-			}
-		}
-
 	}
-	a.cache.SetIfAbsent(service, "")
+	m.cache.SetIfAbsent(path, "")
 	return false, ""
+}
+
+func (m *PathMatch) getRegexp(u string, idx int, sep string) string {
+	if m.regexpAll[idx] == "" {
+		parties := strings.Split(u, sep)
+		npts := make([]string, len(parties))
+		curSpecials := m.processSpecial(strings.ReplaceAll(specials, sep, ""))
+		sep = m.processSpecial(sep)
+
+		for i := range parties {
+			if parties[i] == "" {
+				continue
+			}
+			pv, ok := tsmp[parties[i]]
+			if !ok {
+				nv := m.processSpecial(parties[i])
+				if !strings.Contains(nv, "*") {
+					pv = nv
+					if i > 0 {
+						pv = sep + nv
+					}
+				} else {
+					pv = strings.ReplaceAll(nv, `\*`, tsmp["*"])
+				}
+			}
+			sl := sep
+			if i <= 0 {
+				sl = ""
+			}
+
+			pv = strings.Replace(pv, "{0}", sl, -1)
+			npts[i] = strings.ReplaceAll(pv, "{1}", curSpecials)
+		}
+		m.regexpAll[idx] = "^(" + strings.Join(npts, "") + ")$"
+	}
+	return m.regexpAll[idx]
+}
+
+func (m *PathMatch) processSpecial(nv string) string {
+	nv = strings.ReplaceAll(nv, `\`, `\\`)
+	nv = strings.ReplaceAll(nv, "$", `\$`)
+	nv = strings.ReplaceAll(nv, "(", `\(`)
+	nv = strings.ReplaceAll(nv, ")", `\)`)
+	nv = strings.ReplaceAll(nv, "*", `\*`)
+	nv = strings.ReplaceAll(nv, "+", `\+`)
+	nv = strings.ReplaceAll(nv, ".", `\.`)
+	nv = strings.ReplaceAll(nv, "[", `\[`)
+	nv = strings.ReplaceAll(nv, "]", `\]`)
+	nv = strings.ReplaceAll(nv, "?", `\?`)
+	nv = strings.ReplaceAll(nv, "^", `\^`)
+	nv = strings.ReplaceAll(nv, "{", `\{`)
+	nv = strings.ReplaceAll(nv, "|", `\|`)
+	nv = strings.ReplaceAll(nv, "-", `\-`)
+	return nv
 }
