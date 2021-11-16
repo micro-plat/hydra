@@ -1,6 +1,8 @@
 package static
 
 import (
+	"errors"
+	"io"
 	"io/fs"
 	"net/http"
 	"os"
@@ -17,9 +19,74 @@ type osfs struct {
 func newOSFS(dir string) *osfs {
 	return &osfs{
 		dir: dir,
-		fs:  http.FS(localFs(dir)),
+		fs:  ioFS{localFs(dir)},
 		p:   make([]IFS, 0, 0),
 	}
+}
+
+type ioFS struct {
+	fsys fs.FS
+}
+
+type ioFile struct {
+	file fs.File
+}
+
+func (f ioFS) Open(name string) (http.File, error) {
+	file, err := f.fsys.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return ioFile{file}, nil
+}
+
+func (f ioFile) Close() error               { return f.file.Close() }
+func (f ioFile) Read(b []byte) (int, error) { return f.file.Read(b) }
+func (f ioFile) Stat() (fs.FileInfo, error) { return f.file.Stat() }
+
+var errMissingSeek = errors.New("io.File missing Seek method")
+var errMissingReadDir = errors.New("io.File directory missing ReadDir method")
+
+func (f ioFile) Seek(offset int64, whence int) (int64, error) {
+	s, ok := f.file.(io.Seeker)
+	if !ok {
+		return 0, errMissingSeek
+	}
+	return s.Seek(offset, whence)
+}
+
+func (f ioFile) ReadDir(count int) ([]fs.DirEntry, error) {
+	d, ok := f.file.(fs.ReadDirFile)
+	if !ok {
+		return nil, errMissingReadDir
+	}
+	return d.ReadDir(count)
+}
+
+func (f ioFile) Readdir(count int) ([]fs.FileInfo, error) {
+	d, ok := f.file.(fs.ReadDirFile)
+	if !ok {
+		return nil, errMissingReadDir
+	}
+	var list []fs.FileInfo
+	for {
+		dirs, err := d.ReadDir(count - len(list))
+		for _, dir := range dirs {
+			info, err := dir.Info()
+			if err != nil {
+				// Pretend it doesn't exist, like (*os.File).Readdir does.
+				continue
+			}
+			list = append(list, info)
+		}
+		if err != nil {
+			return list, err
+		}
+		if count < 0 || len(list) >= count {
+			break
+		}
+	}
+	return list, nil
 }
 
 func (o *osfs) ReadFile(name string) (http.FileSystem, string, error) {
