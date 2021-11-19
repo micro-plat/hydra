@@ -93,6 +93,14 @@ func (m *module) HasFile(name string) error {
 	return errs.NewErrorf(http.StatusNotFound, "文件%s不存在", name)
 }
 
+//HasFile 本地是否存在文件
+func (m *module) Exists(name string) bool {
+	if m.HasFile(name) == nil {
+		return true
+	}
+	return m.remoting.HasFile(name) == nil
+}
+
 //SaveNewFile 保存新文件到本地
 //1. 查询本地是否有此文件了,有则报错
 //2. 保存到本地，返回指纹信息

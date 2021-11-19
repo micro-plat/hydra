@@ -51,6 +51,29 @@ func (r *remoting) Update(hosts []string, masterHost string, currentAddrs string
 }
 
 //GetFP 主动向master发起查询,查询某个文件是否存在，及所在的服务器
+func (r *remoting) HasFile(name string) error {
+	//构建请求参数
+	input := types.XMap{"name": name}
+
+	//发送远程请求
+	log := trace(r.rmt_fp_get, name, r.masterHost)
+	_, status, err := hydra.C.HTTP().GetRegularClient().Request("POST", fmt.Sprintf("http://%s%s", r.masterHost, r.rmt_fp_get), input.ToKV(), "utf-8", http.Header{
+		context.XRequestID: []string{log.log.GetSessionID()},
+		"Accept-Encoding":  []string{"gzip"},
+	})
+
+	if err == nil && status == http.StatusOK {
+		return nil
+	}
+	//处理返回结果
+	if status == http.StatusNoContent || status == http.StatusNotFound {
+		log.error(r.rmt_fp_get, name, r.masterHost, status)
+		return errs.NewError(http.StatusNotFound, "文件不存在")
+	}
+	return fmt.Errorf("查询文件出错:%v %d", errs.GetError(err), status)
+}
+
+//GetFP 主动向master发起查询,查询某个文件是否存在，及所在的服务器
 func (r *remoting) GetFP(name string) (v *eFileFP, err error) {
 	//构建请求参数
 	v = &eFileFP{}
