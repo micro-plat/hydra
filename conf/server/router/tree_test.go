@@ -33,6 +33,8 @@ func TestNode_Match(t *testing.T) {
 		{services: []string{"/a/:b/c", "/a/:b/d"}, path: "/a/b/c", matchPath: "/a/:b/c", matched: true},
 		{services: []string{"/a/:b/c", "/a/:b/d", "a/b/c"}, path: "/a/b/c", matchPath: "/a/:b/c", matched: true},
 		{services: []string{"a/b/c", "/a/:b/c", "/a/:b/d"}, path: "/a/b/c", matchPath: "/a/b/c", matched: true},
+		{services: []string{}, path: "/a/b/c", matchPath: "", matched: false},
+		{services: []string{"/", "/a"}, path: "/", matchPath: "/", matched: true},
 	}
 	for index, tt := range tests {
 		tree := NewTree(tt.services...)
