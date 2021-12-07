@@ -44,6 +44,16 @@ func (q *queue) Send(key string, value interface{}, requestID ...string) error {
 	return q.q.Push(global.MQConf.GetQueueName(key), pkgs.GetStringByHeader(key, value, hd...))
 }
 
+//Pop 从队列中获取一个消息
+func (q *queue) Pop(key string) (string, error) {
+	return q.q.Pop(global.MQConf.GetQueueName(key))
+}
+
+//Count 队列中消息个数
+func (q *queue) Count(key string) (int64, error) {
+	return q.q.Count(global.MQConf.GetQueueName(key))
+}
+
 func (q *queue) Close() error {
 	return q.q.Close()
 }
