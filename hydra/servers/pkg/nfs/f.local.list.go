@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 const (
@@ -30,7 +31,16 @@ func (s fileList) Less(i, j int) bool {
 	} else if s[j].Type == DIR {
 		return false
 	}
-	return s[i].ModTime < s[i].ModTime
+	if s[i].ModTime == "" {
+		return true
+	}
+	if s[j].ModTime == "" {
+		return false
+	}
+	left, _ := time.Parse("2006/01/02 15:04:05", s[i].ModTime)
+	right, _ := time.Parse("2006/01/02 15:04:05", s[j].ModTime)
+
+	return !left.Before(right)
 }
 
 func (s fileList) Swap(i, j int) {
