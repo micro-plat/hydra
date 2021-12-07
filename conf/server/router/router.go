@@ -96,6 +96,7 @@ func (r *Router) GetParams(path string) map[string]string {
 func NewRouters() *Routers {
 	r := &Routers{
 		Routers: make([]*Router, 0),
+		tree:    NewTree(),
 	}
 	return r
 }
