@@ -170,8 +170,14 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 		}
 
 		if cnf.AllowDownload {
-			services.Def.API(SVSDonwload, cnfs.Download)
-			cnfs.services = append(cnfs.services, SVSDonwload)
+			s := types.GetString(cnfs.c.DownloadService, SVSDonwload)
+			services.Def.API(s, cnfs.Download)
+			cnfs.services = append(cnfs.services, s)
+		}
+		if cnf.AllowListFile {
+			s := types.GetString(cnfs.c.ListFileService, SVSList)
+			services.Def.API(s, cnfs.GetFileList)
+			cnfs.services = append(cnfs.services, s)
 		}
 
 		//内部服务
@@ -191,8 +197,15 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 		}
 
 		if cnf.AllowDownload {
-			services.Def.Web(SVSDonwload, cnfs.Download)
-			cnfs.services = append(cnfs.services, SVSDonwload)
+			s := types.GetString(cnfs.c.DownloadService, SVSDonwload)
+			services.Def.Web(s, cnfs.Download)
+			cnfs.services = append(cnfs.services, s)
+		}
+
+		if cnf.AllowListFile {
+			s := types.GetString(cnfs.c.ListFileService, SVSList)
+			services.Def.Web(s, cnfs.GetFileList)
+			cnfs.services = append(cnfs.services, s)
 		}
 
 		//内部服务

@@ -55,7 +55,7 @@ func (l *local) FWrite(name string, buff []byte) error {
 }
 
 //FList 获取本地所有文件清单
-func (l *local) FList(path string) ([]string, error) {
+func (l *local) FList(path string) ([]*eFileEntity, error) {
 
 	//文件夹不存在时返回空
 	dirEntity, err := os.ReadDir(path)
@@ -67,7 +67,7 @@ func (l *local) FList(path string) ([]string, error) {
 	}
 
 	//查找所有文件
-	list := make([]string, 0, len(dirEntity))
+	list := make([]*eFileEntity, 0, len(dirEntity))
 	for _, entity := range dirEntity {
 		if l.exclude(entity.Name()) {
 			continue
@@ -87,7 +87,15 @@ func (l *local) FList(path string) ([]string, error) {
 		if strings.HasPrefix(nname, filepath.Join(l.path)) {
 			nname = nname[len(filepath.Join(l.path))+1:]
 		}
-		list = append(list, nname)
+		info, err := entity.Info()
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, &eFileEntity{
+			Path:    nname,
+			Size:    info.Size(),
+			ModTime: info.ModTime(),
+		})
 	}
 	return list, nil
 }
@@ -100,9 +108,6 @@ func (l *local) exclude(f string) bool {
 			return true
 		}
 	}
-	// if strings.HasPrefix(f, filepath.Join(l.path, time.Now().Format("20060102"))) {
-	// 	return true
-	// }
 	return false
 }
 func (l *local) FindChange() bool {
@@ -114,13 +119,15 @@ func (l *local) FindChange() bool {
 	}
 
 	//处理不一致数据
-	for _, path := range lst {
-		if ok := l.FPS.Has(path); !ok {
+	for _, entity := range lst {
+		if ok := l.FPS.Has(entity.Path); !ok {
 			fp := &eFileFP{
-				Path:  path,
-				Hosts: []string{l.currentAddr},
+				Path:    entity.Path,
+				Size:    entity.Size,
+				ModTime: entity.ModTime,
+				Hosts:   []string{l.currentAddr},
 			}
-			l.FPS.Set(path, fp)
+			l.FPS.Set(entity.Path, fp)
 			change = true
 		}
 	}

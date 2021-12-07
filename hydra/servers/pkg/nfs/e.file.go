@@ -1,6 +1,10 @@
 package nfs
 
-import "github.com/micro-plat/lib4go/types"
+import (
+	"time"
+
+	"github.com/micro-plat/lib4go/types"
+)
 
 type eFileFPLists map[string]*eFileFP
 
@@ -29,15 +33,21 @@ func (e eFileFPLists) GetAlives(allAliveHosts []string) map[string]eFileFPLists 
 //eRomotingFileFP 远程文件清单
 type eFileFP struct {
 	Path string `json:"path,omitempty" valid:"required" `
+
+	ModTime time.Time `json:"modTime,omitempty" valid:"required"`
+
 	// CRC64 uint64   `json:"crc64,omitempty" valid:"required" `
 	Hosts []string `json:"hosts,omitempty" valid:"required" `
+
+	//文件大小
+	Size int64 `json:"size,omitempty"`
 }
 
 //eFileEntity 文件实体
 type eFileEntity struct {
-	Path   string `json:"path,omitempty" valid:"required"`
-	CRC64  uint64 `json:"crc64,omitempty" valid:"required"`
-	Buffer []byte `json:"buffer,omitempty" valid:"required"`
+	Path    string    `json:"path,omitempty" valid:"required"`
+	ModTime time.Time `json:"modTime,omitempty" valid:"required"`
+	Size    int64     `json:"buffer,omitempty" valid:"required"`
 }
 
 //MergeHosts 合并hosts

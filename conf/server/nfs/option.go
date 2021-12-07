@@ -31,10 +31,19 @@ func WithUpload(service string) Option {
 	}
 }
 
-//WithAllowDownload 允许下载文件
-func WithAllowDownload() Option {
+//WithListFile 列出文件服务
+func WithListFile(service string) Option {
+	return func(a *NFS) {
+		a.AllowListFile = true
+		a.ListFileService = service
+	}
+}
+
+//WithDownload 允许下载文件
+func WithDownload(service string) Option {
 	return func(a *NFS) {
 		a.AllowDownload = true
+		a.DownloadService = service
 	}
 }
 

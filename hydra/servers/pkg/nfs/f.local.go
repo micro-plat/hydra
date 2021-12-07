@@ -104,17 +104,17 @@ func (l *local) check() error {
 	}
 
 	//处理不一致数据
-	for _, path := range lst {
-		if v, ok := fps[path]; ok {
-			v.MergeHosts(l.currentAddr)
-			l.FPS.Set(path, v)
-			continue
-		}
+	for _, entity := range lst {
 		fp := &eFileFP{
-			Path:  path,
-			Hosts: []string{l.currentAddr},
+			Path:    entity.Path,
+			Size:    entity.Size,
+			ModTime: entity.ModTime,
+			Hosts:   []string{l.currentAddr},
 		}
-		l.FPS.Set(path, fp)
+		if v, ok := fps[entity.Path]; ok {
+			fp.MergeHosts(v.Hosts...)
+		}
+		l.FPS.Set(entity.Path, fp)
 	}
 	//更新数据
 	return l.FPWrite(l.FPS.Items())

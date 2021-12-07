@@ -28,6 +28,9 @@ const (
 	//SVSDonwload 用户端下载文件
 	SVSDonwload = "/nfs/file/:dir/:name"
 
+	//SVSList 文件列表
+	SVSList = "/nfs/file/list"
+
 	//获取远程文件的指纹信息
 	rmt_fp_get = "/_/nfs/fp/get"
 
@@ -59,6 +62,11 @@ func (c *cnfs) GetFP(ctx context.IContext) interface{} {
 		return err
 	}
 	return fp
+}
+
+//GetFileList 获取本机的指定文件的指纹信息，仅master提供对外查询功能
+func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
+	return c.module.GetFileList(ctx.Request().GetString(dirName))
 }
 
 //RecvNotify 接收远程文件通知
