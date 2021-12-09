@@ -27,11 +27,11 @@ type IStatic interface {
 //Static 设置静态文件配置
 type Static struct {
 	security.ConfEncrypt
-	Path           string          `json:"path,omitempty" valid:"ascii" label:"静态文件路径或压缩包路径"`
-	Excludes       []string        `json:"excludes,omitempty" valid:"ascii" label:"排除名称"`
+	Path           string          `json:"path,omitempty"  label:"静态文件路径或压缩包路径"`
+	Excludes       []string        `json:"excludes,omitempty"  label:"排除名称"`
 	HomePage       string          `json:"homePath,omitempty" valid:"ascii" label:"静态文件首页"`
-	AutoRewrite    bool            `json:"autoRewrite,omitempty" valid:"ascii" label:"自动重写到首页"`
-	Unrewrites     []string        `json:"unrewrite,omitempty" valid:"ascii" label:"不重写列表"`
+	AutoRewrite    bool            `json:"autoRewrite,omitempty"  label:"自动重写到首页"`
+	Unrewrites     []string        `json:"unrewrite,omitempty"  label:"不重写列表"`
 	Disable        bool            `json:"disable,omitempty"`
 	unrewriteMatch *conf.PathMatch `json:"-"`
 	fs             IFS             `json:"-"`

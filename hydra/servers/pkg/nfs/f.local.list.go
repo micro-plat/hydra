@@ -13,6 +13,7 @@ const (
 
 type fileInfo struct {
 	Path    string `json:"path"`
+	DPath   string `json:"dpath"`
 	Name    string `json:"name"`
 	Type    string `json:"type"`
 	ModTime string `json:"time,omitempty"`
@@ -72,6 +73,7 @@ func (l *local) GetFileList(q string) fileList {
 			Path:    k,
 			ModTime: v.ModTime.Format("2006/01/02 15:04:05"),
 			Size:    v.Size,
+			DPath:   strings.ReplaceAll(k, "/", "|"),
 			Name:    strings.Trim(path, filepath.Ext(k))})
 
 	}

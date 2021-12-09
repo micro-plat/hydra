@@ -134,9 +134,9 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 
 	//检查参数
 	dir := multiPath(ctx.Request().Path().Params().GetString(dirName))
-	name := ctx.Request().Path().Params().GetString(fileName)
-	if dir == "" || name == "" {
-		return errs.NewError(http.StatusNotAcceptable, "参数不能为空")
+	name := multiPath(ctx.Request().Path().Params().GetString(fileName))
+	if name == "" {
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\"", fileName)
 	}
 
 	//获取文件
