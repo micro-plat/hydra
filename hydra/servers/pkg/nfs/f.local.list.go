@@ -53,6 +53,7 @@ func (s fileList) Swap(i, j int) {
 //GetFileList 获以文件列表
 func (l *local) GetFileList(q string) fileList {
 	list := make(fileList, 0, 1)
+	dirs := map[string]string{}
 	prefix := strings.Trim(q, "/")
 	fps := l.GetFPs()
 	for k, v := range fps {
@@ -61,11 +62,15 @@ func (l *local) GetFileList(q string) fileList {
 		}
 		path := strings.Trim(strings.Trim(k, prefix), "/")
 		if strings.Contains(path, "/") {
-			list = append(list, &fileInfo{
-				Type: DIR,
-				Path: k,
-				Size: v.Size,
-				Name: strings.Split(path, "/")[0]})
+			name := strings.Split(path, "/")[0]
+			if _, ok := dirs[name]; !ok {
+				dirs[name] = name
+				list = append(list, &fileInfo{
+					Type: DIR,
+					Path: k,
+					Size: v.Size,
+					Name: name})
+			}
 			continue
 		}
 		list = append(list, &fileInfo{

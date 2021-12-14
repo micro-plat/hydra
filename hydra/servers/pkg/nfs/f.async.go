@@ -28,7 +28,7 @@ func newAsync(l *local, r *remoting) *async {
 		downloadChan:   make(chan *eFileFP, 10000),
 		queryChan:      make(chan struct{}, 1),
 		maxGocoroutine: 10,
-		reportList:     cmap.New(6),
+		reportList:     cmap.New(36),
 	}
 	go m.loopReport()
 	go m.loopQuery()
