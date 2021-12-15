@@ -19,6 +19,12 @@ type fileInfo struct {
 	ModTime string `json:"time,omitempty"`
 	Size    int64  `json:"size"`
 }
+
+func (f *fileInfo) Copy() *fileInfo {
+	n := *f
+	return &n
+}
+
 type fileList []*fileInfo
 
 func (s fileList) Len() int {
@@ -50,8 +56,21 @@ func (s fileList) Swap(i, j int) {
 	s[j] = temp
 }
 
+//GetFileList 获取文件列表
+func (l *local) GetFileList(q string, index int, count int) fileList {
+	list := l.getFileList(q)
+	total := index + count
+	if index >= list.Len() {
+		return nil
+	}
+	if total > list.Len() {
+		return list[index:]
+	}
+	return list[index:total]
+}
+
 //GetFileList 获以文件列表
-func (l *local) GetFileList(q string) fileList {
+func (l *local) getFileList(q string) fileList {
 	list := make(fileList, 0, 1)
 	dirs := map[string]string{}
 	prefix := strings.Trim(strings.Replace(q, "|", "/", -1), "/")

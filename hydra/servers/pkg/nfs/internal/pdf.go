@@ -16,10 +16,10 @@ func Conver2PDF(local string) (contentType string, buff []byte, err error) {
 		resultPath = local
 	case "cad":
 		contentType = "application/x-pdf"
-		resultPath = convertFromCADToPDF(local)
+		resultPath, err = convertFromCADToPDF(local)
 	case "office":
 		contentType = "application/x-pdf"
-		resultPath = convertToPDF(local)
+		resultPath, err = convertToPDF(local)
 	case "txt", "":
 		contentType = "text/plain"
 		resultPath = local
@@ -29,6 +29,9 @@ func Conver2PDF(local string) (contentType string, buff []byte, err error) {
 	default:
 		return "", nil, fmt.Errorf("文件暂时不支持格式:%s", fileType)
 	}
+	if err != nil {
+		return "", nil, err
+	}
 	data, err := file2Bytes(resultPath)
-	return "", data, err
+	return "", data, fmt.Errorf("读取文件失败:%w %s", err, resultPath)
 }

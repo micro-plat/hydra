@@ -142,8 +142,8 @@ func (m *module) Query() eFileFPLists {
 }
 
 //GetFileList 获取文件列表
-func (m *module) GetFileList(q string) []*fileInfo {
-	return m.local.GetFileList(q)
+func (m *module) GetFileList(q string, index int, count int) []*fileInfo {
+	return m.local.GetFileList(q, index, count)
 }
 
 //RecvNotify 接收远程发过来的新文件通知

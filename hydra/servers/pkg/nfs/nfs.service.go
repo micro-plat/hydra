@@ -69,7 +69,9 @@ func (c *cnfs) GetFP(ctx context.IContext) interface{} {
 
 //GetFileList 获取本机的指定文件的指纹信息，仅master提供对外查询功能
 func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
-	return c.module.GetFileList(ctx.Request().GetString(dirName))
+	return c.module.GetFileList(multiPath(ctx.Request().GetString(dirName)),
+		ctx.Request().GetInt("pi"),
+		ctx.Request().GetInt("ps", 10))
 }
 
 //RecvNotify 接收远程文件通知
@@ -168,7 +170,7 @@ func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
 	path := filepath.Join(c.c.Local, dir, name)
 	contentType, buff, err := internal.Conver2PDF(path)
 	if err != nil {
-		return fmt.Errorf("转换为pdf文件失败:%w", err)
+		return fmt.Errorf("转换为pdf文件失败:%w %s", err, path)
 	}
 	ctx.Response().ContentType(contentType)
 	ctx.Response().GetHTTPReponse().Write(buff)
