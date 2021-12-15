@@ -54,7 +54,7 @@ func (s fileList) Swap(i, j int) {
 func (l *local) GetFileList(q string) fileList {
 	list := make(fileList, 0, 1)
 	dirs := map[string]string{}
-	prefix := strings.Trim(q, "/")
+	prefix := strings.Trim(strings.Replace(q, "|", "/", -1), "/")
 	fps := l.GetFPs()
 	for k, v := range fps {
 		if prefix != "" && !strings.HasPrefix(k, prefix) {
