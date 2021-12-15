@@ -26,7 +26,11 @@ type NFS struct {
 
 	ListFileService string `json:"listFileService,omitempty" toml:"listFileService,omitempty"`
 	AllowListFile   bool   `json:"allowListFile,omitempty" toml:"allowListFile,omitempty"`
-	Disable         bool   `json:"disable,omitempty" toml:"disable,omitempty"`
+
+	PreviewService string `json:"previewService,omitempty" toml:"previewService,omitempty"`
+	AllowPreview   bool   `json:"allowPreview,omitempty" toml:"allowPreview,omitempty"`
+
+	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 //New 构建mqc NFS配置，默认为对等模式

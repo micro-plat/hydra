@@ -47,6 +47,14 @@ func WithDownload(service string) Option {
 	}
 }
 
+//WithPreview 允许预览
+func WithPreview(service string) Option {
+	return func(a *NFS) {
+		a.AllowPreview = true
+		a.PreviewService = service
+	}
+}
+
 //WithDomain 下载域名
 func WithDomain(domain string) Option {
 	return func(a *NFS) {

@@ -185,7 +185,7 @@ func getCRC64(buff []byte) uint64 {
 
 func getFileName(name string, rename bool) string {
 	if !rename {
-		return filepath.Join(time.Now().Format("20060102"), name)
+		return filepath.Join(name)
 	}
 	ext := filepath.Ext(name)
 	return filepath.Join(time.Now().Format("20060102"), fmt.Sprintf("%d%s", fnv32(utility.GetGUID()), ext))

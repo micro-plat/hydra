@@ -9,6 +9,7 @@ import (
 
 	"github.com/micro-plat/hydra/conf/server/auth"
 	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/internal"
 	"github.com/micro-plat/lib4go/errs"
 )
 
@@ -24,6 +25,8 @@ const (
 const (
 	//SVSUpload 用户端上传文件
 	SVSUpload = "/nfs/upload"
+
+	SVSPreview = "/nfs/preview"
 
 	//SVSDonwload 用户端下载文件
 	SVSDonwload = "/nfs/file/:dir/:name"
@@ -116,7 +119,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	}
 
 	// 保存文件
-	path := multiPath(ctx.Request().Path().Params().GetString("path"))
+	path := multiPath(ctx.Request().Path().Params().GetString("path", ctx.Request().GetString("path")))
 	fp, domain, err := c.module.SaveNewFile(path, name, buff)
 	if err != nil {
 		return err
@@ -140,6 +143,7 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 	}
 
 	//获取文件
+
 	path := filepath.Join(dir, name)
 	err := c.module.checkAndDownload(path)
 	if err != nil {
@@ -150,6 +154,27 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 	ctx.Response().File(path, http.FS(c.module.local))
 	return nil
 }
+
+//View 获取PDF预览文件
+func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
+	//检查参数
+	dir := multiPath(ctx.Request().Path().Params().GetString(dirName, ctx.Request().GetString(dirName)))
+	name := multiPath(ctx.Request().Path().Params().GetString(fileName, ctx.Request().GetString(fileName)))
+	if name == "" {
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\"", fileName)
+	}
+
+	//获取文件
+	path := filepath.Join(c.c.Local, dir, name)
+	contentType, buff, err := internal.Conver2PDF(path)
+	if err != nil {
+		return fmt.Errorf("转换为pdf文件失败:%w", err)
+	}
+	ctx.Response().ContentType(contentType)
+	ctx.Response().GetHTTPReponse().Write(buff)
+	return nil
+}
+
 func init() {
 	auth.AppendExcludes(notExcludes...)
 }
