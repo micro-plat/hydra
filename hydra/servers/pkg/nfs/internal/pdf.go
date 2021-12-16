@@ -33,5 +33,8 @@ func Conver2PDF(local string) (contentType string, buff []byte, err error) {
 		return "", nil, err
 	}
 	data, err := file2Bytes(resultPath)
-	return "", data, fmt.Errorf("读取文件失败:%w %s", err, resultPath)
+	if err != nil {
+		return "", nil, fmt.Errorf("读取文件失败:%w %s", err, resultPath)
+	}
+	return "", data, nil
 }
