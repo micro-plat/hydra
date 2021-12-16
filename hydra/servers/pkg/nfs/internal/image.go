@@ -18,10 +18,12 @@ func ScaleImageByPath(p string, width, height, quality int) ([]byte, string, err
 
 	basePath := fmt.Sprintf("tmp/scale/%s%s", strings.Replace(p, "/", "|", -1), filepath.Ext(p))
 	if fileExist(basePath) {
-		ctp := fmt.Sprintf("image/%s", strings.Trim(filepath.Ext(p), "."))
+		fmt.Println("从缓存中读取文件")
+		ctp := fmt.Sprintf("image/%s;cache", strings.Trim(filepath.Ext(p), "."))
 		data, err := file2Bytes(basePath)
 		return data, ctp, err
 	}
+	fmt.Println("重新构建文件")
 	data, err := file2Bytes(p)
 	if err != nil {
 		return nil, "", fmt.Errorf("读取文件失败:%w %s", err, p)
@@ -30,12 +32,16 @@ func ScaleImageByPath(p string, width, height, quality int) ([]byte, string, err
 	if err != nil {
 		return nil, "", err
 	}
-	f, err := os.OpenFile(basePath, os.O_TRUNC|os.O_CREATE, 0666)
+	f, err := os.OpenFile(basePath, os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModeAppend|os.ModePerm)
 	if err != nil {
+		fmt.Println(err)
 		return buff, ctp, nil
 	}
-	f.Write(buff)
-	f.Close()
+	defer f.Close()
+	_, err = f.Write(buff)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return buff, ctp, nil
 }
 
