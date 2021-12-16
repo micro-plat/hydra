@@ -34,6 +34,9 @@ const (
 	//SVSList 文件列表
 	SVSList = "/nfs/file/list"
 
+	//SVSScalrImage 压缩文件
+	SVSScalrImage = "/nfs/scale/image/:name"
+
 	//获取远程文件的指纹信息
 	rmt_fp_get = "/_/nfs/fp/get"
 
@@ -154,6 +157,29 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 
 	//写入文件
 	ctx.Response().File(path, http.FS(c.module.local))
+	return nil
+}
+
+//ImgScale 缩略图生成
+func (c *cnfs) ImgScale(ctx context.IContext) interface{} {
+	//检查参数
+	dir := multiPath(ctx.Request().Path().Params().GetString(dirName, ctx.Request().GetString(dirName)))
+	name := multiPath(ctx.Request().Path().Params().GetString(fileName, ctx.Request().GetString(fileName)))
+	if name == "" {
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\"", fileName)
+	}
+
+	//获取文件
+	path := filepath.Join(c.c.Local, dir, name)
+	width := ctx.Request().GetInt("w")
+	height := ctx.Request().GetInt("h")
+	quality := ctx.Request().GetInt("q")
+	buff, contentType, err := internal.ScaleImageByPath(path, width, height, quality)
+	if err != nil {
+		return fmt.Errorf("转换为pdf文件失败:%w %s", err, path)
+	}
+	ctx.Response().ContentType(contentType)
+	ctx.Response().GetHTTPReponse().Write(buff)
 	return nil
 }
 

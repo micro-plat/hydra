@@ -31,6 +31,14 @@ func WithUpload(service string) Option {
 	}
 }
 
+//WithScaleImage 压缩图片文件服务
+func WithScaleImage(service string) Option {
+	return func(a *NFS) {
+		a.AllowScaleImage = true
+		a.ScaleImageService = service
+	}
+}
+
 //WithListFile 列出文件服务
 func WithListFile(service string) Option {
 	return func(a *NFS) {

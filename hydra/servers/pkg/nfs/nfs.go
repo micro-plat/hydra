@@ -185,6 +185,12 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			services.Def.API(s, cnfs.GetPDF4Preview)
 			cnfs.services = append(cnfs.services, s)
 		}
+
+		if cnf.AllowScaleImage {
+			s := types.GetString(cnfs.c.ScaleImageService, SVSScalrImage)
+			services.Def.API(s, cnfs.ImgScale)
+			cnfs.services = append(cnfs.services, s)
+		}
 		//内部服务
 		services.Def.API(rmt_fp_get, cnfs.GetFP)
 		services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
@@ -219,6 +225,11 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			cnfs.services = append(cnfs.services, s)
 		}
 
+		if cnf.AllowScaleImage {
+			s := types.GetString(cnfs.c.ScaleImageService, SVSScalrImage)
+			services.Def.Web(s, cnfs.ImgScale)
+			cnfs.services = append(cnfs.services, s)
+		}
 		//内部服务
 		services.Def.Web(rmt_fp_get, cnfs.GetFP)
 		services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)

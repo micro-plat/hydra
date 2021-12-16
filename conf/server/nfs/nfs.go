@@ -30,6 +30,9 @@ type NFS struct {
 	PreviewService string `json:"previewService,omitempty" toml:"previewService,omitempty"`
 	AllowPreview   bool   `json:"allowPreview,omitempty" toml:"allowPreview,omitempty"`
 
+	ScaleImageService string `json:"scaleImageService,omitempty" toml:"scaleImageService,omitempty"`
+	AllowScaleImage   bool   `json:"allowScaleImage,omitempty" toml:"allowScaleImage,omitempty"`
+
 	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 
