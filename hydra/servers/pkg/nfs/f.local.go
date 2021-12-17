@@ -1,12 +1,16 @@
 package nfs
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
 
@@ -18,21 +22,55 @@ type local struct {
 	FPS         cmap.ConcurrentMap
 	once        sync.Once
 	fsWatcher   *fsnotify.Watcher
-	readyChan   chan struct{}
+	init        bool
+	nfsChecker  sync.WaitGroup
+	lockValue   int32
 	done        bool
 }
 
 //newLocal 构建本地处理服务
 func newLocal(path string) *local {
-
 	l := &local{
 		FPS:       cmap.New(8),
 		path:      path,
+		lockValue: 0,
+		init:      true,
 		fpPath:    filepath.Join(path, ".fp"),
-		readyChan: make(chan struct{}),
 	}
-
+	l.nfsChecker.Add(1)
+	l.fsWatcher, _ = fsnotify.NewWatcher()
+	l.fsWatcher.Add(path)
+	go l.loopWatch()
 	return l
+}
+func (l *local) loopWatch() {
+	if l.fsWatcher == nil {
+		return
+	}
+	for {
+		select {
+		case ev, ok := <-l.fsWatcher.Events:
+			if !ok {
+				return
+			}
+			fmt.Println("文件变化:", filepath.Base(ev.Name))
+			if strings.HasPrefix(filepath.Base(ev.Name), ".") {
+				continue
+			}
+			if ev.Op&fsnotify.Create == fsnotify.Create ||
+				ev.Op&fsnotify.Write == fsnotify.Write ||
+				ev.Op&fsnotify.Remove == fsnotify.Remove ||
+				ev.Op&fsnotify.Rename == fsnotify.Rename ||
+				ev.Op&fsnotify.Chmod == fsnotify.Chmod {
+
+				fmt.Println("文件变化:", ev.Name)
+				if err := l.check(); err != nil {
+					hydra.G.Log().Debug("check.err", err)
+				}
+			}
+
+		}
+	}
 }
 
 //Update 更新配置数据
@@ -40,8 +78,11 @@ func (l *local) Update(currentAddr string) {
 	needCheck := l.currentAddr != currentAddr
 	l.currentAddr = currentAddr
 	l.fpPath = filepath.Join(l.path, ".fp")
-	if needCheck {
-		l.check()
+	if !needCheck {
+		return
+	}
+	if err := l.check(); err != nil {
+		hydra.G.Log().Debug("check.err", err)
 	}
 	return
 }
@@ -89,7 +130,20 @@ func (l *local) Close() error {
 
 //check 处理本地文件与指纹不一致，以文件为准
 func (l *local) check() error {
-	defer close(l.readyChan)
+	//只允许一个协程执行检查任务
+	if !atomic.CompareAndSwapInt32(&l.lockValue, 0, 1) {
+		return nil
+	}
+	//添加等待任务，完成后结束任务，并释放任务数
+	l.nfsChecker.Add(1)
+	defer atomic.CompareAndSwapInt32(&l.lockValue, 1, 0)
+	defer l.nfsChecker.Done()
+	defer func() {
+		if l.init {
+			l.init = false
+			l.nfsChecker.Done()
+		}
+	}()
 
 	//读取本地指纹
 	fps, err := l.FPRead()
@@ -102,7 +156,6 @@ func (l *local) check() error {
 	if err != nil {
 		return err
 	}
-
 	//处理不一致数据
 	for _, entity := range lst {
 		fp := &eFileFP{
@@ -116,6 +169,15 @@ func (l *local) check() error {
 		}
 		l.FPS.Set(entity.Path, fp)
 	}
+
+	lstMap := lst.GetMap()
+	for _, fp := range fps {
+		if _, ok := lstMap[fp.Path]; !ok {
+			delete(fps, fp.Path)
+			l.FPS.Remove(fp.Path)
+		}
+	}
+
 	//更新数据
 	return l.FPWrite(l.FPS.Items())
 }

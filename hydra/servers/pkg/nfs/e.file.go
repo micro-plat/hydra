@@ -50,6 +50,16 @@ type eFileEntity struct {
 	Size    int64     `json:"buffer,omitempty" valid:"required"`
 }
 
+type eFileEntityList []*eFileEntity
+
+func (l eFileEntityList) GetMap() map[string]*eFileEntity {
+	mp := make(map[string]*eFileEntity)
+	for _, v := range l {
+		mp[v.Path] = v
+	}
+	return mp
+}
+
 //MergeHosts 合并hosts
 func (e *eFileFP) MergeHosts(hosts ...string) bool {
 	hasChange := false

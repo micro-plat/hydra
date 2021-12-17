@@ -170,15 +170,23 @@ func (c *cnfs) ImgScale(ctx context.IContext) interface{} {
 	}
 
 	//获取文件
-	path := filepath.Join(c.c.Local, dir, name)
+	path := filepath.Join(dir, name)
 	width := ctx.Request().GetInt("w")
 	height := ctx.Request().GetInt("h")
 	quality := ctx.Request().GetInt("q")
-	buff, contentType, err := internal.ScaleImageByPath(path, width, height, quality)
-	if err != nil {
-		return fmt.Errorf("转换为pdf文件失败:%w %s", err, path)
+	buff, err := internal.ScaleImageByPath(c.c.Local, path, width, height, quality)
+	if err == nil {
+		ctx.Response().ContentType(internal.GetContentType(path))
+		ctx.Response().GetHTTPReponse().Write(buff)
+		return nil
 	}
-	ctx.Response().ContentType(contentType)
+
+	ctx.Log().Error(fmt.Errorf("%w %s", err, path))
+	buff, err = internal.ReadFile(filepath.Join(c.c.Local, path))
+	if err != nil {
+		return err
+	}
+	ctx.Response().ContentType(internal.GetContentType(path))
 	ctx.Response().GetHTTPReponse().Write(buff)
 	return nil
 }
@@ -193,10 +201,10 @@ func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
 	}
 
 	//获取文件
-	path := filepath.Join(c.c.Local, dir, name)
-	contentType, buff, err := internal.Conver2PDF(path)
+	path := filepath.Join(dir, name)
+	contentType, buff, err := internal.Conver2PDF(c.c.Local, path)
 	if err != nil {
-		return fmt.Errorf("转换为pdf文件失败:%w %s", err, path)
+		return err
 	}
 	ctx.Response().ContentType(contentType)
 	ctx.Response().GetHTTPReponse().Write(buff)

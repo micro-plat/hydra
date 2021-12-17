@@ -55,7 +55,7 @@ func (l *local) FWrite(name string, buff []byte) error {
 }
 
 //FList 获取本地所有文件清单
-func (l *local) FList(path string) ([]*eFileEntity, error) {
+func (l *local) FList(path string) (eFileEntityList, error) {
 
 	//文件夹不存在时返回空
 	dirEntity, err := os.ReadDir(path)
@@ -74,6 +74,7 @@ func (l *local) FList(path string) ([]*eFileEntity, error) {
 		}
 		//处理目录
 		if entity.IsDir() {
+			l.fsWatcher.Add(filepath.Join(path, entity.Name()))
 			nlist, err := l.FList(filepath.Join(path, entity.Name()))
 			if err != nil {
 				return nil, err

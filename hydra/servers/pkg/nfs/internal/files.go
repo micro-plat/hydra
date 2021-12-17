@@ -1,12 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/mholt/archiver/v3"
 )
 
 /**
@@ -14,67 +13,87 @@ import (
  */
 
 var (
-	AllOfficeEtx  = []string{".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"}
-	AllImageEtx   = []string{".jpeg", ".jpg", ".png", ".gif", ".bmp", ".heic", ".tiff"}
-	AllCADEtx     = []string{".dwg", ".dxf"}
-	AllAchieveEtx = []string{".tar.gz", ".tar.bzip2", ".tar.xz", ".zip", ".rar", ".tar", ".7z", "br", ".bz2", ".lz4", ".sz", ".xz", ".zstd"}
-	AllTxtEtx     = []string{".txt", ".java", ".php", ".py", ".md", ".js", ".css", ".xml", ".log"}
-	AllVideoEtx   = []string{".mp4", ".webm", ".ogg"}
+	officeEtx  = []string{".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"}
+	imageEtx   = []string{".jpeg", ".jpg", ".png", ".gif", ".bmp", ".heic", ".tiff"}
+	cadEtx     = []string{".dwg", ".dxf"}
+	achieveEtx = []string{".tar.gz", ".tar.bzip2", ".tar.xz", ".zip", ".rar", ".tar", ".7z", "br", ".bz2", ".lz4", ".sz", ".xz", ".zstd"}
+	txtEtx     = []string{".txt", ".java", ".php", ".py", ".md", ".js", ".css", ".xml", ".log"}
+	videoEtx   = []string{".mp4", ".webm", ".ogg"}
 )
 
+const (
+	pdfTempRoot  = "./tmp/convert"
+	imgThumbnail = "./tmp/thumbnail"
+)
+
+func getPDFRootPath(dir string) string {
+	return filepath.Join(dir, pdfTempRoot)
+}
+func getThumbnailPath(dir string, path string) string {
+	return filepath.Join(dir, imgThumbnail, strings.Replace(path, "/", "|", -1))
+}
+func getPDFConverPath(dir string, p string) (dwg string, svg string) {
+	name := getFileName(p)
+	dwg = filepath.Join(getPDFRootPath(dir), fmt.Sprintf("%s.dwg.pdf", name))
+	svg = fmt.Sprintf("%s.svg", p)
+	return dwg, svg
+}
+func getPDFPath(dir string, p string) string {
+	return getPDFPathByName(dir, getFileName(p))
+}
+func getPDFPathByName(dir string, name string) string {
+	return filepath.Join(getPDFRootPath(dir), fmt.Sprintf("%s.pdf", name))
+}
+
 func fileTypeVerify(url string) (string, string, string) {
-	filenameWithSuffix := path.Base(url)   //获取文件名带后缀
-	filesuffix := path.Ext(url)            //文件后缀
-	if strings.Contains(filesuffix, "?") { //单独测试过
-		filesuffix = filesuffix[0:strings.Index(filesuffix, "?")]
-		filenameWithSuffix = filenameWithSuffix[0:strings.Index(filenameWithSuffix, "?")]
-	}
+	fileName := path.Base(url)  //获取文件名带后缀
+	filesuffix := path.Ext(url) //文件后缀
 
 	if strings.Contains(url, ".pdf") {
-		return "pdf", ".pdf", filenameWithSuffix
+		return "pdf", ".pdf", fileName
 	}
 
-	for _, x := range AllOfficeEtx {
+	for _, x := range officeEtx {
 		if filesuffix == x {
-			return "office", x, filenameWithSuffix
+			return "office", x, fileName
 		}
 	}
 
-	for _, x := range AllImageEtx {
+	for _, x := range imageEtx {
 		if strings.Contains(url, x) {
-			return "image", x, filenameWithSuffix
+			return "image", x, fileName
 		}
 	}
 
-	for _, x := range AllCADEtx {
+	for _, x := range cadEtx {
 		if strings.Contains(url, x) {
-			return "cad", x, filenameWithSuffix
+			return "cad", x, fileName
 		}
 	}
 
-	for _, x := range AllAchieveEtx {
+	for _, x := range achieveEtx {
 		if strings.Contains(url, x) {
-			return "achieve", x, filenameWithSuffix
+			return "achieve", x, fileName
 		}
 	}
 
-	for _, x := range AllTxtEtx {
+	for _, x := range txtEtx {
 		if strings.Contains(url, x) {
-			return "txt", x, filenameWithSuffix
+			return "txt", x, fileName
 		}
 	}
 
-	for _, x := range AllVideoEtx {
+	for _, x := range videoEtx {
 		if strings.Contains(url, x) {
-			return "video", x, filenameWithSuffix
+			return "video", x, fileName
 		}
 	}
 
-	return "", "", filenameWithSuffix
+	return "", "", fileName
 
 }
 
-func file2Bytes(filename string) ([]byte, error) {
+func ReadFile(filename string) ([]byte, error) {
 
 	// File
 	file, err := os.Open(filename)
@@ -98,48 +117,53 @@ func file2Bytes(filename string) ([]byte, error) {
 	return data, nil
 }
 
-func unarchiveFiles(file string) {
-	decompressName := strings.TrimSuffix(path.Base(file), path.Ext(path.Base(file)))
-	archiver.Unarchive(file, "tmp/decompress/"+decompressName)
-}
-
-func getFilesFromDirectory(source string) ([]string, string) {
-
-	decompressName := strings.TrimSuffix(path.Base(source), path.Ext(path.Base(source)))
-	base := "tmp/decompress/" + decompressName
-
-	files, _ := filepath.Glob(filepath.Join(base, "*"))
-	for i := range files {
-		// __MACOSX 目录 过滤掉
-		if strings.Index(files[i], "__MACOSX") == -1 {
-			base = files[i]
-			break
-		}
-	}
-
-	files, _ = filepath.Glob(filepath.Join(base, "*.*"))
-	// Mac 过滤__MACOSX 目录 和.DS_Store 文件
-	var files_result []string
-	for i := range files {
-		if strings.Index(files[i], "__MACOSX") == -1 && strings.Index(files[i], ".DS_Store") == -1 {
-			// 清空字符串名中空格并重命名
-			os.Rename(files[i], strings.Replace(files[i], " ", "", -1))
-			files[i] = strings.Replace(files[i], " ", "", -1)
-
-			files_result = append(files_result, files[i])
-		}
-	}
-
-	return files_result, base[:len(base)-2]
-}
-
 func fileExist(path string) bool {
 	_, err := os.Lstat(path)
 	return !os.IsNotExist(err)
 }
 
-func getFileNameOnly(url string) string {
-	filenameWithSuffix := path.Base(url)                      //获取文件名带后缀
-	fileSuffix := path.Ext(filenameWithSuffix)                //获取文件后缀
-	return strings.TrimSuffix(filenameWithSuffix, fileSuffix) //获取文件名
+func getFileName(p string) string {
+	suffix := path.Base(p)                 //获取文件名带后缀
+	ext := path.Ext(suffix)                //获取文件后缀
+	return strings.TrimSuffix(suffix, ext) //获取文件名
+}
+func getExtName(p string) string {
+	return strings.Trim(filepath.Ext(p), ".")
+}
+
+func checkAndCreateDir(path string) error {
+	root := filepath.Dir(path)
+	ok, err := pathExists(root)
+	fmt.Println("检查文件是否存在", root, ok, err)
+	if err != nil {
+		return err
+	}
+	if ok {
+		return nil
+	}
+	return os.MkdirAll(root, 0775)
+
+}
+
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func isFileExist(filename string, filesize int64) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if filesize == info.Size() {
+		return true
+	}
+	os.Remove(filename)
+	return false
 }

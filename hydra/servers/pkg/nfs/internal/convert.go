@@ -1,49 +1,52 @@
 package internal
 
 import (
+	"bytes"
+	"fmt"
+	"os/exec"
 	"path"
 	"runtime"
 	"strings"
 )
 
-func convertFromCADToPDF(filePath string) (string, error) {
-	basePath := "tmp/convert/" + getFileNameOnly(filePath) + ".dwg.pdf"
-	if fileExist(basePath) {
-		return basePath, nil
+func convertFromCADToPDF(dir string, filePath string) (string, error) {
+	dwg, svg := getPDFConverPath(dir, filePath)
+	if fileExist(dwg) {
+		return dwg, nil
 	}
 	commandName := "java"
-	params := []string{"-jar", "cad/cad-preview-addon-1.0-SNAPSHOT.jar", "-s", filePath, "-t", filePath + ".svg"}
+	params := []string{"-jar", "cad/cad-preview-addon-1.0-SNAPSHOT.jar", "-s", filePath, "-t", svg}
 
-	_, err := interactiveToexec(commandName, params)
+	_, err := executeCMD(commandName, params)
 	if err == nil {
-		resultPath := filePath + ".svg"
-		if ok, _ := pathExists(resultPath); ok {
-			return convertToPDF(resultPath)
+		if ok, _ := pathExists(svg); ok {
+			return convertToPDF(dir, svg)
 		}
 	}
 	return "", err
 
 }
 
-func convertToPDF(filePath string) (string, error) {
-
-	basePath := "tmp/convert/" + getFileNameOnly(filePath) + ".pdf"
-	if fileExist(basePath) {
-		return basePath, nil
+func convertToPDF(dir string, filePath string) (string, error) {
+	pdfPath := getPDFPath(dir, filePath)
+	if fileExist(pdfPath) {
+		return pdfPath, nil
 	}
+
+	rootTemp := getPDFRootPath(dir)
 	commandName := ""
 	var params []string
 	if runtime.GOOS == "windows" {
 		commandName = "cmd"
-		params = []string{"/c", "soffice", "--headless", "--invisible", "--convert-to", "pdf", "--outdir", "tmp/convert/", filePath}
+		params = []string{"/c", "soffice", "--headless", "--invisible", "--convert-to", "pdf", "--outdir", rootTemp, filePath}
 	} else if runtime.GOOS == "linux" {
 		commandName = "libreoffice"
-		params = []string{"--invisible", "--headless", "--convert-to", "pdf", "--outdir", "tmp/convert/", filePath}
+		params = []string{"--invisible", "--headless", "--convert-to", "pdf", "--outdir", rootTemp, filePath}
 	} else { // https://ask.libreoffice.org/en/question/12084/how-to-convert-documents-to-pdf-on-osx/
 		commandName = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
-		params = []string{"--headless", "--convert-to", "pdf", "--outdir", "tmp/convert/", filePath}
+		params = []string{"--headless", "--convert-to", "pdf", "--outdir", rootTemp, filePath}
 	}
-	_, err := interactiveToexec(commandName, params)
+	_, err := executeCMD(commandName, params)
 	if err != nil {
 		return "", err
 	}
@@ -54,7 +57,18 @@ func convertToPDF(filePath string) (string, error) {
 	for i, n := 0, len(paths)-1; i < n; i++ {
 		tmp += "." + paths[i]
 	}
-	resultPath := "tmp/convert/" + tmp[1:] + ".pdf"
+	resultPath := getPDFPathByName(dir, tmp[1:])
 	return resultPath, nil
+}
+
+func executeCMD(commandName string, params []string) (string, error) {
+	cmd := exec.Command(commandName, params...)
+	buf, err := cmd.Output()
+	w := bytes.NewBuffer(nil)
+	cmd.Stderr = w
+	if err != nil {
+		return "", fmt.Errorf("命令执行失败：%w %s %s", err, commandName, strings.Join(params, " "))
+	}
+	return string(buf), nil
 
 }

@@ -22,7 +22,7 @@ func (l *local) GetFP(name string) (*eFileFP, bool) {
 
 //GetFPs 获以FP列表
 func (l *local) GetFPs() eFileFPLists {
-	<-l.readyChan
+	l.nfsChecker.Wait()
 	list := make(eFileFPLists)
 	for k, v := range l.FPS.Items() {
 		list[k] = v.(*eFileFP)
@@ -52,6 +52,9 @@ func (l *local) FPRead() (eFileFPLists, error) {
 	}
 	if err != nil {
 		return nil, fmt.Errorf("读取%s失败%w", l.fpPath, err)
+	}
+	if len(buff) == 0 {
+		return list, nil
 	}
 	err = json.Unmarshal(buff, &list)
 	return list, err

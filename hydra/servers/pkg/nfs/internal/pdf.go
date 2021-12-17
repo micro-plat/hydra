@@ -2,9 +2,11 @@ package internal
 
 import (
 	"fmt"
+	"path/filepath"
 )
 
-func Conver2PDF(local string) (contentType string, buff []byte, err error) {
+func Conver2PDF(dir string, p string) (contentType string, buff []byte, err error) {
+	local := filepath.Join(dir, p)
 	fileType, _, _ := fileTypeVerify(local)
 	var resultPath string
 	switch fileType {
@@ -16,10 +18,10 @@ func Conver2PDF(local string) (contentType string, buff []byte, err error) {
 		resultPath = local
 	case "cad":
 		contentType = "application/x-pdf"
-		resultPath, err = convertFromCADToPDF(local)
+		resultPath, err = convertFromCADToPDF(dir, local)
 	case "office":
 		contentType = "application/x-pdf"
-		resultPath, err = convertToPDF(local)
+		resultPath, err = convertToPDF(dir, local)
 	case "txt", "":
 		contentType = "text/plain"
 		resultPath = local
@@ -32,7 +34,7 @@ func Conver2PDF(local string) (contentType string, buff []byte, err error) {
 	if err != nil {
 		return "", nil, err
 	}
-	data, err := file2Bytes(resultPath)
+	data, err := ReadFile(resultPath)
 	if err != nil {
 		return "", nil, fmt.Errorf("读取文件失败:%w %s", err, resultPath)
 	}
