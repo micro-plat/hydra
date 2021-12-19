@@ -20,6 +20,8 @@ const (
 	fileName = "name"
 
 	dirName = "dir"
+
+	ndirName = "ndir"
 )
 
 const (
@@ -35,7 +37,13 @@ const (
 	SVSList = "/nfs/file/list"
 
 	//SVSScalrImage 压缩文件
-	SVSScalrImage = "/nfs/scale/image/:name"
+	SVSScalrImage = "/nfs/scale/:name"
+
+	//SVSCreateDir 创建文件目录
+	SVSCreateDir = "/nfs/create/:dir"
+
+	//SVSRenameDir 重命名文件目录
+	SVSRenameDir = "/nfs/create/:dir/:ndir"
 
 	//获取远程文件的指纹信息
 	rmt_fp_get = "/_/nfs/fp/get"
@@ -74,7 +82,7 @@ func (c *cnfs) GetFP(ctx context.IContext) interface{} {
 func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
 	return c.module.GetFileList(multiPath(ctx.Request().GetString(dirName)),
 		ctx.Request().GetInt("pi"),
-		ctx.Request().GetInt("ps", 10))
+		ctx.Request().GetInt("ps", 100))
 }
 
 //RecvNotify 接收远程文件通知
@@ -158,6 +166,27 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 	//写入文件
 	ctx.Response().File(path, http.FS(c.module.local))
 	return nil
+}
+
+//CreateDir 创建目录
+func (c *cnfs) CreateDir(ctx context.IContext) interface{} {
+	//检查参数
+	dir := multiPath(ctx.Request().Path().Params().GetString(dirName, ctx.Request().GetString(dirName)))
+	if dir == "" {
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\"", dirName)
+	}
+	return internal.CreateDir(c.c.Local, dir)
+}
+
+//RenameDir 重命名目录
+func (c *cnfs) RenameDir(ctx context.IContext) interface{} {
+	//检查参数
+	dir := multiPath(ctx.Request().Path().Params().GetString(dirName, ctx.Request().GetString(dirName)))
+	ndir := multiPath(ctx.Request().Path().Params().GetString(ndirName, ctx.Request().GetString(ndirName)))
+	if dir == "" || ndir == "" {
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\",\":%s\"", dirName, ndirName)
+	}
+	return internal.Rename(c.c.Local, dir, ndir)
 }
 
 //ImgScale 缩略图生成

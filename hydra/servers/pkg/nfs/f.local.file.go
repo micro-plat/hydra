@@ -63,13 +63,14 @@ func (l *local) FList(path string) (eFileEntityList, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("读取目录失败:%s %v", path, err)
+		return nil, nil
+		// return nil, fmt.Errorf("读取目录失败:%s %v", path, err)
 	}
 
 	//查找所有文件
 	list := make([]*eFileEntity, 0, len(dirEntity))
 	for _, entity := range dirEntity {
-		if l.exclude(entity.Name()) {
+		if l.exclude(path, entity.Name()) {
 			continue
 		}
 		//处理目录
@@ -103,14 +104,30 @@ func (l *local) FList(path string) (eFileEntityList, error) {
 
 var exclude = []string{".", "~"}
 
-func (l *local) exclude(f string) bool {
+func (l *local) exclude(p string, f string) (v bool) {
 	for _, ex := range exclude {
 		if strings.HasPrefix(f, ex) {
 			return true
 		}
 	}
+	np := filepath.Join(p, f)
+	for _, v := range l.excludes {
+		if strings.Contains(np, v) {
+			return true
+		}
+	}
+	if len(l.includes) > 0 {
+		for _, v := range l.includes {
+			if strings.Contains(np, v) {
+				return false
+			}
+		}
+		return true
+	}
+
 	return false
 }
+
 func (l *local) FindChange() bool {
 	//获取本地文件列表
 	change := false

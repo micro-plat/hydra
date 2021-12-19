@@ -191,6 +191,17 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			services.Def.API(s, cnfs.ImgScale)
 			cnfs.services = append(cnfs.services, s)
 		}
+		if cnf.AllowCreateDir {
+			s := types.GetString(cnfs.c.CreateDirService, SVSCreateDir)
+			services.Def.API(s, cnfs.CreateDir)
+			cnfs.services = append(cnfs.services, s)
+		}
+
+		if cnf.AllowRenameDir {
+			s := types.GetString(cnfs.c.RenameDirService, SVSRenameDir)
+			services.Def.API(s, cnfs.RenameDir)
+			cnfs.services = append(cnfs.services, s)
+		}
 		//内部服务
 		services.Def.API(rmt_fp_get, cnfs.GetFP)
 		services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
@@ -230,6 +241,19 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			services.Def.Web(s, cnfs.ImgScale)
 			cnfs.services = append(cnfs.services, s)
 		}
+
+		if cnf.AllowCreateDir {
+			s := types.GetString(cnfs.c.CreateDirService, SVSCreateDir)
+			services.Def.Web(s, cnfs.CreateDir)
+			cnfs.services = append(cnfs.services, s)
+		}
+
+		if cnf.AllowRenameDir {
+			s := types.GetString(cnfs.c.RenameDirService, SVSRenameDir)
+			services.Def.Web(s, cnfs.RenameDir)
+			cnfs.services = append(cnfs.services, s)
+		}
+
 		//内部服务
 		services.Def.Web(rmt_fp_get, cnfs.GetFP)
 		services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)

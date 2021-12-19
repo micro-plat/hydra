@@ -31,7 +31,7 @@ func newModule(c *nfs.NFS, prefix string) (m *module) {
 	m = &module{
 		c:         c,
 		prefix:    prefix,
-		local:     newLocal(c.Local),
+		local:     newLocal(c.Local, c.Excludes, c.Includes),
 		remoting:  newRemoting(),
 		checkChan: make(chan struct{}, 1),
 	}

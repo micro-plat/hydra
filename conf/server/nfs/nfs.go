@@ -33,6 +33,16 @@ type NFS struct {
 	ScaleImageService string `json:"scaleImageService,omitempty" toml:"scaleImageService,omitempty"`
 	AllowScaleImage   bool   `json:"allowScaleImage,omitempty" toml:"allowScaleImage,omitempty"`
 
+	CreateDirService string `json:"createDirService,omitempty" toml:"createDirService,omitempty"`
+	AllowCreateDir   bool   `json:"allowCreateDir,omitempty" toml:"allowCreateDir,omitempty"`
+
+	RenameDirService string `json:"renameDirService,omitempty" toml:"renameDirService,omitempty"`
+	AllowRenameDir   bool   `json:"allowRenameDir,omitempty" toml:"allowRenameDir,omitempty"`
+
+	Excludes []string `json:"excludes,omitempty"  label:"排除目录"`
+
+	Includes []string `json:"includes,omitempty"  label:"目录"`
+
 	Disable bool `json:"disable,omitempty" toml:"disable,omitempty"`
 }
 

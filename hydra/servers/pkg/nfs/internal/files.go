@@ -134,7 +134,6 @@ func getExtName(p string) string {
 func checkAndCreateDir(path string) error {
 	root := filepath.Dir(path)
 	ok, err := pathExists(root)
-	fmt.Println("检查文件是否存在", root, ok, err)
 	if err != nil {
 		return err
 	}

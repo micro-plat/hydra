@@ -1,7 +1,6 @@
 package nfs
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -24,14 +23,18 @@ type local struct {
 	fsWatcher   *fsnotify.Watcher
 	init        bool
 	nfsChecker  sync.WaitGroup
+	excludes    []string
+	includes    []string
 	lockValue   int32
 	done        bool
 }
 
 //newLocal 构建本地处理服务
-func newLocal(path string) *local {
+func newLocal(path string, excludes []string, includes []string) *local {
 	l := &local{
 		FPS:       cmap.New(8),
+		excludes:  excludes,
+		includes:  includes,
 		path:      path,
 		lockValue: 0,
 		init:      true,
@@ -53,17 +56,13 @@ func (l *local) loopWatch() {
 			if !ok {
 				return
 			}
-			fmt.Println("文件变化:", filepath.Base(ev.Name))
 			if strings.HasPrefix(filepath.Base(ev.Name), ".") {
 				continue
 			}
 			if ev.Op&fsnotify.Create == fsnotify.Create ||
-				ev.Op&fsnotify.Write == fsnotify.Write ||
 				ev.Op&fsnotify.Remove == fsnotify.Remove ||
-				ev.Op&fsnotify.Rename == fsnotify.Rename ||
-				ev.Op&fsnotify.Chmod == fsnotify.Chmod {
+				ev.Op&fsnotify.Rename == fsnotify.Rename {
 
-				fmt.Println("文件变化:", ev.Name)
 				if err := l.check(); err != nil {
 					hydra.G.Log().Debug("check.err", err)
 				}

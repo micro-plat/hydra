@@ -19,7 +19,7 @@ func (l *module) watch() {
 		return
 	}
 	filepath.WalkDir(l.local.path, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() || l.local.exclude(d.Name()) {
+		if !d.IsDir() || l.local.exclude(path, d.Name()) {
 			return nil
 		}
 		l.fsWatcher.Add(path)
@@ -41,7 +41,7 @@ func (l *module) watch() {
 					return
 				}
 				_, name := filepath.Split(ev.Name)
-				if l.local.exclude(name) {
+				if l.local.exclude(ev.Name, name) {
 					continue
 				}
 				select {

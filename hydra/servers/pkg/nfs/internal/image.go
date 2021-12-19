@@ -20,7 +20,6 @@ func ScaleImageByPath(dir string, p string, width, height, quality int) ([]byte,
 		data, err := ReadFile(basePath)
 		return data, err
 	}
-	fmt.Println("url:", basePath)
 	if err := checkAndCreateDir(basePath); err != nil {
 		return nil, fmt.Errorf("创建目录失败:%w", err)
 	}
@@ -52,11 +51,11 @@ func ScaleImage(data []byte, width, height, quality int) ([]byte, error) {
 		return nil, fmt.Errorf("解码失败:%w", err)
 	}
 	if width == 0 || height == 0 {
-		width = origin.Bounds().Max.X
-		height = origin.Bounds().Max.Y
+		width = origin.Bounds().Max.X / 3
+		height = origin.Bounds().Max.Y / 3
 	}
 	if quality == 0 {
-		quality = 20
+		quality = 40
 	}
 	canvas := resize.Thumbnail(uint(width), uint(height), origin, resize.Lanczos3)
 

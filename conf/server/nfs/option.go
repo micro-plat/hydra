@@ -63,6 +63,36 @@ func WithPreview(service string) Option {
 	}
 }
 
+//WithCreateDir 允许创建目录
+func WithCreateDir(service string) Option {
+	return func(a *NFS) {
+		a.AllowCreateDir = true
+		a.CreateDirService = service
+	}
+}
+
+//WithRenameDir 允许创建目录
+func WithRenameDir(service string) Option {
+	return func(a *NFS) {
+		a.AllowRenameDir = true
+		a.RenameDirService = service
+	}
+}
+
+//WithInclude 只包含目录
+func WithIncludes(name ...string) Option {
+	return func(a *NFS) {
+		a.Includes = name
+	}
+}
+
+//WithExcludes 排除目录
+func WithExcludes(name ...string) Option {
+	return func(a *NFS) {
+		a.Excludes = name
+	}
+}
+
 //WithDomain 下载域名
 func WithDomain(domain string) Option {
 	return func(a *NFS) {
