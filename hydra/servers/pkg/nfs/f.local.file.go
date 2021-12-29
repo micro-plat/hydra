@@ -55,51 +55,68 @@ func (l *local) FWrite(name string, buff []byte) error {
 }
 
 //FList 获取本地所有文件清单
-func (l *local) FList(path string) (eFileEntityList, error) {
+func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 
 	//文件夹不存在时返回空
 	dirEntity, err := os.ReadDir(path)
 	if os.IsNotExist(err) {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if err != nil {
-		return nil, nil
+		return nil, nil, nil
 		// return nil, fmt.Errorf("读取目录失败:%s %v", path, err)
 	}
 
 	//查找所有文件
 	list := make([]*eFileEntity, 0, len(dirEntity))
+	dirs := make([]*eDirEntity, 0, 1)
 	for _, entity := range dirEntity {
 		if l.exclude(path, entity.Name()) {
 			continue
 		}
 		//处理目录
 		if entity.IsDir() {
-			l.fsWatcher.Add(filepath.Join(path, entity.Name()))
-			nlist, err := l.FList(filepath.Join(path, entity.Name()))
+
+			//处理目录
+			info, err := entity.Info()
 			if err != nil {
-				return nil, err
+				return nil, nil, err
+			}
+			dirs = append(dirs, &eDirEntity{
+				Path:    filepath.Join(path, entity.Name()),
+				Name:    entity.Name(),
+				Size:    info.Size(),
+				ModTime: info.ModTime(),
+			})
+
+			//递归处理目录
+			l.fsWatcher.Add(filepath.Join(path, entity.Name()))
+			nlist, ndirs, err := l.FList(filepath.Join(path, entity.Name()))
+			if err != nil {
+				return nil, nil, err
 			}
 			list = append(list, nlist...)
+			dirs = append(dirs, ndirs...)
 			continue
 		}
 
-		//处理文件名称
+		//处理文件
 		nname := filepath.Join(path, entity.Name())
 		if strings.HasPrefix(nname, filepath.Join(l.path)) {
 			nname = nname[len(filepath.Join(l.path))+1:]
 		}
 		info, err := entity.Info()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		list = append(list, &eFileEntity{
+			Name:    entity.Name(),
 			Path:    nname,
 			Size:    info.Size(),
 			ModTime: info.ModTime(),
 		})
 	}
-	return list, nil
+	return list, dirs, nil
 }
 
 var exclude = []string{".", "~"}
@@ -131,9 +148,14 @@ func (l *local) exclude(p string, f string) (v bool) {
 func (l *local) FindChange() bool {
 	//获取本地文件列表
 	change := false
-	lst, err := l.FList(l.path)
+	lst, dir, err := l.FList(l.path)
 	if err != nil {
 		return false
+	}
+
+	//检查目录结构是否相同
+	if !dir.Equal(l.dirs) {
+		return true
 	}
 
 	//处理不一致数据

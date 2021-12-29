@@ -23,6 +23,7 @@ type local struct {
 	fsWatcher   *fsnotify.Watcher
 	init        bool
 	nfsChecker  sync.WaitGroup
+	dirs        cmap.ConcurrentMap
 	excludes    []string
 	includes    []string
 	lockValue   int32
@@ -33,6 +34,7 @@ type local struct {
 func newLocal(path string, excludes []string, includes []string) *local {
 	l := &local{
 		FPS:       cmap.New(8),
+		dirs:      cmap.New(4),
 		excludes:  excludes,
 		includes:  includes,
 		path:      path,
@@ -151,7 +153,7 @@ func (l *local) check() error {
 	}
 
 	//获取本地文件列表
-	lst, err := l.FList(l.path)
+	lst, dirs, err := l.FList(l.path)
 	if err != nil {
 		return err
 	}
@@ -159,6 +161,7 @@ func (l *local) check() error {
 	for _, entity := range lst {
 		fp := &eFileFP{
 			Path:    entity.Path,
+			Name:    entity.Name,
 			Size:    entity.Size,
 			ModTime: entity.ModTime,
 			Hosts:   []string{l.currentAddr},
@@ -178,5 +181,7 @@ func (l *local) check() error {
 	}
 
 	//更新数据
+	l.dirs.Clear()
+	l.dirs.MSet(dirs.GetMap())
 	return l.FPWrite(l.FPS.Items())
 }

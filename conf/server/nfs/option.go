@@ -47,6 +47,14 @@ func WithListFile(service string) Option {
 	}
 }
 
+//WithListDir 列出目录服务
+func WithListDir(service string) Option {
+	return func(a *NFS) {
+		a.AllowListDir = true
+		a.ListDirService = service
+	}
+}
+
 //WithDownload 允许下载文件
 func WithDownload(service string) Option {
 	return func(a *NFS) {

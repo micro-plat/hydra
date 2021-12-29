@@ -27,6 +27,9 @@ type NFS struct {
 	ListFileService string `json:"listFileService,omitempty" toml:"listFileService,omitempty"`
 	AllowListFile   bool   `json:"allowListFile,omitempty" toml:"allowListFile,omitempty"`
 
+	ListDirService string `json:"listDirService,omitempty" toml:"listDirService,omitempty"`
+	AllowListDir   bool   `json:"allowListDir,omitempty" toml:"allowListDir,omitempty"`
+
 	PreviewService string `json:"previewService,omitempty" toml:"previewService,omitempty"`
 	AllowPreview   bool   `json:"allowPreview,omitempty" toml:"allowPreview,omitempty"`
 

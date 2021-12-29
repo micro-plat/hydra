@@ -180,6 +180,12 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			cnfs.services = append(cnfs.services, s)
 		}
 
+		if cnf.AllowListDir {
+			s := types.GetString(cnfs.c.ListDirService, SVSDir)
+			services.Def.API(s, cnfs.GetDirList)
+			cnfs.services = append(cnfs.services, s)
+		}
+
 		if cnf.AllowPreview {
 			s := types.GetString(cnfs.c.PreviewService, SVSPreview)
 			services.Def.API(s, cnfs.GetPDF4Preview)
@@ -228,8 +234,14 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 			s := types.GetString(cnfs.c.ListFileService, SVSList)
 			services.Def.Web(s, cnfs.GetFileList)
 			cnfs.services = append(cnfs.services, s)
-
 		}
+
+		if cnf.AllowListDir {
+			s := types.GetString(cnfs.c.ListDirService, SVSDir)
+			services.Def.Web(s, cnfs.GetDirList)
+			cnfs.services = append(cnfs.services, s)
+		}
+
 		if cnf.AllowPreview {
 			s := types.GetString(cnfs.c.PreviewService, SVSPreview)
 			services.Def.Web(s, cnfs.GetPDF4Preview)

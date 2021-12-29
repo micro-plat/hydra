@@ -34,6 +34,8 @@ func (e eFileFPLists) GetAlives(allAliveHosts []string) map[string]eFileFPLists 
 type eFileFP struct {
 	Path string `json:"path,omitempty" valid:"required" `
 
+	Name string `json:"name,omitempty" valid:"required"`
+
 	ModTime time.Time `json:"modTime,omitempty" valid:"required"`
 
 	// CRC64 uint64   `json:"crc64,omitempty" valid:"required" `
@@ -47,6 +49,7 @@ type eFileFP struct {
 type eFileEntity struct {
 	Path    string    `json:"path,omitempty" valid:"required"`
 	ModTime time.Time `json:"modTime,omitempty" valid:"required"`
+	Name    string    `json:"name,omitempty" valid:"required"`
 	Size    int64     `json:"buffer,omitempty" valid:"required"`
 }
 

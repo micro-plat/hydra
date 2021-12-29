@@ -36,6 +36,9 @@ const (
 	//SVSList 文件列表
 	SVSList = "/nfs/file/list"
 
+	//SVSDir 目录列表
+	SVSDir = "/nfs/dir/list"
+
 	//SVSScalrImage 压缩文件
 	SVSScalrImage = "/nfs/scale/:name"
 
@@ -81,8 +84,16 @@ func (c *cnfs) GetFP(ctx context.IContext) interface{} {
 //GetFileList 获取本机的指定文件的指纹信息，仅master提供对外查询功能
 func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
 	return c.module.GetFileList(multiPath(ctx.Request().GetString(dirName)),
+		ctx.Request().GetString("kw"),
+		ctx.Request().GetBool("all"),
 		ctx.Request().GetInt("pi"),
 		ctx.Request().GetInt("ps", 100))
+}
+
+//GetDirList 获取本机目录信息
+func (c *cnfs) GetDirList(ctx context.IContext) interface{} {
+	return c.module.GetDirList(multiPath(ctx.Request().GetString(dirName)),
+		ctx.Request().GetInt("deep", 1))
 }
 
 //RecvNotify 接收远程文件通知
@@ -246,5 +257,5 @@ func init() {
 
 //处理多级目录
 func multiPath(path string) string {
-	return strings.ReplaceAll(path, "|", "/")
+	return strings.Trim(strings.ReplaceAll(path, "|", "/"), "/")
 }
