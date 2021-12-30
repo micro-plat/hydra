@@ -119,7 +119,7 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 
 		if cnf.AllowListDir {
 			s := types.GetString(cnf.ListDirService, infs.SVSDir)
-			services.Def.API(s, cnfs.infs.GetDirList)
+			services.Def.API(s, cnfs.GetDirList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
@@ -136,7 +136,7 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 		}
 		if cnf.AllowCreateDir {
 			s := types.GetString(cnf.CreateDirService, infs.SVSCreateDir)
-			services.Def.API(s, cnfs.infs.CreateDir)
+			services.Def.API(s, cnfs.CreateDir)
 			cnfs.services = append(cnfs.services, s)
 		}
 
@@ -157,19 +157,19 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 
 		if cnf.AllowDownload {
 			s := types.GetString(cnf.DownloadService, infs.SVSDonwload)
-			services.Def.Web(s, cnfs.infs.Get)
+			services.Def.Web(s, cnfs.Download)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowListFile {
 			s := types.GetString(cnf.ListFileService, infs.SVSList)
-			services.Def.Web(s, cnfs.infs.GetFileList)
+			services.Def.Web(s, cnfs.GetFileList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowListDir {
 			s := types.GetString(cnf.ListDirService, infs.SVSDir)
-			services.Def.Web(s, cnfs.infs.GetDirList)
+			services.Def.Web(s, cnfs.GetDirList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
@@ -187,7 +187,7 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 
 		if cnf.AllowCreateDir {
 			s := types.GetString(cnf.CreateDirService, infs.SVSCreateDir)
-			services.Def.Web(s, cnfs.infs.CreateDir)
+			services.Def.Web(s, cnfs.CreateDir)
 			cnfs.services = append(cnfs.services, s)
 		}
 

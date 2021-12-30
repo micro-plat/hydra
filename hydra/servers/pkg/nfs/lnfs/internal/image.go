@@ -79,17 +79,18 @@ func ScaleImage(data []byte, width, height, quality int) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func GetContentType(path string) string {
-	contentType := "image/jpeg"
-	ftp := getExtName(path)
-	switch strings.ToLower(ftp) {
-	case "jpg", "jpeg":
-		contentType = "image/jpeg"
 
-	case "png":
-		contentType = "image/png"
-	case "gif":
-		contentType = "image/gif"
-	}
-	return contentType
-}
+// func GetContentType(path string) string {
+// 	contentType := "image/jpeg"
+// 	ftp := getExtName(path)
+// 	switch strings.ToLower(ftp) {
+// 	case "jpg", "jpeg":
+// 		contentType = "image/jpeg"
+
+// 	case "png":
+// 		contentType = "image/png"
+// 	case "gif":
+// 		contentType = "image/gif"
+// 	}
+// 	return contentType
+// }

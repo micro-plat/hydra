@@ -10,6 +10,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/micro-plat/hydra/conf/server/nfs"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/lnfs/internal"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/utility"
@@ -89,9 +90,9 @@ func (m *Module) Get(name string) ([]byte, string, error) {
 	if err := m.CheckAndDownload(name); err != nil {
 		return nil, "", err
 	}
-
-	panic("未实现")
-
+	ctp := infs.GetContentType(name)
+	buff, err := internal.ReadFile(filepath.Join(m.c.Local, name))
+	return buff, ctp, err
 }
 
 //HasFile 本地是否存在文件
@@ -187,7 +188,7 @@ func (c *Module) Rename(root string, oname string, nname string) error {
 }
 func (c *Module) GetScaleImage(root string, path string, width int, height int, quality int) (buff []byte, ctp string, err error) {
 
-	ctp = internal.GetContentType(path)
+	ctp = infs.GetContentType(path)
 	buff, err = internal.ScaleImageByPath(root, path, width, height, quality)
 	if err == nil {
 		return buff, ctp, err
