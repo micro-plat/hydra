@@ -117,7 +117,6 @@ func (s *export) getVarConf() error {
 }
 
 func (s *export) getNodes(path string, v *conf.RawConf, input map[string]interface{}) {
-	fmt.Println("path:", path)
 	if s.encrypt {
 		input[path] = security.Encrypt(v.GetRaw())
 		return

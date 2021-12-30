@@ -1,102 +1,39 @@
 package nfs
 
 import (
-	"fmt"
-	"net"
-	"sync"
-
-	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/global"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/lnfs"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
 )
 
 //currentModule 当前Module
-var currentModule *module
+var currentModule infs.Infs
 
 type cnfs struct {
-	c         *nfs.NFS
-	app       app.IAPPConf
-	watcher   conf.IWatcher
-	closch    chan struct{}
-	isStarted bool
-	module    *module
-	once      sync.Once
-	services  []string
+	c        *nfs.NFS
+	app      app.IAPPConf
+	services []string
+	infs     infs.Infs
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	p, _ := app.GetProcessorConf()
-	currentModule = newModule(c, p.ServicePrefix)
-	return &cnfs{c: c, app: app, closch: make(chan struct{}), module: currentModule, services: make([]string, 0, 3)}
+	currentModule = lnfs.NewNFS(app, c)
+	return &cnfs{c: c,
+		app:      app,
+		infs:     currentModule,
+		services: make([]string, 0, 3)}
 }
 func (c *cnfs) Start() error {
-	if c.isStarted {
-		return nil
-	}
-	c.isStarted = true
-	go c.watch()
-	return nil
-
+	return c.infs.Start()
 }
 
-//监控集群变化
-func (c *cnfs) watch() {
-	cluster, err := c.app.GetServerConf().GetCluster()
-	if err != nil {
-		return
-	}
-	c.watcher = cluster.Watch()
-	notify := c.watcher.Notify()
-	for {
-		select {
-		case <-notify:
-			hosts, masterHost, currentAddr, isMaster, err := c.get()
-			if err != nil {
-				continue
-			}
-			trace(fmt.Sprintf("change:hosts:%v,master:%s,current:%s,isMaster:%v", hosts, masterHost, currentAddr, isMaster))
-			c.module.Update(hosts, masterHost, currentAddr, isMaster)
-
-		case <-c.closch:
-			c.watcher.Close()
-			return
-		}
-	}
-}
-
-//get 从集群中获取数据
-func (r *cnfs) get() (hosts []string, masterHost string, currentAddr string, isMaster bool, err error) {
-	c, err := r.app.GetServerConf().GetCluster()
-	if err != nil {
-		return nil, "", "", false, err
-	}
-	if c.Current().GetPort() == "" {
-		return nil, "", "", false, fmt.Errorf("系统未就绪")
-	}
-	hosts = make([]string, 0, 0)
-	c.Iter(func(n conf.ICNode) bool {
-		if !n.IsCurrent() {
-			hosts = append(hosts, net.JoinHostPort(n.GetHost(), n.GetPort()))
-		}
-		if n.GetIndex() == 0 {
-			masterHost = net.JoinHostPort(n.GetHost(), n.GetPort())
-		}
-		return true
-	})
-	isMaster = c.Current().GetIndex() == 0
-	currentAddr = net.JoinHostPort(c.Current().GetHost(), c.Current().GetPort())
-	return
-}
 func (r *cnfs) Close() error {
-	r.once.Do(func() {
-		close(r.closch)
-		r.module.Close()
-	})
-	return nil
+	return r.infs.Close()
 }
 
 func init() {
@@ -104,7 +41,6 @@ func init() {
 		//处理服务初始化
 		services.Def.OnSetup(func(c app.IAPPConf) error {
 			//取消服务注册
-			// excludesJWT(c)
 			closeNFS(c.GetServerConf().GetServerType())
 			n, err := c.GetNFSConf()
 			if err != nil {
@@ -120,6 +56,7 @@ func init() {
 
 			//注册服务
 			registry(c.GetServerConf().GetServerType(), cnfs, n)
+			cnfs.infs.Registry(c.GetServerConf().GetServerType())
 			return nil
 		})
 
@@ -164,113 +101,100 @@ func registry(tp string, cnfs *cnfs, cnf *nfs.NFS) {
 	if tp == global.API {
 		//注册服务
 		if !cnf.DiableUpload {
-			s := types.GetString(cnfs.c.UploadService, SVSUpload)
+			s := types.GetString(cnf.UploadService, infs.SVSUpload)
 			services.Def.API(s, cnfs.Upload)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowDownload {
-			s := types.GetString(cnfs.c.DownloadService, SVSDonwload)
+			s := types.GetString(cnf.DownloadService, infs.SVSDonwload)
 			services.Def.API(s, cnfs.Download)
 			cnfs.services = append(cnfs.services, s)
 		}
 		if cnf.AllowListFile {
-			s := types.GetString(cnfs.c.ListFileService, SVSList)
+			s := types.GetString(cnf.ListFileService, infs.SVSList)
 			services.Def.API(s, cnfs.GetFileList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowListDir {
-			s := types.GetString(cnfs.c.ListDirService, SVSDir)
-			services.Def.API(s, cnfs.GetDirList)
+			s := types.GetString(cnf.ListDirService, infs.SVSDir)
+			services.Def.API(s, cnfs.infs.GetDirList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowPreview {
-			s := types.GetString(cnfs.c.PreviewService, SVSPreview)
+			s := types.GetString(cnf.PreviewService, infs.SVSPreview)
 			services.Def.API(s, cnfs.GetPDF4Preview)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowScaleImage {
-			s := types.GetString(cnfs.c.ScaleImageService, SVSScalrImage)
+			s := types.GetString(cnf.ScaleImageService, infs.SVSScalrImage)
 			services.Def.API(s, cnfs.ImgScale)
 			cnfs.services = append(cnfs.services, s)
 		}
 		if cnf.AllowCreateDir {
-			s := types.GetString(cnfs.c.CreateDirService, SVSCreateDir)
-			services.Def.API(s, cnfs.CreateDir)
+			s := types.GetString(cnf.CreateDirService, infs.SVSCreateDir)
+			services.Def.API(s, cnfs.infs.CreateDir)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowRenameDir {
-			s := types.GetString(cnfs.c.RenameDirService, SVSRenameDir)
+			s := types.GetString(cnf.RenameDirService, infs.SVSRenameDir)
 			services.Def.API(s, cnfs.RenameDir)
 			cnfs.services = append(cnfs.services, s)
 		}
-		//内部服务
-		services.Def.API(rmt_fp_get, cnfs.GetFP)
-		services.Def.API(rmt_fp_notify, cnfs.RecvNotify)
-		services.Def.API(rmt_fp_query, cnfs.Query)
-		services.Def.API(rmt_file_download, cnfs.GetFile)
-		cnfs.services = append(cnfs.services, rmt_fp_get, rmt_fp_notify, rmt_fp_query, rmt_file_download)
 	}
 
 	if tp == global.Web {
 
 		if !cnf.DiableUpload {
-			s := types.GetString(cnfs.c.UploadService, SVSUpload)
+			s := types.GetString(cnf.UploadService, infs.SVSUpload)
 			services.Def.Web(s, cnfs.Upload)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowDownload {
-			s := types.GetString(cnfs.c.DownloadService, SVSDonwload)
-			services.Def.Web(s, cnfs.Download)
+			s := types.GetString(cnf.DownloadService, infs.SVSDonwload)
+			services.Def.Web(s, cnfs.infs.Get)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowListFile {
-			s := types.GetString(cnfs.c.ListFileService, SVSList)
-			services.Def.Web(s, cnfs.GetFileList)
+			s := types.GetString(cnf.ListFileService, infs.SVSList)
+			services.Def.Web(s, cnfs.infs.GetFileList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowListDir {
-			s := types.GetString(cnfs.c.ListDirService, SVSDir)
-			services.Def.Web(s, cnfs.GetDirList)
+			s := types.GetString(cnf.ListDirService, infs.SVSDir)
+			services.Def.Web(s, cnfs.infs.GetDirList)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowPreview {
-			s := types.GetString(cnfs.c.PreviewService, SVSPreview)
+			s := types.GetString(cnf.PreviewService, infs.SVSPreview)
 			services.Def.Web(s, cnfs.GetPDF4Preview)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowScaleImage {
-			s := types.GetString(cnfs.c.ScaleImageService, SVSScalrImage)
+			s := types.GetString(cnf.ScaleImageService, infs.SVSScalrImage)
 			services.Def.Web(s, cnfs.ImgScale)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowCreateDir {
-			s := types.GetString(cnfs.c.CreateDirService, SVSCreateDir)
-			services.Def.Web(s, cnfs.CreateDir)
+			s := types.GetString(cnf.CreateDirService, infs.SVSCreateDir)
+			services.Def.Web(s, cnfs.infs.CreateDir)
 			cnfs.services = append(cnfs.services, s)
 		}
 
 		if cnf.AllowRenameDir {
-			s := types.GetString(cnfs.c.RenameDirService, SVSRenameDir)
+			s := types.GetString(cnf.RenameDirService, infs.SVSRenameDir)
 			services.Def.Web(s, cnfs.RenameDir)
 			cnfs.services = append(cnfs.services, s)
 		}
-
-		//内部服务
-		services.Def.Web(rmt_fp_get, cnfs.GetFP)
-		services.Def.Web(rmt_fp_notify, cnfs.RecvNotify)
-		services.Def.Web(rmt_fp_query, cnfs.Query)
-		services.Def.Web(rmt_file_download, cnfs.GetFile)
-		cnfs.services = append(cnfs.services, rmt_fp_get, rmt_fp_notify, rmt_fp_query, rmt_file_download)
 	}
 }
