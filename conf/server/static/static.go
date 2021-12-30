@@ -35,8 +35,7 @@ type Static struct {
 	Disable        bool            `json:"disable,omitempty"`
 	unrewriteMatch *conf.PathMatch `json:"-"`
 	fs             IFS             `json:"-"`
-	// gzipfileMap    map[string]gzFileInfo `json:"-"`
-	serverType string
+	serverType     string
 }
 
 //New 构建静态文件配置信息
@@ -46,7 +45,6 @@ func New(serverType string, opts ...Option) *Static {
 		HomePage:   DefaultHome,
 		Excludes:   DefaultExclude,
 		Unrewrites: DefaultUnrewrite,
-		// gzipfileMap: map[string]gzFileInfo{},
 	}
 	for _, opt := range opts {
 		opt(a)

@@ -64,26 +64,33 @@ func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 	}
 	if err != nil {
 		return nil, nil, nil
-		// return nil, fmt.Errorf("读取目录失败:%s %v", path, err)
 	}
 
 	//查找所有文件
 	list := make([]*eFileEntity, 0, len(dirEntity))
 	dirs := make([]*eDirEntity, 0, 1)
 	for _, entity := range dirEntity {
-		if l.exclude(path, entity.Name()) {
+
+		//处理目录
+		info, err := entity.Info()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		//处理文件
+		npath := filepath.Join(path, entity.Name())
+		if strings.HasPrefix(npath, filepath.Join(l.path)) {
+			npath = npath[len(filepath.Join(l.path))+1:]
+		}
+
+		if l.exclude(npath, entity.Name()) {
 			continue
 		}
 		//处理目录
 		if entity.IsDir() {
 
-			//处理目录
-			info, err := entity.Info()
-			if err != nil {
-				return nil, nil, err
-			}
 			dirs = append(dirs, &eDirEntity{
-				Path:    filepath.Join(path, entity.Name()),
+				Path:    npath,
 				Name:    entity.Name(),
 				Size:    info.Size(),
 				ModTime: info.ModTime(),
@@ -100,18 +107,9 @@ func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 			continue
 		}
 
-		//处理文件
-		nname := filepath.Join(path, entity.Name())
-		if strings.HasPrefix(nname, filepath.Join(l.path)) {
-			nname = nname[len(filepath.Join(l.path))+1:]
-		}
-		info, err := entity.Info()
-		if err != nil {
-			return nil, nil, err
-		}
 		list = append(list, &eFileEntity{
 			Name:    entity.Name(),
-			Path:    nname,
+			Path:    npath,
 			Size:    info.Size(),
 			ModTime: info.ModTime(),
 		})

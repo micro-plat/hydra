@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/micro-plat/hydra"
 )
 
 const (
@@ -61,7 +63,7 @@ func (l *local) GetFileList(path string, q string, all bool, index int, count in
 	list := l.getFileList(path, q, all)
 	total := index + count
 	if index >= list.Len() {
-		return nil
+		return make(fileList, 0)
 	}
 	if total > list.Len() {
 		return list[index:]
@@ -70,13 +72,13 @@ func (l *local) GetFileList(path string, q string, all bool, index int, count in
 }
 
 //GetFileList 获以文件列表
-func (l *local) getFileList(root string, q string, all bool) fileList {
+func (l *local) getFileList(path string, q string, all bool) fileList {
 	list := make(fileList, 0, 1)
-	path := strings.Trim(strings.Replace(root, "|", "/", -1), "/")
 	fps := l.GetFPs()
 	for k, v := range fps {
 
-		if all || !all && k == path {
+		hydra.G.Log().Debug("path:", filepath.Join(path, v.Name), k, path, v.Name)
+		if all || !all && k == filepath.Join(path, v.Name) {
 
 			if !strings.Contains(v.Name, q) {
 				continue
