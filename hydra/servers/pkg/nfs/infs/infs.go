@@ -25,3 +25,8 @@ type Infs interface {
 func MultiPath(path string) string {
 	return strings.Trim(strings.ReplaceAll(path, "|", "/"), "/")
 }
+
+//处理多级目录
+func UnMultiPath(path string) string {
+	return strings.Trim(strings.ReplaceAll(path, "/", "|"), "|")
+}
