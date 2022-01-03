@@ -9,8 +9,8 @@ type Infs interface {
 	Close() error
 	Exists(string) bool
 
-	GetDirList(string, int) interface{}
-	GetFileList(path string, q string, all bool, index int, count int) interface{}
+	GetDirList(string, int) DirList
+	GetFileList(path string, q string, all bool, index int, count int) FileList
 
 	Save(string, string, []byte) (string, string, error)
 	Get(string) ([]byte, string, error)

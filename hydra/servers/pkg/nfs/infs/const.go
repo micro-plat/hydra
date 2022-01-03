@@ -15,7 +15,9 @@ const (
 
 	NDIRNAME = "ndir"
 )
-
+const (
+	DIR = "dir"
+)
 const (
 	//SVSUpload 用户端上传文件
 	SVSUpload = "/nfs/upload"

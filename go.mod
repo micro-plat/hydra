@@ -9,6 +9,7 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/clbanning/mxj v1.8.4
 	github.com/d5/tengo/v2 v2.6.2
+	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
@@ -23,10 +24,10 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/mholt/archiver/v3 v3.5.1
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.1.10
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
@@ -34,7 +35,9 @@ require (
 	github.com/sergi/go-diff v1.2.0
 	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go/codec v1.2.2
+	github.com/ulikunitz/xz v0.5.9 // indirect
 	github.com/urfave/cli v1.22.5
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/zkfy/go-cache v2.1.0+incompatible
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896

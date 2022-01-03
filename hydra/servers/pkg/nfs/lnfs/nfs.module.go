@@ -152,12 +152,12 @@ func (m *Module) Query() EFileFPLists {
 }
 
 //GetFileList 获取文件列表
-func (m *Module) GetFileList(path string, q string, all bool, index int, count int) interface{} {
+func (m *Module) GetFileList(path string, q string, all bool, index int, count int) infs.FileList {
 	return m.Local.GetFileList(path, q, all, index, count)
 }
 
 //GetDirList 获取目录列表
-func (m *Module) GetDirList(path string, deep int) interface{} {
+func (m *Module) GetDirList(path string, deep int) infs.DirList {
 	return m.Local.GetDirList(path, deep)
 }
 

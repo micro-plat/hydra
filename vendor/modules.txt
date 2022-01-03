@@ -11,8 +11,6 @@ github.com/SkyAPM/go2sky/reporter
 github.com/SkyAPM/go2sky/reporter/grpc/common
 github.com/SkyAPM/go2sky/reporter/grpc/language-agent
 github.com/SkyAPM/go2sky/reporter/grpc/management
-# github.com/andybalholm/brotli v1.0.1
-github.com/andybalholm/brotli
 # github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 ## explicit
 github.com/asaskevich/govalidator
@@ -36,6 +34,7 @@ github.com/d5/tengo/v2/token
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5
+## explicit
 github.com/dsnet/compress
 github.com/dsnet/compress/bzip2
 github.com/dsnet/compress/bzip2/internal/sais
@@ -104,17 +103,6 @@ github.com/juju/ansiterm
 github.com/juju/ansiterm/tabwriter
 # github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
 github.com/keybase/go-ps/darwincgo
-# github.com/klauspost/compress v1.11.4
-github.com/klauspost/compress/flate
-github.com/klauspost/compress/fse
-github.com/klauspost/compress/gzip
-github.com/klauspost/compress/huff0
-github.com/klauspost/compress/snappy
-github.com/klauspost/compress/zip
-github.com/klauspost/compress/zstd
-github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/klauspost/pgzip v1.2.5
-github.com/klauspost/pgzip
 # github.com/kr/fs v0.1.0
 github.com/kr/fs
 # github.com/leodido/go-urn v1.2.0
@@ -141,9 +129,6 @@ github.com/mattn/go-oci8
 # github.com/mholt/archiver v3.1.1+incompatible
 ## explicit
 github.com/mholt/archiver
-# github.com/mholt/archiver/v3 v3.5.1
-## explicit
-github.com/mholt/archiver/v3
 # github.com/micro-plat/gmq v1.0.1
 ## explicit
 github.com/micro-plat/gmq/mqtt
@@ -185,17 +170,12 @@ github.com/modern-go/reflect2
 ## explicit
 github.com/nfnt/resize
 # github.com/nwaples/rardecode v1.1.0
+## explicit
 github.com/nwaples/rardecode
 # github.com/pierrec/lz4 v2.6.0+incompatible
 ## explicit
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/pierrec/lz4/v4 v4.1.2
-github.com/pierrec/lz4/v4
-github.com/pierrec/lz4/v4/internal/lz4block
-github.com/pierrec/lz4/v4/internal/lz4errors
-github.com/pierrec/lz4/v4/internal/lz4stream
-github.com/pierrec/lz4/v4/internal/xxh32
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pkg/profile v1.2.1
@@ -227,6 +207,7 @@ github.com/stretchr/testify/assert
 ## explicit
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.9
+## explicit
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
@@ -235,6 +216,7 @@ github.com/ulikunitz/xz/lzma
 ## explicit
 github.com/urfave/cli
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+## explicit
 github.com/xi2/xz
 # github.com/yosssi/gmq v0.0.1
 github.com/yosssi/gmq/mqtt
