@@ -11,7 +11,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/lnfs/internal"
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/internal"
 	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/lib4go/utility"
 )
@@ -115,23 +115,22 @@ func (m *Module) Exists(name string) bool {
 //1. 查询本地是否有此文件了,有则报错
 //2. 保存到本地，返回指纹信息
 //3. 通知master我也有这个文件了,如果是master则告诉所有人我也有此文件了
-func (m *Module) Save(path string, name string, buff []byte) (string, string, error) {
+func (m *Module) Save(name string, buff []byte) (string, error) {
 	//检查文件是否存在
 	name = getFileName(name, m.c.Rename)
 	if m.Local.Has(name) {
-		return "", "", fmt.Errorf("文件名称重复:%s", name)
+		return "", fmt.Errorf("文件名称重复:%s", name)
 	}
 
 	//保存到本地
-	filePath := filepath.Join(path, name)
-	fp, err := m.Local.SaveFile(filePath, buff)
+	fp, err := m.Local.SaveFile(name, buff)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	//远程通知
 	m.async.DoReport(fp.GetMAP())
-	return fp.Path, m.c.Domain, nil
+	return fp.Path, nil
 }
 
 //GetFP 获取本地的指纹信息，用于master对外提供服务
@@ -179,25 +178,25 @@ func (m *Module) RecvNotify(f EFileFPLists) error {
 	}
 	return m.Local.FPWrite(m.Local.FPS.Items())
 }
-func (c *Module) CreateDir(root string, name string) error {
-	return internal.CreateDir(root, name)
+func (c *Module) CreateDir(path string) error {
+	return internal.CreateDir(filepath.Join(c.c.Local, path))
 }
 
-func (c *Module) Rename(root string, oname string, nname string) error {
-	return internal.Rename(root, oname, nname)
+func (c *Module) Rename(oname string, nname string) error {
+	return internal.Rename(filepath.Join(c.c.Local, oname), filepath.Join(c.c.Local, nname))
 }
-func (c *Module) GetScaleImage(root string, path string, width int, height int, quality int) (buff []byte, ctp string, err error) {
+func (c *Module) GetScaleImage(path string, width int, height int, quality int) (buff []byte, ctp string, err error) {
 
 	ctp = infs.GetContentType(path)
-	buff, err = internal.ScaleImageByPath(root, path, width, height, quality)
+	buff, err = internal.ScaleImageByPath(c.c.Local, path, width, height, quality)
 	if err == nil {
 		return buff, ctp, err
 	}
-	buff, err = internal.ReadFile(filepath.Join(root, path))
+	buff, err = internal.ReadFile(filepath.Join(c.c.Local, path))
 	return buff, ctp, err
 }
-func (c *Module) Conver2PDF(root string, path string) (buff []byte, ctp string, err error) {
-	ctp, buff, err = internal.Conver2PDF(root, path)
+func (c *Module) Conver2PDF(path string) (buff []byte, ctp string, err error) {
+	ctp, buff, err = internal.Conver2PDF(c.c.Local, filepath.Join(c.c.Local, path))
 	return buff, ctp, err
 }
 

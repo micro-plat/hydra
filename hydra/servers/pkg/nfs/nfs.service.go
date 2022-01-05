@@ -38,15 +38,17 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	// 保存文件
 	path := infs.MultiPath(ctx.Request().Path().Params().GetString("path", ctx.Request().GetString("path")))
-	path, domain, err := c.infs.Save(path, name, buff)
+
+	npath, err := c.infs.Save(filepath.Join(path, name), buff)
 	if err != nil {
 		return err
 	}
 
 	// 处理返回结果
+	xpath := fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(npath, "/"))
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	return map[string]interface{}{
-		"path": fmt.Sprintf("%s/%s", strings.Trim(domain, "/"), strings.Trim(path, "/")),
+		"path": xpath,
 	}
 }
 
@@ -92,18 +94,21 @@ func (c *cnfs) CreateDir(ctx context.IContext) interface{} {
 	if dir == "" {
 		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\"", infs.DIRNAME)
 	}
-	return c.infs.CreateDir(c.c.Local, dir)
+	return c.infs.CreateDir(dir)
 }
 
 //RenameDir 重命名目录
 func (c *cnfs) RenameDir(ctx context.IContext) interface{} {
 	//检查参数
 	dir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))
-	ndir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))
+	ndir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.NDIRNAME, ctx.Request().GetString(infs.NDIRNAME)))
 	if dir == "" || ndir == "" {
-		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\",\":%s\"", infs.DIRNAME, infs.DIRNAME)
+		return errs.NewErrorf(http.StatusNotAcceptable, "参数不能为空,请求路径中应包含参数 \":%s\",\":%s\"", infs.DIRNAME, infs.NDIRNAME)
 	}
-	return c.infs.Rename(c.c.Local, dir, ndir)
+	if dir == ndir {
+		return nil
+	}
+	return c.infs.Rename(dir, ndir)
 }
 
 //ImgScale 缩略图生成
@@ -120,7 +125,7 @@ func (c *cnfs) ImgScale(ctx context.IContext) interface{} {
 	width := ctx.Request().GetInt("w")
 	height := ctx.Request().GetInt("h")
 	quality := ctx.Request().GetInt("q")
-	buff, ctp, err := c.infs.GetScaleImage(c.c.Local, path, width, height, quality)
+	buff, ctp, err := c.infs.GetScaleImage(path, width, height, quality)
 	if err == nil {
 		ctx.Response().ContentType(ctp)
 		ctx.Response().GetHTTPReponse().Write(buff)
@@ -141,7 +146,7 @@ func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
 	//获取文件
 	path := filepath.Join(dir, name)
 
-	buff, contentType, err := c.infs.Conver2PDF(c.c.Local, path)
+	buff, contentType, err := c.infs.Conver2PDF(path)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,6 @@ import (
 	"github.com/micro-plat/hydra/conf/server/nfs"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
-	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/lnfs"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/types"
@@ -22,7 +21,7 @@ type cnfs struct {
 }
 
 func newNFS(app app.IAPPConf, c *nfs.NFS) *cnfs {
-	currentModule = lnfs.NewNFS(app, c)
+	currentModule = getNFS(app, c)
 	return &cnfs{c: c,
 		app:      app,
 		infs:     currentModule,

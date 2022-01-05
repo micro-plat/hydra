@@ -34,11 +34,11 @@ func (l *local) getFileList(path string, q string, all bool) infs.FileList {
 			}
 
 			list = append(list, &infs.FileInfo{
-				Type:    strings.ToLower(strings.Trim(filepath.Ext(k), ".")),
+				Type:    infs.GetFileType(k),
 				Path:    k,
 				ModTime: v.ModTime.Format("2006/01/02 15:04:05"),
 				Size:    v.Size,
-				DPath:   strings.ReplaceAll(k, "/", "|"),
+				DPath:   infs.UnMultiPath(k),
 				Name:    v.Name,
 			})
 		}

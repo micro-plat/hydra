@@ -29,7 +29,7 @@ func (l *local) GetDirList(path string, deep int) infs.DirList {
 			Path:    k,
 			ModTime: dir.ModTime.Format("2006/01/02 15:04:05"),
 			Size:    dir.Size,
-			DPath:   strings.ReplaceAll(k, "/", "|"),
+			DPath:   infs.UnMultiPath(k),
 			PID:     getParent(k),
 			Name:    dir.Name,
 		})

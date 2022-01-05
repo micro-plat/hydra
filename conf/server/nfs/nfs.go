@@ -14,10 +14,16 @@ const TypeNodeName = "nfs"
 //NFS 网络文件系统配置
 type NFS struct {
 	security.ConfEncrypt
-	Local           string `json:"local,omitempty" toml:"local,omitempty"`
-	Domain          string `json:"domain,omitempty" toml:"domain,omitempty"`
-	Rename          bool   `json:"rename,omitempty" toml:"rename,omitempty"`
-	Watch           bool   `json:"watch,omitempty" toml:"watch,omitempty"`
+	Local  string `json:"local,omitempty" toml:"local,omitempty"`
+	Domain string `json:"domain,omitempty" toml:"domain,omitempty"`
+	Rename bool   `json:"rename,omitempty" toml:"rename,omitempty"`
+	Watch  bool   `json:"watch,omitempty" toml:"watch,omitempty"`
+
+	CloudNFS  string `json:"cloudNfs,omitempty" toml:"cloudNfs,omitempty"`
+	Endpoint  string `json:"endpoint,omitempty" toml:"endpoint,omitempty"`
+	AccessKey string `json:"ak,omitempty" toml:"ak,omitempty"`
+	SecretKey string `json:"sk,omitempty" toml:"sk,omitempty"`
+
 	AllowDownload   bool   `json:"allowDownload,omitempty" toml:"allowDownload,omitempty"`
 	DownloadService string `json:"downloadService,omitempty" toml:"downloadService,omitempty"`
 

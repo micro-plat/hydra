@@ -87,6 +87,17 @@ func WithRenameDir(service string) Option {
 	}
 }
 
+//WithHWOBS 使用华为OBS
+func WithHWOBS(ak string, sk string, bucket string, endpoint string) Option {
+	return func(a *NFS) {
+		a.CloudNFS = "OBS"
+		a.AccessKey = ak
+		a.SecretKey = sk
+		a.Local = bucket
+		a.Endpoint = endpoint
+	}
+}
+
 //WithInclude 只包含目录
 func WithIncludes(name ...string) Option {
 	return func(a *NFS) {
