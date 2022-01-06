@@ -52,12 +52,10 @@ func WithKeepalive(keepalive bool) Option {
 
 //WithRaw 根据json串设置配置信息
 func WithRaw(raw []byte) Option {
-	c := &HTTPConf{}
-	if err := json.Unmarshal(raw, c); err != nil {
-		panic(fmt.Errorf("http配置节点解析异常,%v", err))
-	}
 	return func(o *HTTPConf) {
-		o = c
+		if err := json.Unmarshal(raw, o); err != nil {
+			panic(fmt.Errorf("http配置节点解析异常,%v", err))
+		}
 	}
 }
 
