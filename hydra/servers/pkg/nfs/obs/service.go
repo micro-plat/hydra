@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/internal"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/obs/obs"
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/security/md5"
 )
 
 // type Infs interface {
@@ -38,15 +40,20 @@ type OBS struct {
 	endpoint  string
 	bucket    string
 	obsClient *obs.ObsClient
+	excludes  []string
+	includes  []string
 }
 
-func NewOBS(ak, sk, bucket, endpoint string) *OBS {
-	return &OBS{
+func NewOBS(ak, sk, bucket, endpoint string, excludes []string, includes ...string) *OBS {
+	obs := &OBS{
 		ak:       ak,
 		sk:       sk,
 		bucket:   bucket,
 		endpoint: endpoint,
+		excludes: excludes,
+		includes: includes,
 	}
+	return obs
 }
 func (o *OBS) Start() error {
 	var err error
@@ -96,14 +103,14 @@ func (o *OBS) CreateDir(path string) error {
 func (o *OBS) GetFileList(path string, q string, all bool, index int, count int) infs.FileList {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = o.bucket
-	input.Prefix = getPath(path)
+	input.Prefix = getCurrentDir(path)
 	output, err := o.obsClient.ListObjects(input)
 	if err != nil {
 		return make(infs.FileList, 0)
 	}
 	list := make(infs.FileList, 0, len(output.Contents))
 	for _, val := range output.Contents {
-		if strings.HasSuffix(val.Key, "/") {
+		if strings.HasSuffix(val.Key, "/") || o.fileExclude(val.Key) || !strings.HasPrefix(val.Key, input.Prefix) {
 			continue
 		}
 		if !strings.Contains(infs.GetFullFileName(val.Key), q) {
@@ -133,7 +140,7 @@ func (o *OBS) GetFileList(path string, q string, all bool, index int, count int)
 func (o *OBS) Exists(p string) bool {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = o.bucket
-	input.Prefix = getPath(p)
+	input.Prefix = getCurrentDir(p)
 	output, err := o.obsClient.ListObjects(input)
 	if err != nil {
 		return false
@@ -181,30 +188,39 @@ func (o *OBS) Rename(path string, new string) error {
 func (o *OBS) GetDirList(path string, deep int) infs.DirList {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = o.bucket
-	input.Prefix = getPath(path)
+	input.Prefix = getCurrentDir(path)
 	output, err := o.obsClient.ListObjects(input)
 	if err != nil {
 		return make(infs.DirList, 0)
 	}
 	list := make(infs.DirList, 0, len(output.Contents))
 	for _, val := range output.Contents {
-		if val.Key == path || !strings.HasSuffix(val.Key, "/") {
+		if val.Key == path || o.fileExclude(path) || !strings.HasSuffix(val.Key, "/") || !strings.HasPrefix(val.Key, path) {
 			continue
 		}
 		list = append(list, &infs.DirInfo{
-			Path:    val.Key,
+			ID:      md5.Encrypt(val.Key)[8:16],
+			Path:    infs.MultiPath(val.Key),
 			DPath:   infs.UnMultiPath(val.Key),
 			Name:    infs.GetFileName(val.Key),
 			ModTime: val.LastModified.Format("2006/01/02 15:04:05"),
 			Size:    val.Size,
+			PID:     getParent(val.Key),
 		})
 	}
-	return list
+	sort.Sort(list)
+	return list.GetMultiLevel(path)
 }
-func getPath(p string) string {
-	if len(p) > 1 && strings.HasSuffix(p, "/") {
-		return p
+func getCurrentDir(p string) string {
+	if len(p) > 1 {
+		if strings.HasSuffix(p, "/") {
+			return p
+		}
+		if !strings.Contains(p, ".") {
+			return p + "/"
+		}
 	}
+
 	f := filepath.Dir(p)
 	if f == "." || f == "/" || f == "" {
 		return ""
@@ -212,14 +228,18 @@ func getPath(p string) string {
 	return f + "/"
 }
 func (o *OBS) GetScaleImage(path string, width int, height int, quality int) (buff []byte, ctp string, err error) {
-	dir := getPath(path)
-	name := infs.GetFileName(path)
-	thumbnail := filepath.Join(dir, "thumbnail_"+name)
+	dir := getCurrentDir(path)
+	name := infs.GetFullFileName(path)
+	thumbnail := filepath.Join(dir, "__thumbnail_"+name)
+	if strings.HasPrefix(name, "__thumbnail_") {
+		thumbnail = path
+	}
+
 	if o.Exists(thumbnail) {
 		buff, ctp, err = o.Get(thumbnail)
 		return buff, ctp, err
 	}
-	if !o.Exists(path) {
+	if path == thumbnail || !o.Exists(path) {
 		return nil, "", errs.NewError(404, fmt.Errorf("文件不存在:%s", path))
 	}
 	buff, ctp, err = o.Get(path)
@@ -234,8 +254,77 @@ func (o *OBS) GetScaleImage(path string, width int, height int, quality int) (bu
 	return buff, ctp, nil
 }
 func (o *OBS) Conver2PDF(path string) (buff []byte, ctp string, err error) {
-	return nil, "", nil
+	dir := getCurrentDir(path)
+	oname := infs.GetFullFileName(path)
+	name := infs.GetFileName(path) + ".pdf"
+
+	//构建PDF文件目录
+	pdf := filepath.Join(dir, "__pdf_"+name)
+	if strings.HasPrefix(name, "__pdf_") {
+		pdf = path
+	}
+	if o.Exists(pdf) {
+		buff, ctp, err = o.Get(pdf)
+		return buff, ctp, err
+	}
+	if path == pdf || !o.Exists(path) {
+		return nil, "", errs.NewError(404, fmt.Errorf("文件不存在:%s", path))
+	}
+
+	//获取原始文件
+	buff, ctp, err = o.Get(path)
+	if err != nil {
+		return nil, "", nil
+	}
+
+	//构建临时文件
+	tempDir, err := ioutil.TempDir("", "hydad-pdf-")
+	if err != nil {
+		return nil, "", fmt.Errorf("构建临时目录失败:%w", err)
+	}
+
+	//构建临时文件
+	file, err := ioutil.TempFile(tempDir, "*"+oname)
+	if err != nil {
+		return nil, "", err
+	}
+	defer os.RemoveAll(tempDir)
+	defer os.Remove(file.Name())
+	defer file.Close()
+
+	file.Write(buff)
+
+	//转换为pdf文件
+	fmt.Println("file:", tempDir, file.Name())
+	buff, ctp, rpath, err := internal.Conver2PDF(tempDir, file.Name())
+	if err != nil {
+		return nil, "", err
+	}
+	defer os.Remove(rpath)
+
+	// if _, err = o.Save(pdf, buff); err != nil {
+	// 	return nil, "", nil
+	// }
+
+	return buff, ctp, nil
 }
 func (o *OBS) Registry(tp string) {
 
+}
+func getParent(p string) string {
+	path := strings.Trim(p, "/")
+	if path == "" {
+		return path
+	}
+	items := strings.Split(path, "/")
+	return strings.Join(items[0:len(items)-1], "/")
+}
+
+func (o *OBS) exclude(p string, excludes ...string) bool {
+	nexcludes := append(o.excludes, excludes...)
+	return infs.Exclude(p, nexcludes, o.includes...)
+}
+func (o *OBS) fileExclude(p string) bool {
+	nexcludes := append(o.excludes, "__pdf_", "__thumbnail_")
+	return infs.Exclude(p, nexcludes, o.includes...)
 }

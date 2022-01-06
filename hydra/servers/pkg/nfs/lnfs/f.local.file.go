@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
 )
 
 //SaveFile 保存文件
@@ -83,7 +85,7 @@ func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 			npath = npath[len(filepath.Join(l.path))+1:]
 		}
 
-		if l.exclude(npath, entity.Name()) {
+		if l.exclude(npath) {
 			continue
 		}
 		//处理目录
@@ -117,32 +119,6 @@ func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 	return list, dirs, nil
 }
 
-var exclude = []string{".", "~"}
-
-func (l *local) exclude(p string, f string) (v bool) {
-	for _, ex := range exclude {
-		if strings.HasPrefix(f, ex) {
-			return true
-		}
-	}
-	np := filepath.Join(p, f)
-	for _, v := range l.excludes {
-		if strings.Contains(np, v) {
-			return true
-		}
-	}
-	if len(l.includes) > 0 {
-		for _, v := range l.includes {
-			if strings.Contains(np, v) {
-				return false
-			}
-		}
-		return true
-	}
-
-	return false
-}
-
 func (l *local) FindChange() bool {
 	//获取本地文件列表
 	change := false
@@ -170,4 +146,7 @@ func (l *local) FindChange() bool {
 		}
 	}
 	return change
+}
+func (l *local) exclude(npath string) bool {
+	return infs.Exclude(npath, l.excludes, l.includes...)
 }

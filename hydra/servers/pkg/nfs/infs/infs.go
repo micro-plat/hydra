@@ -44,3 +44,29 @@ func GetFileName(p string) string {
 	ext := path.Ext(p)
 	return filenameall[0 : len(filenameall)-len(ext)]
 }
+
+var exclude = []string{".", "~"}
+
+func Exclude(p string, excludes []string, includes ...string) (v bool) {
+	f := GetFullFileName(p)
+	for _, ex := range exclude {
+		if strings.HasPrefix(f, ex) {
+			return true
+		}
+	}
+	for _, v := range excludes {
+		if strings.Contains(p, v) {
+			return true
+		}
+	}
+	if len(includes) > 0 {
+		for _, v := range includes {
+			if strings.Contains(p, v) {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
+}

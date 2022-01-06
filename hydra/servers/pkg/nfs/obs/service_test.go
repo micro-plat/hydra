@@ -14,12 +14,12 @@ var bucket = "cdocs-files"
 var endpoint = "obs.cn-southwest-2.myhuaweicloud.com"
 
 func TestStart(t *testing.T) {
-	var ctx = NewOBS(ak, sk, bucket, endpoint)
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
 	err := ctx.Start()
 	assert.Equal(t, nil, err)
 }
 func TestFiles(t *testing.T) {
-	var ctx = NewOBS(ak, sk, bucket, endpoint)
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
 	err := ctx.Start()
 	assert.Equal(t, nil, err)
 
@@ -37,7 +37,6 @@ func TestFiles(t *testing.T) {
 
 		buff, p, err := ctx.Get(v.name)
 		assert.Equal(t, nil, err)
-		assert.Equal(t, v.name, p)
 		assert.Equal(t, v.buff, buff)
 
 		ok := ctx.Exists(v.name)
@@ -54,7 +53,7 @@ func TestFiles(t *testing.T) {
 }
 
 func TestDir(t *testing.T) {
-	var ctx = NewOBS(ak, sk, bucket, endpoint)
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
 	err := ctx.Start()
 	assert.Equal(t, nil, err)
 
@@ -91,4 +90,30 @@ func TestDir(t *testing.T) {
 		assert.Equal(t, nil, err)
 	}
 
+}
+
+func TestScaleImage(t *testing.T) {
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
+	err := ctx.Start()
+	assert.Equal(t, nil, err)
+	buff, ctp, err := ctx.GetScaleImage("照片/我的照片/展展/微信图片_20210514165133.jpg", 80, 80, 80)
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, "", ctp)
+	assert.NotEqual(t, 0, len(buff))
+}
+func TestConver2PDF(t *testing.T) {
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
+	err := ctx.Start()
+	assert.Equal(t, nil, err)
+	buff, ctp, err := ctx.Conver2PDF("文件/公司文件/合同管理/千行惠捷&聚合动力-渠道推广合作服务协议-2021.07.13.docx")
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, "", ctp)
+	assert.NotEqual(t, 0, len(buff))
+}
+func TestGetFileList(t *testing.T) {
+	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
+	err := ctx.Start()
+	assert.Equal(t, nil, err)
+	list := ctx.GetFileList("文件/公司文件/营销方案", "", true, 0, 100)
+	assert.Equal(t, 1, len(list))
 }

@@ -12,10 +12,9 @@ import (
 )
 
 func getNFS(app app.IAPPConf, c *nfs.NFS) infs.Infs {
-	fmt.Println("obs:", c.CloudNFS)
 	switch strings.ToUpper(c.CloudNFS) {
 	case "OBS":
-		return obs.NewOBS(c.AccessKey, c.SecretKey, c.Local, c.Endpoint)
+		return obs.NewOBS(c.AccessKey, c.SecretKey, c.Local, c.Endpoint, c.Excludes, c.Includes...)
 	case "":
 		return lnfs.NewNFS(app, c)
 	default:

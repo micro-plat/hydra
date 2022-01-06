@@ -29,11 +29,12 @@ func convertFromCADToPDF(dir string, filePath string) (string, error) {
 
 func convertToPDF(dir string, filePath string) (string, error) {
 	pdfPath := getPDFPath(dir, filePath)
+	fmt.Println("pdf.path:", pdfPath)
 	if fileExist(pdfPath) {
 		return pdfPath, nil
 	}
 
-	rootTemp := getPDFRootPath(dir)
+	rootTemp := getPDFRootPath(pdfPath)
 	commandName := ""
 	var params []string
 	if runtime.GOOS == "windows" {
@@ -46,6 +47,7 @@ func convertToPDF(dir string, filePath string) (string, error) {
 		commandName = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
 		params = []string{"--headless", "--convert-to", "pdf", "--outdir", rootTemp, filePath}
 	}
+	fmt.Println(commandName, strings.Join(params, " "))
 	_, err := executeCMD(commandName, params)
 	if err != nil {
 		return "", err

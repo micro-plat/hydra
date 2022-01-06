@@ -139,12 +139,6 @@ func (r *remoting) Pull(v *eFileFP) (rpns []byte, err error) {
 			continue
 		}
 
-		// //检查校验位是否一致
-		// if getCRC64(rpns) != v.CRC64 {
-		// 	log.end(rmt_file_download, v.Path, "from", host, status, "crc不一致")
-		// 	continue
-		// }
-
 		//数据正确
 		log.end(r.rmt_file_download, v.Path, "from", host, status)
 		return rpns, nil
