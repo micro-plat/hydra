@@ -19,7 +19,7 @@ type Infs interface {
 	CreateDir(string) error
 	Rename(string, string) error
 	GetScaleImage(path string, width int, height int, quality int) (buff []byte, ctp string, err error)
-	Conver2PDF(path string) (buff []byte, ctp string, err error)
+	GetPDF4Preview(path string) (buff []byte, ctp string, err error)
 	Registry(tp string)
 }
 

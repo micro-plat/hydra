@@ -105,7 +105,7 @@ func TestConver2PDF(t *testing.T) {
 	var ctx = NewOBS(ak, sk, bucket, endpoint, nil)
 	err := ctx.Start()
 	assert.Equal(t, nil, err)
-	buff, ctp, err := ctx.Conver2PDF("文件/公司文件/合同管理/千行惠捷&聚合动力-渠道推广合作服务协议-2021.07.13.docx")
+	buff, ctp, err := ctx.GetPDF4Preview("文件/公司文件/合同管理/千行惠捷&聚合动力-渠道推广合作服务协议-2021.07.13.docx")
 	assert.Equal(t, nil, err)
 	assert.NotEqual(t, "", ctp)
 	assert.NotEqual(t, 0, len(buff))

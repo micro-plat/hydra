@@ -146,11 +146,11 @@ func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
 	//获取文件
 	path := filepath.Join(dir, name)
 
-	buff, contentType, err := c.infs.Conver2PDF(path)
+	buff, _, err := c.infs.GetPDF4Preview(path)
 	if err != nil {
 		return err
 	}
-	ctx.Response().ContentType(contentType)
+	// ctx.Response().ContentType(contentType) 直接输出流，无需设置contentType
 	ctx.Response().GetHTTPReponse().Write(buff)
 	return nil
 }

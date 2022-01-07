@@ -195,7 +195,7 @@ func (c *Module) GetScaleImage(path string, width int, height int, quality int) 
 	buff, err = internal.ReadFile(filepath.Join(c.c.Local, path))
 	return buff, ctp, err
 }
-func (c *Module) Conver2PDF(path string) (buff []byte, ctp string, err error) {
+func (c *Module) GetPDF4Preview(path string) (buff []byte, ctp string, err error) {
 	buff, ctp, _, err = internal.Conver2PDF(c.c.Local, filepath.Join(c.c.Local, path))
 	return buff, ctp, err
 }

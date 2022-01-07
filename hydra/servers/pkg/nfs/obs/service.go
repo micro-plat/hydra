@@ -253,7 +253,7 @@ func (o *OBS) GetScaleImage(path string, width int, height int, quality int) (bu
 
 	return buff, ctp, nil
 }
-func (o *OBS) Conver2PDF(path string) (buff []byte, ctp string, err error) {
+func (o *OBS) GetPDF4Preview(path string) (buff []byte, ctp string, err error) {
 	dir := getCurrentDir(path)
 	oname := infs.GetFullFileName(path)
 	name := infs.GetFileName(path) + ".pdf"
@@ -295,17 +295,15 @@ func (o *OBS) Conver2PDF(path string) (buff []byte, ctp string, err error) {
 	file.Write(buff)
 
 	//转换为pdf文件
-	fmt.Println("file:", tempDir, file.Name())
 	buff, ctp, rpath, err := internal.Conver2PDF(tempDir, file.Name())
 	if err != nil {
 		return nil, "", err
 	}
 	defer os.Remove(rpath)
 
-	// if _, err = o.Save(pdf, buff); err != nil {
-	// 	return nil, "", nil
-	// }
-
+	if _, err = o.Save(pdf, buff); err != nil {
+		return nil, "", nil
+	}
 	return buff, ctp, nil
 }
 func (o *OBS) Registry(tp string) {
@@ -328,3 +326,5 @@ func (o *OBS) fileExclude(p string) bool {
 	nexcludes := append(o.excludes, "__pdf_", "__thumbnail_")
 	return infs.Exclude(p, nexcludes, o.includes...)
 }
+
+var _ infs.Infs = &OBS{}
