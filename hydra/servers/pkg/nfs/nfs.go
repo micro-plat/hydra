@@ -57,12 +57,12 @@ func init() {
 			registry(c.GetServerConf().GetServerType(), cnfs, n)
 			cnfs.infs.Registry(c.GetServerConf().GetServerType())
 			return nil
-		})
+		}, global.API, global.Web)
 
 		//处理服务启动完成
 		services.Def.OnStarted(func(c app.IAPPConf) error {
 			return startNFS(c.GetServerConf().GetServerType())
-		})
+		}, global.API, global.Web)
 
 	})
 
