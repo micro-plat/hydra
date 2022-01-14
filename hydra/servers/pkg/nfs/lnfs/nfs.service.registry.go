@@ -16,7 +16,7 @@ func init() {
 		services.Def.OnSetup(func(c app.IAPPConf) error {
 			unregistry(c.GetServerConf().GetServerType())
 			return nil
-		})
+		}, global.API, global.Web)
 
 	})
 
