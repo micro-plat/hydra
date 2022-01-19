@@ -165,6 +165,7 @@ func jsonEscape(input string) string {
 	r = strings.Replace(r, "\n", "<br />", -1)
 	r = strings.Replace(r, "\r", "", -1)
 	r = strings.Replace(r, "\t", "    ", -1)
-
+	r = strings.Replace(r, "\"", "\\\"", -1)
+	r = strings.Replace(r, "'", "\\'", -1)
 	return r
 }
