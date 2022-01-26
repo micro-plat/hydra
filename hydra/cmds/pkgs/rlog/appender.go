@@ -122,6 +122,7 @@ func (f *RPCAppender) writeNow(b bool) (err error) {
 		defer f.lock.Unlock()
 	}
 	if _, err := f.buffer.WriteTo(writeHandler(write)); err != nil {
+		f.buffer.Reset()
 		return err
 	}
 	f.buffer.Reset()
@@ -159,12 +160,13 @@ func Registry(platName string, addr string) error {
 
 // Escape 把编码 \\u0026，\\u003c，\\u003e 替换为 &,<,>
 func jsonEscape(input string) string {
-	r := strings.Replace(input, "\\u0026", "&", -1)
-	r = strings.Replace(r, "\\u003c", "<", -1)
-	r = strings.Replace(r, "\\u003e", ">", -1)
-	r = strings.Replace(r, "\n", "<br />", -1)
-	r = strings.Replace(r, "\r", "", -1)
-	r = strings.Replace(r, "\t", "    ", -1)
-	r = strings.Replace(r, "\"", "\\\"", -1)
-	return r
+	return strings.TrimRight(strings.TrimLeft(input, "\""), "\"")
+	// r := strings.Replace(input, "\\u0026", "&", -1)
+	// r = strings.Replace(r, "\\u003c", "<", -1)
+	// r = strings.Replace(r, "\\u003e", ">", -1)
+	// r = strings.Replace(r, "\n", "<br />", -1)
+	// r = strings.Replace(r, "\r", "", -1)
+	// r = strings.Replace(r, "\t", "    ", -1)
+	// r = strings.Replace(r, `"`, "\"", -1)
+	// return r
 }
