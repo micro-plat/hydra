@@ -62,6 +62,7 @@ hydra致力于为后端软件开发者提供简单的、统一的、完善的服
 
 
 
+[hydra](https://github.com/micro-plat/hydra)
 
 [hello world示例](/01guide/01helloworld.md)
 
