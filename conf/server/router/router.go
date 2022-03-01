@@ -115,8 +115,9 @@ func (h *Routers) Match(path string, method string) (*Router, error) {
 	if !matched {
 		return nil, fmt.Errorf("未找到与[%s]匹配的路由", path)
 	}
+	rmatch := strings.Replace(matchPath, "\\", "/", -1)
 	for _, r := range h.Routers {
-		if r.Path == matchPath && types.StringContains(r.Action, method) {
+		if r.Path == rmatch && types.StringContains(r.Action, method) {
 			return r, nil
 		}
 	}
