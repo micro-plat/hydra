@@ -52,7 +52,7 @@ LOOP:
 				if ok {
 					unavailableCount = 0
 					w.update("run-mode", "master")
-					w.log.Debugf("this mqc server is started as master")
+					w.log.Debugf("当前server启动为:master")
 				}
 				continue
 			}
@@ -64,7 +64,7 @@ LOOP:
 			if ok {
 				unavailableCount = 0
 				w.update("run-mode", "slave")
-				w.log.Debugf("this mqc server is started as slave")
+				w.log.Debugf("当前server启动为:slave")
 			}
 		}
 	}
