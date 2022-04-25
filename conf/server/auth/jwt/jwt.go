@@ -77,7 +77,7 @@ type JWTAuth struct {
 	Mode            string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty" label:"jwt认证方式"`
 	Secret          string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"  label:"jwt密钥"`
 	Source          string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty" label:"jwt存储方式"`
-	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Excludes        []string `json:"excludes,omitempty" toml:"excludes,omitempty"`
 	Domain          string   `json:"domain,omitempty" toml:"domain,omitempty"`
 	AuthURL         string   `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty" label:"jwt认证跳转地址"`
 	Disable         bool     `json:"disable,omitempty" toml:"disable,omitempty"`
@@ -129,7 +129,7 @@ func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string,
 	token = TokenBearerPrefix + token
 	switch strings.ToUpper(j.Source) {
 	case SourceHeader, SourceHeaderShort: //"HEADER", "H":
-		return AuthorizationHeader, token, isExpired == false
+		return AuthorizationHeader, token, !isExpired
 	default:
 		expireVal := j.getExpireTime(isExpired)
 		if j.Domain != "" {
