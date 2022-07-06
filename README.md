@@ -1,6 +1,6 @@
-[hydra](https://github.com/micro-plat/hydra)
+[hydra](https://github.com/micro-plat/hydra)微服务容器
 ======================
-基于golang的后端服务容器。
+基于golang实现。
 
 hydra 提供简单的、统一的、易扩展的服务容器框架。通过少量的代码集成，即可实现的丰富功能，如：集群管理、配置管理、服务注册与发现、系统监控、日志归集、链路追踪、安全访问、常用组件等。
 
