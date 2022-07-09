@@ -59,10 +59,6 @@ hydra 提供简单的、统一的、易扩展的服务容器框架。通过少�
     redis,memcached,数据库，mqtt,activeMQ,rpc,uuid,分布式锁，http client,rpc client等。
 
 
-![image](https://github.com/micro-plat/hydra/raw/master/hydra.png)
-
-
-
 [hydra](https://github.com/micro-plat/hydra)
 
 [hello world示例](/01guide/01helloworld.md)
@@ -75,6 +71,13 @@ hydra 提供简单的、统一的、易扩展的服务容器框架。通过少�
 
 
 [配置中心](/02component/02conf.md)
+
+
+[toc]
+
+架构图
+
+![image](https://github.com/micro-plat/hydra/raw/master/hydra.png)
 
 
 
