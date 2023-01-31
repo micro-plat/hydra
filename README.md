@@ -61,17 +61,6 @@ hydra 提供简单的、统一的、易扩展的服务容器框架。通过少�
 
 [hydra](https://github.com/micro-plat/hydra)
 
-[hello world示例](/01guide/01helloworld.md)
-
-
-[构建六类服务器](/01guide/02servers.md)
-
-
-[服务运行](/02component/01service.md)
-
-
-[配置中心](/02component/02conf.md)
-
 
 - [hydra微服务容器](#hydra微服务容器)
   - [一、示例](#一示例)
@@ -89,11 +78,6 @@ hydra 提供简单的、统一的、易扩展的服务容器框架。通过少�
       - [10. 缓存配置](#10-缓存配置)
   - [四、 服务注册](#四-服务注册)
   - [五、 服务响应](#五-服务响应)
-
-架构图
-
-![image](https://github.com/micro-plat/hydra/raw/master/hydra.png)
-
 
 
 
@@ -690,5 +674,10 @@ func request(ctx hydra.IContext) interface{} {
 > 状态码: 500
 > 响应内容: err
 > Content-Type: text/plain; charset=utf-8
+
+
+架构图
+
+![image](https://github.com/micro-plat/hydra/raw/master/hydra.png)
 
 

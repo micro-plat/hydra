@@ -228,13 +228,13 @@ type IResponse interface {
 	//XML xml输出响应内容
 	XML(code int, data interface{}, header string, rootNode ...string) interface{}
 
-	//以text/html输出响应内容
+	//HTML 以text/html输出响应内容
 	HTML(code int, data string) interface{}
 
 	//YAML yaml输出响应内容
 	YAML(code int, data interface{}) interface{}
 
-	//以text/plain格式输出响应内容
+	//Plain 以text/plain格式输出响应内容
 	Plain(code int, data string) interface{}
 
 	//Data 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
@@ -285,7 +285,7 @@ type IAuth interface {
 	//Bind 将请求的认证对象绑定为特定的结构体
 	Bind(out interface{}) error
 
-	//Clear 清除用户登录信息
+	//Clear 清除用户认证信息
 	Clear()
 }
 

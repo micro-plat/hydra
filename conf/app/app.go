@@ -31,31 +31,65 @@ import (
 
 //IAPPConf 服务器配置信息
 type IAPPConf interface {
+	//GetServerConf 获取服务器配置
 	GetServerConf() conf.IServerConf
+
+	//GetVarConf 获取全局参数配置
 	GetVarConf() conf.IVarConf
 
+	//GetMQCMainConf 获取MQC服务配置
 	GetMQCMainConf() (*mqc.Server, error)
+
+	//GetMQCQueueConf 获取MQC监听队列配置
 	GetMQCQueueConf() (*queue.Queues, error)
 
+	//GetCRONTaskConf 获取cron任务配置
 	GetCRONTaskConf() (*task.Tasks, error)
 
+	//GetJWTConf 获取JWT配置
 	GetJWTConf() (*jwt.JWTAuth, error)
+
+	//GetHeaderConf 获取响应头默认配置
 	GetHeaderConf() (header.Headers, error)
+
+	//GetMetricConf 获取服务监控配置
 	GetMetricConf() (*metric.Metric, error)
+
+	//GetStaticConf 获取静态文件配置
 	GetStaticConf() (*static.Static, error)
+
+	//GetAPIKeyConf 获取API KEY配置
 	GetAPIKeyConf() (*apikey.APIKeyAuth, error)
+
+	//GetRASConf 获取RAS远程认证服务配置
 	GetRASConf() (*ras.RASAuth, error)
+
+	//GetBasicConf 获取basic auth配置
 	GetBasicConf() (*basic.BasicAuth, error)
+
+	//GetRenderConf 获取响应输出配置
 	GetRenderConf() (*render.Render, error)
+
+	//GetWhiteListConf 获取白名单配置
 	GetWhiteListConf() (*whitelist.WhiteList, error)
+
+	//GetBlackListConf 获取黑名单配置
 	GetBlackListConf() (*blacklist.BlackList, error)
+
+	//GetLimiterConf 获取限流配置
 	GetLimiterConf() (*limiter.Limiter, error)
+
+	//GetProxyConf 获取转发代理配置
 	GetProxyConf() (*proxy.Proxy, error)
 	GetAPMConf() (*apm.APM, error)
+
+	//GetProcessorConf 获取服务器处理程序配置
 	GetProcessorConf() (*processor.Processor, error)
 
+	//GetNFSConf 获取文件同步系统配置
 	GetNFSConf() (*nfs.NFS, error)
-	//获取远程日志配置
+
+	//GetRLogConf 获取远程日志配置
 	GetRLogConf() (*rlog.Layout, error)
 
 	Close() error
