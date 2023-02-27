@@ -29,7 +29,12 @@ func GetString(v interface{}, def ...string) string {
 			return fmt.Sprintf("%v", v)
 		}
 	}
-	return GetStringByIndex(def, 0)
+	for _, d := range def {
+		if d != "" {
+			return d
+		}
+	}
+	return ""
 }
 
 //GetMax 获取指定参数的最大值
