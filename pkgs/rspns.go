@@ -19,7 +19,7 @@ import (
 
 //------------------------RPC响应---------------------------------------
 
-//Rspns 请求响应
+// Rspns 请求响应
 type Rspns struct {
 	status   int
 	header   types.XMap
@@ -29,13 +29,13 @@ type Rspns struct {
 	encoding string
 }
 
-//NewRspns 根据状态构建响应
+// NewRspns 根据状态构建响应
 func NewRspns(result interface{}) *Rspns {
 	r := NewRspnsByHD(0, "{}", result)
 	return r
 }
 
-//NewRspnsByHD 请求响应
+// NewRspnsByHD 请求响应
 func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 	r = &Rspns{
 		encoding: "utf-8",
@@ -87,42 +87,45 @@ func NewRspnsByHD(status int, header string, result interface{}) (r *Rspns) {
 	case map[string]interface{}:
 		r.data = v
 	default:
+		if result == nil {
+			return r
+		}
 		panic("不支持的数据类型")
 	}
 	return r
 }
 
-//IsSuccess 请求是否成功(状态码是否为２００)
+// IsSuccess 请求是否成功(状态码是否为２００)
 func (r *Rspns) IsSuccess() bool {
 	return r.status == http.StatusOK
 }
 
-//GetStatus 获取响应的状态码
+// GetStatus 获取响应的状态码
 func (r *Rspns) GetStatus() int {
 	return r.status
 }
 
-//GetMap 获取响应的map对象
+// GetMap 获取响应的map对象
 func (r *Rspns) GetMap() types.XMap {
 	return r.data
 }
 
-//GetHeaders 获取响应头信息
+// GetHeaders 获取响应头信息
 func (r *Rspns) GetHeaders() types.XMap {
 	return r.header
 }
 
-//GetResult 获取响应的原串
+// GetResult 获取响应的原串
 func (r *Rspns) GetResult() interface{} {
 	return r.result
 }
 
-//GetError 获取远程请求的error或result转换为map
+// GetError 获取远程请求的error或result转换为map
 func (r *Rspns) GetError() error {
 	return r.err
 }
 
-//Bind 根据输入参数绑定对象
+// Bind 根据输入参数绑定对象
 func (r *Rspns) Bind(obj interface{}) error {
 	if r.err != nil {
 		return r.err
