@@ -8,7 +8,7 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//executeBatch  批量执行SQL语句
+// executeBatch  批量执行SQL语句
 func executeBatch(db IDBExecuter, sqls []string, input map[string]interface{}) (QueryRows, error) {
 	output := types.NewXMaps()
 	if len(sqls) == 0 {
@@ -48,4 +48,32 @@ func executeBatch(db IDBExecuter, sqls []string, input map[string]interface{}) (
 		}
 	}
 	return output, nil
+}
+
+// queryBatch  批量执行SQL语句
+func queryBatch(db IDBExecuter, sqls []string, input map[string]interface{}) (QueryRows, error) {
+	outputs := types.NewXMaps()
+	if len(sqls) == 0 {
+		return outputs, fmt.Errorf("未传入任何SQL语句")
+	}
+
+	for _, sql := range sqls {
+		if len(sql) < 6 {
+			return nil, fmt.Errorf("sql语句错误%s", sql)
+		}
+		prefix := strings.Trim(strings.TrimSpace(strings.TrimLeft(sql, "\n")), "\t")[:6]
+		switch strings.ToUpper(prefix) {
+		case "SELECT":
+			coutput, err := db.Query(sql, input)
+			if err != nil {
+				return outputs, err
+			}
+			for _, v := range coutput {
+				outputs.Append(v)
+			}
+		default:
+			return outputs, fmt.Errorf("不支持的SQL语句，或SQL语句前包含有特殊字符:%s", sql)
+		}
+	}
+	return outputs, nil
 }

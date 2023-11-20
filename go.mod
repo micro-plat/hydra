@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.2.0
+	github.com/micro-plat/lib4go v1.2.1
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0

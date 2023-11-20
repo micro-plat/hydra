@@ -9,12 +9,12 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 )
 
-//Invoke 调用本地服务，并返回response
+// Invoke 调用本地服务，并返回response
 func (s *regist) Invoke(ctx context.IContext, service string) *pkgs.Rspns {
 	return pkgs.NewRspns(s.Call(ctx, service))
 }
 
-//Call 调用本地服务，返回原始result
+// Call 调用本地服务，返回原始result
 func (s *regist) Call(ctx context.IContext, service string) (result interface{}) {
 	//获取处理服务
 	h, ok := Def.GetHandler(ctx.APPConf().GetServerConf().GetServerType(), service)
@@ -47,6 +47,7 @@ func (s *regist) Call(ctx context.IContext, service string) (result interface{})
 
 	//业务处理----------------------------------
 	result = h.Handle(ctx)
+	ctx.Meta().SetValue("response", result)
 
 	//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
 	handleds := Def.GetHandleds(ctx.APPConf().GetServerConf().GetServerType(), service)

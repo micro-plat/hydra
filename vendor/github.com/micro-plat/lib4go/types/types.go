@@ -15,7 +15,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-//GetString 获取字符串
+// GetString 获取字符串
 func GetString(v interface{}, def ...string) string {
 	if !IsEmpty(v) {
 		switch v.(type) {
@@ -37,7 +37,7 @@ func GetString(v interface{}, def ...string) string {
 	return ""
 }
 
-//GetMax 获取指定参数的最大值
+// GetMax 获取指定参数的最大值
 func GetMax(v interface{}, o ...int) int {
 	r := GetInt(v)
 	if len(o) > 0 && o[0] > r {
@@ -46,7 +46,7 @@ func GetMax(v interface{}, o ...int) int {
 	return r
 }
 
-//GetMin 获取指定参数的最小值
+// GetMin 获取指定参数的最小值
 func GetMin(v interface{}, o ...int) int {
 	r := GetInt(v)
 	if len(o) > 0 && o[0] < r {
@@ -55,7 +55,7 @@ func GetMin(v interface{}, o ...int) int {
 	return r
 }
 
-//GetInt 获取int数据，不是有效的数字则返回默然值或0
+// GetInt 获取int数据，不是有效的数字则返回默然值或0
 func GetInt(v interface{}, def ...int) int {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
@@ -75,7 +75,7 @@ func GetInt(v interface{}, def ...int) int {
 	return GetIntByIndex(def, 0)
 }
 
-//GetInt32 获取int32数据，不是有效的数字则返回默然值或0
+// GetInt32 获取int32数据，不是有效的数字则返回默然值或0
 func GetInt32(v interface{}, def ...int32) int32 {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
@@ -98,7 +98,7 @@ func GetInt32(v interface{}, def ...int32) int32 {
 	return GetInt32ByIndex(def, 0)
 }
 
-//GetInt64 获取int64数据，不是有效的数字则返回默然值或0
+// GetInt64 获取int64数据，不是有效的数字则返回默然值或0
 func GetInt64(v interface{}, def ...int64) int64 {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
@@ -118,7 +118,7 @@ func GetInt64(v interface{}, def ...int64) int64 {
 	return GetInt64ByIndex(def, 0)
 }
 
-//GetFloat32 获取float32数据，不是有效的数字则返回默然值或0
+// GetFloat32 获取float32数据，不是有效的数字则返回默然值或0
 func GetFloat32(v interface{}, def ...float32) float32 {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
@@ -132,7 +132,7 @@ func GetFloat32(v interface{}, def ...float32) float32 {
 	return nv
 }
 
-//GetFloat64 获取float64数据，不是有效的数字则返回默然值或0
+// GetFloat64 获取float64数据，不是有效的数字则返回默然值或0
 func GetFloat64(v interface{}, def ...float64) float64 {
 	value := fmt.Sprintf("%v", v)
 	d, err := decimal.NewFromString(value)
@@ -146,7 +146,7 @@ func GetFloat64(v interface{}, def ...float64) float64 {
 	return nv
 }
 
-//GetDecimal 获取float64数据，不是有效的数字则返回默然值或0
+// GetDecimal 获取float64数据，不是有效的数字则返回默然值或0
 func GetDecimal(v interface{}, def ...Decimal) Decimal {
 	if value, err := decimal.NewFromString(fmt.Sprintf("%v", v)); err == nil {
 		return value
@@ -154,7 +154,7 @@ func GetDecimal(v interface{}, def ...Decimal) Decimal {
 	return GetDecimalByIndex(def, 0)
 }
 
-//GetBool 获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
+// GetBool 获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
 func GetBool(v interface{}, def ...bool) bool {
 	if value, err := ParseBool(v); err == nil {
 		return value
@@ -162,7 +162,7 @@ func GetBool(v interface{}, def ...bool) bool {
 	return GetBoolByIndex(def, 0)
 }
 
-//GetDatetime 获取时间
+// GetDatetime 获取时间
 func GetDatetime(v interface{}, format ...string) (time.Time, error) {
 	t, b := MustString(v)
 	if !b {
@@ -175,7 +175,7 @@ func GetDatetime(v interface{}, format ...string) (time.Time, error) {
 	return time.ParseInLocation(f, t, time.Local)
 }
 
-//MustString 获取字符串，不是字符串格式则返回false
+// MustString 获取字符串，不是字符串格式则返回false
 func MustString(v interface{}) (string, bool) {
 	if value, ok := v.(string); ok {
 		return value, true
@@ -183,7 +183,7 @@ func MustString(v interface{}) (string, bool) {
 	return "", false
 }
 
-//MustInt 获取int，不是有效的数字则返回false
+// MustInt 获取int，不是有效的数字则返回false
 func MustInt(v interface{}) (int, bool) {
 	if value, ok := v.(int); ok {
 		return value, true
@@ -191,7 +191,7 @@ func MustInt(v interface{}) (int, bool) {
 	return 0, false
 }
 
-//MustBool 获取bool值，不是有效bool值则返回false
+// MustBool 获取bool值，不是有效bool值则返回false
 func MustBool(v interface{}) (bool, bool) {
 	if value, ok := v.(bool); ok {
 		return value, true
@@ -199,7 +199,7 @@ func MustBool(v interface{}) (bool, bool) {
 	return false, false
 }
 
-//MustInt32 获取int32，不是有效的数字则返回false
+// MustInt32 获取int32，不是有效的数字则返回false
 func MustInt32(v interface{}) (int32, bool) {
 	if value, ok := v.(int32); ok {
 		return value, true
@@ -207,7 +207,7 @@ func MustInt32(v interface{}) (int32, bool) {
 	return 0, false
 }
 
-//MustInt64 获取int64，不是有效的数字则返回false
+// MustInt64 获取int64，不是有效的数字则返回false
 func MustInt64(v interface{}) (int64, bool) {
 	if value, ok := v.(int64); ok {
 		return value, true
@@ -215,7 +215,7 @@ func MustInt64(v interface{}) (int64, bool) {
 	return 0, false
 }
 
-//MustFloat32 获取float32，不是有效的数字则返回false
+// MustFloat32 获取float32，不是有效的数字则返回false
 func MustFloat32(v interface{}) (float32, bool) {
 	if value, ok := v.(float32); ok {
 		vn, _ := decimal.NewFromFloat32(value).BigFloat().Float32()
@@ -224,7 +224,7 @@ func MustFloat32(v interface{}) (float32, bool) {
 	return 0, false
 }
 
-//MustFloat64 获取float64，不是有效的数字则返回false
+// MustFloat64 获取float64，不是有效的数字则返回false
 func MustFloat64(v interface{}) (float64, bool) {
 	if value, ok := v.(float64); ok {
 		vn, _ := decimal.NewFromFloat(value).BigFloat().Float64()
@@ -233,7 +233,7 @@ func MustFloat64(v interface{}) (float64, bool) {
 	return 0, false
 }
 
-//IsEmpty 值是否为空
+// IsEmpty 值是否为空
 func IsEmpty(vs ...interface{}) bool {
 	for _, v := range vs {
 		switch value := v.(type) {
@@ -250,27 +250,33 @@ func IsEmpty(vs ...interface{}) bool {
 	return false
 }
 
-//IntContains int数组中是否包含指定值
-func IntContains(input []int, v int) bool {
+// IntContains int数组中是否包含指定值
+func IntContains(input []int, vs ...int) bool {
 	for _, i := range input {
-		if i == v {
-			return true
+		for _, v := range vs {
+			if i == v {
+				return true
+			}
 		}
+
 	}
 	return false
 }
 
-//StringContains string数组中是否包含指定值
-func StringContains(input []string, v string) bool {
+// StringContains string数组中是否包含指定值
+func StringContains(input []string, vs ...string) bool {
 	for _, i := range input {
-		if i == v {
-			return true
+		for _, v := range vs {
+			if strings.EqualFold(i, v) {
+				return true
+			}
 		}
+
 	}
 	return false
 }
 
-//GetFirst 获取数组中获取首个元素
+// GetFirst 获取数组中获取首个元素
 func GetFirst(v ...interface{}) interface{} {
 	if len(v) > 0 {
 		return v[0]
@@ -278,7 +284,7 @@ func GetFirst(v ...interface{}) interface{} {
 	return nil
 }
 
-//GetStringByIndex 获取数组中的指定元素
+// GetStringByIndex 获取数组中的指定元素
 func GetStringByIndex(v []string, index int, def ...string) string {
 	if len(v) > index {
 		return v[index]
@@ -289,7 +295,7 @@ func GetStringByIndex(v []string, index int, def ...string) string {
 	return ""
 }
 
-//GetIntByIndex 获取数组中的指定元素
+// GetIntByIndex 获取数组中的指定元素
 func GetIntByIndex(v []int, index int, def ...int) int {
 	if len(v) > index {
 		return v[index]
@@ -300,7 +306,7 @@ func GetIntByIndex(v []int, index int, def ...int) int {
 	return 0
 }
 
-//GetBoolByIndex 获取数组中的指定元素
+// GetBoolByIndex 获取数组中的指定元素
 func GetBoolByIndex(v []bool, index int, def ...bool) bool {
 	if len(v) > index {
 		return v[index]
@@ -311,7 +317,7 @@ func GetBoolByIndex(v []bool, index int, def ...bool) bool {
 	return false
 }
 
-//GetInt32ByIndex 获取数组中的指定元素
+// GetInt32ByIndex 获取数组中的指定元素
 func GetInt32ByIndex(v []int32, index int, def ...int32) int32 {
 	if len(v) > index {
 		return v[index]
@@ -322,7 +328,7 @@ func GetInt32ByIndex(v []int32, index int, def ...int32) int32 {
 	return 0
 }
 
-//GetInt64ByIndex 获取数组中的指定元素
+// GetInt64ByIndex 获取数组中的指定元素
 func GetInt64ByIndex(v []int64, index int, def ...int64) int64 {
 	if len(v) > index {
 		return v[index]
@@ -333,7 +339,7 @@ func GetInt64ByIndex(v []int64, index int, def ...int64) int64 {
 	return 0
 }
 
-//GetFloat32ByIndex 获取数组中的指定元素
+// GetFloat32ByIndex 获取数组中的指定元素
 func GetFloat32ByIndex(v []float32, index int, def ...float32) float32 {
 	if len(v) > index {
 		return v[index]
@@ -344,7 +350,7 @@ func GetFloat32ByIndex(v []float32, index int, def ...float32) float32 {
 	return 0
 }
 
-//GetFloat64ByIndex 获取数组中的指定元素
+// GetFloat64ByIndex 获取数组中的指定元素
 func GetFloat64ByIndex(v []float64, index int, def ...float64) float64 {
 	if len(v) > index {
 		return v[index]
@@ -355,7 +361,7 @@ func GetFloat64ByIndex(v []float64, index int, def ...float64) float64 {
 	return 0
 }
 
-//GetDecimalByIndex 获取数组中的指定元素
+// GetDecimalByIndex 获取数组中的指定元素
 func GetDecimalByIndex(v []Decimal, index int, def ...Decimal) Decimal {
 	if len(v) > index {
 		return v[index]
@@ -366,7 +372,7 @@ func GetDecimalByIndex(v []Decimal, index int, def ...Decimal) Decimal {
 	return decimal.Zero
 }
 
-//GetErrorByIndex 获取数组中的指定元素
+// GetErrorByIndex 获取数组中的指定元素
 func GetErrorByIndex(v []error, index int, def ...error) error {
 	if len(v) > index {
 		return v[index]
@@ -377,7 +383,7 @@ func GetErrorByIndex(v []error, index int, def ...error) error {
 	return nil
 }
 
-//ParseBool 将字符串转换为bool值
+// ParseBool 将字符串转换为bool值
 func ParseBool(val interface{}) (value bool, err error) {
 	if val == nil {
 		return false, fmt.Errorf("parsing <nil>: invalid syntax")
@@ -401,7 +407,7 @@ func ParseBool(val interface{}) (value bool, err error) {
 	return false, fmt.Errorf("parsing %q: invalid syntax", val)
 }
 
-//Translate 翻译带参数的变量支持格式有 @abc,{@abc}
+// Translate 翻译带参数的变量支持格式有 @abc,{@abc}
 func Translate(format string, kv ...interface{}) string {
 	trf := NewXMap()
 	trf.Append(kv...)
@@ -421,7 +427,7 @@ func BytesToString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-//Split 拆分字符串，当输入字符串为空时返回结果为空
+// Split 拆分字符串，当输入字符串为空时返回结果为空
 func Split(s string, sep string) []string {
 	if len(s) == 0 {
 		return nil
@@ -429,7 +435,7 @@ func Split(s string, sep string) []string {
 	return strings.Split(s, sep)
 }
 
-//Struct2Map 将struct 转换成map[string]interface{}
+// Struct2Map 将struct 转换成map[string]interface{}
 func Struct2Map(i interface{}) (map[string]interface{}, error) {
 	buff, err := json.Marshal(i)
 	if err != nil {
@@ -442,7 +448,7 @@ func Struct2Map(i interface{}) (map[string]interface{}, error) {
 	return out, nil
 }
 
-//DeepCopyByGob 通过gob对对象进行深拷贝
+// DeepCopyByGob 通过gob对对象进行深拷贝
 func DeepCopyByGob(dst, src interface{}) error {
 	var buffer bytes.Buffer
 	if err := gob.NewEncoder(&buffer).Encode(src); err != nil {
@@ -495,7 +501,7 @@ func Sprint(input ...interface{}) string {
 	return strings.TrimRight(buff.String(), " ")
 }
 
-//ToJSON 转换为json
+// ToJSON 转换为json
 func ToJSON(obj interface{}) string {
 	buff, _ := json.Marshal(obj)
 	return string(buff)
