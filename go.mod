@@ -37,7 +37,7 @@ require (
 	github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/net v0.0.0-20201216054612-986b41b23924
-	golang.org/x/sys v0.0.0-20201221093633-bc327ba9c2f0
+	golang.org/x/sys v0.1.0
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
 	google.golang.org/grpc v1.34.0
 	gopkg.in/yaml.v2 v2.3.0
