@@ -47,7 +47,7 @@ func (s *regist) Call(ctx context.IContext, service string) (result interface{})
 
 	//业务处理----------------------------------
 	result = h.Handle(ctx)
-	ctx.Meta().SetValue("response", result)
+	ctx.Meta().SetValue("_input_response", result)
 
 	//后处理，处理资源回收，无论业务处理返回什么结果都会执行--
 	handleds := Def.GetHandleds(ctx.APPConf().GetServerConf().GetServerType(), service)
@@ -65,6 +65,9 @@ func (s *regist) Call(ctx context.IContext, service string) (result interface{})
 		if err := errs.GetError(hresult); err != nil {
 			ctx.Log().Error("后处理发生错误　err:", err)
 		}
+	}
+	if ctx.Meta().Has("_output_response") {
+		return ctx.Meta().GetValue("_output_response")
 	}
 
 	//处理输出, 只会将业务处理结果进行输出---------------
