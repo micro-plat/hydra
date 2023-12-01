@@ -22,7 +22,9 @@ import (
 	"io"
 	"math"
 	"net/rpc"
+	"reflect"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -169,6 +171,7 @@ var (
 type msgpackEncDriver struct {
 	noBuiltInTypes
 	encDriverNoopContainerWriter
+	encDriverNoState
 	h *MsgpackHandle
 	// x [8]byte
 	e Encoder
@@ -288,17 +291,18 @@ func (e *msgpackEncDriver) EncodeTime(t time.Time) {
 	}
 }
 
-func (e *msgpackEncDriver) EncodeExt(v interface{}, xtag uint64, ext Ext) {
-	var bs []byte
+func (e *msgpackEncDriver) EncodeExt(v interface{}, basetype reflect.Type, xtag uint64, ext Ext) {
+	var bs0, bs []byte
 	if ext == SelfExt {
-		bs = e.e.blist.get(1024)
-		e.e.sideEncode(v, &bs)
+		bs0 = e.e.blist.get(1024)
+		bs = bs0
+		e.e.sideEncode(v, basetype, &bs)
 	} else {
 		bs = ext.WriteExt(v)
 	}
 	if bs == nil {
 		e.EncodeNil()
-		return
+		goto END
 	}
 	if e.h.WriteExt {
 		e.encodeExtPreamble(uint8(xtag), len(bs))
@@ -306,8 +310,12 @@ func (e *msgpackEncDriver) EncodeExt(v interface{}, xtag uint64, ext Ext) {
 	} else {
 		e.EncodeStringBytesRaw(bs)
 	}
+END:
 	if ext == SelfExt {
 		e.e.blist.put(bs)
+		if !byteSliceSameData(bs0, bs) {
+			e.e.blist.put(bs0)
+		}
 	}
 }
 
@@ -399,13 +407,11 @@ func (e *msgpackEncDriver) writeContainerLen(ct msgpackContainerType, l int) {
 
 type msgpackDecDriver struct {
 	decDriverNoopContainerReader
+	decDriverNoopNumberHelper
 	h *MsgpackHandle
-	// b      [scratchByteArrayLen]byte
-	bd     byte
-	bdRead bool
-	_      bool
+	bdAndBdread
+	_ bool
 	noBuiltInTypes
-	// _ [6]uint64 // padding
 	d Decoder
 }
 
@@ -481,15 +487,16 @@ func (d *msgpackDecDriver) DecodeNaked() {
 			n.v = valueTypeInt
 			n.i = int64(int8(bd))
 		case bd == mpStr8, bd == mpStr16, bd == mpStr32, bd >= mpFixStrMin && bd <= mpFixStrMax:
-			if d.h.WriteExt || d.h.RawToString {
-				n.v = valueTypeString
-				n.s = string(d.DecodeStringAsBytes())
-			} else {
-				n.v = valueTypeBytes
-				n.l = d.DecodeBytes(nil, false)
-			}
+			d.d.fauxUnionReadRawBytes(d.h.WriteExt)
+			// if d.h.WriteExt || d.h.RawToString {
+			// 	n.v = valueTypeString
+			// 	n.s = d.d.stringZC(d.DecodeStringAsBytes())
+			// } else {
+			// 	n.v = valueTypeBytes
+			// 	n.l = d.DecodeBytes([]byte{})
+			// }
 		case bd == mpBin8, bd == mpBin16, bd == mpBin32:
-			fauxUnionReadRawBytes(d, &d.d, n, d.h.RawToString)
+			d.d.fauxUnionReadRawBytes(false)
 		case bd == mpArray16, bd == mpArray32, bd >= mpFixArrayMin && bd <= mpFixArrayMax:
 			n.v = valueTypeArray
 			decodeFurther = true
@@ -521,24 +528,32 @@ func (d *msgpackDecDriver) DecodeNaked() {
 	}
 }
 
-func (d *msgpackDecDriver) nextValueBytes(start []byte) (v []byte) {
+func (d *msgpackDecDriver) nextValueBytes(v0 []byte) (v []byte) {
 	if !d.bdRead {
 		d.readNextBd()
 	}
-	v = append(start, d.bd)
+	v = v0
+	var h = decNextValueBytesHelper{d: &d.d}
+	var cursor = d.d.rb.c - 1
+	h.append1(&v, d.bd)
 	v = d.nextValueBytesBdReadR(v)
 	d.bdRead = false
+	h.bytesRdV(&v, cursor)
 	return
 }
 
 func (d *msgpackDecDriver) nextValueBytesR(v0 []byte) (v []byte) {
 	d.readNextBd()
-	v = append(v0, d.bd)
+	v = v0
+	var h = decNextValueBytesHelper{d: &d.d}
+	h.append1(&v, d.bd)
 	return d.nextValueBytesBdReadR(v)
 }
 
 func (d *msgpackDecDriver) nextValueBytesBdReadR(v0 []byte) (v []byte) {
 	v = v0
+	var h = decNextValueBytesHelper{d: &d.d}
+
 	bd := d.bd
 
 	var clen uint
@@ -546,77 +561,77 @@ func (d *msgpackDecDriver) nextValueBytesBdReadR(v0 []byte) (v []byte) {
 	switch bd {
 	case mpNil, mpFalse, mpTrue: // pass
 	case mpUint8, mpInt8:
-		v = append(v, d.d.decRd.readn1())
+		h.append1(&v, d.d.decRd.readn1())
 	case mpUint16, mpInt16:
-		v = append(v, d.d.decRd.readx(2)...)
+		h.appendN(&v, d.d.decRd.readx(2)...)
 	case mpFloat, mpUint32, mpInt32:
-		v = append(v, d.d.decRd.readx(4)...)
+		h.appendN(&v, d.d.decRd.readx(4)...)
 	case mpDouble, mpUint64, mpInt64:
-		v = append(v, d.d.decRd.readx(8)...)
+		h.appendN(&v, d.d.decRd.readx(8)...)
 	case mpStr8, mpBin8:
 		clen = uint(d.d.decRd.readn1())
-		v = append(v, byte(clen))
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.append1(&v, byte(clen))
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpStr16, mpBin16:
 		x := d.d.decRd.readn2()
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		clen = uint(bigen.Uint16(x))
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpStr32, mpBin32:
 		x := d.d.decRd.readn4()
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		clen = uint(bigen.Uint32(x))
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpFixExt1:
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readn1())
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.append1(&v, d.d.decRd.readn1())
 	case mpFixExt2:
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(2)...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(2)...)
 	case mpFixExt4:
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(4)...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(4)...)
 	case mpFixExt8:
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(8)...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(8)...)
 	case mpFixExt16:
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(16)...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(16)...)
 	case mpExt8:
 		clen = uint(d.d.decRd.readn1())
-		v = append(v, uint8(clen))
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.append1(&v, uint8(clen))
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpExt16:
 		x := d.d.decRd.readn2()
 		clen = uint(bigen.Uint16(x))
-		v = append(v, x[:]...)
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.appendN(&v, x[:]...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpExt32:
 		x := d.d.decRd.readn4()
 		clen = uint(bigen.Uint32(x))
-		v = append(v, x[:]...)
-		v = append(v, d.d.decRd.readn1()) // tag
-		v = append(v, d.d.decRd.readx(clen)...)
+		h.appendN(&v, x[:]...)
+		h.append1(&v, d.d.decRd.readn1()) // tag
+		h.appendN(&v, d.d.decRd.readx(clen)...)
 	case mpArray16:
 		x := d.d.decRd.readn2()
 		clen = uint(bigen.Uint16(x))
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		for i := uint(0); i < clen; i++ {
 			v = d.nextValueBytesR(v)
 		}
 	case mpArray32:
 		x := d.d.decRd.readn4()
 		clen = uint(bigen.Uint32(x))
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		for i := uint(0); i < clen; i++ {
 			v = d.nextValueBytesR(v)
 		}
 	case mpMap16:
 		x := d.d.decRd.readn2()
 		clen = uint(bigen.Uint16(x))
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		for i := uint(0); i < clen; i++ {
 			v = d.nextValueBytesR(v)
 			v = d.nextValueBytesR(v)
@@ -624,7 +639,7 @@ func (d *msgpackDecDriver) nextValueBytesBdReadR(v0 []byte) (v []byte) {
 	case mpMap32:
 		x := d.d.decRd.readn4()
 		clen = uint(bigen.Uint32(x))
-		v = append(v, x[:]...)
+		h.appendN(&v, x[:]...)
 		for i := uint(0); i < clen; i++ {
 			v = d.nextValueBytesR(v)
 			v = d.nextValueBytesR(v)
@@ -635,7 +650,7 @@ func (d *msgpackDecDriver) nextValueBytesBdReadR(v0 []byte) (v []byte) {
 		case bd >= mpNegFixNumMin && bd <= mpNegFixNumMax: // pass
 		case bd >= mpFixStrMin && bd <= mpFixStrMax:
 			clen = uint(mpFixStrMin ^ bd)
-			v = append(v, d.d.decRd.readx(clen)...)
+			h.appendN(&v, d.d.decRd.readx(clen)...)
 		case bd >= mpFixArrayMin && bd <= mpFixArrayMax:
 			clen = uint(mpFixArrayMin ^ bd)
 			for i := uint(0); i < clen; i++ {
@@ -650,6 +665,24 @@ func (d *msgpackDecDriver) nextValueBytesBdReadR(v0 []byte) (v []byte) {
 		default:
 			d.d.errorf("nextValueBytes: cannot infer value: %s: Ox%x/%d/%s", msgBadDesc, bd, bd, mpdesc(bd))
 		}
+	}
+	return
+}
+
+func (d *msgpackDecDriver) decFloat4Int32() (f float32) {
+	fbits := bigen.Uint32(d.d.decRd.readn4())
+	f = math.Float32frombits(fbits)
+	if !noFrac32(fbits) {
+		d.d.errorf("assigning integer value from float32 with a fraction: %v", f)
+	}
+	return
+}
+
+func (d *msgpackDecDriver) decFloat4Int64() (f float64) {
+	fbits := bigen.Uint64(d.d.decRd.readn8())
+	f = math.Float64frombits(fbits)
+	if !noFrac64(fbits) {
+		d.d.errorf("assigning integer value from float64 with a fraction: %v", f)
 	}
 	return
 }
@@ -676,6 +709,10 @@ func (d *msgpackDecDriver) DecodeInt64() (i int64) {
 		i = int64(int32(bigen.Uint32(d.d.decRd.readn4())))
 	case mpInt64:
 		i = int64(bigen.Uint64(d.d.decRd.readn8()))
+	case mpFloat:
+		i = int64(d.decFloat4Int32())
+	case mpDouble:
+		i = int64(d.decFloat4Int64())
 	default:
 		switch {
 		case d.bd >= mpPosFixNumMin && d.bd <= mpPosFixNumMax:
@@ -728,6 +765,18 @@ func (d *msgpackDecDriver) DecodeUint64() (ui uint64) {
 		} else {
 			d.d.errorf("assigning negative signed value: %v, to unsigned type", i)
 		}
+	case mpFloat:
+		if f := d.decFloat4Int32(); f >= 0 {
+			ui = uint64(f)
+		} else {
+			d.d.errorf("assigning negative float value: %v, to unsigned type", f)
+		}
+	case mpDouble:
+		if f := d.decFloat4Int64(); f >= 0 {
+			ui = uint64(f)
+		} else {
+			d.d.errorf("assigning negative float value: %v, to unsigned type", f)
+		}
 	default:
 		switch {
 		case d.bd >= mpPosFixNumMin && d.bd <= mpPosFixNumMax:
@@ -774,7 +823,8 @@ func (d *msgpackDecDriver) DecodeBool() (b bool) {
 	return
 }
 
-func (d *msgpackDecDriver) DecodeBytes(bs []byte, zerocopy bool) (bsOut []byte) {
+func (d *msgpackDecDriver) DecodeBytes(bs []byte) (bsOut []byte) {
+	d.d.decByteState = decByteStateNone
 	if d.advanceNil() {
 		return
 	}
@@ -789,14 +839,21 @@ func (d *msgpackDecDriver) DecodeBytes(bs []byte, zerocopy bool) (bsOut []byte) 
 	} else if bd == mpArray16 || bd == mpArray32 ||
 		(bd >= mpFixArrayMin && bd <= mpFixArrayMax) {
 		// check if an "array" of uint8's
-		if zerocopy && len(bs) == 0 {
+		if bs == nil {
+			d.d.decByteState = decByteStateReuseBuf
 			bs = d.d.b[:]
 		}
 		// bsOut, _ = fastpathTV.DecSliceUint8V(bs, true, d.d)
 		slen := d.ReadArrayStart()
-		bs = usableByteSlice(bs, slen)
+		var changed bool
+		if bs, changed = usableByteSlice(bs, slen); changed {
+			d.d.decByteState = decByteStateNone
+		}
 		for i := 0; i < len(bs); i++ {
 			bs[i] = uint8(chkOvf.UintV(d.DecodeUint64(), 8))
+		}
+		for i := len(bs); i < slen; i++ {
+			bs = append(bs, uint8(chkOvf.UintV(d.DecodeUint64(), 8)))
 		}
 		return bs
 	} else {
@@ -804,17 +861,27 @@ func (d *msgpackDecDriver) DecodeBytes(bs []byte, zerocopy bool) (bsOut []byte) 
 	}
 
 	d.bdRead = false
-	if d.d.bytes && (zerocopy || d.h.ZeroCopy) {
+	if d.d.zerocopy() {
+		d.d.decByteState = decByteStateZerocopy
 		return d.d.decRd.rb.readx(uint(clen))
 	}
-	if zerocopy && len(bs) == 0 {
+	if bs == nil {
+		d.d.decByteState = decByteStateReuseBuf
 		bs = d.d.b[:]
 	}
 	return decByteSlice(d.d.r(), clen, d.h.MaxInitLen, bs)
 }
 
 func (d *msgpackDecDriver) DecodeStringAsBytes() (s []byte) {
-	return d.DecodeBytes(d.d.b[:], true)
+	s = d.DecodeBytes(nil)
+	if d.h.ValidateUnicode && !utf8.Valid(s) {
+		d.d.errorf("DecodeStringAsBytes: invalid UTF-8: %s", s)
+	}
+	return
+}
+
+func (d *msgpackDecDriver) descBd() string {
+	return sprintf("%v (%s)", d.bd, mpdesc(d.bd))
 }
 
 func (d *msgpackDecDriver) readNextBd() {
@@ -963,30 +1030,30 @@ func (d *msgpackDecDriver) decodeTime(clen int) (t time.Time) {
 	return
 }
 
-func (d *msgpackDecDriver) DecodeExt(rv interface{}, xtag uint64, ext Ext) {
+func (d *msgpackDecDriver) DecodeExt(rv interface{}, basetype reflect.Type, xtag uint64, ext Ext) {
 	if xtag > 0xff {
 		d.d.errorf("ext: tag must be <= 0xff; got: %v", xtag)
 	}
 	if d.advanceNil() {
 		return
 	}
-	realxtag1, xbs := d.decodeExtV(ext != nil, uint8(xtag))
+	xbs, realxtag1, zerocopy := d.decodeExtV(ext != nil, uint8(xtag))
 	realxtag := uint64(realxtag1)
 	if ext == nil {
 		re := rv.(*RawExt)
 		re.Tag = realxtag
-		re.Data = detachZeroCopyBytes(d.d.bytes, re.Data, xbs)
+		re.setData(xbs, zerocopy)
 	} else if ext == SelfExt {
-		d.d.sideDecode(rv, xbs)
+		d.d.sideDecode(rv, basetype, xbs)
 	} else {
 		ext.ReadExt(rv, xbs)
 	}
 }
 
-func (d *msgpackDecDriver) decodeExtV(verifyTag bool, tag byte) (xtag byte, xbs []byte) {
+func (d *msgpackDecDriver) decodeExtV(verifyTag bool, tag byte) (xbs []byte, xtag byte, zerocopy bool) {
 	xbd := d.bd
 	if xbd == mpBin8 || xbd == mpBin16 || xbd == mpBin32 {
-		xbs = d.DecodeBytes(nil, true)
+		xbs = d.DecodeBytes(nil)
 	} else if xbd == mpStr8 || xbd == mpStr16 || xbd == mpStr32 ||
 		(xbd >= mpFixStrMin && xbd <= mpFixStrMax) {
 		xbs = d.DecodeStringAsBytes()
@@ -998,6 +1065,7 @@ func (d *msgpackDecDriver) decodeExtV(verifyTag bool, tag byte) (xtag byte, xbs 
 		}
 		if d.d.bytes {
 			xbs = d.d.decRd.rb.readx(uint(clen))
+			zerocopy = true
 		} else {
 			xbs = decByteSlice(d.d.r(), clen, d.d.h.MaxInitLen, d.d.b[:])
 		}
@@ -1008,7 +1076,7 @@ func (d *msgpackDecDriver) decodeExtV(verifyTag bool, tag byte) (xtag byte, xbs 
 
 //--------------------------------------------------
 
-//MsgpackHandle is a Handle for the Msgpack Schema-Free Encoding Format.
+// MsgpackHandle is a Handle for the Msgpack Schema-Free Encoding Format.
 type MsgpackHandle struct {
 	binaryEncodingType
 	BasicHandle
@@ -1055,13 +1123,6 @@ func (h *MsgpackHandle) newDecDriver() decDriver {
 	return d
 }
 
-func (e *msgpackEncDriver) reset() {
-}
-
-func (d *msgpackDecDriver) reset() {
-	d.bd, d.bdRead = 0, false
-}
-
 //--------------------------------------------------
 
 type msgpackSpecRpcCodec struct {
@@ -1080,7 +1141,7 @@ func (c *msgpackSpecRpcCodec) WriteRequest(r *rpc.Request, body interface{}) err
 		bodyArr = []interface{}{body}
 	}
 	r2 := []interface{}{0, uint32(r.Seq), r.ServiceMethod, bodyArr}
-	return c.write(r2, nil, false)
+	return c.write(r2)
 }
 
 func (c *msgpackSpecRpcCodec) WriteResponse(r *rpc.Response, body interface{}) error {
@@ -1092,7 +1153,7 @@ func (c *msgpackSpecRpcCodec) WriteResponse(r *rpc.Response, body interface{}) e
 		body = nil
 	}
 	r2 := []interface{}{1, uint32(r.Seq), moe, body}
-	return c.write(r2, nil, false)
+	return c.write(r2)
 }
 
 func (c *msgpackSpecRpcCodec) ReadResponseHeader(r *rpc.Response) error {
