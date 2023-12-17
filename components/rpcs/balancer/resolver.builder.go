@@ -32,7 +32,7 @@ type Builder interface {
 }
 */
 
-//ResolverBuilder creates a resolver that will be used to watch name resolution updates.
+// ResolverBuilder creates a resolver that will be used to watch name resolution updates.
 type ResolverBuilder struct {
 	address     string
 	proto       string
@@ -51,7 +51,7 @@ type ResolverBuilder struct {
 
 var _ resolver.Builder = &ResolverBuilder{}
 
-//NewResolverBuilder 新建builder
+// NewResolverBuilder 新建builder
 func NewResolverBuilder(address, plat, service, sortPrefix string) (*ResolverBuilder, error) {
 	proto, addr, err := global.ParseProto(address)
 	if err != nil {
@@ -107,8 +107,7 @@ func (b *ResolverBuilder) buildManualResolver(proto string, address []string) {
 	for i := range address {
 		grpcAddrs = append(grpcAddrs, resolver.Address{
 			Addr:       address[i],
-			Type:       resolver.Backend,
-			Attributes: attributes.New(),
+			Attributes: &attributes.Attributes{},
 		})
 		b.caches[address[i]] = true
 	}
@@ -278,8 +277,7 @@ func (b *ResolverBuilder) updateAddrs() {
 	for i := range address {
 		grpcAddrs = append(grpcAddrs, resolver.Address{
 			Addr:       address[i],
-			Type:       resolver.Backend,
-			Attributes: attributes.New(),
+			Attributes: &attributes.Attributes{},
 		})
 	}
 	b.orgResolver.CC.UpdateState(resolver.State{Addresses: grpcAddrs})
@@ -301,7 +299,7 @@ func (b *ResolverBuilder) checkUpdate(address []string) bool {
 	return needUpdate
 }
 
-//Close 关闭builder
+// Close 关闭builder
 func (b *ResolverBuilder) Close() {
 	b.onceLock.Do(func() {
 		b.isClose = true

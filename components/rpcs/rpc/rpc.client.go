@@ -16,9 +16,10 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-//Client rpc client, 用于构建基础的RPC调用,并提供基于服务器的限流工具，轮询、本地优先等多种负载算法
+// Client rpc client, 用于构建基础的RPC调用,并提供基于服务器的限流工具，轮询、本地优先等多种负载算法
 type Client struct {
 	address string //RPC Server Address 或 registry target
 	conn    *grpc.ClientConn
@@ -33,13 +34,13 @@ type Client struct {
 	isClose         bool
 }
 
-//NewClient .
+// NewClient .
 func NewClient(address, plat, service string, opts ...rpcconf.Option) (*Client, error) {
 	conf := rpcconf.New(opts...)
 	return NewClientByConf(address, plat, service, conf)
 }
 
-//NewClientByConf 创建RPC客户端,地址是远程RPC服务器地址或注册中心地址
+// NewClientByConf 创建RPC客户端,地址是远程RPC服务器地址或注册中心地址
 func NewClientByConf(address, plat, service string, conf *rpcconf.RPCConf) (*Client, error) {
 	client := &Client{address: address, plat: plat, service: service}
 	client.RPCConf = conf
@@ -56,7 +57,7 @@ func NewClientByConf(address, plat, service string, conf *rpcconf.RPCConf) (*Cli
 	return client, err
 }
 
-//Request 发送Request请求
+// Request 发送Request请求
 func (c *Client) Request(ctx context.Context, service string, form map[string]interface{}, opts ...RequestOption) (res *pkgs.Rspns, err error) {
 	//处理可选参数
 	buff, err := json.Marshal(form)
@@ -70,7 +71,7 @@ func (c *Client) Request(ctx context.Context, service string, form map[string]in
 	return c.RequestByString(ctx, service, string(buff), opts...)
 }
 
-//RequestByString 发送Request请求
+// RequestByString 发送Request请求
 func (c *Client) RequestByString(ctx context.Context, service string, form string, opts ...RequestOption) (res *pkgs.Rspns, err error) {
 	//处理可选参数
 	o := newOption()
@@ -93,7 +94,7 @@ func (c *Client) RequestByString(ctx context.Context, service string, form strin
 	return pkgs.NewRspnsByHD(int(response.Status), response.GetHeader(), response.GetResult()), err
 }
 
-//Close 关闭RPC客户端连接
+// Close 关闭RPC客户端连接
 func (c *Client) Close() {
 	c.isClose = true
 	if c.conn != nil {
@@ -102,8 +103,8 @@ func (c *Client) Close() {
 	c.balancerBuilder.Close()
 }
 
-//Connect 连接到RPC服务器，如果当前无法连接系统会定时自动重连
-//未使用压缩，由于传输数据默认限制为4M(已修改为20M)压缩后会影响系统并发能力
+// Connect 连接到RPC服务器，如果当前无法连接系统会定时自动重连
+// 未使用压缩，由于传输数据默认限制为4M(已修改为20M)压缩后会影响系统并发能力
 // grpc.WithDefaultCallOptions(grpc.UseCompressor(Snappy)),
 // grpc.WithDecompressor(grpc.NewGZIPDecompressor()),
 // grpc.WithCompressor(grpc.NewGZIPCompressor()),
@@ -124,8 +125,10 @@ func (c *Client) connect() (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(c.ConntTimeout)*time.Second)
 	c.conn, err = grpc.DialContext(ctx,
 		c.address+"/rpcsrv",
-		grpc.WithInsecure(),
-		grpc.WithBalancerName(c.Balancer),
+		grpc.WithTransportCredentials(insecure.NewCredentials()), //2023/12/17
+		grpc.WithDefaultServiceConfig(
+			`{"loadBalancingPolicy":"round_robin"}`,
+		),
 		grpc.WithResolvers(c.balancerBuilder))
 
 	if err != nil {
