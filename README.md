@@ -685,4 +685,4 @@ func request(ctx hydra.IContext) interface{} {
 ![image](https://github.com/micro-plat/hydra/raw/master/imgs/wx-p.png)
 
 ### 💲捐赠 🥣
-![image](https://github.com/micro-plat/hydra/raw/master/imgs/jz.png))
+![image](https://github.com/micro-plat/hydra/raw/master/imgs/jz.png)
