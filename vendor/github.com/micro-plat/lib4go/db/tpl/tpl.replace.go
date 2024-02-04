@@ -34,6 +34,6 @@ func replaceSpecialCharacter(s string) string {
 		})
 	}
 
-	return strings.ReplaceAll(result, "@~", "`")
+	return strings.ReplaceAll(result, "\\000", "`")
 
 }
