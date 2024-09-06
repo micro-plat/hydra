@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/micro-plat/hydra/components"
+	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 )
 
-//ExecuteHandler 业务处理Handler
+// ExecuteHandler 业务处理Handler
 func ExecuteHandler() Handler {
 	return func(ctx IMiddleContext) {
 		service := ctx.Request().Path().GetService()
@@ -30,7 +31,7 @@ func ExecuteHandler() Handler {
 			for k := range headers {
 				ctx.Response().Header(k, headers.GetString(k))
 			}
-			ctx.Response().Write(response.GetStatus(), response.GetResult())
+			ctx.Response().Write(response.GetStatus(), response.GetResult()) //写入响应内容
 			return
 		}
 
@@ -39,7 +40,12 @@ func ExecuteHandler() Handler {
 
 		if services.Def.Has(serverType, service, method) {
 			result := services.Def.Call(ctx, service)
-			ctx.Response().WriteAny(result)
+			if ok, r := context.IsSSEData(result); ok { //处理SSE协议数据
+				// ctx.Response().NoNeedWrite(200)
+				r.LoopWrite(ctx.Response().GetHTTPReponse())
+				return
+			}
+			ctx.Response().WriteAny(result) //写入响应内容
 			return
 		}
 

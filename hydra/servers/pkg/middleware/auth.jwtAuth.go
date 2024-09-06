@@ -10,7 +10,7 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 )
 
-//JwtAuth jwt
+// JwtAuth jwt
 func JwtAuth() Handler {
 
 	return func(ctx IMiddleContext) {
@@ -28,6 +28,7 @@ func JwtAuth() Handler {
 
 		//2.检查jwt是否有效
 		ctx.Response().AddSpecial("jwt")
+		_, jwtErr := checkJWT(ctx, jwtAuth)
 
 		//3.检查是否需要跳过请求
 		if ok, _ := jwtAuth.Match(ctx.Request().Path().GetRequestPath()); ok {
@@ -36,8 +37,7 @@ func JwtAuth() Handler {
 		}
 
 		//4. 验证jwt
-		_, err = checkJWT(ctx, jwtAuth)
-		if err == nil {
+		if jwtErr == nil {
 			ctx.Next()
 			return
 		}
@@ -68,7 +68,7 @@ func checkJWT(ctx context.IContext, j *xjwt.JWTAuth) (data interface{}, err erro
 	return data, nil
 }
 
-//getToken 从请求头或cookie中获取cookie
+// getToken 从请求头或cookie中获取cookie
 func getToken(ctx context.IContext, jwt *xjwt.JWTAuth) string {
 	switch strings.ToUpper(jwt.Source) {
 	case xjwt.SourceHeader, xjwt.SourceHeaderShort:

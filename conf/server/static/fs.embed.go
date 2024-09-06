@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/mholt/archiver"
 )
@@ -21,7 +23,7 @@ type embedFs struct {
 
 var defEmbedFs = map[string]*embedFs{}
 
-//check2FS 检查并转换为fs类型
+// check2FS 检查并转换为fs类型
 func (e *embedFs) getFileEmbed() (IFS, error) {
 	if len(e.bytes) > 0 {
 		return newEmbedFile(e.name, e.bytes)
@@ -58,7 +60,7 @@ func newEmbedFile(name string, buff []byte) (*osfs, error) {
 	return unarchive(file.Name())
 }
 
-//efs 扩展embed.fs
+// efs 扩展embed.fs
 type efs struct {
 	fs   *embed.FS
 	hfs  http.FileSystem
@@ -81,7 +83,7 @@ func (o *efs) ReadFile(name string) (http.FileSystem, string, error) {
 			return p.ReadFile(name)
 		}
 	}
-	return o.hfs, filepath.Join(o.name, name), nil
+	return o.hfs, getPath(o.name, name), nil
 }
 
 func (o *efs) Has(name string) (string, bool) {
@@ -90,7 +92,7 @@ func (o *efs) Has(name string) (string, bool) {
 			return v, true
 		}
 	}
-	path := filepath.Join(o.name, name)
+	path := getPath(o.name, name)
 	_, err := o.fs.ReadFile(path)
 	return path, err == nil
 }
@@ -100,4 +102,10 @@ func (o *efs) Merge(p IFS) {
 		return
 	}
 	o.p = append(o.p, p)
+}
+func getPath(p, n string) string {
+	if runtime.GOOS == "windows" {
+		return strings.Replace(filepath.Join(p, n), "\\", "/", -1)
+	}
+	return filepath.Join(p, n)
 }

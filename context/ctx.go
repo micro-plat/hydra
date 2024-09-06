@@ -20,47 +20,49 @@ const (
 
 	XRequestID = "X-Request-Id"
 
-	JSONF  = "application/json; charset=%s"
-	XMLF   = "application/xml; charset=%s"
-	YAMLF  = "text/yaml; charset=%s"
-	HTMLF  = "text/html; charset=%s"
-	PLAINF = "text/plain; charset=%s"
+	JSONF        = "application/json; charset=%s"
+	XMLF         = "application/xml; charset=%s"
+	YAMLF        = "text/yaml; charset=%s"
+	HTMLF        = "text/html; charset=%s"
+	PLAINF       = "text/plain; charset=%s"
+	EventStreamF = "text/event-stream; charset=%s"
 
-	UTF8JSON  = "application/json; charset=utf-8"
-	UTF8XML   = "application/xml; charset=utf-8"
-	UTF8YAML  = "text/yaml; charset=utf-8"
-	UTF8HTML  = "text/html; charset=utf-8"
-	UTF8PLAIN = "text/plain; charset=utf-8"
+	UTF8JSON        = "application/json; charset=utf-8"
+	UTF8XML         = "application/xml; charset=utf-8"
+	UTF8YAML        = "text/yaml; charset=utf-8"
+	UTF8HTML        = "text/html; charset=utf-8"
+	UTF8PLAIN       = "text/plain; charset=utf-8"
+	UTF8EventStream = "text/event-stream; charset=utf-8"
 )
 
 var EmptyReponseResult = &EmptyResult{}
 
 type EmptyResult struct{}
 
-//Handler 业务处理Handler
+// Handler 业务处理Handler
 type Handler func(IContext) interface{}
 
-//Handle 处理业务流程
+// Handle 处理业务流程
 func (h Handler) Handle(c IContext) interface{} {
 	return h(c)
 }
 
-//VoidHandler 无返回值的Handler处理
+// VoidHandler 无返回值的Handler处理
 type VoidHandler func(IContext)
 
-//Handle 处理业务流程
+// Handle 处理业务流程
 func (h VoidHandler) Handle(c IContext) interface{} {
 	h(c)
 	return EmptyReponseResult
 }
 
-//IHandler 业务处理接口
+// IHandler 业务处理接口
 type IHandler interface {
 	//Handle 业务处理
 	Handle(IContext) interface{}
 }
 
-//IGetter 参数获取
+// IGetter 参数获取
 type IGetter interface {
 
 	//GetKeys 获取所有参数名称
@@ -95,7 +97,7 @@ type IGetter interface {
 	IsEmpty(name string) bool
 }
 
-//IPath 请求参数
+// IPath 请求参数
 type IPath interface {
 
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
@@ -136,7 +138,7 @@ type IPath interface {
 	GetRouter(path string) (*router.Router, error)
 }
 
-//IVariable 参与变量
+// IVariable 参与变量
 type IVariable interface {
 	IGetter
 }
@@ -146,7 +148,7 @@ type IFile interface {
 	GetFile(fileKey string) (string, io.ReadCloser, int64, error)
 }
 
-//IRequest 请求信息
+// IRequest 请求信息
 type IRequest interface {
 
 	//GetHTTPRequest 获取http request原生对象
@@ -190,7 +192,7 @@ type IRequest interface {
 	IFile
 }
 
-//IResponse 响应信息
+// IResponse 响应信息
 type IResponse interface {
 
 	//GetHTTPReponse 获取http response原生对象
@@ -274,7 +276,7 @@ type IResponse interface {
 	GetHeaders() types.XMap
 }
 
-//IAuth 认证信息
+// IAuth 认证信息
 type IAuth interface {
 	//Request 获取或设置用户请求的认证信息
 	Request(...interface{}) interface{}
@@ -289,7 +291,7 @@ type IAuth interface {
 	Clear()
 }
 
-//IUser 用户相关信息
+// IUser 用户相关信息
 type IUser interface {
 
 	//GetUserName 获取用户名
@@ -305,7 +307,7 @@ type IUser interface {
 	Auth() IAuth
 }
 
-//IContext 用于中间件处理的上下文管理
+// IContext 用于中间件处理的上下文管理
 type IContext interface {
 
 	//Meta 元数据
@@ -339,7 +341,7 @@ type IContext interface {
 	Close()
 }
 
-//ITracer 链路跟踪器
+// ITracer 链路跟踪器
 type ITracer interface {
 	ITraceSpan
 
@@ -347,7 +349,7 @@ type ITracer interface {
 	Root() ITraceSpan
 }
 
-//ITraceSpan 跟踪处理器
+// ITraceSpan 跟踪处理器
 type ITraceSpan interface {
 	IEnd
 
@@ -361,7 +363,7 @@ type ITraceSpan interface {
 	NewSpan(opertor string) ITraceSpan
 }
 
-//IEnd 关闭
+// IEnd 关闭
 type IEnd interface {
 	//End 结束跟踪
 	End()

@@ -40,6 +40,15 @@ func doInstall(c *cli.Context) (err error) {
 	}
 	args := []string{"run", "--nostd"}
 	args = append(args, os.Args[2:]...)
+
+	//执行本地处理服务
+	handlers := global.Installer.Local.GetHandlers()
+	for _, v := range handlers {
+		if err := v(); err != nil {
+			return err
+		}
+	}
+
 	//3.创建本地服务
 	hydraSrv, err := pkgs.GetService(c, isFixed, args...)
 	if err != nil {

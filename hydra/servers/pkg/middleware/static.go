@@ -8,7 +8,7 @@ import (
 	"github.com/micro-plat/hydra/services"
 )
 
-//Static 静态文件处理插件
+// Static 静态文件处理插件
 func Static() Handler {
 	return func(ctx IMiddleContext) {
 		//查询静态文件中是否存在

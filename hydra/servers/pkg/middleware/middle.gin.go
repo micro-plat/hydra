@@ -101,7 +101,7 @@ func (g *ginCtx) WHeader(k string) string {
 	return g.Writer.Header().Get(k)
 }
 
-//GetUploadFile 获取上传文件
+// GetUploadFile 获取上传文件
 func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 	g.load()
 	header, err := g.FormFile(fileKey)
@@ -115,17 +115,17 @@ func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 	return header.Filename, f, header.Size, nil
 }
 
-//GetHTTPReqResp 获取GetHttpReqResp请求与响应对象
+// GetHTTPReqResp 获取GetHttpReqResp请求与响应对象
 func (g *ginCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return g.Request, g.Writer
 }
 
-//GetWriter 获取writer
+// GetWriter 获取writer
 func (g *ginCtx) GetWriter() interface{} {
 	return g.Writer
 }
 
-//GetWriter 获取writer
+// GetWriter 获取writer
 func (g *ginCtx) SetWriter(w interface{}) {
 	g.Writer = w.(gin.ResponseWriter)
 }

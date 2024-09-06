@@ -51,7 +51,7 @@ type response struct {
 	specials     []string
 }
 
-//NewResponse 构建响应信息
+// NewResponse 构建响应信息
 func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogger, meta conf.IMeta) *response {
 	path := NewRpath(ctx, conf, meta)
 	return &response{
@@ -65,12 +65,12 @@ func NewResponse(ctx context.IInnerContext, conf app.IAPPConf, log logger.ILogge
 	}
 }
 
-//Header 设置头信息
+// Header 设置头信息
 func (c *response) Header(k string, v string) {
 	c.ctx.Header(k, v)
 }
 
-//Header 获取头信息
+// Header 获取头信息
 func (c *response) GetHeaders() types.XMap {
 	hds := c.ctx.WHeaders()
 	c.headers = make(map[string]interface{})
@@ -80,7 +80,7 @@ func (c *response) GetHeaders() types.XMap {
 	return c.headers
 }
 
-//ContentType 设置contentType
+// ContentType 设置contentType
 func (c *response) ContentType(v string, xmlRoot ...string) {
 	if v == "" {
 		return
@@ -99,14 +99,14 @@ func (c *response) ContentType(v string, xmlRoot ...string) {
 	c.ctx.Header("Content-Type", v)
 }
 
-//Abort 设置状态码,内容到响应流,并终止应用
+// Abort 设置状态码,内容到响应流,并终止应用
 func (c *response) Abort(s int, content ...interface{}) {
 	defer c.ctx.Abort()
 	defer c.Flush()
 	c.Write(s, content...)
 }
 
-//File 将文件写入到响应流,并终止应用
+// File 将文件写入到响应流,并终止应用
 func (c *response) File(path string, fs http.FileSystem) {
 	defer c.ctx.Abort()
 	if c.noneedWrite || c.ctx.Written() {
@@ -120,18 +120,18 @@ func (c *response) File(path string, fs http.FileSystem) {
 	c.final.status = status
 }
 
-//NoNeedWrite 无需写入响应数据到缓存
+// NoNeedWrite 无需写入响应数据到缓存
 func (c *response) NoNeedWrite(status int) {
 	c.noneedWrite = true
 	c.final.status = status
 }
 
-//JSON 以application/json输出响应内容
+// JSON 以application/json输出响应内容
 func (c *response) JSON(code int, data interface{}) interface{} {
 	return c.Data(code, fmt.Sprintf(context.JSONF, c.path.GetEncoding()), data)
 }
 
-//XML 以application/xml输出响应内容
+// XML 以application/xml输出响应内容
 func (c *response) XML(code int, data interface{}, header string, rootNode ...string) interface{} {
 	c.xmlHeader = header
 	if len(rootNode) > 0 {
@@ -140,23 +140,23 @@ func (c *response) XML(code int, data interface{}, header string, rootNode ...st
 	return c.Data(code, fmt.Sprintf(context.XMLF, c.path.GetEncoding()), data)
 }
 
-//YAML 以text/yaml输出响应内容
+// YAML 以text/yaml输出响应内容
 func (c *response) YAML(code int, data interface{}) interface{} {
 	return c.Data(code, fmt.Sprintf(context.YAMLF, c.path.GetEncoding()), data)
 }
 
-//HTML 以text/html输出响应内容
+// HTML 以text/html输出响应内容
 func (c *response) HTML(code int, data string) interface{} {
 	return c.Data(code, fmt.Sprintf(context.YAMLF, c.path.GetEncoding()), data)
 }
 
-//Plain 以text/plain格式输出响应内容
+// Plain 以text/plain格式输出响应内容
 func (c *response) Plain(code int, data string) interface{} {
 	return c.Data(code, fmt.Sprintf(context.PLAINF, c.path.GetEncoding()), data)
 }
 
-//Data 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
-//格式输出内容
+// Data 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+// 格式输出内容
 func (c *response) Data(code int, contentType string, data interface{}) interface{} {
 	c.ContentType(contentType)
 	if err := c.Write(code, data); err != nil {
@@ -165,8 +165,8 @@ func (c *response) Data(code int, contentType string, data interface{}) interfac
 	return c.final.content
 }
 
-//WriteAny 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
-//格式输出内容
+// WriteAny 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+// 格式输出内容
 func (c *response) WriteAny(v interface{}) error {
 	if v == nil {
 		return nil
@@ -179,8 +179,8 @@ func (c *response) WriteAny(v interface{}) error {
 	return c.Write(c.final.status, v)
 }
 
-//Write 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
-//格式输出内容
+// Write 使用已设置的Content-Type输出内容，未设置时自动根据内容识别输出格式，内容无法识别时(map,struct)使用application/json
+// 格式输出内容
 func (c *response) Write(status int, ct ...interface{}) error {
 	if c.noneedWrite {
 		return fmt.Errorf("不能重复写入到响应流:status:%d 已写入状态:%d", status, c.final.status)
@@ -297,7 +297,10 @@ func (c *response) swapByctp(content interface{}) (string, string) {
 			return context.PLAINF, text
 		}
 
-	} else if vtpKind == reflect.Struct || vtpKind == reflect.Map || vtpKind == reflect.Slice || vtpKind == reflect.Array {
+	} else if vtpKind == reflect.Struct ||
+		vtpKind == reflect.Map ||
+		vtpKind == reflect.Slice ||
+		vtpKind == reflect.Array {
 		return context.JSONF, c.getStringByCP(context.JSONF, vtpKind, content)
 	}
 	return context.PLAINF, c.getStringByCP(context.JSONF, vtpKind, content)
@@ -346,12 +349,12 @@ func (c *response) getStringByCP(ctp string, tpkind reflect.Kind, content interf
 	}
 }
 
-//WStatus 设置状态码
+// WStatus 设置状态码
 func (c *response) WStatus(s int) {
 	c.ctx.WStatus(s)
 }
 
-//Flush 调用异步写入将状态码、内容写入到响应流中
+// Flush 调用异步写入将状态码、内容写入到响应流中
 func (c *response) Flush() {
 	for _, h := range c.flushHandles {
 		h()
@@ -367,12 +370,12 @@ func (c *response) Flush() {
 	c.noneedWrite = true
 }
 
-//OnFlush 添加flush勾子，在flush执行前执行
+// OnFlush 添加flush勾子，在flush执行前执行
 func (c *response) OnFlush(f func()) {
 	c.flushHandles = append(c.flushHandles, f)
 }
 
-//writeNow 将状态码、内容写入到响应流中
+// writeNow 将状态码、内容写入到响应流中
 func (c *response) writeNow() error {
 
 	c.final.status = types.DecodeInt(types.DecodeInt(c.final.status, 0, c.ctx.Status()), 0, http.StatusNoContent)
@@ -406,13 +409,13 @@ func (c *response) writeNow() error {
 	return nil
 }
 
-//Redirect 转跳g刚才gc
+// Redirect 转跳g刚才gc
 func (c *response) Redirect(code int, url string) {
 	c.ctx.Redirect(code, url)
 	c.noneedWrite = true
 }
 
-//AddSpecial 添加响应的特殊字符
+// AddSpecial 添加响应的特殊字符
 func (c *response) AddSpecial(t ...string) {
 	if c.specials == nil {
 		c.specials = make([]string, 0, 1)
@@ -420,12 +423,12 @@ func (c *response) AddSpecial(t ...string) {
 	c.specials = append(c.specials, t...)
 }
 
-//GetSpecials 获取多个响应特殊字符
+// GetSpecials 获取多个响应特殊字符
 func (c *response) GetSpecials() string {
 	return strings.Join(c.specials, "|")
 }
 
-//HasSpecial 是否包含某个特殊关键字
+// HasSpecial 是否包含某个特殊关键字
 func (c *response) HasSpecial(s string) bool {
 	for _, p := range c.specials {
 		if strings.EqualFold(p, s) {
@@ -435,23 +438,23 @@ func (c *response) HasSpecial(s string) bool {
 	return false
 }
 
-//GetRaw 获取原始响应请求
+// GetRaw 获取原始响应请求
 func (c *response) GetRaw() interface{} {
 	return c.raw.content
 }
 
-//GetRawResponse 获取响应内容信息
+// GetRawResponse 获取响应内容信息
 func (c *response) GetRawResponse() (int, interface{}, string) {
 	return c.raw.status, c.raw.content, c.raw.contentType
 }
 
-//GetHTTPReponse 获取http response原生对象
+// GetHTTPReponse 获取http response原生对象
 func (c *response) GetHTTPReponse() http.ResponseWriter {
 	_, response := c.ctx.GetHTTPReqResp()
 	return response
 }
 
-//GetFinalResponse 获取响应内容信息
+// GetFinalResponse 获取响应内容信息
 func (c *response) GetFinalResponse() (int, string, string) {
 	return c.final.status, c.final.content, c.final.contentType
 }

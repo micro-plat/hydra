@@ -14,14 +14,20 @@ func Escape(input string) string {
 	return r
 }
 
-//Unmarshal 反序列化JSON
+// Unmarshal 反序列化JSON
 func Unmarshal(buf []byte) (c map[string]interface{}, err error) {
 	c = make(map[string]interface{})
 	err = json.Unmarshal(buf, &c)
 	return
 }
 
-//Marshal 序列化JSON
+// Marshal 序列化JSON
 func Marshal(data interface{}) (b []byte, err error) {
 	return json.Marshal(data)
+}
+
+// MarshalAll 序列化JSON
+func MarshalAll(data interface{}) string {
+	buff, _ := json.Marshal(data)
+	return string(buff)
 }

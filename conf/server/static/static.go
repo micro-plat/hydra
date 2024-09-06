@@ -10,21 +10,21 @@ import (
 	"github.com/micro-plat/hydra/conf/pkgs/security"
 )
 
-//TempDirName 临时目录创建名
+// TempDirName 临时目录创建名
 const TempDirName = "hydra"
 
-//TempArchiveName 临时压缩文件创建名
+// TempArchiveName 临时压缩文件创建名
 const TempArchiveName = "hydra*"
 
-//TypeNodeName static分类节点名
+// TypeNodeName static分类节点名
 const TypeNodeName = "static"
 
-//IStatic 静态文件接口
+// IStatic 静态文件接口
 type IStatic interface {
 	GetConf() (*Static, bool)
 }
 
-//Static 设置静态文件配置
+// Static 设置静态文件配置
 type Static struct {
 	security.ConfEncrypt
 	Path           string          `json:"path,omitempty"  label:"静态文件路径或压缩包路径"`
@@ -38,7 +38,7 @@ type Static struct {
 	serverType     string
 }
 
-//New 构建静态文件配置信息
+// New 构建静态文件配置信息
 func New(serverType string, opts ...Option) *Static {
 	a := &Static{
 		serverType: serverType,
@@ -53,7 +53,7 @@ func New(serverType string, opts ...Option) *Static {
 	return a
 }
 
-//Has 检查文件是否存在
+// Has 检查文件是否存在
 func (s *Static) Has(name string) bool {
 	if s.fs == nil {
 		return false
@@ -71,7 +71,7 @@ func (s *Static) Has(name string) bool {
 	return false
 }
 
-//OptionsCheck 检查文件是否存在
+// OptionsCheck 检查文件是否存在
 func (s *Static) OptionsCheck(name string) bool {
 	if s.fs == nil {
 		return false
@@ -86,7 +86,7 @@ func (s *Static) OptionsCheck(name string) bool {
 	return false
 }
 
-//Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
+// Get 获取文件内容//http.FileServer(http.FS(embed.FS{}))
 func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	if s.fs == nil {
 		return nil, "", nil
@@ -111,8 +111,8 @@ func (s *Static) Get(name string) (http.FileSystem, string, error) {
 	return s.fs.ReadFile(name)
 }
 
-//IsExclude 是否是排除的文件
-//@todo:该方法不是非常合适，需要修改匹配算法
+// IsExclude 是否是排除的文件
+// @todo:该方法不是非常合适，需要修改匹配算法
 func (s *Static) IsExclude(rPath string) bool {
 	if len(s.Excludes) == 0 {
 		return false
@@ -127,7 +127,7 @@ func (s *Static) IsExclude(rPath string) bool {
 	return false
 }
 
-//IsUnrewrite 是否是非重写文件
+// IsUnrewrite 是否是非重写文件
 func (s *Static) IsUnrewrite(rPath string) bool {
 	if len(s.Unrewrites) == 0 {
 		return false
@@ -136,12 +136,12 @@ func (s *Static) IsUnrewrite(rPath string) bool {
 	return ok
 }
 
-//AllowRequest 是否是合适的请求
+// AllowRequest 是否是合适的请求
 func (s *Static) AllowRequest(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead
 }
 
-//GetConf 设置static
+// GetConf 设置static
 func GetConf(cnf conf.IServerConf) (*Static, error) {
 	static := New(cnf.GetServerType())
 	_, err := cnf.GetSubObject(TypeNodeName, static)
