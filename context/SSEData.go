@@ -59,12 +59,12 @@ func (s *SSEData) Pop() (bool, string) {
 	}
 	vtpKind := getTypeKind(data)
 	if vtpKind == reflect.String {
-		return true, fmt.Sprintf("data:%s\n\n", data)
+		return true, fmt.Sprintf("%s", data)
 	}
 	if buff, err := json.Marshal(data); err != nil {
 		panic(err)
 	} else {
-		return true, fmt.Sprintf("data:%s\n\n", string(buff))
+		return true, fmt.Sprintf("%s", string(buff))
 	}
 }
 func (s *SSEData) LoopWrite(wr http.ResponseWriter) {
