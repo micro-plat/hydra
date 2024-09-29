@@ -59,7 +59,7 @@
 //			logger.Error(err)
 //		}
 //	}
-package service // import "github.com/kardianos/service"
+package service
 
 import (
 	"errors"
@@ -307,16 +307,16 @@ type System interface {
 // Interface represents the service interface for a program. Start runs before
 // the hosting process is granted control and Stop runs when control is returned.
 //
-//   1. OS service manager executes user program.
-//   2. User program sees it is executed from a service manager (IsInteractive is false).
-//   3. User program calls Service.Run() which blocks.
-//   4. Interface.Start() is called and quickly returns.
-//   5. User program runs.
-//   6. OS service manager signals the user program to stop.
-//   7. Interface.Stop() is called and quickly returns.
-//      - For a successful exit, os.Exit should not be called in Interface.Stop().
-//   8. Service.Run returns.
-//   9. User program should quickly exit.
+//  1. OS service manager executes user program.
+//  2. User program sees it is executed from a service manager (IsInteractive is false).
+//  3. User program calls Service.Run() which blocks.
+//  4. Interface.Start() is called and quickly returns.
+//  5. User program runs.
+//  6. OS service manager signals the user program to stop.
+//  7. Interface.Stop() is called and quickly returns.
+//     - For a successful exit, os.Exit should not be called in Interface.Stop().
+//  8. Service.Run returns.
+//  9. User program should quickly exit.
 type Interface interface {
 	// Start provides a place to initiate the service. The service doesn't
 	// signal a completed start until after this function returns, so the
