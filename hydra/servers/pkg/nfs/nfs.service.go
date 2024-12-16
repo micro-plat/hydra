@@ -2,7 +2,7 @@ package nfs
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -13,14 +13,14 @@ import (
 	"github.com/micro-plat/lib4go/errs"
 )
 
-//GetDirList 获取本机目录信息
+// GetDirList 获取本机目录信息
 func (c *cnfs) GetDirList(ctx context.IContext) interface{} {
 	return c.infs.GetDirList(infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME,
 		ctx.Request().GetString(infs.DIRNAME))),
 		ctx.Request().GetInt("deep", 1))
 }
 
-//Upload 用户上传文件
+// Upload 用户上传文件
 func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	//读取文件
 	name := ctx.Request().GetString(infs.FILENAME, "file")
@@ -31,7 +31,7 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	//读取内容
 	defer reader.Close()
-	buff, err := ioutil.ReadAll(reader)
+	buff, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}
@@ -46,13 +46,14 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 
 	// 处理返回结果
 	xpath := fmt.Sprintf("%s/%s", strings.Trim(c.c.Domain, "/"), strings.Trim(npath, "/"))
+	xpath = strings.Replace(xpath, "\\", "/", -1)
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	return map[string]interface{}{
 		"path": xpath,
 	}
 }
 
-//Download 用户下载文件
+// Download 用户下载文件
 func (c *cnfs) Download(ctx context.IContext) interface{} {
 
 	//检查参数
@@ -77,7 +78,7 @@ func (c *cnfs) Download(ctx context.IContext) interface{} {
 	return nil
 }
 
-//GetFileList 获取本机的指定文件的指纹信息，仅master提供对外查询功能
+// GetFileList 获取本机的指定文件的指纹信息，仅master提供对外查询功能
 func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
 	return c.infs.GetFileList(infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME,
 		ctx.Request().GetString(infs.DIRNAME))),
@@ -87,7 +88,7 @@ func (c *cnfs) GetFileList(ctx context.IContext) interface{} {
 		ctx.Request().GetInt("ps", 100))
 }
 
-//CreateDir 创建目录
+// CreateDir 创建目录
 func (c *cnfs) CreateDir(ctx context.IContext) interface{} {
 	//检查参数
 	dir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))
@@ -97,7 +98,7 @@ func (c *cnfs) CreateDir(ctx context.IContext) interface{} {
 	return c.infs.CreateDir(dir)
 }
 
-//RenameDir 重命名目录
+// RenameDir 重命名目录
 func (c *cnfs) RenameDir(ctx context.IContext) interface{} {
 	//检查参数
 	dir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))
@@ -111,7 +112,7 @@ func (c *cnfs) RenameDir(ctx context.IContext) interface{} {
 	return c.infs.Rename(dir, ndir)
 }
 
-//ImgScale 缩略图生成
+// ImgScale 缩略图生成
 func (c *cnfs) ImgScale(ctx context.IContext) interface{} {
 	//检查参数
 	dir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))
@@ -134,7 +135,7 @@ func (c *cnfs) ImgScale(ctx context.IContext) interface{} {
 	return err
 }
 
-//View 获取PDF预览文件
+// View 获取PDF预览文件
 func (c *cnfs) GetPDF4Preview(ctx context.IContext) interface{} {
 	//检查参数
 	dir := infs.MultiPath(ctx.Request().Path().Params().GetString(infs.DIRNAME, ctx.Request().GetString(infs.DIRNAME)))

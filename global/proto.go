@@ -17,10 +17,11 @@ const (
 	ProtoLMQ     = "lmq"
 	ProtoREDIS   = "redis"
 	ProtoMQTT    = "mqtt"
+	ProtoKafka   = "kafka"
 	ProtoInvoker = "ivk"
 )
 
-//ParseProto 解析协议信息
+// ParseProto 解析协议信息
 func ParseProto(address string) (proto string, raddr string, err error) {
 	address = strings.Trim(address, " ")
 
@@ -56,7 +57,7 @@ func isIP(addr string) bool {
 	return govalidator.IsIP(a)
 }
 
-//IsProto 是否是指定的协议
+// IsProto 是否是指定的协议
 func IsProto(addr string, proto ...string) (string, bool) {
 	for _, prt := range proto {
 		p, addrs, _ := ParseProto(addr)
@@ -67,7 +68,7 @@ func IsProto(addr string, proto ...string) (string, bool) {
 	return "", false
 }
 
-//IsLocal 是否是本地服务
+// IsLocal 是否是本地服务
 func IsLocal(proto string) bool {
 	return strings.EqualFold(proto, ProtoLM) || strings.EqualFold(proto, ProtoLMQ)
 }

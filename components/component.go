@@ -15,13 +15,14 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
 
+	_ "github.com/micro-plat/hydra/components/queues/mq/kafka"
 	_ "github.com/micro-plat/hydra/components/queues/mq/lmq"
 	_ "github.com/micro-plat/hydra/components/queues/mq/mqtt"
 	_ "github.com/micro-plat/hydra/components/queues/mq/redis"
 	_ "github.com/micro-plat/hydra/components/queues/mq/xmq"
 )
 
-//IComponent 组件
+// IComponent 组件
 type IComponent interface {
 	Container() container.IContainer
 	RPC() rpcs.IComponentRPC
@@ -33,10 +34,10 @@ type IComponent interface {
 	UUID() uuid.UUID
 }
 
-//Def 默认组件
+// Def 默认组件
 var Def IComponent = NewComponent()
 
-//Component 组件
+// Component 组件
 type Component struct {
 	c          container.IContainer
 	rpc        rpcs.IComponentRPC
@@ -46,7 +47,7 @@ type Component struct {
 	httpClient http.IComponentHTTPClient
 }
 
-//NewComponent 创建组件
+// NewComponent 创建组件
 func NewComponent() *Component {
 	c := &Component{
 		c: container.NewContainer(),
@@ -59,42 +60,42 @@ func NewComponent() *Component {
 	return c
 }
 
-//Container 获取Container容器
+// Container 获取Container容器
 func (c *Component) Container() container.IContainer {
 	return c.c
 }
 
-//RPC 获取rpc组件
+// RPC 获取rpc组件
 func (c *Component) RPC() rpcs.IComponentRPC {
 	return c.rpc
 }
 
-//Queue 获取Queue组件
+// Queue 获取Queue组件
 func (c *Component) Queue() queues.IComponentQueue {
 	return c.queue
 }
 
-//Cache 获取Queue组件
+// Cache 获取Queue组件
 func (c *Component) Cache() caches.IComponentCache {
 	return c.cache
 }
 
-//DB 获取DB组件
+// DB 获取DB组件
 func (c *Component) DB() dbs.IComponentDB {
 	return c.db
 }
 
-//HTTP 获取HTTP Client组件
+// HTTP 获取HTTP Client组件
 func (c *Component) HTTP() http.IComponentHTTPClient {
 	return c.httpClient
 }
 
-//DLock 获取分布式鍞
+// DLock 获取分布式鍞
 func (c *Component) DLock(name string) (dlock.ILock, error) {
 	return dlock.NewLock(registry.Join(global.Def.PlatName, "dlock", name), global.Def.RegistryAddr, context.Current().Log())
 }
 
-//UUID 获取全局唯一编号
+// UUID 获取全局唯一编号
 func (c *Component) UUID() uuid.UUID {
 	cluster, err := context.Current().APPConf().GetServerConf().GetCluster()
 	if err != nil {

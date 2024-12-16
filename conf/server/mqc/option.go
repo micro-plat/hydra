@@ -6,67 +6,72 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
-//Option 配置选项
+// Option 配置选项
 type Option func(*Server)
 
-//WithTrace 构建api server配置信息
+// WithTrace 构建api server配置信息
 func WithTrace() Option {
 	return func(a *Server) {
 		a.Trace = true
 	}
 }
 
-//WithMasterSlave 设置为主备模式
+// WithMasterSlave 设置为主备模式
 func WithMasterSlave() Option {
 	return func(a *Server) {
 		a.Sharding = 1
 	}
 }
 
-//WithSharding 设置为分片模式
+// WithSharding 设置为分片模式
 func WithSharding(i int) Option {
 	return func(a *Server) {
 		a.Sharding = i
 	}
 }
 
-//WithP2P 设置为对等模式
+// WithP2P 设置为对等模式
 func WithP2P() Option {
 	return func(a *Server) {
 		a.Sharding = 0
 	}
 }
 
-//WithDisable 禁用任务
+// WithDisable 禁用任务
 func WithDisable() Option {
 	return func(a *Server) {
 		a.Status = StartStop
 	}
 }
 
-//WithEnable 启用任务
+// WithEnable 启用任务
 func WithEnable() Option {
 	return func(a *Server) {
 		a.Status = StartStatus
 	}
 }
 
-//WithRedis 返回redis地址名称
+// WithRedis 返回redis地址名称
 func WithRedis(name string) string {
 	return fmt.Sprintf("%s://%s", global.ProtoREDIS, name)
 }
 
-//WithMQTT 返回mqtt地址名称
+// WithMQTT 返回mqtt地址名称
 func WithMQTT(name string) string {
 	return fmt.Sprintf("%s://%s", global.ProtoMQTT, name)
 }
 
-//WithLMQ 返回lmq地址名称
+// WithLMQ 返回lmq地址名称
 func WithLMQ() string {
 	return fmt.Sprintf("%s://.", global.ProtoLMQ)
 }
 
-//WithEnableEncryption 启用加密设置
+// WithKafka 返回kafka地址
+func WithKafka(name string) string {
+	return fmt.Sprintf("%s://%s", global.ProtoKafka, name)
+}
+
+// WithEnableEncryption 启用加密设置
 func WithEnableEncryption() Option {
 	return func(a *Server) {
 		a.EnableEncryption = true

@@ -12,10 +12,10 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//DefMethod DefMethod
+// DefMethod DefMethod
 var DefMethod = "GET"
 
-//Request 处理任务请求
+// Request 处理任务请求
 type Request struct {
 	queue *queue.Queue
 	mq.IMQCMessage
@@ -24,7 +24,7 @@ type Request struct {
 	header map[string]string
 }
 
-//NewRequest 构建任务请求
+// NewRequest 构建任务请求
 func NewRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	if pkgs.IsOriginalQueue(queue.Queue) {
 		return newOldRequest(queue, m)
@@ -43,6 +43,9 @@ func newOldRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error)
 	//将消息原串转换为map
 	input := make(map[string]interface{})
 	message := m.GetMessage()
+	if err = m.Ack(); err != nil {
+		return nil, err
+	}
 	json.Unmarshal(types.StringToBytes(message), &input)
 
 	r.form = input
@@ -90,27 +93,27 @@ func newRequest(queue *queue.Queue, m mq.IMQCMessage) (r *Request, err error) {
 	return r, nil
 }
 
-//GetName 获取任务名称
+// GetName 获取任务名称
 func (m *Request) GetName() string {
 	return m.queue.Queue
 }
 
-//GetService 服务名
+// GetService 服务名
 func (m *Request) GetService() string {
 	return m.queue.Service
 }
 
-//GetMethod 方法名
+// GetMethod 方法名
 func (m *Request) GetMethod() string {
 	return m.method
 }
 
-//GetForm 输入参数
+// GetForm 输入参数
 func (m *Request) GetForm() map[string]interface{} {
 	return m.form
 }
 
-//GetHeader 头信息
+// GetHeader 头信息
 func (m *Request) GetHeader() map[string]string {
 	return m.header
 }
