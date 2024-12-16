@@ -22,4 +22,4 @@ rpctestservre*
 /logs
 /conf/logger.toml
 .vscode
-rgit.sh
+rgit.py
