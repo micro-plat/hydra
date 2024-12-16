@@ -14,7 +14,7 @@ import (
 
 var onceLock sync.Once
 
-//Queues01 兼容hydra0-1版本的mqc服务
+// Queues01 兼容hydra0-1版本的mqc服务
 var queues01 = map[string]bool{}
 
 func envsInit() {
@@ -30,10 +30,10 @@ func envsInit() {
 
 }
 
-//GetStringByHeader 设置头信息
+// GetStringByHeader 设置头信息
 func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	//兼容老版本
-	if IsOriginalQueue(name) {
+	if IsOriginalQueue(name) || !global.MQConf.IsEncodingSend() {
 		return GetString(content)
 	}
 
@@ -51,7 +51,7 @@ func GetStringByHeader(name string, content interface{}, hd ...string) string {
 	return string(out.Marshal())
 }
 
-//IsOriginalQueue 是否是老版本队列
+// IsOriginalQueue 是否是老版本队列
 func IsOriginalQueue(name string) bool {
 	onceLock.Do(envsInit)
 
@@ -66,7 +66,7 @@ func IsOriginalQueue(name string) bool {
 	return false
 }
 
-//GetString 将任意类型转换为字符串，map,struct等转换为json
+// GetString 将任意类型转换为字符串，map,struct等转换为json
 func GetString(content interface{}) string {
 	vtpKind := getTypeKind(content)
 	if vtpKind == reflect.String {

@@ -28,9 +28,9 @@ type request struct {
 	*file
 }
 
-//NewRequest 构建请求的Request
-//自动对请求进行解码，响应结果进行编码。
-//当指定为gbk,gb2312后,请求方式为application/x-www-form-urlencoded或application/xml、application/json时内容必须编码为指定的格式，否则会解码失败
+// NewRequest 构建请求的Request
+// 自动对请求进行解码，响应结果进行编码。
+// 当指定为gbk,gb2312后,请求方式为application/x-www-form-urlencoded或application/xml、application/json时内容必须编码为指定的格式，否则会解码失败
 func NewRequest(c context.IInnerContext, s app.IAPPConf, meta conf.IMeta) *request {
 	rpath := NewRpath(c, s, meta)
 	req := &request{
@@ -50,18 +50,18 @@ func NewRequest(c context.IInnerContext, s app.IAPPConf, meta conf.IMeta) *reque
 	return req
 }
 
-//GetHTTPRequest 获取http request原生对象
+// GetHTTPRequest 获取http request原生对象
 func (r *request) GetHTTPRequest() *http.Request {
 	req, _ := r.ctx.GetHTTPReqResp()
 	return req
 }
 
-//Path 获取请求路径信息
+// Path 获取请求路径信息
 func (r *request) Path() context.IPath {
 	return r.path
 }
 
-//Bind 根据输入参数绑定对象，并使用govalidator.ValidateMap进行参数验证
+// Bind 根据输入参数绑定对象，并使用govalidator.ValidateMap进行参数验证
 func (r *request) Bind(obj interface{}) error {
 	if r.readMapErr != nil {
 		return r.readMapErr
@@ -85,7 +85,7 @@ func (r *request) Bind(obj interface{}) error {
 	return nil
 }
 
-//Check 检查输入参数和配置参数是否为空
+// Check 检查输入参数和配置参数是否为空
 func (r *request) Check(field ...string) error {
 	for _, key := range field {
 		if v := r.GetString(key); v == "" {
@@ -95,7 +95,7 @@ func (r *request) Check(field ...string) error {
 	return nil
 }
 
-//CheckMap 传入验证Map[字段名]验证规则，并使用govalidator.ValidateMap进行参数验证
+// CheckMap 传入验证Map[字段名]验证规则，并使用govalidator.ValidateMap进行参数验证
 func (r *request) CheckMap(vdt map[string]interface{}) error {
 	if len(vdt) == 0 {
 		return nil
@@ -112,7 +112,7 @@ func (r *request) CheckMap(vdt map[string]interface{}) error {
 	return nil
 }
 
-//GetMap 获取请求的参数信息
+// GetMap 获取请求的参数信息
 func (r *request) GetMap() types.XMap {
 	return r.XMap
 }
@@ -120,7 +120,7 @@ func (r *request) GetError() error {
 	return r.readMapErr
 }
 
-//GetPlayload 获取trace信息
+// GetPlayload 获取trace信息
 func (r *request) GetPlayload() string {
 	if r.readMapErr != nil {
 		return fmt.Errorf("err:%w", r.readMapErr).Error()
@@ -129,7 +129,7 @@ func (r *request) GetPlayload() string {
 	return fmt.Sprintf("%+v", body)
 }
 
-//Headers 获取请求的header
+// Headers 获取请求的header
 func (r *request) Headers() types.XMap {
 	if r.headers != nil {
 		return r.headers
@@ -142,7 +142,7 @@ func (r *request) Headers() types.XMap {
 	return r.headers
 }
 
-//Cookies 获取请求的header
+// Cookies 获取请求的header
 func (r *request) Cookies() types.XMap {
 	if r.cookies != nil {
 		return r.cookies
