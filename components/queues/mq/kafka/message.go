@@ -83,7 +83,7 @@ func (h *ConsumeHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 					if !ok {
 						break START
 					}
-					go h.handle(NewKafkaMessage(message, session))
+					h.handle(NewKafkaMessage(message, session))
 				case <-session.Context().Done():
 					break START
 

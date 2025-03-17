@@ -7,6 +7,8 @@ import (
 
 	"errors"
 
+	"github.com/micro-plat/lib4go/types"
+
 	"github.com/micro-plat/hydra/components/pkgs/redis"
 	"github.com/micro-plat/hydra/components/queues/mq"
 	"github.com/micro-plat/hydra/conf/vars/queue/queueredis"
@@ -22,7 +24,7 @@ type consumerChan struct {
 	unconsumeCh chan struct{}
 }
 
-//Consumer Consumer
+// Consumer Consumer
 type Consumer struct {
 	address    string
 	client     *redis.Client
@@ -37,12 +39,12 @@ type Consumer struct {
 	ConfOpts   *varredis.Redis
 }
 
-//NewConsumerByRaw 创建新的Consumer
+// NewConsumerByRaw 创建新的Consumer
 func NewConsumerByRaw(cfg string) (consumer *Consumer, err error) {
 	return NewConsumerByConfig(varredis.NewByRaw(cfg))
 }
 
-//NewConsumerByConfig 创建新的Consumer
+// NewConsumerByConfig 创建新的Consumer
 func NewConsumerByConfig(cfg *varredis.Redis) (consumer *Consumer, err error) {
 	consumer = &Consumer{log: logger.GetSession("mq.redis", logger.CreateSession())}
 	consumer.ConfOpts = cfg
@@ -52,13 +54,13 @@ func NewConsumerByConfig(cfg *varredis.Redis) (consumer *Consumer, err error) {
 	return
 }
 
-//Connect  连接服务器
+// Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
 	consumer.client, err = redis.NewByConfig(consumer.ConfOpts)
 	return
 }
 
-//Consume 注册消费信息
+// Consume 注册消费信息
 func (consumer *Consumer) Consume(queue string, concurrency int, callback func(mq.IMQCMessage)) (err error) {
 	if strings.EqualFold(queue, "") {
 		return errors.New("队列名字不能为空")
@@ -70,10 +72,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	_, _, err = consumer.queues.SetIfAbsentCb(queue, func(input ...interface{}) (c interface{}, err error) {
 		queue := input[0].(string)
 		unconsumeCh := make(chan struct{}, 1)
-		nconcurrency := concurrency
-		if concurrency <= 0 {
-			nconcurrency = 10
-		}
+		nconcurrency := types.GetMax(concurrency, 1)
 		msgChan := make(chan *RedisMessage, nconcurrency)
 		for i := 0; i < nconcurrency; i++ {
 			go func() {
@@ -84,12 +83,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 						if !ok {
 							break START
 						}
-						if concurrency == 0 {
-							//默认10个线程获取任务，开启新协程处理任务
-							go callback(message)
-						} else {
-							callback(message)
-						}
+						callback(message)
 					}
 				}
 			}()
@@ -127,7 +121,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	return
 }
 
-//UnConsume 取消注册消费
+// UnConsume 取消注册消费
 func (consumer *Consumer) UnConsume(queue string) {
 	if consumer.client == nil {
 		return
@@ -138,7 +132,7 @@ func (consumer *Consumer) UnConsume(queue string) {
 	consumer.queues.Remove(queue)
 }
 
-//Close 关闭当前连接
+// Close 关闭当前连接
 func (consumer *Consumer) Close() {
 	consumer.once.Do(func() {
 		consumer.done = true
@@ -167,5 +161,5 @@ func init() {
 	mq.RegisterConsumer(Proto, &cresolver{})
 }
 
-//Proto redis
+// Proto redis
 const Proto = "redis"

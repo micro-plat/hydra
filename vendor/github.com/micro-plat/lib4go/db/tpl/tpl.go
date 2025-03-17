@@ -18,7 +18,7 @@ var (
 	tplCaches cmap.ConcurrentMap
 )
 
-//ITPLContext 模板上下文
+// ITPLContext 模板上下文
 type ITPLContext interface {
 	GetSQLContext(tpl string, input map[string]interface{}) (query string, args []interface{})
 	GetSPContext(tpl string, input map[string]interface{}) (query string, args []interface{})
@@ -34,6 +34,9 @@ func init() {
 	Register("mysql", MTPLContext{name: "mysql", prefix: "?"})
 	Register("sqlite", MTPLContext{name: "sqlite", prefix: "?"})
 	Register("postgres", ATTPLContext{name: "postgres", prefix: "$"})
+	Register("taosws", MTPLContext{name: "taosWS", prefix: "?"})
+	Register("taossql", MTPLContext{name: "taosSql", prefix: "?"})
+	Register("taosrestful", MTPLContext{name: "taosRestful", prefix: "?"})
 }
 func Register(name string, tpl ITPLContext) {
 	if _, ok := tpls[name]; ok {
@@ -42,7 +45,7 @@ func Register(name string, tpl ITPLContext) {
 	tpls[name] = tpl
 }
 
-//GetDBContext 获取数据库上下文操作
+// GetDBContext 获取数据库上下文操作
 func GetDBContext(name string) (ITPLContext, error) {
 	if v, ok := tpls[strings.ToLower(name)]; ok {
 		return v, nil

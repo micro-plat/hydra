@@ -76,7 +76,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	_, _, err = consumer.queues.SetIfAbsentCb(queue, func(input ...interface{}) (c interface{}, err error) {
 		queue := input[0].(string)
 		unconsumeCh := make(chan struct{}, 1)
-		nconcurrency := types.GetMax(concurrency, 10)
+		nconcurrency := types.GetMax(concurrency, 1)
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			msgconsumer := NewConsumeHandler(consumer.log, callback, nconcurrency)

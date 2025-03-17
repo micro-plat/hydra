@@ -10,12 +10,12 @@ func isNil(input interface{}) bool {
 	return input == nil || fmt.Sprintf("%v", input) == ""
 }
 
-//AnalyzeTPL 解析模板内容，并返回解析后的SQL语句，入输入参数
-//@表达式，替换为参数化字符如: :1,:2,:3
-//#表达式，替换为指定值，值为空时返回NULL
-//~表达式，检查值，值为空时返加"",否则返回: , name=value
-//&条件表达式，检查值，值为空时返加"",否则返回: and name=value
-//|条件表达式，检查值，值为空时返回"", 否则返回: or name=value
+// AnalyzeTPL 解析模板内容，并返回解析后的SQL语句，入输入参数
+// @表达式，替换为参数化字符如: :1,:2,:3
+// #表达式，替换为指定值，值为空时返回NULL
+// ~表达式，检查值，值为空时返加"",否则返回: , name=value
+// &条件表达式，检查值，值为空时返加"",否则返回: and name=value
+// |条件表达式，检查值，值为空时返回"", 否则返回: or name=value
 func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, like func(string, func() string) string) (sql string, params []interface{}, names []string) {
 	params = make([]interface{}, 0)
 	names = make([]string, 0)
@@ -23,21 +23,30 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 		sql = replaceSpecialCharacter(sql)
 	}()
 
-	//@变量, 将数据放入params中
-	word, _ := regexp.Compile(`[\\]?([@#&~!$?]|[|]{1,2})(\w+(\.\w+)?)`)
+	// 匹配模板中的变量表达式（包括转义字符）
+	word, _ := regexp.Compile(`(\\?)([@#&~!$?]|\|{1,2})(\w+(\.\w+)?)`)
 	sql = word.ReplaceAllStringFunc(tpl, func(s string) string {
-		index := 1
-		if strings.HasPrefix(s, "||") {
-			index = 2
+		// 判断是否有转义字符
+		groups := word.FindStringSubmatch(s)
+		escapeChar := groups[1] // 转义字符（\）
+		pre := groups[2]        // 前缀（@、#、&、~、| 等）
+		key := groups[3]        // 变量名
+
+		// 如果有转义字符，直接返回原始字符串（去掉转义字符）
+		if escapeChar == "\\" {
+			return pre + key
 		}
-		pre, key, name := s[:index], s[index:], s[index:]
-		if strings.Index(key, ".") > 0 {
+
+		// 处理变量名（去掉可能的点号）
+		name := key
+		if strings.Contains(key, ".") {
 			name = strings.Split(key, ".")[1]
 		}
-		if strings.Contains(pre, "\\") {
-			pre = "\\"
-		}
+
+		// 获取输入值
 		value := input[name]
+
+		// 根据前缀处理不同的逻辑
 		switch pre {
 		case "@":
 			if !isNil(value) {
@@ -84,7 +93,6 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 				names = append(names, key)
 				params = append(params, value)
 				return fmt.Sprintf(",%s=%s", key, prefix())
-
 			}
 			return ""
 		default:
@@ -92,10 +100,11 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 		}
 	})
 
-	//@变量, 将数据放入params中
-	word2, _ := regexp.Compile(`[\\][@#&~\|!\$\?><]`)
+	// 处理单独的转义字符（如 \@、\# 等）
+	word2, _ := regexp.Compile(`\\([@#&~|!$?><_])`)
 	sql = word2.ReplaceAllStringFunc(sql, func(s string) string {
-		return s[1:]
+		return s[1:] // 去掉转义字符
 	})
+
 	return
 }

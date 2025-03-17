@@ -10,7 +10,7 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//Consumer 基于本地channel的Consumer
+// Consumer 基于本地channel的Consumer
 type Consumer struct {
 	queues  cmap.ConcurrentMap
 	closeCh chan struct{}
@@ -18,7 +18,7 @@ type Consumer struct {
 	once    sync.Once
 }
 
-//newConsumer 创建新的Consumer
+// newConsumer 创建新的Consumer
 func newConsumer() (consumer *Consumer, err error) {
 	consumer = &Consumer{
 		queues:  cmap.New(4),
@@ -26,12 +26,12 @@ func newConsumer() (consumer *Consumer, err error) {
 	return consumer, nil
 }
 
-//Connect  连接服务器
+// Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
 	return nil
 }
 
-//Consume 注册消费信息
+// Consume 注册消费信息
 func (consumer *Consumer) Consume(queue string, concurrency int, callback func(mq.IMQCMessage)) (err error) {
 	if strings.EqualFold(queue, "") {
 		return errors.New("队列名字不能为空")
@@ -42,7 +42,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	_, _, err = consumer.queues.SetIfAbsentCb(queue, func(input ...interface{}) (c interface{}, err error) {
 		queue := input[0].(string)
 		unconsumeCh := make(chan struct{}, 1)
-		nconcurrency := types.GetMax(concurrency, 10)
+		nconcurrency := types.GetMax(concurrency, 1)
 		msgChan := make(chan *Message, nconcurrency)
 		for i := 0; i < nconcurrency; i++ {
 			go func() {
@@ -53,11 +53,8 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 						if !ok {
 							break START
 						}
-						if concurrency == 0 {
-							go callback(message)
-						} else {
-							callback(message)
-						}
+						callback(message)
+
 					}
 				}
 			}()
@@ -86,7 +83,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	return
 }
 
-//UnConsume 取消注册消费
+// UnConsume 取消注册消费
 func (consumer *Consumer) UnConsume(queue string) {
 	if c, ok := consumer.queues.Get(queue); ok {
 		close(c.(chan struct{}))
@@ -94,7 +91,7 @@ func (consumer *Consumer) UnConsume(queue string) {
 	consumer.queues.Remove(queue)
 }
 
-//Close 关闭当前连接
+// Close 关闭当前连接
 func (consumer *Consumer) Close() {
 	consumer.once.Do(func() {
 		close(consumer.closeCh)

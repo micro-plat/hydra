@@ -18,13 +18,13 @@ type itrace interface {
 
 var supportTraces = []string{"cpu", "mem", "block", "mutex", "web"}
 
-//startTrace 启用项目性能跟踪
+// startTrace 启用项目性能跟踪
 func startTrace(trace, tracePort string) (itrace, error) {
 	switch strings.ToLower(trace) {
 	case "cpu":
 		return profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mem":
-		return profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
+		return profile.Start(profile.MemProfile, profile.ProfilePath("../logs/track-flow/"+time.Now().Format("1504")), profile.NoShutdownHook), nil
 	case "block":
 		return profile.Start(profile.BlockProfile, profile.ProfilePath("."), profile.NoShutdownHook), nil
 	case "mutex":

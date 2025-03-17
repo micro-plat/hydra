@@ -28,7 +28,7 @@ type consumerChan struct {
 	unconsumeCh chan struct{}
 }
 
-//Consumer Consumer
+// Consumer Consumer
 type Consumer struct {
 	client     mqtt.Client
 	queues     cmap.ConcurrentMap
@@ -46,7 +46,7 @@ type Consumer struct {
 	confOpts   *queuemqtt.MQTT
 }
 
-//NewConsumer 创建新的Consumer
+// NewConsumer 创建新的Consumer
 func NewConsumerByConfig(confOpts *queuemqtt.MQTT) (consumer *Consumer, err error) {
 	consumer = &Consumer{uid: utility.GetGUID()[0:6], log: logger.GetSession("mqtt", logger.CreateSession())}
 	consumer.confOpts = confOpts
@@ -61,7 +61,7 @@ func NewConsumerByConfig(confOpts *queuemqtt.MQTT) (consumer *Consumer, err erro
 	return consumer, nil
 }
 
-//Connect  连接服务器
+// Connect  连接服务器
 func (consumer *Consumer) Connect() (err error) {
 	cc, _, err := consumer.connect()
 	if err != nil {
@@ -166,7 +166,7 @@ func (consumer *Consumer) getCert(conf *queuemqtt.MQTT) (*tls.Config, error) {
 	}, nil
 }
 
-//subscribe 循环接收，并放入指定的队列
+// subscribe 循环接收，并放入指定的队列
 // QoS0，最多一次送达。也就是发出去就fire掉，没有后面的事情了。
 // QoS1，至少一次送达。发出去之后必须等待ack，没有ack，就要找时机重发
 // QoS2，准确一次送达。消息id将拥有一个简单的生命周期。
@@ -197,7 +197,7 @@ START:
 	}
 }
 
-//Consume 注册消费信息
+// Consume 注册消费信息
 func (consumer *Consumer) Consume(queue string, concurrency int, callback func(mq.IMQCMessage)) (err error) {
 	if strings.EqualFold(queue, "") {
 		return errors.New("队列名字不能为空")
@@ -205,7 +205,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	if callback == nil {
 		return errors.New("回调函数不能为nil")
 	}
-	concurrency = types.GetMax(concurrency, 10)
+	concurrency = types.GetMax(concurrency, 1)
 	_, _, err = consumer.queues.SetIfAbsentCb(queue, func(input ...interface{}) (c interface{}, err error) {
 		queue := input[0].(string)
 		msgChan := make(chan *Message, concurrency)
@@ -229,7 +229,7 @@ func (consumer *Consumer) Consume(queue string, concurrency int, callback func(m
 	return
 }
 
-//UnConsume 取消注册消费
+// UnConsume 取消注册消费
 func (consumer *Consumer) UnConsume(queue string) {
 	consumer.queues.Remove(queue)
 	err := consumer.client.Unsubscribe(queue)
@@ -244,7 +244,7 @@ func (consumer *Consumer) getAddr() string {
 	return fmt.Sprintf("ssl://%s", consumer.confOpts.Address)
 }
 
-//Close 关闭当前连接
+// Close 关闭当前连接
 func (consumer *Consumer) Close() {
 	consumer.done = true
 	consumer.once.Do(func() {

@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/micro-plat/hydra/conf/app"
@@ -21,7 +22,7 @@ const defClose = "Close"
 
 //IService 服务注册接口
 
-//IMicroRegistry 微服务注册接口
+// IMicroRegistry 微服务注册接口
 type IMicroRegistry func(name string, h interface{}, r ...router.Option) IService
 type IService interface {
 	Group(name ...string) IService
@@ -87,10 +88,10 @@ type IService interface {
 	OnHandleExecuted(h context.Handler, tps ...string)
 }
 
-//Def 服务注册管理
+// Def 服务注册管理
 var Def = New()
 
-//New 构建服务组件
+// New 构建服务组件
 func New() *regist {
 	return &regist{
 		servers: make(map[string]*serverServices),
@@ -98,14 +99,14 @@ func New() *regist {
 	}
 }
 
-//regist  本地服务
+// regist  本地服务
 type regist struct {
 	group   string
 	servers map[string]*serverServices
 	caches  map[string]map[string]interface{}
 }
 
-//Micro 注册为微服务包括api,web,rpc
+// Micro 注册为微服务包括api,web,rpc
 func (s *regist) Micro(name string, h interface{}, r ...router.Option) IService {
 	s.API(name, h, r...)
 	s.Web(name, h, r...)
@@ -118,14 +119,14 @@ func (s *regist) Group(name ...string) IService {
 	return s
 }
 
-//Flow 注册为流程服务，包括mqc,cron
+// Flow 注册为流程服务，包括mqc,cron
 func (s *regist) Flow(name string, h interface{}) IService {
 	s.Custom(global.MQC, name, h)
 	s.Custom(global.CRON, name, h)
 	return s
 }
 
-//API 注册为API服务
+// API 注册为API服务
 func (s *regist) API(name string, h interface{}, ext ...router.Option) IService {
 	v := make([]interface{}, 0, len(ext))
 	for _, e := range ext {
@@ -134,7 +135,7 @@ func (s *regist) API(name string, h interface{}, ext ...router.Option) IService 
 	return s.Custom(global.API, name, h, v...)
 }
 
-//Web 注册为web服务
+// Web 注册为web服务
 func (s *regist) Web(name string, h interface{}, ext ...router.Option) IService {
 	v := make([]interface{}, 0, len(ext))
 	for _, e := range ext {
@@ -143,7 +144,7 @@ func (s *regist) Web(name string, h interface{}, ext ...router.Option) IService 
 	return s.Custom(global.Web, name, h, v...)
 }
 
-//RPC 注册为rpc服务
+// RPC 注册为rpc服务
 func (s *regist) RPC(name string, h interface{}, ext ...router.Option) IService {
 	v := make([]interface{}, 0, len(ext))
 	for _, e := range ext {
@@ -152,7 +153,7 @@ func (s *regist) RPC(name string, h interface{}, ext ...router.Option) IService 
 	return s.Custom(global.RPC, name, h, v...)
 }
 
-//WS 注册为websocket服务
+// WS 注册为websocket服务
 func (s *regist) WS(name string, h interface{}, ext ...router.Option) IService {
 	v := make([]interface{}, 0, len(ext))
 	for _, e := range ext {
@@ -161,7 +162,7 @@ func (s *regist) WS(name string, h interface{}, ext ...router.Option) IService {
 	return s.Custom(global.WS, name, h, v...)
 }
 
-//MQC 注册为消息队列服务
+// MQC 注册为消息队列服务
 func (s *regist) MQC(name string, h interface{}, queues ...string) IService {
 	v := make([]interface{}, 0, len(queues))
 	for _, e := range queues {
@@ -170,7 +171,7 @@ func (s *regist) MQC(name string, h interface{}, queues ...string) IService {
 	return s.Custom(global.MQC, name, h, v...)
 }
 
-//CRON 注册为定时任务服务
+// CRON 注册为定时任务服务
 func (s *regist) CRON(name string, h interface{}, crons ...string) IService {
 	v := make([]interface{}, 0, len(crons))
 	for _, e := range crons {
@@ -179,7 +180,7 @@ func (s *regist) CRON(name string, h interface{}, crons ...string) IService {
 	return s.Custom(global.CRON, name, h, v...)
 }
 
-//Remove 移除已注册服务（重启服务生效）
+// Remove 移除已注册服务（重启服务生效）
 func (s *regist) Remove(path string, tp ...string) {
 	if len(tp) == 0 {
 		for _, server := range s.servers {
@@ -195,7 +196,7 @@ func (s *regist) Remove(path string, tp ...string) {
 
 }
 
-//Clear 清除所有注册服务
+// Clear 清除所有注册服务
 func (s *regist) Clear(tp ...string) {
 	if len(tp) == 0 {
 		for _, server := range s.servers {
@@ -211,14 +212,14 @@ func (s *regist) Clear(tp ...string) {
 
 }
 
-//HookRemove 移除钩子函数
+// HookRemove 移除钩子函数
 func (s *regist) HookRemove(hs ...interface{}) {
 	for _, server := range s.servers {
 		server.HookRemove(hs...)
 	}
 }
 
-//Custom 自定义服务注册
+// Custom 自定义服务注册
 func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{}) IService {
 	//去掉两头'/'
 	name = fmt.Sprintf("/%s", strings.Trim(name, "/"))
@@ -229,7 +230,7 @@ func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{
 	return s
 }
 
-//RegisterServer 注册服务器
+// RegisterServer 注册服务器
 func (s *regist) RegisterServer(tp string, f func(g *Unit, ext ...interface{}) error, v func(path string)) {
 	if _, ok := s.servers[tp]; ok {
 		panic(fmt.Errorf("服务%s已存在，不能重复注册", tp))
@@ -241,7 +242,7 @@ func (s *regist) RegisterServer(tp string, f func(g *Unit, ext ...interface{}) e
 	s.servers[tp] = newServerServices(nil, nil)
 }
 
-//OnSetup 服务器初始化勾子，服务器配置初始化前执行(首次启动前或收到配置变更后需要重启服务器前)
+// OnSetup 服务器初始化勾子，服务器配置初始化前执行(首次启动前或收到配置变更后需要重启服务器前)
 func (s *regist) OnSetup(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -253,7 +254,7 @@ func (s *regist) OnSetup(h func(app.IAPPConf) error, tps ...string) {
 	}
 }
 
-//OnStarting 处理服务器启动前
+// OnStarting 处理服务器启动前
 func (s *regist) OnStarting(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -265,7 +266,7 @@ func (s *regist) OnStarting(h func(app.IAPPConf) error, tps ...string) {
 	}
 }
 
-//OnStarted 处理服务器启动后
+// OnStarted 处理服务器启动后
 func (s *regist) OnStarted(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -277,7 +278,7 @@ func (s *regist) OnStarted(h func(app.IAPPConf) error, tps ...string) {
 	}
 }
 
-//OnClosing 处理服务器关闭
+// OnClosing 处理服务器关闭
 func (s *regist) OnClosing(h func(app.IAPPConf) error, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -289,7 +290,7 @@ func (s *regist) OnClosing(h func(app.IAPPConf) error, tps ...string) {
 	}
 }
 
-//OnHandleExecuting 处理handling业务
+// OnHandleExecuting 处理handling业务
 func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -301,7 +302,7 @@ func (s *regist) OnHandleExecuting(h context.Handler, tps ...string) {
 	}
 }
 
-//Handled 处理Handled业务
+// Handled 处理Handled业务
 func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 	if len(tps) == 0 {
 		tps = global.Def.ServerTypes
@@ -313,7 +314,7 @@ func (s *regist) OnHandleExecuted(h context.Handler, tps ...string) {
 	}
 }
 
-//Has 服务器是否注册了某个服务
+// Has 服务器是否注册了某个服务
 func (s *regist) Has(serverType string, service, method string) (ok bool) {
 	if s.get(serverType).Has(service) {
 		return true
@@ -321,22 +322,22 @@ func (s *regist) Has(serverType string, service, method string) (ok bool) {
 	return s.get(serverType).Has(fmt.Sprintf("%s$%s", service, method))
 }
 
-//GetHandleExecutings 获取handle预处理勾子
+// GetHandleExecutings 获取handle预处理勾子
 func (s *regist) GetHandleExecutings(serverType string) []context.IHandler {
 	return s.get(serverType).GetHandleExecutings()
 }
 
-//GetHandleExecuted 获取handle后处理勾子
+// GetHandleExecuted 获取handle后处理勾子
 func (s *regist) GetHandleExecuted(serverType string) []context.IHandler {
 	return s.get(serverType).GetHandleExecuteds()
 }
 
-//GetHandler 获取服务对应的处理函数
+// GetHandler 获取服务对应的处理函数
 func (s *regist) GetHandler(serverType string, service string) (context.IHandler, bool) {
 	return s.get(serverType).GetHandlers(service)
 }
 
-//GetGroup 获取服务的分组信息
+// GetGroup 获取服务的分组信息
 func (s *regist) GetGroup(serverType string, service string, method ...string) string {
 	if len(method) == 0 {
 		return s.get(serverType).GetGroup(service)
@@ -344,22 +345,22 @@ func (s *regist) GetGroup(serverType string, service string, method ...string) s
 	return s.get(serverType).GetGroup(registry.Join(service, "$"+strings.ToLower(types.GetStringByIndex(method, 0))))
 }
 
-//GetRawPathAndTag 获取服务原始注册路径与方法名(restful服务的tag值为空)
+// GetRawPathAndTag 获取服务原始注册路径与方法名(restful服务的tag值为空)
 func (s *regist) GetRawPathAndTag(serverType string, service string) (path string, tagName string, ok bool) {
 	return s.get(serverType).GetRawPathAndTag(service)
 }
 
-//GetHandling 获取预处理函数
+// GetHandling 获取预处理函数
 func (s *regist) GetHandlings(serverType string, service string) []context.IHandler {
 	return s.get(serverType).GetHandlings(service)
 }
 
-//GetHandling 获取后处理函数
+// GetHandling 获取后处理函数
 func (s *regist) GetHandleds(serverType string, service string) []context.IHandler {
 	return s.get(serverType).GetHandleds(service)
 }
 
-//GetFallback 获取服务对应的降级函数
+// GetFallback 获取服务对应的降级函数
 func (s *regist) GetFallback(serverType string, service string) (context.IHandler, bool) {
 	return s.get(serverType).GetFallback(service)
 }
@@ -371,30 +372,30 @@ func (s *regist) get(tp string) *serverServices {
 	panic(fmt.Sprintf("不支持的服务器类型:%s", tp))
 }
 
-//DoStarting 执行服务启动函数
+// DoStarting 执行服务启动函数
 func (s *regist) DoStarting(c app.IAPPConf) error {
 	return s.get(c.GetServerConf().GetServerType()).DoStarting(c)
 
 }
 
-//DoStarted 执行服务启动函数
+// DoStarted 执行服务启动函数
 func (s *regist) DoStarted(c app.IAPPConf) error {
 	return s.get(c.GetServerConf().GetServerType()).DoStarted(c)
 
 }
 
-//DoSetup 执行服务启动函数
+// DoSetup 执行服务启动函数
 func (s *regist) DoSetup(c app.IAPPConf) error {
 	return s.get(c.GetServerConf().GetServerType()).DoSetup(c)
 
 }
 
-//DoClosing 执行服务关闭函数
+// DoClosing 执行服务关闭函数
 func (s *regist) DoClosing(c app.IAPPConf) error {
 	return s.get(c.GetServerConf().GetServerType()).DoClosing(c)
 }
 
-//GetClosers 获取资源释放函数
+// GetClosers 获取资源释放函数
 func (s *regist) Close() error {
 	var sb strings.Builder
 	for _, r := range s.servers {
@@ -413,7 +414,7 @@ func (s *regist) Close() error {
 
 //-----------------------注册缓存-------------------------------------------
 
-//init 处理服务初始化及特殊注册函数
+// init 处理服务初始化及特殊注册函数
 func init() {
 	Def.servers[global.API] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return API.Add(g.Path, g.Service, g.Actions, ext...)
@@ -438,9 +439,23 @@ func init() {
 	}, routerCRON.Remove)
 	Def.servers[global.MQC] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
-			MQC.Add(t.(string), g.Service)
+			qname, concurrency := extractParts(t.(string), 10)
+			MQC.Add(qname, g.Service, concurrency)
 		}
 		routerMQC.Add(g.Path, g.Service, g.Actions)
 		return nil
 	}, routerMQC.Remove)
+}
+func extractParts(input string, defNumber int) (prefix string, number int) {
+	// 定义正则表达式，匹配 { 前的部分和 {} 中的数字
+	re := regexp.MustCompile(`^(.*)\{(\d+)\}$`)
+
+	// 查找匹配项
+	matches := re.FindStringSubmatch(input)
+	if len(matches) < 3 {
+		return input, defNumber
+	}
+
+	// 返回 { 前的部分和 {} 中的数字部分
+	return matches[1], types.GetInt(matches[2], defNumber)
 }

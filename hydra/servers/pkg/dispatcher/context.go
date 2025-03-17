@@ -67,12 +67,12 @@ func (c *Context) Next() {
 	}
 }
 
-//Find 查找指定的路由是否存在
+// Find 查找指定的路由是否存在
 func (c *Context) Find(path string) bool {
 	return c.engine.Find(path)
 }
 
-//FullPath 获取完整的路由名称
+// FullPath 获取完整的路由名称
 func (c *Context) FullPath() string {
 	return c.fullPath
 }
@@ -263,10 +263,11 @@ func (c *Context) GetStringMapStringSlice(key string) (smss map[string][]string)
 
 // Param returns the value of the URL param.
 // It is a shortcut for c.Params.ByName(key)
-//     router.GET("/user/:id", func(c *gin.Context) {
-//         // a GET request to /user/john
-//         id := c.Param("id") // id == "john"
-//     })
+//
+//	router.GET("/user/:id", func(c *gin.Context) {
+//	    // a GET request to /user/john
+//	    id := c.Param("id") // id == "john"
+//	})
 func (c *Context) Param(key string) string {
 	return c.Params.ByName(key)
 }
@@ -292,9 +293,10 @@ func (c *Context) DefaultPostForm(key, defaultValue string) interface{} {
 // form or multipart form when it exists `(value, true)` (even when the value is an empty string),
 // otherwise it returns ("", false).
 // For example, during a PATCH request to update the user's email:
-//     email=mail@example.com  -->  ("mail@example.com", true) := GetPostForm("email") // set email to "mail@example.com"
-// 	   email=                  -->  ("", true) := GetPostForm("email") // set email to ""
-//                             -->  ("", false) := GetPostForm("email") // do nothing with email
+//
+//	    email=mail@example.com  -->  ("mail@example.com", true) := GetPostForm("email") // set email to "mail@example.com"
+//		   email=                  -->  ("", true) := GetPostForm("email") // set email to ""
+//	                            -->  ("", false) := GetPostForm("email") // do nothing with email
 func (c *Context) GetPostForm(key string) (interface{}, bool) {
 	if values, ok := c.Request.GetForm()[key]; ok {
 		return values, ok
@@ -390,7 +392,7 @@ func (c *Context) Redirect(code int, location string) {
 	c.writermem.Header()["Loction"] = []string{location}
 }
 
-//ClientIP 获取客户端IP
+// ClientIP 获取客户端IP
 func (c *Context) GetClientIP() string {
 	clientIP := c.requestHeader("X-Forwarded-For")
 	if index := strings.IndexByte(clientIP, ','); index >= 0 {
@@ -400,9 +402,9 @@ func (c *Context) GetClientIP() string {
 	if clientIP != "" {
 		return clientIP
 	}
-	clientIP = strings.TrimSpace(c.requestHeader("X-Real-Ip"))
+	clientIP = strings.TrimSpace(c.requestHeader("X-Real-IP"))
 	if clientIP != "" {
 		return clientIP
 	}
-	return ""
+	return c.requestHeader("clientIP")
 }
