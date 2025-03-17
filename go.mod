@@ -25,7 +25,7 @@ require (
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.2.6
+	github.com/micro-plat/lib4go v1.2.7
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
@@ -61,7 +61,7 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
@@ -102,4 +102,4 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 )
 
-replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+// replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
