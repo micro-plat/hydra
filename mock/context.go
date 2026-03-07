@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"sync"
+
 	"github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/context/ctx"
@@ -12,7 +14,9 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//NewContext 创建mock类型的Context包
+var once sync.Once
+
+// NewContext 创建mock类型的Context包
 func NewContext(content string, opts ...Option) context.IContext {
 
 	//构建mock
@@ -32,19 +36,22 @@ func NewContext(content string, opts ...Option) context.IContext {
 	}
 
 	//发布配置
-	err := mk.Conf.Pub(global.Current().GetPlatName(),
-		global.Current().GetSysName(),
-		global.Current().GetClusterName(),
-		global.Def.RegistryAddr, nil)
-	if err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		err := mk.Conf.Pub(global.Current().GetPlatName(),
+			global.Current().GetSysName(),
+			global.Current().GetClusterName(),
+			global.Def.RegistryAddr, nil)
+		if err != nil {
+			panic(err)
+		}
 
-	//初始化缓存
-	err = app.PullAndSave()
-	if err != nil {
-		panic(err)
-	}
+		//初始化缓存
+		err = app.PullAndSave()
+		if err != nil {
+			panic(err)
+		}
+
+	})
 
 	//构建Context
 	return ctx.NewCtx(mk, global.Def.ServerTypes[0])

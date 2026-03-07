@@ -9,18 +9,18 @@ import (
 	"github.com/micro-plat/hydra/conf"
 )
 
-//TypeNodeName header配置节点名
+// TypeNodeName header配置节点名
 const TypeNodeName = "header"
 
-//IHeader 获取header
+// IHeader 获取header
 type IHeader interface {
 	GetConf() (Headers, bool)
 }
 
-//Headers http头信息
+// Headers http头信息
 type Headers map[string]string
 
-//New 构建请求的头配置
+// New 构建请求的头配置
 func New(opts ...Option) Headers {
 	h := make(map[string]string)
 	for _, opt := range opts {
@@ -29,12 +29,12 @@ func New(opts ...Option) Headers {
 	return h
 }
 
-//IsAccessControlAllowOrigin 是否是Access-Control-Allow-Origin
+// IsAccessControlAllowOrigin 是否是Access-Control-Allow-Origin
 func (h Headers) IsAccessControlAllowOrigin(k string) bool {
 	return strings.EqualFold(k, HeadeAllowOrigin)
 }
 
-//GetHTTPHeaderByOrigin 根据请求origin获取http请求头
+// GetHTTPHeaderByOrigin 根据请求origin获取http请求头
 func (h Headers) GetHTTPHeaderByOrigin(origin string) http.Header {
 	hd := make(http.Header)
 	header := h.GetHeaderByOrigin(origin)
@@ -44,9 +44,12 @@ func (h Headers) GetHTTPHeaderByOrigin(origin string) http.Header {
 	return hd
 }
 
-//GetHeaderByOrigin 根据origin选择合适的header
+// GetHeaderByOrigin 根据origin选择合适的header
 func (h Headers) GetHeaderByOrigin(origin string) Headers {
 	hd := New()
+	if origin == "" {
+		return hd
+	}
 	if h.hasCross(origin) {
 		for k, v := range h {
 			hd[k] = v
@@ -64,7 +67,7 @@ func (h Headers) GetHeaderByOrigin(origin string) Headers {
 	return hd
 }
 
-//hasCross 是否允许跨域访问
+// hasCross 是否允许跨域访问
 func (h Headers) hasCross(origin string) bool {
 	value, ok := h[HeadeAllowOrigin]
 	if !ok {
@@ -82,7 +85,7 @@ func (h Headers) hasCross(origin string) bool {
 	return false
 }
 
-//GetConf 设置header
+// GetConf 设置header
 func GetConf(cnf conf.IServerConf) (header Headers, err error) {
 	rawConf, err := cnf.GetSubConf(TypeNodeName)
 	if errors.Is(err, conf.ErrNoSetting) {

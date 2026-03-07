@@ -9,7 +9,7 @@ import (
 var originName = "Origin"
 var hostName = "Host"
 
-//Header 响应头设置
+// Header 响应头设置
 func Header() Handler {
 
 	return func(ctx IMiddleContext) {
@@ -27,7 +27,11 @@ func Header() Handler {
 
 		//2. 处理响应header参数
 		origin := ctx.Request().Headers().GetString(originName)
-		hds := headers.GetHeaderByOrigin(types.GetString(origin, ctx.Response().GetHeaders().GetString(hostName)))
+		if origin == "" {
+			ctx.Next()
+			return
+		}
+		hds := headers.GetHeaderByOrigin(types.GetString(origin))
 		for k, v := range hds {
 			ctx.Response().Header(k, v)
 		}

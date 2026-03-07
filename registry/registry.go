@@ -11,25 +11,25 @@ import (
 	"github.com/micro-plat/lib4go/registry"
 )
 
-//LocalMemory 本地内存模式
+// LocalMemory 本地内存模式
 const LocalMemory = "lm"
 
-//Zookeeper zk
+// Zookeeper zk
 const Zookeeper = "zk"
 
-//FileSystem 本地文件系统
+// FileSystem 本地文件系统
 const FileSystem = "fs"
 
-//Consul Consul
+// Consul Consul
 const Consul = "consul"
 
-//Redis redis
+// Redis redis
 const Redis = "redis"
 
-//Mysql mysql
+// Mysql mysql
 const Mysql = "mysql"
 
-//IRegistry 注册中心接口
+// IRegistry 注册中心接口
 type IRegistry interface {
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)
 	WatchValue(path string) (data chan registry.ValueWatcher, err error)
@@ -44,7 +44,7 @@ type IRegistry interface {
 	Close() error
 }
 
-//IFactory 注册中心构建器
+// IFactory 注册中心构建器
 type IFactory interface {
 	Create(...Option) (IRegistry, error)
 }
@@ -52,7 +52,7 @@ type IFactory interface {
 var registryMap = cmap.New(2)
 var registries = make(map[string]IFactory)
 
-//Register 添加注册中心工厂对象
+// Register 添加注册中心工厂对象
 func Register(name string, builder IFactory) {
 	if builder == nil {
 		panic("registry: Register adapter is nil")
@@ -63,7 +63,7 @@ func Register(name string, builder IFactory) {
 	registries[name] = builder
 }
 
-//CreateRegistry 创建新的的注册中心
+// CreateRegistry 创建新的的注册中心
 func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	proto, addrs, u, p, mt, err := Parse(address)
 	if err != nil {
@@ -77,10 +77,9 @@ func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error
 		WithAuthCreds(u, p),
 		WithLogger(log),
 		WithDomain(global.Def.PlatName), WithMetadata(mt))
-
 }
 
-//Support 检查注册中心地址是否支持
+// Support 检查注册中心地址是否支持
 func Support(address string) bool {
 	proto, _, _, _, _, err := Parse(address)
 	if err != nil {
@@ -91,13 +90,13 @@ func Support(address string) bool {
 	return ok
 }
 
-//GetCurrent 获取当前注册中心
+// GetCurrent 获取当前注册中心
 func GetCurrent() IRegistry {
 	r, _ := GetRegistry(global.Def.RegistryAddr, global.Def.Log())
 	return r
 }
 
-//GetRegistry 获取缓存的注册中心
+// GetRegistry 获取缓存的注册中心
 func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	proto, addrs, u, p, mt, err := Parse(address)
 	if err != nil {
@@ -126,20 +125,20 @@ func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
 	return
 }
 
-//GetProto 获取协议名称
+// GetProto 获取协议名称
 func GetProto(addr string) string {
 	p, _, _, _, _, _ := Parse(addr)
 	return p
 }
 
-//GetAddrs 获取地址信息
+// GetAddrs 获取地址信息
 func GetAddrs(addr string) []string {
 	_, addrs, _, _, _, _ := Parse(addr)
 	return addrs
 }
 
-//Parse 解析地址
-//如:zk://192.168.0.155:2181 或 fs://../
+// Parse 解析地址
+// 如:zk://192.168.0.155:2181 或 fs://../
 func Parse(address string) (proto string, raddr []string, u string, p string, mt map[string]string, err error) {
 
 	//=========================================检查地址是否合法=======================================
@@ -215,12 +214,12 @@ func getAddr(originAddrs string) (d string, addrs []string, err error) {
 	}
 }
 
-//Format 格式化注册中心地址
+// Format 格式化注册中心地址
 func Format(ele string) string {
 	return Join(ele)
 }
 
-//Join 地址连接
+// Join 地址连接
 func Join(elem ...string) string {
 	var builder strings.Builder
 	builder.WriteString("/")
@@ -234,17 +233,17 @@ func Join(elem ...string) string {
 	return strings.TrimSuffix(builder.String(), "/")
 }
 
-//Split 将路径分隔为多段数组
+// Split 将路径分隔为多段数组
 func Split(path string) []string {
 	return strings.Split(Trim(path), "/")
 }
 
-//Trim 去掉前后的""/"
+// Trim 去掉前后的""/"
 func Trim(l string) string {
 	return strings.Trim(l, "/")
 }
 
-//Close 关闭注册中心的服务
+// Close 关闭注册中心的服务
 func Close() {
 	registryMap.RemoveIterCb(func(key string, value interface{}) bool {
 		if v, ok := value.(IRegistry); ok {

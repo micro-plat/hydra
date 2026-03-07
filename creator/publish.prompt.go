@@ -103,9 +103,9 @@ func terminalWidth() (int, error) {
 type wrapperFunc func(string) string
 
 func wrapper(limit int, breakWords bool) wrapperFunc {
-	if limit < 1 {
-		panic("Wrapper limit cannot be less than 1.")
-	}
+	// if limit < 1 {
+	// 	panic("Wrapper limit cannot be less than 1.")
+	// }
 
 	return func(input string) string {
 		var wrapped string

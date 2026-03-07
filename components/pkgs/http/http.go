@@ -14,13 +14,13 @@ import (
 	varhttp "github.com/micro-plat/hydra/conf/vars/http"
 )
 
-//Client HTTP客户端
+// Client HTTP客户端
 type Client struct {
 	*varhttp.HTTPConf
 	client *http.Client
 }
 
-//ClientRequest  http请求
+// ClientRequest  http请求
 type ClientRequest struct {
 	headers  map[string]string
 	client   *http.Client
@@ -36,7 +36,7 @@ func NewClient(opts ...varhttp.Option) (client *Client, err error) {
 	return NewClientByConf(httpconf)
 }
 
-//NewClientByConf 通过配置对象获取客户端
+// NewClientByConf 通过配置对象获取客户端
 func NewClientByConf(conf *varhttp.HTTPConf) (client *Client, err error) {
 	client = &Client{}
 	client.HTTPConf = conf
@@ -58,8 +58,9 @@ func NewClientByConf(conf *varhttp.HTTPConf) (client *Client, err error) {
 				return c, nil
 			},
 			MaxIdleConnsPerHost:   0,
-			ResponseHeaderTimeout: 0,
+			ResponseHeaderTimeout: time.Second * time.Duration(client.HTTPConf.RequestTimeout),
 		},
+		Timeout: time.Second * time.Duration(client.HTTPConf.RequestTimeout),
 	}
 	client.client = orginalClient
 	return
@@ -79,7 +80,7 @@ func (c *Client) Post(url string, params string, charset ...string) (content str
 	return string(r), s, err
 }
 
-//Upload 文件上传
+// Upload 文件上传
 func (c *Client) Upload(url string, params map[string]string, files map[string]string, charset string, header http.Header, cookies ...*http.Cookie) (content string, status int, err error) {
 	ncharset := getCharset(charset)
 	bodyBuffer := &bytes.Buffer{}

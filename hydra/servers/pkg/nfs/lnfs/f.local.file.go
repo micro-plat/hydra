@@ -9,7 +9,7 @@ import (
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
 )
 
-//SaveFile 保存文件
+// SaveFile 保存文件
 func (l *local) SaveFile(name string, buff []byte, hosts ...string) (f *eFileFP, err error) {
 
 	//将文件写入本地
@@ -25,10 +25,10 @@ func (l *local) SaveFile(name string, buff []byte, hosts ...string) (f *eFileFP,
 	fp.MergeHosts(hosts...)
 	fp.MergeHosts(l.currentAddr)
 	l.FPS.Set(name, fp)
-	return fp, l.FPWrite(l.FPS)
+	return fp, l.FPWrite(l.FPS.Items())
 }
 
-//FRead 读取文件，本地不存在
+// FRead 读取文件，本地不存在
 func (l *local) FRead(name string) ([]byte, error) {
 	buff, err := os.ReadFile(filepath.Join(l.path, name))
 	if err != nil {
@@ -37,7 +37,7 @@ func (l *local) FRead(name string) ([]byte, error) {
 	return buff, nil
 }
 
-//FWrite 写入文件到本地
+// FWrite 写入文件到本地
 func (l *local) FWrite(name string, buff []byte) error {
 	rpath := filepath.Join(l.path, name)
 
@@ -56,7 +56,7 @@ func (l *local) FWrite(name string, buff []byte) error {
 	return nil
 }
 
-//FList 获取本地所有文件清单
+// FList 获取本地所有文件清单
 func (l *local) FList(path string) (eFileEntityList, eDirEntityList, error) {
 
 	//文件夹不存在时返回空

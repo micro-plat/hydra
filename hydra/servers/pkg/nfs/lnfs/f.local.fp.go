@@ -6,12 +6,12 @@ import (
 	"os"
 )
 
-//FPHas 本地是否存在文件
+// FPHas 本地是否存在文件
 func (l *local) Has(name string) bool {
 	return l.FPS.Has(name)
 }
 
-//GetFP 获以FP配置
+// GetFP 获以FP配置
 func (l *local) GetFP(name string) (*eFileFP, bool) {
 	if fx, ok := l.FPS.Get(name); ok {
 		f := fx.(*eFileFP)
@@ -20,9 +20,12 @@ func (l *local) GetFP(name string) (*eFileFP, bool) {
 	return nil, false
 }
 
-//GetFPs 获以FP列表
+// GetFPs 获以FP列表
 func (l *local) GetFPs() EFileFPLists {
-	l.nfsChecker.Wait()
+	//检查是否正在初始化，如果是则等待初始化完成
+	if l.init {
+		l.nfsChecker.Wait()
+	}
 	list := make(EFileFPLists)
 	for k, v := range l.FPS.Items() {
 		list[k] = v.(*eFileFP)
@@ -30,7 +33,7 @@ func (l *local) GetFPs() EFileFPLists {
 	return list
 }
 
-//FPWrite 写入本地文件
+// FPWrite 写入本地文件
 func (l *local) FPWrite(content interface{}) error {
 	buff, err := json.Marshal(content)
 	if err != nil {
@@ -43,7 +46,7 @@ func (l *local) FPWrite(content interface{}) error {
 	return os.WriteFile(l.fpPath, buff, 0666)
 }
 
-//FPRead 读取指纹信息
+// FPRead 读取指纹信息
 func (l *local) FPRead() (EFileFPLists, error) {
 	list := make(EFileFPLists)
 	buff, err := os.ReadFile(l.fpPath)
