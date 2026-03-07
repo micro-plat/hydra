@@ -13,12 +13,14 @@ const defLogPath = "../conf/logger.toml"
 
 var loggerPath = []string{"./logger.toml", defLogPath}
 
-//Layout 输出器
+// Layout 输出器
 type Layout struct {
-	Type   string `json:"type"  toml:"type"`
-	Level  string `json:"level" valid:"in(Off|Info|Warn|Error|Fatal|Debug|All)" toml:"level"`
-	Path   string `json:"path,omitempty,omitempty" toml:"path"`
-	Layout string `json:"layout" toml:"layout"`
+	Type         string `json:"type"  toml:"type"`
+	Level        string `json:"level" valid:"in(Off|Info|Warn|Error|Fatal|Debug|All)" toml:"level"`
+	Path         string `json:"path,omitempty,omitempty" toml:"path"`
+	Layout       string `json:"layout" toml:"layout"`
+	AutoCompress bool   `json:"auto_compress" toml:"auto_compress"`
+	MaxDays      int    `json:"max_days" toml:"max_days"`
 }
 type layoutSetting struct {
 	Layouts []*Layout `json:"layouts" toml:"layouts"`
@@ -27,7 +29,7 @@ type layoutSetting struct {
 func newDefLayouts() *layoutSetting {
 	setting := &layoutSetting{Layouts: make([]*Layout, 0, 2)}
 
-	fileLayout := &Layout{Type: "file", Level: SLevel_ALL}
+	fileLayout := &Layout{Type: "file", Level: SLevel_ALL, AutoCompress: true, MaxDays: 15}
 	fileLayout.Path, _ = file.GetAbs("../logs/%app/%date.log")
 	fileLayout.Layout = "[%datetime.%ms][%l][%session] %content%n"
 	setting.Layouts = append(setting.Layouts, fileLayout)
@@ -39,7 +41,7 @@ func newDefLayouts() *layoutSetting {
 	return setting
 }
 
-//Encode 将当前配置内容保存到文件中
+// Encode 将当前配置内容保存到文件中
 func Encode(paths ...string) (string, error) {
 	for _, path := range paths {
 		if _, err := os.Stat(path); err == nil || os.IsExist(err) {
@@ -62,7 +64,7 @@ func Encode(paths ...string) (string, error) {
 	return path, nil
 }
 
-//Decode 从配置文件中读取配置信息
+// Decode 从配置文件中读取配置信息
 func Decode(f string) (*layoutSetting, error) {
 	l := &layoutSetting{}
 	if _, err := toml.DecodeFile(f, &l); err != nil {

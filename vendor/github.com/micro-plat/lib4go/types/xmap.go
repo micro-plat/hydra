@@ -15,7 +15,7 @@ import (
 
 var _ IXMap = XMap{}
 
-//IXMap 扩展map
+// IXMap 扩展map
 type IXMap interface {
 	//Keys map中的所有键名
 	Keys() []string
@@ -55,6 +55,8 @@ type IXMap interface {
 
 	//GetDatetime 获取日期类型的值
 	GetDatetime(name string, format ...string) (time.Time, error)
+	//GetTime 获取日期类型的值
+	GetTime(name string, format ...string) time.Time
 
 	//GetStrings 获取值为[]string类型的值
 	GetStrings(name string, def ...string) (r []string)
@@ -150,20 +152,20 @@ type IXMap interface {
 	MergeSMap(anr map[string]string)
 }
 
-//XMap map扩展对象
+// XMap map扩展对象
 type XMap map[string]interface{}
 
-//NewXMap 构建xmap对象
+// NewXMap 构建xmap对象
 func NewXMap(len ...int) XMap {
 	return make(map[string]interface{}, GetIntByIndex(len, 0, 1))
 }
 
-//NewXMapByMap 根据map[string]interface{}构建xmap
+// NewXMapByMap 根据map[string]interface{}构建xmap
 func NewXMapByMap(i map[string]interface{}) XMap {
 	return i
 }
 
-//NewXMapBySMap  根据map[string]string构建xmap
+// NewXMapBySMap  根据map[string]string构建xmap
 func NewXMapBySMap(i map[string]string) XMap {
 	n := make(map[string]interface{})
 	for k, v := range i {
@@ -172,7 +174,7 @@ func NewXMapBySMap(i map[string]string) XMap {
 	return n
 }
 
-//NewXMapByJSON 根据json创建XMap
+// NewXMapByJSON 根据json创建XMap
 func NewXMapByJSON(j string) (XMap, error) {
 	var query XMap
 	d := json.NewDecoder(bytes.NewBuffer(StringToBytes(j)))
@@ -181,7 +183,7 @@ func NewXMapByJSON(j string) (XMap, error) {
 	return query, err
 }
 
-//NewXMapByXML 将xml转换为xmap
+// NewXMapByXML 将xml转换为xmap
 func NewXMapByXML(j string) (XMap, error) {
 	data := make(map[string]interface{})
 	mxj.PrependAttrWithHyphen(false) //修改成可以转换成多层map
@@ -207,7 +209,7 @@ func NewXMapByXML(j string) (XMap, error) {
 	return data, nil
 }
 
-//Merge 合并
+// Merge 合并
 func (q XMap) Merge(m IXMap) {
 	keys := m.Keys()
 	for _, key := range keys {
@@ -215,21 +217,21 @@ func (q XMap) Merge(m IXMap) {
 	}
 }
 
-//MergeMap 将传入的xmap合并到当前xmap
+// MergeMap 将传入的xmap合并到当前xmap
 func (q XMap) MergeMap(anr map[string]interface{}) {
 	for k, v := range anr {
 		q.SetValue(k, v)
 	}
 }
 
-//MergeSMap 将传入的xmap合并到当前xmap
+// MergeSMap 将传入的xmap合并到当前xmap
 func (q XMap) MergeSMap(anr map[string]string) {
 	for k, v := range anr {
 		q.SetValue(k, v)
 	}
 }
 
-//Cascade 对map进行级联累加，即将多级map转化为一级map,key使用"."进行边拉
+// Cascade 对map进行级联累加，即将多级map转化为一级map,key使用"."进行边拉
 func (q XMap) Cascade(m IXMap) {
 	keys := m.Keys()
 	for _, key := range keys {
@@ -238,7 +240,7 @@ func (q XMap) Cascade(m IXMap) {
 	}
 }
 
-//Append 追加键值对
+// Append 追加键值对
 func (q XMap) Append(kv ...interface{}) {
 	if len(kv) == 0 || len(kv)%2 != 0 {
 		return
@@ -249,7 +251,7 @@ func (q XMap) Append(kv ...interface{}) {
 	return
 }
 
-//Keys 从对象中获取数据值，如果不是字符串则返回空
+// Keys 从对象中获取数据值，如果不是字符串则返回空
 func (q XMap) Keys() []string {
 	keys := make([]string, 0, len(q))
 	for k := range q {
@@ -258,73 +260,78 @@ func (q XMap) Keys() []string {
 	return keys
 }
 
-//IsEmpty 当前对象未包含任何数据
+// IsEmpty 当前对象未包含任何数据
 func (q XMap) IsEmpty() bool {
 	return q == nil || len(q) == 0
 }
 
-//Len 获取当前对象包含的键值对个数
+// Len 获取当前对象包含的键值对个数
 func (q XMap) Len() int {
 	return len(q)
 }
 
-//Get 获取指定元素的值
+// Get 获取指定元素的值
 func (q XMap) Get(name string) (interface{}, bool) {
 	v, ok := q[name]
 	return v, ok
 }
 
-//GetValue 获取指定参数的值
+// GetValue 获取指定参数的值
 func (q XMap) GetValue(name string) interface{} {
 	return q[name]
 }
 
-//GetString 从对象中获取数据值，如果不是字符串则返回空
+// GetString 从对象中获取数据值，如果不是字符串则返回空
 func (q XMap) GetString(name string, def ...string) string {
 	return GetString(q[name], def...)
 }
 
-//GetInt 从对象中获取数据值，如果不是字符串则返回0
+// GetInt 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) GetInt(name string, def ...int) int {
 	return GetInt(q[name], def...)
 }
 
-//GetInt32 从对象中获取数据值，如果不是字符串则返回0
+// GetInt32 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) GetInt32(name string, def ...int32) int32 {
 	return GetInt32(q[name], def...)
 }
 
-//GetInt64 从对象中获取数据值，如果不是字符串则返回0
+// GetInt64 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) GetInt64(name string, def ...int64) int64 {
 	return GetInt64(q[name], def...)
 }
 
-//GetFloat32 从对象中获取数据值，如果不是字符串则返回0
+// GetFloat32 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) GetFloat32(name string, def ...float32) float32 {
 	return GetFloat32(q[name], def...)
 }
 
-//GetFloat64 从对象中获取数据值，如果不是字符串则返回0
+// GetFloat64 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) GetFloat64(name string, def ...float64) float64 {
 	return GetFloat64(q[name], def...)
 }
 
-//GetDecimal 获取类型为Decimal的值
+// GetDecimal 获取类型为Decimal的值
 func (q XMap) GetDecimal(name string, def ...Decimal) Decimal {
 	return GetDecimal(q[name], def...)
 }
 
-//GetBool 从对象中获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
+// GetBool 从对象中获取bool类型值，表示为true的值有：1, t, T, true, TRUE, True, YES, yes, Yes, Y, y, ON, on, On
 func (q XMap) GetBool(name string, def ...bool) bool {
 	return GetBool(q[name], def...)
 }
 
-//GetDatetime 获取时间字段
+// GetDatetime 获取时间字段
 func (q XMap) GetDatetime(name string, format ...string) (time.Time, error) {
 	return GetDatetime(q[name], format...)
 }
 
-//GetStrings 获取字符串数组
+// GetDatetime 获取时间字段
+func (q XMap) GetTime(name string, format ...string) time.Time {
+	return GetTime(q[name], GetStringByIndex(format, 0, "2006-01-02 15:04:05"))
+}
+
+// GetStrings 获取字符串数组
 func (q XMap) GetStrings(name string, def ...string) (r []string) {
 	if v := q.GetString(name); v != "" {
 		if r = strings.Split(v, ","); len(r) > 0 {
@@ -337,7 +344,7 @@ func (q XMap) GetStrings(name string, def ...string) (r []string) {
 	return nil
 }
 
-//GetArray 获取数组对象
+// GetArray 获取数组对象
 func (q XMap) GetArray(name string, def ...interface{}) (r []interface{}) {
 	v, ok := q.Get(name)
 	if !ok && len(def) > 0 || v == nil {
@@ -358,13 +365,13 @@ func (q XMap) GetArray(name string, def ...interface{}) (r []interface{}) {
 	return []interface{}{v}
 }
 
-//Marshal 转换为json数据
+// Marshal 转换为json数据
 func (q XMap) Marshal() []byte {
 	r, _ := json.Marshal(q)
 	return r
 }
 
-//GetJSON 获取JSON串
+// GetJSON 获取JSON串
 func (q XMap) GetJSON(name string) (r []byte, err error) {
 	v, ok := q.Get(name)
 	if !ok {
@@ -378,7 +385,7 @@ func (q XMap) GetJSON(name string) (r []byte, err error) {
 	return buffer, nil
 }
 
-//IsXMap 是否存在节点
+// IsXMap 是否存在节点
 func (q XMap) IsXMap(name string) bool {
 	v, ok := q.Get(name)
 	if !ok {
@@ -388,7 +395,7 @@ func (q XMap) IsXMap(name string) bool {
 	return ok
 }
 
-//GetXMap 指定节点名称获取JSONConf
+// GetXMap 指定节点名称获取JSONConf
 func (q XMap) GetXMap(name string) (c XMap) {
 	v, ok := q.Get(name)
 	if !ok {
@@ -407,48 +414,48 @@ func (q XMap) GetXMap(name string) (c XMap) {
 	return map[string]interface{}{}
 }
 
-//SetValue 获取时间字段
+// SetValue 获取时间字段
 func (q XMap) SetValue(name string, value interface{}) {
 	q[name] = value
 }
 
-//Has 检查对象中是否存在某个值
+// Has 检查对象中是否存在某个值
 func (q XMap) Has(name string) bool {
 	_, ok := q.Get(name)
 	return ok
 }
 
-//MustString 从对象中获取数据值，如果不是字符串则返回空
+// MustString 从对象中获取数据值，如果不是字符串则返回空
 func (q XMap) MustString(name string) (string, bool) {
 	return MustString(q[name])
 }
 
-//MustInt 从对象中获取数据值，如果不是字符串则返回0
+// MustInt 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustInt(name string) (int, bool) {
 	return MustInt(q[name])
 }
 
-//MustInt32 从对象中获取数据值，如果不是字符串则返回0
+// MustInt32 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustInt32(name string) (int32, bool) {
 	return MustInt32(q[name])
 }
 
-//MustInt64 从对象中获取数据值，如果不是字符串则返回0
+// MustInt64 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustInt64(name string) (int64, bool) {
 	return MustInt64(q[name])
 }
 
-//MustFloat32 从对象中获取数据值，如果不是字符串则返回0
+// MustFloat32 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustFloat32(name string) (float32, bool) {
 	return MustFloat32(q[name])
 }
 
-//MustFloat64 从对象中获取数据值，如果不是字符串则返回0
+// MustFloat64 从对象中获取数据值，如果不是字符串则返回0
 func (q XMap) MustFloat64(name string) (float64, bool) {
 	return MustFloat64(q[name])
 }
 
-//ToKV 转换为可通过URL传递的键值对
+// ToKV 转换为可通过URL传递的键值对
 func (q XMap) ToKV(ecoding ...string) string {
 	u := url.Values{}
 	for k, v := range q {
@@ -457,7 +464,7 @@ func (q XMap) ToKV(ecoding ...string) string {
 	return u.Encode()
 }
 
-//ToStruct 将当前对象转换为指定的struct
+// ToStruct 将当前对象转换为指定的struct
 func (q XMap) ToStruct(out interface{}) error {
 	buff, err := json.Marshal(q)
 	if err != nil {
@@ -467,24 +474,24 @@ func (q XMap) ToStruct(out interface{}) error {
 	return err
 }
 
-//ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
+// ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
 	return Map2Struct(out, q, "json")
 }
 
-//Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
+// Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
 func (q XMap) Each(fn func(string, interface{})) {
 	for k, v := range q {
 		fn(k, v)
 	}
 }
 
-//Delete 删除指定键名的值
+// Delete 删除指定键名的值
 func (q XMap) Delete(name string) {
 	delete(q, name)
 }
 
-//Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
+// Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
 func (q XMap) Iterator(fn func(string, interface{}) interface{}) XMap {
 	n := NewXMap()
 	for k, v := range q {
@@ -494,7 +501,7 @@ func (q XMap) Iterator(fn func(string, interface{}) interface{}) XMap {
 	return n
 }
 
-//Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
+// Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
 func (q XMap) Count(fn func(string, interface{}) bool) int {
 	var n = 0
 	for k, v := range q {
@@ -505,7 +512,7 @@ func (q XMap) Count(fn func(string, interface{}) bool) int {
 	return n
 }
 
-//Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
+// Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
 func (q XMap) Filter(fn func(string, interface{}) bool) XMap {
 	n := NewXMap()
 	for k, v := range q {
@@ -516,12 +523,12 @@ func (q XMap) Filter(fn func(string, interface{}) bool) XMap {
 	return n
 }
 
-//ToMap 转换为map[string]interface{}
+// ToMap 转换为map[string]interface{}
 func (q XMap) ToMap() map[string]interface{} {
 	return q
 }
 
-//ToSMap 转换为map[string]string
+// ToSMap 转换为map[string]string
 func (q XMap) ToSMap() map[string]string {
 	rmap := make(map[string]string)
 	for k, v := range q {
@@ -543,7 +550,7 @@ func (q XMap) ToSMap() map[string]string {
 	return rmap
 }
 
-//Translate 翻译带参数的变量支持格式有 @abc,{@abc},转义符@
+// Translate 翻译带参数的变量支持格式有 @abc,{@abc},转义符@
 func (q XMap) Translate(format string) string {
 	word := regexp.MustCompile(`[\w^@]*(\{@\w+[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*[\.]?\w*\})`)
 	result := word.ReplaceAllStringFunc(format, func(s string) string {
@@ -585,7 +592,7 @@ func (q XMap) Translate(format string) string {
 	return result
 }
 
-//GetCascade 根据key将值转换为map[string]ineterface{}
+// GetCascade 根据key将值转换为map[string]ineterface{}
 func GetCascade(key string, value interface{}) map[string]interface{} {
 	nmap := make(map[string]interface{})
 	switch vlu := value.(type) {
@@ -618,7 +625,7 @@ func GetCascade(key string, value interface{}) map[string]interface{} {
 	}
 }
 
-//IToMap struct类型转map[string]interface{}
+// IToMap struct类型转map[string]interface{}
 func IToMap(o interface{}) (map[string]interface{}, error) {
 	if o == nil {
 		return nil, nil

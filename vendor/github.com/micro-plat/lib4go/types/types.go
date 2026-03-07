@@ -174,6 +174,13 @@ func GetDatetime(v interface{}, format ...string) (time.Time, error) {
 	}
 	return time.ParseInLocation(f, t, time.Local)
 }
+func GetTime(v interface{}, format string, def ...time.Time) time.Time {
+	t, err := GetDatetime(v, format)
+	if err != nil {
+		return GetTimeByIndex(def, 0)
+	}
+	return t
+}
 
 // MustString 获取字符串，不是字符串格式则返回false
 func MustString(v interface{}) (string, bool) {
@@ -381,6 +388,17 @@ func GetErrorByIndex(v []error, index int, def ...error) error {
 		return def[0]
 	}
 	return nil
+}
+
+// GetErrorByIndex 获取数组中的指定元素
+func GetTimeByIndex(v []time.Time, index int, def ...time.Time) time.Time {
+	if len(v) > index {
+		return v[index]
+	}
+	if len(def) > 0 {
+		return def[0]
+	}
+	return time.Now()
 }
 
 // ParseBool 将字符串转换为bool值
