@@ -14,6 +14,7 @@ import (
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/nfs/infs"
 	"github.com/micro-plat/lib4go/errs"
+	"github.com/micro-plat/lib4go/security/md5"
 )
 
 // GetDirList 获取本机目录信息
@@ -58,6 +59,9 @@ func (c *cnfs) Upload(ctx context.IContext) interface{} {
 	ctx.Response().AddSpecial(fmt.Sprintf("nfs|%s|%d", name, size))
 	return map[string]interface{}{
 		"path": xpath,
+		"ext":  filepath.Ext(name),
+		"size": size,
+		"md5":  md5.EncryptBytes(buff),
 	}
 }
 
