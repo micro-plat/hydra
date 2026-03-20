@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydra 微服务框架 - 文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #10b981;
+            --dark-bg: #0f172a;
+            --sidebar-bg: #1e293b;
+            --content-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+            --hover-bg: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--content-bg);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* 顶部导航 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--sidebar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .breadcrumb {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .home-btn {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .home-btn:hover {
+            color: white;
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--sidebar-bg);
+            overflow-y: auto;
+            padding: 20px 0;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-section {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-title {
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 10px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background: var(--hover-bg);
+            color: white;
+        }
+
+        .sidebar-link.active {
+            background: var(--hover-bg);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.chapter {
+            font-weight: 600;
+            color: white;
+            padding-left: 16px;
+        }
+
+        .sidebar-link.section {
+            padding-left: 32px;
+            font-size: 13px;
+        }
+
+        /* 主内容区 */
+        .main {
+            margin-left: 280px;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+            padding: 40px 60px;
+            max-width: 900px;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block !important;
+        }
+
+        /* 内容样式 */
+        .content h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 48px;
+            margin-bottom: 20px;
+        }
+
+        .content h3 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        .content h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            color: var(--text-secondary);
+        }
+
+        .content li {
+            margin-bottom: 8px;
+        }
+
+        .content code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #dc2626;
+        }
+
+        .content pre {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .content pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .content th, .content td {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .content th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .content a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .content a:hover {
+            text-decoration: underline;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 16px;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 回到顶部 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .back-to-top.visible {
+            display: flex;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main {
+                margin-left: 240px;
+                padding: 30px 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 99;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--sidebar-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* 目录章节分组样式 */
+        .chapter-group {
+            margin-bottom: 24px;
+        }
+
+        .chapter-label {
+            padding: 8px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">H</div>
+                <span>Hydra</span>
+            </a>
+            <span class="breadcrumb">/ <a href="index.html">首页</a> / <span id="currentChapter">文档</span></span>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="home-btn">← 返回首页</a>
+        </div>
+    </header>
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">基础入门</div>
+            <ul class="sidebar-menu">
+                <li><a href="#chapter1" class="sidebar-link chapter active" data-chapter="1">第一章：框架概述</a></li>
+                <li><a href="#chapter2" class="sidebar-link chapter" data-chapter="2">第二章：核心概念</a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-title">服务开发</div>
+            <ul class="sidebar-menu">
+                <li><a href="#chapter3" class="sidebar-link chapter" data-chapter="3">第三章：HTTP服务开发</a></li>
+                <li><a href="#chapter4" class="sidebar-link chapter" data-chapter="4">第四章：RPC服务开发</a></li>
+                <li><a href="#chapter5" class="sidebar-link chapter" data-chapter="5">第五章：定时任务开发</a></li>
+                <li><a href="#chapter6" class="sidebar-link chapter" data-chapter="6">第六章：消息队列消费</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">核心功能</div>
+            <ul class="sidebar-menu">
+                <li><a href="#chapter7" class="sidebar-link chapter" data-chapter="7">第七章：服务注册与发现</a></li>
+                <li><a href="#chapter8" class="sidebar-link chapter" data-chapter="8">第八章：组件使用</a></li>
+                <li><a href="#chapter9" class="sidebar-link chapter" data-chapter="9">第九章：上下文与请求处理</a></li>
+                <li><a href="#chapter10" class="sidebar-link chapter" data-chapter="10">第十章：中间件与钩子</a></li>
+                <li><a href="#chapter11" class="sidebar-link chapter" data-chapter="11">第十一章：配置详解</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">运维与进阶</div>
+            <ul class="sidebar-menu">
+                <li><a href="#chapter12" class="sidebar-link chapter" data-chapter="12">第十二章：监控与运维</a></li>
+                <li><a href="#chapter13" class="sidebar-link chapter" data-chapter="13">第十三章：高级特性</a></li>
+                <li><a href="#chapter14" class="sidebar-link chapter" data-chapter="14">第十四章：最佳实践</a></li>
+                <li><a href="#chapter15" class="sidebar-link chapter" data-chapter="15">第十五章：实战案例</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main">
+        <!-- 第一章：框架概述 -->
+        <div id="chapter1" class="content active">
+            <h1>第一章：框架概述</h1>
+            
+            <h2>1.1 Hydra框架介绍</h2>
+            <p>Hydra是基于Golang实现的微服务容器框架，为开发者提供简单、统一、易扩展的服务容器解决方案。通过少量的代码集成，即可实现丰富的功能，包括集群管理、配置管理、服务注册与发现、系统监控、日志归集、链路追踪、安全访问等。</p>
+            <p>Hydra框架目前已应用于50+生产项目，经过了大量实际生产环境的验证，具有极高的稳定性和可靠性。</p>
+
+            <h2>1.2 核心特性</h2>
+            
+            <h3>1.2.1 六类服务支持</h3>
+            <ul>
+                <li><strong>API服务</strong>：基于RESTful风格的API服务</li>
+                <li><strong>Web服务</strong>：提供Web页面渲染能力</li>
+                <li><strong>WebSocket服务</strong>：支持实时双向通信</li>
+                <li><strong>RPC服务</strong>：基于gRPC的高性能远程过程调用</li>
+                <li><strong>定时任务服务</strong>：基于时间轮的定时任务调度</li>
+                <li><strong>消息消费服务</strong>：支持多种消息队列的消费</li>
+            </ul>
+
+            <h3>1.2.2 跨平台支持</h3>
+            <p>Hydra支持Windows、Mac、Linux三大主流操作系统，可以以服务方式安装、运行、停止、卸载，满足跨平台部署需求。</p>
+
+            <h3>1.2.3 配置管理</h3>
+            <p>采用配置中心模式，中心化管理配置，本地零配置。支持以下配置源：</p>
+            <ul>
+                <li>Zookeeper</li>
+                <li>Redis</li>
+                <li>本地文件</li>
+                <li>进程内配置</li>
+            </ul>
+            <p>配置变更后自动生效，无须手动重启服务。</p>
+
+            <h3>1.2.4 访问控制</h3>
+            <ul>
+                <li>白名单、黑名单访问控制</li>
+                <li>Basic Auth认证</li>
+                <li>API KEY认证</li>
+                <li>JWT认证</li>
+            </ul>
+
+            <h2>1.3 系统架构</h2>
+            <pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        Hydra应用层                               │
+├─────────────────────────────────────────────────────────────────┤
+│  API服务  │  Web服务  │  WebSocket  │  RPC服务  │  Cron/MQC  │
+├─────────────────────────────────────────────────────────────────┤
+│                        服务管理层                               │
+│  服务注册  │  服务发现  │  负载均衡  │  熔断降级  │  灰度发布  │
+├─────────────────────────────────────────────────────────────────┤
+│                        配置中心层                               │
+│  配置管理  │  配置热更新  │  多配置源  │  配置比对  │
+├─────────────────────────────────────────────────────────────────┤
+│                        组件层                                   │
+│   DB   │  Cache  │  Queue  │  RPC  │  HTTP  │  DLock  │
+├─────────────────────────────────────────────────────────────────┤
+│                        注册中心层                               │
+│    Zookeeper    │    Etcd    │    Redis    │   Local    │
+├─────────────────────────────────────────────────────────────────┤
+│                        监控层                                   │
+│    指标采集    │   日志归集   │   链路追踪   │   告警    │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h2>1.4 快速开始</h2>
+            
+            <h3>1.4.1 环境要求</h3>
+            <ul>
+                <li>Go 1.15及以上版本</li>
+                <li>支持的操作系统：Windows、Mac、Linux</li>
+            </ul>
+
+            <h3>1.4.2 安装</h3>
+            <pre><code>go get github.com/micro-plat/hydra</code></pre>
+
+            <h3>1.4.3 第一个示例：构建API服务</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/http"
+)
+
+func main() {
+    // 创建应用，指定平台名、系统名和服务类型
+    app := hydra.NewApp(
+        hydra.WithPlatName("test"),           // 平台名
+        hydra.WithSystemName("apiserver"),   // 系统名
+        hydra.WithServerTypes(http.API),      // 服务类型：API
+    )
+
+    // 注册服务
+    app.API("/hello", func(ctx hydra.IContext) interface{} {
+        return "hello world"
+    })
+
+    // 启动应用
+    app.Start()
+}</code></pre>
+
+            <h4>运行服务：</h4>
+            <pre><code>go run main.go</code></pre>
+
+            <h4>测试服务：</h4>
+            <pre><code>curl http://localhost:8080/hello
+# 返回: hello world</code></pre>
+
+            <h3>1.4.4 组合服务示例</h3>
+            <p>Hydra支持在同一应用中组合使用多种服务类型：</p>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"   
+    "github.com/micro-plat/hydra/hydra/servers/http"
+    "github.com/micro-plat/hydra/hydra/servers/cron"
+)
+
+func main() {
+    // 创建支持API和定时任务的应用
+    app := hydra.NewApp(
+        hydra.WithServerTypes(http.API, cron.CRON),
+    )
+
+    // 注册API服务
+    app.API("/hello", hello)
+    
+    // 注册定时任务
+    app.CRON("/task", hello, "@every 5s") 
+    
+    // 启动应用
+    app.Start()
+}
+
+func hello(ctx hydra.IContext) interface{} {
+    return "hello world"
+}</code></pre>
+
+            <h2>1.5 应用创建选项</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>说明</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>WithPlatName</code></td>
+                        <td>设置平台名称</td>
+                        <td><code>WithPlatName("test")</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>WithSystemName</code></td>
+                        <td>设置系统名称</td>
+                        <td><code>WithSystemName("apiserver")</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>WithClusterName</code></td>
+                        <td>设置集群名称</td>
+                        <td><code>WithClusterName("prod")</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>WithServerTypes</code></td>
+                        <td>设置服务类型</td>
+                        <td><code>WithServerTypes(http.API, rpc.RPC)</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>WithRegistry</code></td>
+                        <td>设置注册中心地址</td>
+                        <td><code>WithRegistry("zookeeper://localhost:2181")</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>WithDebug</code></td>
+                        <td>启用调试模式</td>
+                        <td><code>WithDebug()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 第二章：核心概念 -->
+        <div id="chapter2" class="content">
+            <h1>第二章：核心概念</h1>
+            
+            <h2>2.1 应用模型</h2>
+            <p>Hydra应用是服务的容器，每个应用可以包含多种服务类型（API、Web、RPC等）。</p>
+
+            <h3>2.1.1 创建应用</h3>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithPlatName("test"),           // 平台名
+    hydra.WithSystemName("apiserver"),   // 系统名
+    hydra.WithClusterName("prod"),        // 集群名
+    hydra.WithServerTypes(http.API),      // 服务类型
+)</code></pre>
+
+            <h2>2.2 服务类型详解</h2>
+            
+            <h3>2.2.1 API服务</h3>
+            <p>提供RESTful风格的HTTP API接口，是最常用的服务类型。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(http.API),
+)
+app.API("/users", usersHandler)
+app.Start()</code></pre>
+
+            <h3>2.2.2 Web服务</h3>
+            <p>提供Web页面渲染和静态文件服务。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(http.WEB),
+)
+app.Web("/", indexHandler)
+app.Start()</code></pre>
+
+            <h3>2.2.3 WebSocket服务</h3>
+            <p>支持实时双向通信。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(http.WS),
+)
+app.WS("/chat", chatHandler)
+app.Start()</code></pre>
+
+            <h3>2.2.4 RPC服务</h3>
+            <p>基于gRPC的高性能远程过程调用。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(rpc.RPC),
+)
+app.RPC("/user", userService)
+app.Start()</code></pre>
+
+            <h3>2.2.5 定时任务服务</h3>
+            <p>基于时间轮的定时任务调度。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(cron.CRON),
+)
+app.CRON("/sync", syncHandler, "@every 5s")
+app.Start()</code></pre>
+
+            <h3>2.2.6 消息消费服务</h3>
+            <p>支持Kafka、Redis、MQTT等消息队列消费。</p>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithServerTypes(mqc.MQC),
+)
+app.MQC("/queue", handler, "queue-name")
+app.Start()</code></pre>
+
+            <h2>2.3 生命周期钩子</h2>
+            
+            <h3>2.3.1 服务级别钩子</h3>
+            <pre><code>// 服务启动前
+services.Def.OnSetup(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)
+
+// 服务启动后
+services.Def.OnStarted(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)
+
+// 服务关闭前
+services.Def.OnClosing(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)</code></pre>
+
+            <h3>2.3.2 请求处理钩子</h3>
+            <pre><code>// 请求处理前
+services.Def.OnHandleExecuting(func(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("请求开始")
+    return nil
+})
+
+// 请求处理后
+services.Def.OnHandleExecuted(func(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("请求结束")
+    return nil
+})</code></pre>
+        </div>
+
+        <!-- 第三章：HTTP服务开发 -->
+        <div id="chapter3" class="content">
+            <h1>第三章：HTTP服务开发</h1>
+            
+            <h2>3.1 API服务基础</h2>
+            
+            <h3>3.1.1 创建API服务</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/http"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithPlatName("test"),
+        hydra.WithSystemName("apiserver"),
+        hydra.WithClusterName("prod"),
+        hydra.WithServerTypes(http.API),
+    )
+
+    // 注册路由
+    app.API("/hello", helloHandler)
+    app.API("/users", usersHandler)
+    app.API("/users/:id", userHandler)
+
+    app.Start()
+}
+
+func helloHandler(ctx hydra.IContext) interface{} {
+    return "hello world"
+}
+
+func usersHandler(ctx hydra.IContext) interface{} {
+    return []map[string]interface{}{
+        {"id": 1, "name": "张三"},
+        {"id": 2, "name": "李四"},
+    }
+}
+
+func userHandler(ctx hydra.IContext) interface{} {
+    id := ctx.Request().GetMap()["id"]
+    return map[string]interface{}{
+        "id":   id,
+        "name": "用户" + id,
+    }
+}</code></pre>
+
+            <h3>3.1.2 配置API服务</h3>
+            <pre><code>// 配置API服务监听端口8090
+hydra.Conf.API("8090")
+
+// 配置带超时和请求头读取超时
+hydra.Conf.API("8090", api.WithHeaderReadTimeout(30), api.WithTimeout(30, 30))</code></pre>
+
+            <h2>3.2 请求参数处理</h2>
+            
+            <h3>3.2.1 获取请求参数</h3>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    // 获取所有参数（Query + Body + Path）
+    params := ctx.Request().GetMap()
+    
+    // 获取特定参数
+    name := ctx.Request().GetMap().GetString("name")
+    age := ctx.Request().GetMap().GetInt("age", 0)
+    
+    // 获取Body
+    body, _ := ctx.Request().GetBody()
+    
+    return map[string]interface{}{
+        "params": params,
+        "name":   name,
+        "age":    age,
+    }
+}</code></pre>
+
+            <h3>3.2.2 参数绑定到结构体</h3>
+            <pre><code>type UserRequest struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+    ID   string `path:"id"`  // 路径参数
+}
+
+func handler(ctx hydra.IContext) interface{} {
+    user := &UserRequest{}
+    if err := ctx.Request().Bind(user); err != nil {
+        return fmt.Errorf("参数绑定失败: %v", err)
+    }
+    return user
+}</code></pre>
+
+            <h2>3.3 响应处理</h2>
+            
+            <h3>3.3.1 基本响应</h3>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    // 普通字符串 - text/plain
+    return "success"
+    
+    // Map/Struct - application/json
+    return map[string]interface{}{"name": "colin"}
+    
+    // XML字符串 - application/xml
+    return `<name>colin</name>`
+}</code></pre>
+
+            <h3>3.3.2 使用Response对象</h3>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    resp := ctx.Response()
+    
+    // JSON响应
+    resp.JSON(200, map[string]interface{}{"code": 0, "msg": "success"})
+    
+    // 文件下载
+    resp.File("/path/to/file.zip", nil)
+    
+    // 重定向
+    resp.Redirect(302, "/newlocation")
+    
+    // 停止执行
+    resp.Abort(401, "unauthorized")
+    
+    return nil
+}</code></pre>
+
+            <h2>3.4 访问控制</h2>
+            
+            <h3>3.4.1 白名单</h3>
+            <pre><code>hydra.Conf.API("8080").
+    WhiteList(whitelist.NewIPList("/**", whitelist.WithIP("192.168.4.121")))</code></pre>
+
+            <h3>3.4.2 黑名单</h3>
+            <pre><code>hydra.Conf.API("8080").
+    BlackList(blacklist.NewIPList("/**", blacklist.WithIP("192.168.4.120")))</code></pre>
+
+            <h2>3.5 认证</h2>
+            
+            <h3>3.5.1 JWT认证</h3>
+            <pre><code>// 配置JWT，排除登录接口
+hydra.Conf.API("8080").
+    Jwt(jwt.WithExcludes("/member/**"), jwt.WithHeader())
+
+// 登录时设置JWT信息
+func login(ctx hydra.IContext) interface{} {
+    userInfo := &UserInfo{UID: "209867923", Name: "colin"}
+    ctx.User().Auth().Response(userInfo)
+    return "success"
+}
+
+// 获取JWT中的用户信息
+func getUserInfo(ctx hydra.IContext) interface{} {
+    userInfo := &UserInfo{}
+    ctx.User().Auth().Bind(userInfo)
+    return userInfo
+}</code></pre>
+
+            <h3>3.5.2 Basic认证</h3>
+            <pre><code>hydra.Conf.API("8080").
+    Basic(basic.WithUser("admin"), basic.WithPassword("123456"))</code></pre>
+
+            <h2>3.6 限流</h2>
+            <pre><code>hydra.Conf.API("8080").
+    Limit(limiter.WithRate(100), limiter.WithBurst(50))</code></pre>
+            <ul>
+                <li><code>WithRate(100)</code>: 每秒允许100个请求</li>
+                <li><code>WithBurst(50)</code>: 允许50个突发请求</li>
+            </ul>
+        </div>
+
+        <!-- 第四章：RPC服务开发 -->
+        <div id="chapter4" class="content">
+            <h1>第四章：RPC服务开发</h1>
+            
+            <h2>4.1 RPC服务概述</h2>
+            <p>RPC（Remote Procedure Call）服务基于gRPC协议，提供高性能的远程过程调用。Hydra框架内置gRPC支持，可以方便地创建RPC服务。</p>
+
+            <h3>4.1.1 创建RPC服务</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/rpc"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithPlatName("test"),
+        hydra.WithSystemName("rpcserver"),
+        hydra.WithClusterName("prod"),
+        hydra.WithServerTypes(rpc.RPC),
+    )
+
+    // 注册RPC服务
+    app.RPC("/user", userService)
+
+    app.Start()
+}
+
+var userService = &UserService{}
+
+type UserService struct{}
+
+func (s *UserService) Handle(ctx hydra.IContext) interface{} {
+    return map[string]interface{}{
+        "id":   1,
+        "name": "张三",
+    }
+}</code></pre>
+
+            <h2>4.2 配置RPC服务</h2>
+            
+            <h3>4.2.1 基本配置</h3>
+            <pre><code>// 配置RPC服务监听地址
+hydra.Conf.RPC(":8090")</code></pre>
+
+            <h3>4.2.2 消息大小配置</h3>
+            <pre><code>hydra.Conf.RPC(":8090",
+    rpc.WithMaxRecvMsgSize(10*1024*1024),  // 最大接收消息大小：10MB
+    rpc.WithMaxSendMsgSize(10*1024*1024),  // 最大发送消息大小：10MB
+)</code></pre>
+
+            <h2>4.3 gRPC基础</h2>
+            
+            <h3>4.3.1 定义Proto文件</h3>
+            <pre><code>syntax = "proto3";
+
+package user;
+
+option go_package = "userpb";
+
+service UserService {
+    rpc GetUser (GetUserRequest) returns (User);
+    rpc CreateUser (CreateUserRequest) returns (User);
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
+}
+
+message GetUserRequest {
+    string id = 1;
+}
+
+message CreateUserRequest {
+    string name = 1;
+    int32 age = 2;
+}
+
+message User {
+    string id = 1;
+    string name = 2;
+    int32 age = 3;
+}</code></pre>
+
+            <h3>4.3.2 生成Go代码</h3>
+            <pre><code>protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    user.proto</code></pre>
+
+            <h2>4.4 RPC客户端</h2>
+            <pre><code>// 获取RPC客户端
+client := hydra.C.RPC().GetRPC("test/rpcserver/rpc/prod")
+
+// 调用RPC服务
+func callRPCService(ctx hydra.IContext) interface{} {
+    resp := hydra.C.RPC().Invoke("test/rpcserver/rpc/prod", "/user", map[string]interface{}{
+        "id": "1",
+    })
+    return resp
+}</code></pre>
+        </div>
+
+        <!-- 第五章：定时任务开发 -->
+        <div id="chapter5" class="content">
+            <h1>第五章：定时任务开发</h1>
+            
+            <h2>5.1 定时任务概述</h2>
+            <p>Hydra框架的定时任务服务基于时间轮（Time Wheel）算法实现，具有高性能、低资源消耗的特点。</p>
+
+            <h3>5.1.1 创建定时任务服务</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/cron"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithServerTypes(cron.CRON),
+    )
+
+    // 注册定时任务
+    // 参数：路由路径、处理器函数、CRON表达式
+    app.CRON("/sync", syncDataHandler, "@every 5s")
+
+    app.Start()
+}
+
+func syncDataHandler(ctx hydra.IContext) interface{} {
+    // 定时执行的业务逻辑
+    return "sync success"
+}</code></pre>
+
+            <h2>5.2 CRON表达式</h2>
+            
+            <h3>5.2.1 常用表达式</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>表达式</th>
+                        <th>说明</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>@every 5s</code></td>
+                        <td>每5秒执行一次</td>
+                        <td>@every 5s</td>
+                    </tr>
+                    <tr>
+                        <td><code>@every 5m</code></td>
+                        <td>每5分钟执行一次</td>
+                        <td>@every 5m</td>
+                    </tr>
+                    <tr>
+                        <td><code>@every 1h</code></td>
+                        <td>每小时执行一次</td>
+                        <td>@every 1h</td>
+                    </tr>
+                    <tr>
+                        <td><code>0 0 * * *</code></td>
+                        <td>每天0点执行</td>
+                        <td>每天0点</td>
+                    </tr>
+                    <tr>
+                        <td><code>0 */2 * * *</code></td>
+                        <td>每隔2小时执行</td>
+                        <td>每隔2小时</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>5.3 动态任务管理</h2>
+            <pre><code>// 添加任务
+hydra.CRON.Add("/task1", taskHandler, "@every 10s")
+
+// 移除任务
+hydra.CRON.Remove("/task1")
+
+// 暂停所有任务
+hydra.CRON.Pause()
+
+// 恢复所有任务
+hydra.CRON.Resume()</code></pre>
+        </div>
+
+        <!-- 第六章：消息队列消费 -->
+        <div id="chapter6" class="content">
+            <h1>第六章：消息队列消费</h1>
+            
+            <h2>6.1 消息队列概述</h2>
+            <p>Hydra框架支持多种消息队列，包括Kafka、Redis Queue、MQTT、本地队列（LMQ）。</p>
+
+            <h3>6.1.1 创建消息消费服务</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/mqc"
+    "github.com/micro-plat/hydra/conf/vars/queue/lmq"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithServerTypes(mqc.MQC),
+    )
+
+    // 注册消息消费服务
+    app.MQC("/hello", helloHandler, "queue-name")
+
+    // 设置消息队列服务器（本地内存MQ）
+    hydra.Conf.MQC(lmq.MQ)
+
+    app.Start()
+}
+
+func helloHandler(ctx hydra.IContext) interface{} {
+    // 在这里处理接收到的消息
+    return "success"
+}</code></pre>
+
+            <h2>6.2 队列管理</h2>
+            
+            <h3>6.2.1 动态管理</h3>
+            <pre><code>// 添加队列监听
+hydra.C.MQC().Add("/handler", handler, "queue-name")
+
+// 移除队列监听
+hydra.C.MQC().Remove("/handler")
+
+// 暂停消费
+hydra.C.MQC().Pause()
+
+// 恢复消费
+hydra.C.MQC().Resume()</code></pre>
+
+            <h2>6.3 并发控制</h2>
+            <pre><code>// 配置每个队列的消费并发数
+hydra.Conf.MQC(lmq.MQ, lmq.WithWorkerCount(5))</code></pre>
+        </div>
+
+        <!-- 第七章：服务注册与发现 -->
+        <div id="chapter7" class="content">
+            <h1>第七章：服务注册与发现</h1>
+            
+            <h2>7.1 注册中心概述</h2>
+            <p>Hydra框架支持多种注册中心，用于服务注册与发现。</p>
+
+            <h3>7.1.1 支持的注册中心</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>注册中心</th>
+                        <th>地址格式</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Zookeeper</td>
+                        <td><code>zookeeper://host:port</code></td>
+                        <td>Apache ZooKeeper</td>
+                    </tr>
+                    <tr>
+                        <td>Etcd</td>
+                        <td><code>etcd://host:port</code></td>
+                        <td>etcd</td>
+                    </tr>
+                    <tr>
+                        <td>Redis</td>
+                        <td><code>redis://host:port</code></td>
+                        <td>Redis</td>
+                    </tr>
+                    <tr>
+                        <td>LocalMemory</td>
+                        <td><code>local://</code></td>
+                        <td>本地内存</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>7.2 配置注册中心</h2>
+            
+            <h3>7.2.1 使用Zookeeper</h3>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithRegistry("zookeeper://192.168.0.109:2181"),
+    hydra.WithServerTypes(http.API),
+)</code></pre>
+
+            <h3>7.2.2 使用Redis</h3>
+            <pre><code>app := hydra.NewApp(
+    hydra.WithRegistry("redis://192.168.0.109:6379"),
+    hydra.WithServerTypes(http.API),
+)</code></pre>
+
+            <h2>7.3 服务发现</h2>
+            <pre><code>// 通过组件获取服务信息
+services := hydra.C.Container().GetServices("test", "apiserver", "api", "prod")
+
+// 选择服务节点
+node, err := hydra.C.Container().Choose("test", "apiserver", "api", "prod")</code></pre>
+
+            <h2>7.4 集群模式</h2>
+            
+            <h3>7.4.1 对等集群</h3>
+            <pre><code>// 对等集群配置
+hydra.Conf.API("8080").Cluster("peer")</code></pre>
+
+            <h3>7.4.2 主从集群</h3>
+            <pre><code>// 主从集群配置
+hydra.Conf.API("8080").Cluster("master-slave")</code></pre>
+        </div>
+
+        <!-- 第八章：组件使用 -->
+        <div id="chapter8" class="content">
+            <h1>第八章：组件使用</h1>
+            
+            <h2>8.1 组件概述</h2>
+            <p>Hydra框架提供了丰富的内置组件，包括数据库、缓存、消息队列、HTTP客户端等。</p>
+
+            <h3>8.1.1 组件访问</h3>
+            <pre><code>// 数据库组件
+db := hydra.C.DB()
+
+// 缓存组件
+cache := hydra.C.Cache()
+
+// 队列组件
+queue := hydra.C.Queue()
+
+// RPC组件
+rpc := hydra.C.RPC()
+
+// HTTP客户端
+httpClient := hydra.C.HTTP()
+
+// 分布式锁
+lock, _ := hydra.C.DLock("lock-name")
+
+// UUID生成
+uuid := hydra.C.UUID()</code></pre>
+
+            <h2>8.2 数据库组件</h2>
+            
+            <h3>8.2.1 配置数据库</h3>
+            <pre><code>// 使用代码配置数据库
+hydra.Conf.Vars().DB("main", mysql.New("user:password@tcp(localhost:3306)/dbname"))</code></pre>
+
+            <h3>8.2.2 使用数据库</h3>
+            <pre><code>func queryUser(id int64) (map[string]interface{}, error) {
+    db := hydra.C.GetDB()
+    result, err := db.Query("SELECT * FROM users WHERE id = @id", map[string]interface{}{
+        "id": id,
+    })
+    return result, err
+}</code></pre>
+
+            <h2>8.3 缓存组件</h2>
+            
+            <h3>8.3.1 配置Redis缓存</h3>
+            <pre><code>// 使用Redis缓存
+hydra.Conf.Vars().Cache("redis", redis.New("192.168.0.109:6379"))</code></pre>
+
+            <h3>8.3.2 使用缓存</h3>
+            <pre><code>func getUserFromCache(id int64) (string, error) {
+    cache := hydra.C.GetCache()
+    key := fmt.Sprintf("user:info:%d", id)
+    
+    // 尝试从缓存获取
+    value, err := cache.Get(key)
+    if err == nil {
+        return value, nil
+    }
+    
+    // 缓存不存在，从数据库获取
+    user, err := queryUser(id)
+    if err != nil {
+        return "", err
+    }
+    
+    // 存入缓存
+    data, _ := json.Marshal(user)
+    cache.Set(key, string(data), 3600)  // 缓存1小时
+    
+    return string(data), nil
+}</code></pre>
+
+            <h2>8.4 分布式锁</h2>
+            <pre><code>func processWithLock(lockName string, fn func() error) error {
+    lock, err := hydra.C.DLock(lockName)
+    if err != nil {
+        return err
+    }
+
+    ok, err := lock.TryLock(10) // 10秒超时
+    if !ok {
+        return fmt.Errorf("获取锁失败")
+    }
+    
+    err = fn()
+    lock.Unlock()
+    
+    return err
+}</code></pre>
+        </div>
+
+        <!-- 第九章：上下文与请求处理 -->
+        <div id="chapter9" class="content">
+            <h1>第九章：上下文与请求处理</h1>
+            
+            <h2>9.1 IContext核心接口</h2>
+            <p>IContext是Hydra框架的核心接口，封装了请求的所有信息。</p>
+
+            <h3>9.1.1 获取请求参数</h3>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    // 获取所有参数
+    params := ctx.Request().GetMap()
+    
+    // 获取特定参数
+    name := ctx.Request().GetMap().GetString("name")
+    age := ctx.Request().GetMap().GetInt("age", 0)
+    
+    // 获取请求头
+    headers := ctx.Request().Headers()
+    token := headers.GetString("Authorization")
+    
+    // 获取Cookie
+    cookies := ctx.Request().Cookies()
+    sessionID := cookies.GetString("session_id")
+    
+    return params
+}</code></pre>
+
+            <h2>9.2 响应处理</h2>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    resp := ctx.Response()
+    
+    // JSON响应
+    resp.JSON(200, map[string]interface{}{"code": 0})
+    
+    // 设置响应头
+    resp.Header("X-Request-ID", "12345")
+    
+    // 文件下载
+    resp.File("/path/to/file.zip", nil)
+    
+    return nil
+}</code></pre>
+
+            <h2>9.3 用户认证</h2>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    // 获取当前用户
+    user := ctx.User().GetUser()
+    
+    // 获取用户ID
+    userID := ctx.User().GetUserID()
+    
+    // 获取用户Claims
+    claims := ctx.User().GetClaims()
+    
+    return user
+}</code></pre>
+
+            <h2>9.4 日志记录</h2>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    log := ctx.Log()
+    
+    // 不同级别日志
+    log.Debug("调试信息")
+    log.Info("普通信息")
+    log.Warn("警告信息")
+    log.Error("错误信息")
+    
+    return "success"
+}</code></pre>
+        </div>
+
+        <!-- 第十章：中间件与钩子 -->
+        <div id="chapter10" class="content">
+            <h1>第十章：中间件与钩子</h1>
+            
+            <h2>10.1 生命周期钩子</h2>
+            
+            <h3>10.1.1 服务级别钩子</h3>
+            <pre><code>// 服务启动前
+services.Def.OnSetup(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)
+
+// 服务启动后
+services.Def.OnStarted(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)
+
+// 服务关闭前
+services.Def.OnClosing(func(conf app.IAPPConf) error {
+    return nil
+}, http.API)</code></pre>
+
+            <h2>10.2 请求处理钩子</h2>
+            
+            <h3>10.2.1 全局钩子</h3>
+            <pre><code>// 请求处理前
+services.Def.OnHandleExecuting(func(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("请求开始")
+    return nil
+})
+
+// 请求处理后
+services.Def.OnHandleExecuted(func(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("请求结束")
+    return nil
+})</code></pre>
+
+            <h2>10.3 结构体钩子</h2>
+            <pre><code>type MyHandler struct{}
+
+func (h *MyHandler) Handling(ctx hydra.IContext) interface{} {
+    // 预处理
+    return nil
+}
+
+func (h *MyHandler) Handle(ctx hydra.IContext) interface{} {
+    return "success"
+}
+
+func (h *MyHandler) Handled(ctx hydra.IContext) interface{} {
+    // 后处理
+    return nil
+}</code></pre>
+        </div>
+
+        <!-- 第十一章：配置详解 -->
+        <div id="chapter11" class="content">
+            <h1>第十一章：配置详解</h1>
+            
+            <h2>11.1 配置层级</h2>
+            <pre><code>/[platName]/[sysName]/[serverType]/[clusterName]/
+├── main.conf
+├── api.conf
+├── rpc.conf
+├── cron.conf
+├── mqc.conf
+└── router.conf</code></pre>
+
+            <h2>11.2 服务器配置</h2>
+            <pre><code>// API配置
+hydra.Conf.API("8080").
+    WhiteList(whitelist.WithIP("192.168.1.0/24")).
+    Jwt(jwt.WithExcludes("/public/**")).
+    Limit(limiter.WithRate(100))</code></pre>
+
+            <h2>11.3 变量配置</h2>
+            <pre><code>// 变量配置
+hydra.Conf.Vars().DB("main", mysql.New("..."))
+hydra.Conf.Vars().Cache("redis", redis.New("..."))</code></pre>
+        </div>
+
+        <!-- 第十二章：监控与运维 -->
+        <div id="chapter12" class="content">
+            <h1>第十二章：监控与运维</h1>
+            
+            <h2>12.1 业务监控</h2>
+            <p>Hydra框架内置业务监控功能，支持将QPS、处理时长等指标上报到InfluxDB数据库。</p>
+
+            <h3>12.1.1 指标上报配置</h3>
+            <pre><code>// 配置监控指标上报到InfluxDB
+hydra.Conf.API("8080").Metric(
+    "http://influxdb.example.com:8086",  // InfluxDB地址
+    "hydra_metrics",                       // 数据库名称
+    "@every 10s",                         // 上报周期
+)</code></pre>
+
+            <h3>12.1.2 配置文件方式</h3>
+            <pre><code>[metric]
+host = "http://influxdb.example.com:8086"
+dataBase = "hydra_metrics"
+cron = "@every 10s"
+userName = "admin"
+password = "password"</code></pre>
+
+            <h2>12.2 日志管理</h2>
+            <p>Hydra框架支持将本地日志自动归集到远程日志服务器，便于集中查询和分析。</p>
+
+            <h3>12.2.1 日志归集配置</h3>
+            <pre><code>// 配置日志归集服务
+hydra.Conf.Vars().RLog("test-api-prod",
+    rlog.WithEnable(),      // 启用日志归集
+    rlog.WithAll(),        // 归集所有级别日志
+)</code></pre>
+
+            <h2>12.3 部署运维</h2>
+            
+            <h3>12.3.1 服务安装</h3>
+            <pre><code>./apiserver install --plat test --cluster prod</code></pre>
+
+            <h3>12.3.2 服务启动</h3>
+            <pre><code>./apiserver start</code></pre>
+
+            <h3>12.3.3 服务停止</h3>
+            <pre><code>./apiserver stop</code></pre>
+
+            <h3>12.3.4 服务状态</h3>
+            <pre><code>./apiserver status</code></pre>
+        </div>
+
+        <!-- 第十三章：高级特性 -->
+        <div id="chapter13" class="content">
+            <h1>第十三章：高级特性</h1>
+            
+            <h2>13.1 灰度发布</h2>
+            <p>支持根据业务规则编写灰度脚本，将用户请求转发到不同集群。</p>
+
+            <h3>13.1.1 灰度脚本配置</h3>
+            <pre><code>hydra.Conf.API("8090").Proxy(`
+    request := import("request")
+    app := import("app")
+    
+    getUpCluster := func(){
+        ip := request.getClientIP()
+        if text.has_prefix(ip, "202.222."){
+            return app.getClusterNameBy("gray")
+        }
+        return app.getCurrentClusterName()
+    }
+:`)</code></pre>
+
+            <h2>13.2 服务降级</h2>
+            <p>服务降级是在系统压力过大或服务不可用时，通过返回备用响应来保证系统整体可用性的机制。</p>
+
+            <h3>13.2.1 降级配置</h3>
+            <pre><code>// 配置API服务，启用限流和降级
+hydra.Conf.API("8080").Limit(
+    limiter.NewRuleList(
+        limiter.NewRule("/api/order",
+            10, // 每秒允许10个请求
+            limiter.WithMaxWait(5),       // 最多等待5秒
+            limiter.WithFallback(),       // 启用降级
+            limiter.WithResp(429, `{"code":-1,"msg":"服务繁忙，请稍后重试"}`),
+        ),
+    ),
+)</code></pre>
+
+            <h2>13.3 熔断</h2>
+            <p>熔断机制是在服务持续出现错误时，暂时切断对该服务的调用，避免级联故障。</p>
+
+            <h3>13.3.1 熔断配置</h3>
+            <pre><code>// 配置限流/熔断规则
+hydra.Conf.API("8080").Limit(
+    limiter.NewRuleList(
+        limiter.NewRule("/api/external",
+            50,  // 每秒允许50个请求
+            limiter.WithMaxWait(1),  // 最多等待1秒
+            limiter.WithResp(503, `{"code":-1,"msg":"服务暂不可用"}`),
+        ),
+    ),
+)</code></pre>
+        </div>
+
+        <!-- 第十四章：最佳实践 -->
+        <div id="chapter14" class="content">
+            <h1>第十四章：最佳实践</h1>
+            
+            <h2>14.1 项目结构</h2>
+            <pre><code>myapp/
+├── main.go
+├── conf/
+│   └── vars/
+│       ├── db.conf
+│       └── cache.conf
+├── handlers/
+│   ├── user.go
+│   └── order.go
+└── services/
+    └── user.go</code></pre>
+
+            <h2>14.2 错误处理</h2>
+            <pre><code>func handler(ctx hydra.IContext) interface{} {
+    err := doSomething()
+    if err != nil {
+        return errs.New(500, err.Error())
+    }
+    return "success"
+}</code></pre>
+
+            <h2>14.3 性能优化</h2>
+            <ul>
+                <li>使用连接池</li>
+                <li>合理使用缓存</li>
+                <li>异步处理</li>
+                <li>避免在循环中创建对象</li>
+                <li>使用对象池减少GC压力</li>
+            </ul>
+        </div>
+
+        <!-- 第十五章：实战案例 -->
+        <div id="chapter15" class="content">
+            <h1>第十五章：实战案例</h1>
+            
+            <h2>15.1 电商API服务</h2>
+            
+            <h3>15.1.1 项目结构</h3>
+            <pre><code>ecommerce/
+├── main.go
+├── handlers/
+│   ├── product.go
+│   ├── order.go
+│   └── user.go
+└── services/
+    └── ...</code></pre>
+
+            <h3>15.1.2 完整示例</h3>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/http"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithPlatName("ecommerce"),
+        hydra.WithSystemName("api"),
+        hydra.WithClusterName("prod"),
+        hydra.WithServerTypes(http.API),
+    )
+
+    // 商品接口
+    app.API("/products", productList)
+    app.API("/products/:id", productDetail)
+    
+    // 订单接口
+    app.API("/orders", createOrder)
+    app.API("/orders/:id", getOrder)
+    
+    app.Start()
+}
+
+func productList(ctx hydra.IContext) interface{} {
+    return []map[string]interface{}{
+        {"id": 1, "name": "商品A", "price": 100},
+        {"id": 2, "name": "商品B", "price": 200},
+    }
+}
+
+func productDetail(ctx hydra.IContext) interface{} {
+    id := ctx.Request().GetMap()["id"]
+    return map[string]interface{}{
+        "id":    id,
+        "name":  "商品A",
+        "price": 100,
+    }
+}
+
+func createOrder(ctx hydra.IContext) interface{} {
+    params := ctx.Request().GetMap()
+    return map[string]interface{}{
+        "order_id": "ORDER123",
+        "status":   "created",
+    }
+}
+
+func getOrder(ctx hydra.IContext) interface{} {
+    id := ctx.Request().GetMap()["id"]
+    return map[string]interface{}{
+        "order_id": id,
+        "status":   "paid",
+    }
+}</code></pre>
+
+            <h2>15.2 微服务架构</h2>
+            <p>典型微服务划分：</p>
+            <ul>
+                <li>用户服务（user-service）</li>
+                <li>商品服务（product-service）</li>
+                <li>订单服务（order-service）</li>
+            </ul>
+
+            <h2>15.3 定时任务系统</h2>
+            <pre><code>package main
+
+import (
+    "github.com/micro-plat/hydra"
+    "github.com/micro-plat/hydra/hydra/servers/cron"
+)
+
+func main() {
+    app := hydra.NewApp(
+        hydra.WithServerTypes(cron.CRON),
+    )
+
+    // 每天凌晨2点执行数据同步
+    app.CRON("/sync/data", syncData, "0 2 * * *")
+    
+    // 每小时执行状态检查
+    app.CRON("/check/status", checkStatus, "0 * * * *")
+    
+    app.Start()
+}
+
+func syncData(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("开始同步数据")
+    // 执行数据同步
+    ctx.Log().Info("数据同步完成")
+    return "success"
+}
+
+func checkStatus(ctx hydra.IContext) interface{} {
+    ctx.Log().Info("检查服务状态")
+    return "success"
+}</code></pre>
+        </div>
+    </main>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">↑</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏链接点击事件
+            const sidebarLinks = document.querySelectorAll('.sidebar-link.chapter');
+            const contents = document.querySelectorAll('.content');
+            const currentChapter = document.getElementById('currentChapter');
+
+            const chapterNames = {
+                1: '框架概述',
+                2: '核心概念',
+                3: 'HTTP服务开发',
+                4: 'RPC服务开发',
+                5: '定时任务开发',
+                6: '消息队列消费',
+                7: '服务注册与发现',
+                8: '组件使用',
+                9: '上下文与请求处理',
+                10: '中间件与钩子',
+                11: '配置详解',
+                12: '监控与运维',
+                13: '高级特性',
+                14: '最佳实践',
+                15: '实战案例'
+            };
+
+            // 切换章节函数
+            function switchChapter(chapterNum) {
+                // 更新侧边栏激活状态
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                document.querySelector('[data-chapter="' + chapterNum + '"]').classList.add('active');
+                
+                // 隐藏所有内容
+                contents.forEach(c => {
+                    c.style.display = 'none';
+                    c.classList.remove('active');
+                });
+                
+                // 显示对应内容
+                const targetContent = document.getElementById('chapter' + chapterNum);
+                if (targetContent) {
+                    targetContent.style.display = 'block';
+                    targetContent.classList.add('active');
+                }
+                
+                // 更新面包屑
+                currentChapter.textContent = chapterNames[chapterNum];
+                
+                // 滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // 绑定点击事件
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const chapter = this.getAttribute('data-chapter');
+                    switchChapter(chapter);
+                });
+            });
+
+            // 回到顶部
+            const backToTop = document.getElementById('backToTop');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+
+            backToTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const activeIndex = Array.from(sidebarLinks).findIndex(l => l.classList.contains('active'));
+                    let newIndex;
+                    
+                    if (e.key === 'ArrowDown') {
+                        newIndex = (activeIndex + 1) % sidebarLinks.length;
+                    } else {
+                        newIndex = (activeIndex - 1 + sidebarLinks.length) % sidebarLinks.length;
+                    }
+                    
+                    const chapter = sidebarLinks[newIndex].getAttribute('data-chapter');
+                    switchChapter(chapter);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
