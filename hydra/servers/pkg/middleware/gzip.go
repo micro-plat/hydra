@@ -35,17 +35,25 @@ func (g *gzipHandler) Handle(ctx IMiddleContext) {
 		return
 	}
 
+	var nwriter interface{}
 	switch strings.ToLower(ctx.GetType()) {
 	case "gin":
 		writer := ctx.GetWriter().(gin.ResponseWriter)
-		nwriter := newGinWriter(writer, ctx, g.level)
+		nwriter = newGinWriter(writer, ctx, g.level)
 		ctx.SetWriter(nwriter)
-		ctx.Response().OnFlush(nwriter.Close)
 	default:
 		writer := ctx.GetWriter().(dispatcher.ResponseWriter)
-		nwriter := newDispWriter(writer, ctx, g.level)
+		nwriter = newDispWriter(writer, ctx, g.level)
 		ctx.SetWriter(nwriter)
-		ctx.Response().OnFlush(nwriter.Close)
 	}
+
+	// 使用 defer 确保在请求结束时关闭 gzip writer
+	// defer 会在 ctx.Next() 返回后执行，也就是所有中间件（包括 Flush）完成后
+	defer func() {
+		if closer, ok := nwriter.(interface{ Close() }); ok {
+			closer.Close()
+		}
+	}()
+
 	ctx.Next()
 }

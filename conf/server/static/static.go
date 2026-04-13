@@ -33,6 +33,8 @@ type Static struct {
 	AutoRewrite    bool            `json:"autoRewrite,omitempty"  label:"自动重写到首页"`
 	Unrewrites     []string        `json:"unrewrite,omitempty"  label:"不重写列表"`
 	Disable        bool            `json:"disable,omitempty"`
+	CacheForever   []string        `json:"cacheForever,omitempty" label:"永不过期的文件扩展名列表"`
+	CacheMaxAge    int             `json:"cacheMaxAge,omitempty" label:"永不过期的缓存时间(秒)"`
 	unrewriteMatch *conf.PathMatch `json:"-"`
 	fs             IFS             `json:"-"`
 	serverType     string

@@ -1,6 +1,11 @@
 package static
 
-import "embed"
+import (
+	"strings"
+	"time"
+
+	"embed"
+)
 
 //DefaultSataticDir 默认静态文件存放路径
 const DefaultSataticDir = "./static"
@@ -89,4 +94,45 @@ func WithEnableEncryption() Option {
 	return func(a *Static) {
 		a.EnableEncryption = true
 	}
+}
+
+//WithCacheForever 设置永不过期的文件扩展名列表
+//d: 过期时间，如 time.Hour*24*30 表示30天
+//exts: 文件扩展名，支持两种传参方式：
+//   - 多个参数：WithCacheForever(time.Hour*24*30, ".jpg", ".png", ".gif")
+//   - 逗号分隔：WithCacheForever(time.Hour*24*30, ".jpg,.png,.gif")
+//   - 支持混合使用：WithCacheForever(time.Hour*24*30, ".jpg,.png", ".gif")
+func WithCacheForever(d time.Duration, exts ...string) Option {
+	return func(s *Static) {
+		// 转换时间为秒数
+		s.CacheMaxAge = int(d.Seconds())
+
+		// 处理扩展名列表（支持逗号分隔）
+		s.CacheForever = parseExtensions(exts)
+	}
+}
+
+//parseExtensions 解析扩展名列表，支持逗号分隔
+func parseExtensions(exts []string) []string {
+	var result []string
+	for _, ext := range exts {
+		// 去除空格
+		ext = strings.TrimSpace(ext)
+		if ext == "" {
+			continue
+		}
+		// 如果包含逗号，则分割
+		if strings.Contains(ext, ",") {
+			parts := strings.Split(ext, ",")
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if part != "" {
+					result = append(result, part)
+				}
+			}
+		} else {
+			result = append(result, ext)
+		}
+	}
+	return result
 }

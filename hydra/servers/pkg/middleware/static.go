@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/micro-plat/hydra/conf/server/static"
 	"github.com/micro-plat/hydra/services"
 )
 
@@ -46,7 +47,7 @@ func Static() Handler {
 		// 判断是否为 HTTP 远程路径
 		if strings.HasPrefix(static.Path, "http://") || strings.HasPrefix(static.Path, "https://") {
 			// 从 HTTP 远程服务下载静态文件
-			if err := downloadFromHTTP(ctx, static.Path, rpath); err != nil {
+			if err := downloadFromHTTP(ctx, static.Path, rpath, static); err != nil {
 				ctx.Response().Abort(http.StatusNotFound, fmt.Errorf("远程下载文件失败:%s, 错误:%v", rpath, err))
 				return
 			}
@@ -61,6 +62,9 @@ func Static() Handler {
 			return
 		}
 
+		//设置缓存头
+		setCacheHeaders(ctx, static, rpath)
+
 		//写入到响应流
 		if strings.HasSuffix(p, ".gz") {
 			ctx.Response().AddSpecial("gz")
@@ -71,7 +75,7 @@ func Static() Handler {
 }
 
 // downloadFromHTTP 从 HTTP 远程服务下载静态文件
-func downloadFromHTTP(ctx IMiddleContext, basePath string, rpath string) error {
+func downloadFromHTTP(ctx IMiddleContext, basePath string, rpath string, staticConf *static.Static) error {
 	// 构建 HTTP 请求 URL
 	baseURL := strings.TrimRight(basePath, "/")
 	// 确保路径以 / 开头
@@ -110,13 +114,40 @@ func downloadFromHTTP(ctx IMiddleContext, basePath string, rpath string) error {
 	// 设置响应头并写入文件内容
 	ctx.Response().AddSpecial("static-remote")
 
-	// 检查是否为 gzip 压缩文件
-	if strings.HasSuffix(rpath, ".gz") {
-		ctx.Response().AddSpecial("gz")
-		ctx.Response().Header("Content-Encoding", "gzip")
-	}
+	// 设置缓存头
+	setCacheHeaders(ctx, staticConf, rpath)
+
+	// 注意：Go 的 http.Client 会自动解压远程返回的 gzip 内容
+	// 所以 buff 中存储的是解压后的原始数据
+	// 本地的 gzip 中间件会决定是否再次压缩后发送给客户端
+	// 不需要手动设置 Content-Encoding
 
 	// 使用 Data 方法直接写入二进制数据
 	ctx.Response().Data(http.StatusOK, contentType, string(buff))
 	return nil
+}
+
+//setCacheHeaders 设置缓存头
+func setCacheHeaders(ctx IMiddleContext, staticConf *static.Static, rpath string) {
+	if len(staticConf.CacheForever) == 0 {
+		return
+	}
+
+	// 检查是否匹配永不过期配置
+	if shouldCacheForever(staticConf, rpath) {
+		ctx.Response().Header("Cache-Control", fmt.Sprintf("public, max-age=%d", staticConf.CacheMaxAge))
+	}
+}
+
+//shouldCacheForever 判断文件是否应该永不过期
+func shouldCacheForever(staticConf *static.Static, rpath string) bool {
+	for _, ext := range staticConf.CacheForever {
+		if ext == ".*" {
+			return true // 所有文件都永不过期
+		}
+		if strings.HasSuffix(rpath, ext) {
+			return true
+		}
+	}
+	return false
 }
