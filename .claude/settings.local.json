@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(find \"D:\\\\\\\\yanglei\\\\\\\\work\\\\\\\\src\\\\\\\\github.com\\\\\\\\micro-plat\\\\\\\\hydra\" -name \"*.go\")"
+    ]
+  }
+}
