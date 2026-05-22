@@ -96,6 +96,27 @@ func WithEnableEncryption() Option {
 	}
 }
 
+//WithEncryptKey 设置 AES-256 加密密钥（推荐32字节）
+func WithEncryptKey(key string) Option {
+	return func(a *Static) {
+		a.EncryptKey = key
+	}
+}
+
+//WithEncryptIV 设置 AES-GCM 的 IV 偏移量（12字节，前后端约定）
+func WithEncryptIV(iv string) Option {
+	return func(a *Static) {
+		a.EncryptIV = iv
+	}
+}
+
+//WithEncryptExts 设置需要加密的文件扩展名
+func WithEncryptExts(exts ...string) Option {
+	return func(a *Static) {
+		a.EncryptExts = exts
+	}
+}
+
 //WithCacheForever 设置永不过期的文件扩展名列表
 //d: 过期时间，如 time.Hour*24*30 表示30天
 //exts: 文件扩展名，支持两种传参方式：

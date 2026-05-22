@@ -35,6 +35,9 @@ type Static struct {
 	Disable        bool            `json:"disable,omitempty"`
 	CacheForever   []string        `json:"cacheForever,omitempty" label:"永不过期的文件扩展名列表"`
 	CacheMaxAge    int             `json:"cacheMaxAge,omitempty" label:"永不过期的缓存时间(秒)"`
+	EncryptKey     string          `json:"encryptKey,omitempty" label:"加密密钥(32字节)"`
+	EncryptIV      string          `json:"encryptIV,omitempty" label:"IV偏移量(12字节)"`
+	EncryptExts    []string        `json:"encryptExts,omitempty" label:"加密文件扩展名"`
 	unrewriteMatch *conf.PathMatch `json:"-"`
 	fs             IFS             `json:"-"`
 	serverType     string
@@ -181,4 +184,25 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		return static, nil
 	}
 	return nil, fmt.Errorf("%s %w", "static", conf.ErrNoSetting)
+}
+
+// NeedEncrypt 检查文件是否需要加密
+func (s *Static) NeedEncrypt(filePath string) bool {
+	if s.EncryptKey == "" || len(s.EncryptExts) == 0 {
+		return false
+	}
+	for _, ext := range s.EncryptExts {
+		if strings.HasSuffix(strings.ToLower(filePath), ext) {
+			return true
+		}
+	}
+	return false
+}
+
+// KeyFingerprint 生成密钥指纹（SHA256 前8字节 hex）
+func (s *Static) KeyFingerprint() string {
+	if s.EncryptKey == "" {
+		return ""
+	}
+	return computeKeyFingerprint(s.EncryptKey)
 }

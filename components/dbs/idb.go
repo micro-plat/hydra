@@ -9,4 +9,6 @@ type IDB = db.IDB
 type IComponentDB interface {
 	GetRegularDB(names ...string) (d IDB)
 	GetDB(names ...string) (d IDB, err error)
+	GetRegularTenantDB(tenantID string, names ...string) (d IDB)
+	GetTenantDB(tenantID string, names ...string) (d IDB, err error)
 }

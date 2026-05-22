@@ -13,6 +13,7 @@ type DB struct {
 	MaxOpen    int    `json:"maxOpen" valid:"required" label:"最大打开连接数"`
 	MaxIdle    int    `json:"maxIdle" valid:"required" label:"最大空闲连接数"`
 	LifeTime   int    `json:"lifeTime" valid:"required" label:"单个连接时长(秒)"`
+	TenantMode string `json:"tenantMode"` // 多租户模式：shared_schema | shared_rls | indep_schema，为空不启用
 }
 
 //New 构建DB连接信息

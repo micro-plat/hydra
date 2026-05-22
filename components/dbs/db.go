@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/micro-plat/hydra/components/container"
-	"github.com/micro-plat/lib4go/db"
+	libdb "github.com/micro-plat/lib4go/db"
 	"github.com/micro-plat/lib4go/types"
 
 	"github.com/micro-plat/hydra/conf"
+	"github.com/micro-plat/hydra/conf/app"
 	xdb "github.com/micro-plat/hydra/conf/vars/db"
 )
 
@@ -49,10 +50,65 @@ func (s *StandardDB) GetDB(names ...string) (d IDB, err error) {
 		if err = conf.ToStruct(&dbConf); err != nil {
 			return nil, fmt.Errorf("数据库[%s/%s]配置有误：%w", dbTypeNode, name, err)
 		}
-		return db.NewDB(dbConf.Provider, dbConf.ConnString, dbConf.MaxOpen, dbConf.MaxIdle, dbConf.LifeTime)
+		return libdb.NewDB(dbConf.Provider, dbConf.ConnString, dbConf.MaxOpen, dbConf.MaxIdle, dbConf.LifeTime)
 	})
 	if err != nil {
 		return nil, err
 	}
 	return obj.(IDB), nil
+}
+
+//GetRegularTenantDB 获取绑定租户的数据库实例，出错时 panic
+func (s *StandardDB) GetRegularTenantDB(tenantID string, names ...string) (d IDB) {
+	d, err := s.GetTenantDB(tenantID, names...)
+	if err != nil {
+		panic(err)
+	}
+	return d
+}
+
+//GetTenantDB 获取绑定租户的数据库实例
+// tenantID 为空或配置未启用多租户时，自动降级到普通 GetDB
+func (s *StandardDB) GetTenantDB(tenantID string, names ...string) (d IDB, err error) {
+	if tenantID == "" {
+		return s.GetDB(names...)
+	}
+
+	name := types.GetStringByIndex(names, 0, dbNameNode)
+
+	varConf, err := app.Cache.GetVarConf()
+	if err != nil {
+		return nil, fmt.Errorf("无法获取var配置: %w", err)
+	}
+	if !varConf.Has(dbTypeNode, name) {
+		return nil, fmt.Errorf("节点/%s/%s未配置", dbTypeNode, name)
+	}
+	jconf, err := varConf.GetConf(dbTypeNode, name)
+	if err != nil {
+		return nil, err
+	}
+	var dbConf xdb.DB
+	if err := jconf.ToStruct(&dbConf); err != nil {
+		return nil, fmt.Errorf("数据库[%s/%s]配置有误: %w", dbTypeNode, name, err)
+	}
+
+	if dbConf.TenantMode == "" {
+		return s.GetDB(names...)
+	}
+
+	if err := libdb.InitTenantManager(
+		dbConf.Provider, dbConf.ConnString,
+		dbConf.MaxOpen, dbConf.MaxIdle, dbConf.LifeTime,
+		"", "",
+	); err != nil {
+		return nil, fmt.Errorf("初始化多租户管理器失败: %w", err)
+	}
+
+	libdb.SetTenantConfig(tenantID, &libdb.TenantConfig{
+		TenantID:   tenantID,
+		Model:      libdb.TenantModel(dbConf.TenantMode),
+		SchemaName: tenantID,
+	})
+
+	return libdb.NewTenantDB(tenantID)
 }

@@ -18,3 +18,10 @@ func WithEnableEncryption() Option {
 		a.EnableEncryption = true
 	}
 }
+
+//WithTenantMode 设置多租户模式：shared_schema | shared_rls | indep_schema
+func WithTenantMode(mode string) Option {
+	return func(a *DB) {
+		a.TenantMode = mode
+	}
+}

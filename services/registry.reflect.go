@@ -76,16 +76,16 @@ func reflectHandle(path string, h interface{}) (g *UnitGroup, err error) {
 		}
 		switch {
 		case strings.HasSuffix(mName, defHandling):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandling)])
+			endName := camelToPath(mName[0 : len(mName)-len(defHandling)])
 			current.AddHandling(endName, nf)
 		case strings.HasSuffix(mName, defHandler):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandler)])
+			endName := camelToPath(mName[0 : len(mName)-len(defHandler)])
 			current.AddHandle(endName, nf)
 		case strings.HasSuffix(mName, defHandled):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defHandled)])
+			endName := camelToPath(mName[0 : len(mName)-len(defHandled)])
 			current.AddHandled(endName, nf)
 		case strings.HasSuffix(mName, defFallback):
-			endName := strings.ToLower(mName[0 : len(mName)-len(defFallback)])
+			endName := camelToPath(mName[0 : len(mName)-len(defFallback)])
 			current.AddFallback(endName, nf)
 		}
 	}
@@ -121,4 +121,19 @@ func swapFunc(i interface{}) (context.Handler, bool) {
 		return context.VoidHandler(vnfx).Handle, true
 	}
 	return nil, false
+}
+
+func camelToPath(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if r >= 'A' && r <= 'Z' {
+			if i > 0 {
+				b.WriteByte('/')
+			}
+			b.WriteRune(r + 32)
+		} else {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }

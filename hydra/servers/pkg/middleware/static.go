@@ -65,6 +65,34 @@ func Static() Handler {
 		//设置缓存头
 		setCacheHeaders(ctx, static, rpath)
 
+		// 本地文件加密处理
+		if static.NeedEncrypt(p) {
+			f, ferr := fs.Open(p)
+			if ferr != nil {
+				ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("文件打开失败:%s, 错误:%v", rpath, ferr))
+				return
+			}
+			defer f.Close()
+
+			fileData, rdErr := io.ReadAll(f)
+			if rdErr != nil {
+				ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("文件读取失败:%s, 错误:%v", rpath, rdErr))
+				return
+			}
+
+			encrypted, encErr := static.DoEncrypt(fileData)
+			if encErr != nil {
+				ctx.Response().Abort(http.StatusInternalServerError, fmt.Errorf("加密失败:%s, 错误:%v", rpath, encErr))
+				return
+			}
+
+			ctx.Response().Header("X-Content-Crypto", "aes-256-gcm")
+			ctx.Response().Header("X-Content-Crypto-Key", static.KeyFingerprint())
+			ctx.Response().Header("Content-Type", "application/octet-stream")
+			ctx.Response().Data(http.StatusOK, "application/octet-stream", string(encrypted))
+			return
+		}
+
 		//写入到响应流
 		if strings.HasSuffix(p, ".gz") {
 			ctx.Response().AddSpecial("gz")
@@ -109,13 +137,39 @@ func downloadFromHTTP(ctx IMiddleContext, basePath string, rpath string, staticC
 		return fmt.Errorf("读取响应内容失败: %v", err)
 	}
 
-	// 获取 Content-Type
-	contentType := resp.Header.Get("Content-Type")
 	// 设置响应头并写入文件内容
 	ctx.Response().AddSpecial("static-remote")
 
 	// 设置缓存头
 	setCacheHeaders(ctx, staticConf, rpath)
+
+	// 获取密钥指纹
+	localFinger := staticConf.KeyFingerprint()
+
+	// 场景1：远程已加密 + 密钥匹配 → 直接透传
+	if static.IsRemoteEncrypted(resp.Header, localFinger) {
+		ctx.Response().Header("X-Content-Crypto", "aes-256-gcm")
+		ctx.Response().Header("X-Content-Crypto-Key", localFinger)
+		ctx.Response().Header("Content-Type", "application/octet-stream")
+		ctx.Response().Data(http.StatusOK, "application/octet-stream", string(buff))
+		return nil
+	}
+
+	// 场景2：本地需要加密（配置了密钥 且 文件类型匹配）
+	if staticConf.NeedEncrypt(rpath) {
+		encrypted, encErr := static.EncryptAndCompress(buff, staticConf.EncryptKey, staticConf.EncryptIV)
+		if encErr != nil {
+			return fmt.Errorf("加密失败: %v", encErr)
+		}
+		ctx.Response().Header("X-Content-Crypto", "aes-256-gcm")
+		ctx.Response().Header("X-Content-Crypto-Key", localFinger)
+		ctx.Response().Header("Content-Type", "application/octet-stream")
+		ctx.Response().Data(http.StatusOK, "application/octet-stream", string(encrypted))
+		return nil
+	}
+
+	// 场景3：不需要加密 → 直接透传
+	contentType := resp.Header.Get("Content-Type")
 
 	// 注意：Go 的 http.Client 会自动解压远程返回的 gzip 内容
 	// 所以 buff 中存储的是解压后的原始数据

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/micro-plat/hydra/conf"
@@ -11,6 +12,27 @@ import (
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 )
+
+// ========== 测试模式支持（包级变量） ==========
+
+// testComponentGetter 测试组件获取函数（可由 testing 包设置）
+var testComponentGetter func(typ, name string) (interface{}, bool)
+
+// testComponentChecker 测试组件检查函数（可由 testing 包设置）
+var testComponentChecker func() bool
+
+// SetTestComponentGetter 设置测试组件获取函数（供 testing 包使用）
+func SetTestComponentGetter(getter func(typ, name string) (interface{}, bool)) {
+	testComponentGetter = getter
+}
+
+// SetTestComponentChecker 设置测试组件检查函数（供 testing 包使用）
+func SetTestComponentChecker(checker func() bool) {
+	testComponentChecker = checker
+}
+
+var testGetterMutex sync.RWMutex
+
 
 //ICloser 关闭
 type ICloser interface {
@@ -41,8 +63,19 @@ func NewContainer() *Container {
 
 }
 
+
 //GetOrCreate 获取指定名称的组件，不存在时自动创建
 func (c *Container) GetOrCreate(typ string, name string, creator func(conf *conf.RawConf, keys ...string) (interface{}, error), keys ...string) (interface{}, error) {
+
+	//0. 测试模式优先：检查是否有预注册的测试组件
+	testGetterMutex.RLock()
+	if testComponentGetter != nil {
+		if component, ok := testComponentGetter(typ, name); ok {
+			testGetterMutex.RUnlock()
+			return component, nil
+		}
+	}
+	testGetterMutex.RUnlock()
 
 	//1. 获取配置信息
 	varConf, err := app.Cache.GetVarConf()
