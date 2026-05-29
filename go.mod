@@ -26,7 +26,6 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
 	github.com/micro-plat/lib4go v1.2.7
-	github.com/nacos-group/nacos-sdk-go v1.1.6
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
@@ -35,7 +34,6 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/ugorji/go/codec v1.2.2
 	github.com/urfave/cli v1.22.5
-	github.com/zkfy/go-cache v2.1.0+incompatible
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896
 	github.com/zkfy/stompngo v0.0.0-20170803022748-9378e70ca481
@@ -49,8 +47,6 @@ require (
 )
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -61,10 +57,10 @@ require (
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gmallard/stompngo v1.0.13 // indirect
-	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
+	github.com/golang/mock v1.3.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
@@ -75,7 +71,6 @@ require (
 	github.com/jcmturner/gofork v1.7.6 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
 	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect
@@ -104,16 +99,9 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/yosssi/gmq v0.0.1 // indirect
 	github.com/zkfy/jwt-go v3.0.0+incompatible // indirect
-	go.uber.org/atomic v1.6.0 // indirect
-	go.uber.org/multierr v1.5.0 // indirect
-	go.uber.org/zap v1.15.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
-	golang.org/x/tools v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
-	gopkg.in/ini.v1 v1.42.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
 
 replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

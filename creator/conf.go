@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/micro-plat/hydra/conf/server/aigw"
 	"github.com/micro-plat/hydra/conf/server/api"
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
@@ -39,6 +40,12 @@ type IConf interface {
 
 	//GetWS() 获取ws服务器配置
 	GetWS() *httpBuilder
+
+	//AIGW AI网关服务器配置
+	AIGW(address string, opts ...aigw.Option) *aigwBuilder
+
+	//GetAIGW() 获取AI网关服务器配置
+	GetAIGW() *aigwBuilder
 
 	//RPC rpc服务器配置
 	RPC(address string, opts ...rpc.Option) *rpcBuilder
@@ -109,6 +116,8 @@ func (c *conf) Load() error {
 				c.data[global.Web] = c.GetWeb()
 			case global.WS:
 				c.data[global.WS] = c.GetWS()
+			case global.AIGW:
+				c.data[global.AIGW] = c.GetAIGW()
 			case global.RPC:
 				c.data[global.RPC] = c.GetRPC()
 			case global.CRON:
@@ -172,7 +181,22 @@ func (c *conf) GetWS() *httpBuilder {
 	return c.WS(api.DefaultWSAddress)
 }
 
-//RPC rpc服务器配置
+// AIGW AI网关服务器配置
+func (c *conf) AIGW(address string, opts ...aigw.Option) *aigwBuilder {
+	aigw := newAIGW(address, opts...)
+	c.data[global.AIGW] = aigw
+	return aigw
+}
+
+// GetAIGW 获取当前已配置的AI网关服务器
+func (c *conf) GetAIGW() *aigwBuilder {
+	if aigw, ok := c.data[global.AIGW]; ok {
+		return aigw.(*aigwBuilder)
+	}
+	return c.AIGW(aigw.DefaultAddress)
+}
+
+// RPC rpc服务器配置
 func (c *conf) RPC(address string, opts ...rpc.Option) *rpcBuilder {
 	rpc := newRPC(address, opts...)
 	c.data[global.RPC] = rpc

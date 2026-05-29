@@ -18,10 +18,13 @@ var API = NewORouter("API")
 //WEB web服务的路由信息
 var WEB = NewORouter("WEB")
 
-//WS web socket路由信息
+// WS web socket路由信息
 var WS = NewORouter("WS")
 
-//RPC rpc服务的路由信息
+// AIGW AI网关路由信息
+var AIGW = NewORouter("AIGW")
+
+// RPC rpc服务的路由信息
 var RPC = NewORouter("RPC")
 
 //routerMQC MQC服务的路由信息
@@ -39,6 +42,8 @@ func GetRouter(tp string) *ORouter {
 		return WEB
 	case global.WS:
 		return WS
+	case global.AIGW:
+		return AIGW
 	case global.RPC:
 		return RPC
 	case global.MQC:

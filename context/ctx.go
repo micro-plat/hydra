@@ -178,6 +178,9 @@ type IRequest interface {
 	//GetBody 获取请求的参数
 	GetBody() (body []byte, err error)
 
+	//RawBody 获取原始请求体
+	RawBody() []byte
+
 	//GetPlayload
 	GetPlayload() string
 

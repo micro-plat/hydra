@@ -116,6 +116,13 @@ func (r *request) CheckMap(vdt map[string]interface{}) error {
 func (r *request) GetMap() types.XMap {
 	return r.XMap
 }
+
+// RawBody 获取原始请求体
+func (r *request) RawBody() []byte {
+	body, _ := r.GetBody()
+	return body
+}
+
 func (r *request) GetError() error {
 	return r.readMapErr
 }

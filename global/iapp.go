@@ -25,10 +25,13 @@ const Web = "web"
 //RPC rpc服务器
 const RPC = "rpc"
 
-//WS websocket服务器
+// WS websocket服务器
 const WS = "ws"
 
-//CRON cron服务器
+// AIGW AI网关服务器
+const AIGW = "aigw"
+
+// CRON cron服务器
 const CRON = "cron"
 
 //MQC mqc服务器

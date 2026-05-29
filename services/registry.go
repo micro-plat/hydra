@@ -48,6 +48,9 @@ type IService interface {
 	//WS 注册为websocket服务
 	WS(name string, h interface{}, r ...router.Option) IService
 
+	//AIGW 注册为AI网关服务
+	AIGW(name string, h interface{}, r ...router.Option) IService
+
 	//MQC 注册为消息消费服务
 	MQC(name string, h interface{}, queues ...string) IService
 
@@ -160,6 +163,15 @@ func (s *regist) WS(name string, h interface{}, ext ...router.Option) IService {
 		v = append(v, e)
 	}
 	return s.Custom(global.WS, name, h, v...)
+}
+
+// AIGW 注册为AI网关服务
+func (s *regist) AIGW(name string, h interface{}, ext ...router.Option) IService {
+	v := make([]interface{}, 0, len(ext))
+	for _, e := range ext {
+		v = append(v, e)
+	}
+	return s.Custom(global.AIGW, name, h, v...)
 }
 
 // MQC 注册为消息队列服务
@@ -429,6 +441,9 @@ func init() {
 	Def.servers[global.WS] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return WS.Add(g.Path, g.Service, g.Actions, ext...)
 	}, WS.Remove)
+	Def.servers[global.AIGW] = newServerServices(func(g *Unit, ext ...interface{}) error {
+		return AIGW.Add(g.Path, g.Service, g.Actions, ext...)
+	}, AIGW.Remove)
 	Def.servers[global.CRON] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		for _, t := range ext {
 			CRON.Add(t.(string), g.Service)
