@@ -16,9 +16,6 @@ const (
 	//DefaultAPIAddress api服务默认端口号
 	DefaultAPIAddress = "8080"
 
-	//DefaultWSAddress ws服务默认端口号
-	DefaultWSAddress = "8070"
-
 	//DefaultWEBAddress web服务默认端口号
 	DefaultWEBAddress = "8089"
 
@@ -38,14 +35,14 @@ const (
 	StartStop = "stop"
 )
 
-//MainConfName 主配置中的关键配置名
+// MainConfName 主配置中的关键配置名
 var MainConfName = []string{"address", "status", "rTimeout", "wTimeout", "rhTimeout", "dns"}
 
-//SubConfName 子配置中的关键配置名
+// SubConfName 子配置中的关键配置名
 var SubConfName = []string{"router", "metric", "processor", "nfs"}
-var validTypes = map[string]bool{"api": true, "web": true, "ws": true}
+var validTypes = map[string]bool{"api": true, "web": true}
 
-//Server api server配置信息
+// Server api server配置信息
 type Server struct {
 	security.ConfEncrypt
 	Address   string `json:"address,omitempty" valid:"port,required" label:"端口号|请输入正确的端口号(1-65535)"`
@@ -58,7 +55,7 @@ type Server struct {
 	Trace     bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 
-//New 构建api server配置信息
+// New 构建api server配置信息
 func New(address string, opts ...Option) *Server {
 	a := &Server{
 		Address:   address,
@@ -73,7 +70,7 @@ func New(address string, opts ...Option) *Server {
 	return a
 }
 
-//GetAPIAddress 获取api服务地址端口
+// GetAPIAddress 获取api服务地址端口
 func (s *Server) GetAPIAddress() string {
 	if types.IsEmpty(s.Address) {
 		return DefaultAPIAddress
@@ -81,15 +78,7 @@ func (s *Server) GetAPIAddress() string {
 	return s.Address
 }
 
-//GetWSAddress 获取ws服务地址端口
-func (s *Server) GetWSAddress() string {
-	if types.IsEmpty(s.Address) {
-		return DefaultWSAddress
-	}
-	return s.Address
-}
-
-//GetWEBAddress 获取web服务地址端口
+// GetWEBAddress 获取web服务地址端口
 func (s *Server) GetWEBAddress() string {
 	if types.IsEmpty(s.Address) {
 		return DefaultWEBAddress
@@ -97,7 +86,7 @@ func (s *Server) GetWEBAddress() string {
 	return s.Address
 }
 
-//GetRTimeout 获取读取超时时间
+// GetRTimeout 获取读取超时时间
 func (s *Server) GetRTimeout() int {
 	if s.RTimeout <= 0 {
 		return DefaultRTimeOut
@@ -105,7 +94,7 @@ func (s *Server) GetRTimeout() int {
 	return s.RTimeout
 }
 
-//GetWTimeout 获取写超时时间
+// GetWTimeout 获取写超时时间
 func (s *Server) GetWTimeout() int {
 	if s.WTimeout <= 0 {
 		return DefaultWTimeOut
@@ -113,7 +102,7 @@ func (s *Server) GetWTimeout() int {
 	return s.WTimeout
 }
 
-//GetRHTimeout 获取头读取超时时间
+// GetRHTimeout 获取头读取超时时间
 func (s *Server) GetRHTimeout() int {
 	if s.RHTimeout <= 0 {
 		return DefaultRHTimeOut
@@ -121,7 +110,7 @@ func (s *Server) GetRHTimeout() int {
 	return s.RHTimeout
 }
 
-//GetConf 获取主配置信息
+// GetConf 获取主配置信息
 func GetConf(cnf conf.IServerConf) (s *Server, err error) {
 	if _, ok := validTypes[cnf.GetServerType()]; !ok {
 		return nil, fmt.Errorf("api主配置类型错误:%s != %+v", cnf.GetServerType(), validTypes)

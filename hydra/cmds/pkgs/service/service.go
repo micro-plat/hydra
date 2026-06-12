@@ -170,6 +170,8 @@ var (
 	ErrHasInstalled = errors.New("the service already exists")
 	ErrHasStopped   = errors.New("the service has not been started")
 	ErrIsRunning    = errors.New("the service is running")
+	// ErrServiceInFailedState is returned when the systemd service is in failed state
+	ErrServiceInFailedState = errors.New("service in failed state")
 )
 
 // New creates a new service based on a service interface and configuration.

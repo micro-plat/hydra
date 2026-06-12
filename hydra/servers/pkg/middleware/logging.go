@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -23,11 +24,25 @@ func Logging() Handler {
 
 		//4. 处理响应日志
 		code, _, _ := ctx.Response().GetFinalResponse()
+		cost := formatCost(time.Since(start))
 		if code >= http.StatusOK && code < http.StatusBadRequest {
-			ctx.Log().Info(serverType+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
+			ctx.Log().Info(serverType+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), cost)
 		} else {
-			ctx.Log().Error(serverType+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), time.Since(start))
+			ctx.Log().Error(serverType+".response:", ctx.Request().Path().GetMethod(), path, code, ctx.Response().GetSpecials(), cost)
 		}
 
+	}
+}
+
+func formatCost(d time.Duration) string {
+	switch {
+	case d >= time.Second:
+		return strconv.FormatFloat(float64(d)/float64(time.Second), 'f', 3, 64) + "s"
+	case d >= time.Millisecond:
+		return strconv.FormatFloat(float64(d)/float64(time.Millisecond), 'f', 3, 64) + "ms"
+	case d >= time.Microsecond:
+		return strconv.FormatFloat(float64(d)/float64(time.Microsecond), 'f', 3, 64) + "us"
+	default:
+		return strconv.FormatInt(int64(d), 10) + "ns"
 	}
 }

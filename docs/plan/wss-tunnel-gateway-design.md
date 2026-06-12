@@ -28,7 +28,7 @@
   - `Shutdown()`
 - 配置通过 `conf/server/*` 包定义 main/sub 配置结构，使用 `cnf.GetMainObject` 和 `cnf.GetSubObject` 读取。
 - `creator` 将配置发布到注册中心，main 节点固定名为 `main`，子配置通过 `BaseBuilder` 写入。
-- WSS 可转发的本地业务服务通过 `hydra.S.WSS(...)` 或应用实例的 `app.WSS(...)` 注册，最终进入 `services.ORouter` 和 `services.Def.Call`。
+- WSS 可转发的本地业务服务通过 `hydra.S.WSS(...)` 注册，最终进入 `services.ORouter` 和 `services.Def.Call`。
 - HTTP/RPC/MQC/CRON/AIGW 的 `Responsive` 都遵循 `DoSetup -> Start -> DoStarted -> publish -> Notify -> Shutdown -> DoClosing` 的生命周期。
 
 因此 `wss.server` 和 `wss.client` 必须以“新增标准 Hydra server type”的方式接入，而不是独立后台组件；两端服务类型分开，避免一个配置节点靠 `mode` 字段承担两种生命周期。
@@ -86,8 +86,8 @@ const (
 - 新增 `hydra/servers/wss`。
 - 新增 `conf/server/wss`。
 - 新增 `creator/server.wss.go`。
-- `services` 中新增 `services.WSSServer = NewORouter("WSS.SERVER")`，并在 `Def.servers` 初始化中注册 `global.WSSServer`。
-- `wss.client` 不对外承载业务 WebSocket 服务，不需要业务 ORouter；它只负责连接云端、注册本地服务和本地分发。
+- `services` 中新增共享 `services.WSS = NewORouter("WSS")`，并在 `Def.servers` 初始化中让 `global.WSSServer` 和 `global.WSSClient` 指向同一个 `*serverServices` 实例，避免路由表共享但 handler 元数据分裂。
+- `wss.client` 不对外承载业务 WebSocket 服务，不发布公网监听入口；它只负责连接云端、采集本地 `hydra.S.WSS(...)` 服务、注册 group 和执行本地分发。
 - `creator.Conf.WSS(...)` 作为统一配置入口，根据 `wss.WithServerSide(...)` 或 `wss.WithClientSide(...)` 生成 `wss.server` 或 `wss.client` 配置。
 - 删除旧 `global.WS`、`conf/server/ws`、`hydra/servers/http/ws`、`creator.Conf.WS/GetWS`、`services.Def.WS` 等所有 `ws` 相关入口和实现。
 
@@ -105,42 +105,29 @@ const (
 conf/server/wss
   wss.go
   option.go
-  service.go
   route.go
 
 creator
   server.wss.go
 
 hydra/servers/wss
-  responsive.server.go
-  responsive.client.go
+  responsive.go
   server.go
   client.go
-  option.go
-  upgrader.go
   frame.go
-  codec.go
   session.go
   pool.go
-  heartbeat.go
-  reconnect.go
-  pending.go
-  route.table.go
-  proxy.http.go
-  dispatch.local.go
-  registry.tunnel.go
-  middleware.go
+  request.go
+  dispatcher.go
 ```
 
 说明：
 
-- `responsive.server.go` 注册并启动 `global.WSSServer`。
-- `responsive.client.go` 注册并启动 `global.WSSClient`。
+- `responsive.go` 注册并启动 `global.WSSServer/global.WSSClient`。
 - `server.go` 只处理云端 server side。
 - `client.go` 只处理本地 client side。
-- `session/pool/heartbeat/pending` 是两端共用的连接基础设施。
-- `proxy.http.go` 负责 `wss.server` 下 HTTP 请求转 tunnel frame。
-- `dispatch.local.go` 负责 `wss.client` 下 tunnel frame 转本地服务。
+- `session.go/pool.go` 是连接池和 pending 请求基础设施。
+- `request.go/dispatcher.go` 负责 tunnel frame 与 Hydra 本地 dispatcher 之间的转换。
 
 ## 6. 配置模型
 
@@ -155,62 +142,37 @@ hydra/servers/wss
 
 `cluster` 是 Hydra 原有配置命名空间，用来定位当前进程从哪里读取自己的配置；`group` 是 WSS 隧道连接池分组，用来决定外部 HTTP 请求转发给哪一组本地 B。两者没有映射关系，也不要求同名。
 
-`conf/server/wss.ServerSide` 作为 `wss.server` main 配置：
+`conf/server/wss.Server` 作为 `wss.server` 和 `wss.client` 共同使用的 main 配置。不同 side 只启用自己需要的字段：
 
 ```go
-type ServerSide struct {
+type Server struct {
     security.ConfEncrypt
-    Address    string `json:"address,omitempty" toml:"address,omitempty"`
-    Status     string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-    Path       string `json:"path,omitempty" toml:"path,omitempty"`
-    Trace      bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-
-    TLS        TLSConf        `json:"tls,omitempty" toml:"tls,omitempty"`
-    Auth       AuthConf       `json:"auth,omitempty" toml:"auth,omitempty"`
-    Heartbeat  HeartbeatConf  `json:"heartbeat,omitempty" toml:"heartbeat,omitempty"`
-    Pool       PoolConf       `json:"pool,omitempty" toml:"pool,omitempty"`
-    Proxy      ProxyConf      `json:"proxy,omitempty" toml:"proxy,omitempty"`
-}
-```
-
-`conf/server/wss.ClientSide` 作为 `wss.client` main 配置：
-
-```go
-type ClientSide struct {
-    security.ConfEncrypt
-    Server   string `json:"server,omitempty" toml:"server,omitempty"`
-    Status   string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
-    Group    string `json:"group,omitempty" toml:"group,omitempty"`
-    ClientID string `json:"clientID,omitempty" toml:"clientID,omitempty"` // 可选，默认自动生成
-    Trace    bool   `json:"trace,omitempty" toml:"trace,omitempty"`
-
-    Auth      AuthConf      `json:"auth,omitempty" toml:"auth,omitempty"`
-    Heartbeat HeartbeatConf `json:"heartbeat,omitempty" toml:"heartbeat,omitempty"`
-    Reconnect ReconnectConf `json:"reconnect,omitempty" toml:"reconnect,omitempty"`
-    Pool      PoolConf      `json:"pool,omitempty" toml:"pool,omitempty"`
+    Address        string `json:"address,omitempty" toml:"address,omitempty"`        // server side
+    Server         string `json:"server,omitempty" toml:"server,omitempty"`          // client side
+    Status         string `json:"status,omitempty" valid:"in(start|stop)" toml:"status,omitempty"`
+    Path           string `json:"path,omitempty" toml:"path,omitempty"`
+    Group          string `json:"group,omitempty" toml:"group,omitempty"`            // client side
+    ClientID       string `json:"clientID,omitempty" toml:"clientID,omitempty"`      // client side，可选
+    AuthType       string `json:"authType,omitempty" toml:"authType,omitempty"`
+    AuthSecret     string `json:"authSecret,omitempty" toml:"authSecret,omitempty"`
+    PingInterval   int    `json:"pingInterval,omitempty" toml:"pingInterval,omitempty"`
+    PongTimeout    int    `json:"pongTimeout,omitempty" toml:"pongTimeout,omitempty"`
+    WriteTimeout   int    `json:"writeTimeout,omitempty" toml:"writeTimeout,omitempty"`
+    RequestTimeout int    `json:"requestTimeout,omitempty" toml:"requestTimeout,omitempty"`
+    Trace          bool   `json:"trace,omitempty" toml:"trace,omitempty"`
 }
 ```
 
 默认值：
 
 ```text
-address = ":8443"
+address = "8443"
 path = "/hydra/wss"
 status = "start"
-heartbeat.pingInterval = 25
-heartbeat.pongTimeout = 75
-heartbeat.writeTimeout = 10
-pool.sendQueueSize = 256
-pool.maxFrameSize = 1048576
-pool.maxMessageSize = 52428800
-pool.maxInflightPerClient = 128
-pool.requestTimeout = 60
-pool.balancer = "least_inflight"
-reconnect.minInterval = 1
-reconnect.maxInterval = 30
-reconnect.factor = 2
-proxy.enabled = true
-proxy.prefix = "/"
+pingInterval = 25
+pongTimeout = 75
+writeTimeout = 10
+requestTimeout = 60
 ```
 
 最小必配原则：
@@ -225,10 +187,8 @@ proxy.prefix = "/"
 ```toml
 [wss]
 status = "start"
-
-[wss.auth]
-type = "apikey"
-secret = "server-secret"
+authType = "apikey"
+authSecret = "server-secret"
 ```
 
 `wss.client` 最小示例：
@@ -236,12 +196,10 @@ secret = "server-secret"
 ```toml
 [wss]
 status = "start"
-server = "wss://gateway.example.com/hydra/wss"
+server = "wss://wss.isamrt.xhydra.cn/hydra/wss"
 group = "store-01"
-
-[wss.auth]
-type = "apikey"
-secret = "server-secret"
+authType = "apikey"
+authSecret = "server-secret"
 ```
 
 `clientID` 默认使用 Hydra 现有 `ServerID` 或 `machineCode + pid` 生成；只有需要固定节点名、稳定替换旧连接或排查问题时才配置。
@@ -253,27 +211,27 @@ client server = <公网可访问的 scheme + host + serverSide path>
 ```
 
 - `scheme`：公网 TLS 终止后仍建议对 client 暴露 `wss://`；如果只在内网明文调试，可使用 `ws://`。
-- `host`：由部署入口决定，可以是 SLB、Ingress、Nginx 或直接暴露的 Hydra 地址，例如 `gateway.example.com`。
+- `host`：由部署入口决定，可以是 SLB、Ingress、Nginx 或直接暴露的 Hydra 地址，例如 `wss.isamrt.xhydra.cn`。
 - `path`：来自 `wss.server` 的 `Path` 配置，默认是 `/hydra/wss`。
 
-因此 `wss://gateway.example.com/hydra/wss` 不是服务端自动拼出来下发给 client 的地址，而是部署者根据公网入口填写给 client 的连接地址。若经过 Nginx，Nginx 只需要把这个 path 的 WebSocket Upgrade 请求转发到 Hydra `wss.server` 的监听地址。
+因此 `wss://wss.isamrt.xhydra.cn/hydra/wss` 不是服务端自动拼出来下发给 client 的地址，而是部署者根据公网入口填写给 client 的连接地址。若经过 Nginx，Nginx 只需要把这个 path 的 WebSocket Upgrade 请求转发到 Hydra `wss.server` 的监听地址。
 
 示例：
 
 ```text
-公网入口: gateway.example.com
+公网入口: wss.isamrt.xhydra.cn
 wss.server address: :8443
 wss.server path: /hydra/wss
-client server: wss://gateway.example.com/hydra/wss
+client server: wss://wss.isamrt.xhydra.cn/hydra/wss
 ```
 
 如果 Nginx 对外使用自定义路径：
 
 ```text
-公网入口: gateway.example.com
+公网入口: wss.isamrt.xhydra.cn
 外部 path: /tunnel
 Nginx proxy_pass: http://127.0.0.1:8443/hydra/wss
-client server: wss://gateway.example.com/tunnel
+client server: wss://wss.isamrt.xhydra.cn/tunnel
 ```
 
 此时 client 只关心外部完整地址；server 只关心自己实际监听的 `Path`。
@@ -340,10 +298,8 @@ func init() {
 ```toml
 [wss]
 status = "start"
-
-[wss.auth]
-type = "apikey"
-secret = "server-secret"
+authType = "apikey"
+authSecret = "server-secret"
 ```
 
 启动：
@@ -391,7 +347,7 @@ import (
 func init() {
     hydra.Conf.WSS(
         wss.WithClientSide(
-            wss.WithServer("wss://gateway.example.com/hydra/wss"),
+            wss.WithServer("wss://wss.isamrt.xhydra.cn/hydra/wss"),
             wss.WithGroup("store-01"),
             wss.WithAuth("apikey", "server-secret"),
         ),
@@ -434,12 +390,10 @@ func (s *OrderService) PostHandle(ctx hydra.IContext) interface{} {
 ```toml
 [wss]
 status = "start"
-server = "wss://gateway.example.com/hydra/wss"
+server = "wss://wss.isamrt.xhydra.cn/hydra/wss"
 group = "store-01"
-
-[wss.auth]
-type = "apikey"
-secret = "server-secret"
+authType = "apikey"
+authSecret = "server-secret"
 ```
 
 启动：
@@ -455,7 +409,7 @@ store-client.exe run -p demo -s store-client -t wss.client -r lm://.
 外部调用：
 
 ```text
-POST https://gateway.example.com/store-01/order/create
+POST https://wss.isamrt.xhydra.cn/store-01/order/create
 ```
 
 默认规则：
@@ -494,7 +448,7 @@ method = POST
 GET 请求同理：
 
 ```text
-GET https://gateway.example.com/store-01/order?id=1001
+GET https://wss.isamrt.xhydra.cn/store-01/order?id=1001
   -> group=store-01
   -> path=/order
   -> method=GET
@@ -507,7 +461,7 @@ GET https://gateway.example.com/store-01/order?id=1001
 
 ```go
 wss.WithClientSide(
-    wss.WithServer("wss://gateway.example.com/hydra/wss"),
+    wss.WithServer("wss://wss.isamrt.xhydra.cn/hydra/wss"),
     wss.WithGroup("store-01"),
     wss.WithAuth("apikey", "server-secret"),
 )
@@ -521,7 +475,7 @@ B 连接 A 后自动注册：
 
 ```text
 wss.client(group=store-01, clientID=<auto>)
-  -> connect wss://gateway.example.com/hydra/wss
+  -> connect wss://wss.isamrt.xhydra.cn/hydra/wss
   -> auth + register
   -> wss.server pool[group=store-01].add(clientID)
 ```
@@ -590,14 +544,16 @@ POST https://store01-api.example.com/order/create
 ```go
 type wssBuilder struct {
     BaseBuilder
-    side string
+    tp string
 }
 
-func newWSS(opts ...wss.SideOption) *wssBuilder {
-    b := &wssBuilder{BaseBuilder: make(map[string]interface{})}
-    side := wss.ApplySide(opts...)
-    b.side = side.Type() // global.WSSServer 或 global.WSSClient
-    b.BaseBuilder[ServerMainNodeName] = side.MainConf()
+func newWSS(opts ...wss.Option) *wssBuilder {
+    side := wss.WithServerSide()
+    if len(opts) > 0 {
+        side = opts[0]
+    }
+    b := &wssBuilder{tp: side.Type(), BaseBuilder: make(map[string]interface{})}
+    // 根据 side.Type() 创建 wss.NewServerSide 或 wss.NewClientSide
     return b
 }
 ```
@@ -605,7 +561,7 @@ func newWSS(opts ...wss.SideOption) *wssBuilder {
 `creator.IConf` 增加：
 
 ```go
-WSS(opts ...wss.SideOption) *wssBuilder
+WSS(opts ...wss.Option) *wssBuilder
 GetWSSServer() *wssBuilder
 GetWSSClient() *wssBuilder
 ```
@@ -660,8 +616,8 @@ type ClientResponsive struct {
 
 1. 保存 `app.Cache`。
 2. 执行 `services.Def.DoSetup(cnf)`。
-3. `wss.server` 读取 `wss.GetServerSideConf(cnf.GetServerConf())`。
-4. `wss.client` 读取 `wss.GetClientSideConf(cnf.GetServerConf())`。
+3. `wss.server/wss.client` 读取统一的 `wss.GetConf(cnf.GetServerConf())`。
+4. 根据 `GetServerType()` 创建 `NewServer` 或 `NewClient`。
 
 `Start`：
 
@@ -677,9 +633,8 @@ type ClientResponsive struct {
 - `wss.server` main 中 `address/path/tls/auth` 变更：重启。
 - `wss.client` main 中 `server/group/clientID/auth` 变更：断线、重连、重新注册。
 - `heartbeat/pool/reconnect/proxy` 变更：优先动态更新；不能动态更新时重启。
-- `services/routes` 子配置变更：
-  - `wss.server` 更新本地静态路由表。
-  - `wss.client` 发送新的 `register` 覆盖旧注册。
+- `routes` 子配置变更：`wss.server` 更新本地静态路由表。
+- 如果未来支持运行时增删 `hydra.S.WSS(...)` 服务，`wss.client` 需要重新采集本地 WSS 路由并发送新的 `register` 覆盖旧注册；第一版按进程启动时的注册表为准。
 
 `Shutdown`：
 
@@ -719,38 +674,19 @@ wss://host:port/hydra/wss
 
 ```go
 type TunnelPool struct {
-    groups  map[string]*ClientPool
-    clients map[string]*Session
-    routes  *RouteTable
-    pending *PendingStore
+    groups  map[string]map[string]*session
+    pending map[string]chan *Frame
 }
 ```
 
-`ClientPool`：
-
-```go
-type ClientPool struct {
-    Group    string
-    Sessions map[string]*Session
-    Picker   Picker
-}
-```
-
-`Session` 自动维护：
+当前 `session` 维护：
 
 ```text
-session_id
 client_id
 group
-remote_addr
-registered_services
-connected_at
-last_seen
-inflight
-send_queue_len
-status: active/unhealthy/closing/closed
-weight
-version
+websocket conn
+last pong time
+closed signal
 ```
 
 自动行为：
@@ -758,14 +694,13 @@ version
 - `hello/register` 成功后加入 pool。
 - 相同 `clientID` 重连时，新 session 替换旧 session。
 - 连接断开、心跳超时、认证失败时自动摘除。
-- 摘除 session 时移除其动态路由贡献。
-- pending 请求在 session 断开时返回 `502/503`。
+- pending 请求超时返回 `504`。
 - group 内无可用 client 时返回 `503`。
 
 负载策略：
 
-- 第一版：`least_inflight` 默认，支持 `round_robin`。
-- 第二版：权重、按 header/cookie 一致性 hash。
+- 当前实现：group 内按连接做简单 round-robin。
+- 后续可扩展：`least_inflight`、权重、按 header/cookie 一致性 hash。
 
 ## 11. 心跳、重连、超时
 
@@ -780,21 +715,20 @@ server：
 client：
 
 - 收到 ping 自动 pong。
-- 可主动 ping server。
-- 断线后按 `reconnect` 配置指数退避重连。
+- 当前由 A 侧主动 ping，B 收到后自动 pong。
+- 断线后 B 自动重连，默认 10 秒重试一次，可通过 `wss.WithReconnect(seconds)` 或 `reconnectInterval` 配置覆盖。
 - 重连成功后自动发送 `hello/register`。
 
 请求超时：
 
 - 每个 tunnel request 在 A 侧创建 pending waiter。
-- 超过 `pool.requestTimeout` 清理 pending 并返回 HTTP `504`。
-- 如果外部 HTTP client 提前断开，A 发送 `cancel` 给 B。
+- 超过 `requestTimeout` 清理 pending 并返回 HTTP `504`。
+- 如果外部 HTTP client 提前断开，当前由 pending 超时或连接错误清理；后续可扩展主动 `cancel` 帧。
 
 背压：
 
-- `sendQueueSize` 满时禁止继续投递。
-- `maxInflightPerClient` 满时选择其他 B 或返回 `503`。
-- `maxFrameSize/maxMessageSize` 超限返回 `413` 或关闭异常连接。
+- 当前实现用同步 WebSocket 写和 pending waiter 控制请求生命周期。
+- 后续可扩展 `sendQueueSize`、`maxInflightPerClient`、`maxFrameSize/maxMessageSize` 等背压和限帧策略。
 
 ## 12. 协议帧
 
@@ -816,6 +750,12 @@ type Frame struct {
     Seq     int64             `json:"seq,omitempty"`
     End     bool              `json:"end,omitempty"`
     Body    []byte            `json:"body,omitempty"`
+    Services []ServiceMeta    `json:"services,omitempty"`
+}
+
+type ServiceMeta struct {
+    Path    string   `json:"path"`
+    Methods []string `json:"methods,omitempty"`
 }
 ```
 
@@ -824,16 +764,15 @@ type Frame struct {
 ```text
 hello        client -> server，握手和能力声明
 hello_ack    server -> client，握手成功
-register     client -> server，注册服务
+register     client -> server，注册 group、client 和本地服务快照
 registered   server -> client，注册成功
 request      server -> client，转发 HTTP 请求
 response     client -> server，返回 HTTP 响应
-chunk        双向，大 body 分片
-cancel       server -> client，取消请求
 ping/pong    心跳
-unregister   client -> server，注销
 error        双向错误
 ```
+
+`chunk/cancel/unregister` 暂不作为第一版必需帧，后续需要大 body 分片、主动取消或显式注销时再扩展。
 
 所有业务请求必须带 `ID`，用于多路复用。
 
@@ -843,12 +782,16 @@ error        双向错误
 
 `wss.server` 对外暴露的是一个 HTTP 网关入口，不是把每个 B 的服务发布成独立端口，也不是写入普通 RPC provider 路径。
 
-它在同一个监听地址上承担两类入口：
+它在同一个监听地址上承担三类入口：
 
 ```text
 GET /hydra/wss
   -> WebSocket Upgrade
   -> 只给 wss.client 建立长连接和注册 group
+
+GET /chat 或其他 hydra.S.WSS(...) 注册路径
+  -> WebSocket Upgrade
+  -> 云端本地业务 WSS 服务
 
 ANY /{group}/{service-path}
   -> 普通业务 HTTP 请求
@@ -856,21 +799,218 @@ ANY /{group}/{service-path}
   -> 通过该 group 的 WSS 连接池转发给本地 B
 ```
 
+路由优先级必须固定为：先匹配 `Path=/hydra/wss` 的隧道 WebSocket Upgrade，再匹配业务 WSS Upgrade，最后进入业务 HTTP 代理规则。`/hydra/wss` 是系统保留路径，不能被默认 `/{group}/{service-path}` 解释成 `group=hydra, service-path=/wss`。
+
 默认情况下，服务暴露由 URL 第一段决定 group：
 
 ```text
-POST https://gateway.example.com/store-01/order/create
+POST https://wss.isamrt.xhydra.cn/store-01/order/create
   -> group = store-01
   -> B 侧 path = /order/create
   -> B 侧 hydra.S.WSS("/order", &OrderService{})
   -> OrderService.PostHandle(ctx)
 ```
 
-因此云端 A 只需要暴露一个公网 HTTP(S) 域名和端口。Nginx/Ingress/SLB 可以把所有业务 HTTP 请求转给 A，同时把 WSS Upgrade path 也转给 A：
+因此云端 A 只需要暴露一个公网 HTTP(S) 域名和端口。Nginx/Ingress/SLB 可以把所有业务 HTTP 请求转给 A，同时把 WSS Upgrade path 也转给 A。下面以域名 `wss.isamrt.xhydra.cn` 为例：
 
 ```text
-https://gateway.example.com/store-01/order/create  -> A:8443/store-01/order/create
-wss://gateway.example.com/hydra/wss               -> A:8443/hydra/wss
+https://wss.isamrt.xhydra.cn/store-01/order/create  -> A:8443/store-01/order/create
+wss://wss.isamrt.xhydra.cn/hydra/wss                -> A:8443/hydra/wss
+```
+
+Nginx 推荐映射如下。这里假设 Hydra `wss.server` 在云端本机监听 `127.0.0.1:8443`。如果 Nginx 负责 TLS 终止，监听 `443 ssl`，client 使用 `wss://`；如果只开放 80 明文入口，监听 `80`，client 使用 `ws://`。
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+upstream hydra_wss_server {
+    server 127.0.0.1:8443;
+    keepalive 64;
+}
+
+server {
+    # 如果只开放 80 明文入口，改为：listen 80;
+    listen 443 ssl http2;
+    server_name wss.isamrt.xhydra.cn;
+
+    # 仅 listen 443 ssl 时需要证书；listen 80 时删除这两行。
+    ssl_certificate     /etc/nginx/certs/wss.isamrt.xhydra.cn.crt;
+    ssl_certificate_key /etc/nginx/certs/wss.isamrt.xhydra.cn.key;
+
+    # WSS 长连接入口，必须优先于业务代理 location。
+    location = /hydra/wss {
+        proxy_pass http://hydra_wss_server;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_connect_timeout 10s;
+
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+
+    # 业务 HTTP 网关入口：/{group}/{service-path}
+    # 也承载云端本地业务 WSS，例如 /chat，因此这里同样透传 Upgrade。
+    location / {
+        proxy_pass http://hydra_wss_server;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_connect_timeout 10s;
+    }
+}
+```
+
+对应关系：
+
+```text
+client WithServer("wss://wss.isamrt.xhydra.cn/hydra/wss")
+  -> Nginx location = /hydra/wss
+  -> http://127.0.0.1:8443/hydra/wss
+  -> Hydra wss.server Upgrade
+
+external POST https://wss.isamrt.xhydra.cn/store-01/order/create
+  -> Nginx location /
+  -> http://127.0.0.1:8443/store-01/order/create
+  -> Hydra wss.server HTTP proxy
+```
+
+如果入口只使用 80 明文，则对应为：
+
+```text
+client WithServer("ws://wss.isamrt.xhydra.cn/hydra/wss")
+external POST http://wss.isamrt.xhydra.cn/store-01/order/create
+```
+
+如果 Nginx 对外想使用 `/tunnel`，而 Hydra 内部仍使用默认 `/hydra/wss`，则需要重写 path：
+
+```nginx
+location = /tunnel {
+    proxy_pass http://hydra_wss_server/hydra/wss;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+    proxy_set_header Host $host;
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+    proxy_buffering off;
+    proxy_request_buffering off;
+}
+```
+
+此时 client 配置：
+
+```go
+wss.WithServer("wss://wss.isamrt.xhydra.cn/tunnel")
+```
+
+如果 `/tunnel` 也走 80 明文，则改为：
+
+```go
+wss.WithServer("ws://wss.isamrt.xhydra.cn/tunnel")
+```
+
+### 13.2 云端业务 WSS 服务
+
+`wss.server` 除了作为隧道网关，也可以直接提供通用业务 WebSocket/WSS 服务。业务 WSS 和隧道 WSS 共用同一个监听地址，但路径必须分开：
+
+```text
+/hydra/wss      系统保留，只用于 tunnel client
+/chat           业务 WSS
+/notify         业务 WSS
+/store-01/order 普通 HTTP 隧道请求
+```
+
+业务 WSS 服务仍然只按 Hydra 原有方式注册，不进入 WSS 配置：
+
+```go
+package main
+
+import "github.com/micro-plat/hydra"
+
+func init() {
+    hydra.S.WSS("/chat", &ChatService{})
+}
+
+type ChatService struct{}
+
+func (s *ChatService) Handle(ctx hydra.IContext) interface{} {
+    text := ctx.Request().GetString("text")
+    return map[string]interface{}{
+        "type": "reply",
+        "text": text,
+    }
+}
+```
+
+业务客户端连接：
+
+```text
+wss://wss.isamrt.xhydra.cn/chat
+```
+
+业务消息建议使用 JSON。每条客户端消息都会被 `wss.server` 包装成一次 Hydra 本地 dispatcher 调用；服务返回值会被序列化后写回同一条 WebSocket 连接：
+
+```json
+{"text":"hello"}
+```
+
+返回：
+
+```json
+{"type":"reply","text":"hello"}
+```
+
+如果一个业务连接下需要按消息路由到不同动作，推荐仍然使用路径维度，而不是在 WSS 配置里声明服务。例如：
+
+```go
+func init() {
+    hydra.S.WSS("/chat/send", &ChatSendService{})
+    hydra.S.WSS("/chat/read", &ChatReadService{})
+}
+```
+
+对应连接：
+
+```text
+wss://wss.isamrt.xhydra.cn/chat/send
+wss://wss.isamrt.xhydra.cn/chat/read
+```
+
+第一版业务 WSS 约束：
+
+- `/hydra/wss` 只用于隧道，不允许业务注册占用。
+- 业务 WSS 只在 `wss.server` 对外暴露，`wss.client` 不监听公网业务 WebSocket。
+- 业务 WSS 不通过 `group` 分发；`group` 只属于隧道连接池。
+- 业务 WSS 与 HTTP 隧道共享认证、中间件、日志、限流、trace 能力。
+- 单连接内的每条消息独立调用一次 Hydra handler；长连接状态通过 `traceID/clientIP/header` 和后续设计的 WSS session helper 维护。
+
+Nginx 对业务 WSS 不需要额外 location，只要 `location /` 已经透传 `Upgrade` 和 `Connection` 头即可：
+
+```text
+wss://wss.isamrt.xhydra.cn/chat
+  -> Nginx location /
+  -> http://127.0.0.1:8443/chat
+  -> wss.server 本地业务 WSS dispatch
 ```
 
 如果不希望 URL 中出现 group，可以用可选 `routes` 做 Host 到 group 的映射：
@@ -888,12 +1028,12 @@ POST https://store01-api.example.com/order/create
 
 1. HTTP 请求进入 `wss` server 的 Gin/HTTP engine。
 2. 普通中间件执行：recovery、metric、logging、trace、black/white list、limit、auth。
-3. `ProxyHandler` 按默认 `/{group}/{service-path}` 规则解析 group；如配置了高级 `routes`，优先使用 `RouteTable`。
+3. `serveProxy` 按默认 `/{group}/{service-path}` 规则解析 group；如配置了高级 `routes`，优先使用 `[]wss.Route`。
 4. 找到 group。
 5. `TunnelPool.Pick(group)` 选择 B。
 6. 创建 pending request。
-7. 将 HTTP request 转为 `request/chunk` frame。
-8. 等待 `response/chunk`。
+7. 将 HTTP request 转为 `request` frame。
+8. 等待 `response` frame。
 9. 写回原 HTTP response。
 
 未匹配 tunnel 路由时：
@@ -906,25 +1046,30 @@ POST https://store01-api.example.com/order/create
 client 收到 `request` frame 后：
 
 - 默认构造 dispatcher request，复用 `adapter.DispatcherEngine` + `middleware.ExecuteHandler()` 调本地 Hydra 服务。
-- 生成 `response/chunk` frame 返回 server。
+- 生成 `response` frame 返回 server。
 
 本地 Hydra dispatcher 是默认方式，因为它能复用 Hydra 本地服务注册、上下文、日志、hook 和 render 能力。
 
 ## 15. 与 services 注册统一
 
-新增 `services.WSSServer`，并通过 `hydra.S.WSS(...)` / `app.WSS(...)` 暴露给业务使用：
+新增共享的 `services.WSS` 路由表，并通过 `hydra.S.WSS(...)` 暴露给业务使用：
 
 ```go
-var WSSServer = NewORouter("WSS.SERVER")
+var WSS = NewORouter("WSS")
 ```
 
-`services.Def` 初始化中增加：
+`services.Def` 初始化中增加。`wss.server` 和 `wss.client` 必须指向同一个 `*serverServices` 实例，而不是分别创建两个 `serverServices` 后只共享 `ORouter`。原因是 Hydra 的 handler、hook、fallback 等元数据保存在 `serverServices` 内部；如果拆成两份，`hydra.S.WSS(...)` 注册到一边，另一边 dispatch 时会找不到 handler。
 
 ```go
-Def.servers[global.WSSServer] = newServerServices(func(g *Unit, ext ...interface{}) error {
-    return WSSServer.Add(g.Path, g.Service, g.Actions, ext...)
-}, WSSServer.Remove)
+var wssServices = newServerServices(func(g *Unit, ext ...interface{}) error {
+    return WSS.Add(g.Path, g.Service, g.Actions, ext...)
+}, WSS.Remove)
+
+Def.servers[global.WSSServer] = wssServices
+Def.servers[global.WSSClient] = wssServices
 ```
+
+这样 `hydra.S.WSS("/order", &OrderService{})` 注册一次后，云端 `wss.server` 的本地 dispatch 和本地 `wss.client` 的隧道 dispatch 都能从同一个 WSS 服务表读取 handler。
 
 新增：
 
@@ -949,7 +1094,7 @@ hydra.S.WSS("/notify", notifyHandler)
 `Micro(...)` 是否包含 `WSS` 要谨慎：
 
 - 如果 `wss.server` 主要用于隧道，不建议默认加入 `Micro`，避免普通业务服务意外暴露到长连接网关。
-- 若需要业务 WebSocket 场景，可由用户显式调用 `hydra.S.WSS(...)` 或 `app.WSS(...)`。
+- 若需要业务 WebSocket 场景，可由用户显式调用 `hydra.S.WSS(...)`。
 
 ## 16. 安全设计
 
@@ -996,7 +1141,7 @@ Binary Frame 与 Text Frame 在连接稳定性上没有本质差异，稳定性�
 
 1. 新增 `wss.server` 和 `wss.client` 服务类型。
 2. 删除旧 `ws` 服务类型、配置、creator、服务注册和 HTTP WS 实现。
-3. 新增 `hydra.S.WSS`、`app.WSS` 和 `creator.Conf.WSS`。
+3. 新增 `hydra.S.WSS` 和 `creator.Conf.WSS`。
 4. 实现 `wss.server` 和 `wss.client`。
 5. 实现 tunnel 注册、连接池和 HTTP 转发。
 6. 默认分发到本地 Hydra dispatcher。
@@ -1033,9 +1178,9 @@ Binary Frame 与 Text Frame 在连接稳定性上没有本质差异，稳定性�
 - `global/iapp.go`：新增 `WSSServer` 和 `WSSClient` 常量。
 - `global/iapp.go`：删除 `WS` 常量。
 - `global.ServerTypes`：由 `servers.Register(global.WSSServer, ...)` 和 `servers.Register(global.WSSClient, ...)` 自动追加。
-- `services/orouter.go`：新增 `WSSServer` router 和 `GetRouter(global.WSSServer)` 分支。
+- `services/orouter.go`：新增共享 `WSS` router，`GetRouter(global.WSSServer)` 和 `GetRouter(global.WSSClient)` 都返回它。
 - `services/orouter.go`：删除 `WS` router 和 `GetRouter(global.WS)` 分支。
-- `services/registry.go`：新增 `WSS(...)` 方法和 `Def.servers[global.WSSServer]` 初始化。
+- `services/registry.go`：新增 `WSS(...)` 方法，并初始化 `Def.servers[global.WSSServer]` 和 `Def.servers[global.WSSClient]` 为同一个 `*serverServices` 实例。
 - `services/registry.go`：删除 `WS(...)` 方法，`Micro(...)` 不再注册 WebSocket，删除 `Def.servers[global.WS]` 初始化。
 - `conf/server/wss`：新增 main/sub 配置。
 - `conf/server/ws`：删除旧配置包。

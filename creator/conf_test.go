@@ -9,6 +9,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/rpc"
 	"github.com/micro-plat/hydra/conf/server/static"
+	"github.com/micro-plat/hydra/conf/server/wss"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/lib4go/assert"
@@ -34,14 +35,18 @@ func TestNew(t *testing.T) {
 
 func Test_conf_Load(t *testing.T) {
 	servers.Register(global.API, nil)
-	servers.Register(global.WS, nil)
+	servers.Register(global.WSSServer, nil)
 	servers.Register(global.Web, nil)
 	servers.Register(global.RPC, nil)
 	servers.Register(global.MQC, nil)
 	servers.Register(global.CRON, nil)
 	cuurConfDefault := New()
 	cuurConfAPI := func() *conf { cuurConf := New(); cuurConf.API("1122"); return cuurConf }()
-	cuurConfWS := func() *conf { cuurConf := New(); cuurConf.WS("1123"); return cuurConf }()
+	cuurConfWSS := func() *conf {
+		cuurConf := New()
+		cuurConf.WSS(wss.WithServerSide(wss.WithAddress("1123")))
+		return cuurConf
+	}()
 	cuurConfWEB := func() *conf { cuurConf := New(); cuurConf.Web("1124"); return cuurConf }()
 	cuurConfMQC := func() *conf { cuurConf := New(); cuurConf.MQC("redis://192.168.0.102"); return cuurConf }()
 	cuurConfRPC := func() *conf { cuurConf := New(); cuurConf.RPC("1125"); return cuurConf }()
@@ -51,7 +56,7 @@ func Test_conf_Load(t *testing.T) {
 		cuurConf := New()
 		cuurConf.Custom("test", "自定义配置")
 		cuurConf.API("1122")
-		cuurConf.WS("1123")
+		cuurConf.WSS(wss.WithServerSide(wss.WithAddress("1123")))
 		cuurConf.MQC("redis://192.168.0.102")
 		cuurConf.RPC("1125")
 		cuurConf.CRON()
@@ -67,8 +72,8 @@ func Test_conf_Load(t *testing.T) {
 		{name: "1.1 没有设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, api.DefaultAPIAddress)}, wantErr: true},
 		{name: "1.2 已经设置api节点,加载默认节点", serverTypes: []string{global.API}, fields: cuurConfAPI, want: map[string]iCustomerBuilder{global.API: newHTTP(global.API, "1122")}, wantErr: true},
 
-		{name: "2.1 没有设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}, wantErr: true},
-		{name: "2.2 已经设置WS节点,加载默认节点", serverTypes: []string{global.WS}, fields: cuurConfWS, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, "1123")}, wantErr: true},
+		{name: "2.1 没有设置WSS节点,加载默认节点", serverTypes: []string{global.WSSServer}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WSSServer: newWSS(wss.WithServerSide())}, wantErr: true},
+		{name: "2.2 已经设置WSS节点,加载默认节点", serverTypes: []string{global.WSSServer}, fields: cuurConfWSS, want: map[string]iCustomerBuilder{global.WSSServer: newWSS(wss.WithServerSide(wss.WithAddress("1123")))}, wantErr: true},
 
 		{name: "3.1 没有设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, api.DefaultWEBAddress)}, wantErr: true},
 		{name: "3.2 已经设置web节点,加载默认节点", serverTypes: []string{global.Web}, fields: cuurConfWEB, want: map[string]iCustomerBuilder{global.Web: newHTTP(global.Web, "1124")}, wantErr: true},
@@ -84,8 +89,8 @@ func Test_conf_Load(t *testing.T) {
 
 		{name: "7.1 没有设置任何节点", serverTypes: []string{}, fields: cuurConfDefault, want: map[string]iCustomerBuilder{}, wantErr: true},
 		{name: "7.2 已经设置自定义节点节点-test", serverTypes: []string{"test"}, fields: cuurConfCustom, want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置")}, wantErr: true},
-		{name: "7.3 同时加载所有服务节点", serverTypes: []string{global.API, global.WS, global.Web, global.RPC, global.CRON, "test"}, fields: cuurConfAll,
-			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, "1122"), global.WS: newHTTP(global.WS, "1123"),
+		{name: "7.3 同时加载所有服务节点", serverTypes: []string{global.API, global.WSSServer, global.Web, global.RPC, global.CRON, "test"}, fields: cuurConfAll,
+			want: map[string]iCustomerBuilder{"test": newCustomerBuilder("自定义配置"), global.API: newHTTP(global.API, "1122"), global.WSSServer: newWSS(wss.WithServerSide(wss.WithAddress("1123"))),
 				global.Web: newHTTP(global.Web, "1124").Static(static.WithAssetsPath(global.AppName)), global.RPC: newRPC("1125"),
 				global.MQC: newMQC("redis://192.168.0.102"), global.CRON: newCron()}, wantErr: true},
 	}
@@ -106,9 +111,12 @@ func Test_conf_Load(t *testing.T) {
 			_, ok := tt.fields.data[k]
 			assert.Equal(t, true, ok, tt.name+",ok")
 			switch k {
-			case global.API, global.WS, global.Web:
+			case global.API, global.Web:
 				assert.Equal(t, (tt.want[k].(*httpBuilder)).tp, (tt.fields.data[k].(*httpBuilder)).tp, tt.name+",http-tp")
 				assert.Equal(t, (tt.want[k].(*httpBuilder)).BaseBuilder, (tt.fields.data[k].(*httpBuilder)).BaseBuilder, tt.name+",http-CustomerBuilder")
+			case global.WSSServer, global.WSSClient:
+				assert.Equal(t, (tt.want[k].(*wssBuilder)).tp, (tt.fields.data[k].(*wssBuilder)).tp, tt.name+",wss-tp")
+				assert.Equal(t, (tt.want[k].(*wssBuilder)).BaseBuilder, (tt.fields.data[k].(*wssBuilder)).BaseBuilder, tt.name+",wss-CustomerBuilder")
 
 			case global.RPC:
 				assert.Equal(t, (tt.want[k].(*rpcBuilder)).tp, (tt.fields.data[k].(*rpcBuilder)).tp, tt.name+",rpc-tp")
@@ -211,46 +219,53 @@ func Test_conf_GetWeb(t *testing.T) {
 	}
 }
 
-func Test_conf_WS(t *testing.T) {
+func Test_conf_WSS(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS("1122"); return cuurConf }()
+	cuurConfWSS := func() *conf {
+		cuurConf := New()
+		cuurConf.WSS(wss.WithServerSide(wss.WithAddress("1122")))
+		return cuurConf
+	}()
 	tests := []struct {
-		name    string
-		address string
-		fields  *conf
-		opts    []api.Option
+		name   string
+		fields *conf
+		opts   []wss.Option
 	}{
-		{name: "1. 设置默认ws配置对象", address: "", fields: cuurConfDefault, opts: []api.Option{}},
-		{name: "2. 设置自定义ws配置对象", address: ":9092", fields: cuurConfDefault, opts: []api.Option{api.WithDisable(), api.WithTrace()}},
-		{name: "3. 重复设置自定义ws配置对象", address: ":9092", fields: cuurConfWs, opts: []api.Option{api.WithDisable(), api.WithTrace()}},
+		{name: "1. 设置默认wss.server配置对象", fields: cuurConfDefault, opts: []wss.Option{wss.WithServerSide()}},
+		{name: "2. 设置自定义wss.server配置对象", fields: cuurConfDefault, opts: []wss.Option{wss.WithServerSide(wss.WithAddress(":9092"), wss.WithTrace())}},
+		{name: "3. 重复设置自定义wss.server配置对象", fields: cuurConfWSS, opts: []wss.Option{wss.WithServerSide(wss.WithAddress(":9092"), wss.WithTrace())}},
+		{name: "4. 设置wss.client配置对象", fields: cuurConfDefault, opts: []wss.Option{wss.WithClientSide(wss.WithServer("wss://gateway.example.com/hydra/wss"), wss.WithGroup("store-01"))}},
 	}
 
 	for _, tt := range tests {
-		want := newHTTP(global.WS, tt.address, tt.opts...)
-		obj := tt.fields.WS(tt.address, tt.opts...)
+		want := newWSS(tt.opts...)
+		obj := tt.fields.WSS(tt.opts...)
 		assert.Equal(t, want.tp, obj.tp, tt.name+",tp")
 		assert.Equal(t, want.BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
 	}
 }
 
-func Test_conf_GetWS(t *testing.T) {
+func Test_conf_GetWSS(t *testing.T) {
 	cuurConfDefault := New()
-	cuurConfWs := func() *conf { cuurConf := New(); cuurConf.WS("1122"); return cuurConf }()
-	tests := []struct {
-		name   string
-		fields *conf
-		want   map[string]iCustomerBuilder
-	}{
-		{name: "1. 未设置,获取WS配置对象", fields: cuurConfDefault, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, api.DefaultWSAddress)}},
-		{name: "2. 已设置,获取ws配置对象", fields: cuurConfWs, want: map[string]iCustomerBuilder{global.WS: newHTTP(global.WS, "1122")}},
-	}
+	cuurConfServer := func() *conf {
+		cuurConf := New()
+		cuurConf.WSS(wss.WithServerSide(wss.WithAddress("1122")))
+		return cuurConf
+	}()
+	cuurConfClient := func() *conf {
+		cuurConf := New()
+		cuurConf.WSS(wss.WithClientSide(wss.WithServer("wss://gateway.example.com/hydra/wss"), wss.WithGroup("store-01")))
+		return cuurConf
+	}()
 
-	for _, tt := range tests {
-		obj := tt.fields.GetWS()
-		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).tp, obj.tp, tt.name+",tp")
-		assert.Equal(t, (tt.want[global.WS].(*httpBuilder)).BaseBuilder, obj.BaseBuilder, tt.name+",CustomerBuilder")
+	serverObj := cuurConfDefault.GetWSSServer()
+	assert.Equal(t, newWSS(wss.WithServerSide()).BaseBuilder, serverObj.BaseBuilder, "默认wss.server配置")
 
-	}
+	serverObj = cuurConfServer.GetWSSServer()
+	assert.Equal(t, newWSS(wss.WithServerSide(wss.WithAddress("1122"))).BaseBuilder, serverObj.BaseBuilder, "已设置wss.server配置")
+
+	clientObj := cuurConfClient.GetWSSClient()
+	assert.Equal(t, newWSS(wss.WithClientSide(wss.WithServer("wss://gateway.example.com/hydra/wss"), wss.WithGroup("store-01"))).BaseBuilder, clientObj.BaseBuilder, "已设置wss.client配置")
 }
 
 func Test_conf_RPC(t *testing.T) {
@@ -442,7 +457,7 @@ func Test_conf_Custom(t *testing.T) {
 	}
 }
 
-//toml 文件格式化  暂时不用测试
+// toml 文件格式化  暂时不用测试
 func Test_conf_Encode(t *testing.T) {
 
 	// //空对象序列化为toml格式
@@ -514,12 +529,12 @@ func Test_conf_Encode(t *testing.T) {
 	// fmt.Println("nodes:", string(xxx))
 }
 
-//toml 文件格式化  暂时不用测试
+// toml 文件格式化  暂时不用测试
 func Test_conf_Encode2File(t *testing.T) {
 
 }
 
-//toml 文件格式化  暂时不用测试
+// toml 文件格式化  暂时不用测试
 func Test_conf_Decode(t *testing.T) {
 
 }

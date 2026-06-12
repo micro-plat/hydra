@@ -306,7 +306,7 @@ func (c *Context) GetPostForm(key string) (interface{}, bool) {
 
 // Status sets the HTTP response code.
 func (c *Context) Status(code int) {
-	c.writermem.WriteHeader(code)
+	c.Writer.WriteHeader(code)
 }
 
 func (c *Context) requestHeader(key string) string {
@@ -388,8 +388,8 @@ func (c *Context) Data(code int, contentType string, data []byte) {
 
 // Redirect returns a HTTP redirect to the specific location.
 func (c *Context) Redirect(code int, location string) {
-	c.writermem.WriteHeader(code)
-	c.writermem.Header()["Loction"] = []string{location}
+	c.Writer.WriteHeader(code)
+	c.Writer.Header()["Loction"] = []string{location}
 }
 
 // ClientIP 获取客户端IP

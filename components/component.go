@@ -11,6 +11,7 @@ import (
 	"github.com/micro-plat/hydra/components/queues"
 	"github.com/micro-plat/hydra/components/rpcs"
 	"github.com/micro-plat/hydra/components/uuid"
+	"github.com/micro-plat/hydra/components/wss"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/registry"
@@ -29,6 +30,7 @@ type IComponent interface {
 	Queue() queues.IComponentQueue
 	Cache() caches.IComponentCache
 	HTTP() http.IComponentHTTPClient
+	WSS() wss.IComponentWSS
 	DB() dbs.IComponentDB
 	DLock(name string) (dlock.ILock, error)
 	UUID() uuid.UUID
@@ -45,6 +47,7 @@ type Component struct {
 	cache      caches.IComponentCache
 	db         dbs.IComponentDB
 	httpClient http.IComponentHTTPClient
+	wss        wss.IComponentWSS
 }
 
 // NewComponent 创建组件
@@ -57,6 +60,7 @@ func NewComponent() *Component {
 	c.cache = caches.NewStandardCache(c.c)
 	c.db = dbs.NewStandardDB(c.c)
 	c.httpClient = http.NewStandardHTTPClient(c.c)
+	c.wss = wss.New()
 	return c
 }
 
@@ -88,6 +92,10 @@ func (c *Component) DB() dbs.IComponentDB {
 // HTTP 获取HTTP Client组件
 func (c *Component) HTTP() http.IComponentHTTPClient {
 	return c.httpClient
+}
+
+func (c *Component) WSS() wss.IComponentWSS {
+	return c.wss
 }
 
 // DLock 获取分布式鍞

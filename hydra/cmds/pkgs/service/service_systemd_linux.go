@@ -260,7 +260,7 @@ func (s *systemd) Status() (Status, error) {
 	case strings.HasPrefix(out, "activating"):
 		return StatusRunning, nil
 	case strings.HasPrefix(out, "failed"):
-		return StatusUnknown, errors.New("service in failed state")
+		return StatusUnknown, ErrServiceInFailedState
 	default:
 		return StatusUnknown, ErrNotInstalled
 	}
@@ -270,6 +270,13 @@ func (s *systemd) Start() error {
 
 	status, err := s.Status()
 	if err != nil {
+		// 服务处于 failed 状态时，自动 reset-failed 后重试
+		if errors.Is(err, ErrServiceInFailedState) {
+			if resetErr := run("systemctl", "reset-failed", s.Name+".service"); resetErr != nil {
+				return resetErr
+			}
+			return run("systemctl", "start", s.Name+".service")
+		}
 		return err
 	}
 	if status == StatusRunning {
@@ -281,6 +288,13 @@ func (s *systemd) Start() error {
 func (s *systemd) Stop() error {
 	status, err := s.Status()
 	if err != nil {
+		// 服务处于 failed 状态时，自动 reset-failed 后重试
+		if errors.Is(err, ErrServiceInFailedState) {
+			if resetErr := run("systemctl", "reset-failed", s.Name+".service"); resetErr != nil {
+				return resetErr
+			}
+			return run("systemctl", "stop", s.Name+".service")
+		}
 		return err
 	}
 	if status == StatusStopped {

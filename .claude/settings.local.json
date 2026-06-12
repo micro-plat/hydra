@@ -3,7 +3,9 @@
     "allow": [
       "Bash(go build:*)",
       "Bash(find \"D:\\\\\\\\yanglei\\\\\\\\work\\\\\\\\src\\\\\\\\github.com\\\\\\\\micro-plat\\\\\\\\hydra\" -name \"*.go\")",
-      "Bash(xargs wc -l)"
+      "Bash(xargs wc -l)",
+      "Bash(go vet *)",
+      "Bash(go test *)"
     ]
   }
 }

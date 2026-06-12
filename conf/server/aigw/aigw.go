@@ -14,11 +14,11 @@ const (
 	// DefaultAddress AIGW默认端口
 	DefaultAddress = "8082"
 
-	// DefaultRTimeOut 默认读取超时时间
-	DefaultRTimeOut = 180
+	// DefaultRTimeOut 默认读取超时时间（0=不限制，由上游client和流式空闲超时控制）
+	DefaultRTimeOut = 0
 
-	// DefaultWTimeOut 默认写入超时时间
-	DefaultWTimeOut = 1800
+	// DefaultWTimeOut 默认写入超时时间（0=不限制，由上游client和流式空闲超时控制）
+	DefaultWTimeOut = 0
 
 	// DefaultRHTimeOut 默认请求头读取超时时间
 	DefaultRHTimeOut = 30
@@ -46,8 +46,8 @@ type Server struct {
 	security.ConfEncrypt
 	Address       string `json:"address,omitempty" valid:"port,required" label:"端口号"`
 	Status        string `json:"status,omitempty" valid:"in(start|stop)" label:"服务器状态"`
-	RTimeout      int    `json:"rTimeout,omitempty" valid:"range(3|3600)" label:"请求读取超时时间"`
-	WTimeout      int    `json:"wTimeout,omitempty" valid:"range(3|7200)" label:"请求处理写入时间"`
+	RTimeout      int    `json:"rTimeout,omitempty" valid:"range(0|3600)" label:"请求读取超时时间"`
+	WTimeout      int    `json:"wTimeout,omitempty" valid:"range(0|7200)" label:"请求处理写入时间"`
 	RHTimeout     int    `json:"rhTimeout,omitempty" valid:"range(3|3600)"`
 	StreamTimeout int    `json:"streamTimeout,omitempty" valid:"range(3|7200)"`
 	Domain        string `json:"dns,omitempty" valid:"dns" toml:"dns,omitempty" label:"域名"`
@@ -79,19 +79,13 @@ func (s *Server) GetAddress() string {
 	return s.Address
 }
 
-// GetRTimeout 获取读取超时时间
+// GetRTimeout 获取读取超时时间（0=不限制）
 func (s *Server) GetRTimeout() int {
-	if s.RTimeout <= 0 {
-		return DefaultRTimeOut
-	}
 	return s.RTimeout
 }
 
-// GetWTimeout 获取写超时时间
+// GetWTimeout 获取写超时时间（0=不限制）
 func (s *Server) GetWTimeout() int {
-	if s.WTimeout <= 0 {
-		return DefaultWTimeOut
-	}
 	return s.WTimeout
 }
 

@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/context"
+	hctx "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
 )
@@ -40,8 +41,14 @@ func ExecuteHandler() Handler {
 
 		if services.Def.Has(serverType, service, method) {
 			result := services.Def.Call(ctx, service)
-			if ok, r := context.IsSSEData(result); ok { //处理SSE协议数据
+			if ok, r := hctx.IsSSEData(result); ok { //处理SSE协议数据
 				// ctx.Response().NoNeedWrite(200)
+				if stream, ok := r.(interface {
+					LoopWriteWithContext(context.Context, http.ResponseWriter)
+				}); ok {
+					stream.LoopWriteWithContext(ctx.Request().GetHTTPRequest().Context(), ctx.Response().GetHTTPReponse())
+					return
+				}
 				r.LoopWrite(ctx.Response().GetHTTPReponse())
 				return
 			}

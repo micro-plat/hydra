@@ -34,6 +34,12 @@ var MQC services.IMQC = services.MQC
 // IContext 请求上下文
 type IContext = context.IContext
 
+// WSSServer 云端WSS服务类型
+const WSSServer = global.WSSServer
+
+// WSSClient 本地WSS客户端服务类型
+const WSSClient = global.WSSClient
+
 // Installer 安装程序
 var Installer = global.Installer
 

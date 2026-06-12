@@ -20,7 +20,7 @@ func Test_regist_get(t *testing.T) {
 		{name: "1. 获取api对应的serverServices", tp: global.API, want: Def.servers[global.API]},
 		{name: "2. 获取web对应的serverServices", tp: global.Web, want: Def.servers[global.Web]},
 		{name: "3. 获取rpc对应的serverServices", tp: global.RPC, want: Def.servers[global.RPC]},
-		{name: "4. 获取ws对应的serverServices", tp: global.WS, want: Def.servers[global.WS]},
+		{name: "4. 获取wss对应的serverServices", tp: global.WSSServer, want: Def.servers[global.WSSServer]},
 		{name: "5. 获取cron对应的serverServices", tp: global.CRON, want: Def.servers[global.CRON]},
 		{name: "6. 获取mqc对应的serverServices", tp: global.MQC, want: Def.servers[global.MQC]},
 	}
@@ -66,7 +66,7 @@ func Test_regist_OnStarting(t *testing.T) {
 	}{
 		{name: "1.指定api,添加启动预处理函数", tps: []string{global.API}, h: h},
 		{name: "2.指定web,添加启动预处理函数", tps: []string{global.Web}, h: h},
-		{name: "3.指定ws,添加启动预处理函数", tps: []string{global.WS}, h: h},
+		{name: "3.指定wss,添加启动预处理函数", tps: []string{global.WSSServer}, h: h},
 		{name: "4.指定cron,添加启动预处理函数", tps: []string{global.CRON}, h: h},
 		{name: "5.指定mqc,添加启动预处理函数", tps: []string{global.MQC}, h: h},
 		{name: "6.未指定服务类型,添加启动预处理函数", tps: []string{}, h: h},
@@ -99,7 +99,7 @@ func Test_regist_OnClosing(t *testing.T) {
 	}{
 		{name: "1.指定api,添加关闭服务", tps: []string{global.API}, h: h},
 		{name: "2.指定web,添加关闭服务", tps: []string{global.Web}, h: h},
-		{name: "3.指定ws,添加关闭服务", tps: []string{global.WS}, h: h},
+		{name: "3.指定wss,添加关闭服务", tps: []string{global.WSSServer}, h: h},
 		{name: "4.指定cron,添加关闭服务", tps: []string{global.CRON}, h: h},
 		{name: "5.指定mqc,添加关闭服务", tps: []string{global.MQC}, h: h},
 		{name: "6.未指定服务类型,添加关闭服务", tps: []string{}, h: h},
@@ -135,8 +135,8 @@ func Test_regist_OnHandleExecuting(t *testing.T) {
 		{name: "2.指定api,添加业务预处理钩子", tps: []string{global.API}, h: h},
 		{name: "3.指定web,添加空的业务预处理钩子", h: nil, tps: []string{global.Web}},
 		{name: "4.指定web,添加业务预处理钩子", tps: []string{global.Web}, h: h},
-		{name: "5.指定ws,添加空的业务预处理钩子", h: nil, tps: []string{global.WS}},
-		{name: "6.指定ws,添加业务预处理钩子", tps: []string{global.WS}, h: h},
+		{name: "5.指定wss,添加空的业务预处理钩子", h: nil, tps: []string{global.WSSServer}},
+		{name: "6.指定wss,添加业务预处理钩子", tps: []string{global.WSSServer}, h: h},
 		{name: "7.指定cron,添加空的业务预处理钩子", h: nil, tps: []string{global.CRON}},
 		{name: "8.指定cron,添加业务预处理钩子", tps: []string{global.CRON}, h: h},
 		{name: "9.指定mqc,添加空的业务预处理钩子", h: nil, tps: []string{global.MQC}},
@@ -172,8 +172,8 @@ func Test_regist_OnHandleExecuted(t *testing.T) {
 		{name: "2.指定api,添加业务后处理钩子", tps: []string{global.API}, h: h},
 		{name: "3.指定web,添加空的业务后处理钩子", h: nil, tps: []string{global.Web}},
 		{name: "4.指定web,添加业务后处理钩子", tps: []string{global.Web}, h: h},
-		{name: "5.指定ws,添加空的业务后处理钩子", h: nil, tps: []string{global.WS}},
-		{name: "6.指定ws,添加业务后处理钩子", tps: []string{global.WS}, h: h},
+		{name: "5.指定wss,添加空的业务后处理钩子", h: nil, tps: []string{global.WSSServer}},
+		{name: "6.指定wss,添加业务后处理钩子", tps: []string{global.WSSServer}, h: h},
 		{name: "7.指定cron,添加空的业务后处理钩子", h: nil, tps: []string{global.CRON}},
 		{name: "8.指定cron,添加业务后处理钩子", tps: []string{global.CRON}, h: h},
 		{name: "9.指定mqc,添加空的业务后处理钩子", h: nil, tps: []string{global.MQC}},
@@ -207,7 +207,7 @@ func Test_regist_Custome(t *testing.T) {
 		{name: "2.注册cron类型服务", tp: global.CRON, path: "/path1", h: &testHandler{}, ext: []interface{}{"taks1", "task2"}},
 		{name: "3.注册web类型服务", tp: global.Web, path: "/path2", h: &testHandler{}},
 		{name: "4.注册rpc类型服务", tp: global.RPC, path: "/path3", h: &testHandler{}},
-		{name: "5.注册ws类型服务", tp: global.WS, path: "/path4", h: &testHandler{}},
+		{name: "5.注册wss类型服务", tp: global.WSSServer, path: "/path4", h: &testHandler{}},
 		{name: "6.注册mqc类型服务", tp: global.MQC, path: "/path5", h: &testHandler{}, ext: []interface{}{"queue1", "queue2"}},
 	}
 	s := Def
@@ -395,9 +395,9 @@ func Test_regist_WS(t *testing.T) {
 	s := Def
 	for _, tt := range tests {
 		for _, v := range tt.h {
-			s.WS(tt.path, v, tt.ext...)
+			s.WSS(tt.path, v, tt.ext...)
 		}
-		checkTestCustomeResult(t, s, global.WS, tt.name, tt.ext)
+		checkTestCustomeResult(t, s, global.WSSServer, tt.name, tt.ext)
 	}
 }
 

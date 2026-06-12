@@ -30,7 +30,7 @@ type IService interface {
 	//GetGroup 获取服务的分组信息
 	GetGroup(serverType string, service string, method ...string) string
 
-	//Micro 注册为微服务，包括api,web,rpc,websocket
+	//Micro 注册为微服务，包括api,web,rpc
 	Micro(name string, h interface{}, r ...router.Option) IService
 
 	//Flow 注册为流程,包括mqc,cron
@@ -45,8 +45,8 @@ type IService interface {
 	//RPC 注册为RPC服务
 	RPC(name string, h interface{}, r ...router.Option) IService
 
-	//WS 注册为websocket服务
-	WS(name string, h interface{}, r ...router.Option) IService
+	//WSS 注册为websocket服务
+	WSS(name string, h interface{}, r ...router.Option) IService
 
 	//AIGW 注册为AI网关服务
 	AIGW(name string, h interface{}, r ...router.Option) IService
@@ -113,7 +113,6 @@ type regist struct {
 func (s *regist) Micro(name string, h interface{}, r ...router.Option) IService {
 	s.API(name, h, r...)
 	s.Web(name, h, r...)
-	s.WS(name, h, r...)
 	s.RPC(name, h, r...)
 	return s
 }
@@ -156,13 +155,13 @@ func (s *regist) RPC(name string, h interface{}, ext ...router.Option) IService 
 	return s.Custom(global.RPC, name, h, v...)
 }
 
-// WS 注册为websocket服务
-func (s *regist) WS(name string, h interface{}, ext ...router.Option) IService {
+// WSS 注册为websocket服务
+func (s *regist) WSS(name string, h interface{}, ext ...router.Option) IService {
 	v := make([]interface{}, 0, len(ext))
 	for _, e := range ext {
 		v = append(v, e)
 	}
-	return s.Custom(global.WS, name, h, v...)
+	return s.Custom(global.WSSServer, name, h, v...)
 }
 
 // AIGW 注册为AI网关服务
@@ -438,9 +437,11 @@ func init() {
 		return RPC.Add(g.Path, g.Service, g.Actions, ext...)
 	}, RPC.Remove)
 
-	Def.servers[global.WS] = newServerServices(func(g *Unit, ext ...interface{}) error {
-		return WS.Add(g.Path, g.Service, g.Actions, ext...)
-	}, WS.Remove)
+	wssServices := newServerServices(func(g *Unit, ext ...interface{}) error {
+		return WSS.Add(g.Path, g.Service, g.Actions, ext...)
+	}, WSS.Remove)
+	Def.servers[global.WSSServer] = wssServices
+	Def.servers[global.WSSClient] = wssServices
 	Def.servers[global.AIGW] = newServerServices(func(g *Unit, ext ...interface{}) error {
 		return AIGW.Add(g.Path, g.Service, g.Actions, ext...)
 	}, AIGW.Remove)

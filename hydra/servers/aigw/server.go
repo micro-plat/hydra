@@ -33,8 +33,8 @@ func NewServer(name string, addr string, routers []*router.Router, opts ...Optio
 		ip:    global.LocalIP(),
 		option: &option{
 			readHeaderTimeout: 30,
-			readTimeout:       180,
-			writeTimeout:      1800,
+			readTimeout:       0,
+			writeTimeout:      0,
 			metric:            middleware.NewMetric(),
 		},
 	}
@@ -48,9 +48,13 @@ func NewServer(name string, addr string, routers []*router.Router, opts ...Optio
 	t.server = &xhttp.Server{
 		Addr:              xnet.JoinHostPort(t.host, t.port),
 		ReadHeaderTimeout: time.Second * time.Duration(t.option.readHeaderTimeout),
-		ReadTimeout:       time.Second * time.Duration(t.option.readTimeout),
-		WriteTimeout:      time.Second * time.Duration(t.option.writeTimeout),
 		MaxHeaderBytes:    1 << 20,
+	}
+	if t.option.readTimeout > 0 {
+		t.server.ReadTimeout = time.Second * time.Duration(t.option.readTimeout)
+	}
+	if t.option.writeTimeout > 0 {
+		t.server.WriteTimeout = time.Second * time.Duration(t.option.writeTimeout)
 	}
 	t.addAIRouters(routers...)
 	return t, nil

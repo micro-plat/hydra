@@ -87,7 +87,31 @@ func (engine *Engine) HandleRequest(r IRequest) (w *responseWriter, err error) {
 	return
 }
 
-//Find 查找指定路由是否存在
+// HandleRequestWithWriter handles a request with a caller supplied response writer.
+func (engine *Engine) HandleRequestWithWriter(r IRequest, writer ResponseWriter) (w ResponseWriter, err error) {
+	c := engine.pool.Get().(*Context)
+	c.reset(r)
+	c.writermem.reset()
+	if writer != nil {
+		c.Writer = writer
+	}
+	engine.handleRequest(c)
+	if len(c.Errors) > 0 {
+		err = c.Errors[0]
+	}
+	if writer != nil {
+		writer.WriteHeaderNow()
+		w = writer
+	} else {
+		w = c.writermem.Copy()
+	}
+	c.writermem.reset()
+	c.reset(nil)
+	engine.pool.Put(c)
+	return
+}
+
+// Find 查找指定路由是否存在
 func (engine *Engine) Find(path string) bool {
 	t := engine.trees
 	for i, tl := 0, len(t); i < tl; i++ {

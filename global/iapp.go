@@ -7,26 +7,29 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 )
 
-//AppName 当前应用程序的名称
+// AppName 当前应用程序的名称
 var AppName string = filepath.Base(os.Args[0])
 
-//Version 版本号
+// Version 版本号
 var Version string = "1.0.0"
 
-//Usage 用途
+// Usage 用途
 var Usage string = filepath.Base(os.Args[0]) + "(A new hydra application)"
 
-//API api服务器
+// API api服务器
 const API = "api"
 
-//Web web服务器
+// Web web服务器
 const Web = "web"
 
-//RPC rpc服务器
+// RPC rpc服务器
 const RPC = "rpc"
 
-// WS websocket服务器
-const WS = "ws"
+// WSSServer wss云端服务器
+const WSSServer = "wss.server"
+
+// WSSClient wss本地客户端
+const WSSClient = "wss.client"
 
 // AIGW AI网关服务器
 const AIGW = "aigw"
@@ -34,13 +37,13 @@ const AIGW = "aigw"
 // CRON cron服务器
 const CRON = "cron"
 
-//MQC mqc服务器
+// MQC mqc服务器
 const MQC = "mqc"
 
-//ServerTypes 支持的所有服务器类型
+// ServerTypes 支持的所有服务器类型
 var ServerTypes = []string{}
 
-//IGlobal 应用程序信息
+// IGlobal 应用程序信息
 type IGlobal interface {
 
 	//GetRegistryAddr 注册中心
@@ -77,7 +80,7 @@ type IGlobal interface {
 	Close()
 }
 
-//Current 当前应用程序信息
+// Current 当前应用程序信息
 func Current() IGlobal {
 	return Def
 }

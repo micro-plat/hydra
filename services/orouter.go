@@ -12,14 +12,14 @@ import (
 	"github.com/micro-plat/hydra/global"
 )
 
-//API  路由信息
+// API  路由信息
 var API = NewORouter("API")
 
-//WEB web服务的路由信息
+// WEB web服务的路由信息
 var WEB = NewORouter("WEB")
 
-// WS web socket路由信息
-var WS = NewORouter("WS")
+// WSS websocket路由信息
+var WSS = NewORouter("WSS")
 
 // AIGW AI网关路由信息
 var AIGW = NewORouter("AIGW")
@@ -27,21 +27,21 @@ var AIGW = NewORouter("AIGW")
 // RPC rpc服务的路由信息
 var RPC = NewORouter("RPC")
 
-//routerMQC MQC服务的路由信息
+// routerMQC MQC服务的路由信息
 var routerMQC = NewORouter("MQC")
 
-//routerCRON CRON服务的路由信息
+// routerCRON CRON服务的路由信息
 var routerCRON = NewORouter("CRON")
 
-//GetRouter 获取服务器的路由配置
+// GetRouter 获取服务器的路由配置
 func GetRouter(tp string) *ORouter {
 	switch tp {
 	case global.API:
 		return API
 	case global.Web:
 		return WEB
-	case global.WS:
-		return WS
+	case global.WSSServer, global.WSSClient:
+		return WSS
 	case global.AIGW:
 		return AIGW
 	case global.RPC:
@@ -55,7 +55,7 @@ func GetRouter(tp string) *ORouter {
 	}
 }
 
-//ORouter ORouter
+// ORouter ORouter
 type ORouter struct {
 	name        string
 	routers     *router.Routers
@@ -63,7 +63,7 @@ type ORouter struct {
 	mapPath     map[string]map[string]string
 }
 
-//NewORouter 构建路由管理器
+// NewORouter 构建路由管理器
 func NewORouter(name string) *ORouter {
 	return &ORouter{
 		name:        name,
@@ -73,7 +73,7 @@ func NewORouter(name string) *ORouter {
 	}
 }
 
-//Add 添加路由
+// Add 添加路由
 func (s *ORouter) Add(path string, service string, action []string, opts ...interface{}) error {
 	if _, ok := s.pathRouters[path]; !ok {
 		s.pathRouters[path] = newPathRouter(path)
@@ -84,12 +84,12 @@ func (s *ORouter) Add(path string, service string, action []string, opts ...inte
 	return nil
 }
 
-//Remove 移除路由
+// Remove 移除路由
 func (s *ORouter) Remove(path string) {
 	delete(s.pathRouters, path)
 }
 
-//BuildRouters 根据前缀处理路由数据
+// BuildRouters 根据前缀处理路由数据
 func (s *ORouter) BuildRouters(prefix string) (*router.Routers, error) {
 	s.routers = router.NewRouters()
 	s.mapPath = make(map[string]map[string]string)
@@ -121,12 +121,12 @@ func (s *ORouter) fillActs(r *router.Router) {
 	s.mapPath[r.Path] = array
 }
 
-//GetRouters 获取所有路由配置
+// GetRouters 获取所有路由配置
 func (s *ORouter) GetRouters() (*router.Routers, error) {
 	return s.routers, nil
 }
 
-//处理管理相同服务名称的所有路由，当action重复时报错，对未指定时进行排除选择
+// 处理管理相同服务名称的所有路由，当action重复时报错，对未指定时进行排除选择
 type pathRouter struct {
 	path    string
 	action  map[string]string

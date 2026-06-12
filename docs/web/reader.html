@@ -673,12 +673,12 @@ app.Start()</code></pre>
 app.Web("/", indexHandler)
 app.Start()</code></pre>
 
-            <h3>2.2.3 WebSocket服务</h3>
-            <p>支持实时双向通信。</p>
+            <h3>2.2.3 WSS服务</h3>
+            <p>支持业务WebSocket和隧道穿透。</p>
             <pre><code>app := hydra.NewApp(
-    hydra.WithServerTypes(http.WS),
+    hydra.WithServerTypes(hydra.WSSServer),
 )
-app.WS("/chat", chatHandler)
+hydra.S.WSS("/chat", chatHandler)
 app.Start()</code></pre>
 
             <h3>2.2.4 RPC服务</h3>

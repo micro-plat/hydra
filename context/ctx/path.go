@@ -16,7 +16,7 @@ import (
 
 var _ context.IPath = &rpath{}
 
-//rpath 处理请求的路径信息
+// rpath 处理请求的路径信息
 type rpath struct {
 	ctx      context.IInnerContext
 	appConf  app.IAPPConf
@@ -35,7 +35,7 @@ func NewRpath(ctx context.IInnerContext, appConf app.IAPPConf, meta conf.IMeta) 
 	}
 }
 
-//GetMethod 获取服务请求方式
+// GetMethod 获取服务请求方式
 func (c *rpath) GetMethod() string {
 	return c.ctx.GetMethod()
 }
@@ -49,7 +49,7 @@ func (c *rpath) Params() types.XMap {
 	return c.params
 }
 
-//FormatService 通过GetProcessorConf 格式化服务名
+// FormatService 通过GetProcessorConf 格式化服务名
 func (c *rpath) FormatService(service string) string {
 	p, err := c.appConf.GetProcessorConf()
 	if err != nil {
@@ -58,12 +58,12 @@ func (c *rpath) FormatService(service string) string {
 	return p.FormatService(service)
 }
 
-//GetService 获取服务名称
+// GetService 获取服务名称
 func (c *rpath) GetService(path ...string) string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	routerPath := types.GetStringByIndex(path, 0, c.ctx.GetRouterPath())
 	switch tp {
-	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
+	case global.API, global.Web, global.WSSServer, global.WSSClient, global.RPC, global.MQC, global.CRON:
 		r, err := c.GetRouter(routerPath)
 		if err != nil {
 			return ""
@@ -87,12 +87,12 @@ func (c *rpath) GetRouter(path string) (*router.Router, error) {
 	return router, nil
 }
 
-//GetGroup 获取当前服务注册的group名
+// GetGroup 获取当前服务注册的group名
 func (c *rpath) GetGroup() string {
 	return services.Def.GetGroup(c.appConf.GetServerConf().GetServerType(), c.GetService())
 }
 
-//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
+// GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
 func (c *rpath) GetPageAndTag() (page string, tag string, ok bool) {
 
 	//获取服务注册的路径名，tag标签
@@ -135,11 +135,11 @@ func (c *rpath) GetEncoding() string {
 	return c.encoding
 }
 
-//getEncoding 获取路由配置的编码
+// getEncoding 获取路由配置的编码
 func (c *rpath) getEncoding() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS, global.RPC, global.MQC, global.CRON:
+	case global.API, global.Web, global.WSSServer, global.WSSClient, global.RPC, global.MQC, global.CRON:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
 			return ""
@@ -154,28 +154,28 @@ func (c *rpath) getEncoding() string {
 	}
 }
 
-//GetURL 获取请求路径
+// GetURL 获取请求路径
 func (c *rpath) GetURL() *url.URL {
 	return c.ctx.GetURL()
 }
 
-//GetRequestPath 获取请求路径
+// GetRequestPath 获取请求路径
 func (c *rpath) GetRequestPath() string {
 	return c.ctx.GetURL().Path
 }
 
-//Limit 限流设置
+// Limit 限流设置
 func (c *rpath) Limit(isLimit bool, fallback bool) {
 	c.isLimit = isLimit
 	c.fallback = fallback
 }
 
-//IsLimited 是否已限流
+// IsLimited 是否已限流
 func (c *rpath) IsLimited() bool {
 	return c.isLimit
 }
 
-//AllowFallback 是否允许降级
+// AllowFallback 是否允许降级
 func (c *rpath) AllowFallback() bool {
 	return c.fallback
 }

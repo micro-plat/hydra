@@ -14,7 +14,7 @@ import (
 	"github.com/micro-plat/lib4go/logger"
 )
 
-//Responsive 响应式服务器
+// Responsive 响应式服务器
 type Responsive struct {
 	*Server
 	conf     app.IAPPConf
@@ -23,7 +23,7 @@ type Responsive struct {
 	log      logger.ILogger
 }
 
-//NewResponsive 创建响应式服务器
+// NewResponsive 创建响应式服务器
 func NewResponsive(cnf app.IAPPConf) (h *Responsive, err error) {
 	h = &Responsive{
 		conf:     cnf,
@@ -40,7 +40,7 @@ func NewResponsive(cnf app.IAPPConf) (h *Responsive, err error) {
 	return h, err
 }
 
-//Start 启用服务
+// Start 启用服务
 func (w *Responsive) Start() (err error) {
 	if err := services.Def.DoStarting(w.conf); err != nil {
 		return err
@@ -74,7 +74,7 @@ func (w *Responsive) Start() (err error) {
 	return nil
 }
 
-//Notify 服务器配置变更通知
+// Notify 服务器配置变更通知
 func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	w.comparer.Update(c.GetServerConf())
 	if !w.comparer.IsChanged() {
@@ -109,7 +109,7 @@ func (w *Responsive) Notify(c app.IAPPConf) (change bool, err error) {
 	return true, nil
 }
 
-//Shutdown 关闭服务器
+// Shutdown 关闭服务器
 func (w *Responsive) Shutdown() {
 	w.log.Infof("关闭[%s]服务...", w.conf.GetServerConf().GetServerType())
 	w.Server.Shutdown()
@@ -120,7 +120,7 @@ func (w *Responsive) Shutdown() {
 	}
 }
 
-//publish 将当前服务器的节点信息发布到注册中心
+// publish 将当前服务器的节点信息发布到注册中心
 func (w *Responsive) publish() (err error) {
 	addr := w.Server.GetAddress()
 	serverName := strings.Split(addr, "://")[1]
@@ -132,7 +132,7 @@ func (w *Responsive) publish() (err error) {
 	return
 }
 
-//serverNum 获取服务数量
+// serverNum 获取服务数量
 func (w *Responsive) serverNum() int {
 	routers := w.Server.engine.Routes()
 	serverMap := map[string]string{}
@@ -144,7 +144,7 @@ func (w *Responsive) serverNum() int {
 	return len(serverMap)
 }
 
-//根据main.conf创建服务嚣
+// 根据main.conf创建服务嚣
 func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 	tp := cnf.GetServerConf().GetServerType()
 	apiConf, err := api.GetConf(cnf.GetServerConf())
@@ -162,14 +162,6 @@ func (w *Responsive) getServer(cnf app.IAPPConf) (*Server, error) {
 		return nil, err
 	}
 	switch tp {
-	case WS:
-		return NewWSServer(tp,
-			apiConf.GetWSAddress(),
-			routersObj.GetRouters(),
-			WithServerType(tp),
-			WithTimeout(apiConf.GetRTimeout(), apiConf.GetWTimeout(), apiConf.GetRHTimeout()),
-			WithGinTrace(apiConf.Trace),
-		)
 	case Web:
 		return NewServer(tp,
 			apiConf.GetWEBAddress(),
@@ -195,14 +187,10 @@ func init() {
 	}
 	servers.Register(API, fn)
 	servers.Register(Web, fn)
-	servers.Register(WS, fn)
 }
 
-//API api服务器
+// API api服务器
 const API = global.API
 
-//Web web服务器
+// Web web服务器
 const Web = global.Web
-
-//WS web socket服务器
-const WS = global.WS

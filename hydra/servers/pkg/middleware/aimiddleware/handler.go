@@ -1,14 +1,18 @@
 package aimiddleware
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/micro-plat/hydra/components"
-	"github.com/micro-plat/hydra/context"
+	aigwconf "github.com/micro-plat/hydra/conf/server/aigw"
+	hctx "github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
+	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/hydra/services"
 )
 
@@ -23,7 +27,11 @@ func ExecuteHandler() middleware.Handler {
 		if addr, ok := global.IsProto(service, global.ProtoRPC); ok {
 			response, err := components.Def.RPC().GetRegularRPC().Swap(addr, ctx)
 			if err != nil {
-				writeOpenAIError(ctx, response.GetStatus(), err)
+				writeOpenAIError(ctx, rpcErrorStatus(response), err)
+				return
+			}
+			if response == nil {
+				writeOpenAIError(ctx, http.StatusBadGateway, fmt.Errorf("rpc response is nil"))
 				return
 			}
 			headers := response.GetHeaders()
@@ -58,7 +66,13 @@ func ExecuteHandler() middleware.Handler {
 			}
 			writeSSEProxy(ctx, *v)
 		default:
-			if ok, r := context.IsSSEData(result); ok {
+			if ok, r := hctx.IsSSEData(result); ok {
+				if stream, ok := r.(interface {
+					LoopWriteWithContext(context.Context, http.ResponseWriter)
+				}); ok {
+					stream.LoopWriteWithContext(ctx.Request().GetHTTPRequest().Context(), ctx.Response().GetHTTPReponse())
+					return
+				}
 				r.LoopWrite(ctx.Response().GetHTTPReponse())
 				return
 			}
@@ -87,13 +101,9 @@ func writeRawJSON(ctx middleware.IMiddleContext, data RawJSON) {
 
 func writeSSEProxy(ctx middleware.IMiddleContext, proxy SSEProxy) {
 	w := ctx.Response().GetHTTPReponse()
-	flusher, ok := w.(http.Flusher)
-	if !ok {
+	if _, ok := w.(http.Flusher); !ok {
 		writeOpenAIError(ctx, http.StatusInternalServerError, fmt.Errorf("streaming unsupported"))
 		return
-	}
-	if closer, ok := proxy.Body.(io.Closer); ok {
-		defer closer.Close()
 	}
 	code := proxy.StatusCode
 	if code <= 0 {
@@ -111,25 +121,84 @@ func writeSSEProxy(ctx middleware.IMiddleContext, proxy SSEProxy) {
 	ctx.Response().NoNeedWrite(code)
 
 	req := ctx.Request().GetHTTPRequest()
+	if err := copySSEProxy(req.Context(), w, proxy, streamTimeout(ctx)); err != nil {
+		ctx.Log().Warn("aigw.stream.closed", err)
+	}
+}
+
+func rpcErrorStatus(response *pkgs.Rspns) int {
+	if response == nil {
+		return http.StatusBadGateway
+	}
+	status := response.GetStatus()
+	if status <= 0 {
+		return http.StatusBadGateway
+	}
+	return status
+}
+
+func streamTimeout(ctx middleware.IMiddleContext) time.Duration {
+	conf, err := aigwconf.GetConf(ctx.APPConf().GetServerConf())
+	if err != nil {
+		return time.Duration(aigwconf.DefaultStreamTimeOut) * time.Second
+	}
+	return time.Duration(conf.GetStreamTimeout()) * time.Second
+}
+
+func copySSEProxy(ctx context.Context, w http.ResponseWriter, proxy SSEProxy, idleTimeout time.Duration) error {
+	if proxy.Body == nil {
+		return nil
+	}
+	flusher, _ := w.(http.Flusher)
+	closer, _ := proxy.Body.(io.Closer)
+	if closer != nil {
+		defer closer.Close()
+	}
+	closeBody := func() {
+		if closer != nil {
+			_ = closer.Close()
+		}
+	}
+	if ctx != nil && ctx.Done() != nil {
+		go func() {
+			<-ctx.Done()
+			closeBody()
+		}()
+	}
+	var timer *time.Timer
+	if idleTimeout > 0 {
+		timer = time.AfterFunc(idleTimeout, closeBody)
+		defer timer.Stop()
+	}
 	buf := make([]byte, 32*1024)
 	for {
-		select {
-		case <-req.Context().Done():
-			return
-		default:
+		if ctx != nil {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+			}
 		}
 		n, err := proxy.Body.Read(buf)
+		if timer != nil {
+			timer.Reset(idleTimeout)
+		}
 		if n > 0 {
 			if _, writeErr := w.Write(buf[:n]); writeErr != nil {
-				return
+				return writeErr
 			}
-			flusher.Flush()
+			if flusher != nil {
+				flusher.Flush()
+			}
 		}
 		if err == io.EOF {
-			return
+			return nil
 		}
 		if err != nil {
-			return
+			if ctx != nil && ctx.Err() != nil {
+				return ctx.Err()
+			}
+			return err
 		}
 	}
 }

@@ -47,3 +47,8 @@ func (e *DispatcherEngine) Handle(method string, path string, handler middleware
 	handlers = append(handlers, handler.DispFunc(e.serverType))
 	e.Engine.Handle(method, path, handlers...)
 }
+
+// HandleRequestWithWriter handles a dispatcher request with a caller supplied response writer.
+func (e *DispatcherEngine) HandleRequestWithWriter(r dispatcher.IRequest, writer dispatcher.ResponseWriter) (dispatcher.ResponseWriter, error) {
+	return e.Engine.HandleRequestWithWriter(r, writer)
+}

@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-//Pub2Registry 发布到注册中心
+// Pub2Registry 发布到注册中心
 func Pub2Registry(cover bool, importPath string) error {
 	//导入配置
 	input, err := getImportConfs(importPath)
@@ -34,7 +34,7 @@ func Pub2Registry(cover bool, importPath string) error {
 	return nil
 }
 
-//GetFixedFlags 获取服务名称flags
+// GetFixedFlags 获取服务名称flags
 func GetFixedFlags(isFixed *bool) []cli.Flag {
 	flags := make([]cli.Flag, 0, 1)
 	flags = append(flags, cli.BoolFlag{
@@ -46,7 +46,7 @@ func GetFixedFlags(isFixed *bool) []cli.Flag {
 
 }
 
-//GetBaseFlags 获取运行时的参数
+// GetBaseFlags 获取运行时的参数
 func GetBaseFlags() []cli.Flag {
 	flags := make([]cli.Flag, 0, 4)
 	flags = append(flags, registryFlag)
@@ -78,7 +78,7 @@ var sysNameFlag = cli.StringFlag{
 var serverTypesFlag = cli.StringFlag{
 	Name:        "server-types,S",
 	Destination: &global.FlagVal.ServerTypeNames,
-	Usage:       "-服务类型，有api,web,rpc,cron,mqc,ws。多个以“-”分割",
+	Usage:       "-服务类型，有api,web,rpc,cron,mqc,wss.server,wss.client。多个以“-”分割",
 }
 var clusterFlag = cli.StringFlag{
 	Name:        "cluster,c",

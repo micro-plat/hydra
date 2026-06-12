@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	stdcontext "context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -23,7 +24,7 @@ func (b *buffer) Close() error {
 	return nil
 }
 
-//NewDispCtx NewDispCtx
+// NewDispCtx NewDispCtx
 func NewDispCtx() *dispCtx {
 	return &dispCtx{Context: &dispatcher.Context{}}
 }
@@ -73,6 +74,9 @@ func (g *dispCtx) GetURL() *url.URL {
 	if err != nil {
 		global.Def.Log().Error("service不是有效的路径，转换为URL失败", err)
 		return &url.URL{}
+	}
+	if q, ok := g.Context.Request.(interface{ GetQuery() string }); ok && u.RawQuery == "" {
+		u.RawQuery = q.GetQuery()
 	}
 	return u
 }
@@ -138,17 +142,24 @@ func (g *dispCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) 
 	return "", nil, 0, nil
 }
 
-//GetHTTPReqResp 获取http请求与响应对象
+// GetHTTPReqResp 获取http请求与响应对象
 func (g *dispCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
-	return nil, nil
+	req, _ := http.NewRequestWithContext(stdcontext.Background(), g.GetMethod(), g.GetURL().String(), g.GetBody())
+	if req != nil {
+		req.Header = g.GetHeaders()
+	}
+	if w, ok := g.Writer.(http.ResponseWriter); ok {
+		return req, w
+	}
+	return req, nil
 }
 
-//GetWriter 获取writer
+// GetWriter 获取writer
 func (g *dispCtx) GetWriter() interface{} {
 	return g.Writer
 }
 
-//GetWriter 获取writer
+// GetWriter 获取writer
 func (g *dispCtx) SetWriter(w interface{}) {
 	g.Writer = w.(dispatcher.ResponseWriter)
 }

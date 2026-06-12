@@ -1,10 +1,12 @@
 package context
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/micro-plat/lib4go/types"
@@ -23,7 +25,8 @@ type EventData struct {
 }
 type SSEData struct {
 	data chan interface{}
-	done bool
+	done chan struct{}
+	once sync.Once
 }
 
 func IsSSEData(v interface{}) (bool, ISSEData) {
@@ -35,28 +38,48 @@ func IsSSEData(v interface{}) (bool, ISSEData) {
 }
 
 func NewSSEData(cacheNum ...int) *SSEData {
-	return &SSEData{data: make(chan interface{}, types.GetIntByIndex(cacheNum, 0, 32))}
+	return &SSEData{
+		data: make(chan interface{}, types.GetIntByIndex(cacheNum, 0, 32)),
+		done: make(chan struct{}),
+	}
 }
 
 func (s *SSEData) Push(data interface{}) {
-	if !s.done {
-		s.data <- data
+	if s.done == nil {
+		s.done = make(chan struct{})
+	}
+	select {
+	case <-s.done:
+		return
+	case s.data <- data:
 	}
 }
 func (s *SSEData) Close() {
-	if !s.done {
-		s.done = true
-		close(s.data)
+	if s.done == nil {
+		s.done = make(chan struct{})
 	}
+	s.once.Do(func() {
+		close(s.done)
+	})
 }
 func (s *SSEData) Pop() (bool, string) {
-	if s.done {
+	select {
+	case data := <-s.data:
+		return formatSSEData(data)
+	default:
+	}
+	if s.done == nil {
+		s.done = make(chan struct{})
+	}
+	select {
+	case data := <-s.data:
+		return formatSSEData(data)
+	case <-s.done:
 		return false, ""
 	}
-	data, ok := <-s.data
-	if !ok {
-		return false, ""
-	}
+}
+
+func formatSSEData(data interface{}) (bool, string) {
 	vtpKind := getTypeKind(data)
 	if vtpKind == reflect.String {
 		return true, fmt.Sprintf("%s", data)
@@ -68,16 +91,30 @@ func (s *SSEData) Pop() (bool, string) {
 	}
 }
 func (s *SSEData) LoopWrite(wr http.ResponseWriter) {
+	s.LoopWriteWithContext(context.Background(), wr)
+}
+func (s *SSEData) LoopWriteWithContext(ctx context.Context, wr http.ResponseWriter) {
 	wr.Header().Add("Content-Type", UTF8EventStream)
 	wr.Header().Add("Cache-Control", "no-cache")
 	wr.Header().Add("Connection", "keep-alive")
+	if s.done == nil {
+		s.done = make(chan struct{})
+	}
 
 	for {
-		ok, content := s.Pop()
-		// fmt.Print(content)
-		if !ok {
+		var data interface{}
+		select {
+		case <-ctx.Done():
 			return
+		case data = <-s.data:
+		case <-s.done:
+			select {
+			case data = <-s.data:
+			default:
+				return
+			}
 		}
+		_, content := formatSSEData(data)
 		if content == "" {
 			time.Sleep(time.Millisecond * 10)
 			continue

@@ -14,7 +14,7 @@ import (
 	"github.com/micro-plat/lib4go/types"
 )
 
-//Server api服务器
+// Server api服务器
 type Server struct {
 	*option
 	server *x.Server
@@ -27,7 +27,7 @@ type Server struct {
 	engine  *adapter.GinEngine
 }
 
-//NewServer 创建http api服务嚣
+// NewServer 创建http api服务嚣
 func NewServer(name string, addr string, routers []*router.Router, opts ...Option) (t *Server, err error) {
 	t, err = new(name, addr, opts...)
 	if err != nil {
@@ -37,18 +37,7 @@ func NewServer(name string, addr string, routers []*router.Router, opts ...Optio
 	return
 }
 
-//NewWSServer 创建web socket服务嚣
-func NewWSServer(name string, addr string, routers []*router.Router, opts ...Option) (t *Server, err error) {
-	t, err = new(name, addr, opts...)
-	if err != nil {
-		return
-	}
-	t.proto = "ws"
-	t.addWSRouters(routers...)
-	return
-}
-
-//new 创建http api服务嚣
+// new 创建http api服务嚣
 func new(name string, addr string, opts ...Option) (t *Server, err error) {
 	t = &Server{
 		proto: "http",
@@ -97,7 +86,7 @@ func (s *Server) Start() error {
 	}
 }
 
-//Shutdown 关闭服务器
+// Shutdown 关闭服务器
 func (s *Server) Shutdown() error {
 	if s.server != nil && s.running {
 		s.running = false
@@ -114,7 +103,7 @@ func (s *Server) Shutdown() error {
 	return nil
 }
 
-//GetAddress 获取当前服务地址
+// GetAddress 获取当前服务地址
 func (s *Server) GetAddress(h ...string) string {
 	if len(h) > 0 && h[0] != "" {
 		return fmt.Sprintf("%s://%s:%s", s.proto, h[0], s.port)
@@ -125,7 +114,7 @@ func (s *Server) GetAddress(h ...string) string {
 	return fmt.Sprintf("%s://%s:%s", s.proto, s.host, s.port)
 }
 
-//GetStatus 获取当前服务器状态
+// GetStatus 获取当前服务器状态
 func (s *Server) GetStatus() string {
 	return types.DecodeString(s.running, true, "运行中", "停止")
 }

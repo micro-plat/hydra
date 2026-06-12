@@ -21,6 +21,7 @@ import (
 	_ "github.com/micro-plat/hydra/hydra/cmds/stop"
 
 	_ "github.com/micro-plat/hydra/hydra/cmds/restart"
+	_ "github.com/micro-plat/hydra/hydra/servers/wss"
 
 	_ "github.com/micro-plat/hydra/registry/registry/dbr"
 	_ "github.com/micro-plat/hydra/registry/registry/filesystem"
@@ -29,13 +30,13 @@ import (
 	_ "github.com/micro-plat/hydra/registry/registry/zookeeper"
 )
 
-//MicroApp  微服务应用
+// MicroApp  微服务应用
 type MicroApp struct {
 	app *cli.App
 	services.IService
 }
 
-//NewApp 创建微服务应用
+// NewApp 创建微服务应用
 func NewApp(opts ...Option) (m *MicroApp) {
 	m = &MicroApp{
 		IService: services.Def,
@@ -46,19 +47,19 @@ func NewApp(opts ...Option) (m *MicroApp) {
 	return m
 }
 
-//Start 启动服务器
+// Start 启动服务器
 func (m *MicroApp) Start() {
 	defer logger.Close()
 	m.app = cli.New(cli.WithVersion(global.Version), cli.WithUsage(global.Usage))
 	m.app.Start()
 }
 
-//Close 关闭服务器
+// Close 关闭服务器
 func (m *MicroApp) Close() {
 	Close()
 }
 
-//Close 关闭服务器
+// Close 关闭服务器
 func Close() {
 	compatible.AppClose()
 }

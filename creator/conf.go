@@ -11,13 +11,14 @@ import (
 	"github.com/micro-plat/hydra/conf/server/cron"
 	"github.com/micro-plat/hydra/conf/server/mqc"
 	"github.com/micro-plat/hydra/conf/server/rpc"
+	"github.com/micro-plat/hydra/conf/server/wss"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/hydra/servers"
 	"github.com/micro-plat/hydra/services"
 	"github.com/micro-plat/lib4go/types"
 )
 
-//IConf 配置注册管理
+// IConf 配置注册管理
 type IConf interface {
 
 	//Var 参数配置
@@ -35,11 +36,14 @@ type IConf interface {
 	//GetWeb() 获取Web服务器配置
 	GetWeb() *httpBuilder
 
-	//WS ws服务器配置
-	WS(address string, opts ...api.Option) *httpBuilder
+	//WSS wss服务器配置
+	WSS(opts ...wss.Option) *wssBuilder
 
-	//GetWS() 获取ws服务器配置
-	GetWS() *httpBuilder
+	//GetWSSServer 获取wss.server服务器配置
+	GetWSSServer() *wssBuilder
+
+	//GetWSSClient 获取wss.client服务器配置
+	GetWSSClient() *wssBuilder
 
 	//AIGW AI网关服务器配置
 	AIGW(address string, opts ...aigw.Option) *aigwBuilder
@@ -75,13 +79,13 @@ type IConf interface {
 	Load() error
 }
 
-//ServerMainNodeName 服务主节点名称
+// ServerMainNodeName 服务主节点名称
 const ServerMainNodeName = "main"
 
-//Conf 配置服务
+// Conf 配置服务
 var Conf = New()
 
-//New 构建新的配置
+// New 构建新的配置
 func New() *conf {
 	return &conf{
 		data: make(map[string]iCustomerBuilder),
@@ -89,7 +93,7 @@ func New() *conf {
 	}
 }
 
-//NewByLoader 设置路由加载器
+// NewByLoader 设置路由加载器
 func NewByLoader(routerLoader func(string) *services.ORouter) *conf {
 	return &conf{
 		data: make(map[string]iCustomerBuilder),
@@ -102,7 +106,7 @@ type conf struct {
 	vars map[string]map[string]interface{}
 }
 
-//Load 加载所有配置
+// Load 加载所有配置
 func (c *conf) Load() error {
 
 	types := servers.GetServerTypes()
@@ -114,8 +118,10 @@ func (c *conf) Load() error {
 				c.data[global.API] = c.GetAPI()
 			case global.Web:
 				c.data[global.Web] = c.GetWeb()
-			case global.WS:
-				c.data[global.WS] = c.GetWS()
+			case global.WSSServer:
+				c.data[global.WSSServer] = c.GetWSSServer()
+			case global.WSSClient:
+				c.data[global.WSSClient] = c.GetWSSClient()
 			case global.AIGW:
 				c.data[global.AIGW] = c.GetAIGW()
 			case global.RPC:
@@ -135,14 +141,14 @@ func (c *conf) Load() error {
 	return nil
 }
 
-//API api服务器配置
+// API api服务器配置
 func (c *conf) API(address string, opts ...api.Option) *httpBuilder {
 	api := newHTTP(global.API, address, opts...)
 	c.data[global.API] = api
 	return api
 }
 
-//GetAPI 获取当前已配置的api服务器
+// GetAPI 获取当前已配置的api服务器
 func (c *conf) GetAPI() *httpBuilder {
 	if api, ok := c.data[global.API]; ok {
 		return api.(*httpBuilder)
@@ -151,14 +157,14 @@ func (c *conf) GetAPI() *httpBuilder {
 	return c.API(api.DefaultAPIAddress)
 }
 
-//Web web服务器配置
+// Web web服务器配置
 func (c *conf) Web(address string, opts ...api.Option) *httpBuilder {
 	web := newHTTP(global.Web, address, opts...)
 	c.data[global.Web] = web
 	return web
 }
 
-//GetWeb 获取当前已配置的web服务器
+// GetWeb 获取当前已配置的web服务器
 func (c *conf) GetWeb() *httpBuilder {
 	if web, ok := c.data[global.Web]; ok {
 		return web.(*httpBuilder)
@@ -166,19 +172,27 @@ func (c *conf) GetWeb() *httpBuilder {
 	return c.Web(api.DefaultWEBAddress)
 }
 
-//Ws websocket服务器配置
-func (c *conf) WS(address string, opts ...api.Option) *httpBuilder {
-	ws := newHTTP(global.WS, address, opts...)
-	c.data[global.WS] = ws
-	return ws
+// WSS wss服务器配置
+func (c *conf) WSS(opts ...wss.Option) *wssBuilder {
+	builder := newWSS(opts...)
+	c.data[builder.tp] = builder
+	return builder
 }
 
-//GetWeb 获取当前已配置的web服务器
-func (c *conf) GetWS() *httpBuilder {
-	if ws, ok := c.data[global.WS]; ok {
-		return ws.(*httpBuilder)
+// GetWSSServer 获取当前已配置的wss.server服务器
+func (c *conf) GetWSSServer() *wssBuilder {
+	if builder, ok := c.data[global.WSSServer]; ok {
+		return builder.(*wssBuilder)
 	}
-	return c.WS(api.DefaultWSAddress)
+	return c.WSS(wss.WithServerSide())
+}
+
+// GetWSSClient 获取当前已配置的wss.client服务器
+func (c *conf) GetWSSClient() *wssBuilder {
+	if builder, ok := c.data[global.WSSClient]; ok {
+		return builder.(*wssBuilder)
+	}
+	return c.WSS(wss.WithClientSide())
 }
 
 // AIGW AI网关服务器配置
@@ -203,7 +217,7 @@ func (c *conf) RPC(address string, opts ...rpc.Option) *rpcBuilder {
 	return rpc
 }
 
-//GetRPC 获取当前已配置的rpc服务器
+// GetRPC 获取当前已配置的rpc服务器
 func (c *conf) GetRPC() *rpcBuilder {
 	if rpc, ok := c.data[global.RPC]; ok {
 		return rpc.(*rpcBuilder)
@@ -211,14 +225,14 @@ func (c *conf) GetRPC() *rpcBuilder {
 	return c.RPC(rpc.DefaultRPCAddress)
 }
 
-//CRON cron服务器配置
+// CRON cron服务器配置
 func (c *conf) CRON(opts ...cron.Option) *cronBuilder {
 	cron := newCron(opts...)
 	c.data[global.CRON] = cron
 	return cron
 }
 
-//GetWeb 获取当前已配置的web服务器
+// GetWeb 获取当前已配置的web服务器
 func (c *conf) GetCRON() *cronBuilder {
 	if cron, ok := c.data[global.CRON]; ok {
 		return cron.(*cronBuilder)
@@ -226,14 +240,14 @@ func (c *conf) GetCRON() *cronBuilder {
 	return c.CRON()
 }
 
-//MQC mqc服务器配置
+// MQC mqc服务器配置
 func (c *conf) MQC(addr string, opts ...mqc.Option) *mqcBuilder {
 	mqc := newMQC(addr, opts...)
 	c.data[global.MQC] = mqc
 	return mqc
 }
 
-//GetMQC 获取当前已配置的mqc服务器
+// GetMQC 获取当前已配置的mqc服务器
 func (c *conf) GetMQC() *mqcBuilder {
 	if mqc, ok := c.data[global.MQC]; ok {
 		return mqc.(*mqcBuilder)
@@ -241,12 +255,12 @@ func (c *conf) GetMQC() *mqcBuilder {
 	panic("未指定mqc服务器配置,请通过hydra.Conf.MQC...指定")
 }
 
-//Vars 平台变量配置
+// Vars 平台变量配置
 func (c *conf) Vars() vars {
 	return c.vars
 }
 
-//Vars 平台变量配置
+// Vars 平台变量配置
 func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
 	tpv, ok := c.vars[tp]
 	if !ok {
@@ -259,7 +273,7 @@ func (c *conf) GetVar(tp, name string) (val interface{}, ok bool) {
 	return
 }
 
-//Custom 用户自定义配置服务
+// Custom 用户自定义配置服务
 func (c *conf) Custom(tp string, s ...interface{}) *CustomerBuilder {
 	if _, ok := c.data[tp]; ok {
 		panic(fmt.Sprintf("不能重复注册%s", tp))
@@ -269,7 +283,7 @@ func (c *conf) Custom(tp string, s ...interface{}) *CustomerBuilder {
 	return customer
 }
 
-//Encode 将当前配置序列化为toml格式
+// Encode 将当前配置序列化为toml格式
 func (c *conf) Encode() (string, error) {
 	var buffer bytes.Buffer
 	encoder := toml.NewEncoder(&buffer)
@@ -277,7 +291,7 @@ func (c *conf) Encode() (string, error) {
 	return buffer.String(), err
 }
 
-//Encode2File 将当前配置内容保存到文件中
+// Encode2File 将当前配置内容保存到文件中
 func (c *conf) Encode2File(path string, cover bool) error {
 	if !cover {
 		if _, err := os.Stat(path); err == nil || os.IsExist(err) {
@@ -299,7 +313,7 @@ func (c *conf) Encode2File(path string, cover bool) error {
 	return nil
 }
 
-//Decode 从配置文件中读取配置信息
+// Decode 从配置文件中读取配置信息
 func (c *conf) Decode(f string) error {
 	_, err := toml.DecodeFile(f, &c.data)
 	return err
