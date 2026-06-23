@@ -60,6 +60,12 @@ type IService interface {
 	//custome 注册为自定义服务器的服务
 	Custom(tp string, name string, h interface{}, ext ...interface{}) IService
 
+	//MCP 注册为 MCP 工具（仅 MCP，不创建 HTTP 路由），opts 透传给 mcp 子包
+	MCP(name string, h interface{}, opts ...interface{}) IService
+
+	//WithMCP 将最近一次注册的服务同时登记为 MCP 工具，opts 透传给 mcp 子包
+	WithMCP(opts ...interface{}) IService
+
 	//Remove 移除已注册服务（重启服务器生效）
 	Remove(path string, tp ...string)
 
@@ -104,9 +110,13 @@ func New() *regist {
 
 // regist  本地服务
 type regist struct {
-	group   string
-	servers map[string]*serverServices
-	caches  map[string]map[string]interface{}
+	group          string
+	servers        map[string]*serverServices
+	caches         map[string]map[string]interface{}
+	lastPath       string
+	lastHandler    interface{}
+	lastServerType string // 最近一次注册的服务器类型（错误提示用）
+	lastHTTPCapable bool  // 最近一次注册是否为 HTTP 类型（Micro/API/Web），决定 .WithMCP() 是否有效
 }
 
 // Micro 注册为微服务包括api,web,rpc
@@ -114,6 +124,7 @@ func (s *regist) Micro(name string, h interface{}, r ...router.Option) IService 
 	s.API(name, h, r...)
 	s.Web(name, h, r...)
 	s.RPC(name, h, r...)
+	s.lastHTTPCapable = true // Micro 含 API/Web（HTTP），允许后续 .WithMCP()（覆盖末尾 RPC 的 false）
 	return s
 }
 func (s *regist) Group(name ...string) IService {
@@ -232,13 +243,69 @@ func (s *regist) HookRemove(hs ...interface{}) {
 
 // Custom 自定义服务注册
 func (s *regist) Custom(tp string, name string, h interface{}, ext ...interface{}) IService {
-	//去掉两头'/'
+	name = s.normalize(name)
+	s.lastPath, s.lastHandler = name, h
+	s.lastServerType = tp
+	s.lastHTTPCapable = tp == global.Web || tp == global.API
+	s.get(tp).Register(s.group, name, h, ext...)
+	return s
+}
+
+// normalize 规范化服务路径：去两头'/'，按 group 补前缀
+func (s *regist) normalize(name string) string {
 	name = fmt.Sprintf("/%s", strings.Trim(name, "/"))
 	if s.group != "" {
 		name = fmt.Sprintf("/%s%s", s.group, name)
 	}
-	s.get(tp).Register(s.group, name, h, ext...)
+	return name
+}
+
+// MCP 注册为 MCP 工具（仅 MCP，不创建 HTTP 路由）。opts 透传给 mcp 子包的注册钩子。
+// 未 import mcp 子包（钩子为 nil）时为空操作，仅返回 s 以保持链式。
+func (s *regist) MCP(name string, h interface{}, opts ...interface{}) IService {
+	if MCPRegisterHook != nil {
+		MCPRegisterHook(s.normalize(name), h, opts...)
+	}
 	return s
+}
+
+// WithMCP 将最近一次注册的 HTTP 服务（Micro/API/Web）同时登记为 MCP 工具。
+// MCP 工具经 web/api 服务器的 /mcp 端点对外提供，仅 HTTP 类型注册有意义；
+// 非 HTTP 类型（RPC/CRON/MQC/WSS/AIGW）的 handler 非 HTTP 请求处理器，登记无意义。
+// 依赖 Custom 写入的 lastPath/lastHandler/lastHTTPCapable；opts 透传给 mcp 子包注册钩子。
+// 未 import mcp 子包（钩子为 nil）或无最近注册时为空操作；最近注册非 HTTP 类型则启动期 panic（fail-fast）。
+func (s *regist) WithMCP(opts ...interface{}) IService {
+	if MCPRegisterHook == nil || s.lastHandler == nil {
+		return s
+	}
+	if !s.lastHTTPCapable {
+		panic(fmt.Sprintf("mcp: .WithMCP() 仅支持 Micro/API/Web 注册的服务，最近注册类型为 %q（非 HTTP），无法登记为 MCP 工具；请改用 Micro/API/Web 注册或去掉 .WithMCP()", s.lastServerType))
+	}
+	MCPRegisterHook(s.lastPath, s.lastHandler, opts...)
+	return s
+}
+
+// MCPRegisterHook MCP 工具注册钩子，由 mcp 子包在 init 时通过 RegisterMCPHook 注入。
+// 遵循开闭原则：services 不反向依赖 mcp，仅持有函数变量。未注入时为 nil，MCP/WithMCP 为空操作。
+var MCPRegisterHook func(path string, h interface{}, opts ...interface{})
+
+// RegisterMCPHook 注册 MCP 工具注册钩子，供 mcp 子包注入。
+func RegisterMCPHook(fn func(path string, h interface{}, opts ...interface{})) {
+	MCPRegisterHook = fn
+}
+
+// MCPHandlerProvider MCP /mcp 路由处理器提供者，由 mcp 子包注入。
+// creator.httpBuilder.MCP() 启用时通过它获取 /mcp 的 JSON-RPC 处理器并注册到当前 http 服务器。
+// 遵循开闭原则：services/creator 不反向依赖 mcp，仅持有函数变量。未注入时为 nil，.MCP() 为空操作。
+//
+// 注意：返回类型必须是未命名 func(context.IContext) interface{}，而非命名类型 context.Handler。
+// 因注册经 Custom(interface{}) 装箱后，reflectHandle.swapFunc 用 .(func(context.IContext) interface{}) 做类型断言，
+// 命名类型与未命名类型即使底层相同也互不 identical，断言会失败并误入 createObject 分支导致 panic。
+var MCPHandlerProvider func() func(context.IContext) interface{}
+
+// RegisterMCPHandlerProvider 注册 MCP /mcp 处理器提供者，供 mcp 子包注入。
+func RegisterMCPHandlerProvider(fn func() func(context.IContext) interface{}) {
+	MCPHandlerProvider = fn
 }
 
 // RegisterServer 注册服务器

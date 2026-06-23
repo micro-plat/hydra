@@ -1,14 +1,13 @@
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://api.ai.xhydra.cn/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "2yxd-gwz5p35aajkiaslrh28ymjiw2gcyrh2r",
+    "ANTHROPIC_AUTH_TOKEN": "ik-0227ed80c8ab0131129f803501a011e8",
    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5-turbo",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1",
     "API_TIMEOUT_MS": "3000000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "200000", 
-    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",      
     "CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT": "1"      
 
   },

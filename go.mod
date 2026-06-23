@@ -33,7 +33,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.2.0
 	github.com/stretchr/testify v1.9.0
-	github.com/ugorji/go/codec v1.2.2
+	github.com/ugorji/go/codec v1.2.12
 	github.com/urfave/cli v1.22.5
 	github.com/zkfy/go-metrics v0.0.0-20161128210544-1f30fe9094a5
 	github.com/zkfy/log v0.0.0-20180312054228-b2704c3ef896

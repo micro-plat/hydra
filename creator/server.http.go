@@ -17,6 +17,7 @@ import (
 	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/conf/server/render"
 	"github.com/micro-plat/hydra/conf/server/static"
+	"github.com/micro-plat/hydra/services"
 )
 
 type httpBuilder struct {
@@ -118,5 +119,23 @@ func (b *httpBuilder) Processor(opts ...processor.Option) *httpBuilder {
 //NFS 网络文件系统配置
 func (b *httpBuilder) NFS(local string, opts ...nfs.Option) *httpBuilder {
 	b.BaseBuilder[nfs.TypeNodeName] = nfs.New(local, opts...)
+	return b
+}
+
+//MCP 启用 MCP 服务（默认启用）。在当前 http(api/web) 服务器上自动注册 /mcp 路由，
+//对外提供 JSON-RPC 2.0 接口（initialize/tools/list/tools/call/ping），无需业务代码显式注册。
+//MCP 复用本服务器完整中间件链（含 JwtAuth）：MCP 客户端须与 HTTP 客户端一样携带有效登录态，
+//不支持匿名访问（/mcp 不豁免 JWT）。
+//需 import hydra/mcp 子包以注入处理器（未注入时为空操作，保持链式）。
+//opts：mcp.WithDisable() 显式关闭、mcp.WithPath(path) 自定义端点路径。
+//遵循开闭原则：本包不反向依赖 mcp，处理器由 services.MCPHandlerProvider 提供（mcp.init 注入）。
+func (b *httpBuilder) MCP(opts ...services.MCPOption) *httpBuilder {
+	cfg := services.DefaultMCPConf()
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	if cfg.Enable && services.MCPHandlerProvider != nil {
+		services.Def.Custom(b.tp, cfg.Path, services.MCPHandlerProvider())
+	}
 	return b
 }

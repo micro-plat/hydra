@@ -120,7 +120,22 @@ func swapFunc(i interface{}) (context.Handler, bool) {
 	if ok {
 		return context.VoidHandler(vnfx).Handle, true
 	}
+	//typed Handle 扩展点：由 mcp 子包注册，识别 func(ctx, req)(resp, error) 签名
+	if TypedHandlerHook != nil {
+		return TypedHandlerHook(i)
+	}
 	return nil, false
+}
+
+// TypedHandlerHook typed Handle 识别包装扩展点。
+// 由 mcp 子包(hydra/mcp)在 init 时注册，用于识别 func(ctx context.IContext, req)(resp, error)
+// 签名并包装为 context.Handler。未注册时为 nil，swapFunc 仅识别旧两种签名，框架行为不变。
+var TypedHandlerHook func(interface{}) (context.Handler, bool)
+
+// RegisterTypedHandlerHook 注册 typed Handle 识别包装函数。
+// 供 mcp 子包注入 typed 能力，遵循开闭原则——核心 swapFunc 两条分支不修改。
+func RegisterTypedHandlerHook(fn func(interface{}) (context.Handler, bool)) {
+	TypedHandlerHook = fn
 }
 
 func camelToPath(s string) string {

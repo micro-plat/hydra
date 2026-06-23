@@ -1,7 +1,8 @@
 // Copyright (c) 2012-2020 Ugorji Nwoke. All rights reserved.
 // Use of this source code is governed by a MIT license found in the LICENSE file.
 
-// +build notfastpath
+//go:build notfastpath || codec.notfastpath
+// +build notfastpath codec.notfastpath
 
 package codec
 
@@ -38,6 +39,3 @@ func fastpathAvIndex(rtid uintptr) int { return -1 }
 
 var fastpathAv fastpathA
 var fastpathTV fastpathT
-
-// ----
-type TestMammoth2Wrapper struct{} // to allow testMammoth work in notfastpath mode

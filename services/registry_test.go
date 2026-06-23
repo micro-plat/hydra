@@ -472,3 +472,53 @@ func Test_regist_rawPathTag(t *testing.T) {
 	}
 
 }
+
+// TestWithMCP_HTTPTypeRestriction 验证 .WithMCP() 仅 Micro/API/Web（HTTP 类型）可用，
+// 非 HTTP 类型（RPC/CRON/MQC/WSS/AIGW）调用应启动期 panic；nil hook 或无最近注册时空操作。
+func TestWithMCP_HTTPTypeRestriction(t *testing.T) {
+	old := MCPRegisterHook
+	defer func() { MCPRegisterHook = old }()
+
+	// 1. 端到端：Micro 末尾覆盖为 HTTP 可用；RPC 置 false（验证 Micro 内部 RPC 不污染判定）
+	Def.Micro("/t/micro", &testHandler{})
+	if !Def.lastHTTPCapable {
+		t.Error("Micro 后 lastHTTPCapable 应为 true")
+	}
+	Def.RPC("/t/rpc", &testHandler{})
+	if Def.lastHTTPCapable {
+		t.Error("RPC 后 lastHTTPCapable 应为 false")
+	}
+
+	// 2. WithMCP 决策逻辑（用独立 regist，仅读 last* 字段，不依赖 servers）
+	s := &regist{}
+	s.lastHandler = func() {} // 非 nil，进入类型判定
+	invoked := 0
+	MCPRegisterHook = func(string, interface{}, ...interface{}) { invoked++ }
+
+	// HTTP 类型 → 调用 hook，不 panic
+	for _, tp := range []string{global.Web, global.API} {
+		s.lastServerType, s.lastHTTPCapable = tp, true
+		s.WithMCP()
+	}
+	if invoked != 2 {
+		t.Fatalf("Web/API+WithMCP 应调用 hook 2 次, got %d", invoked)
+	}
+
+	// 非 HTTP 类型 → panic
+	for _, tp := range []string{global.RPC, global.CRON, global.MQC, global.WSSServer, global.AIGW} {
+		s.lastServerType, s.lastHTTPCapable = tp, false
+		func() {
+			defer func() {
+				if r := recover(); r == nil {
+					t.Fatalf("类型 %q + WithMCP 应 panic", tp)
+				}
+			}()
+			s.WithMCP()
+		}()
+	}
+
+	// 3. nil hook → 空操作不 panic（即使非 HTTP）
+	MCPRegisterHook = nil
+	s.lastServerType, s.lastHTTPCapable = global.RPC, false
+	s.WithMCP()
+}
