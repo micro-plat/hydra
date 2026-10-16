@@ -18,73 +18,52 @@ import (
 )
 
 const (
-	//JWTStatusTokenNotExsit jwt token 不存在
 	JWTStatusTokenNotExsit = http.StatusUnauthorized
-	//JWTStatusTokenExpired jwt token过期
-	JWTStatusTokenExpired = http.StatusForbidden
-	//JWTStatusTokenError  jwt token错误
-	JWTStatusTokenError = http.StatusForbidden
-	//JWTStatusConfError jwt配置错误
-	JWTStatusConfError = http.StatusNotExtended
-	//JWTStatusConfDataError jwt配置数据错误
+	JWTStatusTokenExpired  = http.StatusForbidden
+	JWTStatusTokenError    = http.StatusForbidden
+	JWTStatusConfError     = http.StatusNotExtended
 	JWTStatusConfDataError = http.StatusInternalServerError
-	//JWTStatusRedirect jwt跳转
-	JWTStatusRedirect = http.StatusFound
+	JWTStatusRedirect      = http.StatusFound
 )
 
 const (
-	//ParNodeName auth-jwt配置父节点名
 	ParNodeName = "auth"
-	//SubNodeName auth-jwt配置子节点名
 	SubNodeName = "jwt"
 )
 
 const (
-	//ModeHS256 加密模式HS256
 	ModeHS256 = "HS256"
-	//ModeHS384 加密模式HS384
 	ModeHS384 = "HS384"
-	//ModeHS512 加密模式HS512
 	ModeHS512 = "HS512"
-	//ModeRS256 加密模式RS256
 	ModeRS256 = "RS256"
-	//ModeES256 加密模式ES256
 	ModeES256 = "ES256"
-	//ModeES384 加密模式ES384
 	ModeES384 = "ES384"
-	//ModeES512 加密模式ES512
 	ModeES512 = "ES512"
-	//ModeRS384 加密模式RS384
 	ModeRS384 = "RS384"
-	//ModeRS512 加密模式RS512
 	ModeRS512 = "RS512"
-	//ModePS256 加密模式PS256
 	ModePS256 = "PS256"
-	//ModePS384 加密模式PS384
 	ModePS384 = "PS384"
-	//ModePS512 加密模式PS512
 	ModePS512 = "PS512"
 )
 
-//JWTName 节点标识名
 const JWTName = "Authorization-Jwt"
 
-//JWTAuth jwt配置信息
 type JWTAuth struct {
 	security.ConfEncrypt
-	Name            string   `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty" label:"jwt名称"`
-	ExpireAt        int64    `json:"expireAt,omitzero" valid:"required" toml:"expireAt,omitzero" label:"jwt过期时间"`
-	Mode            string   `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty" label:"jwt认证方式"`
-	Secret          string   `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty"  label:"jwt密钥"`
-	Source          string   `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty" label:"jwt存储方式"`
-	Excludes        []string `json:"excludes,omitempty" toml:"exclude,omitempty"`
-	Domain          string   `json:"domain,omitempty" toml:"domain,omitempty"`
-	AuthURL         string   `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty" label:"jwt认证跳转地址"`
-	Disable         bool     `json:"disable,omitempty" toml:"disable,omitempty"`
-	*conf.PathMatch `json:"-"`
+	Name             string            `json:"name,omitempty" valid:"ascii,required" toml:"name,omitempty" label:"jwt name"`
+	ExpireAt         int64             `json:"expireAt,omitzero" valid:"required" toml:"expireAt,omitzero" label:"jwt expire seconds"`
+	Mode             string            `json:"mode,omitempty" valid:"in(HS256|HS384|HS512|RS256|ES256|ES384|ES512|RS384|RS512|PS256|PS384|PS512),required" toml:"mode,omitempty" label:"jwt mode"`
+	Secret           string            `json:"secret,omitempty" valid:"ascii,required" toml:"secret,omitempty" label:"jwt secret"`
+	Source           string            `json:"source,omitempty" valid:"in(header|cookie|HEADER|COOKIE|H)" toml:"source,omitempty" label:"jwt source"`
+	Excludes         []string          `json:"excludes,omitempty" toml:"exclude,omitempty"`
+	Domain           string            `json:"domain,omitempty" toml:"domain,omitempty"`
+	AuthURL          string            `json:"authURL,omitempty" valid:"ascii" toml:"authURL,omitempty" label:"jwt auth redirect url"`
+	AuthenticateURL  string            `json:"authenticateURL,omitempty" valid:"ascii" toml:"authenticateURL,omitempty" label:"jwt authenticate url"`
+	AuthenticateURLs map[string]string `json:"authenticateURLs,omitempty" toml:"authenticateURLs,omitempty"`
+	Disable          bool              `json:"disable,omitempty" toml:"disable,omitempty"`
+	*conf.PathMatch  `json:"-"`
 }
 
-//NewJWT 构建JWT配置参数
 func NewJWT(opts ...Option) *JWTAuth {
 	jwt := &JWTAuth{
 		Name:     AuthorizationHeader,
@@ -100,35 +79,59 @@ func NewJWT(opts ...Option) *JWTAuth {
 	return jwt
 }
 
-//CheckJWT 检查jwt合法性
 func (j *JWTAuth) CheckJWT(token string) (data interface{}, err error) {
 	if token == "" {
-		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("未传入jwt.token(%s %s值为空)", j.Source, j.Name))
+		return nil, errs.NewError(JWTStatusTokenNotExsit, fmt.Errorf("jwt token is empty(%s %s)", j.Source, j.Name))
 	}
 	if !strings.HasPrefix(token, TokenBearerPrefix) {
-		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt.token格式错误(%s)", token))
+		return nil, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt token format error(%s)", token))
 	}
 	token = token[len(TokenBearerPrefix):]
 
-	//2. 解密jwt判断是否有效，是否过期
 	data, er := jwt.Decrypt(token, j.Secret)
 	if er != nil {
 		if strings.Contains(er.Error(), "Token is expired") {
 			return nil, errs.NewError(JWTStatusTokenExpired, er)
 		}
-		return data, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt.token值(%s)有误 %w", token, er))
+		return data, errs.NewError(JWTStatusTokenError, fmt.Errorf("jwt token value(%s) error %w", token, er))
 	}
 
 	return data, nil
 }
 
-//GetJWTForRspns 获取jwt响应参数值
-func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string, bool) {
+func (j *JWTAuth) GetAuthenticateURL(path string) string {
+	if j.AuthenticateURLs != nil {
+		if url := j.AuthenticateURLs[path]; url != "" {
+			return url
+		}
+	}
+	return j.AuthenticateURL
+}
 
+// HasPathAuthenticateURL 判断指定路径是否显式配置了路径级认证URL。
+// 仅显式配置了 AuthenticateURLs[path] 的路径才在未登录时附加 return_to，
+// 避免对未配置的路径（如 API）生成无意义的 return_to。
+func (j *JWTAuth) HasPathAuthenticateURL(path string) bool {
+	return j.AuthenticateURLs != nil && j.AuthenticateURLs[path] != ""
+}
+
+func (j *JWTAuth) SetAuthenticateURLForPath(path string, url string) {
+	if j.AuthenticateURLs == nil {
+		j.AuthenticateURLs = make(map[string]string)
+	}
+	j.AuthenticateURLs[path] = url
+}
+
+func (j *JWTAuth) AddExcludes(paths ...string) {
+	j.Excludes = append(j.Excludes, paths...)
+	j.PathMatch = conf.NewPathMatch(j.Excludes...)
+}
+
+func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string, bool) {
 	isExpired := types.GetBoolByIndex(expired, 0, false)
 	token = TokenBearerPrefix + token
 	switch strings.ToUpper(j.Source) {
-	case SourceHeader, SourceHeaderShort: //"HEADER", "H":
+	case SourceHeader, SourceHeaderShort:
 		return AuthorizationHeader, token, isExpired == false
 	default:
 		expireVal := j.getExpireTime(isExpired)
@@ -139,7 +142,6 @@ func (j *JWTAuth) GetJWTForRspns(token string, expired ...bool) (string, string,
 	}
 }
 
-//getExpireTime 获取jwt的超时时间
 func (j *JWTAuth) getExpireTime(expired bool) string {
 	expireTime := time.Now().Add(time.Hour * -24)
 	if !expired {
@@ -148,7 +150,6 @@ func (j *JWTAuth) getExpireTime(expired bool) string {
 	return expireTime.Format("Mon, 02 Jan 2006 15:04:05 GMT")
 }
 
-//GetConf 获取jwt配置
 func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 	jwt := JWTAuth{}
 	_, err := cnf.GetSubObject(registry.Join(ParNodeName, SubNodeName), &jwt)
@@ -156,10 +157,10 @@ func GetConf(cnf conf.IServerConf) (*JWTAuth, error) {
 		return &JWTAuth{Disable: true}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("jwt配置格式有误:%v", err)
+		return nil, fmt.Errorf("jwt conf format error:%v", err)
 	}
 	if b, err := govalidator.ValidateStruct(&jwt); !b {
-		return nil, fmt.Errorf("jwt配置数据有误:%v", err)
+		return nil, fmt.Errorf("jwt conf data error:%v", err)
 	}
 	jwt.PathMatch = conf.NewPathMatch(jwt.Excludes...)
 

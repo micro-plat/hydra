@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"strings"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
 	"github.com/micro-plat/hydra/conf/server/header"
@@ -52,7 +53,19 @@ func setJwtResponse(ctx IMiddleContext, jwtAuth *xjwt.JWTAuth, data interface{})
 		}
 		if k, v, ok := jwtAuth.GetJWTForRspns(jwtToken); ok {
 			ctx.Response().Header(k, v)
+			setJwtCookieFallback(ctx, jwtAuth, k, v)
 		}
 	}
+}
 
+func setJwtCookieFallback(ctx IMiddleContext, jwtAuth *xjwt.JWTAuth, key string, value string) {
+	if !strings.EqualFold(key, xjwt.AuthorizationHeader) {
+		return
+	}
+	cookieAuth := *jwtAuth
+	cookieAuth.Source = xjwt.SourceCookie
+	cookieKey, cookieValue, ok := cookieAuth.GetJWTForRspns(strings.TrimPrefix(value, xjwt.TokenBearerPrefix))
+	if ok && cookieKey == "Set-Cookie" {
+		ctx.Response().Header(cookieKey, cookieValue)
+	}
 }

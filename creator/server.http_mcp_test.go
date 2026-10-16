@@ -3,6 +3,8 @@ package creator
 import (
 	"testing"
 
+	"github.com/micro-plat/hydra/conf/server/auth/jwt"
+	"github.com/micro-plat/hydra/conf/server/processor"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -44,5 +46,36 @@ func Test_httpBuilder_MCP(t *testing.T) {
 	b.MCP(func(c *services.MCPConf) { c.Enable = false })
 	if invoked != 1 {
 		t.Fatalf("MCP(禁用) 不应调用 provider, 实际 %d", invoked)
+	}
+}
+
+func Test_httpBuilder_MCPWithOAuthDefaultsFromJWT(t *testing.T) {
+	services.RegisterMCPHandlerProvider(func() func(context.IContext) interface{} {
+		return func(context.IContext) interface{} { return nil }
+	})
+	services.RegisterMCPAuthorizeHandlerProvider(func(*services.MCPConf) func(context.IContext) interface{} {
+		return func(context.IContext) interface{} { return nil }
+	})
+	defer services.RegisterMCPHandlerProvider(nil)
+	defer services.RegisterMCPAuthorizeHandlerProvider(nil)
+
+	b := newHTTP(global.Web, ":0").
+		Processor(processor.WithServicePrefix("/api")).
+		Jwt(jwt.WithSecret("123456"), jwt.WithAuthenticateURL("http://erp.ismart.xhydra.cn/login")).
+		MCP(func(c *services.MCPConf) {
+			c.Path = "/mcp-oauth-test"
+			c.OAuth = services.DefaultMCPOAuthConf()
+			c.OAuth.AuthorizePath = "/oauth/authorize-test"
+		})
+
+	auth := b.BaseBuilder["auth/jwt"].(*jwt.JWTAuth)
+	if got := auth.GetAuthenticateURL("/api/mcp-oauth-test"); got != "/api/oauth/authorize-test" {
+		t.Fatalf("mcp challenge = %q, want /api/oauth/authorize-test", got)
+	}
+	if got := auth.GetAuthenticateURL("/api/other"); got != "http://erp.ismart.xhydra.cn/login" {
+		t.Fatalf("default challenge = %q, want login URL", got)
+	}
+	if ok, _ := auth.Match("/api/oauth/authorize-test"); !ok {
+		t.Fatalf("oauth authorize path should be excluded from JwtAuth")
 	}
 }

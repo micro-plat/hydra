@@ -11,4 +11,6 @@ type IComponentDB interface {
 	GetDB(names ...string) (d IDB, err error)
 	GetRegularTenantDB(tenantID string, names ...string) (d IDB)
 	GetTenantDB(tenantID string, names ...string) (d IDB, err error)
+	GetTenantDBByMode(tenantID int64, names ...string) (d IDB, err error)
+	GetRegularTenantDBByMode(tenantID int64, names ...string) (d IDB)
 }

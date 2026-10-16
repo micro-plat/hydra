@@ -16,19 +16,28 @@ func newGinWriter(w gin.ResponseWriter, ctx IMiddleContext, level int) *ginWrite
 	}
 }
 func (g *ginWriter) WriteString(s string) (int, error) {
-	g.ResponseWriter.Header().Del("Content-Length")
+	// 仅真走 gzip 压缩时才需删 Content-Length（压缩后长度不可预知）；
+	// 未压缩透传时保留业务 handler 设置的 Content-Length（文件下载走 identity 定长帧，
+	// 避免部分中间层无法转发 chunked 大响应导致浏览器 net::ERR_FAILED）
+	if g.gzip.needCompress {
+		g.ResponseWriter.Header().Del("Content-Length")
+	}
 	// 返回压缩前的长度，保持与原始行为一致
 	return g.gzip.WriteString(s)
 }
 
 func (g *ginWriter) Write(data []byte) (int, error) {
-	g.ResponseWriter.Header().Del("Content-Length")
+	if g.gzip.needCompress {
+		g.ResponseWriter.Header().Del("Content-Length")
+	}
 	// 返回压缩前的长度，保持与原始行为一致
 	return g.gzip.Write(data)
 }
 
 func (g *ginWriter) WriteHeader(code int) {
-	g.ResponseWriter.Header().Del("Content-Length")
+	if g.gzip.needCompress {
+		g.ResponseWriter.Header().Del("Content-Length")
+	}
 	g.ResponseWriter.WriteHeader(code)
 }
 
@@ -46,6 +55,8 @@ func (g *ginWriter) Size() int {
 // 修复说明：gzip 压缩后实际大小与原始大小不同，无法在压缩前预知 Content-Length。
 // 修复方案：删除 Content-Length，让 HTTP 使用 Transfer-Encoding: chunked 自动处理。
 func (g *ginWriter) Close() {
-	g.ResponseWriter.Header().Del("Content-Length")
+	if g.gzip.needCompress {
+		g.ResponseWriter.Header().Del("Content-Length")
+	}
 	g.gzip.Close()
 }

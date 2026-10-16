@@ -110,13 +110,13 @@ func New() *regist {
 
 // regist  本地服务
 type regist struct {
-	group          string
-	servers        map[string]*serverServices
-	caches         map[string]map[string]interface{}
-	lastPath       string
-	lastHandler    interface{}
-	lastServerType string // 最近一次注册的服务器类型（错误提示用）
-	lastHTTPCapable bool  // 最近一次注册是否为 HTTP 类型（Micro/API/Web），决定 .WithMCP() 是否有效
+	group           string
+	servers         map[string]*serverServices
+	caches          map[string]map[string]interface{}
+	lastPath        string
+	lastHandler     interface{}
+	lastServerType  string // 最近一次注册的服务器类型（错误提示用）
+	lastHTTPCapable bool   // 最近一次注册是否为 HTTP 类型（Micro/API/Web），决定 .WithMCP() 是否有效
 }
 
 // Micro 注册为微服务包括api,web,rpc
@@ -306,6 +306,14 @@ var MCPHandlerProvider func() func(context.IContext) interface{}
 // RegisterMCPHandlerProvider 注册 MCP /mcp 处理器提供者，供 mcp 子包注入。
 func RegisterMCPHandlerProvider(fn func() func(context.IContext) interface{}) {
 	MCPHandlerProvider = fn
+}
+
+// MCPAuthorizeHandlerProvider provides the MCP OAuth authorize handler.
+var MCPAuthorizeHandlerProvider func(*MCPConf) func(context.IContext) interface{}
+
+// RegisterMCPAuthorizeHandlerProvider registers the MCP OAuth authorize handler provider.
+func RegisterMCPAuthorizeHandlerProvider(fn func(*MCPConf) func(context.IContext) interface{}) {
+	MCPAuthorizeHandlerProvider = fn
 }
 
 // RegisterServer 注册服务器

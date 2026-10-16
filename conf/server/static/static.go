@@ -183,6 +183,10 @@ func GetConf(cnf conf.IServerConf) (*Static, error) {
 		static.fs = fs
 		return static, nil
 	}
+	// HTTP(S) 远程静态资源：fs 为空但 Path 为远程地址，交由 middleware.downloadFromHTTP 处理
+	if strings.HasPrefix(static.Path, "http://") || strings.HasPrefix(static.Path, "https://") {
+		return static, nil
+	}
 	return nil, fmt.Errorf("%s %w", "static", conf.ErrNoSetting)
 }
 

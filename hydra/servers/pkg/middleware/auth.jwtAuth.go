@@ -2,6 +2,9 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
 	"strings"
 
 	xjwt "github.com/micro-plat/hydra/conf/server/auth/jwt"
@@ -43,14 +46,103 @@ func JwtAuth() Handler {
 		}
 
 		//5.jwt验证失败后返回错误
-		ctx.Log().Error(err)
+		ctx.Log().Error(jwtErr)
+		authenticateURL := writeJWTAuthenticateHeader(ctx, jwtAuth)
+		if authenticateURL != "" && isBrowserNavigation(ctx) {
+			ctx.Response().Redirect(http.StatusFound, authenticateURL)
+			return
+		}
 		if jwtAuth.AuthURL != "" {
 			ctx.Response().Header(header.XLocation, ctx.Request().Headers().Translate(jwtAuth.AuthURL))
 			ctx.Response().Abort(xjwt.JWTStatusTokenError)
 			return
 		}
-		ctx.Response().Abort(errs.GetCode(err, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))
+		ctx.Response().Abort(errs.GetCode(jwtErr, xjwt.JWTStatusTokenError), errors.New("jwt验证串错误，禁止访问"))
 	}
+}
+
+func writeJWTAuthenticateHeader(ctx IMiddleContext, jwtAuth *xjwt.JWTAuth) string {
+	path := ctx.Request().Path().GetRequestPath()
+	challengeURL := jwtAuth.GetAuthenticateURL(path)
+	if challengeURL == "" {
+		return ""
+	}
+	// 仅显式配置了路径级认证URL的路径才附加 return_to；
+	// 未配置的路径（如 API）登录后跳默认页，不回跳到当前请求URL。
+	authenticateURL := challengeURL
+	if jwtAuth.HasPathAuthenticateURL(path) {
+		authenticateURL = appendReturnTo(challengeURL, ctx)
+	}
+	ctx.Response().Header("WWW-Authenticate", fmt.Sprintf(`Bearer location="%s"`, authenticateURL))
+	return authenticateURL
+}
+
+func isBrowserNavigation(ctx IMiddleContext) bool {
+	if strings.ToUpper(ctx.Request().Path().GetMethod()) != http.MethodGet {
+		return false
+	}
+	accept := ctx.Request().Headers().GetString("Accept")
+	secFetchMode := ctx.Request().Headers().GetString("Sec-Fetch-Mode")
+	return strings.Contains(accept, "text/html") || strings.EqualFold(secFetchMode, "navigate")
+}
+
+func appendReturnTo(challengeURL string, ctx IMiddleContext) string {
+	u, err := url.Parse(challengeURL)
+	if err != nil {
+		return challengeURL
+	}
+	q := u.Query()
+	if q.Get("return_to") == "" {
+		q.Set("return_to", currentRequestURL(ctx))
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func currentRequestURL(ctx IMiddleContext) string {
+	reqURL := ctx.Request().Path().GetURL()
+	path := ctx.Request().Path().GetRequestPath()
+	if path == "" && reqURL != nil {
+		path = reqURL.EscapedPath()
+	}
+	if path == "" {
+		path = "/"
+	}
+	if reqURL != nil && reqURL.RawQuery != "" {
+		path += "?" + reqURL.RawQuery
+	}
+	if origin := requestOrigin(ctx, reqURL); origin != "" {
+		return origin + path
+	}
+	return path
+}
+
+func requestOrigin(ctx IMiddleContext, reqURL *url.URL) string {
+	scheme := firstHeaderValue(ctx.Request().Headers().GetString("X-Forwarded-Proto"))
+	if scheme == "" && reqURL != nil {
+		scheme = reqURL.Scheme
+	}
+	if scheme == "" {
+		scheme = "http"
+	}
+	host := firstHeaderValue(ctx.Request().Headers().GetString("X-Forwarded-Host"))
+	if host == "" {
+		host = ctx.Request().Headers().GetString("Host")
+	}
+	if host == "" && reqURL != nil {
+		host = reqURL.Host
+	}
+	if host == "" {
+		return ""
+	}
+	return scheme + "://" + host
+}
+
+func firstHeaderValue(value string) string {
+	if i := strings.Index(value, ","); i >= 0 {
+		return strings.TrimSpace(value[:i])
+	}
+	return strings.TrimSpace(value)
 }
 
 // CheckJWT 检查jwk参数是否合法

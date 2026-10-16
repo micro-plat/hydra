@@ -2,104 +2,118 @@ package jwt
 
 import "github.com/micro-plat/hydra/conf/server/auth"
 
-//Option jwt配置选项
+// Option jwt配置选项
 type Option func(*JWTAuth)
 
-//AuthorizationHeader AuthorizationHeader
+// AuthorizationHeader AuthorizationHeader
 const AuthorizationHeader = "Authorization"
 
-//TokenBearerPrefix TokenBearerPrefix
+// TokenBearerPrefix TokenBearerPrefix
 const TokenBearerPrefix = "Bearer "
 
 const SourceHeader = "HEADER"
 const SourceHeaderShort = "H"
 const SourceCookie = "COOKIE"
 
-//WithName jwt设置到cookie中或header中的名称
+// WithName jwt设置到cookie中或header中的名称
 func WithName(name string) Option {
 	return func(a *JWTAuth) {
 		a.Name = name
 	}
 }
 
-//WithExpireAt 过期时间以秒为单位
+// WithExpireAt 过期时间以秒为单位
 func WithExpireAt(expireAt int64) Option {
 	return func(a *JWTAuth) {
 		a.ExpireAt = expireAt
 	}
 }
 
-//WithMode jwt加解密模式
+// WithMode jwt加解密模式
 func WithMode(mode string) Option {
 	return func(a *JWTAuth) {
 		a.Mode = mode
 	}
 }
 
-//WithSecret jwt加密密钥
+// WithSecret jwt加密密钥
 func WithSecret(secret string) Option {
 	return func(a *JWTAuth) {
 		a.Secret = secret
 	}
 }
 
-//WithHeader 将jwt存储到http头中
+// WithHeader 将jwt存储到http头中
 func WithHeader() Option {
 	return func(a *JWTAuth) {
 		a.Source = SourceHeader
 	}
 }
 
-//WithCookie 将jwt存储到cookie中
+// WithCookie 将jwt存储到cookie中
 func WithCookie() Option {
 	return func(a *JWTAuth) {
 		a.Source = SourceCookie
 	}
 }
 
-//WithExcludes 排除的服务或请求
+// WithExcludes 排除的服务或请求
 func WithExcludes(p ...string) Option {
 	return func(a *JWTAuth) {
 		a.Excludes = append(a.Excludes, p...)
 	}
 }
 
-//WithAuthURL 设置转跳URL
+// WithAuthURL 设置转跳URL
 func WithAuthURL(url string) Option {
 	return func(a *JWTAuth) {
 		a.AuthURL = url
 	}
 }
 
-//WithDisable 禁用配置
+// WithAuthenticateURL 设置认证入口URL，认证失败时通过WWW-Authenticate返回。
+func WithAuthenticateURL(url string) Option {
+	return func(a *JWTAuth) {
+		a.AuthenticateURL = url
+	}
+}
+
+// WithAuthenticateURLForPath 设置指定请求路径的认证入口URL。
+func WithAuthenticateURLForPath(path string, url string) Option {
+	return func(a *JWTAuth) {
+		a.SetAuthenticateURLForPath(path, url)
+	}
+}
+
+// WithDisable 禁用配置
 func WithDisable() Option {
 	return func(a *JWTAuth) {
 		a.Disable = true
 	}
 }
 
-//WithEnable 启用配置
+// WithEnable 启用配置
 func WithEnable() Option {
 	return func(a *JWTAuth) {
 		a.Disable = false
 	}
 }
 
-//WithDomain 启用配置
+// WithDomain 启用配置
 func WithDomain(domain string) Option {
 	return func(a *JWTAuth) {
 		a.Domain = domain
 	}
 }
 
-//WithEnableEncryption 启用加密设置
+// WithEnableEncryption 启用加密设置
 func WithEnableEncryption() Option {
 	return func(a *JWTAuth) {
 		a.EnableEncryption = true
 	}
 }
 
-//WithAuthExcludes 追加系统excludes
+// WithAuthExcludes 追加系统excludes
 func WithAuthExcludes() Option {
 	return func(a *JWTAuth) {
 		a.Excludes = append(a.Excludes, auth.GetExcludes()...)
